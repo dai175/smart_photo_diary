@@ -5,7 +5,7 @@
 ---
 
 ## 1. プロジェクト初期設定
-- [ ] 1.1 Flutterプロジェクトの初期化（`flutter create`）
+- [x] 1.1 Flutterプロジェクトの初期化（`flutter create`）
 - [ ] 1.2 必要なディレクトリ構成の作成
     - [ ] 1.2.1 `lib/features` ディレクトリの作成
     - [ ] 1.2.2 `lib/core` ディレクトリの作成
