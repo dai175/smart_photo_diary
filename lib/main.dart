@@ -84,8 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      // 全ての写真を取得するために日付フィルターを使用せずに取得
-      final photos = await PhotoService.getAllPhotos();
+      // 今日撮影された写真だけを取得
+      final photos = await PhotoService.getTodayPhotos();
 
       debugPrint('取得した写真数: ${photos.length}');
 
