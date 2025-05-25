@@ -1,17 +1,22 @@
 # =============================
-# Flutter/Dart プロジェクト用 .gitignore
+# Flutter/iOS/macOS プロジェクト用 .gitignore（推奨設定）
 # =============================
 
-# --- FVM（Flutter Version Manager）関連 ---
-.fvm/
+# --- CocoaPods（iOS/macOS共通） ---
+Pods/
+*.xcworkspace
+
+# --- Xcode ---
+xcuserdata/
+DerivedData/
 
 # --- Flutter/Dart/Pub 関連 ---
+.fvm/
 .dart_tool/
 .packages
 .pub-cache/
 build/
-
-# --- Flutter自動生成ファイル（管理不要） ---
+flutter_*.png
 .metadata
 .flutter-plugins-dependencies
 
@@ -33,12 +38,12 @@ ios/DerivedData/
 macos/Flutter/ephemeral/
 macos/Flutter/GeneratedPluginRegistrant.swift
 macos/build/
+macos/Pods/
+macos/Runner.xcworkspace/
 
 # --- Windows/Linux 関連 ---
 windows/
 linux/
-
-# --- Web 関連 ---
 web/.dart_tool/
 web/build/
 
