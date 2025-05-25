@@ -6,18 +6,21 @@
 
 - 📸 写真から自動で日記を生成
 - 🎨 直感的で美しいUI/UX
-- 🔒 完全プライベート - データはすべて端末内に保存
+- 🔒 完全プライベート - データはすべて端末内に保存（クラウド送信なし）
 - 📊 統計機能で日記の振り返りをサポート
 - 🌐 オフライン対応
 
 ## 🚀 技術スタック
 
-- **フレームワーク**: Flutter 3.x
-- **状態管理**: Riverpod + StateNotifier
-- **データベース**: Hive
-- **AI処理**: TFLite Flutter Plugin
-- **画像処理**: image_picker, image_cropper
-- **テスト**: flutter_test, mocktail, integration_test
+- **フレームワーク**: Flutter 3.x（FVM推奨）
+- **ローカルDB**: Hive, hive_flutter
+- **AI処理**: tflite_flutter（オンデバイス推論）
+- **画像処理**: image_picker
+- **パス管理**: path_provider
+- **位置情報**: geolocator
+- **テスト**: flutter_test, mocktail
+
+※ 状態管理やimage_cropper等は現時点で未導入です。必要に応じて今後追加予定。
 
 ## 🛠 開発環境構築
 
@@ -31,30 +34,24 @@
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/your-username/smart-photo-diary.git
-cd smart-photo-diary
+git clone https://github.com/your-username/smart_photo_diary.git
+cd smart_photo_diary
 
-# 依存関係をインストール
-flutter pub get
-
-# コード生成の実行
-flutter pub run build_runner build --delete-conflicting-outputs
+# FVMを利用している場合（推奨）
+fvm flutter pub get
 
 # アプリを起動
-flutter run
+fvm flutter run
 ```
 
 ## 🧪 テストの実行
 
 ```bash
 # ユニットテストとウィジェットテスト
-flutter test
+fvm flutter test
 
 # カバレッジレポートの生成
-flutter test --coverage
-
-# 統合テスト
-flutter test integration_test/app_test.dart
+fvm flutter test --coverage
 ```
 
 ## 📦 リリースビルド

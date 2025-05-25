@@ -11,17 +11,14 @@
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/your-username/smart-photo-diary.git
-cd smart-photo-diary
+git clone https://github.com/your-username/smart_photo_diary.git
+cd smart_photo_diary
 
-# 依存関係をインストール
-flutter pub get
-
-# コード生成（必要な場合）
-flutter pub run build_runner build --delete-conflicting-outputs
+# FVMを利用している場合（推奨）
+fvm flutter pub get
 
 # アプリを起動
-flutter run
+fvm flutter run
 ```
 
 
@@ -37,30 +34,31 @@ flutter run
 
 ```bash
 # すべてのテストを実行
-flutter test
+fvm flutter test
 
 # 特定のテストファイルを実行
-flutter test test/features/photo_picker/photo_picker_test.dart
+fvm flutter test test/features/photo_picker/photo_picker_test.dart
 
 # カバレッジレポートを生成
-flutter test --coverage
-flutter pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+fvm flutter test --coverage
+# coverageパッケージを利用する場合（必要に応じて）
+fvm flutter pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
 
 # 統合テスト (エミュレータ/実機が必要)
-flutter test integration_test/app_test.dart
+fvm flutter test integration_test/app_test.dart
 ```
 
 ## コード生成
 
 ```bash
 # モデルクラスを生成 (freezed)
-flutter pub run build_runner build
+fvm flutter pub run build_runner build
 
 # 変更を監視して自動生成
-flutter pub run build_runner watch
+fvm flutter pub run build_runner watch
 
 # 競合するファイルを削除して再生成
-flutter pub run build_runner build --delete-conflicting-outputs
+fvm flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 ## コミットメッセージ
@@ -94,6 +92,6 @@ git tag v1.0.0
 git push origin v1.0.0
 
 # ビルド
-flutter build apk --release  # Android
-flutter build ipa            # iOS (Macのみ)
+fvm flutter build apk --release  # Android
+fvm flutter build ipa            # iOS (Macのみ)
 ```
