@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'screens/diary_screen.dart';
 import 'services/photo_service.dart';
 
@@ -85,10 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      // 日付範囲を広げてより多くの写真を取得する（テスト用）
-      final now = DateTime.now();
       // 全ての写真を取得するために日付フィルターを使用せずに取得
-      final photos = await PhotoService.getAllPhotos(limit: 100);
+      final photos = await PhotoService.getAllPhotos();
 
       debugPrint('取得した写真数: ${photos.length}');
 

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,8 +9,6 @@ class PhotoService {
   /// 戻り値: 権限が付与されたかどうか
   static Future<bool> requestPermission() async {
     // permission_handlerを使用して権限をリクエスト
-    Permission permission;
-
     // Android 13以上とそれ以前で権限が異なる
     if (await Permission.photos.request().isGranted) {
       debugPrint('写真権限が許可されました');
@@ -67,7 +64,6 @@ class PhotoService {
 
       // アルバムを取得（最近の写真）
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        onlyAll: true,
         filterOption: filterOption,
       );
 
@@ -126,7 +122,6 @@ class PhotoService {
 
       // アルバムを取得
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        onlyAll: true,
         filterOption: filterOption,
       );
 
@@ -206,7 +201,6 @@ class PhotoService {
 
       // アルバムを取得
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        onlyAll: true,
         filterOption: filterOption,
       );
 
