@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'screens/diary_screen.dart';
 import 'services/photo_service.dart';
 
@@ -34,7 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 写真アセットのリスト
   List<dynamic> _photoAssets = [];
-  List<bool> _selected = []; // finalを削除
+  List<bool> _selected = [];
+  bool _hasPermission = false;
+  bool _isLoading = true;
 
   final List<Map<String, String>> _recentDiaries = [
     {
@@ -59,13 +62,47 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadTodayPhotos();
   }
 
-  // 今日の写真を読み込む
+  // 権限リクエストと写真の読み込み
   Future<void> _loadTodayPhotos() async {
-    final photos = await PhotoService.getTodayPhotos();
     setState(() {
-      _photoAssets = photos;
-      _selected = List.generate(photos.length, (index) => true);
+      _isLoading = true;
     });
+
+    try {
+      // 権限リクエスト
+      final hasPermission = await PhotoService.requestPermission();
+      debugPrint('権限ステータス: $hasPermission');
+
+      setState(() {
+        _hasPermission = hasPermission;
+      });
+
+      if (!hasPermission) {
+        // 権限がない場合は継続しない
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // 日付範囲を広げてより多くの写真を取得する（テスト用）
+      final now = DateTime.now();
+      // 全ての写真を取得するために日付フィルターを使用せずに取得
+      final photos = await PhotoService.getAllPhotos(limit: 100);
+
+      debugPrint('取得した写真数: ${photos.length}');
+
+      setState(() {
+        _photoAssets = photos;
+        _selected = List.generate(photos.length, (index) => true);
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('写真読み込みエラー: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   // 画面一覧を取得するメソッド
@@ -77,6 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
         selected: _selected,
         recentDiaries: _recentDiaries,
         onToggleSelect: _toggleSelect,
+        isLoading: _isLoading,
+        hasPermission: _hasPermission,
+        onRequestPermission: _loadTodayPhotos,
       ),
       // 日記一覧画面
       const DiaryScreen(),
@@ -121,12 +161,18 @@ class _HomeContent extends StatelessWidget {
   final List<bool> selected;
   final List<Map<String, String>> recentDiaries;
   final Function(int) onToggleSelect;
+  final bool isLoading;
+  final bool hasPermission;
+  final VoidCallback onRequestPermission;
 
   const _HomeContent({
     required this.photoAssets,
     required this.selected,
     required this.recentDiaries,
     required this.onToggleSelect,
+    required this.isLoading,
+    required this.hasPermission,
+    required this.onRequestPermission,
   });
 
   @override
@@ -147,7 +193,7 @@ class _HomeContent extends StatelessWidget {
           child: Column(
             children: [
               const Text(
-                'スマート写真日記',
+                'Smart Photo Diary',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -193,7 +239,29 @@ class _HomeContent extends StatelessWidget {
               const SizedBox(height: 8),
               SizedBox(
                 height: 300,
-                child: photoAssets.isNotEmpty
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : !hasPermission
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.no_photography,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('写真へのアクセス権限が必要です'),
+                            const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: onRequestPermission,
+                              child: const Text('権限をリクエスト'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : photoAssets.isNotEmpty
                     ? GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -261,7 +329,7 @@ class _HomeContent extends StatelessWidget {
                           );
                         },
                       )
-                    : const Center(child: Text('写真を追加してください')),
+                    : const Center(child: Text('写真が見つかりませんでした')),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
