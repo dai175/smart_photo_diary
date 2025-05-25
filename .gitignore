@@ -1,35 +1,52 @@
-# FVM Version Cache
+# =============================
+# Flutter/Dart プロジェクト用 .gitignore
+# =============================
+
+# --- FVM（Flutter Version Manager）関連 ---
 .fvm/
 
-# Flutter/Dart/Pub related
+# --- Flutter/Dart/Pub 関連 ---
 .dart_tool/
 .packages
 .pub-cache/
 build/
-# iOS
+
+# --- Flutter自動生成ファイル（管理不要） ---
+.metadata
+.flutter-plugins-dependencies
+
+# --- Android 関連 ---
+android/.gradle/
+android/captures/
+android/gradle/
+android/local.properties
+
+# --- iOS 関連 ---
 ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 ios/Flutter/Generated.xcconfig
 ios/Pods/
 ios/Runner.xcworkspace/
 ios/DerivedData/
-# Android
-android/.gradle/
-android/captures/
-android/gradle/
-android/local.properties
-# VSCode
-.vscode/
-# macOS
+
+# --- macOS 関連 ---
 macos/Flutter/ephemeral/
 macos/Flutter/GeneratedPluginRegistrant.swift
 macos/build/
-# Web
+
+# --- Windows/Linux 関連 ---
+windows/
+linux/
+
+# --- Web 関連 ---
 web/.dart_tool/
 web/build/
-# Jetbrains
+
+# --- IDE/エディタ関連 ---
+.vscode/
 .idea/
-# その他
+
+# --- 一時ファイル・その他 ---
 *.iml
 *.log
 *.tmp
