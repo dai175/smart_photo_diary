@@ -3,10 +3,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import 'screens/diary_screen.dart';
 import 'screens/test_screen.dart';
 import 'screens/diary_preview_screen.dart';
+import 'screens/diary_detail_screen.dart';
 import 'services/photo_service.dart';
+import 'services/diary_service.dart';
 import 'models/diary_entry.dart';
 
 Future<void> main() async {
@@ -58,16 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _hasPermission = false;
   bool _isLoading = true;
 
-  final List<Map<String, String>> _recentDiaries = [
-    {
-      'date': '2025年5月23日',
-      'text': '今日は友達と新しくオープンしたカフェに行った。パスタがとても美味しくて、ゆったりとした時間を過ごすことができた...',
-    },
-    {
-      'date': '2025年5月22日',
-      'text': '朝早く起きて散歩に出かけた。空がとてもきれいで、写真を撮らずにはいられなかった。平和な一日の始まり...',
-    },
-  ];
+  // 最近の日記リスト
+  List<DiaryEntry> _recentDiaries = [];
+  bool _loadingDiaries = true;
 
   void _toggleSelect(int index) {
     setState(() {
@@ -79,6 +75,32 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadTodayPhotos();
+    _loadRecentDiaries();
+  }
+
+  // 最近の日記を読み込む
+  Future<void> _loadRecentDiaries() async {
+    try {
+      setState(() {
+        _loadingDiaries = true;
+      });
+
+      final diaryService = await DiaryService.getInstance();
+      final allEntries = diaryService.getSortedDiaryEntries();
+
+      // 最新の3つの日記を取得
+      final recentEntries = allEntries.take(3).toList();
+
+      setState(() {
+        _recentDiaries = recentEntries;
+        _loadingDiaries = false;
+      });
+    } catch (e) {
+      debugPrint('日記の読み込みエラー: $e');
+      setState(() {
+        _loadingDiaries = false;
+      });
+    }
   }
 
   // 権限リクエストと写真の読み込み
@@ -132,8 +154,20 @@ class _HomeScreenState extends State<HomeScreen> {
         recentDiaries: _recentDiaries,
         onToggleSelect: _toggleSelect,
         isLoading: _isLoading,
+        isLoadingDiaries: _loadingDiaries,
         hasPermission: _hasPermission,
         onRequestPermission: _loadTodayPhotos,
+        onDiaryTap: (diaryId) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DiaryDetailScreen(diaryId: diaryId),
+            ),
+          ).then((_) {
+            // 日記詳細画面から戻ってきたときに最近の日記を再読み込み
+            _loadRecentDiaries();
+          });
+        },
       ),
       // 日記一覧画面
       const DiaryScreen(),
@@ -179,11 +213,13 @@ class _HomeScreenState extends State<HomeScreen> {
 class _HomeContent extends StatelessWidget {
   final List<dynamic> photoAssets;
   final List<bool> selected;
-  final List<Map<String, String>> recentDiaries;
+  final List<DiaryEntry> recentDiaries;
   final Function(int) onToggleSelect;
   final bool isLoading;
+  final bool isLoadingDiaries;
   final bool hasPermission;
   final VoidCallback onRequestPermission;
+  final Function(String) onDiaryTap;
 
   const _HomeContent({
     required this.photoAssets,
@@ -191,8 +227,10 @@ class _HomeContent extends StatelessWidget {
     required this.recentDiaries,
     required this.onToggleSelect,
     required this.isLoading,
+    required this.isLoadingDiaries,
     required this.hasPermission,
     required this.onRequestPermission,
+    required this.onDiaryTap,
   });
 
   @override
@@ -390,45 +428,79 @@ class _HomeContent extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...recentDiaries.map(
-                (diary) => Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      const BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+              isLoadingDiaries
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: CircularProgressIndicator(),
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        diary['date']!,
-                        style: const TextStyle(
-                          color: Colors.purple,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        diary['text']!,
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 15,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                    )
+                  : recentDiaries.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: Text('保存された日記がありません')),
+                    )
+                  : Column(
+                      children: recentDiaries.map((diary) {
+                        // タイトルを抽出（最初の行をタイトルとして使用）
+                        final contentLines = diary.content.split('\n');
+                        final title = contentLines.isNotEmpty
+                            ? contentLines.first
+                            : '無題';
+
+                        return GestureDetector(
+                          onTap: () => onDiaryTap(diary.id),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                const BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  DateFormat('yyyy年MM月dd日').format(diary.date),
+                                  style: const TextStyle(
+                                    color: Colors.purple,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  diary.content,
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 15,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
               const SizedBox(height: 80), // ボトムナビ分の余白
             ],
           ),
