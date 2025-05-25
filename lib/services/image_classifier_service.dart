@@ -80,23 +80,31 @@ class ImageClassifierService {
 
       // 推論実行
       final outputShape = _interpreter!.getOutputTensors().first.shape;
+      debugPrint('出力形状: $outputShape');
 
-      // 出力バッファの作成
-      final outputBuffer = List<int>.filled(outputShape[0], 0);
+      // 出力バッファの作成 - [1, 1001]の形状に合わせる
+      final outputBuffer = List<List<int>>.generate(
+        outputShape[0],
+        (_) => List<int>.filled(outputShape[1], 0),
+      );
 
       // 推論実行
       final inputs = [processedImage];
       final outputs = {0: outputBuffer};
       _interpreter!.runForMultipleInputs(inputs, outputs);
 
-      // 結果の処理
-      final resultList = outputBuffer;
+      debugPrint('推論結果形状: ${outputBuffer.length} x ${outputBuffer[0].length}');
+
+      // 結果の処理 - モデルの出力は[1, 1001]の形状
+      final resultList = outputBuffer[0]; // 最初の行を取得
 
       // 確率の高い順にインデックスを取得
       final List<MapEntry<int, int>> indexed = [];
       for (int i = 0; i < resultList.length; i++) {
         indexed.add(MapEntry(i, resultList[i]));
       }
+
+      debugPrint('上位5ラベルのインデックスと値: ${indexed.take(5)}');
 
       // 確率の高い順にソート
       indexed.sort((a, b) => b.value.compareTo(a.value));

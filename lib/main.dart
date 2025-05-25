@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/diary_screen.dart';
+import 'screens/test_screen.dart';
 import 'services/photo_service.dart';
 
 Future<void> main() async {
@@ -126,6 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
       const DiaryScreen(),
       // 統計画面（未実装）
       const Center(child: Text('統計画面（開発中）')),
+      // テスト画面（画像分析と日記生成のテスト用）
+      const TestScreen(),
       // 設定画面（未実装）
       const Center(child: Text('設定画面（開発中）')),
     ];
@@ -152,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: '日記'),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: '統計'),
+          BottomNavigationBarItem(icon: Icon(Icons.science), label: 'テスト'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: '設定'),
         ],
       ),
