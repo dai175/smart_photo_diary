@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../services/image_classifier_service.dart';
 import '../services/ai_service.dart';
+import '../services/diary_service.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -113,14 +114,54 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     }
   }
 
-  /// 日記を保存
-  void _saveDiary() {
-    // TODO: 日記の保存処理を実装
-    // 現在は単純にポップアップで完了メッセージを表示
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('日記を保存しました')));
-    Navigator.pop(context);
+  /// 日記を保存する
+  Future<void> _saveDiary() async {
+    // BuildContextを保存
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      // DiaryServiceのインスタンスを取得
+      final diaryService = await DiaryService.getInstance();
+      
+      // 日記を保存
+      await diaryService.saveDiaryEntry(
+        date: _photoDateTime,
+        content: _diaryController.text,
+        photos: widget.selectedAssets,
+      );
+      
+      // ウィジェットがまだマウントされている場合のみ状態を更新
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        // 保存成功メッセージを表示
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('日記を保存しました')),
+        );
+        
+        // 前の画面に戻る
+        navigator.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+          _errorMessage = '日記の保存に失敗しました: $e';
+        });
+        
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('エラー: $_errorMessage')),
+        );
+      }
+    }
   }
 
   @override

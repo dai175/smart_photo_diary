@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'screens/diary_screen.dart';
 import 'screens/test_screen.dart';
 import 'screens/diary_preview_screen.dart';
 import 'services/photo_service.dart';
+import 'models/diary_entry.dart';
 
 Future<void> main() async {
   // Flutterの初期化を確実に行う
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Hiveの初期化
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(appDocumentDir.path);
+
+  // アダプターの登録
+  Hive.registerAdapter(DiaryEntryAdapter());
 
   // .envファイルの読み込み
   await dotenv.load();
