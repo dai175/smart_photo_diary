@@ -27,6 +27,8 @@ macos/build/
 # Web
 web/.dart_tool/
 web/build/
+# Jetbrains
+.idea/
 # その他
 *.iml
 *.log
