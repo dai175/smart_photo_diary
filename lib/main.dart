@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'screens/diary_screen.dart';
 import 'screens/test_screen.dart';
+import 'screens/diary_preview_screen.dart';
 import 'services/photo_service.dart';
 
 Future<void> main() async {
@@ -341,7 +343,27 @@ class _HomeContent extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: selected.where((s) => s).isNotEmpty ? () {} : null,
+                onPressed: selected.where((s) => s).isNotEmpty
+                    ? () {
+                        // 選択された写真を取得
+                        final List<AssetEntity> selectedPhotos = [];
+                        for (int i = 0; i < photoAssets.length; i++) {
+                          if (selected[i]) {
+                            selectedPhotos.add(photoAssets[i]);
+                          }
+                        }
+
+                        // 日記プレビュー画面へ遷移
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DiaryPreviewScreen(
+                              selectedAssets: selectedPhotos,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6C4AB6),
                   foregroundColor: Colors.white,

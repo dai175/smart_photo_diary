@@ -1,0 +1,286 @@
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:photo_manager/photo_manager.dart';
+import '../services/image_classifier_service.dart';
+import '../services/ai_service.dart';
+
+/// 生成された日記のプレビュー画面
+class DiaryPreviewScreen extends StatefulWidget {
+  /// 選択された写真アセット
+  final List<AssetEntity> selectedAssets;
+
+  const DiaryPreviewScreen({super.key, required this.selectedAssets});
+
+  @override
+  State<DiaryPreviewScreen> createState() => _DiaryPreviewScreenState();
+}
+
+class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
+  final ImageClassifierService _imageClassifier = ImageClassifierService();
+  final AiService _aiService = AiService();
+
+  bool _isLoading = true;
+  bool _hasError = false;
+  String _errorMessage = '';
+
+  // 日記の編集用コントローラー
+  late TextEditingController _diaryController;
+
+  @override
+  void initState() {
+    super.initState();
+    _diaryController = TextEditingController();
+    _loadModelAndGenerateDiary();
+  }
+
+  @override
+  void dispose() {
+    _imageClassifier.dispose();
+    _diaryController.dispose();
+    super.dispose();
+  }
+
+  /// モデルをロードして日記を生成
+  Future<void> _loadModelAndGenerateDiary() async {
+    if (widget.selectedAssets.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = '選択された写真がありません';
+      });
+      return;
+    }
+
+    try {
+      // モデルのロード
+      await _imageClassifier.loadModel();
+
+      // 各写真からラベルを抽出
+      final List<String> allLabels = [];
+      for (final asset in widget.selectedAssets) {
+        final labels = await _imageClassifier.classifyAsset(asset);
+        allLabels.addAll(labels);
+      }
+
+      // 重複を削除
+      final uniqueLabels = allLabels.toSet().toList();
+
+      debugPrint('検出されたラベル: $uniqueLabels');
+
+      if (uniqueLabels.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+          _errorMessage = '写真から特徴を検出できませんでした';
+        });
+        return;
+      }
+
+      // 日記を生成
+      final diary = await _aiService.generateDiaryFromLabels(
+        labels: uniqueLabels,
+        date: DateTime.now(),
+      );
+
+      setState(() {
+        _diaryController.text = diary;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('日記生成エラー: $e');
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = '日記の生成中にエラーが発生しました: $e';
+      });
+    }
+  }
+
+  /// 日記を保存
+  void _saveDiary() {
+    // TODO: 日記の保存処理を実装
+    // 現在は単純にポップアップで完了メッセージを表示
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('日記を保存しました')));
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('日記プレビュー'),
+        backgroundColor: Colors.purple.shade100,
+        actions: [
+          // 保存ボタン
+          if (!_isLoading && !_hasError)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _saveDiary,
+              tooltip: '日記を保存',
+            ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 日付表示
+            Text(
+              DateFormat('yyyy年MM月dd日').format(DateTime.now()),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 選択された写真のプレビュー
+            if (widget.selectedAssets.isNotEmpty)
+              SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.selectedAssets.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: FutureBuilder<Uint8List?>(
+                          future: widget.selectedAssets[index]
+                              .thumbnailDataWithSize(
+                                const ThumbnailSize(200, 200),
+                              ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                    ConnectionState.done &&
+                                snapshot.data != null) {
+                              return Image.memory(
+                                snapshot.data!,
+                                fit: BoxFit.cover,
+                                width: 100,
+                                height: 100,
+                              );
+                            }
+                            return Container(
+                              width: 100,
+                              height: 100,
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 24),
+
+            // ローディング表示
+            if (_isLoading)
+              const Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('写真から日記を生成中...'),
+                    ],
+                  ),
+                ),
+              )
+            // エラー表示
+            else if (_hasError)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('戻る'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            // 日記編集フィールド
+            else
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      '日記の内容',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _diaryController,
+                        maxLines: null,
+                        expands: true,
+                        textAlignVertical: TextAlignVertical.top,
+                        style: const TextStyle(fontSize: 16),
+                        decoration: const InputDecoration(
+                          hintText: '日記の内容を編集できます',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.all(16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: !_isLoading && !_hasError
+          ? SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: ElevatedButton(
+                  onPressed: _saveDiary,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6C4AB6),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text('日記を保存'),
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+}
