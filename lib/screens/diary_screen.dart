@@ -14,7 +14,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
       'id': '1',
       'date': '2025年5月23日',
       'title': '新しいカフェでランチ',
-      'text': '今日は友達と新しくオープンしたカフェに行った。パスタがとても美味しくて、ゆったりとした時間を過ごすことができた。店内の雰囲気も良く、また行きたいと思う。帰りに近くの公園も散歩して、リフレッシュできた一日だった。',
+      'text':
+          '今日は友達と新しくオープンしたカフェに行った。パスタがとても美味しくて、ゆったりとした時間を過ごすことができた。店内の雰囲気も良く、また行きたいと思う。帰りに近くの公園も散歩して、リフレッシュできた一日だった。',
       'images': [
         'https://images.unsplash.com/photo-1554118811-1e0d58224f24',
         'https://images.unsplash.com/photo-1513442542250-854d436a73f2',
@@ -26,7 +27,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
       'id': '2',
       'date': '2025年5月22日',
       'title': '朝の散歩と写真撮影',
-      'text': '朝早く起きて散歩に出かけた。空がとてもきれいで、写真を撮らずにはいられなかった。平和な一日の始まり。近所の公園では桜が満開で、季節の移り変わりを感じられた。',
+      'text':
+          '朝早く起きて散歩に出かけた。空がとてもきれいで、写真を撮らずにはいられなかった。平和な一日の始まり。近所の公園では桜が満開で、季節の移り変わりを感じられた。',
       'images': [
         'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
       ],
@@ -37,7 +39,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
       'id': '3',
       'date': '2025年5月20日',
       'title': '新しい本を読み始めた',
-      'text': '今日から新しい小説を読み始めた。最近忙しくて読書する時間がなかったけど、久しぶりに読書の時間を作れて良かった。物語に引き込まれて、あっという間に100ページ読んでしまった。',
+      'text':
+          '今日から新しい小説を読み始めた。最近忙しくて読書する時間がなかったけど、久しぶりに読書の時間を作れて良かった。物語に引き込まれて、あっという間に100ページ読んでしまった。',
       'images': [],
       'tags': ['読書', '休日'],
       'mood': 'relaxed',
@@ -58,7 +61,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
       'id': '5',
       'date': '2025年5月15日',
       'title': '在宅勤務の一日',
-      'text': '今日は在宅勤務。集中して作業ができて、予定よりも早くプロジェクトを進めることができた。昼休みには近所のカフェでテイクアウトしたサンドイッチを食べた。',
+      'text':
+          '今日は在宅勤務。集中して作業ができて、予定よりも早くプロジェクトを進めることができた。昼休みには近所のカフェでテイクアウトしたサンドイッチを食べた。',
       'images': [],
       'tags': ['仕事', '在宅'],
       'mood': 'productive',
@@ -107,14 +111,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
         ],
       ),
       body: ListView.builder(
@@ -122,7 +120,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         itemCount: _diaries.length,
         itemBuilder: (context, index) {
           final diary = _diaries[index];
-          
+
           return Card(
             margin: const EdgeInsets.only(bottom: 16),
             shape: RoundedRectangleBorder(
@@ -152,7 +150,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ],
                   ),
                 ),
-                
+
                 // タイトル
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -164,7 +162,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ),
                   ),
                 ),
-                
+
                 // 本文（一部）
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -175,7 +173,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     style: const TextStyle(fontSize: 14),
                   ),
                 ),
-                
+
                 // 画像があれば表示
                 if (diary['images'].isNotEmpty)
                   SizedBox(
@@ -187,7 +185,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         return Padding(
                           padding: EdgeInsets.only(
                             left: imgIndex == 0 ? 16 : 8,
-                            right: imgIndex == diary['images'].length - 1 ? 16 : 0,
+                            right: imgIndex == diary['images'].length - 1
+                                ? 16
+                                : 0,
                             bottom: 8,
                           ),
                           child: ClipRRect(
@@ -203,7 +203,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       },
                     ),
                   ),
-                
+
                 // タグ
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -219,9 +219,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
                               color: Colors.white,
                             ),
                           ),
-                          backgroundColor: const Color(0xFF6C4AB6).withAlpha(204), // 0.8の透明度に相当
+                          backgroundColor: const Color(
+                            0xFF6C4AB6,
+                          ).withAlpha(204), // 0.8の透明度に相当
                           padding: const EdgeInsets.all(0),
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
                     ],
                   ),

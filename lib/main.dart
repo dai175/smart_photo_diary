@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/diary_screen.dart';
+import 'services/photo_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,15 +31,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
-  // ダミー画像（ネット画像URL）
-  final List<String> _dummyImages = [
-    'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-    'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
-    'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
-    'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
-  ];
-  final List<bool> _selected = [true, true, false, false];
+
+  // 写真アセットのリスト
+  List<dynamic> _photoAssets = [];
+  List<bool> _selected = []; // finalを削除
 
   final List<Map<String, String>> _recentDiaries = [
     {
@@ -56,13 +52,28 @@ class _HomeScreenState extends State<HomeScreen> {
       _selected[index] = !_selected[index];
     });
   }
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodayPhotos();
+  }
+
+  // 今日の写真を読み込む
+  Future<void> _loadTodayPhotos() async {
+    final photos = await PhotoService.getTodayPhotos();
+    setState(() {
+      _photoAssets = photos;
+      _selected = List.generate(photos.length, (index) => true);
+    });
+  }
+
   // 画面一覧を取得するメソッド
   List<Widget> _getScreens() {
     return [
       // ホーム画面（現在の画面）
       _HomeContent(
-        dummyImages: _dummyImages,
+        photoAssets: _photoAssets,
         selected: _selected,
         recentDiaries: _recentDiaries,
         onToggleSelect: _toggleSelect,
@@ -79,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screens = _getScreens();
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6FF),
       body: screens[_currentIndex],
@@ -106,13 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ホーム画面のコンテンツを別クラスに分離
 class _HomeContent extends StatelessWidget {
-  final List<String> dummyImages;
+  final List<dynamic> photoAssets;
   final List<bool> selected;
   final List<Map<String, String>> recentDiaries;
   final Function(int) onToggleSelect;
 
   const _HomeContent({
-    required this.dummyImages,
+    required this.photoAssets,
     required this.selected,
     required this.recentDiaries,
     required this.onToggleSelect,
@@ -132,30 +143,26 @@ class _HomeContent extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
           ),
-          child: const Column(
+          child: Column(
             children: [
-              Text(
-                '📸 Smart Photo Diary',
+              const Text(
+                'スマート写真日記',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  shadows: [Shadow(blurRadius: 4, color: Colors.black26)],
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                '今日の思い出を写真で記録しよう',
-                style: TextStyle(color: Colors.white70, fontSize: 15),
+                '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
+                style: const TextStyle(fontSize: 16, color: Colors.white),
               ),
             ],
           ),
         ),
+        // メインコンテンツ
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -165,10 +172,7 @@ class _HomeContent extends StatelessWidget {
                 children: [
                   const Text(
                     '新しい写真',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -180,7 +184,7 @@ class _HomeContent extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${dummyImages.length}',
+                      '${photoAssets.length}',
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
@@ -188,26 +192,51 @@ class _HomeContent extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: 100,
-                child: dummyImages.isNotEmpty
-                    ? ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: dummyImages.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(width: 12),
+                height: 300,
+                child: photoAssets.isNotEmpty
+                    ? GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(8),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                        itemCount: photoAssets.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
                             onTap: () => onToggleSelect(index),
                             child: Stack(
-                              alignment: Alignment.topRight,
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(16),
-                                  child: Image.network(
-                                    dummyImages[index],
-                                    height: 90,
-                                    width: 90,
-                                    fit: BoxFit.cover,
+                                  child: FutureBuilder<dynamic>(
+                                    future: PhotoService.getThumbnail(
+                                      photoAssets[index],
+                                    ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.done &&
+                                          snapshot.hasData) {
+                                        return Image.memory(
+                                          snapshot.data!,
+                                          height: 90,
+                                          width: 90,
+                                          fit: BoxFit.cover,
+                                        );
+                                      } else {
+                                        return Container(
+                                          height: 90,
+                                          width: 90,
+                                          color: Colors.grey[300],
+                                          child: const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
                                 ),
                                 Positioned(
@@ -232,15 +261,11 @@ class _HomeContent extends StatelessWidget {
                           );
                         },
                       )
-                    : const Center(
-                        child: Text('写真を追加してください'),
-                      ),
+                    : const Center(child: Text('写真を追加してください')),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: selected.where((s) => s).isNotEmpty
-                    ? () {}
-                    : null,
+                onPressed: selected.where((s) => s).isNotEmpty ? () {} : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6C4AB6),
                   foregroundColor: Colors.white,
@@ -249,9 +274,7 @@ class _HomeContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text(
-                  '✨ ${selected.where((s) => s).length}枚の写真で日記を作成',
-                ),
+                child: Text('✨ ${selected.where((s) => s).length}枚の写真で日記を作成'),
               ),
               const SizedBox(height: 24),
               const Text(

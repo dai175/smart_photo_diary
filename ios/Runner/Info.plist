@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>写真ライブラリにアクセスして、日記作成に使用する写真を取得します</string>
 </dict>
 </plist>
