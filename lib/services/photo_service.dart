@@ -58,7 +58,7 @@ class PhotoService {
 
       // 写真を取得
       final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption(type: OrderOptionType.createDate)],
+        orders: [const OrderOption()],
         createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
       );
 
@@ -116,7 +116,7 @@ class PhotoService {
 
       // 写真を取得
       final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption(type: OrderOptionType.createDate)],
+        orders: [const OrderOption()],
         createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
       );
 
@@ -196,7 +196,7 @@ class PhotoService {
     try {
       // 写真を取得するためのフィルターオプション
       final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption(type: OrderOptionType.createDate)],
+        orders: [const OrderOption()],
       );
 
       // アルバムを取得

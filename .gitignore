@@ -57,3 +57,6 @@ web/build/
 *.tmp
 *.swp
 *.lock
+
+# --- 環境変数ファイル ---
+.env

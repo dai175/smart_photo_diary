@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/diary_screen.dart';
 import 'services/photo_service.dart';
 
-void main() {
+Future<void> main() async {
+  // Flutterの初期化を確実に行う
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // .envファイルの読み込み
+  await dotenv.load();
+
   runApp(const MyApp());
 }
 
