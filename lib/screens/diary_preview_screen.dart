@@ -23,6 +23,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   bool _isLoading = true;
   bool _hasError = false;
   String _errorMessage = '';
+  DateTime _photoDateTime = DateTime.now(); // 写真の撮影日時
 
   // 日記の編集用コントローラー
   late TextEditingController _diaryController;
@@ -56,6 +57,19 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       // モデルのロード
       await _imageClassifier.loadModel();
 
+      // 写真の撮影日時を取得
+      DateTime photoDateTime = DateTime.now();
+
+      // 選択された写真の中で最も古い日時を使用
+      for (final asset in widget.selectedAssets) {
+        final dateTime = asset.createDateTime;
+        if (dateTime.isBefore(photoDateTime)) {
+          photoDateTime = dateTime;
+        }
+      }
+
+      debugPrint('写真の撮影日時: $photoDateTime');
+
       // 各写真からラベルを抽出
       final List<String> allLabels = [];
       for (final asset in widget.selectedAssets) {
@@ -80,12 +94,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       // 日記を生成
       final diary = await _aiService.generateDiaryFromLabels(
         labels: uniqueLabels,
-        date: DateTime.now(),
+        date: photoDateTime,
       );
 
       setState(() {
         _diaryController.text = diary;
         _isLoading = false;
+        // 写真の撮影日時を保存
+        _photoDateTime = photoDateTime;
       });
     } catch (e) {
       debugPrint('日記生成エラー: $e');
@@ -130,7 +146,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           children: [
             // 日付表示
             Text(
-              DateFormat('yyyy年MM月dd日').format(DateTime.now()),
+              DateFormat('yyyy年MM月dd日').format(_photoDateTime),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
