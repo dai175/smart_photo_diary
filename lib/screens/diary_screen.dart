@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/diary_service.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'diary_detail_screen.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -77,6 +78,43 @@ class _DiaryScreenState extends State<DiaryScreen> {
       'mood': 'productive',
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDiaryEntries();
+  }
+
+  // 日記エントリーをタップしたときに詳細画面に遷移
+  void _navigateToDiaryDetail(DiaryEntry entry) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DiaryDetailScreen(diaryId: entry.id),
+      ),
+    ).then((_) {
+      // 詳細画面から戻ってきたときに日記一覧を再読み込み
+      _loadDiaryEntries();
+    });
+  }
+
+  // 日記エントリーを読み込む
+  Future<void> _loadDiaryEntries() async {
+    try {
+      final diaryService = await DiaryService.getInstance();
+      final entries = diaryService.getSortedDiaryEntries();
+
+      setState(() {
+        _diaryEntries = entries;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      debugPrint('日記エントリーの読み込みエラー: $e');
+    }
+  }
 
   // 気分に応じたアイコンを返す
   IconData _getMoodIcon(String mood) {
@@ -249,27 +287,106 @@ class _DiaryScreenState extends State<DiaryScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadDiaryEntries();
-  }
+  // ダミー日記カードを作成
+  Widget _buildDummyDiaryCard(Map<String, dynamic> diary) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 日付とムードアイコン
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  diary['date'],
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Icon(
+                  _getMoodIcon(diary['mood']),
+                  color: _getMoodColor(diary['mood']),
+                ),
+              ],
+            ),
+          ),
 
-  Future<void> _loadDiaryEntries() async {
-    try {
-      final diaryService = await DiaryService.getInstance();
-      final entries = diaryService.getSortedDiaryEntries();
+          // タイトル
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              diary['title'],
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
 
-      setState(() {
-        _diaryEntries = entries;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      debugPrint('日記エントリーの読み込みエラー: $e');
-    }
+          // 本文（一部）
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Text(
+              diary['text'],
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+
+          // 画像があれば表示
+          if (diary['images'].isNotEmpty)
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: diary['images'].length,
+                itemBuilder: (context, imgIndex) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: imgIndex == 0 ? 16 : 8,
+                      right: imgIndex == diary['images'].length - 1 ? 16 : 0,
+                      bottom: 8,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        diary['images'][imgIndex],
+                        height: 120,
+                        width: 120,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+          // タグ
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Wrap(
+              spacing: 8,
+              children: [
+                for (final tag in diary['tags'])
+                  Chip(
+                    label: Text(
+                      '#$tag',
+                      style: const TextStyle(fontSize: 12, color: Colors.white),
+                    ),
+                    backgroundColor: const Color(0xFF6C4AB6).withAlpha(204),
+                    padding: const EdgeInsets.all(0),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -299,128 +416,22 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _diaryEntries.isNotEmpty
           ? ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: _diaryEntries.length,
               itemBuilder: (context, index) {
                 final entry = _diaryEntries[index];
-                return _buildDiaryCard(entry);
+                return GestureDetector(
+                  onTap: () => _navigateToDiaryDetail(entry),
+                  child: _buildDiaryCard(entry),
+                );
               },
             )
           : ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: _dummyDiaries.length,
               itemBuilder: (context, index) {
                 final diary = _dummyDiaries[index];
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 日付とムードアイコン
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              diary['date'],
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Icon(
-                              _getMoodIcon(diary['mood']),
-                              color: _getMoodColor(diary['mood']),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // タイトル
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          diary['title'],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      // 本文（一部）
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        child: Text(
-                          diary['text'],
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-
-                      // 画像があれば表示
-                      if (diary['images'].isNotEmpty)
-                        SizedBox(
-                          height: 120,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: diary['images'].length,
-                            itemBuilder: (context, imgIndex) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  left: imgIndex == 0 ? 16 : 8,
-                                  right: imgIndex == diary['images'].length - 1
-                                      ? 16
-                                      : 0,
-                                  bottom: 8,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    diary['images'][imgIndex],
-                                    height: 120,
-                                    width: 120,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                      // タグ
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Wrap(
-                          spacing: 8,
-                          children: [
-                            for (final tag in diary['tags'])
-                              Chip(
-                                label: Text(
-                                  '#$tag',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                backgroundColor: const Color(
-                                  0xFF6C4AB6,
-                                ).withAlpha(204), // 0.8の透明度に相当
-                                padding: const EdgeInsets.all(0),
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _buildDummyDiaryCard(diary);
               },
             ),
       floatingActionButton: FloatingActionButton(

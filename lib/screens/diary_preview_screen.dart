@@ -119,33 +119,33 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     // BuildContextを保存
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    
+
     try {
       setState(() {
         _isLoading = true;
       });
-      
+
       // DiaryServiceのインスタンスを取得
       final diaryService = await DiaryService.getInstance();
-      
+
       // 日記を保存
       await diaryService.saveDiaryEntry(
         date: _photoDateTime,
         content: _diaryController.text,
         photos: widget.selectedAssets,
       );
-      
+
       // ウィジェットがまだマウントされている場合のみ状態を更新
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
-        
+
         // 保存成功メッセージを表示
         scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('日記を保存しました')),
         );
-        
+
         // 前の画面に戻る
         navigator.pop();
       }
@@ -156,7 +156,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           _hasError = true;
           _errorMessage = '日記の保存に失敗しました: $e';
         });
-        
+
         scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('エラー: $_errorMessage')),
         );
