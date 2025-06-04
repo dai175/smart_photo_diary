@@ -326,7 +326,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 child: ElevatedButton(
                   onPressed: _saveDiary,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6C4AB6),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(

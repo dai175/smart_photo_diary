@@ -195,7 +195,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('日記の詳細'),
-        backgroundColor: const Color(0xFF6C4AB6),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           // 編集モード切替ボタン
@@ -238,10 +238,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           // 日付表示
           Text(
             DateFormat('yyyy年MM月dd日').format(_diaryEntry!.date),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF6C4AB6),
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 16),

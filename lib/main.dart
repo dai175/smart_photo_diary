@@ -9,8 +9,10 @@ import 'screens/test_screen.dart';
 import 'screens/diary_preview_screen.dart';
 import 'screens/diary_detail_screen.dart';
 import 'screens/statistics_screen.dart';
+import 'screens/settings_screen.dart';
 import 'services/photo_service.dart';
 import 'services/diary_service.dart';
+import 'services/settings_service.dart';
 import 'models/diary_entry.dart';
 
 Future<void> main() async {
@@ -30,24 +32,97 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late SettingsService _settingsService;
+  ThemeMode _themeMode = ThemeMode.system;
+  Color _accentColor = const Color(0xFF6C4AB6);
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      _settingsService = await SettingsService.getInstance();
+      setState(() {
+        _themeMode = _settingsService.themeMode;
+        _accentColor = _settingsService.accentColor;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _onThemeChanged(ThemeMode themeMode) {
+    setState(() {
+      _themeMode = themeMode;
+    });
+  }
+
+  void _onAccentColorChanged(Color color) {
+    setState(() {
+      _accentColor = color;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
     return MaterialApp(
       title: 'Smart Photo Diary',
+      themeMode: _themeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _accentColor,
+        ),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _accentColor,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      home: HomeScreen(
+        onThemeChanged: _onThemeChanged,
+        onAccentColorChanged: _onAccentColorChanged,
+      ),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function(ThemeMode)? onThemeChanged;
+  final Function(Color)? onAccentColorChanged;
+  
+  const HomeScreen({
+    super.key,
+    this.onThemeChanged,
+    this.onAccentColorChanged,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -176,8 +251,11 @@ class _HomeScreenState extends State<HomeScreen> {
       const StatisticsScreen(),
       // テスト画面（画像分析と日記生成のテスト用）
       const TestScreen(),
-      // 設定画面（未実装）
-      const Center(child: Text('設定画面（開発中）')),
+      // 設定画面
+      SettingsScreen(
+        onThemeChanged: widget.onThemeChanged,
+        onAccentColorChanged: widget.onAccentColorChanged,
+      ),
     ];
   }
 
@@ -190,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF6C4AB6),
+        selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -414,7 +492,7 @@ class _HomeContent extends StatelessWidget {
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C4AB6),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(

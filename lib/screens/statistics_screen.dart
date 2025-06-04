@@ -168,7 +168,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF6C4AB6),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       child: Text(
                         '${index + 1}',
                         style: const TextStyle(
@@ -240,7 +240,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           '統計',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF6C4AB6),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -286,7 +286,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 '$_totalEntries',
                 '日記',
                 Icons.book,
-                const Color(0xFF6C4AB6),
+                Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -472,11 +472,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
             },
-            calendarStyle: const CalendarStyle(
-              weekendTextStyle: TextStyle(color: Color(0xFF6C4AB6)),
-              holidayTextStyle: TextStyle(color: Color(0xFF6C4AB6)),
+            calendarStyle: CalendarStyle(
+              weekendTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+              holidayTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
               selectedDecoration: BoxDecoration(
-                color: Color(0xFF6C4AB6),
+                color: Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle,
               ),
               todayDecoration: BoxDecoration(
@@ -502,10 +502,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 return null;
               },
             ),
-            headerStyle: const HeaderStyle(
+            headerStyle: HeaderStyle(
               titleCentered: true,
               formatButtonDecoration: BoxDecoration(
-                color: Color(0xFF6C4AB6),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.all(Radius.circular(12.0)),
               ),
               formatButtonTextStyle: TextStyle(

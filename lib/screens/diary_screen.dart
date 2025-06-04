@@ -275,7 +275,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       '#$tag',
                       style: const TextStyle(fontSize: 12, color: Colors.white),
                     ),
-                    backgroundColor: const Color(0xFF6C4AB6).withAlpha(204),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                     padding: const EdgeInsets.all(0),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -377,7 +377,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       '#$tag',
                       style: const TextStyle(fontSize: 12, color: Colors.white),
                     ),
-                    backgroundColor: const Color(0xFF6C4AB6).withAlpha(204),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                     padding: const EdgeInsets.all(0),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -395,7 +395,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       backgroundColor: const Color(0xFFF6F6FF),
       appBar: AppBar(
         title: const Text('日記一覧'),
-        backgroundColor: const Color(0xFF6C4AB6),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -438,7 +438,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         onPressed: () {
           // 新規日記作成画面へ遷移（将来実装）
         },
-        backgroundColor: const Color(0xFF6C4AB6),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add),
       ),
     );
