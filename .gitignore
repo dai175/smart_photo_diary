@@ -50,6 +50,7 @@ web/build/
 # --- IDE/エディタ関連 ---
 .vscode/
 .idea/
+.claude/
 
 # --- 一時ファイル・その他 ---
 *.iml

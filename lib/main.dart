@@ -8,6 +8,7 @@ import 'screens/diary_screen.dart';
 import 'screens/test_screen.dart';
 import 'screens/diary_preview_screen.dart';
 import 'screens/diary_detail_screen.dart';
+import 'screens/statistics_screen.dart';
 import 'services/photo_service.dart';
 import 'services/diary_service.dart';
 import 'models/diary_entry.dart';
@@ -171,8 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       // 日記一覧画面
       const DiaryScreen(),
-      // 統計画面（未実装）
-      const Center(child: Text('統計画面（開発中）')),
+      // 統計画面
+      const StatisticsScreen(),
       // テスト画面（画像分析と日記生成のテスト用）
       const TestScreen(),
       // 設定画面（未実装）
