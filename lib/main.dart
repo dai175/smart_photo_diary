@@ -154,10 +154,32 @@ class _HomeScreenState extends State<HomeScreen> {
         final selectedCount = _selected.where((selected) => selected).length;
         if (selectedCount < maxPhotos) {
           _selected[index] = true;
+        } else {
+          // 上限に達している場合はモーダルを表示
+          _showSelectionLimitModal();
         }
-        // 上限に達している場合は選択しない（無言で制限）
       }
     });
+  }
+
+  // 選択制限モーダルを表示
+  void _showSelectionLimitModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text('写真は3枚までにしてください'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
