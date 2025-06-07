@@ -10,22 +10,19 @@ Smart Photo Diary is a Flutter mobile application that generates diary entries f
 
 ### Setup and Dependencies
 ```bash
-# Get dependencies
-flutter pub get
+# Get dependencies (using FVM)
+fvm flutter pub get
 
-# Code generation for Hive models
-dart run build_runner build
+# Code generation for Hive models (using FVM)
+fvm dart run build_runner build
 
 # Force rebuild generated code
-dart run build_runner build --delete-conflicting-outputs
+fvm dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### Development
 ```bash
-# Run app in development
-flutter run
-
-# Run with FVM (recommended)
+# Run app in development (using FVM)
 fvm flutter run
 
 # Hot reload and hot restart are available during development
@@ -33,39 +30,39 @@ fvm flutter run
 
 ### Testing
 ```bash
-# Run all tests
-flutter test
+# Run all tests (using FVM)
+fvm flutter test
 
 # Run tests with coverage
-flutter test --coverage
+fvm flutter test --coverage
 
 # Run specific test file
-flutter test test/widget_test.dart
+fvm flutter test test/widget_test.dart
 ```
 
 ### Build Commands
 ```bash
 # Debug build
-flutter build apk --debug
+fvm flutter build apk --debug
 
 # Release builds
-flutter build apk --release
-flutter build appbundle
-flutter build ipa
+fvm flutter build apk --release
+fvm flutter build appbundle
+fvm flutter build ipa
 
 # Build for specific platforms
-flutter build macos
-flutter build windows
-flutter build linux
+fvm flutter build macos
+fvm flutter build windows
+fvm flutter build linux
 ```
 
 ### Linting
 ```bash
 # Analyze code
-flutter analyze
+fvm flutter analyze
 
 # Fix formatting
-dart format .
+fvm dart format .
 ```
 
 ## Architecture Overview
@@ -118,7 +115,10 @@ The app follows a service-oriented architecture with singleton services:
 ## Development Notes
 
 ### Code Generation
-Always run `dart run build_runner build` after modifying Hive model classes to regenerate adapters.
+Always run `fvm dart run build_runner build` after modifying Hive model classes to regenerate adapters.
+
+### Code Quality
+Always run `fvm flutter analyze` before committing code. Fix all analyzer warnings and errors immediately to maintain code quality.
 
 ### Testing Strategy
 The project uses `mocktail` for unit testing. Services are designed to be easily mockable with their singleton pattern.
