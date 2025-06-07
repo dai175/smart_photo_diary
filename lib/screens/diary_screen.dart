@@ -88,13 +88,35 @@ class _DiaryScreenState extends State<DiaryScreen> {
     }
   }
 
+  // タグを取得（永続化キャッシュ優先）
+  Future<List<String>> _generateTags(DiaryEntry entry) async {
+    try {
+      final diaryService = await DiaryService.getInstance();
+      return await diaryService.getTagsForEntry(entry);
+    } catch (e) {
+      debugPrint('タグ取得エラー: $e');
+      // エラー時はフォールバックタグを返す（時間帯のみ）
+      final fallbackTags = <String>[];
+      
+      final hour = entry.date.hour;
+      if (hour >= 5 && hour < 12) {
+        fallbackTags.add('朝');
+      } else if (hour >= 12 && hour < 18) {
+        fallbackTags.add('昼');
+      } else if (hour >= 18 && hour < 22) {
+        fallbackTags.add('夕方');
+      } else {
+        fallbackTags.add('夜');
+      }
+      
+      return fallbackTags;
+    }
+  }
+
   // 実際の日記エントリーのカードを作成
   Widget _buildDiaryCard(DiaryEntry entry) {
     // タイトルを取得
     final title = entry.title.isNotEmpty ? entry.title : '無題';
-
-    // タグを抽出（将来的に実装予定）
-    final tags = <String>['AI生成', '写真日記'];
 
     // 気分をランダムに設定（将来的に実装予定）
     final moods = ['happy', 'relaxed', 'excited', 'productive'];
@@ -202,24 +224,49 @@ class _DiaryScreenState extends State<DiaryScreen> {
             },
           ),
 
-          // タグ
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Wrap(
-              spacing: 8,
-              children: [
-                for (final tag in tags)
-                  Chip(
-                    label: Text(
-                      '#$tag',
-                      style: const TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
-                    padding: const EdgeInsets.all(0),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          // タグ（動的生成）
+          FutureBuilder<List<String>>(
+            future: _generateTags(entry),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 8),
+                      Text('タグを生成中...', style: TextStyle(fontSize: 12)),
+                    ],
                   ),
-              ],
-            ),
+                );
+              }
+              
+              final tags = snapshot.data ?? [];
+              if (tags.isEmpty) return const SizedBox();
+              
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final tag in tags)
+                      Chip(
+                        label: Text(
+                          '#$tag',
+                          style: const TextStyle(fontSize: 12, color: Colors.white),
+                        ),
+                        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                        padding: const EdgeInsets.all(0),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

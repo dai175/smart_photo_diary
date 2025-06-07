@@ -4,12 +4,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 import '../models/diary_entry.dart';
+import 'ai_service.dart';
 
 class DiaryService {
   static const String _boxName = 'diary_entries';
   static DiaryService? _instance;
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
+  final _aiService = AiService();
 
   // シングルトンパターン
   DiaryService._();
@@ -85,6 +87,9 @@ class DiaryService {
       await _diaryBox!.put(entry.id, entry);
       debugPrint('Hive保存完了');
 
+      // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
+      _generateTagsInBackground(entry);
+
       return entry;
     } catch (e, stackTrace) {
       debugPrint('日記保存エラー: $e');
@@ -157,5 +162,72 @@ class DiaryService {
   Future<DiaryEntry?> getDiaryEntryById(String id) async {
     if (_diaryBox == null) await _init();
     return _diaryBox!.get(id);
+  }
+
+  // バックグラウンドでタグを生成
+  void _generateTagsInBackground(DiaryEntry entry) {
+    // 非同期でタグ生成を実行（UI をブロックしない）
+    Future.delayed(Duration.zero, () async {
+      try {
+        debugPrint('バックグラウンドでタグ生成開始: ${entry.id}');
+        final tags = await _aiService.generateTagsFromContent(
+          title: entry.title,
+          content: entry.content,
+          date: entry.date,
+          photoCount: entry.photoIds.length,
+        );
+        
+        await entry.updateTags(tags);
+        debugPrint('タグ生成完了: ${entry.id} -> $tags');
+      } catch (e) {
+        debugPrint('バックグラウンドタグ生成エラー: $e');
+      }
+    });
+  }
+
+  // 日記エントリーのタグを取得（キャッシュ優先）
+  Future<List<String>> getTagsForEntry(DiaryEntry entry) async {
+    // 有効なキャッシュがあればそれを返す
+    if (entry.hasValidTags) {
+      return entry.cachedTags!;
+    }
+    
+    try {
+      // キャッシュが無効または存在しない場合は新しく生成
+      debugPrint('新しいタグを生成中: ${entry.id}');
+      final tags = await _aiService.generateTagsFromContent(
+        title: entry.title,
+        content: entry.content,
+        date: entry.date,
+        photoCount: entry.photoIds.length,
+      );
+      
+      // データベースに保存
+      await entry.updateTags(tags);
+      return tags;
+    } catch (e) {
+      debugPrint('タグ生成エラー: $e');
+      // エラー時はフォールバックタグを返す
+      return _generateFallbackTags(entry);
+    }
+  }
+
+  // フォールバックタグを生成
+  List<String> _generateFallbackTags(DiaryEntry entry) {
+    final tags = <String>[];
+    
+    // 時間帯タグのみ
+    final hour = entry.date.hour;
+    if (hour >= 5 && hour < 12) {
+      tags.add('朝');
+    } else if (hour >= 12 && hour < 18) {
+      tags.add('昼');
+    } else if (hour >= 18 && hour < 22) {
+      tags.add('夕方');
+    } else {
+      tags.add('夜');
+    }
+    
+    return tags;
   }
 }

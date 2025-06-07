@@ -465,6 +465,199 @@ ${location != null ? '場所: $location\n' : ''}
     return buffer.toString().trim();
   }
 
+  /// 日記の内容からタグを自動生成
+  Future<List<String>> generateTagsFromContent({
+    required String title,
+    required String content,
+    required DateTime date,
+    required int photoCount,
+  }) async {
+    try {
+      // オンライン状態を確認
+      final online = await isOnline();
+      if (!online) {
+        return _generateOfflineTags(title, content, date, photoCount);
+      }
+
+      // 時間帯を取得
+      final timeOfDay = _getTimeOfDay(date);
+
+      // タグ生成用プロンプト
+      final prompt = '''
+以下の日記の内容から、適切なタグを3-5個生成してください。
+タグは日記の内容を表現する短い単語（1-3文字程度）で、カテゴリ分けに役立つものにしてください。
+
+日付: ${DateFormat('yyyy年MM月dd日').format(date)}
+時間帯: $timeOfDay
+写真枚数: $photoCount枚
+
+タイトル: $title
+本文: $content
+
+以下の形式で出力してください（タグ名のみをカンマ区切りで）：
+朝食,散歩,リラックス
+
+注意事項：
+- 日本語の短い単語でお願いします
+- 食事、活動、場所、感情、時間などの観点から選んでください
+- 「#」記号は不要です
+- 最大5個まで
+''';
+
+      // APIリクエストの作成
+      final response = await http.post(
+        Uri.parse('$_apiUrl?key=$_apiKey'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'contents': [
+            {
+              'parts': [
+                {'text': prompt}
+              ],
+              'role': 'user'
+            }
+          ],
+          'generationConfig': {
+            'temperature': 0.3,
+            'maxOutputTokens': 100,
+            'topP': 0.8,
+            'topK': 10,
+            'thinkingConfig': {
+              'thinkingBudget': 0
+            }
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final candidate = data['candidates'][0];
+          
+          String? tagText;
+          if (candidate['content'] != null && 
+              candidate['content']['parts'] != null &&
+              candidate['content']['parts'].isNotEmpty &&
+              candidate['content']['parts'][0]['text'] != null) {
+            tagText = candidate['content']['parts'][0]['text'];
+          }
+          
+          if (tagText != null && tagText.isNotEmpty) {
+            // カンマ区切りでタグを分割
+            final tags = tagText.trim()
+                .split(',')
+                .map((tag) => tag.trim())
+                .where((tag) => tag.isNotEmpty)
+                .take(5)
+                .toList();
+            
+            // 基本タグ（時間帯）を追加
+            final baseTags = _generateBasicTags(date, photoCount);
+            final allTags = [...baseTags, ...tags];
+            
+            // 似たようなタグを統合
+            final filteredTags = _filterSimilarTags(allTags);
+            
+            return filteredTags.take(5).toList();
+          }
+        }
+      }
+      
+      debugPrint('タグ生成 API エラー: ${response.statusCode} - ${response.body}');
+      return _generateOfflineTags(title, content, date, photoCount);
+    } catch (e) {
+      debugPrint('タグ生成エラー: $e');
+      return _generateOfflineTags(title, content, date, photoCount);
+    }
+  }
+
+  /// オフライン時のタグ生成（基本的な情報のみ）
+  List<String> _generateOfflineTags(String title, String content, DateTime date, int photoCount) {
+    final tags = _generateBasicTags(date, photoCount);
+    
+    // シンプルなキーワード検索
+    final fullText = '$title $content'.toLowerCase();
+    
+    if (fullText.contains('食事') || fullText.contains('朝食') || fullText.contains('昼食') || fullText.contains('夕食')) {
+      tags.add('食事');
+    }
+    if (fullText.contains('散歩') || fullText.contains('歩')) {
+      tags.add('外出');
+    }
+    if (fullText.contains('仕事') || fullText.contains('work')) {
+      tags.add('仕事');
+    }
+    if (fullText.contains('家') || fullText.contains('自宅')) {
+      tags.add('自宅');
+    }
+    
+    // 似たようなタグを統合
+    final filteredTags = _filterSimilarTags(tags);
+    
+    return filteredTags.take(5).toList();
+  }
+
+  /// 基本タグ（時間帯）を生成
+  List<String> _generateBasicTags(DateTime date, int photoCount) {
+    final tags = <String>[];
+    
+    // 時間帯タグ
+    final timeOfDay = _getTimeOfDay(date);
+    tags.add(timeOfDay);
+    
+    return tags;
+  }
+
+  /// 似たようなタグを統合・フィルタリング
+  List<String> _filterSimilarTags(List<String> tags) {
+    final filteredTags = <String>[];
+    
+    // 類似タグのマッピング
+    final similarTagGroups = {
+      '食事': ['朝食', '昼食', '夕食', 'ご飯', '食べ物', '料理', 'グルメ'],
+      '外出': ['散歩', 'お出かけ', '外', '屋外', 'ウォーキング'],
+      '自宅': ['家', '部屋', '室内', 'おうち'],
+      '仕事': ['作業', 'お仕事', 'ワーク'],
+      '運動': ['スポーツ', 'トレーニング', 'エクササイズ', '筋トレ'],
+      '読書': ['本', '読み物', '図書'],
+      '買い物': ['ショッピング', '購入', 'お買い物'],
+      'リラックス': ['癒し', 'のんびり', 'ゆっくり', '休憩'],
+      '楽しい': ['嬉しい', 'ハッピー', '喜び', 'ポジティブ'],
+    };
+    
+    final usedGroups = <String>{};
+    
+    for (final tag in tags) {
+      bool grouped = false;
+      
+      // 各グループをチェック
+      for (final entry in similarTagGroups.entries) {
+        final groupName = entry.key;
+        final groupTags = entry.value;
+        
+        // このタグがグループに属するかチェック
+        if (groupTags.contains(tag) || tag == groupName) {
+          if (!usedGroups.contains(groupName)) {
+            filteredTags.add(groupName); // グループの代表名を使用
+            usedGroups.add(groupName);
+          }
+          grouped = true;
+          break;
+        }
+      }
+      
+      // どのグループにも属さない場合はそのまま追加
+      if (!grouped && !filteredTags.contains(tag)) {
+        filteredTags.add(tag);
+      }
+    }
+    
+    return filteredTags;
+  }
+
   /// 1枚の画像を分析して説明を取得
   Future<String> _analyzeImage(Uint8List imageData, DateTime time, String? location) async {
     final timeStr = DateFormat('HH:mm').format(time);

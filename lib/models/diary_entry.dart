@@ -27,6 +27,12 @@ class DiaryEntry extends HiveObject {
   @HiveField(6)
   DateTime updatedAt;
 
+  @HiveField(7)
+  List<String>? cachedTags; // 生成されたタグのキャッシュ
+
+  @HiveField(8)
+  DateTime? tagsGeneratedAt; // タグ生成日時
+
   DiaryEntry({
     required this.id,
     required this.date,
@@ -35,6 +41,8 @@ class DiaryEntry extends HiveObject {
     required this.photoIds,
     required this.createdAt,
     required this.updatedAt,
+    this.cachedTags,
+    this.tagsGeneratedAt,
   });
 
   // 写真のIDリストからAssetEntityのリストを取得するメソッド
@@ -63,6 +71,21 @@ class DiaryEntry extends HiveObject {
     save(); // Hiveオブジェクトの保存メソッド
   }
 
+  // タグを更新してデータベースに保存
+  Future<void> updateTags(List<String> tags) async {
+    cachedTags = tags;
+    tagsGeneratedAt = DateTime.now();
+    await save(); // Hiveのsaveメソッドでデータベースに保存
+  }
+
+  // タグが有効かどうかをチェック（7日間有効）
+  bool get hasValidTags {
+    if (cachedTags == null || tagsGeneratedAt == null) return false;
+    
+    final daysSinceGeneration = DateTime.now().difference(tagsGeneratedAt!).inDays;
+    return daysSinceGeneration < 7; // 7日以内なら有効
+  }
+
   // 日記エントリーのコピーを作成するメソッド
   DiaryEntry copyWith({
     String? id,
@@ -72,6 +95,8 @@ class DiaryEntry extends HiveObject {
     List<String>? photoIds,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<String>? cachedTags,
+    DateTime? tagsGeneratedAt,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -81,6 +106,8 @@ class DiaryEntry extends HiveObject {
       photoIds: photoIds ?? this.photoIds,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      cachedTags: cachedTags ?? this.cachedTags,
+      tagsGeneratedAt: tagsGeneratedAt ?? this.tagsGeneratedAt,
     );
   }
 }
