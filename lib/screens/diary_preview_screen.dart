@@ -27,6 +27,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   bool _hasError = false;
   String _errorMessage = '';
   DateTime _photoDateTime = DateTime.now(); // 写真の撮影日時
+  
+  // 複数写真処理の進捗表示用
+  int _currentPhotoIndex = 0;
+  int _totalPhotos = 0;
+  bool _isAnalyzingPhotos = false;
 
   // 日記の編集用コントローラー
   late TextEditingController _titleController;
@@ -67,14 +72,22 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       debugPrint('使用する生成モード: ${generationMode.name}');
 
       // 写真の撮影日時を取得
-      DateTime photoDateTime = DateTime.now();
-
-      // 選択された写真の中で最も古い日時を使用
+      List<DateTime> photoTimes = [];
+      
+      // 全ての写真の撮影時刻を収集
       for (final asset in widget.selectedAssets) {
-        final dateTime = asset.createDateTime;
-        if (dateTime.isBefore(photoDateTime)) {
-          photoDateTime = dateTime;
-        }
+        photoTimes.add(asset.createDateTime);
+      }
+      
+      // 写真が複数ある場合は時間範囲を考慮、単一の場合はその時刻を使用
+      DateTime photoDateTime;
+      if (photoTimes.length == 1) {
+        photoDateTime = photoTimes.first;
+      } else {
+        // 複数写真の場合は中央値の時刻を使用
+        photoTimes.sort();
+        final middleIndex = photoTimes.length ~/ 2;
+        photoDateTime = photoTimes[middleIndex];
       }
 
       debugPrint('写真の撮影日時: $photoDateTime');
@@ -85,18 +98,60 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // Vision API方式：画像を直接Geminiに送信
         debugPrint('Vision API方式で日記生成中...');
         
-        // 最初の写真を使用（複数写真の場合は最初の1枚）
-        final firstAsset = widget.selectedAssets.first;
-        final imageData = await PhotoService.getOriginalFile(firstAsset);
-        
-        if (imageData == null) {
-          throw Exception('写真データの取得に失敗しました');
-        }
+        if (widget.selectedAssets.length == 1) {
+          // 単一写真の場合：従来通り
+          final firstAsset = widget.selectedAssets.first;
+          final imageData = await PhotoService.getOriginalFile(firstAsset);
+          
+          if (imageData == null) {
+            throw Exception('写真データの取得に失敗しました');
+          }
 
-        result = await _aiService.generateDiaryFromImage(
-          imageData: imageData,
-          date: photoDateTime,
-        );
+          result = await _aiService.generateDiaryFromImage(
+            imageData: imageData,
+            date: photoDateTime,
+          );
+        } else {
+          // 複数写真の場合：新しい順次処理方式を使用
+          debugPrint('複数写真の順次分析を開始...');
+          
+          // 全ての写真データを収集
+          final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
+          
+          for (final asset in widget.selectedAssets) {
+            final imageData = await PhotoService.getOriginalFile(asset);
+            if (imageData != null) {
+              imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
+            }
+          }
+          
+          if (imagesWithTimes.isEmpty) {
+            throw Exception('写真データの取得に失敗しました');
+          }
+
+          // 進捗表示を開始
+          setState(() {
+            _isAnalyzingPhotos = true;
+            _totalPhotos = imagesWithTimes.length;
+            _currentPhotoIndex = 0;
+          });
+
+          result = await _aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: imagesWithTimes,
+            onProgress: (current, total) {
+              debugPrint('画像分析進捗: $current/$total');
+              setState(() {
+                _currentPhotoIndex = current;
+                _totalPhotos = total;
+              });
+            },
+          );
+          
+          // 進捗表示を終了
+          setState(() {
+            _isAnalyzingPhotos = false;
+          });
+        }
       } else {
         // ラベル抽出方式：従来の方法
         debugPrint('ラベル抽出方式で日記生成中...');
@@ -104,17 +159,28 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // モデルのロード
         await _imageClassifier.loadModel();
 
-        // 各写真からラベルを抽出
+        // 各写真からラベルを抽出し、時刻とペアにする
+        final List<PhotoTimeLabel> photoTimeLabels = [];
         final List<String> allLabels = [];
+        
         for (final asset in widget.selectedAssets) {
           final labels = await _imageClassifier.classifyAsset(asset);
           allLabels.addAll(labels);
+          
+          // 写真ごとの時刻とラベルのペアを作成
+          if (labels.isNotEmpty) {
+            photoTimeLabels.add(PhotoTimeLabel(
+              time: asset.createDateTime,
+              labels: labels,
+            ));
+          }
         }
 
-        // 重複を削除
+        // 重複を削除（全体のラベル）
         final uniqueLabels = allLabels.toSet().toList();
 
         debugPrint('検出されたラベル: $uniqueLabels');
+        debugPrint('写真ごとの時刻とラベル: ${photoTimeLabels.map((p) => '${p.time}: ${p.labels}').join(', ')}');
 
         if (uniqueLabels.isEmpty) {
           setState(() {
@@ -125,10 +191,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           return;
         }
 
-        // 日記を生成
+        // 日記を生成（写真ごとの時刻とラベル情報を使用）
         result = await _aiService.generateDiaryFromLabels(
           labels: uniqueLabels,
           date: photoDateTime,
+          photoTimes: photoTimes,
+          photoTimeLabels: photoTimeLabels,
         );
       }
 
@@ -293,14 +361,21 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
             // ローディング表示
             if (_isLoading)
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('写真から日記を生成中...'),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      if (_isAnalyzingPhotos && _totalPhotos > 1) ...[
+                        Text('写真を分析中... $_currentPhotoIndex/$_totalPhotos枚'),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: _totalPhotos > 0 ? _currentPhotoIndex / _totalPhotos : 0,
+                        ),
+                      ] else
+                        const Text('写真から日記を生成中...'),
                     ],
                   ),
                 ),

@@ -143,7 +143,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _toggleSelect(int index) {
     setState(() {
-      _selected[index] = !_selected[index];
+      // 写真選択の上限は3枚
+      const int maxPhotos = 3;
+      
+      if (_selected[index]) {
+        // 選択解除の場合はそのまま実行
+        _selected[index] = false;
+      } else {
+        // 選択の場合は上限チェック
+        final selectedCount = _selected.where((selected) => selected).length;
+        if (selectedCount < maxPhotos) {
+          _selected[index] = true;
+        }
+        // 上限に達している場合は選択しない（無言で制限）
+      }
     });
   }
 
@@ -210,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         _photoAssets = photos;
-        _selected = List.generate(photos.length, (index) => true);
+        _selected = List.generate(photos.length, (index) => false);
         _isLoading = false;
       });
     } catch (e) {
@@ -472,7 +485,16 @@ class _HomeContent extends StatelessWidget {
                       )
                     : const Center(child: Text('写真が見つかりませんでした')),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              // 選択枚数の表示
+              Text(
+                '選択された写真: ${selected.where((s) => s).length}/3枚',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: selected.where((s) => s).isNotEmpty
                     ? () {
