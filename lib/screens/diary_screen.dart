@@ -340,14 +340,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 ],
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 新規日記作成画面へ遷移（将来実装）
-        },
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
