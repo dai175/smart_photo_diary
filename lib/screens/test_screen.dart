@@ -218,7 +218,7 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '現在のモード: ${_generationMode == DiaryGenerationMode.labels ? "ラベル（高速）" : "ビジョン（詳細）"}',
+                    '現在のモード: ${_generationMode == DiaryGenerationMode.labels ? "プライバシー重視" : "精度重視"}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: _generationMode == DiaryGenerationMode.labels
@@ -275,8 +275,8 @@ class _TestScreenState extends State<TestScreen> {
             if (_detectedLabels.isNotEmpty) ...[
               Text(
                 _generationMode == DiaryGenerationMode.labels
-                    ? '検出されたラベル（デバッグ用）:'
-                    : '使用された生成方式:',
+                    ? '端末内で分析したキーワード:'
+                    : 'サーバーで詳細分析した結果:',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),

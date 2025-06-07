@@ -17,7 +17,6 @@ class StorageService {
   Future<StorageInfo> getStorageInfo() async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      int totalSize = 0;
       int diaryDataSize = 0;
       int imageDataSize = 0;
 
@@ -25,12 +24,9 @@ class StorageService {
       final hiveDir = Directory(appDir.path);
       if (await hiveDir.exists()) {
         await for (final entity in hiveDir.list(recursive: true)) {
-          if (entity is File) {
+          if (entity is File && entity.path.contains('.hive')) {
             final size = await entity.length();
-            if (entity.path.contains('.hive')) {
-              diaryDataSize += size;
-            }
-            totalSize += size;
+            diaryDataSize += size;
           }
         }
       }
@@ -39,11 +35,20 @@ class StorageService {
       final diaryService = await DiaryService.getInstance();
       final entries = await diaryService.getSortedDiaryEntries();
       
-      // 画像データのサイズを推定（エントリー数 × 平均2MB）
-      imageDataSize = entries.length * 2 * 1024 * 1024;
+      // 写真枚数を計算
+      int totalPhotoCount = 0;
+      for (final entry in entries) {
+        totalPhotoCount += entry.photoIds.length;
+      }
+      
+      // 画像データのサイズを推定（写真1枚あたり平均1.5MB）
+      imageDataSize = totalPhotoCount * (1.5 * 1024 * 1024).round();
+
+      // 合計は日記データと画像データの合計
+      final totalSize = diaryDataSize + imageDataSize;
 
       return StorageInfo(
-        totalSize: totalSize + imageDataSize,
+        totalSize: totalSize,
         diaryDataSize: diaryDataSize,
         imageDataSize: imageDataSize,
       );

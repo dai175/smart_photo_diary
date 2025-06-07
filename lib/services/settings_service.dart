@@ -86,12 +86,12 @@ class SettingsService {
   ];
 
   static final List<String> modeNames = [
-    'ラベル抽出方式',
-    '画像直接解析方式',
+    'プライバシー重視',
+    '精度重視',
   ];
 
   static final List<String> modeDescriptions = [
-    '高速・低コスト・オフライン対応',
-    '高精度・詳細描写・オンライン必須',
+    '写真をサーバーに送らず端末内で分析・精度は控えめ',
+    '写真をサーバーに送って分析・精度は高め',
   ];
 }

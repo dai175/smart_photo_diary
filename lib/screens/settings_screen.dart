@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildAppearanceSection() {
     debugPrint('外観設定セクションを構築中...');
     return _buildSection(
-      title: '外観設定',
+      title: 'テーマ・見た目',
       icon: Icons.palette,
       children: [
         _buildThemeSelector(),
@@ -96,7 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildDataManagementSection() {
     return _buildSection(
-      title: 'データ管理',
+      title: 'データ・容量',
       icon: Icons.storage,
       children: [
         _buildStorageInfo(),
@@ -190,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         radius: 12,
         backgroundColor: _settingsService.accentColor,
       ),
-      title: const Text('アクセントカラー'),
+      title: const Text('アプリのカラー'),
       subtitle: Text(_getColorName(_settingsService.accentColor)),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
@@ -203,7 +203,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       return ListTile(
         leading: const Icon(Icons.auto_fix_high),
-        title: const Text('日記生成方式'),
+        title: const Text('プライバシー設定'),
         subtitle: Text(_getGenerationModeLabel(_settingsService.generationMode)),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
@@ -214,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       debugPrint('日記生成モード設定の読み込みエラー: $e');
       return ListTile(
         leading: const Icon(Icons.auto_fix_high),
-        title: const Text('日記生成方式'),
+        title: const Text('プライバシー設定'),
         subtitle: const Text('設定の読み込み中...'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
@@ -235,7 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return ExpansionTile(
       leading: const Icon(Icons.storage),
-      title: const Text('ストレージ使用量'),
+      title: const Text('使用容量'),
       subtitle: Text('合計: ${_storageInfo!.formattedTotalSize}'),
       children: [
         Padding(
@@ -278,15 +278,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         ListTile(
           leading: const Icon(Icons.file_download),
-          title: const Text('データのエクスポート'),
-          subtitle: const Text('日記をJSONファイルでバックアップ'),
+          title: const Text('バックアップ'),
+          subtitle: const Text('日記データをファイルに保存'),
           trailing: const Icon(Icons.chevron_right),
           onTap: _exportData,
         ),
         ListTile(
           leading: const Icon(Icons.cleaning_services),
-          title: const Text('データベース最適化'),
-          subtitle: const Text('ストレージを最適化してパフォーマンスを向上'),
+          title: const Text('容量の整理'),
+          subtitle: const Text('不要なデータを削除してアプリを軽くする'),
           trailing: const Icon(Icons.chevron_right),
           onTap: _optimizeDatabase,
         ),
@@ -298,7 +298,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_packageInfo == null) {
       return const ListTile(
         leading: Icon(Icons.info),
-        title: Text('バージョン情報'),
+        title: Text('アプリのバージョン'),
         subtitle: Text('読み込み中...'),
       );
     }
@@ -313,7 +313,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildLicenseInfo() {
     return ListTile(
       leading: const Icon(Icons.article),
-      title: const Text('ライセンス情報'),
+      title: const Text('ライセンス'),
       subtitle: const Text('オープンソースライセンス'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
@@ -394,7 +394,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('アクセントカラー選択'),
+          title: const Text('カラーを選ぶ'),
           content: Wrap(
             spacing: 16,
             runSpacing: 16,
@@ -556,7 +556,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('日記生成方式'),
+            title: const Text('プライバシー設定'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: SettingsService.availableModes.map((mode) {
