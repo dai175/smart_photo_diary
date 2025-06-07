@@ -268,12 +268,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '記録の統計',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D2D2D),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
@@ -377,10 +377,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D2D2D),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 4),
@@ -418,14 +418,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               '記録カレンダー',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2D2D2D),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),

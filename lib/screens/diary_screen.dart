@@ -264,30 +264,30 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 );
               },
             )
-          : const Center(
+          : Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.book_outlined,
                     size: 64,
-                    color: Colors.grey,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     '日記がありません',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '写真を選んで最初の日記を作成しましょう',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

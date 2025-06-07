@@ -562,8 +562,8 @@ class _HomeContent extends StatelessWidget {
                                 const SizedBox(height: 6),
                                 Text(
                                   title,
-                                  style: const TextStyle(
-                                    color: Colors.black87,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
@@ -573,8 +573,8 @@ class _HomeContent extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   diary.content,
-                                  style: const TextStyle(
-                                    color: Colors.black87,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontSize: 15,
                                   ),
                                   maxLines: 2,
