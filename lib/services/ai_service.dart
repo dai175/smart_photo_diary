@@ -154,6 +154,123 @@ ${location != null ? '場所: $location\n' : ''}
     }
   }
 
+  /// 画像から直接日記を生成（Gemini Vision API使用）
+  ///
+  /// [imageData]: 画像のバイナリデータ
+  /// [date]: 写真の撮影日時
+  /// [location]: 撮影場所（オプション）
+  Future<String> generateDiaryFromImage({
+    required Uint8List imageData,
+    required DateTime date,
+    String? location,
+  }) async {
+    try {
+      // オンライン状態を確認
+      final online = await isOnline();
+      if (!online) {
+        return _generateOfflineDiary([], date, location);
+      }
+
+      // 日付のフォーマット
+      final dateStr = DateFormat('yyyy年MM月dd日').format(date);
+      final timeOfDay = _getTimeOfDay(date);
+
+      // Base64エンコード
+      final base64Image = base64Encode(imageData);
+
+      // プロンプトの作成
+      final prompt = '''
+あなたは日記作成の専門家です。この写真を見て、その日の出来事を振り返る日記を日本語で作成してください。
+自然で個人的な文体で、150-200文字程度にまとめてください。
+
+日付: $dateStr
+時間帯: $timeOfDay
+${location != null ? '場所: $location\n' : ''}
+
+写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。
+''';
+
+      // APIリクエストの作成
+      final response = await http.post(
+        Uri.parse('$_apiUrl?key=$_apiKey'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'contents': [
+            {
+              'parts': [
+                {'text': prompt},
+                {
+                  'inlineData': {
+                    'mimeType': 'image/jpeg',
+                    'data': base64Image
+                  }
+                }
+              ],
+              'role': 'user'
+            }
+          ],
+          'generationConfig': {
+            'temperature': 0.7,
+            'maxOutputTokens': 1000,
+            'topP': 0.8,
+            'topK': 10,
+            'thinkingConfig': {
+              'thinkingBudget': 0
+            }
+          },
+        }),
+      );
+
+      // レスポンスの処理
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        debugPrint('Vision API レスポンス: $data');
+        
+        // null安全性チェック
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final candidate = data['candidates'][0];
+          
+          // Gemini 2.5の場合、異なるレスポンス構造の可能性を考慮
+          String? content;
+          
+          // 通常の構造をチェック
+          if (candidate['content'] != null && 
+              candidate['content']['parts'] != null &&
+              candidate['content']['parts'].isNotEmpty &&
+              candidate['content']['parts'][0]['text'] != null) {
+            content = candidate['content']['parts'][0]['text'];
+          }
+          // 代替構造をチェック（直接textフィールド）
+          else if (candidate['content'] != null && candidate['content']['text'] != null) {
+            content = candidate['content']['text'];
+          }
+          // 思考プロセス用の構造をチェック
+          else if (candidate['text'] != null) {
+            content = candidate['text'];
+          }
+          
+          if (content != null && content.isNotEmpty) {
+            return content.trim();
+          } else {
+            debugPrint('Vision APIでテキストコンテンツが見つかりません。finishReason: ${candidate['finishReason']}');
+            return _generateOfflineDiary([], date, location);
+          }
+        } else {
+          debugPrint('Vision APIレスポンス構造が予期されたものと異なります: $data');
+          return _generateOfflineDiary([], date, location);
+        }
+      } else {
+        debugPrint('Vision API エラー: ${response.statusCode} - ${response.body}');
+        return _generateOfflineDiary([], date, location);
+      }
+    } catch (e) {
+      debugPrint('Vision API日記生成エラー: $e');
+      return _generateOfflineDiary([], date, location);
+    }
+  }
+
   /// 時間帯の文字列を取得
   String _getTimeOfDay(DateTime date) {
     final hour = date.hour;

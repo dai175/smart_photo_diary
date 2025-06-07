@@ -80,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildAppearanceSection() {
+    debugPrint('外観設定セクションを構築中...');
     return _buildSection(
       title: '外観設定',
       icon: Icons.palette,
@@ -87,6 +88,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _buildThemeSelector(),
         const Divider(height: 1),
         _buildAccentColorSelector(),
+        const Divider(height: 1),
+        _buildGenerationModeSelector(),
       ],
     );
   }
@@ -194,6 +197,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _showColorDialog();
       },
     );
+  }
+
+  Widget _buildGenerationModeSelector() {
+    try {
+      return ListTile(
+        leading: const Icon(Icons.auto_fix_high),
+        title: const Text('日記生成方式'),
+        subtitle: Text(_getGenerationModeLabel(_settingsService.generationMode)),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          _showGenerationModeDialog();
+        },
+      );
+    } catch (e) {
+      debugPrint('日記生成モード設定の読み込みエラー: $e');
+      return ListTile(
+        leading: const Icon(Icons.auto_fix_high),
+        title: const Text('日記生成方式'),
+        subtitle: const Text('設定の読み込み中...'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          _showGenerationModeDialog();
+        },
+      );
+    }
   }
 
   Widget _buildStorageInfo() {
@@ -316,6 +344,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return SettingsService.colorNames[index];
     }
     return 'カスタム';
+  }
+
+  String _getGenerationModeLabel(DiaryGenerationMode mode) {
+    final index = SettingsService.availableModes.indexOf(mode);
+    if (index >= 0 && index < SettingsService.modeNames.length) {
+      return SettingsService.modeNames[index];
+    }
+    return 'ラベル抽出方式';
   }
 
   void _showThemeDialog() {
@@ -512,5 +548,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  void _showGenerationModeDialog() {
+    try {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('日記生成方式'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: SettingsService.availableModes.map((mode) {
+                final index = SettingsService.availableModes.indexOf(mode);
+                return RadioListTile<DiaryGenerationMode>(
+                  title: Text(SettingsService.modeNames[index]),
+                  subtitle: Text(SettingsService.modeDescriptions[index]),
+                  value: mode,
+                  groupValue: _settingsService.generationMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      _settingsService.setGenerationMode(value);
+                      setState(() {});
+                      Navigator.pop(context);
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('キャンセル'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      debugPrint('日記生成モードダイアログ表示エラー: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('設定の読み込みに失敗しました: $e')),
+      );
+    }
   }
 }

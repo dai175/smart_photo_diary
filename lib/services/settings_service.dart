@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 日記生成方式の列挙型
+enum DiaryGenerationMode {
+  /// ラベル抽出方式（TensorFlow Lite → ラベル → Gemini Text API）
+  labels,
+  /// 画像直接解析方式（画像 → Gemini Vision API）
+  vision,
+}
+
 class SettingsService {
   static SettingsService? _instance;
   static SharedPreferences? _preferences;
@@ -16,6 +24,7 @@ class SettingsService {
   // テーマ設定のキー
   static const String _themeKey = 'theme_mode';
   static const String _accentColorKey = 'accent_color';
+  static const String _generationModeKey = 'diary_generation_mode';
 
   // テーマモード
   ThemeMode get themeMode {
@@ -58,5 +67,31 @@ class SettingsService {
     'ピンク',
     'オレンジ',
     'シアン',
+  ];
+
+  // 日記生成モード
+  DiaryGenerationMode get generationMode {
+    final modeIndex = _preferences?.getInt(_generationModeKey) ?? 0;
+    return DiaryGenerationMode.values[modeIndex];
+  }
+
+  Future<void> setGenerationMode(DiaryGenerationMode mode) async {
+    await _preferences?.setInt(_generationModeKey, mode.index);
+  }
+
+  // 利用可能な生成モード
+  static final List<DiaryGenerationMode> availableModes = [
+    DiaryGenerationMode.labels,
+    DiaryGenerationMode.vision,
+  ];
+
+  static final List<String> modeNames = [
+    'ラベル抽出方式',
+    '画像直接解析方式',
+  ];
+
+  static final List<String> modeDescriptions = [
+    '高速・低コスト・オフライン対応',
+    '高精度・詳細描写・オンライン必須',
   ];
 }

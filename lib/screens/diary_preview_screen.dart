@@ -5,6 +5,8 @@ import 'package:photo_manager/photo_manager.dart';
 import '../services/image_classifier_service.dart';
 import '../services/ai_service.dart';
 import '../services/diary_service.dart';
+import '../services/settings_service.dart';
+import '../services/photo_service.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -55,8 +57,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     }
 
     try {
-      // モデルのロード
-      await _imageClassifier.loadModel();
+      // 設定サービスから生成モードを取得
+      final settingsService = await SettingsService.getInstance();
+      final generationMode = settingsService.generationMode;
+
+      debugPrint('使用する生成モード: ${generationMode.name}');
 
       // 写真の撮影日時を取得
       DateTime photoDateTime = DateTime.now();
@@ -71,32 +76,58 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       debugPrint('写真の撮影日時: $photoDateTime');
 
-      // 各写真からラベルを抽出
-      final List<String> allLabels = [];
-      for (final asset in widget.selectedAssets) {
-        final labels = await _imageClassifier.classifyAsset(asset);
-        allLabels.addAll(labels);
+      String diary;
+
+      if (generationMode == DiaryGenerationMode.vision) {
+        // Vision API方式：画像を直接Geminiに送信
+        debugPrint('Vision API方式で日記生成中...');
+        
+        // 最初の写真を使用（複数写真の場合は最初の1枚）
+        final firstAsset = widget.selectedAssets.first;
+        final imageData = await PhotoService.getOriginalFile(firstAsset);
+        
+        if (imageData == null) {
+          throw Exception('写真データの取得に失敗しました');
+        }
+
+        diary = await _aiService.generateDiaryFromImage(
+          imageData: imageData,
+          date: photoDateTime,
+        );
+      } else {
+        // ラベル抽出方式：従来の方法
+        debugPrint('ラベル抽出方式で日記生成中...');
+        
+        // モデルのロード
+        await _imageClassifier.loadModel();
+
+        // 各写真からラベルを抽出
+        final List<String> allLabels = [];
+        for (final asset in widget.selectedAssets) {
+          final labels = await _imageClassifier.classifyAsset(asset);
+          allLabels.addAll(labels);
+        }
+
+        // 重複を削除
+        final uniqueLabels = allLabels.toSet().toList();
+
+        debugPrint('検出されたラベル: $uniqueLabels');
+
+        if (uniqueLabels.isEmpty) {
+          setState(() {
+            _isLoading = false;
+            _hasError = true;
+            _errorMessage = '写真から特徴を検出できませんでした';
+          });
+          return;
+        }
+
+        // 日記を生成
+        diary = await _aiService.generateDiaryFromLabels(
+          labels: uniqueLabels,
+          date: photoDateTime,
+        );
       }
-
-      // 重複を削除
-      final uniqueLabels = allLabels.toSet().toList();
-
-      debugPrint('検出されたラベル: $uniqueLabels');
-
-      if (uniqueLabels.isEmpty) {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-          _errorMessage = '写真から特徴を検出できませんでした';
-        });
-        return;
-      }
-
-      // 日記を生成
-      final diary = await _aiService.generateDiaryFromLabels(
-        labels: uniqueLabels,
-        date: photoDateTime,
-      );
 
       setState(() {
         _diaryController.text = diary;
