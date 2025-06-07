@@ -479,11 +479,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 color: Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle,
               ),
-              todayDecoration: BoxDecoration(
+              todayDecoration: const BoxDecoration(
                 color: Color(0xFFFF6B6B),
                 shape: BoxShape.circle,
               ),
-              markerDecoration: BoxDecoration(
+              markerDecoration: const BoxDecoration(
                 color: Color(0xFF4ECDC4),
                 shape: BoxShape.circle,
               ),
@@ -506,9 +506,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               titleCentered: true,
               formatButtonDecoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
               ),
-              formatButtonTextStyle: TextStyle(
+              formatButtonTextStyle: const TextStyle(
                 color: Colors.white,
               ),
             ),
