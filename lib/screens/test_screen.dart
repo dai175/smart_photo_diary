@@ -179,8 +179,13 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('画像分析テスト'),
-        backgroundColor: Colors.purple.shade100,
+        title: const Text(
+          '画像分析テスト',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -192,13 +197,13 @@ class _TestScreenState extends State<TestScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _generationMode == DiaryGenerationMode.labels
-                    ? Colors.blue.shade50
-                    : Colors.green.shade50,
+                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                    : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: _generationMode == DiaryGenerationMode.labels
-                      ? Colors.blue
-                      : Colors.green,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.secondary,
                 ),
               ),
               child: Row(
@@ -208,8 +213,8 @@ class _TestScreenState extends State<TestScreen> {
                         ? Icons.label
                         : Icons.visibility,
                     color: _generationMode == DiaryGenerationMode.labels
-                        ? Colors.blue
-                        : Colors.green,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -217,8 +222,8 @@ class _TestScreenState extends State<TestScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: _generationMode == DiaryGenerationMode.labels
-                          ? Colors.blue.shade700
-                          : Colors.green.shade700,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ],
@@ -228,9 +233,12 @@ class _TestScreenState extends State<TestScreen> {
             ElevatedButton(
               onPressed: _pickImage,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text('画像を選択'),
             ),
@@ -278,7 +286,7 @@ class _TestScreenState extends State<TestScreen> {
                 children: _detectedLabels.map((label) {
                   return Chip(
                     label: Text(label),
-                    backgroundColor: Colors.purple.shade50,
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   );
                 }).toList(),
               ),
@@ -313,9 +321,9 @@ class _TestScreenState extends State<TestScreen> {
                     children: [
                       Text(
                         DateFormat('yyyy年MM月dd日').format(DateTime.now()),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.purple,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
