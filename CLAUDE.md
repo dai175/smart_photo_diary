@@ -86,7 +86,7 @@ The app follows a service-oriented architecture with singleton services:
 
 ### AI/ML Architecture
 - **On-device**: TensorFlow Lite MobileNet v2 model for image classification
-- **Cloud AI**: Optional OpenAI integration for advanced diary generation
+- **Cloud AI**: Google Gemini 2.5 Flash integration for advanced diary generation
 - **Assets**: ML models bundled in `assets/models/` directory
 
 ## Key Dependencies
@@ -124,7 +124,7 @@ Always run `dart run build_runner build` after modifying Hive model classes to r
 The project uses `mocktail` for unit testing. Services are designed to be easily mockable with their singleton pattern.
 
 ### Environment Variables
-Create a `.env` file in the root directory for OpenAI API keys and other configuration.
+Create a `.env` file in the root directory for Google Gemini API keys and other configuration.
 
 ### Platform Considerations
 The app supports multiple platforms but photo access requires platform-specific permissions handled by `permission_handler`.

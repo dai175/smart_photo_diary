@@ -7,11 +7,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// AIを使用して日記文を生成するサービスクラス
 class AiService {
-  // OpenAI APIのエンドポイント
-  static const String _apiUrl = 'https://api.openai.com/v1/chat/completions';
+  // Google Gemini APIのエンドポイント
+  static const String _apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent';
 
   // APIキーを.envファイルから取得
-  static String get _apiKey => dotenv.env['OPENAI_API_KEY'] ?? '';
+  static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
 
   /// インターネット接続があるかどうかを確認
   Future<bool> isOnline() async {
@@ -56,30 +56,71 @@ ${location != null ? '場所: $location\n' : ''}
 
       // APIリクエストの作成
       final response = await http.post(
-        Uri.parse(_apiUrl),
+        Uri.parse('$_apiUrl?key=$_apiKey'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
         },
         body: jsonEncode({
-          'model': 'gpt-4o',
-          'messages': [
+          'contents': [
             {
-              'role': 'system',
-              'content': 'あなたは日記作成の専門家です。自然で個人的な日本語の文体で書いてください。',
-            },
-            {'role': 'user', 'content': prompt},
+              'parts': [
+                {
+                  'text': 'あなたは日記作成の専門家です。自然で個人的な日本語の文体で書いてください。\n\n$prompt'
+                }
+              ],
+              'role': 'user'
+            }
           ],
-          'temperature': 0.7,
-          'max_tokens': 300,
+          'generationConfig': {
+            'temperature': 0.7,
+            'maxOutputTokens': 1000,
+            'topP': 0.8,
+            'topK': 10,
+            'thinkingConfig': {
+              'thinkingBudget': 0
+            }
+          },
         }),
       );
 
       // レスポンスの処理
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final content = data['choices'][0]['message']['content'];
-        return content.trim();
+        debugPrint('API レスポンス: $data');
+        
+        // null安全性チェック
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final candidate = data['candidates'][0];
+          
+          // Gemini 2.5の場合、異なるレスポンス構造の可能性を考慮
+          String? content;
+          
+          // 通常の構造をチェック
+          if (candidate['content'] != null && 
+              candidate['content']['parts'] != null &&
+              candidate['content']['parts'].isNotEmpty &&
+              candidate['content']['parts'][0]['text'] != null) {
+            content = candidate['content']['parts'][0]['text'];
+          }
+          // 代替構造をチェック（直接textフィールド）
+          else if (candidate['content'] != null && candidate['content']['text'] != null) {
+            content = candidate['content']['text'];
+          }
+          // 思考プロセス用の構造をチェック
+          else if (candidate['text'] != null) {
+            content = candidate['text'];
+          }
+          
+          if (content != null && content.isNotEmpty) {
+            return content.trim();
+          } else {
+            debugPrint('テキストコンテンツが見つかりません。finishReason: ${candidate['finishReason']}');
+            return _generateOfflineDiary(labels, date, location);
+          }
+        } else {
+          debugPrint('レスポンス構造が予期されたものと異なります: $data');
+          return _generateOfflineDiary(labels, date, location);
+        }
       } else {
         debugPrint('API エラー: ${response.statusCode} - ${response.body}');
         return _generateOfflineDiary(labels, date, location);
