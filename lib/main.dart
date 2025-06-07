@@ -140,8 +140,18 @@ class _HomeScreenState extends State<HomeScreen> {
   // 最近の日記リスト
   List<DiaryEntry> _recentDiaries = [];
   bool _loadingDiaries = true;
+  
+  // 使用済み写真IDのセット
+  final Set<String> _usedPhotoIds = {};
 
   void _toggleSelect(int index) {
+    // 使用済み写真かどうかをチェック
+    final photoId = _photoAssets[index].id;
+    if (_usedPhotoIds.contains(photoId)) {
+      _showUsedPhotoModal();
+      return;
+    }
+    
     setState(() {
       // 写真選択の上限は3枚
       const int maxPhotos = 3;
@@ -182,6 +192,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 使用済み写真選択時のモーダルを表示
+  void _showUsedPhotoModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text('この写真はすでに日記で使用されています'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -203,6 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final allEntriesResolved = await allEntries;
       final recentEntries = allEntriesResolved.take(3).toList();
 
+      // 使用済み写真IDを収集
+      _collectUsedPhotoIds(allEntriesResolved);
+
       setState(() {
         _recentDiaries = recentEntries;
         _loadingDiaries = false;
@@ -213,6 +246,15 @@ class _HomeScreenState extends State<HomeScreen> {
         _loadingDiaries = false;
       });
     }
+  }
+
+  // 使用済み写真IDを収集
+  void _collectUsedPhotoIds(List<DiaryEntry> allEntries) {
+    _usedPhotoIds.clear();
+    for (final entry in allEntries) {
+      _usedPhotoIds.addAll(entry.photoIds);
+    }
+    debugPrint('使用済み写真ID数: ${_usedPhotoIds.length}');
   }
 
   // 権限リクエストと写真の読み込み
@@ -264,12 +306,18 @@ class _HomeScreenState extends State<HomeScreen> {
         photoAssets: _photoAssets,
         selected: _selected,
         recentDiaries: _recentDiaries,
+        usedPhotoIds: _usedPhotoIds,
         onToggleSelect: _toggleSelect,
         isLoading: _isLoading,
         isLoadingDiaries: _loadingDiaries,
         hasPermission: _hasPermission,
         onRequestPermission: _loadTodayPhotos,
         onLoadRecentDiaries: _loadRecentDiaries,
+        onClearSelection: () {
+          setState(() {
+            _selected = List.generate(_photoAssets.length, (index) => false);
+          });
+        },
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,
@@ -330,6 +378,7 @@ class _HomeContent extends StatelessWidget {
   final List<dynamic> photoAssets;
   final List<bool> selected;
   final List<DiaryEntry> recentDiaries;
+  final Set<String> usedPhotoIds;
   final Function(int) onToggleSelect;
   final bool isLoading;
   final bool isLoadingDiaries;
@@ -337,11 +386,13 @@ class _HomeContent extends StatelessWidget {
   final VoidCallback onRequestPermission;
   final Function(String) onDiaryTap;
   final VoidCallback onLoadRecentDiaries;
+  final VoidCallback onClearSelection;
 
   const _HomeContent({
     required this.photoAssets,
     required this.selected,
     required this.recentDiaries,
+    required this.usedPhotoIds,
     required this.onToggleSelect,
     required this.isLoading,
     required this.isLoadingDiaries,
@@ -349,6 +400,7 @@ class _HomeContent extends StatelessWidget {
     required this.onRequestPermission,
     required this.onDiaryTap,
     required this.onLoadRecentDiaries,
+    required this.onClearSelection,
   });
 
   @override
@@ -489,17 +541,51 @@ class _HomeContent extends StatelessWidget {
                                   child: CircleAvatar(
                                     radius: 14,
                                     backgroundColor: Colors.white,
-                                    child: Icon(
-                                      selected[index]
-                                          ? Icons.check_circle
-                                          : Icons.radio_button_unchecked,
-                                      color: selected[index]
-                                          ? Colors.green
-                                          : Colors.grey,
-                                      size: 22,
-                                    ),
+                                    child: () {
+                                      final photoId = photoAssets[index].id;
+                                      final isUsed = usedPhotoIds.contains(photoId);
+                                      
+                                      if (isUsed) {
+                                        return const Icon(
+                                          Icons.check,
+                                          color: Colors.orange,
+                                          size: 22,
+                                        );
+                                      } else {
+                                        return Icon(
+                                          selected[index]
+                                              ? Icons.check_circle
+                                              : Icons.radio_button_unchecked,
+                                          color: selected[index]
+                                              ? Colors.green
+                                              : Colors.grey,
+                                          size: 22,
+                                        );
+                                      }
+                                    }(),
                                   ),
                                 ),
+                                // 使用済み写真にテキストを追加
+                                if (usedPhotoIds.contains(photoAssets[index].id))
+                                  Positioned(
+                                    bottom: 4,
+                                    left: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.7),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text(
+                                        '使用済み',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           );
@@ -539,6 +625,8 @@ class _HomeContent extends StatelessWidget {
                         ).then((_) {
                           // 日記プレビュー画面から戻ってきたときに最近の日記を再読み込み
                           onLoadRecentDiaries();
+                          // 選択状態をクリア
+                          onClearSelection();
                         });
                       }
                     : null,

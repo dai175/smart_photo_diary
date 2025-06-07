@@ -298,18 +298,8 @@ $timeInfo
         return _generateOfflineDiary([], date, location, null);
       }
 
-      // 日付のフォーマット
-      final dateStr = DateFormat('yyyy年MM月dd日').format(date);
-      
-      // 時間情報を取得
-      String timeInfo;
-      if (photoTimes != null && photoTimes.isNotEmpty && photoTimes.length > 1) {
-        final timeOfDay = _getTimeOfDayForPhotos(date, photoTimes);
-        timeInfo = '時間帯: $timeOfDay（複数の写真から代表的な1枚を表示）';
-      } else {
-        final timeOfDay = _getTimeOfDay(date);
-        timeInfo = '時間帯: $timeOfDay';
-      }
+      // 時間情報を取得（必要な場合のみ）
+      // 現在は日付と時間情報をプロンプトから除外しているため、これらの変数は使用しない
 
       // Base64エンコード
       final base64Image = base64Encode(imageData);
@@ -325,10 +315,7 @@ $timeInfo
 【本文】
 （150-200文字程度の自然で個人的な文体の本文${photoTimes != null && photoTimes.length > 1 ? '。時系列に沿って出来事を描写してください' : ''}）
 
-日付: $dateStr
-$timeInfo
 ${location != null ? '場所: $location\n' : ''}
-
 写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。
 ''';
 
