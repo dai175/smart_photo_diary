@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:typed_data';
 import '../models/diary_entry.dart';
+import '../models/diary_filter.dart';
 import '../services/diary_service.dart';
+import '../shared/filter_bottom_sheet.dart';
+import '../shared/active_filters_display.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'diary_detail_screen.dart';
 
@@ -17,6 +20,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   // 実際の日記データ
   List<DiaryEntry> _diaryEntries = [];
   bool _isLoading = true;
+  DiaryFilter _currentFilter = DiaryFilter.empty;
 
 
   @override
@@ -42,7 +46,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   Future<void> _loadDiaryEntries() async {
     try {
       final diaryService = await DiaryService.getInstance();
-      final entries = await diaryService.getSortedDiaryEntries();
+      final entries = await diaryService.getFilteredDiaryEntries(_currentFilter);
 
       setState(() {
         _diaryEntries = entries;
@@ -56,37 +60,56 @@ class _DiaryScreenState extends State<DiaryScreen> {
     }
   }
 
-  // 気分に応じたアイコンを返す
-  IconData _getMoodIcon(String mood) {
-    switch (mood) {
-      case 'happy':
-        return Icons.sentiment_very_satisfied;
-      case 'relaxed':
-        return Icons.sentiment_satisfied;
-      case 'excited':
-        return Icons.celebration;
-      case 'productive':
-        return Icons.task_alt;
-      default:
-        return Icons.sentiment_neutral;
-    }
+  // フィルタボトムシートを表示
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => FilterBottomSheet(
+        initialFilter: _currentFilter,
+        onApply: _applyFilter,
+      ),
+    );
   }
 
-  // 気分に応じた色を返す
-  Color _getMoodColor(String mood) {
-    switch (mood) {
-      case 'happy':
-        return Colors.amber;
-      case 'relaxed':
-        return Colors.lightBlue;
-      case 'excited':
-        return Colors.pink;
-      case 'productive':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
+  // フィルタを適用
+  void _applyFilter(DiaryFilter filter) {
+    setState(() {
+      _currentFilter = filter;
+      _isLoading = true;
+    });
+    _loadDiaryEntries();
   }
+
+  // フィルタをクリア
+  void _clearAllFilters() {
+    _applyFilter(DiaryFilter.empty);
+  }
+
+  // 個別フィルタを削除
+  void _removeTagFilter(String tag) {
+    final newTags = Set<String>.from(_currentFilter.selectedTags)..remove(tag);
+    _applyFilter(_currentFilter.copyWith(selectedTags: newTags));
+  }
+
+
+  void _removeTimeOfDayFilter(String time) {
+    final newTimeOfDay = Set<String>.from(_currentFilter.timeOfDay)..remove(time);
+    _applyFilter(_currentFilter.copyWith(timeOfDay: newTimeOfDay));
+  }
+
+  void _removeDateRangeFilter() {
+    _applyFilter(_currentFilter.copyWith(clearDateRange: true));
+  }
+
+
+  void _removeSearchFilter() {
+    _applyFilter(_currentFilter.copyWith(clearSearchText: true));
+  }
+
 
   // タグを取得（永続化キャッシュ優先）
   Future<List<String>> _generateTags(DiaryEntry entry) async {
@@ -118,9 +141,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
     // タイトルを取得
     final title = entry.title.isNotEmpty ? entry.title : '無題';
 
-    // 気分をランダムに設定（将来的に実装予定）
-    final moods = ['happy', 'relaxed', 'excited', 'productive'];
-    final mood = moods[entry.date.day % moods.length];
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -129,21 +149,15 @@ class _DiaryScreenState extends State<DiaryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 日付とムードアイコン
+          // 日付
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  DateFormat('yyyy年MM月dd日').format(entry.date),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Icon(_getMoodIcon(mood), color: _getMoodColor(mood)),
-              ],
+            child: Text(
+              DateFormat('yyyy年MM月dd日').format(entry.date),
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
@@ -292,54 +306,90 @@ class _DiaryScreenState extends State<DiaryScreen> {
             },
           ),
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
+          IconButton(
+            icon: Icon(
+              Icons.filter_list,
+              color: _currentFilter.isActive 
+                ? Theme.of(context).colorScheme.secondary 
+                : null,
+            ),
+            onPressed: _showFilterBottomSheet,
+          ),
         ],
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _diaryEntries.isNotEmpty
-          ? ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _diaryEntries.length,
-              itemBuilder: (context, index) {
-                final entry = _diaryEntries[index];
-                return GestureDetector(
-                  onTap: () => _navigateToDiaryDetail(entry),
-                  child: _buildDiaryCard(entry),
-                );
-              },
-            )
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.book_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '日記がありません',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          // アクティブフィルタ表示
+          ActiveFiltersDisplay(
+            filter: _currentFilter,
+            onClear: _clearAllFilters,
+            onRemoveTag: _removeTagFilter,
+            onRemoveTimeOfDay: _removeTimeOfDayFilter,
+            onRemoveDateRange: _removeDateRangeFilter,
+            onRemoveSearch: _removeSearchFilter,
+          ),
+          
+          // 日記一覧
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _diaryEntries.isNotEmpty
+                ? ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _diaryEntries.length,
+                    itemBuilder: (context, index) {
+                      final entry = _diaryEntries[index];
+                      return GestureDetector(
+                        onTap: () => _navigateToDiaryDetail(entry),
+                        child: _buildDiaryCard(entry),
+                      );
+                    },
+                  )
+                : Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _currentFilter.isActive ? Icons.filter_list_off : Icons.book_outlined,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _currentFilter.isActive 
+                            ? 'フィルタ条件に一致する日記がありません'
+                            : '日記がありません',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _currentFilter.isActive 
+                            ? 'フィルタを変更するか、クリアしてみてください'
+                            : '写真を選んで最初の日記を作成しましょう',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (_currentFilter.isActive) ...[
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _clearAllFilters,
+                            child: const Text('フィルタをクリア'),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '写真を選んで最初の日記を作成しましょう',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          ),
+        ],
+      ),
     );
   }
 }

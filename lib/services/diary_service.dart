@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 import '../models/diary_entry.dart';
+import '../models/diary_filter.dart';
 import 'ai_service.dart';
 
 class DiaryService {
@@ -229,5 +230,46 @@ class DiaryService {
     }
     
     return tags;
+  }
+
+  // フィルタを適用して日記エントリーを取得
+  Future<List<DiaryEntry>> getFilteredDiaryEntries(DiaryFilter filter) async {
+    final allEntries = await getSortedDiaryEntries();
+    if (!filter.isActive) return allEntries;
+    
+    return allEntries.where((entry) => filter.matches(entry)).toList();
+  }
+
+  // 全ての日記からユニークなタグを取得
+  Future<Set<String>> getAllTags() async {
+    if (_diaryBox == null) await _init();
+    final allTags = <String>{};
+    
+    for (final entry in _diaryBox!.values) {
+      if (entry.cachedTags != null) {
+        allTags.addAll(entry.cachedTags!);
+      }
+    }
+    
+    return allTags;
+  }
+
+  // よく使われるタグを取得（使用頻度順）
+  Future<List<String>> getPopularTags({int limit = 10}) async {
+    if (_diaryBox == null) await _init();
+    final tagCounts = <String, int>{};
+    
+    for (final entry in _diaryBox!.values) {
+      if (entry.cachedTags != null) {
+        for (final tag in entry.cachedTags!) {
+          tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
+        }
+      }
+    }
+    
+    final sortedTags = tagCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    return sortedTags.take(limit).map((e) => e.key).toList();
   }
 }
