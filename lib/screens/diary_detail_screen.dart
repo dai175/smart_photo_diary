@@ -177,8 +177,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           const SnackBar(content: Text('日記を削除しました')),
         );
 
-        // 前の画面に戻る
-        navigator.pop();
+        // 前の画面に戻る（削除成功を示すフラグを返す）
+        navigator.pop(true);
       }
     } catch (e) {
       if (mounted) {

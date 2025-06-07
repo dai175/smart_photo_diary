@@ -36,9 +36,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
       MaterialPageRoute(
         builder: (context) => DiaryDetailScreen(diaryId: entry.id),
       ),
-    ).then((_) {
+    ).then((result) {
       // 詳細画面から戻ってきたときに日記一覧を再読み込み
       _loadDiaryEntries();
+      
+      // 削除された場合の追加処理（必要に応じて）
+      if (result == true) {
+        debugPrint('日記が削除されました');
+      }
     });
   }
 

@@ -324,9 +324,16 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(
               builder: (context) => DiaryDetailScreen(diaryId: diaryId),
             ),
-          ).then((_) {
+          ).then((result) {
             // 日記詳細画面から戻ってきたときに最近の日記を再読み込み
             _loadRecentDiaries();
+            
+            // 削除された場合は写真の選択状態もクリア
+            if (result == true) {
+              setState(() {
+                _selected = List.generate(_photoAssets.length, (index) => false);
+              });
+            }
           });
         },
       ),
@@ -360,6 +367,11 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _currentIndex = index;
           });
+          
+          // ホームタブに戻った時に最近の日記を再読み込み（使用済み写真状態を更新）
+          if (index == 0) {
+            _loadRecentDiaries();
+          }
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
