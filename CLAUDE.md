@@ -75,7 +75,7 @@ The app follows a service-oriented architecture with singleton services:
 
 - **`DiaryService`**: Manages diary CRUD operations using Hive local database
 - **`PhotoService`**: Handles photo permissions and retrieval via photo_manager
-- **`AiService`**: AI diary generation with OpenAI API and local fallback
+- **`AiService`**: AI diary generation with Google Gemini API and local fallback
 - **`ImageClassifierService`**: On-device image classification using TensorFlow Lite
 - **`SettingsService`**: App configuration and theme management
 - **`StorageService`**: Local file system operations
