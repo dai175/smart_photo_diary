@@ -21,12 +21,24 @@ class _DiaryScreenState extends State<DiaryScreen> {
   List<DiaryEntry> _diaryEntries = [];
   bool _isLoading = true;
   DiaryFilter _currentFilter = DiaryFilter.empty;
+  
+  // 検索機能
+  bool _isSearching = false;
+  String _searchQuery = '';
+  late TextEditingController _searchController;
 
 
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     _loadDiaryEntries();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   // 日記エントリーをタップしたときに詳細画面に遷移
@@ -113,6 +125,59 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   void _removeSearchFilter() {
     _applyFilter(_currentFilter.copyWith(clearSearchText: true));
+  }
+
+  // 検索開始
+  void _startSearch() {
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  // 検索終了
+  void _stopSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchQuery = '';
+      _searchController.clear();
+    });
+    _loadDiaryEntries(); // 全ての日記を再表示
+  }
+
+  // 検索実行
+  void _performSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+      _isLoading = true;
+    });
+    _searchDiaryEntries(query);
+  }
+
+  // 検索で日記を絞り込み
+  Future<void> _searchDiaryEntries(String query) async {
+    try {
+      final diaryService = await DiaryService.getInstance();
+      List<DiaryEntry> entries;
+
+      if (query.isEmpty) {
+        // 検索クエリが空の場合は通常のフィルタを適用
+        entries = await diaryService.getFilteredDiaryEntries(_currentFilter);
+      } else {
+        // 検索クエリがある場合は検索フィルタを作成
+        final searchFilter = _currentFilter.copyWith(searchText: query);
+        entries = await diaryService.getFilteredDiaryEntries(searchFilter);
+      }
+
+      setState(() {
+        _diaryEntries = entries;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      debugPrint('検索エラー: $e');
+    }
   }
 
 
@@ -298,29 +363,63 @@ class _DiaryScreenState extends State<DiaryScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('日記一覧'),
+        title: _isSearching 
+          ? TextField(
+              controller: _searchController,
+              autofocus: true,
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              decoration: InputDecoration(
+                hintText: 'タイトルや本文を検索...',
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                ),
+                border: InputBorder.none,
+              ),
+              onChanged: _performSearch,
+            )
+          : const Text('日記一覧'),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                _isLoading = true;
-              });
-              _loadDiaryEntries();
-            },
-          ),
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: _currentFilter.isActive 
-                ? Theme.of(context).colorScheme.secondary 
-                : null,
-            ),
-            onPressed: _showFilterBottomSheet,
-          ),
-        ],
+        leading: _isSearching 
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: _stopSearch,
+            )
+          : null,
+        actions: _isSearching 
+          ? [
+              if (_searchQuery.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _performSearch('');
+                  },
+                ),
+            ]
+          : [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  _loadDiaryEntries();
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.search), 
+                onPressed: _startSearch,
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.filter_list,
+                  color: _currentFilter.isActive 
+                    ? Theme.of(context).colorScheme.secondary 
+                    : null,
+                ),
+                onPressed: _showFilterBottomSheet,
+              ),
+            ],
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
       ),
@@ -357,15 +456,21 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          _currentFilter.isActive ? Icons.filter_list_off : Icons.book_outlined,
+                          _isSearching 
+                            ? Icons.search_off 
+                            : _currentFilter.isActive 
+                              ? Icons.filter_list_off 
+                              : Icons.book_outlined,
                           size: 64,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          _currentFilter.isActive 
-                            ? 'フィルタ条件に一致する日記がありません'
-                            : '日記がありません',
+                          _isSearching 
+                            ? '「$_searchQuery」に一致する日記がありません'
+                            : _currentFilter.isActive 
+                              ? 'フィルタ条件に一致する日記がありません'
+                              : '日記がありません',
                           style: TextStyle(
                             fontSize: 18,
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -374,15 +479,17 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          _currentFilter.isActive 
-                            ? 'フィルタを変更するか、クリアしてみてください'
-                            : '写真を選んで最初の日記を作成しましょう',
+                          _isSearching 
+                            ? '別のキーワードで検索してみてください'
+                            : _currentFilter.isActive 
+                              ? 'フィルタを変更するか、クリアしてみてください'
+                              : '写真を選んで最初の日記を作成しましょう',
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        if (_currentFilter.isActive) ...[
+                        if (_currentFilter.isActive && !_isSearching) ...[
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: _clearAllFilters,
