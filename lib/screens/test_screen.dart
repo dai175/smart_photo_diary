@@ -97,12 +97,13 @@ class _TestScreenState extends State<TestScreen> {
       final now = DateTime.now();
 
       // 日記を生成
-      final diary = await _aiService.generateDiaryFromLabels(
+      final result = await _aiService.generateDiaryFromLabels(
         labels: labels,
         date: now,
         location: '自宅', // テスト用に固定値
       );
 
+      final diary = '【${result.title}】\n${result.content}';
       debugPrint('生成された日記: $diary');
 
       setState(() {

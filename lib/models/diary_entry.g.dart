@@ -19,28 +19,31 @@ class DiaryEntryAdapter extends TypeAdapter<DiaryEntry> {
     return DiaryEntry(
       id: fields[0] as String,
       date: fields[1] as DateTime,
-      content: fields[2] as String,
-      photoIds: (fields[3] as List).cast<String>(),
-      createdAt: fields[4] as DateTime,
-      updatedAt: fields[5] as DateTime,
+      title: fields[2] as String,
+      content: fields[3] as String,
+      photoIds: (fields[4] as List).cast<String>(),
+      createdAt: fields[5] as DateTime,
+      updatedAt: fields[6] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, DiaryEntry obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.date)
       ..writeByte(2)
-      ..write(obj.content)
+      ..write(obj.title)
       ..writeByte(3)
-      ..write(obj.photoIds)
+      ..write(obj.content)
       ..writeByte(4)
-      ..write(obj.createdAt)
+      ..write(obj.photoIds)
       ..writeByte(5)
+      ..write(obj.createdAt)
+      ..writeByte(6)
       ..write(obj.updatedAt);
   }
 

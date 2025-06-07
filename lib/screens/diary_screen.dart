@@ -102,7 +102,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   Future<void> _loadDiaryEntries() async {
     try {
       final diaryService = await DiaryService.getInstance();
-      final entries = diaryService.getSortedDiaryEntries();
+      final entries = await diaryService.getSortedDiaryEntries();
 
       setState(() {
         _diaryEntries = entries;
@@ -150,9 +150,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   // 実際の日記エントリーのカードを作成
   Widget _buildDiaryCard(DiaryEntry entry) {
-    // タイトルを抽出（最初の行をタイトルとして使用）
-    final contentLines = entry.content.split('\n');
-    final title = contentLines.isNotEmpty ? contentLines.first : '無題';
+    // タイトルを取得
+    final title = entry.title.isNotEmpty ? entry.title : '無題';
 
     // タグを抽出（将来的に実装予定）
     final tags = <String>['AI生成', '写真日記'];

@@ -37,7 +37,7 @@ class StorageService {
 
       // 画像データのサイズを推定（実際の画像ファイルは photo_manager で管理）
       final diaryService = await DiaryService.getInstance();
-      final entries = diaryService.getSortedDiaryEntries();
+      final entries = await diaryService.getSortedDiaryEntries();
       
       // 画像データのサイズを推定（エントリー数 × 平均2MB）
       imageDataSize = entries.length * 2 * 1024 * 1024;
@@ -56,7 +56,7 @@ class StorageService {
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
       final diaryService = await DiaryService.getInstance();
-      var entries = diaryService.getSortedDiaryEntries();
+      var entries = await diaryService.getSortedDiaryEntries();
 
       // 期間フィルター
       if (startDate != null || endDate != null) {
@@ -74,9 +74,10 @@ class StorageService {
         'version': '1.0.0',
         'entries': entries.map((entry) => {
           'id': entry.id,
+          'title': entry.title,
           'content': entry.content,
           'date': entry.date.toIso8601String(),
-          // 'imageIds': entry.imageIds, // 将来実装
+          'photoIds': entry.photoIds,
           // 'location': entry.location, // 将来実装
           'createdAt': entry.createdAt.toIso8601String(),
         }).toList(),

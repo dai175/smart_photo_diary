@@ -165,7 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final allEntries = diaryService.getSortedDiaryEntries();
 
       // 最新の3つの日記を取得
-      final recentEntries = allEntries.take(3).toList();
+      final allEntriesResolved = await allEntries;
+      final recentEntries = allEntriesResolved.take(3).toList();
 
       setState(() {
         _recentDiaries = recentEntries;
@@ -233,6 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoadingDiaries: _loadingDiaries,
         hasPermission: _hasPermission,
         onRequestPermission: _loadTodayPhotos,
+        onLoadRecentDiaries: _loadRecentDiaries,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,
@@ -299,6 +301,7 @@ class _HomeContent extends StatelessWidget {
   final bool hasPermission;
   final VoidCallback onRequestPermission;
   final Function(String) onDiaryTap;
+  final VoidCallback onLoadRecentDiaries;
 
   const _HomeContent({
     required this.photoAssets,
@@ -310,6 +313,7 @@ class _HomeContent extends StatelessWidget {
     required this.hasPermission,
     required this.onRequestPermission,
     required this.onDiaryTap,
+    required this.onLoadRecentDiaries,
   });
 
   @override
@@ -488,7 +492,10 @@ class _HomeContent extends StatelessWidget {
                               selectedAssets: selectedPhotos,
                             ),
                           ),
-                        );
+                        ).then((_) {
+                          // 日記プレビュー画面から戻ってきたときに最近の日記を再読み込み
+                          onLoadRecentDiaries();
+                        });
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
@@ -521,10 +528,9 @@ class _HomeContent extends StatelessWidget {
                     )
                   : Column(
                       children: recentDiaries.map((diary) {
-                        // タイトルを抽出（最初の行をタイトルとして使用）
-                        final contentLines = diary.content.split('\n');
-                        final title = contentLines.isNotEmpty
-                            ? contentLines.first
+                        // タイトルを取得
+                        final title = diary.title.isNotEmpty
+                            ? diary.title
                             : '無題';
 
                         return GestureDetector(

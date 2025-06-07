@@ -13,20 +13,24 @@ class DiaryEntry extends HiveObject {
   final DateTime date;
 
   @HiveField(2)
-  String content;
+  String title;
 
   @HiveField(3)
-  final List<String> photoIds; // 写真のIDリスト（AssetEntityのIDを保存）
+  String content;
 
   @HiveField(4)
-  final DateTime createdAt;
+  final List<String> photoIds; // 写真のIDリスト（AssetEntityのIDを保存）
 
   @HiveField(5)
+  final DateTime createdAt;
+
+  @HiveField(6)
   DateTime updatedAt;
 
   DiaryEntry({
     required this.id,
     required this.date,
+    required this.title,
     required this.content,
     required this.photoIds,
     required this.createdAt,
@@ -52,7 +56,8 @@ class DiaryEntry extends HiveObject {
   }
 
   // 日記エントリーを更新するメソッド
-  void updateContent(String newContent) {
+  void updateContent(String newTitle, String newContent) {
+    title = newTitle;
     content = newContent;
     updatedAt = DateTime.now();
     save(); // Hiveオブジェクトの保存メソッド
@@ -62,6 +67,7 @@ class DiaryEntry extends HiveObject {
   DiaryEntry copyWith({
     String? id,
     DateTime? date,
+    String? title,
     String? content,
     List<String>? photoIds,
     DateTime? createdAt,
@@ -70,6 +76,7 @@ class DiaryEntry extends HiveObject {
     return DiaryEntry(
       id: id ?? this.id,
       date: date ?? this.date,
+      title: title ?? this.title,
       content: content ?? this.content,
       photoIds: photoIds ?? this.photoIds,
       createdAt: createdAt ?? this.createdAt,

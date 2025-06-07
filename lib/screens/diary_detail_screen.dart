@@ -20,18 +20,21 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   bool _isEditing = false;
   bool _hasError = false;
   String _errorMessage = '';
+  late TextEditingController _titleController;
   late TextEditingController _contentController;
   List<AssetEntity> _photoAssets = [];
 
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController();
     _contentController = TextEditingController();
     _loadDiaryEntry();
   }
 
   @override
   void dispose() {
+    _titleController.dispose();
     _contentController.dispose();
     super.dispose();
   }
@@ -48,7 +51,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       final diaryService = await DiaryService.getInstance();
 
       // 日記エントリーを取得
-      final entry = diaryService.getDiaryEntryById(widget.diaryId);
+      final entry = await diaryService.getDiaryEntryById(widget.diaryId);
 
       if (entry == null) {
         setState(() {
@@ -64,6 +67,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
       setState(() {
         _diaryEntry = entry;
+        _titleController.text = entry.title;
         _contentController.text = entry.content;
         _photoAssets = assets;
         _isLoading = false;
@@ -95,6 +99,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       // 日記を更新
       await diaryService.updateDiaryEntry(
         id: _diaryEntry!.id,
+        title: _titleController.text,
         content: _contentController.text,
       );
 
@@ -289,19 +294,53 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             const SizedBox(height: 16),
           ],
 
-          // 日記の内容（編集モードによって表示を切り替え）
+          // 日記のタイトルと内容（編集モードによって表示を切り替え）
           _isEditing
-              ? TextField(
-                  controller: _contentController,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: '日記の内容を入力してください',
-                  ),
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'タイトル',
+                        hintText: '日記のタイトルを入力してください',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _contentController,
+                      maxLines: null,
+                      minLines: 5,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '本文',
+                        hintText: '日記の内容を入力してください',
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
                 )
-              : Text(
-                  _diaryEntry!.content,
-                  style: const TextStyle(fontSize: 16),
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      _diaryEntry!.title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _diaryEntry!.content,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
 
           const SizedBox(height: 16),

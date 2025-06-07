@@ -5,6 +5,14 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/// 日記生成結果を保持するクラス
+class DiaryGenerationResult {
+  final String title;
+  final String content;
+
+  DiaryGenerationResult({required this.title, required this.content});
+}
+
 /// AIを使用して日記文を生成するサービスクラス
 class AiService {
   // Google Gemini APIのエンドポイント
@@ -19,12 +27,12 @@ class AiService {
     return connectivityResult != ConnectivityResult.none;
   }
 
-  /// 検出されたラベルから日記文を生成
+  /// 検出されたラベルから日記のタイトルと本文を生成
   ///
   /// [labels]: 画像から検出されたラベルのリスト
   /// [date]: 写真の撮影日時
   /// [location]: 撮影場所（オプション）
-  Future<String> generateDiaryFromLabels({
+  Future<DiaryGenerationResult> generateDiaryFromLabels({
     required List<String> labels,
     required DateTime date,
     String? location,
@@ -44,14 +52,18 @@ class AiService {
       final prompt =
           '''
 あなたは日記作成の専門家です。以下の情報から、その日の出来事を振り返る日記を日本語で作成してください。
-自然で個人的な文体で、150-200文字程度にまとめてください。
+タイトルと本文を分けて、以下の形式で出力してください。
+
+【タイトル】
+（5-10文字程度の簡潔なタイトル）
+
+【本文】
+（150-200文字程度の自然で個人的な文体の本文）
 
 日付: $dateStr
 時間帯: $timeOfDay
 ${location != null ? '場所: $location\n' : ''}
 キーワード: ${labels.join(', ')}
-
-日記:
 ''';
 
       // APIリクエストの作成
@@ -112,7 +124,7 @@ ${location != null ? '場所: $location\n' : ''}
           }
           
           if (content != null && content.isNotEmpty) {
-            return content.trim();
+            return _parseGeneratedDiary(content.trim());
           } else {
             debugPrint('テキストコンテンツが見つかりません。finishReason: ${candidate['finishReason']}');
             return _generateOfflineDiary(labels, date, location);
@@ -132,7 +144,7 @@ ${location != null ? '場所: $location\n' : ''}
   }
 
   /// オフライン時のシンプルな日記生成
-  String _generateOfflineDiary(
+  DiaryGenerationResult _generateOfflineDiary(
     List<String> labels,
     DateTime date,
     String? location,
@@ -145,12 +157,50 @@ ${location != null ? '場所: $location\n' : ''}
         ? '$locationで'
         : '';
 
+    String title;
+    String content;
+
     if (labels.isEmpty) {
-      return '$dateStr、$locationText過ごした一日の記録です。';
+      title = '今日の記録';
+      content = '$dateStr、$locationText過ごした一日の記録です。';
     } else if (labels.length == 1) {
-      return '$dateStr、$timeOfDayに$locationText${labels[0]}について過ごしました。';
+      title = '${labels[0]}の$timeOfDay';
+      content = '$dateStr、$timeOfDayに$locationText${labels[0]}について過ごしました。';
     } else {
-      return '$dateStr、$timeOfDayに$locationText${labels.join('や')}などについて過ごしました。';
+      title = '${labels.first}と${labels.length - 1}つの出来事';
+      content = '$dateStr、$timeOfDayに$locationText${labels.join('や')}などについて過ごしました。';
+    }
+
+    return DiaryGenerationResult(title: title, content: content);
+  }
+
+  /// 生成された日記テキストをタイトルと本文に分割
+  DiaryGenerationResult _parseGeneratedDiary(String generatedText) {
+    try {
+      // 【タイトル】と【本文】で分割
+      final titleMatch = RegExp(r'【タイトル】\s*(.+?)(?=【本文】|$)', dotAll: true).firstMatch(generatedText);
+      final contentMatch = RegExp(r'【本文】\s*(.+?)$', dotAll: true).firstMatch(generatedText);
+
+      String title = titleMatch?.group(1)?.trim() ?? '';
+      String content = contentMatch?.group(1)?.trim() ?? '';
+
+      // フォールバック：形式が異なる場合は最初の行をタイトル、残りを本文とする
+      if (title.isEmpty || content.isEmpty) {
+        final lines = generatedText.split('\n').where((line) => line.trim().isNotEmpty).toList();
+        if (lines.isNotEmpty) {
+          title = lines.first.trim();
+          content = lines.skip(1).join('\n').trim();
+        }
+      }
+
+      // 最終フォールバック
+      if (title.isEmpty) title = '今日の日記';
+      if (content.isEmpty) content = generatedText.trim();
+
+      return DiaryGenerationResult(title: title, content: content);
+    } catch (e) {
+      debugPrint('日記パース中のエラー: $e');
+      return DiaryGenerationResult(title: '今日の日記', content: generatedText.trim());
     }
   }
 
@@ -159,7 +209,7 @@ ${location != null ? '場所: $location\n' : ''}
   /// [imageData]: 画像のバイナリデータ
   /// [date]: 写真の撮影日時
   /// [location]: 撮影場所（オプション）
-  Future<String> generateDiaryFromImage({
+  Future<DiaryGenerationResult> generateDiaryFromImage({
     required Uint8List imageData,
     required DateTime date,
     String? location,
@@ -181,7 +231,13 @@ ${location != null ? '場所: $location\n' : ''}
       // プロンプトの作成
       final prompt = '''
 あなたは日記作成の専門家です。この写真を見て、その日の出来事を振り返る日記を日本語で作成してください。
-自然で個人的な文体で、150-200文字程度にまとめてください。
+タイトルと本文を分けて、以下の形式で出力してください。
+
+【タイトル】
+（5-10文字程度の簡潔なタイトル）
+
+【本文】
+（150-200文字程度の自然で個人的な文体の本文）
 
 日付: $dateStr
 時間帯: $timeOfDay
@@ -252,7 +308,7 @@ ${location != null ? '場所: $location\n' : ''}
           }
           
           if (content != null && content.isNotEmpty) {
-            return content.trim();
+            return _parseGeneratedDiary(content.trim());
           } else {
             debugPrint('Vision APIでテキストコンテンツが見つかりません。finishReason: ${candidate['finishReason']}');
             return _generateOfflineDiary([], date, location);

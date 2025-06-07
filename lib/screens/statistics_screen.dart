@@ -38,7 +38,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     try {
       _diaryService = await DiaryService.getInstance();
-      _allDiaries = _diaryService.getSortedDiaryEntries();
+      _allDiaries = await _diaryService.getSortedDiaryEntries();
       
       _calculateStatistics();
       
@@ -161,8 +161,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               itemCount: diaries.length,
               itemBuilder: (context, index) {
                 final diary = diaries[index];
-                final contentLines = diary.content.split('\n');
-                final title = contentLines.isNotEmpty ? contentLines.first : '無題';
+                final title = diary.title.isNotEmpty ? diary.title : '無題';
                 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 4),

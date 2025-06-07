@@ -29,19 +29,22 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   DateTime _photoDateTime = DateTime.now(); // 写真の撮影日時
 
   // 日記の編集用コントローラー
-  late TextEditingController _diaryController;
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
 
   @override
   void initState() {
     super.initState();
-    _diaryController = TextEditingController();
+    _titleController = TextEditingController();
+    _contentController = TextEditingController();
     _loadModelAndGenerateDiary();
   }
 
   @override
   void dispose() {
     _imageClassifier.dispose();
-    _diaryController.dispose();
+    _titleController.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
@@ -76,7 +79,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       debugPrint('写真の撮影日時: $photoDateTime');
 
-      String diary;
+      DiaryGenerationResult result;
 
       if (generationMode == DiaryGenerationMode.vision) {
         // Vision API方式：画像を直接Geminiに送信
@@ -90,7 +93,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           throw Exception('写真データの取得に失敗しました');
         }
 
-        diary = await _aiService.generateDiaryFromImage(
+        result = await _aiService.generateDiaryFromImage(
           imageData: imageData,
           date: photoDateTime,
         );
@@ -123,14 +126,15 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         }
 
         // 日記を生成
-        diary = await _aiService.generateDiaryFromLabels(
+        result = await _aiService.generateDiaryFromLabels(
           labels: uniqueLabels,
           date: photoDateTime,
         );
       }
 
       setState(() {
-        _diaryController.text = diary;
+        _titleController.text = result.title;
+        _contentController.text = result.content;
         _isLoading = false;
         // 写真の撮影日時を保存
         _photoDateTime = photoDateTime;
@@ -156,15 +160,23 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _isLoading = true;
       });
 
+      debugPrint('日記保存開始...');
+      debugPrint('タイトル: ${_titleController.text}');
+      debugPrint('本文: ${_contentController.text}');
+      debugPrint('写真数: ${widget.selectedAssets.length}');
+
       // DiaryServiceのインスタンスを取得
       final diaryService = await DiaryService.getInstance();
 
       // 日記を保存
       await diaryService.saveDiaryEntry(
         date: _photoDateTime,
-        content: _diaryController.text,
+        title: _titleController.text,
+        content: _contentController.text,
         photos: widget.selectedAssets,
       );
+
+      debugPrint('日記保存成功');
 
       // ウィジェットがまだマウントされている場合のみ状態を更新
       if (mounted) {
@@ -180,7 +192,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // 前の画面に戻る
         navigator.pop();
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('日記保存失敗: $e');
+      debugPrint('スタックトレース: $stackTrace');
+      
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -189,7 +204,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         });
 
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('エラー: $_errorMessage')),
+          SnackBar(
+            content: Text('エラー: $_errorMessage'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }
@@ -327,14 +346,29 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    TextField(
+                      controller: _titleController,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'タイトル',
+                        border: OutlineInputBorder(),
+                        hintText: '日記のタイトルを入力',
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     Expanded(
                       child: TextField(
-                        controller: _diaryController,
+                        controller: _contentController,
                         maxLines: null,
                         expands: true,
                         textAlignVertical: TextAlignVertical.top,
                         style: const TextStyle(fontSize: 16),
                         decoration: const InputDecoration(
+                          labelText: '本文',
                           hintText: '日記の内容を編集できます',
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.all(16),
