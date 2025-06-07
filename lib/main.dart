@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final screens = _getScreens();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6FF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -539,7 +539,7 @@ class _HomeContent extends StatelessWidget {
                             margin: const EdgeInsets.symmetric(vertical: 6),
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surfaceContainerLow,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 const BoxShadow(

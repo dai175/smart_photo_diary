@@ -50,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6FF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text(
           '設定',
@@ -125,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -415,7 +415,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: color,
                     shape: BoxShape.circle,
                     border: isSelected
-                        ? Border.all(color: Colors.white, width: 3)
+                        ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3)
                         : null,
                     boxShadow: isSelected
                         ? [
@@ -428,9 +428,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         : null,
                   ),
                   child: isSelected
-                      ? const Icon(
+                      ? Icon(
                           Icons.check,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           size: 24,
                         )
                       : null,
