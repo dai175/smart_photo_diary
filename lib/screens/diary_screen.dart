@@ -247,7 +247,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
         ],
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
       ),
       body: _isLoading
@@ -298,6 +298,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
           // 新規日記作成画面へ遷移（将来実装）
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         child: const Icon(Icons.add),
       ),
     );

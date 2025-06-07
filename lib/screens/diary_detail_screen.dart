@@ -201,7 +201,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       appBar: AppBar(
         title: const Text('日記の詳細'),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
           // 編集モード切替ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)

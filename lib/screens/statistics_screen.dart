@@ -240,7 +240,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
       ),
       body: _isLoading
@@ -507,8 +507,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 color: Theme.of(context).colorScheme.primary,
                 borderRadius: const BorderRadius.all(Radius.circular(12.0)),
               ),
-              formatButtonTextStyle: const TextStyle(
-                color: Colors.white,
+              formatButtonTextStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ),
