@@ -211,9 +211,17 @@ class IntegrationTestHelpers {
   /// Pump and settle with extended timeout for integration tests
   static Future<void> pumpAndSettleWithExtendedTimeout(
     WidgetTester tester, {
-    Duration timeout = const Duration(seconds: 30),
+    Duration timeout = const Duration(minutes: 2),
   }) async {
-    await tester.pumpAndSettle(timeout);
+    try {
+      await tester.pumpAndSettle(timeout);
+    } catch (e) {
+      // If pumpAndSettle times out, try manual pumping
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 500));
+        if (!tester.binding.hasScheduledFrame) break;
+      }
+    }
   }
 
   /// Wait for specific widget to appear

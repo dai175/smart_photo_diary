@@ -6,6 +6,7 @@ import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'test_helpers/integration_test_helpers.dart';
+import 'mocks/mock_services.dart';
 
 // Mock classes for integration testing with real database
 class MockAiServiceInterface extends Mock implements AiServiceInterface {}
@@ -19,8 +20,8 @@ void main() {
     late DiaryService diaryService;
 
     setUpAll(() async {
+      registerMockFallbacks();
       await IntegrationTestHelpers.setUpIntegrationEnvironment();
-      registerFallbackValue(MockAssetEntity());
     });
 
     tearDownAll(() async {
