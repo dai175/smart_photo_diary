@@ -136,8 +136,6 @@ void main() {
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
-        final now = DateTime.now();
-        final expectedDate = '${now.year}年${now.month}月${now.day}日';
         expect(find.textContaining('年'), findsAtLeastNWidgets(1));
         expect(find.textContaining('月'), findsAtLeastNWidgets(1));
         expect(find.textContaining('日'), findsAtLeastNWidgets(1));
@@ -317,9 +315,6 @@ void main() {
 
     group('Callback Handling', () {
       testWidgets('should pass onRequestPermission to PhotoGridWidget', (WidgetTester tester) async {
-        // Arrange
-        bool permissionRequested = false;
-
         // Act
         await tester.pumpWidget(
           WidgetTestHelpers.wrapWithMaterialApp(
@@ -328,9 +323,7 @@ void main() {
                 photoController: mockPhotoController,
                 recentDiaries: testDiaries,
                 isLoadingDiaries: false,
-                onRequestPermission: () {
-                  permissionRequested = true;
-                },
+                onRequestPermission: () {},
                 onLoadRecentDiaries: () {},
                 onSelectionLimitReached: () {},
                 onUsedPhotoSelected: () {},
@@ -346,9 +339,6 @@ void main() {
       });
 
       testWidgets('should pass onDiaryTap to RecentDiariesWidget', (WidgetTester tester) async {
-        // Arrange
-        String? tappedId;
-
         // Act
         await tester.pumpWidget(
           WidgetTestHelpers.wrapWithMaterialApp(
@@ -361,9 +351,7 @@ void main() {
                 onLoadRecentDiaries: () {},
                 onSelectionLimitReached: () {},
                 onUsedPhotoSelected: () {},
-                onDiaryTap: (id) {
-                  tappedId = id;
-                },
+                onDiaryTap: (id) {},
               ),
             ),
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
@@ -15,8 +14,6 @@ class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
   group('DiaryService Integration Tests', () {
-    late MockAiServiceInterface mockAiService;
-    late MockPhotoServiceInterface mockPhotoService;
     late DiaryService diaryService;
 
     setUpAll(() async {
@@ -29,8 +26,7 @@ void main() {
     });
 
     setUp(() async {
-      mockAiService = MockAiServiceInterface();
-      mockPhotoService = MockPhotoServiceInterface();
+      // Initialize services for integration testing
       
       // Initialize DiaryService with real Hive database
       diaryService = await DiaryService.getInstance();
