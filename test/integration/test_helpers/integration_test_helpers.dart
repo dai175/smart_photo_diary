@@ -9,6 +9,10 @@ import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/image_classifier_service.dart';
+import 'package:smart_photo_diary/services/settings_service.dart';
+import 'package:smart_photo_diary/services/storage_service.dart';
 import '../mocks/mock_services.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -69,12 +73,23 @@ class IntegrationTestHelpers {
     _mockPhotoService = MockPhotoServiceInterface();
     _mockAiService = MockAiServiceInterface();
     
+    // Create additional required mock services
+    final mockDiaryService = MockDiaryServiceInterface();
+    final mockImageClassifierService = MockImageClassifierService();
+    final mockSettingsService = MockSettingsService();
+    final mockStorageService = MockStorageService();
+    
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
+    _setupAdditionalMockBehaviors(mockDiaryService, mockImageClassifierService, mockSettingsService, mockStorageService);
     
-    // Register mock services
+    // Register all mock services
     _serviceLocator.registerSingleton<PhotoServiceInterface>(_mockPhotoService);
     _serviceLocator.registerSingleton<AiServiceInterface>(_mockAiService);
+    _serviceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
+    _serviceLocator.registerSingleton<ImageClassifierService>(mockImageClassifierService);
+    _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
+    _serviceLocator.registerSingleton<StorageService>(mockStorageService);
   }
 
   /// Setup default behaviors for mock services
@@ -292,6 +307,33 @@ class IntegrationTestHelpers {
       await tester.tap(find.text('閉じる'));
     }
     await tester.pump();
+  }
+
+  /// Setup additional mock service behaviors
+  static void _setupAdditionalMockBehaviors(
+    MockDiaryServiceInterface mockDiaryService,
+    MockImageClassifierService mockImageClassifierService,
+    MockSettingsService mockSettingsService,
+    MockStorageService mockStorageService,
+  ) {
+    // Diary service defaults - using correct interface methods
+    when(() => mockDiaryService.getSortedDiaryEntries()).thenAnswer((_) async => []);
+    when(() => mockDiaryService.getFilteredDiaryEntries(any())).thenAnswer((_) async => []);
+    when(() => mockDiaryService.getAllTags()).thenAnswer((_) async => <String>{});
+    when(() => mockDiaryService.getTotalDiaryCount()).thenAnswer((_) async => 0);
+    when(() => mockDiaryService.getDiaryCountInPeriod(any(), any())).thenAnswer((_) async => 0);
+    when(() => mockDiaryService.getDiaryEntry(any())).thenAnswer((_) async => null);
+    when(() => mockDiaryService.getTagsForEntry(any())).thenAnswer((_) async => []);
+    
+    // Image classifier defaults - basic mock setup
+    when(() => mockImageClassifierService.classifyImage(any())).thenAnswer((_) async => []);
+    
+    // Settings service defaults - basic mock setup
+    when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
+    when(() => mockSettingsService.accentColor).thenReturn(const Color(0xFF6C4AB6));
+    
+    // Storage service defaults - basic mock setup  
+    when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
   }
 
   /// Get mock photo service for additional setup
