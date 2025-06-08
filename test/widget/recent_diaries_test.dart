@@ -9,28 +9,47 @@ void main() {
   group('RecentDiariesWidget', () {
     late List<DiaryEntry> testDiaries;
 
-    setUpAll(() {
-      WidgetTestHelpers.setUpTestEnvironment();
+    setUpAll(() async {
+      await WidgetTestHelpers.setUpTestEnvironment();
     });
 
-    tearDownAll(() {
-      WidgetTestHelpers.tearDownTestEnvironment();
+    tearDownAll(() async {
+      await WidgetTestHelpers.tearDownTestEnvironment();
     });
 
     setUp(() {
       testDiaries = WidgetTestHelpers.createTestDiaryEntries(3);
     });
+    
+    // Helper function to create constrained widget for testing
+    Widget createConstrainedRecentDiariesWidget({
+      required List<DiaryEntry> recentDiaries,
+      required bool isLoading,
+      required Function(String) onDiaryTap,
+      double height = 500,
+    }) {
+      return WidgetTestHelpers.wrapWithMaterialApp(
+        SizedBox(
+          height: height,
+          child: SingleChildScrollView(
+            child: RecentDiariesWidget(
+              recentDiaries: recentDiaries,
+              isLoading: isLoading,
+              onDiaryTap: onDiaryTap,
+            ),
+          ),
+        ),
+      );
+    }
 
     group('Basic Rendering', () {
       testWidgets('should render recent diaries widget', (WidgetTester tester) async {
         // Act
         await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            RecentDiariesWidget(
-              recentDiaries: testDiaries,
-              isLoading: false,
-              onDiaryTap: (id) {},
-            ),
+          createConstrainedRecentDiariesWidget(
+            recentDiaries: testDiaries,
+            isLoading: false,
+            onDiaryTap: (id) {},
           ),
         );
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);

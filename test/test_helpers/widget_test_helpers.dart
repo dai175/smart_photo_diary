@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'mock_platform_channels.dart';
 
@@ -73,13 +74,37 @@ class WidgetTestHelpers {
   }
 
   /// Setup common test environment
-  static void setUpTestEnvironment() {
+  static Future<void> setUpTestEnvironment() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     MockPlatformChannels.setupMocks();
+    
+    // Initialize Hive for testing
+    await _initializeHive();
+  }
+  
+  /// Initialize Hive for testing
+  static Future<void> _initializeHive() async {
+    try {
+      const testDirectory = '/tmp/smart_photo_diary_test';
+      await Hive.initFlutter(testDirectory);
+      
+      // Register adapters if not already registered
+      if (!Hive.isAdapterRegistered(0)) {
+        Hive.registerAdapter(DiaryEntryAdapter());
+      }
+    } catch (e) {
+      // Ignore if already initialized
+    }
   }
 
   /// Clean up test environment
-  static void tearDownTestEnvironment() {
+  static Future<void> tearDownTestEnvironment() async {
+    try {
+      // Clear Hive data
+      await Hive.deleteFromDisk();
+    } catch (e) {
+      // Ignore cleanup errors
+    }
     MockPlatformChannels.clearMocks();
   }
 

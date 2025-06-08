@@ -64,9 +64,14 @@
 - [x] test/test_helpers/widget_test_helpers.dart の作成（テストユーティリティ）
 
 **Integration Tests**
-- [ ] test/integration/diary_flow_test.dart の作成（写真選択→日記生成フロー）
-- [ ] test/integration/settings_flow_test.dart の作成
-- [ ] mocktail によるモック実装の整備
+- [x] test/integration/diary_flow_test.dart の作成（写真選択→日記生成フロー）
+- [x] test/integration/settings_flow_test.dart の作成
+- [x] test/integration/basic_integration_test.dart の作成（基本動作確認）
+- [x] test/integration/test_helpers/integration_test_helpers.dart の作成
+- [x] test/integration/mocks/mock_services.dart の作成
+- [x] mocktail によるモック実装の整備
+- [x] プラットフォームチャンネルのモック対応
+- [x] サービスロケータ連携の統合テスト環境構築
 
 ### 🟡 中優先度（機能追加前に対応）
 

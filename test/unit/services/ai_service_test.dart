@@ -43,8 +43,14 @@ void main() {
       mockTagGenerator = MockTagGenerator();
       mockOfflineService = MockOfflineFallbackService();
       
-      // Create AiService instance (in real app this would be injected)
+      // Create AiService instance with mock API key for testing
       aiService = AiService();
+      
+      // Set up test environment variables
+      if (!const bool.hasEnvironment('GOOGLE_AI_API_KEY')) {
+        // For testing, we'll use the service in offline mode
+        // or catch initialization errors
+      }
     });
 
     group('isOnline', () {

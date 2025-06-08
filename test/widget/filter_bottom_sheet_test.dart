@@ -10,17 +10,25 @@ import '../test_helpers/widget_test_helpers.dart';
 // Mock classes
 class MockDiaryService extends Mock implements DiaryService {}
 
+// Mock implementation to avoid real service initialization
+DiaryService createMockDiaryService() {
+  final mockService = MockDiaryService();
+  when(() => mockService.getPopularTags(limit: any(named: 'limit')))
+      .thenAnswer((_) async => ['tag1', 'tag2', 'tag3']);
+  return mockService;
+}
+
 void main() {
   group('FilterBottomSheet', () {
     late DiaryFilter testFilter;
     late MockDiaryService mockDiaryService;
 
-    setUpAll(() {
-      WidgetTestHelpers.setUpTestEnvironment();
+    setUpAll(() async {
+      await WidgetTestHelpers.setUpTestEnvironment();
     });
 
-    tearDownAll(() {
-      WidgetTestHelpers.tearDownTestEnvironment();
+    tearDownAll(() async {
+      await WidgetTestHelpers.tearDownTestEnvironment();
     });
 
     setUp(() {

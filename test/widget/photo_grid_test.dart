@@ -20,13 +20,13 @@ void main() {
     late MockPhotoServiceInterface mockPhotoService;
     late ServiceLocator serviceLocator;
 
-    setUpAll(() {
-      WidgetTestHelpers.setUpTestEnvironment();
+    setUpAll(() async {
+      await WidgetTestHelpers.setUpTestEnvironment();
       registerFallbackValue(MockAssetEntity());
     });
 
-    tearDownAll(() {
-      WidgetTestHelpers.tearDownTestEnvironment();
+    tearDownAll(() async {
+      await WidgetTestHelpers.tearDownTestEnvironment();
     });
 
     setUp(() {
