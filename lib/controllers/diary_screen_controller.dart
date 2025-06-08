@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_filter.dart';
 import '../services/diary_service.dart';
+import 'base_error_controller.dart';
 
-class DiaryScreenController extends ChangeNotifier {
+class DiaryScreenController extends BaseErrorController {
   // 日記データ
   List<DiaryEntry> _diaryEntries = [];
-  bool _isLoading = true;
   DiaryFilter _currentFilter = DiaryFilter.empty;
   
   // 検索機能
@@ -16,7 +16,6 @@ class DiaryScreenController extends ChangeNotifier {
 
   // Getters
   List<DiaryEntry> get diaryEntries => _diaryEntries;
-  bool get isLoading => _isLoading;
   DiaryFilter get currentFilter => _currentFilter;
   bool get isSearching => _isSearching;
   String get searchQuery => _searchQuery;
@@ -35,23 +34,20 @@ class DiaryScreenController extends ChangeNotifier {
 
   // 日記エントリーを読み込む
   Future<void> loadDiaryEntries() async {
-    try {
-      _setLoading(true);
+    final result = await safeExecute(() async {
       final diaryService = await DiaryService.getInstance();
-      final entries = await diaryService.getFilteredDiaryEntries(_currentFilter);
+      return await diaryService.getFilteredDiaryEntries(_currentFilter);
+    }, context: 'DiaryScreenController.loadDiaryEntries');
 
-      _diaryEntries = entries;
-      _setLoading(false);
-    } catch (e) {
-      _setLoading(false);
-      debugPrint('日記エントリーの読み込みエラー: $e');
+    if (result != null) {
+      _diaryEntries = result;
     }
   }
 
   // フィルタを適用
   void applyFilter(DiaryFilter filter) {
     _currentFilter = filter;
-    _setLoading(true);
+    setLoading(true);
     notifyListeners();
     loadDiaryEntries();
   }
@@ -98,7 +94,7 @@ class DiaryScreenController extends ChangeNotifier {
   // 検索実行
   void performSearch(String query) {
     _searchQuery = query;
-    _setLoading(true);
+    setLoading(true);
     _searchDiaryEntries(query);
   }
 
@@ -110,37 +106,28 @@ class DiaryScreenController extends ChangeNotifier {
 
   // 検索で日記を絞り込み
   Future<void> _searchDiaryEntries(String query) async {
-    try {
+    final result = await safeExecute(() async {
       final diaryService = await DiaryService.getInstance();
-      List<DiaryEntry> entries;
-
+      
       if (query.isEmpty) {
         // 検索クエリが空の場合は通常のフィルタを適用
-        entries = await diaryService.getFilteredDiaryEntries(_currentFilter);
+        return await diaryService.getFilteredDiaryEntries(_currentFilter);
       } else {
         // 検索クエリがある場合は検索フィルタを作成
         final searchFilter = _currentFilter.copyWith(searchText: query);
-        entries = await diaryService.getFilteredDiaryEntries(searchFilter);
+        return await diaryService.getFilteredDiaryEntries(searchFilter);
       }
+    }, context: 'DiaryScreenController.searchDiaryEntries');
 
-      _diaryEntries = entries;
-      _setLoading(false);
-    } catch (e) {
-      _setLoading(false);
-      debugPrint('検索エラー: $e');
+    if (result != null) {
+      _diaryEntries = result;
     }
   }
 
   // リフレッシュ
   void refresh() {
-    _setLoading(true);
+    setLoading(true);
     loadDiaryEntries();
-  }
-
-  // ローディング状態の設定
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
   }
 
   // 空の状態メッセージを取得

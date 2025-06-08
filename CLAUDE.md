@@ -297,3 +297,87 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Type complexity matters**: Result<void> is easier to adopt than Result<ComplexType>
 - **Testing is crucial**: Comprehensive test coverage (41 tests) ensured Result<T> reliability
 - **Documentation prevents confusion**: Clear migration strategy helps future development decisions
+
+## UI Error Display System
+
+### Unified Error Display Architecture
+The application uses a unified error display system that provides consistent error presentation across all screens and components:
+
+#### Core Components
+- **ErrorDisplayService**: Centralized service for showing errors with automatic logging and severity-based display methods
+- **ErrorDisplayWidgets**: Reusable UI components (SnackBar, Dialog, Inline, FullScreen) with consistent styling
+- **ErrorSeverity**: Four-level severity system (info, warning, error, critical) with appropriate visual feedback
+- **ErrorDisplayConfig**: Predefined configurations for common error scenarios
+
+#### Error Display Methods
+1. **SnackBar**: Lightweight notifications for info/warning messages
+2. **Dialog**: Modal alerts for errors requiring user acknowledgment  
+3. **Inline**: Embedded error displays within content areas
+4. **FullScreen**: Critical errors that block entire app functionality
+
+#### Error Severity Levels
+- **Info**: Informational messages (blue, SnackBar, 3s duration)
+- **Warning**: Cautionary messages (orange, SnackBar, 4s duration)
+- **Error**: Standard errors (red, Dialog, user dismissible)
+- **Critical**: Severe errors (dark red, Dialog, retry required, non-dismissible)
+
+#### Integration with Result<T>
+The error display system is fully integrated with the Result<T> pattern:
+
+```dart
+// Direct error display from Result
+result.showErrorOnUI(context);
+
+// With success message
+await operation()
+  .showResultOnUI(context, 
+    onSuccess: (value) => 'Successfully saved!');
+
+// Conditional error display
+result.showErrorOnUIOfType<NetworkException>(context);
+```
+
+#### Usage Patterns
+
+**Service Layer Integration**:
+```dart
+class MyController extends BaseErrorController {
+  Future<void> performAction(BuildContext context) async {
+    await executeWithErrorDisplay(
+      context,
+      () => myService.doSomething(),
+      errorConfig: ErrorDisplayConfig.criticalWithRetry,
+      onRetry: () => performAction(context),
+    );
+  }
+}
+```
+
+**UI Extensions**:
+```dart
+// Simple error display
+context.showError(ServiceException('Failed to save'));
+
+// Success messages
+context.showSuccess('Data saved successfully!');
+
+// Type-specific errors
+context.showNetworkError('Connection failed', onRetry: retry);
+```
+
+**Widget Builders**:
+```dart
+FutureResultUIBuilder<List<Item>>(
+  future: loadItems(),
+  onSuccess: (items) => ItemList(items: items),
+  showDialogErrors: true, // Show errors in dialogs
+  onRetry: loadItems,
+)
+```
+
+#### Best Practices
+- **Use predefined ErrorDisplayConfig** for consistent behavior
+- **Leverage BaseErrorController** for automatic error state management
+- **Prefer contextual extensions** (context.showError) for brevity
+- **Always provide retry mechanisms** for recoverable errors
+- **Use severity levels appropriately** to guide user response

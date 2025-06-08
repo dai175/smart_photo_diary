@@ -5,6 +5,8 @@ import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
 import '../services/diary_service.dart';
 import '../constants/app_constants.dart';
+import '../ui/error_display/error_display_extensions.dart';
+import '../ui/error_display/error_display_widgets.dart';
 
 class DiaryCardWidget extends StatelessWidget {
   final DiaryEntry entry;
@@ -22,7 +24,6 @@ class DiaryCardWidget extends StatelessWidget {
       final diaryService = await DiaryService.getInstance();
       return await diaryService.getTagsForEntry(entry);
     } catch (e) {
-      debugPrint('タグ取得エラー: $e');
       // エラー時はフォールバックタグを返す（時間帯のみ）
       final fallbackTags = <String>[];
       
