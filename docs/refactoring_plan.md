@@ -23,12 +23,12 @@
 - [x] lib/widgets/navigation_widget.dart の作成（ナビゲーション）
 
 **ai_service.dart (835行) の分割**
-- [ ] lib/services/ai/gemini_api_client.dart の作成（API通信）
-- [ ] lib/services/ai/diary_generator.dart の作成（日記生成）
-- [ ] lib/services/ai/tag_generator.dart の作成（タグ生成）
-- [ ] lib/services/ai/offline_fallback_service.dart の作成（オフライン対応）
-- [ ] lib/services/ai/ai_service_interface.dart の作成（インターフェース定義）
-- [ ] 既存 ai_service.dart の置き換えと統合テスト
+- [x] lib/services/ai/gemini_api_client.dart の作成（API通信）
+- [x] lib/services/ai/diary_generator.dart の作成（日記生成）
+- [x] lib/services/ai/tag_generator.dart の作成（タグ生成）
+- [x] lib/services/ai/offline_fallback_service.dart の作成（オフライン対応）
+- [x] lib/services/ai/ai_service_interface.dart の作成（インターフェース定義）
+- [x] 既存 ai_service.dart の置き換えと統合テスト
 
 **diary_screen.dart (509行) の分割**
 - [ ] lib/screens/diary_screen.dart の軽量化（画面構成のみ）

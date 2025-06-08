@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../services/image_classifier_service.dart';
 import '../services/ai_service.dart';
+import '../services/ai/ai_service_interface.dart';
 import '../services/diary_service.dart';
 import '../services/settings_service.dart';
 import '../services/photo_service.dart';
