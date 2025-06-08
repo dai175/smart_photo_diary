@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -107,16 +108,7 @@ void main() {
     group('Date Range Section', () {
       testWidgets('should display date range picker', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -135,16 +127,7 @@ void main() {
         final filterWithDate = testFilter.copyWith(dateRange: dateRange);
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: filterWithDate,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(filter: filterWithDate));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -154,16 +137,7 @@ void main() {
 
       testWidgets('should open date picker when tapped', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Tap on date range selector
@@ -183,16 +157,7 @@ void main() {
         final filterWithDate = testFilter.copyWith(dateRange: dateRange);
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: filterWithDate,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(filter: filterWithDate));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Tap clear button
@@ -207,28 +172,21 @@ void main() {
     group('Tags Section', () {
       testWidgets('should show loading indicator while loading tags', (WidgetTester tester) async {
         // Arrange
-        when(() => mockDiaryService.getPopularTags(limit: any(named: 'limit')))
-            .thenAnswer((_) async {
-          // Simulate slow loading
-          await Future.delayed(const Duration(seconds: 1));
-          return ['tag1', 'tag2'];
-        });
+        final slowMockService = MockDiaryService();
+        final completer = Completer<List<String>>();
+        when(() => slowMockService.getPopularTags(limit: any(named: 'limit')))
+            .thenAnswer((_) => completer.future);
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(customMockService: slowMockService));
         await tester.pump(); // Don't wait for settle to see loading state
 
         // Assert
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        
+        // Complete the future to clean up
+        completer.complete(['tag1', 'tag2']);
+        await tester.pumpAndSettle();
       });
 
       testWidgets('should display tags as filter chips', (WidgetTester tester) async {
@@ -250,16 +208,7 @@ void main() {
         );
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: filterWithTags,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(filter: filterWithTags));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -270,16 +219,7 @@ void main() {
 
       testWidgets('should toggle tag selection when tapped', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Tap on first tag
@@ -308,16 +248,7 @@ void main() {
     group('Time of Day Section', () {
       testWidgets('should display time of day filter chips', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -334,16 +265,7 @@ void main() {
         );
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: filterWithTime,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(filter: filterWithTime));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -358,16 +280,7 @@ void main() {
 
       testWidgets('should toggle time of day selection when tapped', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Find and tap the "朝" chip
@@ -383,16 +296,7 @@ void main() {
     group('Apply Button', () {
       testWidgets('should display apply button', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -408,16 +312,7 @@ void main() {
         );
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: activeFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(filter: activeFilter));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -429,18 +324,11 @@ void main() {
         DiaryFilter? appliedFilter;
         
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {
-                  appliedFilter = filter;
-                },
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(
+          onApply: (filter) {
+            appliedFilter = filter;
+          },
+        ));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         await WidgetTestHelpers.tapAndPump(tester, find.byType(ElevatedButton));
@@ -464,16 +352,7 @@ void main() {
         );
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: activeFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(filter: activeFilter));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Tap clear all button
@@ -497,16 +376,7 @@ void main() {
             .thenThrow(Exception('Network error'));
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert - Should not crash
@@ -516,16 +386,7 @@ void main() {
 
       testWidgets('should handle date picker cancellation', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Tap on date range selector
@@ -545,14 +406,7 @@ void main() {
         // Act
         await tester.pumpWidget(
           WidgetTestHelpers.wrapWithMediaQuery(
-            WidgetTestHelpers.wrapWithMaterialApp(
-              Scaffold(
-                body: FilterBottomSheet(
-                  initialFilter: testFilter,
-                  onApply: (filter) {},
-                ),
-              ),
-            ),
+            createFilterBottomSheet(),
             size: const Size(400, 800), // Phone size
           ),
         );
@@ -572,16 +426,7 @@ void main() {
             .thenAnswer((_) async => List.generate(20, (i) => 'very_long_tag_name_$i'));
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert - Should not overflow
@@ -593,16 +438,7 @@ void main() {
     group('Accessibility', () {
       testWidgets('should be accessible', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -611,16 +447,7 @@ void main() {
 
       testWidgets('should have semantic information for interactive elements', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -636,16 +463,7 @@ void main() {
         final stopwatch = Stopwatch()..start();
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         stopwatch.stop();
@@ -657,16 +475,7 @@ void main() {
 
       testWidgets('should handle rapid filter changes', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Rapid tapping on different filter chips

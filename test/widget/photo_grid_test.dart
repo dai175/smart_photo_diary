@@ -45,6 +45,13 @@ void main() {
       when(() => mockController.hasPermission).thenReturn(true);
       when(() => mockController.isPhotoUsed(any())).thenReturn(false);
       when(() => mockController.canSelectPhoto(any())).thenReturn(true);
+      
+      // Setup PhotoService mock behavior
+      when(() => mockPhotoService.getThumbnail(
+        any(),
+        width: any(named: 'width'),
+        height: any(named: 'height'),
+      )).thenAnswer((_) async => 'mock_thumbnail_data');
     });
 
     tearDown(() {
