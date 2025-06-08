@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/ui/error_display/error_display.dart';
-import 'package:smart_photo_diary/ui/error_display/error_display_widgets.dart';
 
 void main() {
   group('ErrorDisplayService', () {

@@ -53,7 +53,6 @@ class ErrorDisplayConfig {
     severity: ErrorSeverity.info,
     method: ErrorDisplayMethod.snackBar,
     duration: Duration(seconds: 3),
-    dismissible: true,
     logError: false,
   );
 
@@ -62,16 +61,12 @@ class ErrorDisplayConfig {
     severity: ErrorSeverity.warning,
     method: ErrorDisplayMethod.snackBar,
     duration: Duration(seconds: 4),
-    dismissible: true,
-    logError: true,
   );
 
   /// エラーレベルのダイアログ設定
   static const ErrorDisplayConfig error = ErrorDisplayConfig(
     severity: ErrorSeverity.error,
     method: ErrorDisplayMethod.dialog,
-    dismissible: true,
-    logError: true,
   );
 
   /// 重大エラーのダイアログ設定（リトライ付き）
@@ -81,16 +76,13 @@ class ErrorDisplayConfig {
     dismissible: false,
     showRetryButton: true,
     retryButtonText: 'もう一度試す',
-    logError: true,
   );
 
   /// インラインエラー設定
   static const ErrorDisplayConfig inline = ErrorDisplayConfig(
     severity: ErrorSeverity.error,
     method: ErrorDisplayMethod.inline,
-    dismissible: true,
     showRetryButton: true,
     retryButtonText: '再試行',
-    logError: true,
   );
 }

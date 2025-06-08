@@ -117,7 +117,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
         // 更新成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(AppConstants.diaryUpdateSuccessMessage)),
+          const SnackBar(content: Text(AppConstants.diaryUpdateSuccessMessage)),
         );
       }
     } catch (e) {
@@ -168,7 +168,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       if (mounted) {
         // 削除成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(AppConstants.diaryDeleteSuccessMessage)),
+          const SnackBar(content: Text(AppConstants.diaryDeleteSuccessMessage)),
         );
 
         // 前の画面に戻る（削除成功を示すフラグを返す）
@@ -221,9 +221,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _hasError
-          ? Center(child: Text('エラー: $_errorMessage'))
+          ? const Center(child: Text('エラーが発生しました'))
           : _diaryEntry == null
-          ? Center(child: Text(AppConstants.diaryNotFoundMessage))
+          ? const Center(child: Text(AppConstants.diaryNotFoundMessage))
           : _buildDiaryDetail(),
     );
   }
@@ -266,10 +266,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       ),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return SizedBox(
+                          return const SizedBox(
                             width: AppConstants.detailImageSize,
                             height: AppConstants.detailImageSize,
-                            child: const Center(child: CircularProgressIndicator()),
+                            child: Center(child: CircularProgressIndicator()),
                           );
                         }
 

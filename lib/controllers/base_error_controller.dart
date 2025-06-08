@@ -67,7 +67,7 @@ abstract class BaseErrorController extends ChangeNotifier {
     }
   }
 
-  /// Result<T>を返す安全な非同期処理実行
+  /// Result型を返す安全な非同期処理実行
   Future<Result<T>> safeExecuteResult<T>(
     Future<Result<T>> Function() operation, {
     bool setLoadingState = true,
@@ -142,7 +142,7 @@ abstract class BaseErrorController extends ChangeNotifier {
     return result;
   }
 
-  /// Result<T>を返すエラーハンドリング付き処理
+  /// Result型を返すエラーハンドリング付き処理
   Future<Result<T>> executeResultWithErrorDisplay<T>(
     BuildContext context,
     Future<Result<T>> Function() operation, {
@@ -159,13 +159,15 @@ abstract class BaseErrorController extends ChangeNotifier {
       context: operationContext,
     );
     
-    if (result.isFailure && showErrors && context.mounted) {
-      await showErrorInUI(
-        context,
-        config: errorConfig,
-        onRetry: onRetry,
-        retryButtonText: retryButtonText,
-      );
+    if (result.isFailure && showErrors) {
+      if (context.mounted) {
+        await showErrorInUI(
+          context,
+          config: errorConfig,
+          onRetry: onRetry,
+          retryButtonText: retryButtonText,
+        );
+      }
     }
     
     return result;
@@ -197,28 +199,32 @@ abstract class BaseErrorController extends ChangeNotifier {
     if (attempts < maxRetries) {
       onRetry = () async {
         await Future.delayed(retryDelay);
-        await executeWithRetry(
-          context,
-          operation,
-          maxRetries: maxRetries,
-          retryDelay: retryDelay,
-          setLoadingState: false,
-          operationContext: operationContext,
-          errorConfig: errorConfig,
-          retryButtonText: retryButtonText,
-        );
+        if (context.mounted) {
+          await executeWithRetry(
+            context,
+            operation,
+            maxRetries: maxRetries,
+            retryDelay: retryDelay,
+            setLoadingState: false,
+            operationContext: operationContext,
+            errorConfig: errorConfig,
+            retryButtonText: retryButtonText,
+          );
+        }
       };
     }
     
     final result = await attemptOperation();
     
-    if (result == null && _lastError != null && context.mounted) {
-      await showErrorInUI(
-        context,
-        config: errorConfig,
-        onRetry: onRetry,
-        retryButtonText: retryButtonText,
-      );
+    if (result == null && _lastError != null) {
+      if (context.mounted) {
+        await showErrorInUI(
+          context,
+          config: errorConfig,
+          onRetry: onRetry,
+          retryButtonText: retryButtonText,
+        );
+      }
     }
     
     return result;

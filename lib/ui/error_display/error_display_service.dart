@@ -61,7 +61,7 @@ class ErrorDisplayService {
     }
   }
 
-  /// Result<T>からエラーを表示
+  /// Result型からエラーを表示
   Future<void> showResultError<T>(
     BuildContext context,
     Result<T> result, {
@@ -158,17 +158,17 @@ class ErrorDisplayService {
   /// エラーに応じたデフォルト設定を取得
   ErrorDisplayConfig _getDefaultConfigForError(AppException error) {
     switch (error.runtimeType) {
-      case ValidationException:
+      case ValidationException _:
         return ErrorDisplayConfig.warning;
-      case NetworkException:
+      case NetworkException _:
         return ErrorDisplayConfig.criticalWithRetry;
-      case PermissionException:
+      case PermissionException _:
         return ErrorDisplayConfig.error;
-      case ServiceException:
+      case ServiceException _:
         return ErrorDisplayConfig.error;
-      case DataNotFoundException:
+      case DataNotFoundException _:
         return ErrorDisplayConfig.warning;
-      case StorageException:
+      case StorageException _:
         return ErrorDisplayConfig.criticalWithRetry;
       default:
         return ErrorDisplayConfig.error;

@@ -5,7 +5,7 @@ import '../../ui/error_display/error_severity.dart';
 import '../../ui/error_display/error_display_widgets.dart';
 import 'result.dart';
 
-/// Result<T>のUI統合拡張
+/// Result型のUI統合拡張
 extension ResultUIExtensions<T> on Result<T> {
   /// エラーを画面に表示
   Future<void> showErrorOnUI(
@@ -100,7 +100,7 @@ extension ResultUIExtensions<T> on Result<T> {
   }
 }
 
-/// Future<Result<T>>のUI統合拡張
+/// Future Result型のUI統合拡張
 extension FutureResultUIExtensions<T> on Future<Result<T>> {
   /// 非同期結果のエラーを表示
   Future<Result<T>> showErrorsOnUI(
@@ -202,7 +202,7 @@ extension FutureResultUIExtensions<T> on Future<Result<T>> {
   }
 }
 
-/// Result<T>用のUIビルダー
+/// Result型用のUIビルダー
 class ResultUIBuilder<T> extends StatelessWidget {
   final Result<T> result;
   final Widget Function(T value) onSuccess;
@@ -243,7 +243,7 @@ class ResultUIBuilder<T> extends StatelessWidget {
   }
 }
 
-/// Future<Result<T>>用のUIビルダー
+/// Future Result型用のUIビルダー
 class FutureResultUIBuilder<T> extends StatelessWidget {
   final Future<Result<T>> future;
   final Widget Function(T value) onSuccess;

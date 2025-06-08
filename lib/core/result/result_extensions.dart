@@ -90,7 +90,7 @@ class ResultHelper {
   }
 }
 
-/// Future<Result<T>>の拡張メソッド
+/// Future Result型の拡張メソッド
 extension FutureResultExtensions<T> on Future<Result<T>> {
   /// 非同期Resultをマップ
   Future<Result<R>> mapAsync<R>(Future<R> Function(T value) mapper) async {

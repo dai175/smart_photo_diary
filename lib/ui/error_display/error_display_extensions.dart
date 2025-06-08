@@ -23,7 +23,7 @@ extension ErrorDisplayExtensions on BuildContext {
     );
   }
 
-  /// Result<T>からエラーを表示
+  /// Result型からエラーを表示
   Future<void> showResultError<T>(
     Result<T> result, {
     ErrorDisplayConfig? config,
@@ -120,7 +120,7 @@ extension ErrorDisplayExtensions on BuildContext {
   }
 }
 
-/// Future<Result<T>>のエラー表示拡張
+/// Future Result型のエラー表示拡張
 extension FutureResultErrorExtensions<T> on Future<Result<T>> {
   /// Resultのエラーを自動表示
   Future<Result<T>> showErrorsOn(
@@ -187,7 +187,7 @@ extension FutureResultErrorExtensions<T> on Future<Result<T>> {
   }
 }
 
-/// Result<T>のエラー表示拡張
+/// Result型のエラー表示拡張
 extension ResultErrorExtensions<T> on Result<T> {
   /// エラーを表示
   Future<void> showErrorOn(
@@ -262,7 +262,7 @@ class ErrorHandledAction {
     }
   }
 
-  /// Result<T>を返す非同期処理を実行
+  /// Result型を返す非同期処理を実行
   Future<Result<T>> executeWithResult<T>(
     Future<Result<T>> Function() action, {
     String? loadingMessage,

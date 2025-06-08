@@ -208,7 +208,6 @@ class ErrorInlineWidget extends StatelessWidget {
         color: _getColorForSeverity(context, config.severity).withValues(alpha: 0.1),
         border: Border.all(
           color: _getColorForSeverity(context, config.severity),
-          width: 1,
         ),
         borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
       ),
