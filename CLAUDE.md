@@ -95,8 +95,25 @@ The app follows a service-oriented architecture with singleton services using la
 - **`PhotoService`**: Photo access and permissions via `photo_manager` plugin, implements `PhotoServiceInterface`
 - **`AiService`**: AI diary generation with Google Gemini API and comprehensive offline fallbacks, implements `AiServiceInterface`
 - **`ImageClassifierService`**: On-device ML inference using TensorFlow Lite MobileNet v2
-- **`SettingsService`**: App configuration stored in SharedPreferences
+- **`SettingsService`**: App configuration stored in SharedPreferences with Result<T> pattern for write operations
 - **`StorageService`**: File system operations and data export functionality
+- **`LoggingService`**: Structured logging with levels and performance monitoring
+
+### Error Handling Architecture
+
+The app implements a **Result<T> pattern** for functional error handling, providing type-safe alternatives to exception-based error handling:
+
+#### Result<T> Pattern (`lib/core/result/`)
+- **`Result<T>`**: Sealed class with `Success<T>` and `Failure<T>` variants
+- **Functional operations**: `map`, `fold`, `chain`, `onSuccess`, `onFailure`
+- **Helper utilities**: `ResultHelper` for easy creation and combination
+- **Extensions**: Enhanced support for `Future<Result<T>>` and `List<Result<T>>`
+
+#### Standardized Exception Hierarchy (`lib/core/errors/`)
+- **`AppException`**: Base exception with message, details, and original error context
+- **Domain-specific exceptions**: `ServiceException`, `PhotoAccessException`, `AiProcessingException`, etc.
+- **`ErrorHandler`**: Utilities for error conversion, logging, and safe execution
+- **`LoggingService`**: Structured logging with context and performance monitoring
 
 ### Dependency Injection
 - **`ServiceLocator`**: Central dependency injection container supporting singleton, factory, and async factory patterns
@@ -104,17 +121,9 @@ The app follows a service-oriented architecture with singleton services using la
 - Services are registered at app startup and accessed via interfaces for better testability
 
 ### Controller Pattern
-- **`PhotoSelectionController`**: Uses `ChangeNotifier` for reactive photo selection state management
+- **`PhotoSelectionController`**: Uses `ChangeNotifier` for reactive photo selection state management with enhanced robustness and boundary checking
 - **`DiaryScreenController`**: Manages diary screen state and interactions
 - Controllers handle complex UI interactions and provide computed properties for widgets
-
-### Screen Architecture
-- **`HomeScreen`**: Main app entry point with bottom navigation
-- **`DiaryScreen`**: Primary diary management interface
-- **`DiaryDetailScreen`**: Individual diary entry viewing and editing
-- **`DiaryPreviewScreen`**: Preview generated diary before saving
-- **`SettingsScreen`**: App configuration and preferences
-- **`StatisticsScreen`**: Analytics and insights dashboard
 
 ### Data Models
 - **`DiaryEntry`**: Primary data model with Hive annotations for local storage
@@ -131,11 +140,6 @@ The app follows a service-oriented architecture with singleton services using la
   - `OfflineFallbackService`: Offline mode diary generation
 - **Assets**: ML models bundled in `assets/models/` directory
 
-### Widget Components
-- **Shared Widgets**: `FilterBottomSheet`, `ActiveFiltersDisplay`
-- **Feature Widgets**: `DiaryCardWidget`, `PhotoGridWidget`, `RecentDiariesWidget`
-- **Utility Widgets**: `HomeContentWidget`, `DiarySearchWidget`
-
 ## Key Dependencies
 
 ### Core
@@ -144,10 +148,6 @@ The app follows a service-oriented architecture with singleton services using la
 - `tflite_flutter`: On-device ML inference for image classification
 - `permission_handler`: Platform-specific permissions for photo access
 - `connectivity_plus`: Network status checking for AI service fallbacks
-- `image_picker`: Photo selection from gallery and camera
-- `geolocator`: Location services for diary entries
-- `table_calendar`: Calendar UI component for date navigation
-- `flutter_dotenv`: Environment variable management
 - `shared_preferences`: Simple key-value storage for app settings
 
 ### Development
@@ -159,7 +159,7 @@ The app follows a service-oriented architecture with singleton services using la
 
 ### Configuration
 - `pubspec.yaml`: Dependencies and asset configuration
-- `analysis_options.yaml`: Linting rules
+- `analysis_options.yaml`: Linting rules with Japanese text support and performance optimizations
 - `.env`: Environment variables (API keys)
 
 ### Generated Code
@@ -175,11 +175,17 @@ The app follows a service-oriented architecture with singleton services using la
 Always run `fvm dart run build_runner build` after modifying Hive model classes to regenerate adapters.
 
 ### Code Quality Standards
-- Always run `fvm flutter analyze` before committing code - currently no warnings, only minor info-level suggestions
+- Always run `fvm flutter analyze` before committing code - currently 121 issues (mostly info-level suggestions)
 - Custom lint rules enforce single quotes, const constructors, and performance optimizations
 - Fix all analyzer warnings and errors immediately to maintain code quality
 - Project uses Japanese comments for business logic documentation
 - Test suite must maintain 100% success rate - all failing tests should be investigated and either fixed or removed
+
+### Error Handling Patterns
+- **New code should use Result<T> pattern** where appropriate, especially for operations that can fail
+- **SettingsService** already implements Result<T> for write operations (`setThemeMode`, `setAccentColor`, `setGenerationMode`)
+- **ErrorHandler utilities** provide safe execution wrappers for existing exception-based code
+- **Structured logging** via LoggingService for consistent error reporting and debugging
 
 ### Service Dependencies
 Services follow a clear dependency hierarchy:
@@ -188,13 +194,13 @@ Services follow a clear dependency hierarchy:
 - All services use dependency injection rather than tight coupling
 
 ### Testing Architecture
-The project follows a comprehensive 3-tier testing strategy:
+The project follows a comprehensive 3-tier testing strategy with **100% success rate** (133 passing tests):
 
 #### Unit Tests (`test/unit/`)
 - **Pure logic testing** with mocked dependencies using `mocktail`
 - **Service mock tests**: `*_service_mock_test.dart` files test service interfaces without external dependencies
-- **Model tests**: Test data structures, validation, and business logic
-- **Core utilities**: Test dependency injection and utility functions
+- **Core utilities**: Test dependency injection, Result<T> pattern, and utility functions
+- **Enhanced robustness**: All PhotoSelectionController methods include boundary checking and input validation
 
 #### Widget Tests (`test/widget/`)
 - **UI component testing** with mocked services via dependency injection
@@ -216,6 +222,7 @@ The project follows a comprehensive 3-tier testing strategy:
 - **Interface-based testing**: Services implement interfaces for easy mocking and dependency injection
 - **Comprehensive coverage**: Each service has both unit tests (mocked) and integration tests (real implementations)
 - **Test isolation**: Each test is independent with proper setup/teardown
+- **Result<T> testing**: Comprehensive unit tests for functional error handling patterns
 
 ### Environment Variables
 Create a `.env` file in the root directory for Google Gemini API keys and other configuration.
@@ -230,21 +237,25 @@ All user data stays on device. Hive database files are stored in app documents d
 
 ### Recent Achievements
 - **Perfect test coverage**: 133 tests with 100% success rate across unit, widget, and integration tests
+- **Result<T> pattern implementation**: Comprehensive functional error handling system with complete test coverage
+- **Enhanced error handling**: Standardized exception hierarchy with structured logging
 - **Service architecture refactoring**: Implemented dependency injection with ServiceLocator pattern
+- **Controller robustness**: Enhanced PhotoSelectionController with boundary checks and input validation
 - **Interface-based design**: All major services now implement interfaces for better testability
-- **Testing infrastructure**: Added comprehensive test helpers and utilities for all test types
-- **Code quality**: Eliminated all Flutter analyze warnings, only minor info-level suggestions remain
-- **Test suite optimization**: Removed problematic complex integration tests while maintaining core functionality coverage
-
-### Current Test Suite Status
-- **Unit tests**: 100% success rate with comprehensive service mocking
-- **Widget tests**: 100% success rate with isolated UI component testing
-- **Integration tests**: 100% success rate with focused end-to-end flow testing
-- **Total**: 133 passing tests, 0 failing tests
+- **Code quality improvements**: Comprehensive error handling utilities and logging service
 
 ### Current Architecture State
-- **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier) are fully implemented and tested
-- **Robust error handling**: Comprehensive offline fallbacks and error recovery mechanisms
-- **Performance optimized**: Lazy initialization, efficient caching, and optimized database operations
+- **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging) are fully implemented and tested
+- **Functional error handling**: Result<T> pattern implemented with complete utilities and test coverage
+- **Robust error handling**: Comprehensive offline fallbacks, error recovery mechanisms, and structured logging
+- **Performance optimized**: Lazy initialization, efficient caching, optimized database operations, and performance monitoring
 - **Platform support**: Multi-platform support with proper permission handling
-- **High code quality**: Clean, well-documented codebase with strict adherence to Flutter best practices
+- **High code quality**: Clean, well-documented codebase with strict adherence to Flutter best practices and functional programming patterns
+
+### Current Implementation State of Result<T>
+- **✅ Core implementation**: Complete Result<T> pattern with comprehensive API
+- **✅ Testing**: 100% test coverage for Result pattern and error handling
+- **✅ SettingsService**: Partially migrated to use Result<T> for write operations
+- **✅ Error utilities**: Complete ErrorHandler and LoggingService implementation
+- **🔄 Service interfaces**: Still use traditional exception-based signatures (planned for future migration)
+- **📋 UI error display**: Standardized error display patterns not yet implemented

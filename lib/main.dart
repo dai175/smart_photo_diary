@@ -59,6 +59,7 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _isLoading = false;
       });
+      debugPrint('設定の読み込みエラー: $e');
     }
   }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/errors/error_handler.dart';
+import '../core/result/result.dart';
+import '../core/result/result_extensions.dart';
 
 /// 日記生成方式の列挙型
 enum DiaryGenerationMode {
@@ -55,12 +57,13 @@ class SettingsService {
     ) ?? ThemeMode.system;
   }
 
-  Future<void> setThemeMode(ThemeMode themeMode) async {
-    try {
-      await _preferences?.setInt(_themeKey, themeMode.index);
-    } catch (error) {
-      throw ErrorHandler.handleError(error, context: 'SettingsService.setThemeMode');
-    }
+  Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
+    return ResultHelper.tryExecuteAsync(
+      () async {
+        await _preferences?.setInt(_themeKey, themeMode.index);
+      },
+      context: 'SettingsService.setThemeMode',
+    );
   }
 
   // アクセントカラー
@@ -69,12 +72,17 @@ class SettingsService {
     return Color(colorValue);
   }
 
-  Future<void> setAccentColor(Color color) async {
-    final r = (color.r * 255.0).round() & 0xff;
-    final g = (color.g * 255.0).round() & 0xff;
-    final b = (color.b * 255.0).round() & 0xff;
-    final a = (color.a * 255.0).round() & 0xff;
-    await _preferences?.setInt(_accentColorKey, a << 24 | r << 16 | g << 8 | b);
+  Future<Result<void>> setAccentColor(Color color) async {
+    return ResultHelper.tryExecuteAsync(
+      () async {
+        final r = (color.r * 255.0).round() & 0xff;
+        final g = (color.g * 255.0).round() & 0xff;
+        final b = (color.b * 255.0).round() & 0xff;
+        final a = (color.a * 255.0).round() & 0xff;
+        await _preferences?.setInt(_accentColorKey, a << 24 | r << 16 | g << 8 | b);
+      },
+      context: 'SettingsService.setAccentColor',
+    );
   }
 
   // 利用可能なアクセントカラー
@@ -102,8 +110,13 @@ class SettingsService {
     return DiaryGenerationMode.values[modeIndex];
   }
 
-  Future<void> setGenerationMode(DiaryGenerationMode mode) async {
-    await _preferences?.setInt(_generationModeKey, mode.index);
+  Future<Result<void>> setGenerationMode(DiaryGenerationMode mode) async {
+    return ResultHelper.tryExecuteAsync(
+      () async {
+        await _preferences?.setInt(_generationModeKey, mode.index);
+      },
+      context: 'SettingsService.setGenerationMode',
+    );
   }
 
   // 利用可能な生成モード
