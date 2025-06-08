@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
+import 'constants/app_constants.dart';
+import 'controllers/photo_selection_controller.dart';
+import 'widgets/photo_grid_widget.dart';
+import 'widgets/recent_diaries_widget.dart';
 import 'screens/diary_screen.dart';
 import 'screens/test_screen.dart';
 import 'screens/diary_preview_screen.dart';
@@ -92,7 +94,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
-      title: 'Smart Photo Diary',
+      title: AppConstants.appTitle,
       themeMode: _themeMode,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -131,94 +133,54 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-
-  // 写真アセットのリスト
-  List<dynamic> _photoAssets = [];
-  List<bool> _selected = [];
-  bool _hasPermission = false;
-  bool _isLoading = true;
-
+  
+  // コントローラー
+  late final PhotoSelectionController _photoController;
+  
   // 最近の日記リスト
   List<DiaryEntry> _recentDiaries = [];
   bool _loadingDiaries = true;
-  
-  // 使用済み写真IDのセット
-  final Set<String> _usedPhotoIds = {};
-
-  void _toggleSelect(int index) {
-    // 使用済み写真かどうかをチェック
-    final photoId = _photoAssets[index].id;
-    if (_usedPhotoIds.contains(photoId)) {
-      _showUsedPhotoModal();
-      return;
-    }
-    
-    setState(() {
-      // 写真選択の上限は3枚
-      const int maxPhotos = 3;
-      
-      if (_selected[index]) {
-        // 選択解除の場合はそのまま実行
-        _selected[index] = false;
-      } else {
-        // 選択の場合は上限チェック
-        final selectedCount = _selected.where((selected) => selected).length;
-        if (selectedCount < maxPhotos) {
-          _selected[index] = true;
-        } else {
-          // 上限に達している場合はモーダルを表示
-          _showSelectionLimitModal();
-        }
-      }
-    });
-  }
-
-  // 選択制限モーダルを表示
-  void _showSelectionLimitModal() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: const Text('写真は3枚までにしてください'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 使用済み写真選択時のモーダルを表示
-  void _showUsedPhotoModal() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: const Text('この写真はすでに日記で使用されています'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   void initState() {
     super.initState();
+    _photoController = PhotoSelectionController();
     _loadTodayPhotos();
     _loadRecentDiaries();
   }
+  
+  @override
+  void dispose() {
+    _photoController.dispose();
+    super.dispose();
+  }
+
+  // モーダル表示メソッド
+  void _showSelectionLimitModal() {
+    _showSimpleDialog(AppConstants.selectionLimitMessage);
+  }
+
+  void _showUsedPhotoModal() {
+    _showSimpleDialog(AppConstants.usedPhotoMessage);
+  }
+  
+  void _showSimpleDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(AppConstants.okButton),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   // 最近の日記を読み込む
   Future<void> _loadRecentDiaries() async {
@@ -251,51 +213,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 使用済み写真IDを収集
   void _collectUsedPhotoIds(List<DiaryEntry> allEntries) {
-    _usedPhotoIds.clear();
+    final usedIds = <String>{};
     for (final entry in allEntries) {
-      _usedPhotoIds.addAll(entry.photoIds);
+      usedIds.addAll(entry.photoIds);
     }
-    debugPrint('使用済み写真ID数: ${_usedPhotoIds.length}');
+    _photoController.setUsedPhotoIds(usedIds);
+    debugPrint('使用済み写真ID数: ${usedIds.length}');
   }
 
   // 権限リクエストと写真の読み込み
   Future<void> _loadTodayPhotos() async {
-    setState(() {
-      _isLoading = true;
-    });
+    _photoController.setLoading(true);
 
     try {
       // 権限リクエスト
       final hasPermission = await PhotoService.requestPermission();
       debugPrint('権限ステータス: $hasPermission');
 
-      setState(() {
-        _hasPermission = hasPermission;
-      });
+      _photoController.setPermission(hasPermission);
 
       if (!hasPermission) {
-        // 権限がない場合は継続しない
-        setState(() {
-          _isLoading = false;
-        });
+        _photoController.setLoading(false);
         return;
       }
 
       // 今日撮影された写真だけを取得
       final photos = await PhotoService.getTodayPhotos();
-
       debugPrint('取得した写真数: ${photos.length}');
 
-      setState(() {
-        _photoAssets = photos;
-        _selected = List.generate(photos.length, (index) => false);
-        _isLoading = false;
-      });
+      _photoController.setPhotoAssets(photos);
+      _photoController.setLoading(false);
     } catch (e) {
       debugPrint('写真読み込みエラー: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      _photoController.setLoading(false);
     }
   }
 
@@ -304,21 +254,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final screens = [
       // ホーム画面（現在の画面）
       _HomeContent(
-        photoAssets: _photoAssets,
-        selected: _selected,
+        photoController: _photoController,
         recentDiaries: _recentDiaries,
-        usedPhotoIds: _usedPhotoIds,
-        onToggleSelect: _toggleSelect,
-        isLoading: _isLoading,
         isLoadingDiaries: _loadingDiaries,
-        hasPermission: _hasPermission,
         onRequestPermission: _loadTodayPhotos,
         onLoadRecentDiaries: _loadRecentDiaries,
-        onClearSelection: () {
-          setState(() {
-            _selected = List.generate(_photoAssets.length, (index) => false);
-          });
-        },
+        onSelectionLimitReached: _showSelectionLimitModal,
+        onUsedPhotoSelected: _showUsedPhotoModal,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,
@@ -326,21 +268,14 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (context) => DiaryDetailScreen(diaryId: diaryId),
             ),
           ).then((result) {
-            // 日記詳細画面から戻ってきたときに最近の日記を再読み込み
             _loadRecentDiaries();
-            
-            // 削除された場合は写真の選択状態もクリア
             if (result == true) {
-              setState(() {
-                _selected = List.generate(_photoAssets.length, (index) => false);
-              });
+              _photoController.clearSelection();
             }
           });
         },
       ),
-      // 日記一覧画面
       const DiaryScreen(),
-      // 統計画面
       const StatisticsScreen(),
     ];
 
@@ -380,369 +315,167 @@ class _HomeScreenState extends State<HomeScreen> {
             _loadRecentDiaries();
           }
         },
-        items: [
-          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          const BottomNavigationBarItem(icon: Icon(Icons.book), label: '日記'),
-          const BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: '統計'),
-          if (kDebugMode)
-            const BottomNavigationBarItem(icon: Icon(Icons.science), label: 'テスト'),
-          const BottomNavigationBarItem(icon: Icon(Icons.settings), label: '設定'),
-        ],
+        items: _buildNavigationItems(),
       ),
     );
   }
+  
+  // ナビゲーションアイテムを構築
+  List<BottomNavigationBarItem> _buildNavigationItems() {
+    final items = <BottomNavigationBarItem>[];
+    
+    // 基本アイテム
+    for (int i = 0; i < 3; i++) {
+      items.add(BottomNavigationBarItem(
+        icon: Icon(AppConstants.navigationIcons[i]),
+        label: AppConstants.navigationLabels[i],
+      ));
+    }
+    
+    // デバッグモードのみテストアイテムを追加
+    if (kDebugMode) {
+      items.add(BottomNavigationBarItem(
+        icon: Icon(AppConstants.navigationIcons[3]),
+        label: AppConstants.navigationLabels[3],
+      ));
+    }
+    
+    // 設定アイテムを追加
+    items.add(BottomNavigationBarItem(
+      icon: Icon(AppConstants.navigationIcons[4]),
+      label: AppConstants.navigationLabels[4],
+    ));
+    
+    return items;
+  }
 }
 
-// ホーム画面のコンテンツを別クラスに分離
+// ホーム画面のコンテンツクラス（リファクタリング済み）
 class _HomeContent extends StatelessWidget {
-  final List<dynamic> photoAssets;
-  final List<bool> selected;
+  final PhotoSelectionController photoController;
   final List<DiaryEntry> recentDiaries;
-  final Set<String> usedPhotoIds;
-  final Function(int) onToggleSelect;
-  final bool isLoading;
   final bool isLoadingDiaries;
-  final bool hasPermission;
   final VoidCallback onRequestPermission;
-  final Function(String) onDiaryTap;
   final VoidCallback onLoadRecentDiaries;
-  final VoidCallback onClearSelection;
+  final VoidCallback onSelectionLimitReached;
+  final VoidCallback onUsedPhotoSelected;
+  final Function(String) onDiaryTap;
 
   const _HomeContent({
-    required this.photoAssets,
-    required this.selected,
+    required this.photoController,
     required this.recentDiaries,
-    required this.usedPhotoIds,
-    required this.onToggleSelect,
-    required this.isLoading,
     required this.isLoadingDiaries,
-    required this.hasPermission,
     required this.onRequestPermission,
-    required this.onDiaryTap,
     required this.onLoadRecentDiaries,
-    required this.onClearSelection,
+    required this.onSelectionLimitReached,
+    required this.onUsedPhotoSelected,
+    required this.onDiaryTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // グラデーションヘッダー
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.only(top: 50, bottom: 16),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFFF5F6D), Color(0xFFFFC371)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Column(
-            children: [
-              const Text(
-                'Smart Photo Diary',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
-                style: const TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-        // メインコンテンツ
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '新しい写真',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${photoAssets.length}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 300,
-                child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : !hasPermission
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.no_photography,
-                              size: 48,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('写真へのアクセス権限が必要です'),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: onRequestPermission,
-                              child: const Text('権限をリクエスト'),
-                            ),
-                          ],
-                        ),
-                      )
-                    : photoAssets.isNotEmpty
-                    ? GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(8),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
-                        itemCount: photoAssets.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () => onToggleSelect(index),
-                            child: Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: FutureBuilder<dynamic>(
-                                    future: PhotoService.getThumbnail(
-                                      photoAssets[index],
-                                    ),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                              ConnectionState.done &&
-                                          snapshot.hasData) {
-                                        return Image.memory(
-                                          snapshot.data!,
-                                          height: 90,
-                                          width: 90,
-                                          fit: BoxFit.cover,
-                                        );
-                                      } else {
-                                        return Container(
-                                          height: 90,
-                                          width: 90,
-                                          color: Colors.grey[300],
-                                          child: const Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: CircleAvatar(
-                                    radius: 14,
-                                    backgroundColor: Colors.white,
-                                    child: () {
-                                      final photoId = photoAssets[index].id;
-                                      final isUsed = usedPhotoIds.contains(photoId);
-                                      
-                                      if (isUsed) {
-                                        return const Icon(
-                                          Icons.check,
-                                          color: Colors.orange,
-                                          size: 22,
-                                        );
-                                      } else {
-                                        return Icon(
-                                          selected[index]
-                                              ? Icons.check_circle
-                                              : Icons.radio_button_unchecked,
-                                          color: selected[index]
-                                              ? Colors.green
-                                              : Colors.grey,
-                                          size: 22,
-                                        );
-                                      }
-                                    }(),
-                                  ),
-                                ),
-                                // 使用済み写真にテキストを追加
-                                if (usedPhotoIds.contains(photoAssets[index].id))
-                                  Positioned(
-                                    bottom: 4,
-                                    left: 4,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.7),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Text(
-                                        '使用済み',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      )
-                    : const Center(child: Text('写真が見つかりませんでした')),
-              ),
-              const SizedBox(height: 8),
-              // 選択枚数の表示
-              Text(
-                '選択された写真: ${selected.where((s) => s).length}/3枚',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: selected.where((s) => s).isNotEmpty
-                    ? () {
-                        // 選択された写真を取得
-                        final List<AssetEntity> selectedPhotos = [];
-                        for (int i = 0; i < photoAssets.length; i++) {
-                          if (selected[i]) {
-                            selectedPhotos.add(photoAssets[i]);
-                          }
-                        }
-
-                        // 日記プレビュー画面へ遷移
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DiaryPreviewScreen(
-                              selectedAssets: selectedPhotos,
-                            ),
-                          ),
-                        ).then((_) {
-                          // 日記プレビュー画面から戻ってきたときに最近の日記を再読み込み
-                          onLoadRecentDiaries();
-                          // 選択状態をクリア
-                          onClearSelection();
-                        });
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text('✨ ${selected.where((s) => s).length}枚の写真で日記を作成'),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                '最近の日記',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              isLoadingDiaries
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : recentDiaries.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: Text('保存された日記がありません')),
-                    )
-                  : Column(
-                      children: recentDiaries.map((diary) {
-                        // タイトルを取得
-                        final title = diary.title.isNotEmpty
-                            ? diary.title
-                            : '無題';
-
-                        return GestureDetector(
-                          onTap: () => onDiaryTap(diary.id),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                const BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  DateFormat('yyyy年MM月dd日').format(diary.date),
-                                  style: const TextStyle(
-                                    color: Colors.purple,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  title,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  diary.content,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                    fontSize: 15,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-              const SizedBox(height: 80), // ボトムナビ分の余白
-            ],
-          ),
-        ),
+        _buildHeader(),
+        _buildMainContent(context),
       ],
     );
+  }
+  
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(
+        top: AppConstants.headerTopPadding,
+        bottom: AppConstants.headerBottomPadding,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: AppConstants.headerGradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            AppConstants.appTitle,
+            style: TextStyle(
+              fontSize: AppConstants.titleFontSize,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          Text(
+            '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
+            style: const TextStyle(
+              fontSize: AppConstants.subtitleFontSize,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildMainContent(BuildContext context) {
+    return Expanded(
+      child: ListView(
+        padding: ThemeConstants.defaultScreenPadding,
+        children: [
+          PhotoGridWidget(
+            controller: photoController,
+            onSelectionLimitReached: onSelectionLimitReached,
+            onUsedPhotoSelected: onUsedPhotoSelected,
+            onRequestPermission: onRequestPermission,
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          _buildCreateDiaryButton(context),
+          const SizedBox(height: AppConstants.largePadding),
+          RecentDiariesWidget(
+            recentDiaries: recentDiaries,
+            isLoading: isLoadingDiaries,
+            onDiaryTap: onDiaryTap,
+          ),
+          const SizedBox(height: AppConstants.bottomNavPadding),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCreateDiaryButton(BuildContext context) {
+    return ListenableBuilder(
+      listenable: photoController,
+      builder: (context, child) {
+        return ElevatedButton(
+          onPressed: photoController.selectedCount > 0
+              ? () => _navigateToDiaryPreview(context)
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            minimumSize: const Size.fromHeight(AppConstants.buttonHeight),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
+            ),
+          ),
+          child: Text('✨ ${photoController.selectedCount}枚の写真で日記を作成'),
+        );
+      },
+    );
+  }
+
+  void _navigateToDiaryPreview(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DiaryPreviewScreen(
+          selectedAssets: photoController.selectedPhotos,
+        ),
+      ),
+    ).then((_) {
+      onLoadRecentDiaries();
+      photoController.clearSelection();
+    });
   }
 }
