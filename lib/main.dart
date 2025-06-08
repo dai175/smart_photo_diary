@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -300,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 画面一覧を取得するメソッド
   List<Widget> _getScreens() {
-    return [
+    final screens = [
       // ホーム画面（現在の画面）
       _HomeContent(
         photoAssets: _photoAssets,
@@ -341,14 +342,20 @@ class _HomeScreenState extends State<HomeScreen> {
       const DiaryScreen(),
       // 統計画面
       const StatisticsScreen(),
-      // テスト画面（画像分析と日記生成のテスト用）
-      const TestScreen(),
-      // 設定画面
-      SettingsScreen(
-        onThemeChanged: widget.onThemeChanged,
-        onAccentColorChanged: widget.onAccentColorChanged,
-      ),
     ];
+
+    // デバッグモードの場合のみテスト画面を追加
+    if (kDebugMode) {
+      screens.add(const TestScreen());
+    }
+
+    // 設定画面を追加
+    screens.add(SettingsScreen(
+      onThemeChanged: widget.onThemeChanged,
+      onAccentColorChanged: widget.onAccentColorChanged,
+    ));
+
+    return screens;
   }
 
   @override
@@ -373,12 +380,13 @@ class _HomeScreenState extends State<HomeScreen> {
             _loadRecentDiaries();
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: '日記'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: '統計'),
-          BottomNavigationBarItem(icon: Icon(Icons.science), label: 'テスト'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '設定'),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
+          const BottomNavigationBarItem(icon: Icon(Icons.book), label: '日記'),
+          const BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: '統計'),
+          if (kDebugMode)
+            const BottomNavigationBarItem(icon: Icon(Icons.science), label: 'テスト'),
+          const BottomNavigationBarItem(icon: Icon(Icons.settings), label: '設定'),
         ],
       ),
     );
