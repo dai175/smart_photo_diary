@@ -68,19 +68,24 @@ class _HomeScreenState extends State<HomeScreen> {
   // 最近の日記を読み込む
   Future<void> _loadRecentDiaries() async {
     try {
+      if (!mounted) return;
+      
       setState(() {
         _loadingDiaries = true;
       });
 
       final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
-      final allEntries = diaryService.getSortedDiaryEntries();
+      final allEntries = await diaryService.getSortedDiaryEntries();
+
+      if (!mounted) return;
 
       // 最新の3つの日記を取得
-      final allEntriesResolved = await allEntries;
-      final recentEntries = allEntriesResolved.take(3).toList();
+      final recentEntries = allEntries.take(3).toList();
 
       // 使用済み写真IDを収集
-      _collectUsedPhotoIds(allEntriesResolved);
+      _collectUsedPhotoIds(allEntries);
+
+      if (!mounted) return;
 
       setState(() {
         _recentDiaries = recentEntries;
@@ -88,9 +93,12 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       debugPrint('日記の読み込みエラー: $e');
-      setState(() {
-        _loadingDiaries = false;
-      });
+      if (mounted) {
+        setState(() {
+          _recentDiaries = [];
+          _loadingDiaries = false;
+        });
+      }
     }
   }
 
@@ -106,6 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 権限リクエストと写真の読み込み
   Future<void> _loadTodayPhotos() async {
+    if (!mounted) return;
+    
     _photoController.setLoading(true);
 
     try {
@@ -113,6 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
       final hasPermission = await photoService.requestPermission();
       debugPrint('権限ステータス: $hasPermission');
+
+      if (!mounted) return;
 
       _photoController.setPermission(hasPermission);
 
@@ -125,11 +137,16 @@ class _HomeScreenState extends State<HomeScreen> {
       final photos = await photoService.getTodayPhotos();
       debugPrint('取得した写真数: ${photos.length}');
 
+      if (!mounted) return;
+
       _photoController.setPhotoAssets(photos);
       _photoController.setLoading(false);
     } catch (e) {
       debugPrint('写真読み込みエラー: $e');
-      _photoController.setLoading(false);
+      if (mounted) {
+        _photoController.setPhotoAssets([]);
+        _photoController.setLoading(false);
+      }
     }
   }
 

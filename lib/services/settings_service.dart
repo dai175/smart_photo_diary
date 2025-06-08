@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/errors/error_handler.dart';
 
 /// 日記生成方式の列挙型
 enum DiaryGenerationMode {
@@ -15,9 +16,22 @@ class SettingsService {
 
   SettingsService._();
 
+  /// 非同期ファクトリメソッドでサービスインスタンスを取得
   static Future<SettingsService> getInstance() async {
-    _instance ??= SettingsService._();
-    _preferences ??= await SharedPreferences.getInstance();
+    try {
+      _instance ??= SettingsService._();
+      _preferences ??= await SharedPreferences.getInstance();
+      return _instance!;
+    } catch (error) {
+      throw ErrorHandler.handleError(error, context: 'SettingsService.getInstance');
+    }
+  }
+
+  /// 同期的なサービスインスタンス取得（事前に初期化済みの場合のみ）
+  static SettingsService get instance {
+    if (_instance == null) {
+      throw StateError('SettingsService has not been initialized. Call getInstance() first.');
+    }
     return _instance!;
   }
 
@@ -28,12 +42,25 @@ class SettingsService {
 
   // テーマモード
   ThemeMode get themeMode {
-    final themeModeIndex = _preferences?.getInt(_themeKey) ?? 0;
-    return ThemeMode.values[themeModeIndex];
+    return ErrorHandler.safeExecuteSync(
+      () {
+        final themeModeIndex = _preferences?.getInt(_themeKey) ?? 0;
+        if (themeModeIndex < 0 || themeModeIndex >= ThemeMode.values.length) {
+          return ThemeMode.system;
+        }
+        return ThemeMode.values[themeModeIndex];
+      },
+      context: 'SettingsService.themeMode',
+      fallbackValue: ThemeMode.system,
+    ) ?? ThemeMode.system;
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
-    await _preferences?.setInt(_themeKey, themeMode.index);
+    try {
+      await _preferences?.setInt(_themeKey, themeMode.index);
+    } catch (error) {
+      throw ErrorHandler.handleError(error, context: 'SettingsService.setThemeMode');
+    }
   }
 
   // アクセントカラー

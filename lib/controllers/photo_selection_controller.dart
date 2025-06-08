@@ -33,6 +33,11 @@ class PhotoSelectionController extends ChangeNotifier {
   
   /// 写真選択の切り替え
   void toggleSelect(int index) {
+    // 境界チェック
+    if (index < 0 || index >= _photoAssets.length || index >= _selected.length) {
+      return;
+    }
+    
     // 使用済み写真かどうかをチェック
     final photoId = _photoAssets[index].id;
     if (_usedPhotoIds.contains(photoId)) {
@@ -71,7 +76,7 @@ class PhotoSelectionController extends ChangeNotifier {
   
   /// 使用済み写真IDを設定
   void setUsedPhotoIds(Set<String> usedIds) {
-    _usedPhotoIds = usedIds;
+    _usedPhotoIds = Set.from(usedIds);
     notifyListeners();
   }
   
@@ -89,12 +94,15 @@ class PhotoSelectionController extends ChangeNotifier {
   
   /// 写真が使用済みかどうかをチェック
   bool isPhotoUsed(int index) {
-    if (index >= _photoAssets.length) return false;
+    if (index < 0 || index >= _photoAssets.length) return false;
     return _usedPhotoIds.contains(_photoAssets[index].id);
   }
   
   /// 選択可能かどうかをチェック
   bool canSelectPhoto(int index) {
+    if (index < 0 || index >= _photoAssets.length || index >= _selected.length) {
+      return false;
+    }
     return !isPhotoUsed(index) && 
            (selectedCount < AppConstants.maxPhotosSelection || _selected[index]);
   }
