@@ -68,14 +68,18 @@ fvm dart format .
 ## Architecture Overview
 
 ### Service Layer Pattern
-The app follows a service-oriented architecture with singleton services:
+The app follows a service-oriented architecture with singleton services using lazy initialization:
 
-- **`DiaryService`**: Manages diary CRUD operations using Hive local database
-- **`PhotoService`**: Handles photo permissions and retrieval via photo_manager
-- **`AiService`**: AI diary generation with Google Gemini API and local fallback
-- **`ImageClassifierService`**: On-device image classification using TensorFlow Lite
-- **`SettingsService`**: App configuration and theme management
-- **`StorageService`**: Local file system operations
+- **`DiaryService`**: Central data management with Hive database operations, depends on `AiService` for tag generation
+- **`PhotoService`**: Photo access and permissions via `photo_manager` plugin
+- **`AiService`**: AI diary generation with Google Gemini API and comprehensive offline fallbacks
+- **`ImageClassifierService`**: On-device ML inference using TensorFlow Lite MobileNet v2
+- **`SettingsService`**: App configuration stored in SharedPreferences
+- **`StorageService`**: File system operations and data export functionality
+
+### Controller Pattern
+- **`PhotoSelectionController`**: Uses `ChangeNotifier` for reactive photo selection state management
+- Controllers handle complex UI interactions and provide computed properties for widgets
 
 ### Data Models
 - **`DiaryEntry`**: Primary data model with Hive annotations for local storage
@@ -89,14 +93,16 @@ The app follows a service-oriented architecture with singleton services:
 ## Key Dependencies
 
 ### Core
-- `hive` + `hive_flutter`: Local NoSQL database
-- `photo_manager`: Photo access and management
-- `tflite_flutter`: On-device ML inference
+- `hive` + `hive_flutter`: Local NoSQL database for diary storage
+- `photo_manager`: Photo access and management with permission handling
+- `tflite_flutter`: On-device ML inference for image classification
+- `permission_handler`: Platform-specific permissions for photo access
+- `connectivity_plus`: Network status checking for AI service fallbacks
 
 ### Development
-- `build_runner` + `hive_generator`: Code generation
-- `mocktail`: Testing framework
-- `flutter_lints`: Code analysis
+- `build_runner` + `hive_generator`: Code generation for Hive adapters
+- `mocktail`: Testing framework for service mocking
+- `flutter_lints`: Code analysis with custom rules
 
 ## Important Files
 
@@ -119,6 +125,12 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 
 ### Code Quality
 Always run `fvm flutter analyze` before committing code. Fix all analyzer warnings and errors immediately to maintain code quality.
+
+### Service Dependencies
+Services follow a clear dependency hierarchy:
+- `DiaryService` → `AiService` (for background tag generation)
+- `AiService` → Connectivity checking for online/offline modes
+- All services use dependency injection rather than tight coupling
 
 ### Testing Strategy
 The project uses `mocktail` for unit testing. Services are designed to be easily mockable with their singleton pattern.
