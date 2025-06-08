@@ -7,6 +7,7 @@ import '../services/ai_service.dart';
 import '../services/diary_service.dart';
 import '../services/settings_service.dart';
 import '../services/photo_service.dart';
+import '../constants/app_constants.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -329,7 +330,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                         child: FutureBuilder<Uint8List?>(
                           future: widget.selectedAssets[index]
                               .thumbnailDataWithSize(
-                                const ThumbnailSize(200, 200),
+                                ThumbnailSize(
+                                  AppConstants.previewImageSize.toInt(),
+                                  AppConstants.previewImageSize.toInt(),
+                                ),
                               ),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==

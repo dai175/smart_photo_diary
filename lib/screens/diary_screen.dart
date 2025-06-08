@@ -6,6 +6,7 @@ import '../models/diary_filter.dart';
 import '../services/diary_service.dart';
 import '../shared/filter_bottom_sheet.dart';
 import '../shared/active_filters_display.dart';
+import '../constants/app_constants.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'diary_detail_screen.dart';
 
@@ -268,7 +269,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
               final assets = snapshot.data!;
               return SizedBox(
-                height: 120,
+                height: AppConstants.diaryThumbnailSize,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: assets.length,
@@ -283,19 +284,19 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         future: assets[imgIndex].thumbnailData,
                         builder: (context, thumbnailSnapshot) {
                           if (!thumbnailSnapshot.hasData) {
-                            return const SizedBox(
-                              width: 120,
-                              height: 120,
-                              child: Center(child: CircularProgressIndicator()),
+                            return SizedBox(
+                              width: AppConstants.diaryThumbnailSize,
+                              height: AppConstants.diaryThumbnailSize,
+                              child: const Center(child: CircularProgressIndicator()),
                             );
                           }
 
                           return ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(ThemeConstants.mediumBorderRadius),
                             child: Image.memory(
                               thumbnailSnapshot.data!,
-                              height: 120,
-                              width: 120,
+                              height: AppConstants.diaryThumbnailSize,
+                              width: AppConstants.diaryThumbnailSize,
                               fit: BoxFit.cover,
                             ),
                           );

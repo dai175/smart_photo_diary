@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../constants/app_constants.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
 class PhotoService {
@@ -98,7 +99,7 @@ class PhotoService {
   /// 戻り値: 写真アセットのリスト
   static Future<List<AssetEntity>> getPhotosByDate(
     DateTime date, {
-    int limit = 20,
+    int limit = AppConstants.defaultPhotoLimit,
   }) async {
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -157,8 +158,8 @@ class PhotoService {
   /// 戻り値: サムネイル画像
   static Future<Uint8List?> getThumbnail(
     AssetEntity asset, {
-    int width = 200,
-    int height = 200,
+    int width = AppConstants.defaultThumbnailWidth,
+    int height = AppConstants.defaultThumbnailHeight,
   }) async {
     try {
       return await asset.thumbnailDataWithSize(ThumbnailSize(width, height));
@@ -185,7 +186,7 @@ class PhotoService {
   ///
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリスト
-  static Future<List<AssetEntity>> getAllPhotos({int limit = 100}) async {
+  static Future<List<AssetEntity>> getAllPhotos({int limit = AppConstants.maxPhotoLimit}) async {
     // 権限チェック
     final bool hasPermission = await requestPermission();
     debugPrint('写真アクセス権限: $hasPermission');

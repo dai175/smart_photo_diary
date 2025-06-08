@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../constants/app_constants.dart';
 
 /// 日記生成結果を保持するクラス
 class DiaryGenerationResult {
@@ -24,7 +25,7 @@ class PhotoTimeLabel {
 /// AIを使用して日記文を生成するサービスクラス
 class AiService {
   // Google Gemini APIのエンドポイント
-  static const String _apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent';
+  static String get _apiUrl => 'https://generativelanguage.googleapis.com/v1beta/models/${AiConstants.geminiModelName}:generateContent';
 
   // APIキーを.envファイルから取得
   static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
@@ -103,10 +104,10 @@ $timeInfo
             }
           ],
           'generationConfig': {
-            'temperature': 0.7,
-            'maxOutputTokens': 1000,
-            'topP': 0.8,
-            'topK': 10,
+            'temperature': AiConstants.defaultTemperature,
+            'maxOutputTokens': AiConstants.defaultMaxOutputTokens,
+            'topP': AiConstants.defaultTopP,
+            'topK': AiConstants.defaultTopK,
             'thinkingConfig': {
               'thinkingBudget': 0
             }
@@ -341,10 +342,10 @@ ${location != null ? '場所: $location\n' : ''}
             }
           ],
           'generationConfig': {
-            'temperature': 0.7,
-            'maxOutputTokens': 1000,
-            'topP': 0.8,
-            'topK': 10,
+            'temperature': AiConstants.defaultTemperature,
+            'maxOutputTokens': AiConstants.defaultMaxOutputTokens,
+            'topP': AiConstants.defaultTopP,
+            'topK': AiConstants.defaultTopK,
             'thinkingConfig': {
               'thinkingBudget': 0
             }
@@ -403,9 +404,9 @@ ${location != null ? '場所: $location\n' : ''}
   /// 時間帯の文字列を取得
   String _getTimeOfDay(DateTime date) {
     final hour = date.hour;
-    if (hour >= 5 && hour < 12) return '朝';
-    if (hour >= 12 && hour < 18) return '昼';
-    if (hour >= 18 && hour < 22) return '夕方';
+    if (hour >= AiConstants.morningStartHour && hour < AiConstants.afternoonStartHour) return '朝';
+    if (hour >= AiConstants.afternoonStartHour && hour < AiConstants.eveningStartHour) return '昼';
+    if (hour >= AiConstants.eveningStartHour && hour < AiConstants.nightStartHour) return '夕方';
     return '夜';
   }
 
@@ -520,10 +521,10 @@ ${location != null ? '場所: $location\n' : ''}
             }
           ],
           'generationConfig': {
-            'temperature': 0.3,
+            'temperature': AiConstants.tagGenerationTemperature,
             'maxOutputTokens': 100,
-            'topP': 0.8,
-            'topK': 10,
+            'topP': AiConstants.defaultTopP,
+            'topK': AiConstants.defaultTopK,
             'thinkingConfig': {
               'thinkingBudget': 0
             }
@@ -702,10 +703,10 @@ ${location != null ? '場所: $location\n' : ''}
             }
           ],
           'generationConfig': {
-            'temperature': 0.7,
+            'temperature': AiConstants.defaultTemperature,
             'maxOutputTokens': 500,
-            'topP': 0.8,
-            'topK': 10,
+            'topP': AiConstants.defaultTopP,
+            'topK': AiConstants.defaultTopK,
             'thinkingConfig': {
               'thinkingBudget': 0
             }
@@ -791,10 +792,10 @@ $analysesText
             }
           ],
           'generationConfig': {
-            'temperature': 0.7,
-            'maxOutputTokens': 1000,
-            'topP': 0.8,
-            'topK': 10,
+            'temperature': AiConstants.defaultTemperature,
+            'maxOutputTokens': AiConstants.defaultMaxOutputTokens,
+            'topP': AiConstants.defaultTopP,
+            'topK': AiConstants.defaultTopK,
             'thinkingConfig': {
               'thinkingBudget': 0
             }

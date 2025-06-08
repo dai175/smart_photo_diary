@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/diary_filter.dart';
 import '../services/diary_service.dart';
+import '../constants/app_constants.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
@@ -140,7 +141,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: MediaQuery.of(context).size.height * AppConstants.bottomSheetHeightRatio,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

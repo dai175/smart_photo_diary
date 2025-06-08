@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/diary_service.dart';
+import '../constants/app_constants.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -57,7 +58,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = '日記が見つかりませんでした';
+          _errorMessage = AppConstants.diaryNotFoundMessage;
         });
         return;
       }
@@ -76,7 +77,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '日記の読み込みに失敗しました: $e';
+        _errorMessage = '${AppConstants.diaryLoadErrorMessage}: $e';
       });
     }
   }
@@ -113,7 +114,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
         // 更新成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('日記を更新しました')),
+          SnackBar(content: Text(AppConstants.diaryUpdateSuccessMessage)),
         );
       }
     } catch (e) {
@@ -174,7 +175,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       if (mounted) {
         // 削除成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('日記を削除しました')),
+          SnackBar(content: Text(AppConstants.diaryDeleteSuccessMessage)),
         );
 
         // 前の画面に戻る（削除成功を示すフラグを返す）
@@ -229,7 +230,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           : _hasError
           ? Center(child: Text('エラー: $_errorMessage'))
           : _diaryEntry == null
-          ? const Center(child: Text('日記が見つかりませんでした'))
+          ? Center(child: Text(AppConstants.diaryNotFoundMessage))
           : _buildDiaryDetail(),
     );
   }
@@ -265,14 +266,17 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     ),
                     child: FutureBuilder<Uint8List?>(
                       future: _photoAssets[index].thumbnailDataWithSize(
-                        const ThumbnailSize(400, 400),
+                        ThumbnailSize(
+                          AppConstants.largeImageSize.toInt(),
+                          AppConstants.largeImageSize.toInt(),
+                        ),
                       ),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const SizedBox(
-                            width: 200,
-                            height: 200,
-                            child: Center(child: CircularProgressIndicator()),
+                          return SizedBox(
+                            width: AppConstants.detailImageSize,
+                            height: AppConstants.detailImageSize,
+                            child: const Center(child: CircularProgressIndicator()),
                           );
                         }
 
@@ -280,8 +284,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           borderRadius: BorderRadius.circular(12),
                           child: Image.memory(
                             snapshot.data!,
-                            width: 200,
-                            height: 200,
+                            width: AppConstants.detailImageSize,
+                            height: AppConstants.detailImageSize,
                             fit: BoxFit.cover,
                           ),
                         );
