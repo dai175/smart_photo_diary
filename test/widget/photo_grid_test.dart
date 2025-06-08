@@ -1,17 +1,19 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/widgets/photo_grid_widget.dart';
 import 'package:smart_photo_diary/controllers/photo_selection_controller.dart';
-import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/constants/app_constants.dart';
 import '../test_helpers/widget_test_helpers.dart';
+import '../test_helpers/widget_test_service_setup.dart';
+import '../integration/mocks/mock_services.dart';
 
 // Mock classes
 class MockPhotoSelectionController extends Mock implements PhotoSelectionController {}
-class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
@@ -21,23 +23,27 @@ void main() {
     late ServiceLocator serviceLocator;
 
     setUpAll(() async {
+      // Initialize widget test environment with unified service mocks
+      WidgetTestServiceSetup.initializeForWidgetTests();
       await WidgetTestHelpers.setUpTestEnvironment();
-      registerFallbackValue(MockAssetEntity());
     });
 
     tearDownAll(() async {
       await WidgetTestHelpers.tearDownTestEnvironment();
+      TestServiceSetup.clearAllMocks();
     });
 
     setUp(() {
       mockController = MockPhotoSelectionController();
-      mockPhotoService = MockPhotoServiceInterface();
-      serviceLocator = ServiceLocator();
       
-      // Register mock service
-      serviceLocator.registerSingleton<PhotoServiceInterface>(mockPhotoService);
+      // Setup global service registration for widgets that use ServiceRegistration.get<T>()
+      WidgetTestServiceSetup.setupGlobalServiceRegistration();
       
-      // Setup default mock behavior
+      // Use unified service mock system
+      serviceLocator = WidgetTestServiceSetup.setupServiceLocatorForWidget();
+      mockPhotoService = serviceLocator.get<PhotoServiceInterface>() as MockPhotoServiceInterface;
+      
+      // Setup default mock behavior - ensure selected length matches photoAssets
       when(() => mockController.photoAssets).thenReturn([]);
       when(() => mockController.selected).thenReturn([]);
       when(() => mockController.selectedCount).thenReturn(0);
@@ -46,16 +52,18 @@ void main() {
       when(() => mockController.isPhotoUsed(any())).thenReturn(false);
       when(() => mockController.canSelectPhoto(any())).thenReturn(true);
       
-      // Setup PhotoService mock behavior
+      // PhotoService already has default mock behavior from TestServiceSetup
+      // Override specific behavior if needed for this test
       when(() => mockPhotoService.getThumbnail(
         any(),
         width: any(named: 'width'),
         height: any(named: 'height'),
-      )).thenAnswer((_) async => 'mock_thumbnail_data');
+      )).thenAnswer((_) async => Uint8List.fromList([1, 2, 3, 4, 5]));
     });
 
     tearDown(() {
       serviceLocator.clear();
+      TestServiceSetup.clearAllMocks();
     });
 
     group('Basic Rendering', () {
@@ -77,6 +85,7 @@ void main() {
         // Arrange
         final mockAssets = [MockAssetEntity(), MockAssetEntity()];
         when(() => mockController.photoAssets).thenReturn(mockAssets);
+        when(() => mockController.selected).thenReturn([false, false]); // Match asset count
 
         // Act
         await tester.pumpWidget(

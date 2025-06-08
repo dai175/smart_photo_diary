@@ -4,20 +4,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/widgets/diary_card_widget.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import '../test_helpers/widget_test_helpers.dart';
+import '../test_helpers/widget_test_service_setup.dart';
+import '../integration/mocks/mock_services.dart';
 
 void main() {
   group('DiaryCardWidget', () {
     late DiaryEntry testEntry;
 
-    setUpAll(() {
-      WidgetTestHelpers.setUpTestEnvironment();
+    setUpAll(() async {
+      // Initialize widget test environment with unified service mocks
+      WidgetTestServiceSetup.initializeForWidgetTests();
+      await WidgetTestHelpers.setUpTestEnvironment();
     });
 
-    tearDownAll(() {
-      WidgetTestHelpers.tearDownTestEnvironment();
+    tearDownAll(() async {
+      await WidgetTestHelpers.tearDownTestEnvironment();
+      TestServiceSetup.clearAllMocks();
     });
 
     setUp(() {
+      // Setup global service registration for widgets that use ServiceRegistration.get<T>()
+      WidgetTestServiceSetup.setupGlobalServiceRegistration();
+      
       testEntry = WidgetTestHelpers.createTestDiaryEntry(
         title: 'Beautiful Day at the Park',
         content: 'Had a wonderful time walking in the park with my dog. The weather was perfect and we met many friendly people.',

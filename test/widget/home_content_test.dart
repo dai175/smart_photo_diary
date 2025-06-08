@@ -11,10 +11,11 @@ import 'package:smart_photo_diary/constants/app_constants.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import '../test_helpers/widget_test_helpers.dart';
+import '../test_helpers/widget_test_service_setup.dart';
+import '../integration/mocks/mock_services.dart';
 
 // Mock classes
 class MockPhotoSelectionController extends Mock implements PhotoSelectionController {}
-class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
@@ -24,23 +25,28 @@ void main() {
     late List<DiaryEntry> testDiaries;
     late ServiceLocator serviceLocator;
 
-    setUpAll(() {
-      WidgetTestHelpers.setUpTestEnvironment();
+    setUpAll(() async {
+      // Initialize widget test environment with unified service mocks
+      WidgetTestServiceSetup.initializeForWidgetTests();
+      await WidgetTestHelpers.setUpTestEnvironment();
       registerFallbackValue(MockAssetEntity());
     });
 
-    tearDownAll(() {
-      WidgetTestHelpers.tearDownTestEnvironment();
+    tearDownAll(() async {
+      await WidgetTestHelpers.tearDownTestEnvironment();
+      TestServiceSetup.clearAllMocks();
     });
 
     setUp(() {
       mockPhotoController = MockPhotoSelectionController();
-      mockPhotoService = MockPhotoServiceInterface();
       testDiaries = WidgetTestHelpers.createTestDiaryEntries(3);
-      serviceLocator = ServiceLocator();
       
-      // Register mock service
-      serviceLocator.registerSingleton<PhotoServiceInterface>(mockPhotoService);
+      // Setup global service registration for widgets that use ServiceRegistration.get<T>()
+      WidgetTestServiceSetup.setupGlobalServiceRegistration();
+      
+      // Use unified service mock system
+      serviceLocator = WidgetTestServiceSetup.setupServiceLocatorForWidget();
+      mockPhotoService = serviceLocator.get<PhotoServiceInterface>() as MockPhotoServiceInterface;
       
       // Setup default mock behavior
       when(() => mockPhotoController.photoAssets).thenReturn([]);
@@ -62,6 +68,7 @@ void main() {
 
     tearDown(() {
       serviceLocator.clear();
+      TestServiceSetup.clearAllMocks();
     });
 
     group('Basic Rendering', () {
