@@ -53,7 +53,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       final diaryService = await DiaryService.getInstance();
 
       // 日記エントリーを取得
-      final entry = await diaryService.getDiaryEntryById(widget.diaryId);
+      final entry = await diaryService.getDiaryEntry(widget.diaryId);
 
       if (entry == null) {
         setState(() {
@@ -99,11 +99,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       final diaryService = await DiaryService.getInstance();
 
       // 日記を更新
-      await diaryService.updateDiaryEntry(
-        id: _diaryEntry!.id,
+      final updatedEntry = _diaryEntry!.copyWith(
         title: _titleController.text,
         content: _contentController.text,
+        updatedAt: DateTime.now(),
       );
+      await diaryService.updateDiaryEntry(updatedEntry);
 
       // 日記エントリーを再読み込み
       await _loadDiaryEntry();

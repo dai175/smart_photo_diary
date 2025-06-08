@@ -38,11 +38,11 @@
 
 #### 2. 依存性注入の実装
 
-- [ ] AiServiceInterface の作成（抽象化）
-- [ ] PhotoServiceInterface の作成（抽象化）
-- [ ] DiaryService での依存性注入パターン適用
+- [x] AiServiceInterface の作成（抽象化）
+- [x] PhotoServiceInterface の作成（抽象化）
+- [x] DiaryService での依存性注入パターン適用
 - [ ] サービスロケータまたはDIコンテナの導入
-- [ ] 既存サービス間の密結合解消
+- [x] 既存サービス間の密結合解消
 
 #### 3. テストカバレッジの追加
 

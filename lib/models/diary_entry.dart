@@ -33,6 +33,12 @@ class DiaryEntry extends HiveObject {
   @HiveField(8)
   DateTime? tagsGeneratedAt; // タグ生成日時
 
+  @HiveField(9)
+  String? location; // 位置情報
+
+  @HiveField(10)
+  List<String>? tags; // 初期タグ（キャッシュとは別）
+
   DiaryEntry({
     required this.id,
     required this.date,
@@ -43,6 +49,8 @@ class DiaryEntry extends HiveObject {
     required this.updatedAt,
     this.cachedTags,
     this.tagsGeneratedAt,
+    this.location,
+    this.tags,
   });
 
   // 写真のIDリストからAssetEntityのリストを取得するメソッド
@@ -97,6 +105,8 @@ class DiaryEntry extends HiveObject {
     DateTime? updatedAt,
     List<String>? cachedTags,
     DateTime? tagsGeneratedAt,
+    String? location,
+    List<String>? tags,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -108,6 +118,8 @@ class DiaryEntry extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       cachedTags: cachedTags ?? this.cachedTags,
       tagsGeneratedAt: tagsGeneratedAt ?? this.tagsGeneratedAt,
+      location: location ?? this.location,
+      tags: tags ?? this.tags,
     );
   }
 }

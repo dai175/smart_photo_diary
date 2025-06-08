@@ -103,7 +103,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         if (widget.selectedAssets.length == 1) {
           // 単一写真の場合：従来通り
           final firstAsset = widget.selectedAssets.first;
-          final imageData = await PhotoService.getOriginalFile(firstAsset);
+          final photoService = PhotoService.getInstance();
+          final imageData = await photoService.getOriginalFile(firstAsset);
           
           if (imageData == null) {
             throw Exception('写真データの取得に失敗しました');
@@ -121,7 +122,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
           
           for (final asset in widget.selectedAssets) {
-            final imageData = await PhotoService.getOriginalFile(asset);
+            final photoService = PhotoService.getInstance();
+            final imageData = await photoService.getOriginalFile(asset);
             if (imageData != null) {
               imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
             }
@@ -239,7 +241,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       final diaryService = await DiaryService.getInstance();
 
       // 日記を保存
-      await diaryService.saveDiaryEntry(
+      await diaryService.saveDiaryEntryWithPhotos(
         date: _photoDateTime,
         title: _titleController.text,
         content: _contentController.text,

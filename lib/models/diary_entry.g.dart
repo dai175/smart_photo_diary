@@ -26,13 +26,15 @@ class DiaryEntryAdapter extends TypeAdapter<DiaryEntry> {
       updatedAt: fields[6] as DateTime,
       cachedTags: (fields[7] as List?)?.cast<String>(),
       tagsGeneratedAt: fields[8] as DateTime?,
+      location: fields[9] as String?,
+      tags: (fields[10] as List?)?.cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, DiaryEntry obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +52,11 @@ class DiaryEntryAdapter extends TypeAdapter<DiaryEntry> {
       ..writeByte(7)
       ..write(obj.cachedTags)
       ..writeByte(8)
-      ..write(obj.tagsGeneratedAt);
+      ..write(obj.tagsGeneratedAt)
+      ..writeByte(9)
+      ..write(obj.location)
+      ..writeByte(10)
+      ..write(obj.tags);
   }
 
   @override

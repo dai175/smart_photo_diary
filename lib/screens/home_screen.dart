@@ -109,7 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       // 権限リクエスト
-      final hasPermission = await PhotoService.requestPermission();
+      final photoService = PhotoService.getInstance();
+      final hasPermission = await photoService.requestPermission();
       debugPrint('権限ステータス: $hasPermission');
 
       _photoController.setPermission(hasPermission);
@@ -120,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       // 今日撮影された写真だけを取得
-      final photos = await PhotoService.getTodayPhotos();
+      final photos = await photoService.getTodayPhotos();
       debugPrint('取得した写真数: ${photos.length}');
 
       _photoController.setPhotoAssets(photos);

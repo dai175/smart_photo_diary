@@ -2,13 +2,25 @@ import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
+import 'interfaces/photo_service_interface.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
-class PhotoService {
+class PhotoService implements PhotoServiceInterface {
+  // シングルトンパターン
+  static PhotoService? _instance;
+  
+  PhotoService._();
+  
+  static PhotoService getInstance() {
+    _instance ??= PhotoService._();
+    return _instance!;
+  }
+
   /// 写真アクセス権限をリクエストする
   ///
   /// 戻り値: 権限が付与されたかどうか
-  static Future<bool> requestPermission() async {
+  @override
+  Future<bool> requestPermission() async {
     // permission_handlerを使用して権限をリクエスト
     // Android 13以上とそれ以前で権限が異なる
     if (await Permission.photos.request().isGranted) {
@@ -41,7 +53,8 @@ class PhotoService {
   ///
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリスト
-  static Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
+  @override
+  Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
     // 権限チェック
     final bool hasPermission = await requestPermission();
     debugPrint('写真アクセス権限: $hasPermission');
@@ -92,14 +105,17 @@ class PhotoService {
     }
   }
 
-  /// 特定の日付の写真を取得する
+  /// 指定された日付範囲の写真を取得する
   ///
-  /// [date]: 取得したい日付
+  /// [startDate]: 開始日時
+  /// [endDate]: 終了日時
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリスト
-  static Future<List<AssetEntity>> getPhotosByDate(
-    DateTime date, {
-    int limit = AppConstants.defaultPhotoLimit,
+  @override
+  Future<List<AssetEntity>> getPhotosInDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 100,
   }) async {
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -109,16 +125,12 @@ class PhotoService {
     }
 
     try {
-      // 指定日の日付範囲を計算
-      final DateTime startOfDay = DateTime(date.year, date.month, date.day);
-      final DateTime endOfDay = startOfDay.add(const Duration(days: 1));
-
-      debugPrint('日付範囲: $startOfDay - $endOfDay');
+      debugPrint('日付範囲: $startDate - $endDate');
 
       // 写真を取得
       final FilterOptionGroup filterOption = FilterOptionGroup(
         orders: [const OrderOption()],
-        createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
+        createTimeCond: DateTimeCond(min: startDate, max: endDate),
       );
 
       // アルバムを取得
@@ -150,13 +162,64 @@ class PhotoService {
     }
   }
 
-  /// 写真のサムネイルを取得する
+  /// 写真のバイナリデータを取得する
+  ///
+  /// [asset]: 写真アセット
+  /// 戻り値: 写真のバイナリデータ
+  @override
+  Future<List<int>?> getPhotoData(AssetEntity asset) async {
+    try {
+      final Uint8List? data = await asset.originBytes;
+      return data?.toList();
+    } catch (e) {
+      debugPrint('写真データ取得エラー: $e');
+      return null;
+    }
+  }
+
+  /// 写真のサムネイルデータを取得する
+  ///
+  /// [asset]: 写真アセット
+  /// 戻り値: サムネイルのバイナリデータ
+  @override
+  Future<List<int>?> getThumbnailData(AssetEntity asset) async {
+    try {
+      final Uint8List? data = await asset.thumbnailDataWithSize(
+        const ThumbnailSize(AppConstants.defaultThumbnailWidth, AppConstants.defaultThumbnailHeight),
+      );
+      return data?.toList();
+    } catch (e) {
+      debugPrint('サムネイルデータ取得エラー: $e');
+      return null;
+    }
+  }
+
+  /// 特定の日付の写真を取得する（後方互換性のため保持）
+  ///
+  /// [date]: 取得したい日付
+  /// [limit]: 取得する写真の最大数
+  /// 戻り値: 写真アセットのリスト
+  Future<List<AssetEntity>> getPhotosByDate(
+    DateTime date, {
+    int limit = AppConstants.defaultPhotoLimit,
+  }) async {
+    final DateTime startOfDay = DateTime(date.year, date.month, date.day);
+    final DateTime endOfDay = startOfDay.add(const Duration(days: 1));
+    
+    return await getPhotosInDateRange(
+      startDate: startOfDay,
+      endDate: endOfDay,
+      limit: limit,
+    );
+  }
+
+  /// 写真のサムネイルを取得する（後方互換性のため保持）
   ///
   /// [asset]: 写真アセット
   /// [width]: サムネイルの幅
   /// [height]: サムネイルの高さ
   /// 戻り値: サムネイル画像
-  static Future<Uint8List?> getThumbnail(
+  Future<Uint8List?> getThumbnail(
     AssetEntity asset, {
     int width = AppConstants.defaultThumbnailWidth,
     int height = AppConstants.defaultThumbnailHeight,
@@ -169,11 +232,11 @@ class PhotoService {
     }
   }
 
-  /// 写真の元画像を取得する
+  /// 写真の元画像を取得する（後方互換性のため保持）
   ///
   /// [asset]: 写真アセット
   /// 戻り値: 元の画像ファイル
-  static Future<Uint8List?> getOriginalFile(AssetEntity asset) async {
+  Future<Uint8List?> getOriginalFile(AssetEntity asset) async {
     try {
       return await asset.originBytes;
     } catch (e) {
@@ -186,7 +249,7 @@ class PhotoService {
   ///
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリスト
-  static Future<List<AssetEntity>> getAllPhotos({int limit = AppConstants.maxPhotoLimit}) async {
+  Future<List<AssetEntity>> getAllPhotos({int limit = AppConstants.maxPhotoLimit}) async {
     // 権限チェック
     final bool hasPermission = await requestPermission();
     debugPrint('写真アクセス権限: $hasPermission');

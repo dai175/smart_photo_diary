@@ -5,17 +5,24 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_filter.dart';
+import 'interfaces/diary_service_interface.dart';
+import 'interfaces/photo_service_interface.dart';
+import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
+import 'photo_service.dart';
 
-class DiaryService {
+class DiaryService implements DiaryServiceInterface {
   static const String _boxName = 'diary_entries';
   static DiaryService? _instance;
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
-  final _aiService = AiService();
+  final AiServiceInterface _aiService;
+  final PhotoServiceInterface _photoService;
 
   // シングルトンパターン
-  DiaryService._();
+  DiaryService._() : 
+    _aiService = AiService(),
+    _photoService = PhotoService.getInstance();
 
   static Future<DiaryService> getInstance() async {
     if (_instance == null) {
@@ -46,11 +53,14 @@ class DiaryService {
   }
 
   // 日記エントリーを保存
+  @override
   Future<DiaryEntry> saveDiaryEntry({
     required DateTime date,
     required String title,
     required String content,
-    required List<AssetEntity> photos,
+    required List<String> photoIds,
+    String? location,
+    List<String>? tags,
   }) async {
     try {
       // _diaryBoxが初期化されているかチェック
@@ -59,8 +69,6 @@ class DiaryService {
         await _init();
       }
       
-      // 写真のIDリストを作成
-      final List<String> photoIds = photos.map((photo) => photo.id).toList();
 
       // 新しい日記エントリーを作成
       final now = DateTime.now();
@@ -79,6 +87,8 @@ class DiaryService {
         title: title,
         content: content,
         photoIds: photoIds,
+        location: location,
+        tags: tags,
         createdAt: now,
         updatedAt: now,
       );
@@ -100,23 +110,14 @@ class DiaryService {
   }
 
   // 日記エントリーを更新
-  Future<void> updateDiaryEntry({
-    required String id, 
-    String? title, 
-    String? content
-  }) async {
+  @override
+  Future<void> updateDiaryEntry(DiaryEntry entry) async {
     if (_diaryBox == null) await _init();
-    
-    final entry = _diaryBox!.get(id);
-    if (entry != null && (title != null || content != null)) {
-      entry.updateContent(
-        title ?? entry.title, 
-        content ?? entry.content
-      );
-    }
+    await _diaryBox!.put(entry.id, entry);
   }
 
   // 日記エントリーを削除
+  @override
   Future<void> deleteDiaryEntry(String id) async {
     if (_diaryBox == null) await _init();
     await _diaryBox!.delete(id);
@@ -129,6 +130,7 @@ class DiaryService {
   }
 
   // 日付でソートされた日記エントリーを取得
+  @override
   Future<List<DiaryEntry>> getSortedDiaryEntries({bool descending = true}) async {
     final entries = await getAllDiaryEntries();
     entries.sort(
@@ -160,7 +162,8 @@ class DiaryService {
   }
 
   // IDで日記エントリーを取得
-  Future<DiaryEntry?> getDiaryEntryById(String id) async {
+  @override
+  Future<DiaryEntry?> getDiaryEntry(String id) async {
     if (_diaryBox == null) await _init();
     return _diaryBox!.get(id);
   }
@@ -187,6 +190,7 @@ class DiaryService {
   }
 
   // 日記エントリーのタグを取得（キャッシュ優先）
+  @override
   Future<List<String>> getTagsForEntry(DiaryEntry entry) async {
     // 有効なキャッシュがあればそれを返す
     if (entry.hasValidTags) {
@@ -233,6 +237,7 @@ class DiaryService {
   }
 
   // フィルタを適用して日記エントリーを取得
+  @override
   Future<List<DiaryEntry>> getFilteredDiaryEntries(DiaryFilter filter) async {
     final allEntries = await getSortedDiaryEntries();
     if (!filter.isActive) return allEntries;
@@ -241,6 +246,7 @@ class DiaryService {
   }
 
   // 全ての日記からユニークなタグを取得
+  @override
   Future<Set<String>> getAllTags() async {
     if (_diaryBox == null) await _init();
     final allTags = <String>{};
@@ -271,5 +277,36 @@ class DiaryService {
       ..sort((a, b) => b.value.compareTo(a.value));
     
     return sortedTags.take(limit).map((e) => e.key).toList();
+  }
+
+  // インターフェース実装のための追加メソッド
+  @override
+  Future<int> getTotalDiaryCount() async {
+    if (_diaryBox == null) await _init();
+    return _diaryBox!.length;
+  }
+
+  @override
+  Future<int> getDiaryCountInPeriod(DateTime start, DateTime end) async {
+    if (_diaryBox == null) await _init();
+    return _diaryBox!.values.where((entry) => 
+      entry.date.isAfter(start) && entry.date.isBefore(end)
+    ).length;
+  }
+
+  // 写真付きで日記エントリーを保存（後方互換性）
+  Future<DiaryEntry> saveDiaryEntryWithPhotos({
+    required DateTime date,
+    required String title,
+    required String content,
+    required List<AssetEntity> photos,
+  }) async {
+    final List<String> photoIds = photos.map((photo) => photo.id).toList();
+    return await saveDiaryEntry(
+      date: date,
+      title: title,
+      content: content,
+      photoIds: photoIds,
+    );
   }
 }

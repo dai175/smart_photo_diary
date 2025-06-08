@@ -134,7 +134,7 @@ class PhotoGridWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppConstants.photoCornerRadius),
       child: FutureBuilder<dynamic>(
-        future: PhotoService.getThumbnail(controller.photoAssets[index]),
+        future: PhotoService.getInstance().getThumbnail(controller.photoAssets[index]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
