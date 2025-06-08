@@ -56,13 +56,16 @@ fvm flutter build windows
 fvm flutter build linux
 ```
 
-### Linting
+### Linting and Code Quality
 ```bash
-# Analyze code
+# Analyze code (required before commits)
 fvm flutter analyze
 
 # Fix formatting
 fvm dart format .
+
+# Check for outdated dependencies
+fvm flutter pub outdated
 ```
 
 ## Architecture Overview
@@ -98,6 +101,11 @@ The app follows a service-oriented architecture with singleton services using la
 - `tflite_flutter`: On-device ML inference for image classification
 - `permission_handler`: Platform-specific permissions for photo access
 - `connectivity_plus`: Network status checking for AI service fallbacks
+- `image_picker`: Photo selection from gallery and camera
+- `geolocator`: Location services for diary entries
+- `table_calendar`: Calendar UI component for date navigation
+- `flutter_dotenv`: Environment variable management
+- `shared_preferences`: Simple key-value storage for app settings
 
 ### Development
 - `build_runner` + `hive_generator`: Code generation for Hive adapters
@@ -123,8 +131,11 @@ The app follows a service-oriented architecture with singleton services using la
 ### Code Generation
 Always run `fvm dart run build_runner build` after modifying Hive model classes to regenerate adapters.
 
-### Code Quality
-Always run `fvm flutter analyze` before committing code. Fix all analyzer warnings and errors immediately to maintain code quality.
+### Code Quality Standards
+- Always run `fvm flutter analyze` before committing code
+- Custom lint rules enforce single quotes, const constructors, and performance optimizations
+- Fix all analyzer warnings and errors immediately to maintain code quality
+- Project uses Japanese comments for business logic documentation
 
 ### Service Dependencies
 Services follow a clear dependency hierarchy:
