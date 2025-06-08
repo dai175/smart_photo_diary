@@ -182,10 +182,41 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 - Test suite must maintain 100% success rate - all failing tests should be investigated and either fixed or removed
 
 ### Error Handling Patterns
-- **New code should use Result<T> pattern** where appropriate, especially for operations that can fail
-- **SettingsService** already implements Result<T> for write operations (`setThemeMode`, `setAccentColor`, `setGenerationMode`)
-- **ErrorHandler utilities** provide safe execution wrappers for existing exception-based code
-- **Structured logging** via LoggingService for consistent error reporting and debugging
+
+#### Result<T> Usage Guidelines
+- **New features MUST use Result<T> pattern** for all operations that can fail (I/O, network, validation, etc.)
+- **Existing code should be migrated gradually** - do not change service interfaces all at once
+- **Start with write operations** (save, update, delete) as they typically have simpler return types
+- **Prefer Result<void> for operations without return values** to minimize type complexity
+
+#### Current Implementation Status
+- **✅ Complete foundation**: Result<T> core implementation with comprehensive utilities and 100% test coverage
+- **✅ Partial adoption**: SettingsService uses Result<T> for write operations (`setThemeMode`, `setAccentColor`, `setGenerationMode`)
+- **🔄 Legacy support**: Existing service interfaces still use exception-based patterns for backward compatibility
+- **📋 Migration targets**: DiaryService, PhotoService, AiService are candidates for gradual Result<T> adoption
+
+#### Migration Strategy for Future Development
+1. **Phase 1 - New Features** (Immediate):
+   - All new service methods MUST return Result<T>
+   - New services SHOULD implement Result<T> from the start
+   - Use ResultHelper utilities for easy creation and error handling
+
+2. **Phase 2 - Write Operations** (Next priority):
+   - Migrate service write methods (save, update, delete) to Result<T>
+   - Update corresponding UI error handling to use `fold()` pattern
+   - Maintain backward compatibility with wrapper methods if needed
+
+3. **Phase 3 - Read Operations** (Lower priority):
+   - Migrate service read methods (get, list, search) to Result<T>
+   - Update service interfaces gradually, one service at a time
+   - Ensure comprehensive testing at each step
+
+#### Best Practices
+- **Use ResultHelper.tryExecuteAsync()** for wrapping existing exception-based code
+- **Implement ErrorHandler.safeExecute()** for gradual migration of legacy code
+- **Always test both success and failure paths** when implementing Result<T>
+- **Use structured logging** via LoggingService for consistent error reporting and debugging
+- **Avoid changing service interfaces and implementations simultaneously** - update incrementally
 
 ### Service Dependencies
 Services follow a clear dependency hierarchy:
@@ -253,9 +284,16 @@ All user data stays on device. Hive database files are stored in app documents d
 - **High code quality**: Clean, well-documented codebase with strict adherence to Flutter best practices and functional programming patterns
 
 ### Current Implementation State of Result<T>
-- **✅ Core implementation**: Complete Result<T> pattern with comprehensive API
-- **✅ Testing**: 100% test coverage for Result pattern and error handling
-- **✅ SettingsService**: Partially migrated to use Result<T> for write operations
-- **✅ Error utilities**: Complete ErrorHandler and LoggingService implementation
-- **🔄 Service interfaces**: Still use traditional exception-based signatures (planned for future migration)
-- **📋 UI error display**: Standardized error display patterns not yet implemented
+- **✅ Core implementation**: Complete Result<T> pattern with comprehensive API and 100% test coverage
+- **✅ Foundation ready**: All utilities (ResultHelper, ErrorHandler, LoggingService) implemented and tested
+- **✅ Partial adoption**: SettingsService demonstrates successful Result<T> usage for write operations
+- **✅ Migration experience**: Learned best practices for gradual introduction without breaking existing code
+- **🔄 Legacy compatibility**: Existing service interfaces maintained for backward compatibility during transition
+- **📋 Future development**: All new features should adopt Result<T> pattern from day one
+
+### Result<T> Migration Lessons Learned
+- **Avoid wholesale interface changes**: Changing all service methods at once caused 221 analyze errors
+- **Incremental migration works**: SettingsService partial migration was successful and maintainable  
+- **Type complexity matters**: Result<void> is easier to adopt than Result<ComplexType>
+- **Testing is crucial**: Comprehensive test coverage (41 tests) ensured Result<T> reliability
+- **Documentation prevents confusion**: Clear migration strategy helps future development decisions
