@@ -56,10 +56,12 @@
 - [x] test/unit/core/service_locator_test.dart の作成
 
 **Widget Tests**
-- [ ] test/widget/diary_card_test.dart の作成
-- [ ] test/widget/photo_grid_test.dart の作成
-- [ ] test/widget/filter_bottom_sheet_test.dart の作成
-- [ ] test/widget/recent_diaries_widget_test.dart の作成
+- [x] test/widget/diary_card_test.dart の作成
+- [x] test/widget/photo_grid_test.dart の作成
+- [x] test/widget/filter_bottom_sheet_test.dart の作成
+- [x] test/widget/recent_diaries_widget_test.dart の作成
+- [x] test/widget/home_content_test.dart の作成
+- [x] test/test_helpers/widget_test_helpers.dart の作成（テストユーティリティ）
 
 **Integration Tests**
 - [ ] test/integration/diary_flow_test.dart の作成（写真選択→日記生成フロー）
@@ -122,17 +124,17 @@
 
 ## 実装スケジュール案
 
-### Phase 1: 基盤整備 (2-3週間)
-- [ ] main.dart の分割
-- [ ] ai_service.dart の分割
-- [ ] 基本的なテストの追加
-- [ ] 既存機能の動作確認
+### Phase 1: 基盤整備 (2-3週間) ✅ **完了**
+- [x] main.dart の分割
+- [x] ai_service.dart の分割
+- [x] 基本的なテストの追加
+- [x] 既存機能の動作確認
 
-### Phase 2: アーキテクチャ改善 (2-3週間)
-- [ ] 依存性注入の実装
-- [ ] エラーハンドリングの統一
-- [ ] diary_screen.dart の分割
-- [ ] テストカバレッジの拡充
+### Phase 2: アーキテクチャ改善 (2-3週間) ✅ **完了** 
+- [x] 依存性注入の実装
+- [x] エラーハンドリングの統一
+- [x] diary_screen.dart の分割
+- [x] テストカバレッジの拡充
 
 ### Phase 3: 最適化 (1-2週間)
 - [ ] パフォーマンス最適化

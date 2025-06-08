@@ -1,30 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:smart_photo_diary/main.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
-
-// Mock PathProvider for testing
-class MockPathProviderPlatform extends Fake
-    with MockPlatformInterfaceMixin
-    implements PathProviderPlatform {
-  
-  @override
-  Future<String?> getApplicationDocumentsPath() async {
-    return '/tmp/test_docs';
-  }
-}
 
 void main() {
   group('Smart Photo Diary App', () {
     setUp(() async {
       // Set up test environment
       TestWidgetsFlutterBinding.ensureInitialized();
-      
-      // Mock path provider
-      PathProviderPlatform.instance = MockPathProviderPlatform();
       
       // Initialize Hive for testing
       Hive.init('/tmp/test_hive');
