@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
+import '../utils/dialog_utils.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -354,39 +355,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return 'ラベル抽出方式';
   }
 
-  void _showThemeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('テーマ選択'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: ThemeMode.values.map((mode) {
-              return RadioListTile<ThemeMode>(
-                title: Text(_getThemeModeLabel(mode)),
-                value: mode,
-                groupValue: _settingsService.themeMode,
-                onChanged: (value) {
-                  if (value != null) {
-                    _settingsService.setThemeMode(value);
-                    widget.onThemeChanged?.call(value);
-                    setState(() {});
-                    Navigator.pop(context);
-                  }
-                },
-              );
-            }).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-          ],
-        );
-      },
+  void _showThemeDialog() async {
+    final selectedTheme = await DialogUtils.showRadioSelectionDialog<ThemeMode>(
+      context,
+      'テーマ選択',
+      ThemeMode.values,
+      _settingsService.themeMode,
+      _getThemeModeLabel,
     );
+    
+    if (selectedTheme != null) {
+      _settingsService.setThemeMode(selectedTheme);
+      widget.onThemeChanged?.call(selectedTheme);
+      setState(() {});
+    }
   }
 
   void _showColorDialog() {
@@ -497,57 +479,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLoadingDialog(String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          content: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: 16),
-              Text(message),
-            ],
-          ),
-        );
-      },
-    );
+    DialogUtils.showLoadingDialog(context, message);
   }
 
   void _showSuccessDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    DialogUtils.showSuccessDialog(context, title, message);
   }
 
   void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('エラー'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    DialogUtils.showErrorDialog(context, message);
   }
 
   void _showGenerationModeDialog() {

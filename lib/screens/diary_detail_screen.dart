@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/diary_service.dart';
 import '../constants/app_constants.dart';
+import '../utils/dialog_utils.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -141,22 +142,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     if (_diaryEntry == null) return;
 
     // 確認ダイアログを表示
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('日記の削除'),
-        content: const Text('この日記を削除してもよろしいですか？\nこの操作は元に戻せません。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('削除', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    final confirmed = await DialogUtils.showConfirmationDialog(
+      context,
+      '日記の削除',
+      'この日記を削除してもよろしいですか？\nこの操作は元に戻せません。',
+      confirmText: '削除',
+      isDestructive: true,
     );
 
     if (confirmed != true) return;

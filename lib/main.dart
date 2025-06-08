@@ -13,6 +13,7 @@ import 'screens/diary_preview_screen.dart';
 import 'screens/diary_detail_screen.dart';
 import 'screens/statistics_screen.dart';
 import 'screens/settings_screen.dart';
+import 'utils/dialog_utils.dart';
 import 'services/photo_service.dart';
 import 'services/diary_service.dart';
 import 'services/settings_service.dart';
@@ -165,20 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   
   void _showSimpleDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(AppConstants.okButton),
-            ),
-          ],
-        );
-      },
-    );
+    DialogUtils.showSimpleDialog(context, message);
   }
 
 
