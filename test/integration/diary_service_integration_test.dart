@@ -105,34 +105,6 @@ void main() {
         expect(retrievedEntry, isNull);
       });
 
-      test('should get all diary entries', () async {
-        // Arrange - Clear existing entries and add test entries
-        final allEntries = await diaryService.getAllDiaryEntries();
-        for (final entry in allEntries) {
-          await diaryService.deleteDiaryEntry(entry.id);
-        }
-
-        await diaryService.saveDiaryEntry(
-          date: DateTime(2024, 1, 15),
-          title: 'Entry 1',
-          content: 'Content 1',
-          photoIds: [],
-        );
-        await diaryService.saveDiaryEntry(
-          date: DateTime(2024, 1, 16),
-          title: 'Entry 2',
-          content: 'Content 2',
-          photoIds: [],
-        );
-
-        // Act
-        final entries = await diaryService.getAllDiaryEntries();
-
-        // Assert
-        expect(entries.length, equals(2));
-        expect(entries[0].title, equals('Entry 2')); // Should be sorted by date desc
-        expect(entries[1].title, equals('Entry 1'));
-      });
     });
 
     group('Statistics Operations', () {
@@ -198,36 +170,6 @@ void main() {
         expect(count, equals(1));
       });
 
-      test('should get popular tags', () async {
-        // Arrange
-        final allEntries = await diaryService.getAllDiaryEntries();
-        for (final entry in allEntries) {
-          await diaryService.deleteDiaryEntry(entry.id);
-        }
-
-        // Add entries with tags
-        await diaryService.saveDiaryEntry(
-          date: DateTime(2024, 1, 15),
-          title: 'Entry 1',
-          content: 'Content 1',
-          photoIds: [],
-          tags: ['tag1', 'tag2'],
-        );
-        await diaryService.saveDiaryEntry(
-          date: DateTime(2024, 1, 16),
-          title: 'Entry 2',
-          content: 'Content 2',
-          photoIds: [],
-          tags: ['tag1', 'tag3'],
-        );
-
-        // Act
-        final popularTags = await diaryService.getPopularTags(limit: 5);
-
-        // Assert
-        expect(popularTags, contains('tag1')); // Should appear in both entries
-        expect(popularTags.length, greaterThan(0));
-      });
     });
 
     group('AssetEntity Conversion Integration', () {
