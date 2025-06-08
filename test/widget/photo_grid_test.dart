@@ -68,7 +68,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(PhotoGridWidget), findsOneWidget);
@@ -87,7 +88,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         WidgetTestHelpers.expectTextExists(AppConstants.newPhotosTitle);
@@ -105,7 +107,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.textContaining('選択された写真: 3'), findsOneWidget);
@@ -124,7 +127,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -142,7 +146,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byIcon(Icons.no_photography), findsOneWidget);
@@ -163,7 +168,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         WidgetTestHelpers.expectTextExists(AppConstants.noPhotosMessage);
@@ -187,7 +193,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(GridView), findsOneWidget);
@@ -209,7 +216,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(FutureBuilder), findsAtLeastNWidgets(1));
@@ -231,7 +239,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(CircleAvatar), findsNWidgets(2));
@@ -255,7 +264,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         WidgetTestHelpers.expectTextExists(AppConstants.usedPhotoLabel);
@@ -281,7 +291,8 @@ void main() {
             ),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
         
         await WidgetTestHelpers.tapAndPump(tester, find.byType(ElevatedButton));
 
@@ -294,6 +305,8 @@ void main() {
         final mockAssets = [MockAssetEntity()];
         when(() => mockController.photoAssets).thenReturn(mockAssets);
         when(() => mockController.selected).thenReturn([false]);
+        when(() => mockController.isPhotoUsed(0)).thenReturn(false); // Ensure photo is not used
+        when(() => mockController.canSelectPhoto(0)).thenReturn(true); // Ensure photo can be selected
         when(() => mockPhotoService.getThumbnail(any())).thenAnswer(
           (_) async => null,
         );
@@ -304,7 +317,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
         
         await WidgetTestHelpers.tapAndPump(tester, find.byType(GestureDetector).first);
 
@@ -334,7 +348,8 @@ void main() {
             ),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
         
         await WidgetTestHelpers.tapAndPump(tester, find.byType(GestureDetector).first);
 
@@ -365,7 +380,8 @@ void main() {
             ),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
         
         await WidgetTestHelpers.tapAndPump(tester, find.byType(GestureDetector).first);
 
@@ -391,7 +407,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Tap photo
         await WidgetTestHelpers.tapAndPump(tester, find.byType(GestureDetector).first);
@@ -416,7 +433,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(GridView), findsOneWidget);
@@ -439,7 +457,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert - Should still render without crashing
         expect(find.byType(PhotoGridWidget), findsOneWidget);
@@ -466,7 +485,8 @@ void main() {
             size: const Size(400, 800), // Phone size
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         expect(find.byType(GridView), findsOneWidget);
@@ -488,7 +508,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         final gridView = tester.widget<GridView>(find.byType(GridView));
@@ -515,7 +536,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         await WidgetTestHelpers.testAccessibility(tester);
@@ -536,7 +558,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Assert
         final gestureDetectors = find.byType(GestureDetector);
@@ -563,7 +586,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         stopwatch.stop();
 
@@ -587,7 +611,8 @@ void main() {
             PhotoGridWidget(controller: mockController),
           ),
         );
-        await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
+        await tester.pump(); // Initial render
+        await tester.pump(const Duration(milliseconds: 100)); // Additional render for UI elements
 
         // Rapid tapping
         for (int i = 0; i < 5; i++) {

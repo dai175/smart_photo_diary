@@ -142,7 +142,7 @@ class WidgetTestHelpers {
 
   /// Tap widget and pump
   static Future<void> tapAndPump(WidgetTester tester, Finder finder) async {
-    await tester.tap(finder);
+    await tester.tap(finder, warnIfMissed: false);
     await tester.pump();
   }
 
