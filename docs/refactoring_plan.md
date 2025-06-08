@@ -47,12 +47,13 @@
 #### 3. テストカバレッジの追加
 
 **Unit Tests**
-- [ ] test/unit/services/diary_service_test.dart の作成
-- [ ] test/unit/services/ai_service_test.dart の作成
-- [ ] test/unit/services/photo_service_test.dart の作成
-- [ ] test/unit/services/image_classifier_service_test.dart の作成
-- [ ] test/unit/models/diary_entry_test.dart の作成
-- [ ] 既存 widget_test.dart の更新（カウンターアプリテンプレート削除）
+- [x] test/unit/services/diary_service_test.dart の作成
+- [x] test/unit/services/ai_service_test.dart の作成
+- [x] test/unit/services/photo_service_test.dart の作成
+- [x] test/unit/services/image_classifier_service_test.dart の作成
+- [x] test/unit/models/diary_entry_test.dart の作成
+- [x] 既存 widget_test.dart の更新（カウンターアプリテンプレート削除）
+- [x] test/unit/core/service_locator_test.dart の作成
 
 **Widget Tests**
 - [ ] test/widget/diary_card_test.dart の作成
