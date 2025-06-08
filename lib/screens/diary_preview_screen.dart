@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../services/image_classifier_service.dart';
-import '../services/ai_service.dart';
 import '../services/ai/ai_service_interface.dart';
-import '../services/diary_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/photo_service_interface.dart';
 import '../services/settings_service.dart';
-import '../services/photo_service.dart';
+import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 
 /// 生成された日記のプレビュー画面
@@ -22,8 +22,9 @@ class DiaryPreviewScreen extends StatefulWidget {
 }
 
 class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
-  final ImageClassifierService _imageClassifier = ImageClassifierService();
-  final AiService _aiService = AiService();
+  late final ImageClassifierService _imageClassifier;
+  late final AiServiceInterface _aiService;
+  late final PhotoServiceInterface _photoService;
 
   bool _isLoading = true;
   bool _hasError = false;
@@ -44,6 +45,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     super.initState();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
+    
+    // サービスロケータからサービスを取得
+    _imageClassifier = ServiceRegistration.get<ImageClassifierService>();
+    _aiService = ServiceRegistration.get<AiServiceInterface>();
+    _photoService = ServiceRegistration.get<PhotoServiceInterface>();
+    
     _loadModelAndGenerateDiary();
   }
 
@@ -103,8 +110,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         if (widget.selectedAssets.length == 1) {
           // 単一写真の場合：従来通り
           final firstAsset = widget.selectedAssets.first;
-          final photoService = PhotoService.getInstance();
-          final imageData = await photoService.getOriginalFile(firstAsset);
+          final imageData = await _photoService.getOriginalFile(firstAsset);
           
           if (imageData == null) {
             throw Exception('写真データの取得に失敗しました');
@@ -122,8 +128,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
           
           for (final asset in widget.selectedAssets) {
-            final photoService = PhotoService.getInstance();
-            final imageData = await photoService.getOriginalFile(asset);
+            final imageData = await _photoService.getOriginalFile(asset);
             if (imageData != null) {
               imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
             }
@@ -238,7 +243,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       debugPrint('写真数: ${widget.selectedAssets.length}');
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を保存
       await diaryService.saveDiaryEntryWithPhotos(

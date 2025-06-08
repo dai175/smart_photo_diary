@@ -6,6 +6,7 @@ import 'constants/app_constants.dart';
 import 'models/diary_entry.dart';
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
+import 'core/service_registration.dart';
 
 Future<void> main() async {
   // Flutterの初期化を確実に行う
@@ -20,6 +21,9 @@ Future<void> main() async {
 
   // .envファイルの読み込み
   await dotenv.load();
+
+  // サービスロケータの初期化
+  await ServiceRegistration.initialize();
 
   runApp(const MyApp());
 }

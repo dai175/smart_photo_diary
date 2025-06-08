@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
-import '../services/photo_service.dart';
+import '../services/interfaces/photo_service_interface.dart';
+import '../core/service_registration.dart';
 
 /// 写真グリッド表示ウィジェット
 class PhotoGridWidget extends StatelessWidget {
@@ -134,7 +135,7 @@ class PhotoGridWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppConstants.photoCornerRadius),
       child: FutureBuilder<dynamic>(
-        future: PhotoService.getInstance().getThumbnail(controller.photoAssets[index]),
+        future: ServiceRegistration.get<PhotoServiceInterface>().getThumbnail(controller.photoAssets[index]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {

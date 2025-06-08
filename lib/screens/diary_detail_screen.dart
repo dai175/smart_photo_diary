@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:typed_data';
 import '../models/diary_entry.dart';
-import '../services/diary_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
 
@@ -50,7 +51,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記エントリーを取得
       final entry = await diaryService.getDiaryEntry(widget.diaryId);
@@ -96,7 +97,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を更新
       final updatedEntry = _diaryEntry!.copyWith(
@@ -159,7 +160,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を削除
       await diaryService.deleteDiaryEntry(_diaryEntry!.id);

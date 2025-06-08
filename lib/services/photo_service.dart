@@ -219,6 +219,7 @@ class PhotoService implements PhotoServiceInterface {
   /// [width]: サムネイルの幅
   /// [height]: サムネイルの高さ
   /// 戻り値: サムネイル画像
+  @override
   Future<Uint8List?> getThumbnail(
     AssetEntity asset, {
     int width = AppConstants.defaultThumbnailWidth,
@@ -236,6 +237,7 @@ class PhotoService implements PhotoServiceInterface {
   ///
   /// [asset]: 写真アセット
   /// 戻り値: 元の画像ファイル
+  @override
   Future<Uint8List?> getOriginalFile(AssetEntity asset) async {
     try {
       return await asset.originBytes;

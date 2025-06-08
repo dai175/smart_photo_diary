@@ -19,17 +19,34 @@ class DiaryService implements DiaryServiceInterface {
   final AiServiceInterface _aiService;
   final PhotoServiceInterface _photoService;
 
-  // シングルトンパターン
-  DiaryService._() : 
-    _aiService = AiService(),
-    _photoService = PhotoService.getInstance();
+  // プライベートコンストラクタ（依存性注入用）
+  DiaryService._(
+    this._aiService,
+    this._photoService,
+  );
 
+  // 従来のシングルトンパターン（後方互換性のため保持）
   static Future<DiaryService> getInstance() async {
     if (_instance == null) {
-      _instance = DiaryService._();
+      final aiService = AiService();
+      final photoService = PhotoService.getInstance();
+      _instance = DiaryService._(aiService, photoService);
       await _instance!._init();
     }
     return _instance!;
+  }
+
+  // 依存性注入用のファクトリメソッド
+  static DiaryService createWithDependencies({
+    required AiServiceInterface aiService,
+    required PhotoServiceInterface photoService,
+  }) {
+    return DiaryService._(aiService, photoService);
+  }
+
+  // 初期化メソッド（外部から呼び出し可能）
+  Future<void> initialize() async {
+    await _init();
   }
 
   // 初期化処理
@@ -295,6 +312,7 @@ class DiaryService implements DiaryServiceInterface {
   }
 
   // 写真付きで日記エントリーを保存（後方互換性）
+  @override
   Future<DiaryEntry> saveDiaryEntryWithPhotos({
     required DateTime date,
     required String title,

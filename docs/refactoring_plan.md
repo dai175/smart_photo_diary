@@ -41,7 +41,7 @@
 - [x] AiServiceInterface の作成（抽象化）
 - [x] PhotoServiceInterface の作成（抽象化）
 - [x] DiaryService での依存性注入パターン適用
-- [ ] サービスロケータまたはDIコンテナの導入
+- [x] サービスロケータまたはDIコンテナの導入
 - [x] 既存サービス間の密結合解消
 
 #### 3. テストカバレッジの追加

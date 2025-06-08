@@ -8,8 +8,9 @@ import '../screens/diary_detail_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../screens/test_screen.dart';
-import '../services/diary_service.dart';
-import '../services/photo_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/photo_service_interface.dart';
+import '../core/service_registration.dart';
 import '../utils/dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
 
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _loadingDiaries = true;
       });
 
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
       final allEntries = diaryService.getSortedDiaryEntries();
 
       // 最新の3つの日記を取得
@@ -109,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       // 権限リクエスト
-      final photoService = PhotoService.getInstance();
+      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
       final hasPermission = await photoService.requestPermission();
       debugPrint('権限ステータス: $hasPermission');
 

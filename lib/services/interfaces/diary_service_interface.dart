@@ -1,3 +1,4 @@
+import 'package:photo_manager/photo_manager.dart';
 import '../../models/diary_entry.dart';
 import '../../models/diary_filter.dart';
 
@@ -39,4 +40,12 @@ abstract class DiaryServiceInterface {
 
   /// 指定期間の日記数を取得
   Future<int> getDiaryCountInPeriod(DateTime start, DateTime end);
+
+  /// 写真付きで日記エントリーを保存（後方互換性）
+  Future<DiaryEntry> saveDiaryEntryWithPhotos({
+    required DateTime date,
+    required String title,
+    required String content,
+    required List<AssetEntity> photos,
+  });
 }
