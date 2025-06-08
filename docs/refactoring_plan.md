@@ -17,10 +17,10 @@
 #### 1. 大きなファイルの分割
 
 **main.dart (470行) の分割**
-- [ ] lib/main.dart の軽量化（初期化とアプリ設定のみ）
-- [ ] lib/screens/home_screen.dart の作成（ホーム画面）
-- [ ] lib/widgets/home_content_widget.dart の作成（メインコンテンツ）
-- [ ] lib/widgets/navigation_widget.dart の作成（ナビゲーション）
+- [x] lib/main.dart の軽量化（初期化とアプリ設定のみ）
+- [x] lib/screens/home_screen.dart の作成（ホーム画面）
+- [x] lib/widgets/home_content_widget.dart の作成（メインコンテンツ）
+- [x] lib/widgets/navigation_widget.dart の作成（ナビゲーション）
 
 **ai_service.dart (835行) の分割**
 - [ ] lib/services/ai/gemini_api_client.dart の作成（API通信）
