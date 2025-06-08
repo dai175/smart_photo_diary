@@ -140,10 +140,10 @@ class DiaryCardWidget extends StatelessWidget {
       future: asset.thumbnailData,
       builder: (context, thumbnailSnapshot) {
         if (!thumbnailSnapshot.hasData) {
-          return SizedBox(
+          return const SizedBox(
             width: AppConstants.diaryThumbnailSize,
             height: AppConstants.diaryThumbnailSize,
-            child: const Center(child: CircularProgressIndicator()),
+            child: Center(child: CircularProgressIndicator()),
           );
         }
 

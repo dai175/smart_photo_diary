@@ -16,7 +16,7 @@ class OfflineFallbackService {
 
     // シンプルなテンプレートベースの日記
     final locationText = location != null && location.isNotEmpty
-        ? '${location}で'
+        ? '$locationで'
         : '';
 
     String title;
@@ -24,13 +24,13 @@ class OfflineFallbackService {
 
     if (labels.isEmpty) {
       title = '今日の記録';
-      content = '$dateStr、${locationText}過ごした一日の記録です。';
+      content = '$dateStr、$locationText過ごした一日の記録です。';
     } else if (labels.length == 1) {
       title = '${labels[0]}の$timeOfDay';
-      content = '$dateStr、${timeOfDay}に$locationText${labels[0]}について過ごしました。';
+      content = '$dateStr、$timeOfDayに$locationText${labels[0]}について過ごしました。';
     } else {
       title = '${labels.first}と${labels.length - 1}つの出来事';
-      content = '$dateStr、${timeOfDay}に$locationText${labels.join('や')}などについて過ごしました。';
+      content = '$dateStr、$timeOfDayに$locationText${labels.join('や')}などについて過ごしました。';
     }
 
     return DiaryGenerationResult(title: title, content: content);
@@ -48,7 +48,7 @@ class OfflineFallbackService {
     final timeOfDay = _getTimeOfDayForPhotos(date, photoTimes);
     
     final locationText = location != null && location.isNotEmpty
-        ? '${location}で'
+        ? '$locationで'
         : '';
 
     String title;
@@ -66,9 +66,9 @@ class OfflineFallbackService {
     // 本文生成
     if (labels.isEmpty) {
       if (photoCount == 1) {
-        content = '$dateStr、${timeOfDay}に$locationText撮った一枚の写真。この瞬間を記録に残しました。';
+        content = '$dateStr、$timeOfDayに$locationText撮った一枚の写真。この瞬間を記録に残しました。';
       } else {
-        content = '$dateStr、${timeOfDay}に$locationText${photoCount}枚の写真を撮影。様々な瞬間を記録に残した一日でした。';
+        content = '$dateStr、$timeOfDayに$locationText$photoCount枚の写真を撮影。様々な瞬間を記録に残した一日でした。';
       }
     } else {
       final keywordText = labels.length == 1 
@@ -76,9 +76,9 @@ class OfflineFallbackService {
           : '${labels.take(2).join('や')}など';
       
       if (photoCount == 1) {
-        content = '$dateStr、${timeOfDay}に$locationText$keywordText の瞬間を写真に収めました。';
+        content = '$dateStr、$timeOfDayに$locationText$keywordText の瞬間を写真に収めました。';
       } else {
-        content = '$dateStr、${timeOfDay}に$locationText$keywordText について${photoCount}枚の写真を撮影。充実した時間を過ごすことができました。';
+        content = '$dateStr、$timeOfDayに$locationText$keywordText について$photoCount枚の写真を撮影。充実した時間を過ごすことができました。';
       }
     }
 

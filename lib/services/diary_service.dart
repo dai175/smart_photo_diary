@@ -9,7 +9,6 @@ import 'interfaces/diary_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
-import 'photo_service.dart';
 
 class DiaryService implements DiaryServiceInterface {
   static const String _boxName = 'diary_entries';
@@ -17,20 +16,17 @@ class DiaryService implements DiaryServiceInterface {
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
   final AiServiceInterface _aiService;
-  final PhotoServiceInterface _photoService;
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(
     this._aiService,
-    this._photoService,
   );
 
   // 従来のシングルトンパターン（後方互換性のため保持）
   static Future<DiaryService> getInstance() async {
     if (_instance == null) {
       final aiService = AiService();
-      final photoService = PhotoService.getInstance();
-      _instance = DiaryService._(aiService, photoService);
+      _instance = DiaryService._(aiService);
       await _instance!._init();
     }
     return _instance!;
@@ -41,7 +37,7 @@ class DiaryService implements DiaryServiceInterface {
     required AiServiceInterface aiService,
     required PhotoServiceInterface photoService,
   }) {
-    return DiaryService._(aiService, photoService);
+    return DiaryService._(aiService);
   }
 
   // 初期化メソッド（外部から呼び出し可能）
