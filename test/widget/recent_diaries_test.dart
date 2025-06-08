@@ -657,12 +657,11 @@ void main() {
 
         // Act
         await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            RecentDiariesWidget(
-              recentDiaries: diaries,
-              isLoading: false,
-              onDiaryTap: (id) {},
-            ),
+          createConstrainedRecentDiariesWidget(
+            recentDiaries: diaries,
+            isLoading: false,
+            onDiaryTap: (id) {},
+            height: 800, // Larger height for 10 items
           ),
         );
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
@@ -680,24 +679,20 @@ void main() {
 
         // Act - Start with loading
         await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            RecentDiariesWidget(
-              recentDiaries: [],
-              isLoading: true,
-              onDiaryTap: (id) {},
-            ),
+          createConstrainedRecentDiariesWidget(
+            recentDiaries: [],
+            isLoading: true,
+            onDiaryTap: (id) {},
           ),
         );
         await tester.pump();
 
         // Change to loaded state
         await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            RecentDiariesWidget(
-              recentDiaries: diaries,
-              isLoading: false,
-              onDiaryTap: (id) {},
-            ),
+          createConstrainedRecentDiariesWidget(
+            recentDiaries: diaries,
+            isLoading: false,
+            onDiaryTap: (id) {},
           ),
         );
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);

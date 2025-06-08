@@ -39,20 +39,28 @@ void main() {
       when(() => mockDiaryService.getPopularTags(limit: any(named: 'limit')))
           .thenAnswer((_) async => ['tag1', 'tag2', 'tag3']);
     });
+    
+    // Helper function to create FilterBottomSheet with mock service
+    Widget createFilterBottomSheet({
+      DiaryFilter? filter,
+      Function(DiaryFilter)? onApply,
+      DiaryService? customMockService,
+    }) {
+      return WidgetTestHelpers.wrapWithMaterialApp(
+        Scaffold(
+          body: FilterBottomSheet(
+            initialFilter: filter ?? testFilter,
+            onApply: onApply ?? (filter) {},
+            diaryService: customMockService ?? mockDiaryService,
+          ),
+        ),
+      );
+    }
 
     group('Basic Rendering', () {
       testWidgets('should render filter bottom sheet', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -62,16 +70,7 @@ void main() {
 
       testWidgets('should display header with title and clear button', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -82,16 +81,7 @@ void main() {
 
       testWidgets('should display handle indicator', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -104,16 +94,7 @@ void main() {
 
       testWidgets('should display all filter sections', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -252,16 +233,7 @@ void main() {
 
       testWidgets('should display tags as filter chips', (WidgetTester tester) async {
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet());
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert
@@ -320,20 +292,12 @@ void main() {
 
       testWidgets('should show no tags message when empty', (WidgetTester tester) async {
         // Arrange
-        when(() => mockDiaryService.getPopularTags(limit: any(named: 'limit')))
+        final emptyMockService = MockDiaryService();
+        when(() => emptyMockService.getPopularTags(limit: any(named: 'limit')))
             .thenAnswer((_) async => []);
 
         // Act
-        await tester.pumpWidget(
-          WidgetTestHelpers.wrapWithMaterialApp(
-            Scaffold(
-              body: FilterBottomSheet(
-                initialFilter: testFilter,
-                onApply: (filter) {},
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(createFilterBottomSheet(customMockService: emptyMockService));
         await WidgetTestHelpers.pumpAndSettleWithTimeout(tester);
 
         // Assert

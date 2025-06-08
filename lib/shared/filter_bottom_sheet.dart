@@ -7,11 +7,13 @@ import '../constants/app_constants.dart';
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
   final Function(DiaryFilter) onApply;
+  final DiaryService? diaryService; // テスト用のオプショナル依存性注入
 
   const FilterBottomSheet({
     super.key,
     required this.initialFilter,
     required this.onApply,
+    this.diaryService, // テスト時に外部からDiaryServiceを注入可能
   });
 
   @override
@@ -32,7 +34,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   Future<void> _loadAvailableTags() async {
     try {
-      final diaryService = await DiaryService.getInstance();
+      // テスト時は注入されたサービスを使用、本番時は通常のgetInstance
+      final diaryService = widget.diaryService ?? await DiaryService.getInstance();
       final popularTags = await diaryService.getPopularTags(limit: 20);
       setState(() {
         _availableTags = popularTags;
