@@ -31,10 +31,10 @@
 - [x] 既存 ai_service.dart の置き換えと統合テスト
 
 **diary_screen.dart (509行) の分割**
-- [ ] lib/screens/diary_screen.dart の軽量化（画面構成のみ）
-- [ ] lib/widgets/diary_card_widget.dart の作成（日記カード）
-- [ ] lib/widgets/diary_search_widget.dart の作成（検索機能）
-- [ ] lib/controllers/diary_screen_controller.dart の作成（ビジネスロジック）
+- [x] lib/screens/diary_screen.dart の軽量化（画面構成のみ）
+- [x] lib/widgets/diary_card_widget.dart の作成（日記カード）
+- [x] lib/widgets/diary_search_widget.dart の作成（検索機能）
+- [x] lib/controllers/diary_screen_controller.dart の作成（ビジネスロジック）
 
 #### 2. 依存性注入の実装
 
