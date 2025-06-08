@@ -7,7 +7,7 @@ import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/constants/app_constants.dart';
 import '../test_helpers/widget_test_helpers.dart';
-import '../test_helpers/unified_test_setup.dart';
+import '../test_helpers/widget_test_service_setup.dart';
 import '../integration/mocks/mock_services.dart';
 
 // Mock classes

@@ -9,7 +9,6 @@ import 'package:smart_photo_diary/controllers/photo_selection_controller.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/constants/app_constants.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
-import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import '../test_helpers/widget_test_helpers.dart';
 import '../test_helpers/widget_test_service_setup.dart';
 import '../integration/mocks/mock_services.dart';
@@ -21,7 +20,6 @@ class MockAssetEntity extends Mock implements AssetEntity {}
 void main() {
   group('HomeContentWidget', () {
     late MockPhotoSelectionController mockPhotoController;
-    late MockPhotoServiceInterface mockPhotoService;
     late List<DiaryEntry> testDiaries;
     late ServiceLocator serviceLocator;
 
@@ -46,7 +44,6 @@ void main() {
       
       // Use unified service mock system
       serviceLocator = WidgetTestServiceSetup.setupServiceLocatorForWidget();
-      mockPhotoService = serviceLocator.get<PhotoServiceInterface>() as MockPhotoServiceInterface;
       
       // Setup default mock behavior
       when(() => mockPhotoController.photoAssets).thenReturn([]);
@@ -58,12 +55,8 @@ void main() {
       when(() => mockPhotoController.isPhotoUsed(any())).thenReturn(false);
       when(() => mockPhotoController.canSelectPhoto(any())).thenReturn(true);
       
-      // Setup PhotoService mock behavior
-      when(() => mockPhotoService.getThumbnail(
-        any(),
-        width: any(named: 'width'),
-        height: any(named: 'height'),
-      )).thenAnswer((_) async => 'mock_thumbnail_data');
+      // PhotoService already has default mock behavior from TestServiceSetup
+      // (returns null by default to avoid image data issues)
     });
 
     tearDown(() {

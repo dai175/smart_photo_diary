@@ -116,7 +116,7 @@ class TestServiceSetup {
       any(),
       width: any(named: 'width'),
       height: any(named: 'height'),
-    )).thenAnswer((_) async => Uint8List.fromList([1, 2, 3, 4, 5]));
+    )).thenAnswer((_) async => null); // Return null to avoid invalid image data
     when(() => mock.getPhotoData(any()))
         .thenAnswer((_) async => [1, 2, 3, 4, 5]); // Mock image data
     when(() => mock.getThumbnailData(any()))
