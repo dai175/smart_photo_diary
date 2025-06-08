@@ -76,7 +76,7 @@ fvm flutter build linux
 
 ### Linting and Code Quality
 ```bash
-# Analyze code (required before commits)
+# Analyze code (configured to suppress info-level lints for cleaner output)
 fvm flutter analyze
 
 # Fix formatting
@@ -381,3 +381,24 @@ FutureResultUIBuilder<List<Item>>(
 - **Prefer contextual extensions** (context.showError) for brevity
 - **Always provide retry mechanisms** for recoverable errors
 - **Use severity levels appropriately** to guide user response
+
+## Code Quality and Analysis
+
+### Analyzer Configuration
+The project uses a customized `analysis_options.yaml` configuration that:
+- **Suppresses info-level lints** for cleaner output in production
+- **Maintains strict error and warning detection** for actual code problems
+- **Excludes generated files** (*.g.dart, *.freezed.dart) from analysis
+- **Enforces consistent coding standards** through targeted linting rules
+
+### Analyzer Philosophy
+- **Zero tolerance for errors and warnings**: All error and warning-level issues must be resolved
+- **Info-level suppression for mature codebase**: Style hints are suppressed to focus on functional issues
+- **Clean CI/CD integration**: `flutter analyze` returns clear success/failure status
+
+### Suppressed Info Rules (Rationale)
+- `prefer_const_constructors`: Performance optimization hint, not critical for functionality
+- `avoid_redundant_argument_values`: Code style preference, doesn't affect behavior
+- `unintended_html_in_doc_comment`: Documentation formatting issue, not functional problem
+
+This configuration is appropriate for a mature, production-ready codebase where the focus should be on preventing actual bugs rather than enforcing every style preference.

@@ -13,6 +13,12 @@ analyzer:
   exclude:
     - '**/*.g.dart'  # Generated files
     - '**/*.freezed.dart'  # Freezed generated files
+  errors:
+    # Suppress info-level lints for cleaner output in mature codebase
+    # These rules provide style guidance but don't indicate actual problems
+    prefer_const_constructors: ignore  # Performance hint, not critical
+    avoid_redundant_argument_values: ignore  # Style preference, not error
+    unintended_html_in_doc_comment: ignore  # Documentation formatting, not functional issue
 
 linter:
   # The lint rules applied to this project can be customized in the
