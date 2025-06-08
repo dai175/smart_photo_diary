@@ -16,7 +16,6 @@ void main() {
   group('DiaryService Mock Tests', () {
     late MockAiServiceInterface mockAiService;
     late MockPhotoServiceInterface mockPhotoService;
-    late DiaryService diaryService;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -31,11 +30,6 @@ void main() {
     setUp(() {
       mockAiService = MockAiServiceInterface();
       mockPhotoService = MockPhotoServiceInterface();
-      
-      diaryService = DiaryService.createWithDependencies(
-        aiService: mockAiService,
-        photoService: mockPhotoService,
-      );
     });
 
     group('DiaryEntry Creation Logic', () {
@@ -206,7 +200,7 @@ void main() {
     group('Time-based Tag Logic', () {
       test('should identify morning time correctly', () {
         // Arrange & Act
-        final morningTime = DateTime(2024, 1, 15, 8, 0); // 8 AM
+        final morningTime = DateTime(2024, 1, 15, 8); // 8 AM
         
         // Assert - Test time-based logic
         expect(morningTime.hour >= 6 && morningTime.hour < 12, isTrue);
@@ -214,7 +208,7 @@ void main() {
 
       test('should identify afternoon time correctly', () {
         // Arrange & Act
-        final afternoonTime = DateTime(2024, 1, 15, 15, 0); // 3 PM
+        final afternoonTime = DateTime(2024, 1, 15, 15); // 3 PM
         
         // Assert - Test time-based logic
         expect(afternoonTime.hour >= 12 && afternoonTime.hour < 18, isTrue);
@@ -222,7 +216,7 @@ void main() {
 
       test('should identify evening time correctly', () {
         // Arrange & Act
-        final eveningTime = DateTime(2024, 1, 15, 19, 0); // 7 PM
+        final eveningTime = DateTime(2024, 1, 15, 19); // 7 PM
         
         // Assert - Test time-based logic
         expect(eveningTime.hour >= 18 && eveningTime.hour < 22, isTrue);
@@ -230,7 +224,7 @@ void main() {
 
       test('should identify night time correctly', () {
         // Arrange & Act
-        final nightTime = DateTime(2024, 1, 15, 23, 0); // 11 PM
+        final nightTime = DateTime(2024, 1, 15, 23); // 11 PM
         
         // Assert - Test time-based logic
         expect(nightTime.hour >= 22 || nightTime.hour < 6, isTrue);
@@ -239,10 +233,10 @@ void main() {
       test('should generate appropriate fallback tag based on time', () {
         // Test the time-to-tag mapping logic
         final testCases = [
-          (DateTime(2024, 1, 15, 8, 0), '朝'),   // Morning
-          (DateTime(2024, 1, 15, 15, 0), '昼'),  // Afternoon
-          (DateTime(2024, 1, 15, 19, 0), '夕方'), // Evening
-          (DateTime(2024, 1, 15, 23, 0), '夜'),   // Night
+          (DateTime(2024, 1, 15, 8), '朝'),   // Morning
+          (DateTime(2024, 1, 15, 15), '昼'),  // Afternoon
+          (DateTime(2024, 1, 15, 19), '夕方'), // Evening
+          (DateTime(2024, 1, 15, 23), '夜'),   // Night
         ];
 
         for (final (dateTime, expectedTag) in testCases) {
@@ -300,13 +294,27 @@ void main() {
 
     group('Interface Compliance', () {
       test('should implement DiaryService interface', () {
-        expect(diaryService, isA<DiaryService>());
+        // Act
+        final service = DiaryService.createWithDependencies(
+          aiService: mockAiService,
+          photoService: mockPhotoService,
+        );
+
+        // Assert
+        expect(service, isA<DiaryService>());
       });
 
       test('should have all required service methods', () {
-        expect(diaryService.saveDiaryEntry, isA<Function>());
-        expect(diaryService.saveDiaryEntryWithPhotos, isA<Function>());
-        expect(diaryService.getTagsForEntry, isA<Function>());
+        // Act
+        final service = DiaryService.createWithDependencies(
+          aiService: mockAiService,
+          photoService: mockPhotoService,
+        );
+
+        // Assert
+        expect(service.saveDiaryEntry, isA<Function>());
+        expect(service.saveDiaryEntryWithPhotos, isA<Function>());
+        expect(service.getTagsForEntry, isA<Function>());
       });
     });
   });
