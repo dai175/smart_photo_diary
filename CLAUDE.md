@@ -134,10 +134,11 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - **On-device**: TensorFlow Lite MobileNet v2 model for image classification
 - **Cloud AI**: Google Gemini 2.5 Flash integration for advanced diary generation
 - **AI Service Components**:
-  - `GeminiApiClient`: Direct API integration with Google Gemini
+  - `GeminiApiClient`: Direct API integration with Google Gemini, enhanced with EnvironmentConfig
   - `DiaryGenerator`: Core diary generation logic
   - `TagGenerator`: Automatic tag generation from content
   - `OfflineFallbackService`: Offline mode diary generation
+- **Environment Management**: EnvironmentConfig provides robust API key management with validation
 - **Assets**: ML models bundled in `assets/models/` directory
 
 ## Key Dependencies
@@ -160,7 +161,8 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 ### Configuration
 - `pubspec.yaml`: Dependencies and asset configuration
 - `analysis_options.yaml`: Linting rules with Japanese text support and performance optimizations
-- `.env`: Environment variables (API keys)
+- `.env`: Environment variables (API keys) - bundled as asset for release builds
+- `android/app/src/main/AndroidManifest.xml`: Includes INTERNET permissions for API calls
 
 ### Generated Code
 - `lib/models/diary_entry.g.dart`: Auto-generated Hive adapter (do not edit manually)
@@ -175,7 +177,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 Always run `fvm dart run build_runner build` after modifying Hive model classes to regenerate adapters.
 
 ### Code Quality Standards
-- Always run `fvm flutter analyze` before committing code - currently 121 issues (mostly info-level suggestions)
+- Always run `fvm flutter analyze` before committing code - currently **no issues** (clean codebase)
 - Custom lint rules enforce single quotes, const constructors, and performance optimizations
 - Fix all analyzer warnings and errors immediately to maintain code quality
 - Project uses Japanese comments for business logic documentation
@@ -255,8 +257,11 @@ The project follows a comprehensive 3-tier testing strategy with **100% success 
 - **Test isolation**: Each test is independent with proper setup/teardown
 - **Result<T> testing**: Comprehensive unit tests for functional error handling patterns
 
-### Environment Variables
-Create a `.env` file in the root directory for Google Gemini API keys and other configuration.
+### Environment Variables and Configuration
+- **`.env` file**: Create in root directory for Google Gemini API keys and other configuration
+- **EnvironmentConfig**: Robust environment variable management with caching and validation (`lib/config/environment_config.dart`)
+- **Android permissions**: Release builds require INTERNET permissions in AndroidManifest.xml for API calls
+- **Asset bundling**: `.env` file is included as an asset in `pubspec.yaml` for release builds
 
 ### Platform Considerations
 The app supports multiple platforms but photo access requires platform-specific permissions handled by `permission_handler`.
