@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'config/environment_config.dart';
 import 'constants/app_constants.dart';
 import 'models/diary_entry.dart';
 import 'screens/home_screen.dart';
@@ -19,8 +19,8 @@ Future<void> main() async {
   // アダプターの登録
   Hive.registerAdapter(DiaryEntryAdapter());
 
-  // .envファイルの読み込み
-  await dotenv.load();
+  // 環境変数の初期化
+  await EnvironmentConfig.initialize();
 
   // サービスロケータの初期化
   await ServiceRegistration.initialize();

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
 
 /// Gemini APIクライアント - API通信を担当
@@ -9,8 +9,15 @@ class GeminiApiClient {
   // Google Gemini APIのエンドポイント
   static String get _apiUrl => 'https://generativelanguage.googleapis.com/v1beta/models/${AiConstants.geminiModelName}:generateContent';
 
-  // APIキーを.envファイルから取得
-  static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
+  // APIキーをEnvironmentConfigから取得
+  static String get _apiKey {
+    final key = EnvironmentConfig.geminiApiKey;
+    if (key.isEmpty) {
+      debugPrint('警告: GEMINI_API_KEYが設定されていません');
+      EnvironmentConfig.printDebugInfo();
+    }
+    return key;
+  }
 
   /// テキストベースのAPIリクエストを送信
   Future<Map<String, dynamic>?> sendTextRequest({
@@ -18,6 +25,13 @@ class GeminiApiClient {
     double? temperature,
     int? maxOutputTokens,
   }) async {
+    // APIキーの事前検証
+    if (!EnvironmentConfig.hasValidApiKey) {
+      debugPrint('Gemini API エラー: 有効なAPIキーが設定されていません');
+      EnvironmentConfig.printDebugInfo();
+      return null;
+    }
+    
     try {
       final response = await http.post(
         Uri.parse('$_apiUrl?key=$_apiKey'),
@@ -51,10 +65,12 @@ class GeminiApiClient {
         return data;
       } else {
         debugPrint('Gemini API エラー: ${response.statusCode} - ${response.body}');
+        debugPrint('使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}');
         return null;
       }
     } catch (e) {
       debugPrint('Gemini API リクエストエラー: $e');
+      debugPrint('使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}');
       return null;
     }
   }
@@ -66,6 +82,13 @@ class GeminiApiClient {
     double? temperature,
     int? maxOutputTokens,
   }) async {
+    // APIキーの事前検証
+    if (!EnvironmentConfig.hasValidApiKey) {
+      debugPrint('Gemini Vision API エラー: 有効なAPIキーが設定されていません');
+      EnvironmentConfig.printDebugInfo();
+      return null;
+    }
+    
     try {
       // Base64エンコード
       final base64Image = base64Encode(imageData);
@@ -108,11 +131,34 @@ class GeminiApiClient {
         return data;
       } else {
         debugPrint('Gemini Vision API エラー: ${response.statusCode} - ${response.body}');
+        debugPrint('使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}');
         return null;
       }
     } catch (e) {
       debugPrint('Gemini Vision API リクエストエラー: $e');
+      debugPrint('使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}');
       return null;
+    }
+  }
+
+  /// APIキーの有効性をテスト
+  Future<bool> testApiKey() async {
+    if (!EnvironmentConfig.hasValidApiKey) {
+      debugPrint('APIキーテスト: 有効なAPIキーが設定されていません');
+      EnvironmentConfig.printDebugInfo();
+      return false;
+    }
+    
+    try {
+      final response = await sendTextRequest(
+        prompt: 'Hello, this is a test.',
+      );
+      final isValid = response != null;
+      debugPrint('APIキーテスト: ${isValid ? "有効" : "無効"}');
+      return isValid;
+    } catch (e) {
+      debugPrint('APIキーテストエラー: $e');
+      return false;
     }
   }
 
