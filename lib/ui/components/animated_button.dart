@@ -37,7 +37,7 @@ class AnimatedButton extends StatefulWidget {
   /// 前景色（テキスト・アイコンの色）
   final Color? foregroundColor;
 
-  /// グラデーション背景
+  /// グラデーション背景（非推奨）
   final Gradient? gradient;
 
   /// 角丸の半径
@@ -150,7 +150,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
           scale: widget.enableScaleAnimation ? _scaleAnimation.value : 1.0,
           child: Container(
             width: widget.width,
-            height: widget.height ?? AppSpacing.buttonHeightMd,
+            height: widget.height ?? AppSpacing.buttonHeightLg,
             decoration: BoxDecoration(
               color: widget.gradient == null ? backgroundColor : null,
               gradient: widget.gradient,
@@ -187,7 +187,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
                     ? foregroundColor.withValues(alpha: 0.1)
                     : Colors.transparent,
                 child: Container(
-                  padding: widget.padding ?? AppSpacing.buttonPadding,
+                  padding: widget.padding ?? AppSpacing.buttonPaddingSmall,
                   child: DefaultTextStyle(
                     style: AppTypography.withColor(AppTypography.button, foregroundColor),
                     textAlign: TextAlign.center,
@@ -230,7 +230,8 @@ class PrimaryButton extends StatelessWidget {
     return AnimatedButton(
       onPressed: isLoading ? null : onPressed,
       width: width,
-      gradient: AppColors.primaryGradient,
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
       shadowColor: AppColors.primary.withValues(alpha: 0.3),
       child: isLoading
           ? const SizedBox(
@@ -317,7 +318,8 @@ class AccentButton extends StatelessWidget {
     return AnimatedButton(
       onPressed: onPressed,
       width: width,
-      gradient: AppColors.accentGradient,
+      backgroundColor: AppColors.accent,
+      foregroundColor: Colors.white,
       shadowColor: AppColors.accent.withValues(alpha: 0.3),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -12,7 +12,6 @@ import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
@@ -301,9 +300,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GradientAppBar(
+      appBar: AppBar(
         title: const Text('日記プレビュー'),
-        gradient: AppColors.primaryGradient,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
         actions: [
           // 保存ボタン
           if (!_isLoading && !_hasError)
@@ -321,7 +322,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: AppSpacing.screenPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -331,7 +332,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 child: Container(
                   padding: AppSpacing.cardPadding,
                   decoration: BoxDecoration(
-                    gradient: AppColors.modernHomeGradient,
+                    color: AppColors.primaryContainer,
                     borderRadius: AppSpacing.cardRadius,
                     boxShadow: AppSpacing.cardShadow,
                   ),
@@ -339,13 +340,13 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.calendar_today_rounded,
-                          color: AppColors.primary,
+                          color: Colors.white,
                           size: AppSpacing.iconMd,
                         ),
                       ),
@@ -357,14 +358,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             '日記の日付',
                             style: AppTypography.withColor(
                               AppTypography.labelMedium,
-                              Colors.white.withValues(alpha: 0.8),
+                              AppColors.onPrimaryContainer,
                             ),
                           ),
                           Text(
                             DateFormat('yyyy年MM月dd日').format(_photoDateTime),
                             style: AppTypography.withColor(
                               AppTypography.headlineSmall,
-                              Colors.white,
+                              AppColors.onPrimaryContainer,
                             ),
                           ),
                         ],
@@ -461,7 +462,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
               // ローディング表示
               if (_isLoading)
-                Expanded(
+                SizedBox(
+                  height: 400,
                   child: FadeInWidget(
                     child: CustomCard(
                       child: Column(
@@ -504,7 +506,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 widthFactor: _totalPhotos > 0 ? _currentPhotoIndex / _totalPhotos : 0,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    gradient: AppColors.primaryGradient,
+                                    color: AppColors.primary,
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
@@ -532,7 +534,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 )
               // エラー表示
               else if (_hasError)
-                Expanded(
+                SizedBox(
+                  height: 400,
                   child: FadeInWidget(
                     child: CustomCard(
                       child: Column(
@@ -577,7 +580,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 )
               // 日記編集フィールド
               else
-                Expanded(
+                SizedBox(
+                  height: 400,
                   child: SlideInWidget(
                     delay: const Duration(milliseconds: 200),
                     child: CustomCard(
@@ -598,7 +602,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: AppSpacing.lg),
+                          const SizedBox(height: AppSpacing.md),
                           Container(
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -623,8 +627,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          Expanded(
+                          const SizedBox(height: AppSpacing.sm),
+                          Flexible(
                             child: Container(
                               decoration: BoxDecoration(
                                 border: Border.all(
@@ -635,8 +639,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                               child: TextField(
                                 controller: _contentController,
-                                maxLines: null,
-                                expands: true,
+                                maxLines: 8,
+                                minLines: 8,
                                 textAlignVertical: TextAlignVertical.top,
                                 style: AppTypography.bodyLarge,
                                 decoration: InputDecoration(
@@ -658,6 +662,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                     ),
                   ),
                 ),
+              // 底部パディング（キーボード用の余白）
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 100),
             ],
           ),
         ),

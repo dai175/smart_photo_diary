@@ -161,11 +161,8 @@ class HomeContentWidget extends StatelessWidget {
               : null,
           width: double.infinity,
           height: AppSpacing.buttonHeightLg,
-          gradient: photoController.selectedCount > 0 
-              ? AppColors.primaryGradient 
-              : null,
           backgroundColor: photoController.selectedCount > 0 
-              ? null 
+              ? AppColors.primary 
               : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           foregroundColor: photoController.selectedCount > 0 
               ? Colors.white 
