@@ -3,6 +3,11 @@ import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/animated_button.dart';
+import '../ui/components/loading_shimmer.dart';
 
 /// 写真グリッド表示ウィジェット
 class PhotoGridWidget extends StatelessWidget {
@@ -26,10 +31,8 @@ class PhotoGridWidget extends StatelessWidget {
       builder: (context, child) {
         return Column(
           children: [
-            _buildHeader(),
-            const SizedBox(height: AppConstants.smallPadding),
             _buildPhotoGrid(context),
-            const SizedBox(height: AppConstants.smallPadding),
+            const SizedBox(height: AppSpacing.md),
             _buildSelectionCounter(context),
           ],
         );
@@ -37,47 +40,42 @@ class PhotoGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          AppConstants.newPhotosTitle,
-          style: TextStyle(
-            fontSize: AppConstants.sectionTitleFontSize,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.smallPadding,
-            vertical: 2,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.redAccent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '${controller.photoAssets.length}',
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildPhotoGrid(BuildContext context) {
+    if (controller.isLoading) {
+      return SizedBox(
+        height: AppConstants.photoGridHeight,
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: AppConstants.photoGridCrossAxisCount,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
+          ),
+          itemCount: 6,
+          itemBuilder: (context, index) => const CardShimmer(),
+        ),
+      );
+    }
+
+    if (!controller.hasPermission) {
+      return SizedBox(
+        height: AppConstants.photoGridHeight,
+        child: _buildPermissionRequest(),
+      );
+    }
+
+    if (controller.photoAssets.isEmpty) {
+      return SizedBox(
+        height: AppConstants.photoGridHeight,
+        child: _buildEmptyState(),
+      );
+    }
+
     return SizedBox(
       height: AppConstants.photoGridHeight,
-      child: controller.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : !controller.hasPermission
-              ? _buildPermissionRequest()
-              : controller.photoAssets.isNotEmpty
-                  ? _buildGrid()
-                  : const Center(
-                      child: Text(AppConstants.noPhotosMessage),
-                    ),
+      child: _buildGrid(),
     );
   }
 
@@ -86,17 +84,60 @@ class PhotoGridWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.no_photography,
-            size: 48,
-            color: Colors.grey,
+          Container(
+            padding: AppSpacing.cardPadding,
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: AppSpacing.cardRadius,
+            ),
+            child: Icon(
+              Icons.photo_camera_outlined,
+              size: AppSpacing.iconLg,
+              color: AppColors.warning,
+            ),
           ),
-          const SizedBox(height: AppConstants.defaultPadding),
-          const Text(AppConstants.permissionMessage),
-          const SizedBox(height: AppConstants.smallPadding),
-          ElevatedButton(
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            AppConstants.permissionMessage,
+            style: AppTypography.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PrimaryButton(
             onPressed: onRequestPermission,
-            child: const Text(AppConstants.requestPermissionButton),
+            text: AppConstants.requestPermissionButton,
+            icon: Icons.settings_rounded,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: AppSpacing.cardPadding,
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer.withValues(alpha: 0.3),
+              borderRadius: AppSpacing.cardRadius,
+            ),
+            child: Icon(
+              Icons.photo_library_outlined,
+              size: AppSpacing.iconLg,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            AppConstants.noPhotosMessage,
+            style: AppTypography.withColor(
+              AppTypography.bodyMedium,
+              AppColors.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -107,11 +148,10 @@ class PhotoGridWidget extends StatelessWidget {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppConstants.smallPadding),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: AppConstants.photoGridCrossAxisCount,
-        crossAxisSpacing: AppConstants.photoGridSpacing,
-        mainAxisSpacing: AppConstants.photoGridSpacing,
+        crossAxisSpacing: AppSpacing.sm,
+        mainAxisSpacing: AppSpacing.sm,
       ),
       itemCount: controller.photoAssets.length,
       itemBuilder: (context, index) => _buildPhotoItem(index),
@@ -119,21 +159,40 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoItem(int index) {
+    final isSelected = controller.selected[index];
+    final isUsed = controller.isPhotoUsed(index);
+    
     return GestureDetector(
       onTap: () => _handlePhotoTap(index),
-      child: Stack(
-        children: [
-          _buildPhotoThumbnail(index),
-          _buildSelectionIndicator(index),
-          if (controller.isPhotoUsed(index)) _buildUsedLabel(),
-        ],
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: AppSpacing.photoRadius,
+          boxShadow: isSelected 
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : AppSpacing.cardShadow,
+        ),
+        child: Stack(
+          children: [
+            _buildPhotoThumbnail(index),
+            _buildSelectionIndicator(index),
+            if (isUsed) _buildUsedLabel(),
+            if (isSelected) _buildSelectedOverlay(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPhotoThumbnail(int index) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppConstants.photoCornerRadius),
+      borderRadius: AppSpacing.photoRadius,
       child: FutureBuilder<dynamic>(
         future: ServiceRegistration.get<PhotoServiceInterface>().getThumbnail(controller.photoAssets[index]),
         builder: (context, snapshot) {
@@ -149,9 +208,14 @@ class PhotoGridWidget extends StatelessWidget {
             return Container(
               height: AppConstants.photoThumbnailSize,
               width: AppConstants.photoThumbnailSize,
-              color: Colors.grey[300],
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: AppSpacing.photoRadius,
+              ),
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
               ),
             );
           }
@@ -162,11 +226,22 @@ class PhotoGridWidget extends StatelessWidget {
 
   Widget _buildSelectionIndicator(int index) {
     return Positioned(
-      top: 4,
-      right: 4,
-      child: CircleAvatar(
-        radius: 14,
-        backgroundColor: Colors.white,
+      top: AppSpacing.xs,
+      right: AppSpacing.xs,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
         child: _getSelectionIcon(index),
       ),
     );
@@ -174,38 +249,54 @@ class PhotoGridWidget extends StatelessWidget {
 
   Widget _getSelectionIcon(int index) {
     if (controller.isPhotoUsed(index)) {
-      return const Icon(
-        Icons.check,
-        color: Colors.orange,
-        size: 22,
+      return Icon(
+        Icons.done_rounded,
+        color: AppColors.warning,
+        size: 18,
       );
     } else {
       return Icon(
         controller.selected[index]
-            ? Icons.check_circle
-            : Icons.radio_button_unchecked,
-        color: controller.selected[index] ? Colors.green : Colors.grey,
-        size: 22,
+            ? Icons.check_circle_rounded
+            : Icons.radio_button_unchecked_rounded,
+        color: controller.selected[index] ? AppColors.success : AppColors.onSurfaceVariant,
+        size: 18,
       );
     }
   }
 
   Widget _buildUsedLabel() {
     return Positioned(
-      bottom: 4,
-      left: 4,
+      bottom: AppSpacing.xs,
+      left: AppSpacing.xs,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.xxs,
         ),
-        child: const Text(
+        decoration: BoxDecoration(
+          color: AppColors.warning.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(AppSpacing.xs),
+        ),
+        child: Text(
           AppConstants.usedPhotoLabel,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: AppConstants.smallCaptionFontSize,
-            fontWeight: FontWeight.bold,
+          style: AppTypography.withColor(
+            AppTypography.labelSmall,
+            Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedOverlay() {
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: AppSpacing.photoRadius,
+          border: Border.all(
+            color: AppColors.primary,
+            width: 3,
           ),
         ),
       ),
@@ -213,11 +304,38 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildSelectionCounter(BuildContext context) {
-    return Text(
-      '選択された写真: ${controller.selectedCount}/${AppConstants.maxPhotosSelection}枚',
-      style: TextStyle(
-        fontSize: AppConstants.captionFontSize,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: controller.selectedCount > 0 
+            ? AppColors.primaryContainer 
+            : AppColors.surfaceVariant,
+        borderRadius: AppSpacing.chipRadius,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.photo_library_rounded,
+            size: AppSpacing.iconSm,
+            color: controller.selectedCount > 0 
+                ? AppColors.primary 
+                : AppColors.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            '選択された写真: ${controller.selectedCount}/${AppConstants.maxPhotosSelection}枚',
+            style: AppTypography.withColor(
+              AppTypography.labelMedium,
+              controller.selectedCount > 0 
+                  ? AppColors.onPrimaryContainer 
+                  : AppColors.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

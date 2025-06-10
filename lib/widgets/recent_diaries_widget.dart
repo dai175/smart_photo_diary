@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants/app_constants.dart';
 import '../models/diary_entry.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/custom_card.dart';
+import '../ui/components/loading_shimmer.dart';
 
 /// 最近の日記表示ウィジェット
 class RecentDiariesWidget extends StatelessWidget {
@@ -18,48 +23,68 @@ class RecentDiariesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeader(),
-        const SizedBox(height: AppConstants.smallPadding),
-        _buildContent(context),
-      ],
-    );
+    return _buildContent(context);
   }
 
-  Widget _buildHeader() {
-    return const Text(
-      AppConstants.recentDiariesTitle,
-      style: TextStyle(
-        fontSize: AppConstants.cardTitleFontSize,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
 
   Widget _buildContent(BuildContext context) {
     if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: CircularProgressIndicator(),
+      return Column(
+        children: List.generate(
+          3,
+          (index) => Padding(
+            padding: EdgeInsets.only(
+              bottom: index < 2 ? AppSpacing.md : 0,
+            ),
+            child: const DiaryCardShimmer(),
+          ),
         ),
       );
     }
 
     if (recentDiaries.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: Text(AppConstants.noDiariesMessage),
+      return Container(
+        padding: AppSpacing.cardPadding,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: AppSpacing.cardRadius,
+          border: Border.all(
+            color: AppColors.outline.withValues(alpha: 0.2),
+            style: BorderStyle.solid,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.auto_stories_outlined,
+              size: AppSpacing.iconLg,
+              color: AppColors.onSurfaceVariant,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              AppConstants.noDiariesMessage,
+              style: AppTypography.withColor(
+                AppTypography.bodyMedium,
+                AppColors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }
 
     return Column(
       children: recentDiaries
-          .map((diary) => _buildDiaryCard(context, diary))
+          .asMap()
+          .entries
+          .map((entry) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: entry.key < recentDiaries.length - 1 ? AppSpacing.md : 0,
+                ),
+                child: _buildDiaryCard(context, entry.value),
+              ))
           .toList(),
     );
   }
@@ -67,36 +92,51 @@ class RecentDiariesWidget extends StatelessWidget {
   Widget _buildDiaryCard(BuildContext context, DiaryEntry diary) {
     final title = diary.title.isNotEmpty ? diary.title : '無題';
 
-    return GestureDetector(
+    return CustomCard(
       onTap: () => onDiaryTap(diary.id),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: ThemeConstants.defaultCardPadding,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
-          boxShadow: AppConstants.cardShadow,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDateLabel(diary.date),
-            const SizedBox(height: 6),
-            _buildTitle(context, title),
-            const SizedBox(height: 4),
-            _buildDiaryContent(context, diary.content),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _buildDateLabel(diary.date),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.onSurfaceVariant,
+                size: AppSpacing.iconSm,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _buildTitle(context, title),
+          const SizedBox(height: AppSpacing.xs),
+          _buildDiaryContent(context, diary.content),
+          if (diary.tags?.isNotEmpty == true) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _buildTags(diary.tags!),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildDateLabel(DateTime date) {
-    return Text(
-      DateFormat('yyyy年MM月dd日').format(date),
-      style: const TextStyle(
-        color: Colors.purple,
-        fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primaryContainer,
+        borderRadius: AppSpacing.chipRadius,
+      ),
+      child: Text(
+        DateFormat('MM/dd').format(date),
+        style: AppTypography.withColor(
+          AppTypography.labelSmall,
+          AppColors.onPrimaryContainer,
+        ),
       ),
     );
   }
@@ -104,11 +144,7 @@ class RecentDiariesWidget extends StatelessWidget {
   Widget _buildTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontWeight: FontWeight.bold,
-        fontSize: AppConstants.defaultPadding,
-      ),
+      style: AppTypography.titleMedium,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -117,12 +153,41 @@ class RecentDiariesWidget extends StatelessWidget {
   Widget _buildDiaryContent(BuildContext context, String content) {
     return Text(
       content,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontSize: AppConstants.bodyFontSize,
+      style: AppTypography.withColor(
+        AppTypography.bodyMedium,
+        AppColors.onSurfaceVariant,
       ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildTags(List<String> tags) {
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      children: tags
+          .take(3)
+          .map(
+            (tag) => Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xxs,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.1),
+                borderRadius: AppSpacing.chipRadius,
+              ),
+              child: Text(
+                tag,
+                style: AppTypography.withColor(
+                  AppTypography.labelSmall,
+                  AppColors.accent,
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }

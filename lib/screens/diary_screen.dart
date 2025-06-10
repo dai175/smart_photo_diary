@@ -4,6 +4,14 @@ import '../widgets/diary_card_widget.dart';
 import '../shared/filter_bottom_sheet.dart';
 import '../shared/active_filters_display.dart';
 import 'diary_detail_screen.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/gradient_app_bar.dart';
+import '../ui/components/animated_button.dart';
+import '../ui/components/loading_shimmer.dart';
+import '../ui/animations/page_transitions.dart';
+import '../ui/animations/list_animations.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -31,9 +39,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   void _navigateToDiaryDetail(String diaryId) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => DiaryDetailScreen(diaryId: diaryId),
-      ),
+      DiaryDetailScreen(diaryId: diaryId).customRoute(),
     ).then((result) {
       // 詳細画面から戻ってきたときに日記一覧を再読み込み
       _controller.loadDiaryEntries();
@@ -71,13 +77,19 @@ class _DiaryScreenState extends State<DiaryScreen> {
           body: Column(
             children: [
               // アクティブフィルタ表示
-              ActiveFiltersDisplay(
-                filter: _controller.currentFilter,
-                onClear: _controller.clearAllFilters,
-                onRemoveTag: _controller.removeTagFilter,
-                onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
-                onRemoveDateRange: _controller.removeDateRangeFilter,
-                onRemoveSearch: _controller.removeSearchFilter,
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                child: ActiveFiltersDisplay(
+                  filter: _controller.currentFilter,
+                  onClear: _controller.clearAllFilters,
+                  onRemoveTag: _controller.removeTagFilter,
+                  onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
+                  onRemoveDateRange: _controller.removeDateRangeFilter,
+                  onRemoveSearch: _controller.removeSearchFilter,
+                ),
               ),
               
               // 日記一覧
@@ -92,26 +104,33 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
+    return GradientAppBar(
       title: _controller.isSearching 
         ? TextField(
             controller: _controller.searchController,
             autofocus: true,
-            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'タイトルや本文を検索...',
               hintStyle: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
               border: InputBorder.none,
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+              ),
             ),
             onChanged: _controller.performSearch,
           )
         : const Text('日記一覧'),
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      gradient: AppColors.primaryGradient,
       leading: _controller.isSearching 
         ? IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              color: Colors.white,
+            ),
             onPressed: _controller.stopSearch,
           )
         : null,
@@ -119,48 +138,76 @@ class _DiaryScreenState extends State<DiaryScreen> {
         ? [
             if (_controller.searchQuery.isNotEmpty)
               IconButton(
-                icon: const Icon(Icons.clear),
+                icon: const Icon(
+                  Icons.clear_rounded,
+                  color: Colors.white,
+                ),
                 onPressed: _controller.clearSearch,
               ),
           ]
         : [
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: Colors.white,
+              ),
               onPressed: _controller.refresh,
             ),
             IconButton(
-              icon: const Icon(Icons.search), 
+              icon: const Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+              ), 
               onPressed: _controller.startSearch,
             ),
-            IconButton(
-              icon: Icon(
-                Icons.filter_list,
-                color: _controller.currentFilter.isActive 
-                  ? Theme.of(context).colorScheme.secondary 
-                  : null,
+            Container(
+              margin: const EdgeInsets.only(right: AppSpacing.sm),
+              child: IconButton(
+                icon: Icon(
+                  Icons.tune_rounded,
+                  color: _controller.currentFilter.isActive 
+                    ? AppColors.accent 
+                    : Colors.white,
+                ),
+                onPressed: _showFilterBottomSheet,
               ),
-              onPressed: _showFilterBottomSheet,
             ),
           ],
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      elevation: 0,
     );
   }
 
   Widget _buildContent() {
     if (_controller.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView.builder(
+        padding: AppSpacing.screenPadding,
+        itemCount: 6,
+        itemBuilder: (context, index) => Padding(
+          padding: EdgeInsets.only(
+            bottom: index < 5 ? AppSpacing.md : 0,
+          ),
+          child: const DiaryCardShimmer(),
+        ),
+      );
     }
 
     if (_controller.diaryEntries.isNotEmpty) {
       return ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.screenPadding,
         itemCount: _controller.diaryEntries.length,
         itemBuilder: (context, index) {
           final entry = _controller.diaryEntries[index];
-          return DiaryCardWidget(
-            entry: entry,
-            onTap: () => _navigateToDiaryDetail(entry.id),
+          return SlideInWidget(
+            delay: Duration(milliseconds: 50 * index),
+            begin: const Offset(0.0, 0.2),
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: index < _controller.diaryEntries.length - 1 ? AppSpacing.lg : 0,
+              ),
+              child: DiaryCardWidget(
+                entry: entry,
+                onTap: () => _navigateToDiaryDetail(entry.id),
+              ),
+            ),
           );
         },
       );
@@ -171,39 +218,48 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            _controller.getEmptyStateIcon(),
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _controller.getEmptyStateMessage(),
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: AppSpacing.screenPadding,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: AppSpacing.cardPaddingLarge,
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: AppSpacing.cardRadiusLarge,
+              ),
+              child: Icon(
+                _controller.getEmptyStateIcon(),
+                size: AppSpacing.iconXl,
+                color: AppColors.primary,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _controller.getEmptyStateSubMessage(),
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              _controller.getEmptyStateMessage(),
+              style: AppTypography.headlineSmall,
+              textAlign: TextAlign.center,
             ),
-          ),
-          if (_controller.currentFilter.isActive && !_controller.isSearching) ...[
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _controller.clearAllFilters,
-              child: const Text('フィルタをクリア'),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              _controller.getEmptyStateSubMessage(),
+              style: AppTypography.withColor(
+                AppTypography.bodyMedium,
+                AppColors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
+            if (_controller.currentFilter.isActive && !_controller.isSearching) ...[
+              const SizedBox(height: AppSpacing.xl),
+              PrimaryButton(
+                onPressed: _controller.clearAllFilters,
+                text: 'フィルタをクリア',
+                icon: Icons.clear_all_rounded,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

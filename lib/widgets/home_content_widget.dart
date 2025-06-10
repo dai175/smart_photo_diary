@@ -5,6 +5,12 @@ import '../models/diary_entry.dart';
 import '../screens/diary_preview_screen.dart';
 import '../widgets/photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/animated_button.dart';
+import '../ui/animations/page_transitions.dart';
+import '../ui/animations/list_animations.dart';
 
 class HomeContentWidget extends StatelessWidget {
   final PhotoSelectionController photoController;
@@ -41,36 +47,46 @@ class HomeContentWidget extends StatelessWidget {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(
+      padding: EdgeInsets.only(
         top: AppConstants.headerTopPadding,
-        bottom: AppConstants.headerBottomPadding,
+        bottom: AppSpacing.xl,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
       ),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppConstants.headerGradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: AppColors.modernHomeGradient,
       ),
-      child: Column(
-        children: [
-          const Text(
-            AppConstants.appTitle,
-            style: TextStyle(
-              fontSize: AppConstants.titleFontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Text(
+              AppConstants.appTitle,
+              style: AppTypography.withColor(
+                AppTypography.headlineLarge,
+                Colors.white,
+              ),
             ),
-          ),
-          const SizedBox(height: AppConstants.smallPadding),
-          Text(
-            '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
-            style: const TextStyle(
-              fontSize: AppConstants.subtitleFontSize,
-              color: Colors.white,
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: AppSpacing.chipRadius,
+              ),
+              child: Text(
+                '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
+                style: AppTypography.withColor(
+                  AppTypography.bodyMedium,
+                  Colors.white,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -78,23 +94,60 @@ class HomeContentWidget extends StatelessWidget {
   Widget _buildMainContent(BuildContext context) {
     return Expanded(
       child: ListView(
-        padding: ThemeConstants.defaultScreenPadding,
+        padding: AppSpacing.screenPadding,
         children: [
+          FadeInWidget(
+            delay: const Duration(milliseconds: 100),
+            child: _buildPhotoSection(context),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          FadeInWidget(
+            delay: const Duration(milliseconds: 200),
+            child: _buildCreateDiaryButton(context),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          FadeInWidget(
+            delay: const Duration(milliseconds: 300),
+            child: _buildRecentDiariesSection(context),
+          ),
+          const SizedBox(height: AppConstants.bottomNavPadding),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoSection(BuildContext context) {
+    return Container(
+      padding: AppSpacing.cardPadding,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: AppSpacing.cardRadiusLarge,
+        boxShadow: AppSpacing.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.photo_camera_rounded,
+                color: AppColors.primary,
+                size: AppSpacing.iconMd,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                '今日の写真',
+                style: AppTypography.headlineSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
           PhotoGridWidget(
             controller: photoController,
             onSelectionLimitReached: onSelectionLimitReached,
             onUsedPhotoSelected: onUsedPhotoSelected,
             onRequestPermission: onRequestPermission,
           ),
-          const SizedBox(height: AppConstants.smallPadding),
-          _buildCreateDiaryButton(context),
-          const SizedBox(height: AppConstants.largePadding),
-          RecentDiariesWidget(
-            recentDiaries: recentDiaries,
-            isLoading: isLoadingDiaries,
-            onDiaryTap: onDiaryTap,
-          ),
-          const SizedBox(height: AppConstants.bottomNavPadding),
         ],
       ),
     );
@@ -104,32 +157,90 @@ class HomeContentWidget extends StatelessWidget {
     return ListenableBuilder(
       listenable: photoController,
       builder: (context, child) {
-        return ElevatedButton(
+        return AnimatedButton(
           onPressed: photoController.selectedCount > 0
               ? () => _navigateToDiaryPreview(context)
               : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            minimumSize: const Size.fromHeight(AppConstants.buttonHeight),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
-            ),
+          width: double.infinity,
+          height: AppSpacing.buttonHeightLg,
+          gradient: photoController.selectedCount > 0 
+              ? AppColors.primaryGradient 
+              : null,
+          backgroundColor: photoController.selectedCount > 0 
+              ? null 
+              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          foregroundColor: photoController.selectedCount > 0 
+              ? Colors.white 
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          shadowColor: photoController.selectedCount > 0 
+              ? AppColors.primary.withValues(alpha: 0.3) 
+              : null,
+          elevation: photoController.selectedCount > 0 ? AppSpacing.elevationSm : 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                photoController.selectedCount > 0 
+                    ? Icons.auto_awesome_rounded 
+                    : Icons.photo_camera_outlined,
+                size: AppSpacing.iconSm,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                photoController.selectedCount > 0
+                    ? '${photoController.selectedCount}枚の写真で日記を作成'
+                    : '写真を選択してください',
+                style: AppTypography.labelLarge,
+              ),
+            ],
           ),
-          child: Text('✨ ${photoController.selectedCount}枚の写真で日記を作成'),
         );
       },
+    );
+  }
+
+  Widget _buildRecentDiariesSection(BuildContext context) {
+    return Container(
+      padding: AppSpacing.cardPadding,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: AppSpacing.cardRadiusLarge,
+        boxShadow: AppSpacing.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.book_rounded,
+                color: AppColors.primary,
+                size: AppSpacing.iconMd,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                '最近の日記',
+                style: AppTypography.headlineSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          RecentDiariesWidget(
+            recentDiaries: recentDiaries,
+            isLoading: isLoadingDiaries,
+            onDiaryTap: onDiaryTap,
+          ),
+        ],
+      ),
     );
   }
 
   void _navigateToDiaryPreview(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => DiaryPreviewScreen(
-          selectedAssets: photoController.selectedPhotos,
-        ),
-      ),
+      DiaryPreviewScreen(
+        selectedAssets: photoController.selectedPhotos,
+      ).customRoute(),
     ).then((_) {
       onLoadRecentDiaries();
       photoController.clearSelection();

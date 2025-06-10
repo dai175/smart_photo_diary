@@ -5,6 +5,12 @@ import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
 import '../services/diary_service.dart';
 import '../constants/app_constants.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/custom_card.dart';
+import '../ui/components/modern_chip.dart';
+import '../ui/components/loading_shimmer.dart';
 
 class DiaryCardWidget extends StatelessWidget {
   final DiaryEntry entry;
@@ -42,57 +48,85 @@ class DiaryCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // タイトルを取得
     final title = entry.title.isNotEmpty ? entry.title : '無題';
 
-    return GestureDetector(
+    return CustomCard(
       onTap: onTap,
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 2,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 日付
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                DateFormat('yyyy年MM月dd日').format(entry.date),
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
+      elevation: AppSpacing.elevationSm,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ヘッダー（日付とアイコン）
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer,
+                  borderRadius: AppSpacing.chipRadius,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: AppSpacing.iconXs,
+                      color: AppColors.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: AppSpacing.xxs),
+                    Text(
+                      DateFormat('MM/dd').format(entry.date),
+                      style: AppTypography.withColor(
+                        AppTypography.labelSmall,
+                        AppColors.onPrimaryContainer,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-
-            // タイトル
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.onSurfaceVariant,
+                size: AppSpacing.iconSm,
               ),
+            ],
+          ),
+          
+          const SizedBox(height: AppSpacing.md),
+
+          // タイトル
+          Text(
+            title,
+            style: AppTypography.titleLarge,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          const SizedBox(height: AppSpacing.sm),
+
+          // 本文（一部）
+          Text(
+            entry.content,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.withColor(
+              AppTypography.bodyMedium,
+              AppColors.onSurfaceVariant,
             ),
+          ),
 
-            // 本文（一部）
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Text(
-                entry.content,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
+          const SizedBox(height: AppSpacing.md),
 
-            // 写真があれば表示
-            _buildPhotoThumbnails(),
+          // 写真があれば表示
+          _buildPhotoThumbnails(),
 
-            // タグ（動的生成）
-            _buildTags(context),
-          ],
-        ),
+          // タグ（動的生成）
+          _buildTags(context),
+        ],
       ),
     );
   }
@@ -102,9 +136,19 @@ class DiaryCardWidget extends StatelessWidget {
       future: entry.getPhotoAssets(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 120,
-            child: Center(child: CircularProgressIndicator()),
+          return SizedBox(
+            height: AppConstants.diaryThumbnailSize + AppSpacing.sm,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (context, index) => Padding(
+                padding: EdgeInsets.only(
+                  right: index < 2 ? AppSpacing.sm : 0,
+                  bottom: AppSpacing.sm,
+                ),
+                child: const CardShimmer(),
+              ),
+            ),
           );
         }
 
@@ -114,16 +158,15 @@ class DiaryCardWidget extends StatelessWidget {
 
         final assets = snapshot.data!;
         return SizedBox(
-          height: AppConstants.diaryThumbnailSize,
+          height: AppConstants.diaryThumbnailSize + AppSpacing.sm,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: assets.length,
             itemBuilder: (context, imgIndex) {
               return Padding(
                 padding: EdgeInsets.only(
-                  left: imgIndex == 0 ? 16 : 8,
-                  right: imgIndex == assets.length - 1 ? 16 : 0,
-                  bottom: 8,
+                  right: imgIndex < assets.length - 1 ? AppSpacing.sm : 0,
+                  bottom: AppSpacing.sm,
                 ),
                 child: _buildThumbnail(assets[imgIndex]),
               );
@@ -139,20 +182,38 @@ class DiaryCardWidget extends StatelessWidget {
       future: asset.thumbnailData,
       builder: (context, thumbnailSnapshot) {
         if (!thumbnailSnapshot.hasData) {
-          return const SizedBox(
+          return Container(
             width: AppConstants.diaryThumbnailSize,
             height: AppConstants.diaryThumbnailSize,
-            child: Center(child: CircularProgressIndicator()),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: AppSpacing.photoRadius,
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           );
         }
 
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(ThemeConstants.mediumBorderRadius),
-          child: Image.memory(
-            thumbnailSnapshot.data!,
-            height: AppConstants.diaryThumbnailSize,
-            width: AppConstants.diaryThumbnailSize,
-            fit: BoxFit.cover,
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: AppSpacing.photoRadius,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: AppSpacing.photoRadius,
+            child: Image.memory(
+              thumbnailSnapshot.data!,
+              height: AppConstants.diaryThumbnailSize,
+              width: AppConstants.diaryThumbnailSize,
+              fit: BoxFit.cover,
+            ),
           ),
         );
       },
@@ -164,44 +225,59 @@ class DiaryCardWidget extends StatelessWidget {
       future: _generateTags(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+          return Row(
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'タグを生成中...',
+                style: AppTypography.withColor(
+                  AppTypography.labelSmall,
+                  AppColors.onSurfaceVariant,
                 ),
-                SizedBox(width: 8),
-                Text('タグを生成中...', style: TextStyle(fontSize: 12)),
-              ],
-            ),
+              ),
+            ],
           );
         }
         
         final tags = snapshot.data ?? [];
         if (tags.isEmpty) return const SizedBox();
         
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Wrap(
-            spacing: 8,
-            children: [
-              for (final tag in tags)
-                Chip(
-                  label: Text(
-                    '#$tag',
-                    style: const TextStyle(fontSize: 12, color: Colors.white),
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
-                  padding: const EdgeInsets.all(0),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        return Wrap(
+          spacing: AppSpacing.xs,
+          runSpacing: AppSpacing.xs,
+          children: tags
+              .take(4) // 最大4つまで表示
+              .map(
+                (tag) => CategoryChip(
+                  label: tag,
+                  selected: false,
+                  category: _getCategoryForTag(tag),
                 ),
-            ],
-          ),
+              )
+              .toList(),
         );
       },
     );
+  }
+
+  ChipCategory _getCategoryForTag(String tag) {
+    // タグの内容に基づいてカテゴリを判定
+    if (tag.contains('朝') || tag.contains('昼') || tag.contains('夕') || tag.contains('夜')) {
+      return ChipCategory.general;
+    } else if (tag.contains('楽し') || tag.contains('嬉し') || tag.contains('悲し') || tag.contains('怒り')) {
+      return ChipCategory.emotion;
+    } else if (tag.contains('料理') || tag.contains('食事') || tag.contains('食べ') || tag.contains('グルメ')) {
+      return ChipCategory.food;
+    } else if (tag.contains('公園') || tag.contains('家') || tag.contains('店') || tag.contains('場所')) {
+      return ChipCategory.location;
+    } else if (tag.contains('運動') || tag.contains('散歩') || tag.contains('スポーツ') || tag.contains('旅行')) {
+      return ChipCategory.activity;
+    }
+    return ChipCategory.general;
   }
 }
