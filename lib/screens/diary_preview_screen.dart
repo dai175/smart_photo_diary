@@ -9,6 +9,13 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../services/settings_service.dart';
 import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/gradient_app_bar.dart';
+import '../ui/components/animated_button.dart';
+import '../ui/components/custom_card.dart';
+import '../ui/animations/list_animations.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -294,198 +301,393 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: GradientAppBar(
         title: const Text('日記プレビュー'),
-        backgroundColor: Colors.purple.shade100,
+        gradient: AppColors.primaryGradient,
         actions: [
           // 保存ボタン
           if (!_isLoading && !_hasError)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveDiary,
-              tooltip: '日記を保存',
+            Container(
+              margin: const EdgeInsets.only(right: AppSpacing.sm),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.save_rounded,
+                  color: Colors.white,
+                ),
+                onPressed: _saveDiary,
+                tooltip: '日記を保存',
+              ),
             ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 日付表示
-            Text(
-              DateFormat('yyyy年MM月dd日').format(_photoDateTime),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple,
+      body: SafeArea(
+        child: Padding(
+          padding: AppSpacing.screenPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 日付表示カード
+              FadeInWidget(
+                child: Container(
+                  padding: AppSpacing.cardPadding,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.modernHomeGradient,
+                    borderRadius: AppSpacing.cardRadius,
+                    boxShadow: AppSpacing.cardShadow,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.calendar_today_rounded,
+                          color: AppColors.primary,
+                          size: AppSpacing.iconMd,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '日記の日付',
+                            style: AppTypography.withColor(
+                              AppTypography.labelMedium,
+                              Colors.white.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          Text(
+                            DateFormat('yyyy年MM月dd日').format(_photoDateTime),
+                            style: AppTypography.withColor(
+                              AppTypography.headlineSmall,
+                              Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
-            // 選択された写真のプレビュー
-            if (widget.selectedAssets.isNotEmpty)
-              SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.selectedAssets.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: FutureBuilder<Uint8List?>(
-                          future: widget.selectedAssets[index]
-                              .thumbnailDataWithSize(
-                                ThumbnailSize(
-                                  AppConstants.previewImageSize.toInt(),
-                                  AppConstants.previewImageSize.toInt(),
+              // 選択された写真のプレビュー
+              if (widget.selectedAssets.isNotEmpty)
+                FadeInWidget(
+                  delay: const Duration(milliseconds: 100),
+                  child: CustomCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.photo_library_rounded,
+                              color: AppColors.primary,
+                              size: AppSpacing.iconMd,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              '選択された写真 (${widget.selectedAssets.length}枚)',
+                              style: AppTypography.titleMedium,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: widget.selectedAssets.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: index < widget.selectedAssets.length - 1 ? AppSpacing.sm : 0,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: AppSpacing.photoRadius,
+                                    boxShadow: AppSpacing.cardShadow,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: AppSpacing.photoRadius,
+                                    child: FutureBuilder<Uint8List?>(
+                                      future: widget.selectedAssets[index]
+                                          .thumbnailDataWithSize(
+                                            ThumbnailSize(
+                                              (AppConstants.previewImageSize * 1.2).toInt(),
+                                              (AppConstants.previewImageSize * 1.2).toInt(),
+                                            ),
+                                          ),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                                ConnectionState.done &&
+                                            snapshot.data != null) {
+                                          return Image.memory(
+                                            snapshot.data!,
+                                            fit: BoxFit.cover,
+                                            width: 120,
+                                            height: 120,
+                                          );
+                                        }
+                                        return Container(
+                                          width: 120,
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.surfaceVariant,
+                                            borderRadius: AppSpacing.photoRadius,
+                                          ),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // ローディング表示
+              if (_isLoading)
+                Expanded(
+                  child: FadeInWidget(
+                    child: CustomCard(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: AppSpacing.cardPadding,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          if (_isAnalyzingPhotos && _totalPhotos > 1) ...[
+                            Text(
+                              '写真を分析中...',
+                              style: AppTypography.headlineSmall,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              '$_currentPhotoIndex/$_totalPhotos枚完了',
+                              style: AppTypography.withColor(
+                                AppTypography.bodyMedium,
+                                AppColors.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Container(
+                              width: double.infinity,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: _totalPhotos > 0 ? _currentPhotoIndex / _totalPhotos : 0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.primaryGradient,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
                                 ),
                               ),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                    ConnectionState.done &&
-                                snapshot.data != null) {
-                              return Image.memory(
-                                snapshot.data!,
-                                fit: BoxFit.cover,
-                                width: 100,
-                                height: 100,
-                              );
-                            }
-                            return Container(
-                              width: 100,
-                              height: 100,
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+                            ),
+                          ] else ...[
+                            Text(
+                              '写真から日記を生成中...',
+                              style: AppTypography.headlineSmall,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              'AIがあなたの写真を分析しています',
+                              style: AppTypography.withColor(
+                                AppTypography.bodyMedium,
+                                AppColors.onSurfaceVariant,
                               ),
-                            );
-                          },
-                        ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ],
                       ),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height: 24),
-
-            // ローディング表示
-            if (_isLoading)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      if (_isAnalyzingPhotos && _totalPhotos > 1) ...[
-                        Text('写真を分析中... $_currentPhotoIndex/$_totalPhotos枚'),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: _totalPhotos > 0 ? _currentPhotoIndex / _totalPhotos : 0,
-                        ),
-                      ] else
-                        const Text('写真から日記を生成中...'),
-                    ],
+                    ),
+                  ),
+                )
+              // エラー表示
+              else if (_hasError)
+                Expanded(
+                  child: FadeInWidget(
+                    child: CustomCard(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: AppSpacing.cardPadding,
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.error,
+                              size: AppSpacing.iconLg,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          Text(
+                            'エラーが発生しました',
+                            style: AppTypography.headlineSmall,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            _errorMessage,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.withColor(
+                              AppTypography.bodyMedium,
+                              AppColors.error,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          PrimaryButton(
+                            onPressed: () => Navigator.pop(context),
+                            text: '戻る',
+                            icon: Icons.arrow_back_rounded,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              // 日記編集フィールド
+              else
+                Expanded(
+                  child: SlideInWidget(
+                    delay: const Duration(milliseconds: 200),
+                    child: CustomCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.edit_rounded,
+                                color: AppColors.primary,
+                                size: AppSpacing.iconMd,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                '日記の内容',
+                                style: AppTypography.headlineSmall,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: AppColors.outline.withValues(alpha: 0.2),
+                              ),
+                              borderRadius: AppSpacing.inputRadius,
+                              color: AppColors.surface,
+                            ),
+                            child: TextField(
+                              controller: _titleController,
+                              style: AppTypography.titleLarge,
+                              decoration: InputDecoration(
+                                labelText: 'タイトル',
+                                border: InputBorder.none,
+                                hintText: '日記のタイトルを入力',
+                                contentPadding: AppSpacing.inputPadding,
+                                labelStyle: AppTypography.labelMedium,
+                                hintStyle: AppTypography.withColor(
+                                  AppTypography.bodyMedium,
+                                  AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: AppColors.outline.withValues(alpha: 0.2),
+                                ),
+                                borderRadius: AppSpacing.inputRadius,
+                                color: AppColors.surface,
+                              ),
+                              child: TextField(
+                                controller: _contentController,
+                                maxLines: null,
+                                expands: true,
+                                textAlignVertical: TextAlignVertical.top,
+                                style: AppTypography.bodyLarge,
+                                decoration: InputDecoration(
+                                  labelText: '本文',
+                                  hintText: '日記の内容を編集できます',
+                                  border: InputBorder.none,
+                                  contentPadding: AppSpacing.inputPadding,
+                                  labelStyle: AppTypography.labelMedium,
+                                  hintStyle: AppTypography.withColor(
+                                    AppTypography.bodyMedium,
+                                    AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              )
-            // エラー表示
-            else if (_hasError)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 48,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('戻る'),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            // 日記編集フィールド
-            else
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      '日記の内容',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _titleController,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'タイトル',
-                        border: OutlineInputBorder(),
-                        hintText: '日記のタイトルを入力',
-                        contentPadding: EdgeInsets.all(16),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _contentController,
-                        maxLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(
-                          labelText: '本文',
-                          hintText: '日記の内容を編集できます',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.all(16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: !_isLoading && !_hasError
           ? SafeArea(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
                 ),
-                child: ElevatedButton(
-                  onPressed: _saveDiary,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
                     ),
+                  ],
+                ),
+                child: SlideInWidget(
+                  delay: const Duration(milliseconds: 400),
+                  begin: const Offset(0, 1),
+                  child: PrimaryButton(
+                    onPressed: _saveDiary,
+                    text: '日記を保存',
+                    icon: Icons.save_rounded,
+                    width: double.infinity,
                   ),
-                  child: const Text('日記を保存'),
                 ),
               ),
             )

@@ -3,6 +3,13 @@ import 'package:table_calendar/table_calendar.dart';
 import '../services/diary_service.dart';
 import '../models/diary_entry.dart';
 import 'diary_detail_screen.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/gradient_app_bar.dart';
+import '../ui/components/custom_card.dart';
+import '../ui/animations/list_animations.dart';
+import '../ui/animations/page_transitions.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -116,26 +123,35 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildMarker(int count) {
     return Container(
-      width: 20,
-      height: 20,
+      width: 22,
+      height: 22,
       decoration: BoxDecoration(
-        color: count > 1 ? const Color(0xFFFF6B6B) : const Color(0xFF4ECDC4),
+        gradient: count > 1 
+            ? LinearGradient(
+                colors: [AppColors.error, AppColors.errorContainer],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : LinearGradient(
+                colors: [AppColors.success, AppColors.successContainer],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
+            color: (count > 1 ? AppColors.error : AppColors.success).withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Center(
         child: Text(
           count > 9 ? '9+' : count.toString(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
+          style: AppTypography.withColor(
+            AppTypography.labelSmall,
+            Colors.white,
           ),
         ),
       ),
@@ -146,85 +162,188 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            '${selectedDay.month}月${selectedDay.day}日の日記',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: AppSpacing.cardRadiusLarge,
           ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: diaries.length,
-              itemBuilder: (context, index) {
-                final diary = diaries[index];
-                final title = diary.title.isNotEmpty ? diary.title : '無題';
-                
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        '${index + 1}',
-                        style: const TextStyle(
+          child: Container(
+            padding: AppSpacing.dialogPadding,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: AppSpacing.cardRadiusLarge,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ヘッダー
+                Container(
+                  padding: AppSpacing.cardPadding,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: AppSpacing.cardRadius,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: const BoxDecoration(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.calendar_today_rounded,
+                          color: AppColors.primary,
+                          size: AppSpacing.iconSm,
                         ),
                       ),
-                    ),
-                    title: Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          diary.content,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '作成時刻: ${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
+                      const SizedBox(width: AppSpacing.md),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${selectedDay.month}月${selectedDay.day}日の日記',
+                            style: AppTypography.withColor(
+                              AppTypography.titleLarge,
+                              Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pop(); // ダイアログを閉じる
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DiaryDetailScreen(diaryId: diary.id),
+                          Text(
+                            '${diaries.length}件の日記があります',
+                            style: AppTypography.withColor(
+                              AppTypography.bodyMedium,
+                              Colors.white.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                
+                // 日記リスト
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 300,
+                    maxWidth: 400,
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: diaries.length,
+                    itemBuilder: (context, index) {
+                      final diary = diaries[index];
+                      final title = diary.title.isNotEmpty ? diary.title : '無題';
+                      
+                      return SlideInWidget(
+                        delay: Duration(milliseconds: 100 * index),
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            bottom: index < diaries.length - 1 ? AppSpacing.sm : 0,
+                          ),
+                          child: CustomCard(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(
+                                context,
+                                DiaryDetailScreen(diaryId: diary.id).customRoute(),
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.accentGradient,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: AppTypography.withColor(
+                                        AppTypography.labelLarge,
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: AppTypography.titleMedium,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(
+                                        diary.content,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.withColor(
+                                          AppTypography.bodySmall,
+                                          AppColors.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.sm,
+                                          vertical: AppSpacing.xxs,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryContainer,
+                                          borderRadius: AppSpacing.chipRadius,
+                                        ),
+                                        child: Text(
+                                          '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
+                                          style: AppTypography.withColor(
+                                            AppTypography.labelSmall,
+                                            AppColors.onPrimaryContainer,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: AppColors.onSurfaceVariant,
+                                  size: AppSpacing.iconSm,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     },
                   ),
-                );
-              },
+                ),
+                
+                const SizedBox(height: AppSpacing.lg),
+                
+                // アクションボタン
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.onSurfaceVariant,
+                      ),
+                      child: Text(
+                        'キャンセル',
+                        style: AppTypography.labelLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('キャンセル'),
-            ),
-          ],
         );
       },
     );
@@ -234,30 +353,75 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: const Text(
-          '統計',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        elevation: 0,
+      appBar: GradientAppBar(
+        title: const Text('統計'),
+        gradient: AppColors.primaryGradient,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: AppSpacing.sm),
+            child: IconButton(
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: Colors.white,
+              ),
+              onPressed: _loadStatistics,
+              tooltip: '統計を更新',
+            ),
+          ),
+        ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: FadeInWidget(
+                child: CustomCard(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: AppSpacing.cardPadding,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const CircularProgressIndicator(strokeWidth: 3),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      Text(
+                        '統計データを読み込み中...',
+                        style: AppTypography.headlineSmall,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'あなたの日記の記録を分析しています',
+                        style: AppTypography.withColor(
+                          AppTypography.bodyMedium,
+                          AppColors.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.screenPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 統計カード群
-                  _buildStatisticsCards(),
-                  const SizedBox(height: 24),
+                  FadeInWidget(
+                    child: _buildStatisticsCards(),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   
                   // カレンダーセクション
-                  _buildCalendarSection(),
+                  SlideInWidget(
+                    delay: const Duration(milliseconds: 200),
+                    child: _buildCalendarSection(),
+                  ),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
@@ -268,58 +432,106 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '記録の統計',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+        Container(
+          padding: AppSpacing.cardPadding,
+          decoration: BoxDecoration(
+            gradient: AppColors.modernHomeGradient,
+            borderRadius: AppSpacing.cardRadius,
+            boxShadow: AppSpacing.cardShadow,
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.analytics_rounded,
+                  color: AppColors.primary,
+                  size: AppSpacing.iconMd,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '記録の統計',
+                    style: AppTypography.withColor(
+                      AppTypography.headlineMedium,
+                      Colors.white,
+                    ),
+                  ),
+                  Text(
+                    'あなたの日記習慣を見てみよう',
+                    style: AppTypography.withColor(
+                      AppTypography.bodyMedium,
+                      Colors.white.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
-              child: _buildStatCard(
-                '総記録数',
-                '$_totalEntries',
-                '日記',
-                Icons.book,
-                Theme.of(context).colorScheme.primary,
+              child: SlideInWidget(
+                delay: const Duration(milliseconds: 100),
+                child: _buildStatCard(
+                  '総記録数',
+                  '$_totalEntries',
+                  '日記',
+                  Icons.book_rounded,
+                  AppColors.primary,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: _buildStatCard(
-                '現在の連続記録',
-                '$_currentStreak',
-                '日',
-                Icons.local_fire_department,
-                const Color(0xFFFF6B6B),
+              child: SlideInWidget(
+                delay: const Duration(milliseconds: 150),
+                child: _buildStatCard(
+                  '現在の連続記録',
+                  '$_currentStreak',
+                  '日',
+                  Icons.local_fire_department_rounded,
+                  AppColors.error,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Expanded(
-              child: _buildStatCard(
-                '最長連続記録',
-                '$_longestStreak',
-                '日',
-                Icons.emoji_events,
-                const Color(0xFFFFB800),
+              child: SlideInWidget(
+                delay: const Duration(milliseconds: 200),
+                child: _buildStatCard(
+                  '最長連続記録',
+                  '$_longestStreak',
+                  '日',
+                  Icons.emoji_events_rounded,
+                  AppColors.warning,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: _buildStatCard(
-                '今月の記録',
-                '${_getMonthlyCount()}',
-                '日記',
-                Icons.calendar_month,
-                const Color(0xFF4ECDC4),
+              child: SlideInWidget(
+                delay: const Duration(milliseconds: 250),
+                child: _buildStatCard(
+                  '今月の記録',
+                  '${_getMonthlyCount()}',
+                  '日記',
+                  Icons.calendar_month_rounded,
+                  AppColors.success,
+                ),
               ),
             ),
           ],
@@ -329,69 +541,71 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildStatCard(String title, String value, String unit, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return CustomCard(
+      elevation: AppSpacing.elevationSm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    colors: [
+                      color.withValues(alpha: 0.2),
+                      color.withValues(alpha: 0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(AppSpacing.sm),
                 ),
                 child: Icon(
                   icon,
                   color: color,
-                  size: 20,
+                  size: AppSpacing.iconMd,
                 ),
               ),
               const Spacer(),
+              // 小さなアクセント点
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
+            style: AppTypography.withColor(
+              AppTypography.labelMedium,
+              AppColors.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                style: AppTypography.withColor(
+                  AppTypography.displaySmall,
+                  color,
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Padding(
-                padding: const EdgeInsets.only(bottom: 2),
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                 child: Text(
                   unit,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
+                  style: AppTypography.withColor(
+                    AppTypography.labelSmall,
+                    AppColors.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -403,66 +617,62 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildCalendarSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return CustomCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              '記録カレンダー',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_view_month_rounded,
+                color: AppColors.primary,
+                size: AppSpacing.iconMd,
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                '記録カレンダー',
+                style: AppTypography.headlineMedium,
+              ),
+            ],
           ),
-          TableCalendar(
-            firstDay: DateTime.utc(2020),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            eventLoader: _getEventsForDay,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              if (!isSameDay(_selectedDay, selectedDay)) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                
-                // 選択した日に日記がある場合は選択ダイアログまたは直接遷移
-                final diaries = _diaryMap[DateTime(selectedDay.year, selectedDay.month, selectedDay.day)];
-                if (diaries != null && diaries.isNotEmpty) {
-                  if (diaries.length == 1) {
-                    // 1つの日記の場合は直接遷移
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DiaryDetailScreen(diaryId: diaries.first.id),
-                      ),
-                    );
-                  } else {
-                    // 複数の日記がある場合は選択ダイアログを表示
-                    _showDiarySelectionDialog(context, diaries, selectedDay);
+          const SizedBox(height: AppSpacing.lg),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+              borderRadius: AppSpacing.cardRadius,
+            ),
+            child: TableCalendar(
+              firstDay: DateTime.utc(2020),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              calendarFormat: _calendarFormat,
+              eventLoader: _getEventsForDay,
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: (selectedDay, focusedDay) {
+                if (!isSameDay(_selectedDay, selectedDay)) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                  
+                  // 選択した日に日記がある場合は選択ダイアログまたは直接遷移
+                  final diaries = _diaryMap[DateTime(selectedDay.year, selectedDay.month, selectedDay.day)];
+                  if (diaries != null && diaries.isNotEmpty) {
+                    if (diaries.length == 1) {
+                      // 1つの日記の場合は直接遷移
+                      Navigator.push(
+                        context,
+                        DiaryDetailScreen(diaryId: diaries.first.id).customRoute(),
+                      );
+                    } else {
+                      // 複数の日記がある場合は選択ダイアログを表示
+                      _showDiarySelectionDialog(context, diaries, selectedDay);
+                    }
                   }
                 }
-              }
-            },
+              },
             onFormatChanged: (format) {
               setState(() {
                 _calendarFormat = format;
@@ -471,23 +681,38 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
             },
-            calendarStyle: CalendarStyle(
-              weekendTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
-              holidayTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
-              selectedDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
+              calendarStyle: CalendarStyle(
+                weekendTextStyle: TextStyle(color: AppColors.primary),
+                holidayTextStyle: TextStyle(color: AppColors.primary),
+                selectedDecoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                todayDecoration: BoxDecoration(
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accent.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                markerDecoration: const BoxDecoration(
+                  color: AppColors.success,
+                  shape: BoxShape.circle,
+                ),
+                markersMaxCount: 3,
+                cellMargin: const EdgeInsets.all(4),
               ),
-              todayDecoration: const BoxDecoration(
-                color: Color(0xFFFF6B6B),
-                shape: BoxShape.circle,
-              ),
-              markerDecoration: const BoxDecoration(
-                color: Color(0xFF4ECDC4),
-                shape: BoxShape.circle,
-              ),
-              markersMaxCount: 3,
-            ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, day, events) {
                 if (events.isNotEmpty) {
@@ -501,18 +726,30 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 return null;
               },
             ),
-            headerStyle: HeaderStyle(
-              titleCentered: true,
-              formatButtonDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-              ),
-              formatButtonTextStyle: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+              headerStyle: HeaderStyle(
+                titleCentered: true,
+                titleTextStyle: AppTypography.headlineSmall,
+                formatButtonDecoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: AppSpacing.buttonRadius,
+                  boxShadow: AppSpacing.buttonShadow,
+                ),
+                formatButtonTextStyle: AppTypography.withColor(
+                  AppTypography.labelMedium,
+                  Colors.white,
+                ),
+                leftChevronIcon: Icon(
+                  Icons.chevron_left_rounded,
+                  color: AppColors.primary,
+                ),
+                rightChevronIcon: Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
         ],
       ),
     );
