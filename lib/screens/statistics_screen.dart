@@ -6,7 +6,6 @@ import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 
@@ -125,17 +124,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       width: 22,
       height: 22,
       decoration: BoxDecoration(
-        gradient: count > 1 
-            ? LinearGradient(
-                colors: [AppColors.error, AppColors.errorContainer],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : LinearGradient(
-                colors: [AppColors.success, AppColors.successContainer],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+        color: count > 1 ? AppColors.error : AppColors.success,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
@@ -178,20 +167,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Container(
                   padding: AppSpacing.cardPadding,
                   decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    color: AppColors.primaryContainer,
                     borderRadius: AppSpacing.cardRadius,
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.calendar_today_rounded,
-                          color: AppColors.primary,
+                          color: Colors.white,
                           size: AppSpacing.iconSm,
                         ),
                       ),
@@ -203,14 +192,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             '${selectedDay.month}月${selectedDay.day}日の日記',
                             style: AppTypography.withColor(
                               AppTypography.titleLarge,
-                              Colors.white,
+                              AppColors.onPrimaryContainer,
                             ),
                           ),
                           Text(
                             '${diaries.length}件の日記があります',
                             style: AppTypography.withColor(
                               AppTypography.bodyMedium,
-                              Colors.white.withValues(alpha: 0.8),
+                              AppColors.onPrimaryContainer,
                             ),
                           ),
                         ],
@@ -253,7 +242,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    gradient: AppColors.accentGradient,
+                                    color: AppColors.accent,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
@@ -352,9 +341,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: GradientAppBar(
+      appBar: AppBar(
         title: const Text('統計'),
-        gradient: AppColors.primaryGradient,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: AppSpacing.sm),
@@ -434,7 +425,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         Container(
           padding: AppSpacing.cardPadding,
           decoration: BoxDecoration(
-            gradient: AppColors.modernHomeGradient,
+            color: AppColors.primaryContainer,
             borderRadius: AppSpacing.cardRadius,
             boxShadow: AppSpacing.cardShadow,
           ),
@@ -442,13 +433,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.analytics_rounded,
-                  color: AppColors.primary,
+                  color: Colors.white,
                   size: AppSpacing.iconMd,
                 ),
               ),
@@ -460,14 +451,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     '記録の統計',
                     style: AppTypography.withColor(
                       AppTypography.headlineMedium,
-                      Colors.white,
+                      AppColors.onPrimaryContainer,
                     ),
                   ),
                   Text(
                     'あなたの日記習慣を見てみよう',
                     style: AppTypography.withColor(
                       AppTypography.bodyMedium,
-                      Colors.white.withValues(alpha: 0.8),
+                      AppColors.onPrimaryContainer,
                     ),
                   ),
                 ],
@@ -684,7 +675,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 weekendTextStyle: TextStyle(color: AppColors.primary),
                 holidayTextStyle: TextStyle(color: AppColors.primary),
                 selectedDecoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -729,7 +720,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 titleCentered: true,
                 titleTextStyle: AppTypography.headlineSmall,
                 formatButtonDecoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
+                  color: AppColors.primary,
                   borderRadius: AppSpacing.buttonRadius,
                   boxShadow: AppSpacing.buttonShadow,
                 ),

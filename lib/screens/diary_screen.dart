@@ -7,7 +7,6 @@ import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../ui/animations/list_animations.dart';
@@ -103,7 +102,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return GradientAppBar(
+    return AppBar(
       title: _controller.isSearching 
         ? TextField(
             controller: _controller.searchController,
@@ -123,7 +122,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
             onChanged: _controller.performSearch,
           )
         : const Text('日記一覧'),
-      gradient: AppColors.primaryGradient,
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      elevation: 2,
       leading: _controller.isSearching 
         ? IconButton(
             icon: const Icon(

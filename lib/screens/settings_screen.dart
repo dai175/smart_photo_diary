@@ -6,7 +6,6 @@ import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
@@ -59,9 +58,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: GradientAppBar(
+      appBar: AppBar(
         title: const Text('設定'),
-        gradient: AppColors.primaryGradient,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: AppSpacing.sm),
@@ -188,20 +189,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Container(
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              gradient: AppColors.modernHomeGradient,
+              color: AppColors.primaryContainer,
               borderRadius: AppSpacing.cardRadius,
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     icon,
-                    color: AppColors.primary,
+                    color: Colors.white,
                     size: AppSpacing.iconMd,
                   ),
                 ),
@@ -210,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title,
                   style: AppTypography.withColor(
                     AppTypography.headlineMedium,
-                    Colors.white,
+                    AppColors.onPrimaryContainer,
                   ),
                 ),
               ],
@@ -242,11 +243,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.warning.withValues(alpha: 0.2), AppColors.warning.withValues(alpha: 0.1)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.warning.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppSpacing.sm),
                 ),
                 child: Icon(
@@ -362,11 +359,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.accent.withValues(alpha: 0.2), AppColors.accent.withValues(alpha: 0.1)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.accent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppSpacing.sm),
                 ),
                 child: Icon(
@@ -499,11 +492,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         leading: Container(
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.info.withValues(alpha: 0.2), AppColors.info.withValues(alpha: 0.1)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppColors.info.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(AppSpacing.sm),
           ),
           child: Icon(
@@ -596,11 +585,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.success.withValues(alpha: 0.2), AppColors.success.withValues(alpha: 0.1)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: AppColors.success.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.sm),
                   ),
                   child: Icon(
@@ -655,11 +640,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.error.withValues(alpha: 0.2), AppColors.error.withValues(alpha: 0.1)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: AppColors.error.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.sm),
                   ),
                   child: Icon(
@@ -709,11 +690,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primary.withValues(alpha: 0.2), AppColors.primary.withValues(alpha: 0.1)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
             child: Icon(
@@ -767,11 +744,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.accent.withValues(alpha: 0.2), AppColors.accent.withValues(alpha: 0.1)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppColors.accent.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
