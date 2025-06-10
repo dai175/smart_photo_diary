@@ -564,7 +564,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           '写真 (${_photoAssets.length}枚)',
-                          style: AppTypography.headlineMedium,
+                          style: AppTypography.headlineSmall,
                         ),
                       ],
                     ),
@@ -608,7 +608,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         _isEditing ? '日記を編集' : '日記の内容',
-                        style: AppTypography.headlineMedium,
+                        style: AppTypography.headlineSmall,
                       ),
                     ],
                   ),

@@ -450,7 +450,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   Text(
                     '記録の統計',
                     style: AppTypography.withColor(
-                      AppTypography.headlineMedium,
+                      AppTypography.headlineSmall,
                       AppColors.onPrimaryContainer,
                     ),
                   ),
@@ -621,7 +621,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 '記録カレンダー',
-                style: AppTypography.headlineMedium,
+                style: AppTypography.headlineSmall,
               ),
             ],
           ),

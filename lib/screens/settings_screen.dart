@@ -210,7 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   title,
                   style: AppTypography.withColor(
-                    AppTypography.headlineMedium,
+                    AppTypography.headlineSmall,
                     AppColors.onPrimaryContainer,
                   ),
                 ),
