@@ -49,43 +49,41 @@ class HomeContentWidget extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: AppConstants.headerTopPadding,
-        bottom: AppSpacing.xl,
+        bottom: AppSpacing.lg,
         left: AppSpacing.lg,
         right: AppSpacing.lg,
       ),
-      decoration: const BoxDecoration(
-        gradient: AppColors.modernHomeGradient,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
       ),
       child: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            Text(
-              AppConstants.appTitle,
-              style: AppTypography.withColor(
-                AppTypography.headlineLarge,
-                Colors.white,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.primaryContainer,
+            borderRadius: AppSpacing.cardRadius,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_today_rounded,
+                color: AppColors.onPrimaryContainer,
+                size: AppSpacing.iconMd,
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: AppSpacing.chipRadius,
-              ),
-              child: Text(
+              const SizedBox(width: AppSpacing.md),
+              Text(
                 '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
                 style: AppTypography.withColor(
-                  AppTypography.bodyMedium,
-                  Colors.white,
+                  AppTypography.headlineSmall,
+                  AppColors.onPrimaryContainer,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
