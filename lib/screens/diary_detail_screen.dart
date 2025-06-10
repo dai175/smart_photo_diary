@@ -10,7 +10,6 @@ import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/animations/list_animations.dart';
@@ -227,9 +226,11 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: GradientAppBar(
+      appBar: AppBar(
         title: Text(_isEditing ? '日記を編集' : '日記の詳細'),
-        gradient: AppColors.primaryGradient,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
         actions: [
           // 編集モード切替ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)
@@ -469,7 +470,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               width: double.infinity,
               padding: AppSpacing.cardPadding,
               decoration: BoxDecoration(
-                gradient: AppColors.modernHomeGradient,
+                color: AppColors.primaryContainer,
                 borderRadius: AppSpacing.cardRadius,
                 boxShadow: AppSpacing.cardShadow,
               ),
@@ -477,13 +478,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.calendar_today_rounded,
-                      color: AppColors.primary,
+                      color: Colors.white,
                       size: AppSpacing.iconMd,
                     ),
                   ),
@@ -496,14 +497,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           '日記の日付',
                           style: AppTypography.withColor(
                             AppTypography.labelMedium,
-                            Colors.white.withValues(alpha: 0.8),
+                            AppColors.onPrimaryContainer,
                           ),
                         ),
                         Text(
                           DateFormat('yyyy年MM月dd日').format(_diaryEntry!.date),
                           style: AppTypography.withColor(
                             AppTypography.headlineSmall,
-                            Colors.white,
+                            AppColors.onPrimaryContainer,
                           ),
                         ),
                       ],
@@ -516,7 +517,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: AppColors.primary,
                         borderRadius: AppSpacing.chipRadius,
                       ),
                       child: Row(
