@@ -34,7 +34,7 @@ class AppConstants {
   // レイアウト
   static const double headerTopPadding = 50.0;
   static const double headerBottomPadding = 16.0;
-  static const double photoGridHeight = 300.0;
+  static const double photoGridHeight = 400.0;
   static const double recentDiaryCardHeight = 120.0;
   
   // テキストサイズ

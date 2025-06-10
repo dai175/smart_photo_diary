@@ -47,7 +47,7 @@ class PhotoGridWidget extends StatelessWidget {
         height: AppConstants.photoGridHeight,
         child: GridView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: AppConstants.photoGridCrossAxisCount,
             crossAxisSpacing: AppSpacing.sm,
@@ -147,7 +147,7 @@ class PhotoGridWidget extends StatelessWidget {
   Widget _buildGrid() {
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: AppConstants.photoGridCrossAxisCount,
         crossAxisSpacing: AppSpacing.sm,
