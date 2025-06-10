@@ -10,7 +10,6 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
-import '../ui/animations/page_transitions.dart';
 import '../ui/animations/list_animations.dart';
 
 class DiaryScreen extends StatefulWidget {

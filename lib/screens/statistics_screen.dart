@@ -9,7 +9,6 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/gradient_app_bar.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
-import '../ui/animations/page_transitions.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
