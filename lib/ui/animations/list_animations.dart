@@ -133,8 +133,8 @@ class FadeInWidget extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
-    this.duration = const Duration(milliseconds: 500),
-    this.curve = Curves.easeInOut,
+    this.duration = const Duration(milliseconds: 400),
+    this.curve = Curves.easeOutCubic,
   });
 
   final Widget child;
@@ -196,9 +196,9 @@ class SlideInWidget extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
-    this.duration = const Duration(milliseconds: 500),
-    this.curve = Curves.easeOutCubic,
-    this.begin = const Offset(0.0, 0.3),
+    this.duration = const Duration(milliseconds: 350),
+    this.curve = Curves.easeOutQuart,
+    this.begin = const Offset(0.0, 0.2),
     this.end = Offset.zero,
   });
 
@@ -240,7 +240,7 @@ class _SlideInWidgetState extends State<SlideInWidget>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOutCubic,
     ));
 
     // 遅延後にアニメーション開始

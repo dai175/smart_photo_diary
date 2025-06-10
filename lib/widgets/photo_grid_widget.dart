@@ -162,29 +162,51 @@ class PhotoGridWidget extends StatelessWidget {
     final isSelected = controller.selected[index];
     final isUsed = controller.isPhotoUsed(index);
     
-    return GestureDetector(
-      onTap: () => _handlePhotoTap(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          borderRadius: AppSpacing.photoRadius,
-          boxShadow: isSelected 
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : AppSpacing.cardShadow,
-        ),
-        child: Stack(
-          children: [
-            _buildPhotoThumbnail(index),
-            _buildSelectionIndicator(index),
-            if (isUsed) _buildUsedLabel(),
-            if (isSelected) _buildSelectedOverlay(),
-          ],
+    // アクセシビリティ用のラベル作成
+    String semanticLabel = '写真 ${index + 1}';
+    if (isUsed) {
+      semanticLabel += '、使用済み';
+    }
+    if (isSelected) {
+      semanticLabel += '、選択中';
+    } else {
+      semanticLabel += '、未選択';
+    }
+    
+    return RepaintBoundary(
+      child: Semantics(
+        label: semanticLabel,
+        button: true,
+        selected: isSelected,
+        enabled: !isUsed,
+        onTap: isUsed ? null : () => _handlePhotoTap(index),
+        child: GestureDetector(
+          onTap: () => _handlePhotoTap(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              borderRadius: AppSpacing.photoRadius,
+              boxShadow: isSelected 
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : AppSpacing.cardShadow,
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildPhotoThumbnail(index),
+                _buildSelectionIndicator(index),
+                if (isUsed) _buildUsedLabel(),
+                if (isSelected) _buildSelectedOverlay(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -198,11 +220,17 @@ class PhotoGridWidget extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
-            return Image.memory(
-              snapshot.data!,
-              height: AppConstants.photoThumbnailSize,
-              width: AppConstants.photoThumbnailSize,
-              fit: BoxFit.cover,
+            return RepaintBoundary(
+              child: Image.memory(
+                snapshot.data!,
+                height: AppConstants.photoThumbnailSize,
+                width: AppConstants.photoThumbnailSize,
+                fit: BoxFit.cover,
+                cacheHeight: (AppConstants.photoThumbnailSize * MediaQuery.of(context).devicePixelRatio).round(),
+                cacheWidth: (AppConstants.photoThumbnailSize * MediaQuery.of(context).devicePixelRatio).round(),
+                gaplessPlayback: true,
+                filterQuality: FilterQuality.medium,
+              ),
             );
           } else {
             return Container(
@@ -212,9 +240,14 @@ class PhotoGridWidget extends StatelessWidget {
                 color: AppColors.surfaceVariant,
                 borderRadius: AppSpacing.photoRadius,
               ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  ),
                 ),
               ),
             );

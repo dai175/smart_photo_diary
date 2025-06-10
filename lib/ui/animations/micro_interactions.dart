@@ -30,8 +30,8 @@ class MicroInteractions {
     required Widget child,
     required VoidCallback onTap,
     bool enableHaptic = true,
-    double scaleFactor = 0.95,
-    Duration duration = const Duration(milliseconds: 100),
+    double scaleFactor = 0.96,
+    Duration duration = const Duration(milliseconds: 80),
   }) {
     return _BounceWrapper(
       onTap: onTap,
