@@ -36,62 +36,24 @@ class HomeContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(),
-        _buildMainContent(context),
-      ],
+    return Scaffold(
+      appBar: _buildHeader(),
+      body: _buildMainContent(context),
     );
   }
   
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: AppConstants.headerTopPadding,
-        bottom: AppSpacing.lg,
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.primaryContainer,
-            borderRadius: AppSpacing.cardRadius,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.calendar_today_rounded,
-                color: AppColors.onPrimaryContainer,
-                size: AppSpacing.iconMd,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
-                style: AppTypography.withColor(
-                  AppTypography.headlineSmall,
-                  AppColors.onPrimaryContainer,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  PreferredSizeWidget _buildHeader() {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      title: Text('${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日'),
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      elevation: 2,
     );
   }
 
   Widget _buildMainContent(BuildContext context) {
-    return Expanded(
-      child: ListView(
+    return ListView(
         padding: AppSpacing.screenPadding,
         children: [
           FadeInWidget(
@@ -110,8 +72,7 @@ class HomeContentWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.bottomNavPadding),
         ],
-      ),
-    );
+      );
   }
 
   Widget _buildPhotoSection(BuildContext context) {
