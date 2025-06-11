@@ -364,7 +364,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           Text(
                             DateFormat('yyyy年MM月dd日').format(_photoDateTime),
                             style: AppTypography.withColor(
-                              AppTypography.headlineSmall,
+                              AppTypography.titleLarge,
                               AppColors.onPrimaryContainer,
                             ),
                           ),
@@ -483,7 +483,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           if (_isAnalyzingPhotos && _totalPhotos > 1) ...[
                             Text(
                               '写真を分析中...',
-                              style: AppTypography.headlineSmall,
+                              style: AppTypography.titleLarge,
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
@@ -515,7 +515,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           ] else ...[
                             Text(
                               '写真から日記を生成中...',
-                              style: AppTypography.headlineSmall,
+                              style: AppTypography.titleLarge,
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
@@ -598,7 +598,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               const SizedBox(width: AppSpacing.sm),
                               Text(
                                 '日記の内容',
-                                style: AppTypography.headlineSmall,
+                                style: AppTypography.titleLarge,
                               ),
                             ],
                           ),
@@ -613,7 +613,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             ),
                             child: TextField(
                               controller: _titleController,
-                              style: AppTypography.titleLarge,
+                              style: AppTypography.titleMedium,
                               decoration: InputDecoration(
                                 labelText: 'タイトル',
                                 border: InputBorder.none,

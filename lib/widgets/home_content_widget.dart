@@ -96,7 +96,7 @@ class HomeContentWidget extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 '今日の写真',
-                style: AppTypography.headlineSmall,
+                style: AppTypography.titleLarge,
               ),
             ],
           ),
@@ -176,7 +176,7 @@ class HomeContentWidget extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 '最近の日記',
-                style: AppTypography.headlineSmall,
+                style: AppTypography.titleLarge,
               ),
             ],
           ),
