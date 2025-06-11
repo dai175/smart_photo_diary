@@ -183,6 +183,13 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 - Project uses Japanese comments for business logic documentation
 - Test suite must maintain 100% success rate - all failing tests should be investigated and either fixed or removed
 
+### UI Design Guidelines
+- **No gradients**: All gradients have been removed for cleaner, simpler design
+- **Consistent headers**: All screens use standard AppBar styling with unified colors and typography
+- **Button consistency**: All buttons use solid colors (AppColors.primary/accent) instead of gradients
+- **Material Design 3**: Follow MD3 principles with emphasis on solid colors and clean layouts
+- **Typography standardization**: Section headings use AppTypography.headlineSmall (24sp) across all screens
+
 ### Error Handling Patterns
 
 #### Result<T> Usage Guidelines
@@ -279,6 +286,8 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Controller robustness**: Enhanced PhotoSelectionController with boundary checks and input validation
 - **Interface-based design**: All major services now implement interfaces for better testability
 - **Code quality improvements**: Comprehensive error handling utilities and logging service
+- **UI Design Unification**: Removed all gradients across the app for cleaner, simpler design
+- **Header Standardization**: Unified all screen headers to use consistent AppBar styling
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging) are fully implemented and tested
