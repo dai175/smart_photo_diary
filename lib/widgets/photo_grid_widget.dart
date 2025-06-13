@@ -186,16 +186,8 @@ class PhotoGridWidget extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             curve: Curves.easeOutCubic,
             decoration: BoxDecoration(
+              color: Colors.transparent,
               borderRadius: AppSpacing.photoRadius,
-              boxShadow: isSelected 
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : AppSpacing.cardShadow,
             ),
             child: Stack(
               clipBehavior: Clip.none,
@@ -203,7 +195,6 @@ class PhotoGridWidget extends StatelessWidget {
                 _buildPhotoThumbnail(index),
                 _buildSelectionIndicator(index),
                 if (isUsed) _buildUsedLabel(),
-                if (isSelected) _buildSelectedOverlay(),
               ],
             ),
           ),
@@ -322,19 +313,6 @@ class PhotoGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectedOverlay() {
-    return Positioned.fill(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: AppSpacing.photoRadius,
-          border: Border.all(
-            color: AppColors.primary,
-            width: 3,
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildSelectionCounter(BuildContext context) {
     return Container(

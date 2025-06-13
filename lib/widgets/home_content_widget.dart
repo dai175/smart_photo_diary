@@ -100,13 +100,8 @@ class HomeContentWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoSection(BuildContext context) {
-    return Container(
+    return Padding(
       padding: AppSpacing.cardPadding,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: AppSpacing.cardRadiusLarge,
-        boxShadow: AppSpacing.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -180,13 +175,8 @@ class HomeContentWidget extends StatelessWidget {
   }
 
   Widget _buildRecentDiariesSection(BuildContext context) {
-    return Container(
+    return Padding(
       padding: AppSpacing.cardPadding,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: AppSpacing.cardRadiusLarge,
-        boxShadow: AppSpacing.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
