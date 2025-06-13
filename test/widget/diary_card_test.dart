@@ -49,7 +49,8 @@ void main() {
 
         // Assert
         expect(find.byType(DiaryCardWidget), findsOneWidget);
-        expect(find.byType(Card), findsOneWidget);
+        // CustomCardを使用しているためCardは存在しない
+        // expect(find.byType(Card), findsOneWidget);
         
         // Check if title is displayed
         WidgetTestHelpers.expectTextExists('Beautiful Day at the Park');
@@ -71,9 +72,8 @@ void main() {
         await tester.pump(); // Use basic pump instead of pumpAndSettle to avoid timeout
 
         // Assert
-        // Check for date display (format may vary)
-        expect(find.textContaining('2024'), findsAtLeastNWidgets(1));
-        expect(find.textContaining('1'), findsAtLeastNWidgets(1));
+        // Check for date display (MM/dd format)
+        expect(find.textContaining('01/15'), findsAtLeastNWidgets(1));
       });
 
       // Removed: testWidgets('should display photo count') - failing due to rendering issues
@@ -99,8 +99,8 @@ void main() {
         );
         await tester.pump(); // Use basic pump instead of pumpAndSettle to avoid timeout
 
-        // Tap the card
-        await WidgetTestHelpers.tapAndPump(tester, find.byType(Card));
+        // Tap the DiaryCardWidget (CustomCard)
+        await WidgetTestHelpers.tapAndPump(tester, find.byType(DiaryCardWidget));
 
         // Assert
         expect(wasTapped, isTrue);
@@ -124,9 +124,9 @@ void main() {
         await tester.pump(); // Use basic pump instead of pumpAndSettle to avoid timeout
 
         // Tap multiple times
-        await WidgetTestHelpers.tapAndPump(tester, find.byType(Card));
-        await WidgetTestHelpers.tapAndPump(tester, find.byType(Card));
-        await WidgetTestHelpers.tapAndPump(tester, find.byType(Card));
+        await WidgetTestHelpers.tapAndPump(tester, find.byType(DiaryCardWidget));
+        await WidgetTestHelpers.tapAndPump(tester, find.byType(DiaryCardWidget));
+        await WidgetTestHelpers.tapAndPump(tester, find.byType(DiaryCardWidget));
 
         // Assert
         expect(tapCount, equals(3));

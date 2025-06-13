@@ -28,8 +28,10 @@ void main() {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // Assert
-      expect(find.text(AppConstants.appTitle), findsOneWidget);
+      // Assert - 日付タイトルが表示されることを確認
+      final now = DateTime.now();
+      final expectedTitle = '${now.year}年${now.month}月${now.day}日';
+      expect(find.text(expectedTitle), findsOneWidget);
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
@@ -41,8 +43,10 @@ void main() {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // Assert
-      expect(find.text(AppConstants.appTitle), findsOneWidget);
+      // Assert - 日付タイトルと権限メッセージが表示されることを確認
+      final now = DateTime.now();
+      final expectedTitle = '${now.year}年${now.month}月${now.day}日';
+      expect(find.text(expectedTitle), findsOneWidget);
       expect(find.text(AppConstants.permissionMessage), findsOneWidget);
       expect(find.text(AppConstants.requestPermissionButton), findsOneWidget);
     });
@@ -69,6 +73,7 @@ void main() {
         if (tab.evaluate().isNotEmpty) {
           await tester.tap(tab);
           await tester.pump(const Duration(milliseconds: 300));
+          await tester.pump();
           
           // Should remain stable
           expect(find.byType(BottomNavigationBar), findsOneWidget);

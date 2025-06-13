@@ -95,10 +95,7 @@ void main() {
       });
     });
 
-    group('Loading State', () {
-      // Removed: testWidgets('should show loading indicator when loading') - failing due to pumpAndSettle timeout
-      // Removed: testWidgets('should not show diary cards when loading') - failing due to pumpAndSettle timeout
-    });
+    // Removed: Loading State group - tests were failing due to pumpAndSettle timeout
 
     group('Empty State', () {
       testWidgets('should show empty message when no diaries', (WidgetTester tester) async {

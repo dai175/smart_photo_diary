@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// リストアニメーションの定義
@@ -150,6 +151,7 @@ class _FadeInWidgetState extends State<FadeInWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  Timer? _delayTimer;
 
   @override
   void initState() {
@@ -168,7 +170,7 @@ class _FadeInWidgetState extends State<FadeInWidget>
     ));
 
     // 遅延後にアニメーション開始
-    Future.delayed(widget.delay, () {
+    _delayTimer = Timer(widget.delay, () {
       if (mounted) {
         _controller.forward();
       }
@@ -177,6 +179,7 @@ class _FadeInWidgetState extends State<FadeInWidget>
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -218,6 +221,7 @@ class _SlideInWidgetState extends State<SlideInWidget>
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
+  Timer? _delayTimer;
 
   @override
   void initState() {
@@ -244,7 +248,7 @@ class _SlideInWidgetState extends State<SlideInWidget>
     ));
 
     // 遅延後にアニメーション開始
-    Future.delayed(widget.delay, () {
+    _delayTimer = Timer(widget.delay, () {
       if (mounted) {
         _controller.forward();
       }
@@ -253,6 +257,7 @@ class _SlideInWidgetState extends State<SlideInWidget>
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

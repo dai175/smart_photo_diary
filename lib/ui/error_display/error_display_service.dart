@@ -14,9 +14,14 @@ class ErrorDisplayService {
 
   LoggingService? _loggingService;
 
-  LoggingService get loggingService {
-    _loggingService ??= LoggingService.instance;
-    return _loggingService!;
+  LoggingService? get loggingService {
+    try {
+      _loggingService ??= LoggingService.instance;
+      return _loggingService;
+    } catch (e) {
+      // LoggingServiceが初期化されていない場合
+      return null;
+    }
   }
 
   /// エラーを表示する
@@ -32,12 +37,15 @@ class ErrorDisplayService {
     // ログ出力
     if (displayConfig.logError) {
       try {
-        loggingService.error(
-          error.message,
-          context: 'ErrorDisplayService',
-          error: error.originalError,
-          stackTrace: error.stackTrace,
-        );
+        final logging = loggingService;
+        if (logging != null) {
+          logging.error(
+            error.message,
+            context: 'ErrorDisplayService',
+            error: error.originalError,
+            stackTrace: error.stackTrace,
+          );
+        }
       } catch (e) {
         // LoggingService初期化エラーの場合はログ出力をスキップ
         debugPrint('ErrorDisplayService: Failed to log error - $e');
