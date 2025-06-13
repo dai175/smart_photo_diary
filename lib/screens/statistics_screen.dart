@@ -8,6 +8,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
+import '../ui/animations/micro_interactions.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -378,7 +379,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         '統計データを読み込み中...',
-                        style: AppTypography.headlineSmall,
+                        style: AppTypography.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -394,25 +395,29 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ),
               ),
             )
-          : SingleChildScrollView(
-              padding: AppSpacing.screenPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 統計カード群
-                  FadeInWidget(
-                    child: _buildStatisticsCards(),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  
-                  // カレンダーセクション
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 200),
-                    child: _buildCalendarSection(),
-                  ),
-                  
-                  const SizedBox(height: AppSpacing.lg),
-                ],
+          : MicroInteractions.pullToRefresh(
+              onRefresh: _loadStatistics,
+              color: AppColors.primary,
+              child: SingleChildScrollView(
+                padding: AppSpacing.screenPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 統計カード群
+                    FadeInWidget(
+                      child: _buildStatisticsCards(),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    
+                    // カレンダーセクション
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 200),
+                      child: _buildCalendarSection(),
+                    ),
+                    
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                ),
               ),
             ),
     );

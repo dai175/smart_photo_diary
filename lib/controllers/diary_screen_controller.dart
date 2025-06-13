@@ -125,9 +125,9 @@ class DiaryScreenController extends BaseErrorController {
   }
 
   // リフレッシュ
-  void refresh() {
+  Future<void> refresh() async {
     setLoading(true);
-    loadDiaryEntries();
+    await loadDiaryEntries();
   }
 
   // 空の状態メッセージを取得

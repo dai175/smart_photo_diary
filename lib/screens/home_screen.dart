@@ -65,6 +65,14 @@ class _HomeScreenState extends State<HomeScreen> {
     DialogUtils.showSimpleDialog(context, message);
   }
 
+  // ホーム画面全体のリロード
+  Future<void> _refreshHome() async {
+    await Future.wait([
+      _loadTodayPhotos(),
+      _loadRecentDiaries(),
+    ]);
+  }
+
   // 最近の日記を読み込む
   Future<void> _loadRecentDiaries() async {
     try {
@@ -162,6 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onLoadRecentDiaries: _loadRecentDiaries,
         onSelectionLimitReached: _showSelectionLimitModal,
         onUsedPhotoSelected: _showUsedPhotoModal,
+        onRefresh: _refreshHome,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,

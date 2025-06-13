@@ -10,6 +10,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../ui/animations/list_animations.dart';
+import '../ui/animations/micro_interactions.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -92,7 +93,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
               
               // 日記一覧
               Expanded(
-                child: _buildContent(),
+                child: MicroInteractions.pullToRefresh(
+                  onRefresh: _controller.refresh,
+                  color: AppColors.primary,
+                  child: _buildContent(),
+                ),
               ),
             ],
           ),

@@ -95,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         '設定を読み込み中...',
-                        style: AppTypography.headlineSmall,
+                        style: AppTypography.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(

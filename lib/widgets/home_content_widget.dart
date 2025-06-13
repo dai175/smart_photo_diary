@@ -11,6 +11,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/animations/page_transitions.dart';
 import '../ui/animations/list_animations.dart';
+import '../ui/animations/micro_interactions.dart';
 
 class HomeContentWidget extends StatelessWidget {
   final PhotoSelectionController photoController;
@@ -21,6 +22,7 @@ class HomeContentWidget extends StatelessWidget {
   final VoidCallback onSelectionLimitReached;
   final VoidCallback onUsedPhotoSelected;
   final Function(String) onDiaryTap;
+  final Future<void> Function()? onRefresh;
 
   const HomeContentWidget({
     super.key,
@@ -32,13 +34,20 @@ class HomeContentWidget extends StatelessWidget {
     required this.onSelectionLimitReached,
     required this.onUsedPhotoSelected,
     required this.onDiaryTap,
+    this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildHeader(),
-      body: _buildMainContent(context),
+      body: onRefresh != null
+          ? MicroInteractions.pullToRefresh(
+              onRefresh: onRefresh!,
+              color: AppColors.primary,
+              child: _buildMainContent(context),
+            )
+          : _buildMainContent(context),
     );
   }
   
@@ -49,6 +58,21 @@ class HomeContentWidget extends StatelessWidget {
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 2,
+      actions: onRefresh != null
+          ? [
+              Container(
+                margin: const EdgeInsets.only(right: AppSpacing.sm),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.refresh_rounded,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => onRefresh!(),
+                  tooltip: 'ホーム画面を更新',
+                ),
+              ),
+            ]
+          : null,
     );
   }
 
