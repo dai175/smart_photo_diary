@@ -641,7 +641,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
               headerStyle: HeaderStyle(
                 titleCentered: true,
-                titleTextStyle: AppTypography.headlineSmall,
+                titleTextStyle: AppTypography.titleLarge,
                 formatButtonVisible: false,
                 leftChevronIcon: Icon(
                   Icons.chevron_left_rounded,
