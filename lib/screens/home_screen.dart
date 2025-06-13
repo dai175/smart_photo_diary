@@ -16,12 +16,10 @@ import '../widgets/home_content_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
-  final Function(Color)? onAccentColorChanged;
   
   const HomeScreen({
     super.key,
     this.onThemeChanged,
-    this.onAccentColorChanged,
   });
 
   @override
@@ -197,7 +195,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // 設定画面を追加
     screens.add(SettingsScreen(
       onThemeChanged: widget.onThemeChanged,
-      onAccentColorChanged: widget.onAccentColorChanged,
     ));
 
     return screens;

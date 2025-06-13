@@ -12,12 +12,10 @@ import '../ui/animations/micro_interactions.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
-  final Function(Color)? onAccentColorChanged;
 
   const SettingsScreen({
     super.key,
     this.onThemeChanged,
-    this.onAccentColorChanged,
   });
 
   @override
@@ -145,8 +143,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         _buildThemeSelector(),
         const Divider(height: 1),
-        _buildAccentColorSelector(),
-        const Divider(height: 1),
         _buildGenerationModeSelector(),
       ],
     );
@@ -210,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   title,
                   style: AppTypography.withColor(
-                    AppTypography.headlineSmall,
+                    AppTypography.titleLarge,
                     AppColors.onPrimaryContainer,
                   ),
                 ),
@@ -284,66 +280,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAccentColorSelector() {
-    return MicroInteractions.bounceOnTap(
-      onTap: () {
-        MicroInteractions.hapticTap();
-        _showColorDialog();
-      },
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _settingsService.accentColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _settingsService.accentColor.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.palette_rounded,
-                color: Colors.white,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'アプリのカラー',
-                    style: AppTypography.titleMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    _getColorName(_settingsService.accentColor),
-                    style: AppTypography.withColor(
-                      AppTypography.bodyMedium,
-                      AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.onSurfaceVariant,
-              size: AppSpacing.iconSm,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildGenerationModeSelector() {
     try {
@@ -795,13 +731,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  String _getColorName(Color color) {
-    final index = SettingsService.availableColors.indexOf(color);
-    if (index >= 0 && index < SettingsService.colorNames.length) {
-      return SettingsService.colorNames[index];
-    }
-    return 'カスタム';
-  }
 
   String _getGenerationModeLabel(DiaryGenerationMode mode) {
     final index = SettingsService.availableModes.indexOf(mode);
@@ -827,65 +756,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showColorDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('カラーを選ぶ'),
-          content: Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: SettingsService.availableColors.map((color) {
-              final isSelected = color == _settingsService.accentColor;
-              
-              return GestureDetector(
-                onTap: () {
-                  _settingsService.setAccentColor(color);
-                  widget.onAccentColorChanged?.call(color);
-                  setState(() {});
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3)
-                        : null,
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: color.withValues(alpha: 0.5),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          size: 24,
-                        )
-                      : null,
-                ),
-              );
-            }).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> _exportData() async {
     try {

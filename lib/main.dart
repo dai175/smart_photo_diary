@@ -7,6 +7,7 @@ import 'models/diary_entry.dart';
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
 import 'core/service_registration.dart';
+import 'ui/design_system/app_colors.dart';
 
 Future<void> main() async {
   // Flutterの初期化を確実に行う
@@ -38,7 +39,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late SettingsService _settingsService;
   ThemeMode _themeMode = ThemeMode.system;
-  Color _accentColor = const Color(0xFF6C4AB6);
   bool _isLoading = true;
 
   @override
@@ -52,7 +52,6 @@ class _MyAppState extends State<MyApp> {
       _settingsService = await SettingsService.getInstance();
       setState(() {
         _themeMode = _settingsService.themeMode;
-        _accentColor = _settingsService.accentColor;
         _isLoading = false;
       });
     } catch (e) {
@@ -69,11 +68,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _onAccentColorChanged(Color color) {
-    setState(() {
-      _accentColor = color;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,20 +86,19 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: _accentColor,
+          seedColor: AppColors.primary,
         ),
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: _accentColor,
+          seedColor: AppColors.primary,
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
       ),
       home: HomeScreen(
         onThemeChanged: _onThemeChanged,
-        onAccentColorChanged: _onAccentColorChanged,
       ),
     );
   }

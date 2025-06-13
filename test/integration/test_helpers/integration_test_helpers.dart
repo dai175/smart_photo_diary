@@ -337,7 +337,6 @@ class IntegrationTestHelpers {
     
     // Settings service defaults - basic mock setup
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
-    when(() => mockSettingsService.accentColor).thenReturn(const Color(0xFF6C4AB6));
     
     // Storage service defaults - basic mock setup  
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
