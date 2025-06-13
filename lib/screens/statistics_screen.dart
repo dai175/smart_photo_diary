@@ -446,7 +446,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SlideInWidget(
                 delay: const Duration(milliseconds: 150),
                 child: _buildStatCard(
-                  '現在の連続記録',
+                  '連続記録数',
                   '$_currentStreak',
                   '日',
                   Icons.local_fire_department_rounded,
@@ -493,73 +493,63 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildStatCard(String title, String value, String unit, IconData icon, Color color) {
     return CustomCard(
       elevation: AppSpacing.elevationSm,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      color.withValues(alpha: 0.2),
-                      color.withValues(alpha: 0.1),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(AppSpacing.sm),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: AppSpacing.iconMd,
-                ),
-              ),
-              const Spacer(),
-              // 小さなアクセント点
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            style: AppTypography.withColor(
-              AppTypography.labelMedium,
-              AppColors.onSurfaceVariant,
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 20,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style: AppTypography.withColor(
-                  AppTypography.displaySmall,
-                  color,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                child: Text(
-                  unit,
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
                   style: AppTypography.withColor(
                     AppTypography.labelSmall,
                     AppColors.onSurfaceVariant,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        value,
+                        style: AppTypography.withColor(
+                          AppTypography.headlineSmall,
+                          color,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      unit,
+                      style: AppTypography.withColor(
+                        AppTypography.labelSmall,
+                        AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
