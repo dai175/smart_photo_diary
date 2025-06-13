@@ -248,10 +248,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+                    borderRadius: BorderRadius.circular(AppSpacing.xs),
                   ),
                   child: Icon(
                     _isEditing ? Icons.check_rounded : Icons.edit_rounded,
@@ -271,10 +271,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   _deleteDiary();
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
                     color: AppColors.error.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+                    borderRadius: BorderRadius.circular(AppSpacing.xs),
                   ),
                   child: Icon(
                     Icons.delete_rounded,
@@ -304,7 +304,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         '日記を読み込み中...',
-                        style: AppTypography.headlineSmall,
+                        style: AppTypography.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -342,7 +342,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         'エラーが発生しました',
-                        style: AppTypography.headlineSmall,
+                        style: AppTypography.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -386,7 +386,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         '日記が見つかりません',
-                        style: AppTypography.headlineSmall,
+                        style: AppTypography.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -429,6 +429,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 child: Row(
                   children: [
                     Expanded(
+                      flex: 3,
                       child: SecondaryButton(
                         onPressed: () {
                           setState(() {
@@ -443,7 +444,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
-                      flex: 2,
+                      flex: 4,
                       child: PrimaryButton(
                         onPressed: _updateDiary,
                         text: '保存',
@@ -503,7 +504,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         Text(
                           DateFormat('yyyy年MM月dd日').format(_diaryEntry!.date),
                           style: AppTypography.withColor(
-                            AppTypography.headlineSmall,
+                            AppTypography.titleLarge,
                             AppColors.onPrimaryContainer,
                           ),
                         ),
@@ -564,7 +565,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           '写真 (${_photoAssets.length}枚)',
-                          style: AppTypography.headlineSmall,
+                          style: AppTypography.titleLarge,
                         ),
                       ],
                     ),
@@ -608,7 +609,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         _isEditing ? '日記を編集' : '日記の内容',
-                        style: AppTypography.headlineSmall,
+                        style: AppTypography.titleLarge,
                       ),
                     ],
                   ),
@@ -626,7 +627,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           ),
                           child: TextField(
                             controller: _titleController,
-                            style: AppTypography.titleLarge,
+                            style: AppTypography.titleMedium,
                             decoration: InputDecoration(
                               labelText: 'タイトル',
                               border: InputBorder.none,
@@ -653,7 +654,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               _diaryEntry!.title.isNotEmpty ? _diaryEntry!.title : '無題',
-                              style: AppTypography.headlineSmall,
+                              style: AppTypography.titleMedium,
                             ),
                           ],
                         ),

@@ -289,9 +289,9 @@ class SecondaryButton extends StatelessWidget {
         children: [
           if (icon != null) ...[
             Icon(icon, size: AppSpacing.iconSm),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.xs),
           ],
-          Text(text),
+          Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
         ],
       ),
     );
