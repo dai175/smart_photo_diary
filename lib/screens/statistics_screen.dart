@@ -23,7 +23,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   bool _isLoading = true;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  CalendarFormat _calendarFormat = CalendarFormat.month;
 
   // 統計データ
   int _totalEntries = 0;
@@ -127,13 +126,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       decoration: BoxDecoration(
         color: count > 1 ? AppColors.error : AppColors.success,
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: (count > 1 ? AppColors.error : AppColors.success).withValues(alpha: 0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Center(
         child: Text(
@@ -570,7 +562,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               firstDay: DateTime.utc(2020),
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
-              calendarFormat: _calendarFormat,
+              calendarFormat: CalendarFormat.month,
               eventLoader: _getEventsForDay,
               selectedDayPredicate: (day) {
                 return isSameDay(_selectedDay, day);
@@ -598,11 +590,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   }
                 }
               },
-            onFormatChanged: (format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
             },
@@ -654,15 +641,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               headerStyle: HeaderStyle(
                 titleCentered: true,
                 titleTextStyle: AppTypography.headlineSmall,
-                formatButtonDecoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: AppSpacing.buttonRadius,
-                  boxShadow: AppSpacing.buttonShadow,
-                ),
-                formatButtonTextStyle: AppTypography.withColor(
-                  AppTypography.labelMedium,
-                  Colors.white,
-                ),
+                formatButtonVisible: false,
                 leftChevronIcon: Icon(
                   Icons.chevron_left_rounded,
                   color: AppColors.primary,
