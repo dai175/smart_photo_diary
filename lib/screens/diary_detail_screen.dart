@@ -228,8 +228,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(_isEditing ? '日記を編集' : '日記の詳細'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
         actions: [
           // 編集モード切替ボタン
@@ -255,7 +255,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   ),
                   child: Icon(
                     _isEditing ? Icons.check_rounded : Icons.edit_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     size: AppSpacing.iconSm,
                   ),
                 ),
@@ -278,7 +278,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   ),
                   child: Icon(
                     Icons.delete_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     size: AppSpacing.iconSm,
                   ),
                 ),
@@ -309,9 +309,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         '日記の内容と写真を取得しています',
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -347,9 +346,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         _errorMessage,
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.error,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.error,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -391,9 +389,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         AppConstants.diaryNotFoundMessage,
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -485,7 +482,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     ),
                     child: Icon(
                       Icons.calendar_today_rounded,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       size: AppSpacing.iconMd,
                     ),
                   ),
@@ -526,15 +523,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         children: [
                           Icon(
                             Icons.tag_rounded,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                             size: AppSpacing.iconXs,
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Text(
                             '${(_diaryEntry!.tags?.length ?? 0)}個のタグ',
-                            style: AppTypography.withColor(
-                              AppTypography.labelSmall,
-                              Colors.white,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ],
@@ -623,20 +619,21 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                               color: AppColors.outline.withValues(alpha: 0.2),
                             ),
                             borderRadius: AppSpacing.inputRadius,
-                            color: AppColors.surface,
+                            color: Theme.of(context).colorScheme.surface,
                           ),
                           child: TextField(
                             controller: _titleController,
-                            style: AppTypography.titleMedium,
+                            style: AppTypography.titleMedium.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                             decoration: InputDecoration(
                               labelText: 'タイトル',
                               border: InputBorder.none,
                               hintText: '日記のタイトルを入力',
                               contentPadding: AppSpacing.inputPadding,
                               labelStyle: AppTypography.labelMedium,
-                              hintStyle: AppTypography.withColor(
-                                AppTypography.bodyMedium,
-                                AppColors.onSurfaceVariant,
+                              hintStyle: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -646,15 +643,16 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           children: [
                             Text(
                               'タイトル',
-                              style: AppTypography.withColor(
-                                AppTypography.labelMedium,
-                                AppColors.onSurfaceVariant,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               _diaryEntry!.title.isNotEmpty ? _diaryEntry!.title : '無題',
-                              style: AppTypography.titleMedium,
+                              style: AppTypography.titleMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                           ],
                         ),
@@ -669,23 +667,24 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                               color: AppColors.outline.withValues(alpha: 0.2),
                             ),
                             borderRadius: AppSpacing.inputRadius,
-                            color: AppColors.surface,
+                            color: Theme.of(context).colorScheme.surface,
                           ),
                           child: TextField(
                             controller: _contentController,
                             maxLines: null,
                             minLines: 8,
                             textAlignVertical: TextAlignVertical.top,
-                            style: AppTypography.bodyLarge,
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                             decoration: InputDecoration(
                               labelText: '本文',
                               border: InputBorder.none,
                               hintText: '日記の内容を入力してください',
                               contentPadding: AppSpacing.inputPadding,
                               labelStyle: AppTypography.labelMedium,
-                              hintStyle: AppTypography.withColor(
-                                AppTypography.bodyMedium,
-                                AppColors.onSurfaceVariant,
+                              hintStyle: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               alignLabelWithHint: true,
                             ),
@@ -696,25 +695,15 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           children: [
                             Text(
                               '本文',
-                              style: AppTypography.withColor(
-                                AppTypography.labelMedium,
-                                AppColors.onSurfaceVariant,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
-                            Container(
-                              width: double.infinity,
-                              padding: AppSpacing.inputPadding,
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-                                borderRadius: AppSpacing.inputRadius,
-                                border: Border.all(
-                                  color: AppColors.outline.withValues(alpha: 0.1),
-                                ),
-                              ),
-                              child: Text(
-                                _diaryEntry!.content,
-                                style: AppTypography.bodyLarge,
+                            Text(
+                              _diaryEntry!.content,
+                              style: AppTypography.bodyLarge.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -730,7 +719,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           SlideInWidget(
             delay: Duration(milliseconds: _photoAssets.isNotEmpty ? 300 : 200),
             child: CustomCard(
-              backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.3),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -738,15 +726,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     children: [
                       Icon(
                         Icons.info_outline_rounded,
-                        color: AppColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: AppSpacing.iconSm,
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         '詳細情報',
-                        style: AppTypography.withColor(
-                          AppTypography.titleMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -845,23 +832,21 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       children: [
         Icon(
           icon,
-          color: AppColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           size: AppSpacing.iconXs,
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
           '$label: ',
-          style: AppTypography.withColor(
-            AppTypography.labelMedium,
-            AppColors.onSurfaceVariant,
+          style: AppTypography.labelMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: AppTypography.withColor(
-              AppTypography.bodyMedium,
-              AppColors.onSurface,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -875,15 +860,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       children: [
         Icon(
           Icons.tag_rounded,
-          color: AppColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           size: AppSpacing.iconXs,
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
           'タグ: ',
-          style: AppTypography.withColor(
-            AppTypography.labelMedium,
-            AppColors.onSurfaceVariant,
+          style: AppTypography.labelMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         Expanded(

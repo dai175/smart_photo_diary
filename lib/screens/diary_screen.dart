@@ -72,7 +72,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       builder: (context, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          appBar: _buildAppBar(),
+          appBar: _buildAppBar(context),
           body: Column(
             children: [
               // アクティブフィルタ表示
@@ -106,35 +106,35 @@ class _DiaryScreenState extends State<DiaryScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: _controller.isSearching 
         ? TextField(
             controller: _controller.searchController,
             autofocus: true,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
             decoration: InputDecoration(
               hintText: 'タイトルや本文を検索...',
               hintStyle: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
               ),
               border: InputBorder.none,
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.search_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
             onChanged: _controller.performSearch,
           )
         : const Text('日記一覧'),
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
       leading: _controller.isSearching 
         ? IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_rounded,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
             onPressed: _controller.stopSearch,
           )
@@ -143,25 +143,25 @@ class _DiaryScreenState extends State<DiaryScreen> {
         ? [
             if (_controller.searchQuery.isNotEmpty)
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.clear_rounded,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: _controller.clearSearch,
               ),
           ]
         : [
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.refresh_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: _controller.refresh,
             ),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.search_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ), 
               onPressed: _controller.startSearch,
             ),
@@ -172,7 +172,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   Icons.tune_rounded,
                   color: _controller.currentFilter.isActive 
                     ? AppColors.accent 
-                    : Colors.white,
+                    : Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: _showFilterBottomSheet,
               ),

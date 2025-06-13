@@ -302,8 +302,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('日記プレビュー'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
         actions: [
           // 保存ボタン
@@ -311,9 +311,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             Container(
               margin: const EdgeInsets.only(right: AppSpacing.sm),
               child: IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.save_rounded,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: _saveDiary,
                 tooltip: '日記を保存',
@@ -346,7 +346,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                         ),
                         child: Icon(
                           Icons.calendar_today_rounded,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           size: AppSpacing.iconMd,
                         ),
                       ),
@@ -488,9 +488,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             const SizedBox(height: AppSpacing.sm),
                             Text(
                               '$_currentPhotoIndex/$_totalPhotos枚完了',
-                              style: AppTypography.withColor(
-                                AppTypography.bodyMedium,
-                                AppColors.onSurfaceVariant,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.md),
@@ -520,9 +519,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             const SizedBox(height: AppSpacing.sm),
                             Text(
                               'AIがあなたの写真を分析しています',
-                              style: AppTypography.withColor(
-                                AppTypography.bodyMedium,
-                                AppColors.onSurfaceVariant,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -562,9 +560,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           Text(
                             _errorMessage,
                             textAlign: TextAlign.center,
-                            style: AppTypography.withColor(
-                              AppTypography.bodyMedium,
-                              AppColors.error,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Theme.of(context).colorScheme.error,
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xl),
@@ -609,20 +606,21 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 color: AppColors.outline.withValues(alpha: 0.2),
                               ),
                               borderRadius: AppSpacing.inputRadius,
-                              color: AppColors.surface,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                             child: TextField(
                               controller: _titleController,
-                              style: AppTypography.titleMedium,
+                              style: AppTypography.titleMedium.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                               decoration: InputDecoration(
                                 labelText: 'タイトル',
                                 border: InputBorder.none,
                                 hintText: '日記のタイトルを入力',
                                 contentPadding: AppSpacing.inputPadding,
                                 labelStyle: AppTypography.labelMedium,
-                                hintStyle: AppTypography.withColor(
-                                  AppTypography.bodyMedium,
-                                  AppColors.onSurfaceVariant,
+                                hintStyle: AppTypography.bodyMedium.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -635,23 +633,24 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                   color: AppColors.outline.withValues(alpha: 0.2),
                                 ),
                                 borderRadius: AppSpacing.inputRadius,
-                                color: AppColors.surface,
+                                color: Theme.of(context).colorScheme.surface,
                               ),
                               child: TextField(
                                 controller: _contentController,
                                 maxLines: 8,
                                 minLines: 8,
                                 textAlignVertical: TextAlignVertical.top,
-                                style: AppTypography.bodyLarge,
+                                style: AppTypography.bodyLarge.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                                 decoration: InputDecoration(
                                   labelText: '本文',
                                   hintText: '日記の内容を編集できます',
                                   border: InputBorder.none,
                                   contentPadding: AppSpacing.inputPadding,
                                   labelStyle: AppTypography.labelMedium,
-                                  hintStyle: AppTypography.withColor(
-                                    AppTypography.bodyMedium,
-                                    AppColors.onSurfaceVariant,
+                                  hintStyle: AppTypography.bodyMedium.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),

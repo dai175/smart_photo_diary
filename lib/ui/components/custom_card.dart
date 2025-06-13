@@ -148,7 +148,7 @@ class _CustomCardState extends State<CustomCard>
     final borderRadius = widget.borderRadius ?? AppSpacing.cardRadius;
     final elevation = widget.elevation ?? AppSpacing.elevationSm;
     final shadowColor = widget.shadowColor ?? AppColors.shadow;
-    final backgroundColor = widget.backgroundColor ?? AppColors.surface;
+    final backgroundColor = widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
 
     return AnimatedBuilder(
       animation: _animationController,

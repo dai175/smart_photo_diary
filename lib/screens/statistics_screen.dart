@@ -130,9 +130,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Center(
         child: Text(
           count > 9 ? '9+' : count.toString(),
-          style: AppTypography.withColor(
-            AppTypography.labelSmall,
-            Colors.white,
+          style: AppTypography.labelSmall.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
       ),
@@ -173,7 +172,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ),
                         child: Icon(
                           Icons.calendar_today_rounded,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           size: AppSpacing.iconSm,
                         ),
                       ),
@@ -241,9 +240,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   child: Center(
                                     child: Text(
                                       '${index + 1}',
-                                      style: AppTypography.withColor(
-                                        AppTypography.labelLarge,
-                                        Colors.white,
+                                      style: AppTypography.labelLarge.copyWith(
+                                        color: Theme.of(context).colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),
@@ -255,7 +253,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     children: [
                                       Text(
                                         title,
-                                        style: AppTypography.titleMedium,
+                                        style: AppTypography.titleMedium.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -264,9 +264,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                         diary.content,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.withColor(
-                                          AppTypography.bodySmall,
-                                          AppColors.onSurfaceVariant,
+                                        style: AppTypography.bodySmall.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(height: AppSpacing.xs),
@@ -292,7 +291,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 ),
                                 Icon(
                                   Icons.chevron_right_rounded,
-                                  color: AppColors.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   size: AppSpacing.iconSm,
                                 ),
                               ],
@@ -313,11 +312,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.onSurfaceVariant,
+                        foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       child: Text(
                         'キャンセル',
-                        style: AppTypography.labelLarge,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
@@ -336,16 +337,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('統計'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: AppSpacing.sm),
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.refresh_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: _loadStatistics,
               tooltip: '統計を更新',
@@ -376,9 +377,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'あなたの日記の記録を分析しています',
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -508,9 +508,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               children: [
                 Text(
                   title,
-                  style: AppTypography.withColor(
-                    AppTypography.labelSmall,
-                    AppColors.onSurfaceVariant,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -534,9 +533,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       unit,
-                      style: AppTypography.withColor(
-                        AppTypography.labelSmall,
-                        AppColors.onSurfaceVariant,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -554,12 +552,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-              borderRadius: AppSpacing.cardRadius,
-            ),
-            child: TableCalendar(
+          TableCalendar(
               firstDay: DateTime.utc(2020),
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
@@ -595,8 +588,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               _focusedDay = focusedDay;
             },
               calendarStyle: CalendarStyle(
-                weekendTextStyle: TextStyle(color: AppColors.primary),
-                holidayTextStyle: TextStyle(color: AppColors.primary),
+                defaultTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                weekendTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                holidayTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                outsideTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 selectedDecoration: BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
@@ -641,19 +636,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
               headerStyle: HeaderStyle(
                 titleCentered: true,
-                titleTextStyle: AppTypography.titleLarge,
+                titleTextStyle: AppTypography.titleLarge.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 formatButtonVisible: false,
                 leftChevronIcon: Icon(
                   Icons.chevron_left_rounded,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 rightChevronIcon: Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
-          ),
           const SizedBox(height: AppSpacing.md),
         ],
       ),

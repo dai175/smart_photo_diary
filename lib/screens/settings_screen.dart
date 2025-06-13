@@ -58,16 +58,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('設定'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: AppSpacing.sm),
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.refresh_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: _loadSettings,
               tooltip: '設定を更新',
@@ -98,9 +98,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'アプリの設定情報を取得しています',
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -260,9 +259,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
                       _getThemeModeLabel(_settingsService.themeMode),
-                      style: AppTypography.withColor(
-                        AppTypography.bodyMedium,
-                        AppColors.onSurfaceVariant,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -270,7 +268,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
             ],
@@ -316,9 +314,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
                       _getGenerationModeLabel(_settingsService.generationMode),
-                      style: AppTypography.withColor(
-                        AppTypography.bodyMedium,
-                        AppColors.onSurfaceVariant,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -326,7 +323,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
             ],
@@ -347,7 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: Icon(
                 Icons.security_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
             ),
@@ -391,7 +388,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: Icon(
                 Icons.storage_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
             ),
@@ -542,9 +539,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
                         '日記データをファイルに保存',
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -552,7 +548,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   size: AppSpacing.iconSm,
                 ),
               ],
@@ -597,9 +593,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
                         '不要なデータを削除してアプリを軽くする',
-                        style: AppTypography.withColor(
-                          AppTypography.bodyMedium,
-                          AppColors.onSurfaceVariant,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -607,7 +602,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   size: AppSpacing.iconSm,
                 ),
               ],

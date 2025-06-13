@@ -40,7 +40,7 @@ class HomeContentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildHeader(),
+      appBar: _buildHeader(context),
       body: onRefresh != null
           ? MicroInteractions.pullToRefresh(
               onRefresh: onRefresh!,
@@ -51,21 +51,21 @@ class HomeContentWidget extends StatelessWidget {
     );
   }
   
-  PreferredSizeWidget _buildHeader() {
+  PreferredSizeWidget _buildHeader(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       title: Text('${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日'),
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
       actions: onRefresh != null
           ? [
               Container(
                 margin: const EdgeInsets.only(right: AppSpacing.sm),
                 child: IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.refresh_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                   onPressed: () => onRefresh!(),
                   tooltip: 'ホーム画面を更新',

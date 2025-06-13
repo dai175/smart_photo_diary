@@ -65,7 +65,7 @@ class DiaryCardWidget extends StatelessWidget {
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: AppSpacing.chipRadius,
                 ),
                 child: Row(
@@ -74,14 +74,14 @@ class DiaryCardWidget extends StatelessWidget {
                     Icon(
                       Icons.calendar_today_rounded,
                       size: AppSpacing.iconXs,
-                      color: AppColors.onPrimaryContainer,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                     const SizedBox(width: AppSpacing.xxs),
                     Text(
                       DateFormat('MM/dd').format(entry.date),
                       style: AppTypography.withColor(
                         AppTypography.labelSmall,
-                        AppColors.onPrimaryContainer,
+                        Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ],
@@ -90,7 +90,7 @@ class DiaryCardWidget extends StatelessWidget {
               const Spacer(),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
             ],
@@ -115,7 +115,7 @@ class DiaryCardWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppTypography.withColor(
               AppTypography.bodyMedium,
-              AppColors.onSurfaceVariant,
+              Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
 

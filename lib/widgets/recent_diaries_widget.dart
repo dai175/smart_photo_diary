@@ -103,7 +103,7 @@ class RecentDiariesWidget extends StatelessWidget {
               const Spacer(),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
             ],
@@ -153,9 +153,8 @@ class RecentDiariesWidget extends StatelessWidget {
   Widget _buildDiaryContent(BuildContext context, String content) {
     return Text(
       content,
-      style: AppTypography.withColor(
-        AppTypography.bodyMedium,
-        AppColors.onSurfaceVariant,
+      style: AppTypography.bodyMedium.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
