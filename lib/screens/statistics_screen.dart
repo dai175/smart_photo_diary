@@ -391,6 +391,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               onRefresh: _loadStatistics,
               color: AppColors.primary,
               child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: AppSpacing.screenPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
