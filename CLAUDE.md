@@ -72,6 +72,12 @@ fvm flutter build ipa
 fvm flutter build macos
 fvm flutter build windows
 fvm flutter build linux
+
+# Install release APK on connected Android device
+adb install build/app/outputs/flutter-apk/app-release.apk
+
+# Launch app on device
+adb shell am start -n com.example.smart_photo_diary/.MainActivity
 ```
 
 ### Linting and Code Quality
@@ -96,7 +102,7 @@ The app follows a service-oriented architecture with singleton services using la
 - **`AiService`**: AI diary generation with Google Gemini API and comprehensive offline fallbacks, implements `AiServiceInterface`
 - **`ImageClassifierService`**: On-device ML inference using TensorFlow Lite MobileNet v2
 - **`SettingsService`**: App configuration stored in SharedPreferences with Result<T> pattern for write operations
-- **`StorageService`**: File system operations and data export functionality
+- **`StorageService`**: File system operations, data export functionality with user-selectable destinations, and database optimization
 - **`LoggingService`**: Structured logging with levels and performance monitoring
 
 ### Error Handling Architecture
@@ -150,6 +156,13 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `permission_handler`: Platform-specific permissions for photo access
 - `connectivity_plus`: Network status checking for AI service fallbacks
 - `shared_preferences`: Simple key-value storage for app settings
+- `file_picker`: User-selectable file export destinations
+- `package_info_plus`: App version and build information
+- `table_calendar`: Calendar widget for diary timeline views
+- `http`: Network requests for AI API integration
+- `flutter_dotenv`: Environment variable management
+- `uuid`: Unique identifier generation for diary entries
+- `intl`: Internationalization and date formatting
 
 ### Development
 - `build_runner` + `hive_generator`: Code generation for Hive adapters
@@ -288,6 +301,10 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Code quality improvements**: Comprehensive error handling utilities and logging service
 - **UI Design Unification**: Removed all gradients across the app for cleaner, simpler design
 - **Header Standardization**: Unified all screen headers to use consistent AppBar styling
+- **Comprehensive dark mode support**: Fixed text visibility issues and unified card design across all screens
+- **Database optimization**: Implemented Hive database compaction and storage cleanup functionality
+- **Enhanced export feature**: Added file picker integration for user-selectable export destinations
+- **Build configuration**: Resolved Java version warnings and optimized Android build settings
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging) are fully implemented and tested
@@ -416,3 +433,24 @@ The project uses a customized `analysis_options.yaml` configuration that:
 - `unintended_html_in_doc_comment`: Documentation formatting issue, not functional problem
 
 This configuration is appropriate for a mature, production-ready codebase where the focus should be on preventing actual bugs rather than enforcing every style preference.
+
+## Storage Management Features
+
+### Data Export with File Picker
+The app includes comprehensive data export functionality:
+- **User-selectable destinations**: Uses `file_picker` package for cross-platform file saving
+- **JSON format export**: Complete diary data including tags, metadata, and timestamps
+- **Filtered exports**: Support for date range filtering during export
+- **Structured data format**: Includes app metadata, version info, and export timestamps
+
+### Database Optimization
+Storage optimization features include:
+- **Hive database compaction**: Reduces file fragmentation and reclaims deleted data space
+- **Temporary file cleanup**: Automatic removal of temporary files and directories
+- **Cache management**: Deletes cache files older than 7 days
+- **Storage monitoring**: Real-time storage usage reporting with formatted size display
+
+### Implementation Notes
+- **StorageService.exportData()**: Returns file path or null, uses FilePicker.platform.saveFile()
+- **StorageService.optimizeDatabase()**: Calls DiaryService.compactDatabase() and cleanup methods
+- **StorageInfo class**: Provides formatted storage size calculations and breakdown by data type
