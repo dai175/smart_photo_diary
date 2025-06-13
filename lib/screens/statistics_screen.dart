@@ -427,51 +427,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: AppSpacing.cardPadding,
-          decoration: BoxDecoration(
-            color: AppColors.primaryContainer,
-            borderRadius: AppSpacing.cardRadius,
-            boxShadow: AppSpacing.cardShadow,
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.analytics_rounded,
-                  color: Colors.white,
-                  size: AppSpacing.iconMd,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '記録の統計',
-                    style: AppTypography.withColor(
-                      AppTypography.headlineSmall,
-                      AppColors.onPrimaryContainer,
-                    ),
-                  ),
-                  Text(
-                    'あなたの日記習慣を見てみよう',
-                    style: AppTypography.withColor(
-                      AppTypography.bodyMedium,
-                      AppColors.onPrimaryContainer,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
             Expanded(
@@ -616,21 +571,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_view_month_rounded,
-                color: AppColors.primary,
-                size: AppSpacing.iconMd,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                '記録カレンダー',
-                style: AppTypography.headlineSmall,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
           Container(
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant.withValues(alpha: 0.3),
