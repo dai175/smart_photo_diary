@@ -323,4 +323,12 @@ class DiaryService implements DiaryServiceInterface {
       photoIds: photoIds,
     );
   }
+
+  // データベースの最適化（StorageServiceから呼び出し用）
+  Future<void> compactDatabase() async {
+    if (_diaryBox == null) await _init();
+    if (_diaryBox != null) {
+      await _diaryBox!.compact();
+    }
+  }
 }

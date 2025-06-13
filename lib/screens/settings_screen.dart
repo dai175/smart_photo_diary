@@ -762,9 +762,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.pop(context); // ローディングダイアログを閉じる
         
         if (filePath != null) {
-          _showSuccessDialog('エクスポート完了', 'データが以下の場所に保存されました:\n$filePath');
+          _showSuccessDialog('エクスポート完了', 'バックアップファイルが正常に保存されました');
         } else {
-          _showErrorDialog('エクスポートに失敗しました');
+          _showErrorDialog('エクスポートがキャンセルされたか、失敗しました');
         }
       }
     } catch (e) {

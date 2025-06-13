@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
 import 'diary_service.dart';
 
 class StorageService {
@@ -57,7 +58,7 @@ class StorageService {
     }
   }
 
-  // データのエクスポート
+  // データのエクスポート（保存先選択可能）
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
       final diaryService = await DiaryService.getInstance();
@@ -83,20 +84,25 @@ class StorageService {
           'content': entry.content,
           'date': entry.date.toIso8601String(),
           'photoIds': entry.photoIds,
-          // 'location': entry.location, // 将来実装
+          'tags': entry.tags, // タグも含める
           'createdAt': entry.createdAt.toIso8601String(),
+          'updatedAt': entry.updatedAt.toIso8601String(),
         }).toList(),
       };
 
       final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
       
-      // ファイルに保存
-      final directory = await getApplicationDocumentsDirectory();
+      // ファイル保存先を選択
       final fileName = 'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsString(jsonString);
+      final outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: '日記のバックアップを保存',
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: utf8.encode(jsonString),
+      );
 
-      return file.path;
+      return outputFile;
     } catch (e) {
       return null;
     }
@@ -105,12 +111,46 @@ class StorageService {
   // データの最適化
   Future<bool> optimizeDatabase() async {
     try {
-      // データベースの最適化（将来実装）
-      // final diaryService = await DiaryService.getInstance();
-      // await diaryService.box.compact();
+      final diaryService = await DiaryService.getInstance();
+      
+      // Hiveデータベースのコンパクト（断片化を解消）
+      await diaryService.compactDatabase();
+      
+      // 一時ファイルを削除
+      await _cleanupTempFiles();
+      
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  // 一時ファイルの削除
+  Future<void> _cleanupTempFiles() async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final tempDir = Directory('${appDir.path}/temp');
+      
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+      
+      // キャッシュディレクトリの古いファイルを削除
+      final cacheDir = await getApplicationCacheDirectory();
+      if (await cacheDir.exists()) {
+        final cutoffDate = DateTime.now().subtract(const Duration(days: 7));
+        
+        await for (final entity in cacheDir.list()) {
+          if (entity is File) {
+            final stat = await entity.stat();
+            if (stat.modified.isBefore(cutoffDate)) {
+              await entity.delete();
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // エラーがあっても続行
     }
   }
 }
