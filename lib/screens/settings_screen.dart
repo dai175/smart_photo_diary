@@ -114,18 +114,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ListView(
                 padding: AppSpacing.screenPadding,
                 children: [
-                  FadeInWidget(
-                    child: _buildAppearanceSection(),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 100),
-                    child: _buildDataManagementSection(),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 200),
-                    child: _buildAppInfoSection(),
+                  CustomCard(
+                    elevation: AppSpacing.elevationMd,
+                    child: Column(
+                      children: [
+                        FadeInWidget(
+                          child: _buildThemeSelector(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 100),
+                          child: _buildStorageInfo(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 150),
+                          child: _buildBackupAction(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 200),
+                          child: _buildOptimizeAction(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 250),
+                          child: _buildVersionInfo(),
+                        ),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 300),
+                          child: _buildLicenseInfo(),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
                 ],
@@ -134,89 +155,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAppearanceSection() {
-    debugPrint('外観設定セクションを構築中...');
-    return _buildSection(
-      title: 'テーマ・見た目',
-      icon: Icons.palette,
-      children: [
-        _buildThemeSelector(),
-      ],
-    );
-  }
-
-  Widget _buildDataManagementSection() {
-    return _buildSection(
-      title: 'データ・容量',
-      icon: Icons.storage,
-      children: [
-        _buildStorageInfo(),
-        const Divider(height: 1),
-        _buildDataActions(),
-      ],
-    );
-  }
-
-  Widget _buildAppInfoSection() {
-    return _buildSection(
-      title: 'アプリ情報',
-      icon: Icons.info,
-      children: [
-        _buildVersionInfo(),
-        const Divider(height: 1),
-        _buildLicenseInfo(),
-      ],
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return CustomCard(
-      elevation: AppSpacing.elevationMd,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: AppSpacing.cardPadding,
-            decoration: BoxDecoration(
-              color: AppColors.primaryContainer,
-              borderRadius: AppSpacing.cardRadius,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: AppSpacing.iconMd,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  title,
-                  style: AppTypography.withColor(
-                    AppTypography.titleLarge,
-                    AppColors.onPrimaryContainer,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ...children.map((child) => MicroInteractions.bounceOnTap(
-            onTap: () {}, // Will be overridden by the actual ListTile onTap
-            enableHaptic: false, // Disable for section items to avoid double haptic
-            child: child,
-          )),
-        ],
-      ),
+  Widget _buildDivider() {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      color: AppColors.outline.withValues(alpha: 0.1),
     );
   }
 
@@ -407,113 +350,107 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDataActions() {
-    return Column(
-      children: [
-        MicroInteractions.bounceOnTap(
-          onTap: () {
-            MicroInteractions.hapticTap();
-            _exportData();
-          },
-          child: Container(
-            padding: AppSpacing.cardPadding,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                  ),
-                  child: Icon(
-                    Icons.file_download_outlined,
-                    color: AppColors.success,
-                    size: AppSpacing.iconSm,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'バックアップ',
-                        style: AppTypography.titleMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        '日記データをファイルに保存',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: AppSpacing.iconSm,
-                ),
-              ],
+  Widget _buildBackupAction() {
+    return MicroInteractions.bounceOnTap(
+      onTap: () {
+        MicroInteractions.hapticTap();
+        _exportData();
+      },
+      child: Container(
+        padding: AppSpacing.cardPadding,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              child: Icon(
+                Icons.file_download_outlined,
+                color: AppColors.success,
+                size: AppSpacing.iconSm,
+              ),
             ),
-          ),
-        ),
-        Container(
-          height: 1,
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          color: AppColors.outline.withValues(alpha: 0.1),
-        ),
-        MicroInteractions.bounceOnTap(
-          onTap: () {
-            MicroInteractions.hapticTap();
-            _optimizeDatabase();
-          },
-          child: Container(
-            padding: AppSpacing.cardPadding,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'バックアップ',
+                    style: AppTypography.titleMedium,
                   ),
-                  child: Icon(
-                    Icons.cleaning_services_rounded,
-                    color: AppColors.error,
-                    size: AppSpacing.iconSm,
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '日記データをファイルに保存',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '容量の整理',
-                        style: AppTypography.titleMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        '不要なデータを削除してアプリを軽くする',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: AppSpacing.iconSm,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconSm,
+            ),
+          ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildOptimizeAction() {
+    return MicroInteractions.bounceOnTap(
+      onTap: () {
+        MicroInteractions.hapticTap();
+        _optimizeDatabase();
+      },
+      child: Container(
+        padding: AppSpacing.cardPadding,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              child: Icon(
+                Icons.cleaning_services_rounded,
+                color: AppColors.error,
+                size: AppSpacing.iconSm,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '容量の整理',
+                    style: AppTypography.titleMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '不要なデータを削除してアプリを軽くする',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconSm,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
