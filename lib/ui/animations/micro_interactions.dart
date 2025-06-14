@@ -100,6 +100,26 @@ class MicroInteractions {
       child: child,
     );
   }
+
+  /// スケール遷移効果
+  static Widget scaleTransition({
+    required Widget child,
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.easeOutBack,
+  }) {
+    return TweenAnimationBuilder<double>(
+      duration: duration,
+      tween: Tween<double>(begin: 0.0, end: 1.0),
+      curve: curve,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
 }
 
 /// 振動の強度

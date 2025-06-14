@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../ui/components/custom_dialog.dart';
 
 /// ダイアログ表示のユーティリティクラス
 class DialogUtils {
@@ -14,12 +15,13 @@ class DialogUtils {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          content: Text(message),
+        return CustomDialog(
+          message: message,
           actions: [
-            TextButton(
+            CustomDialogAction(
+              text: AppConstants.okButton,
+              isPrimary: true,
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(AppConstants.okButton),
             ),
           ],
         );
@@ -40,15 +42,10 @@ class DialogUtils {
     return showDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(AppConstants.okButton),
-            ),
-          ],
+        return PresetDialogs.success(
+          title: title,
+          message: message,
+          onConfirm: () => Navigator.pop(context),
         );
       },
     );
@@ -67,15 +64,10 @@ class DialogUtils {
     return showDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(AppConstants.okButton),
-            ),
-          ],
+        return PresetDialogs.error(
+          title: title,
+          message: message,
+          onConfirm: () => Navigator.pop(context),
         );
       },
     );
@@ -100,22 +92,14 @@ class DialogUtils {
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(cancelText),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              confirmText,
-              style: isDestructive ? const TextStyle(color: Colors.red) : null,
-            ),
-          ),
-        ],
+      builder: (context) => PresetDialogs.confirmation(
+        title: title,
+        message: message,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        isDestructive: isDestructive,
+        onConfirm: () => Navigator.pop(context, true),
+        onCancel: () => Navigator.pop(context, false),
       ),
     );
   }
@@ -133,15 +117,7 @@ class DialogUtils {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          content: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: AppConstants.defaultPadding),
-              Flexible(child: Text(message)),
-            ],
-          ),
-        );
+        return PresetDialogs.loading(message: message);
       },
     );
   }
@@ -167,8 +143,8 @@ class DialogUtils {
         T? selectedValue = currentValue;
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              title: Text(title),
+            return CustomDialog(
+              title: title,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: options.map((option) {
@@ -186,9 +162,9 @@ class DialogUtils {
                 }).toList(),
               ),
               actions: [
-                TextButton(
+                CustomDialogAction(
+                  text: 'キャンセル',
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('キャンセル'),
                 ),
               ],
             );
@@ -213,8 +189,8 @@ class DialogUtils {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
+        return CustomDialog(
+          title: title,
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -226,9 +202,9 @@ class DialogUtils {
             ),
           ),
           actions: [
-            TextButton(
+            CustomDialogAction(
+              text: 'キャンセル',
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('キャンセル'),
             ),
           ],
         );
