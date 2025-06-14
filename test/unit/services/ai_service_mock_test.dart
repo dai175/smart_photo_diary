@@ -18,7 +18,6 @@ void main() {
       registerFallbackValue(DateTime.now());
       registerFallbackValue(<String>[]);
       registerFallbackValue(<DateTime>[]);
-      registerFallbackValue(<PhotoTimeLabel>[]);
       registerFallbackValue(<({Uint8List imageData, DateTime time})>[]);
     });
 
@@ -56,113 +55,6 @@ void main() {
       });
     });
 
-    group('generateDiaryFromLabels', () {
-      test('should generate diary from labels with basic parameters', () async {
-        // Arrange
-        final labels = ['cat', 'garden', 'sunny'];
-        final date = DateTime(2024, 1, 15, 14, 30);
-        final expectedResult = DiaryGenerationResult(
-          title: '庭で猫と過ごした晴れた午後',
-          content: '今日は晴れた午後、庭で可愛い猫と一緒に過ごしました。太陽の光が暖かく、とても心地よい時間でした。',
-        );
-
-        when(() => mockAiService.generateDiaryFromLabels(
-          labels: any(named: 'labels'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-          photoTimeLabels: any(named: 'photoTimeLabels'),
-        )).thenAnswer((_) async => expectedResult);
-
-        // Act
-        final result = await mockAiService.generateDiaryFromLabels(
-          labels: labels,
-          date: date,
-        );
-
-        // Assert
-        expect(result, equals(expectedResult));
-        expect(result.title, contains('猫'));
-        expect(result.content, contains('庭'));
-        verify(() => mockAiService.generateDiaryFromLabels(
-          labels: labels,
-          date: date,
-          location: null,
-          photoTimes: null,
-          photoTimeLabels: null,
-        )).called(1);
-      });
-
-      test('should generate diary from labels with all parameters', () async {
-        // Arrange
-        final labels = ['dog', 'park', 'morning'];
-        final date = DateTime(2024, 1, 15, 8, 0);
-        const location = 'Central Park';
-        final photoTimes = [
-          DateTime(2024, 1, 15, 8, 0),
-          DateTime(2024, 1, 15, 8, 15),
-        ];
-        final photoTimeLabels = [
-          PhotoTimeLabel(time: DateTime(2024, 1, 15, 8, 0), labels: ['dog']),
-          PhotoTimeLabel(time: DateTime(2024, 1, 15, 8, 15), labels: ['park']),
-        ];
-        
-        final expectedResult = DiaryGenerationResult(
-          title: 'セントラルパークで朝の散歩',
-          content: '朝8時にセントラルパークへ犬と散歩に出かけました。公園の朝の空気は清々しく、犬も嬉しそうでした。',
-        );
-
-        when(() => mockAiService.generateDiaryFromLabels(
-          labels: any(named: 'labels'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-          photoTimeLabels: any(named: 'photoTimeLabels'),
-        )).thenAnswer((_) async => expectedResult);
-
-        // Act
-        final result = await mockAiService.generateDiaryFromLabels(
-          labels: labels,
-          date: date,
-          location: location,
-          photoTimes: photoTimes,
-          photoTimeLabels: photoTimeLabels,
-        );
-
-        // Assert
-        expect(result, equals(expectedResult));
-        expect(result.title, contains('セントラルパーク'));
-        expect(result.content, contains('犬'));
-      });
-
-      test('should handle empty labels gracefully', () async {
-        // Arrange
-        final date = DateTime(2024, 1, 15);
-        final expectedResult = DiaryGenerationResult(
-          title: '思い出の一日',
-          content: '今日も素敵な一日でした。',
-        );
-
-        when(() => mockAiService.generateDiaryFromLabels(
-          labels: any(named: 'labels'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-          photoTimeLabels: any(named: 'photoTimeLabels'),
-        )).thenAnswer((_) async => expectedResult);
-
-        // Act
-        final result = await mockAiService.generateDiaryFromLabels(
-          labels: [],
-          date: date,
-        );
-
-        // Assert
-        expect(result, isA<DiaryGenerationResult>());
-        expect(result.title, isNotEmpty);
-        expect(result.content, isNotEmpty);
-      });
-    });
 
     group('generateDiaryFromImage', () {
       test('should generate diary from image data', () async {
@@ -379,33 +271,6 @@ void main() {
     });
 
     group('Error Handling', () {
-      test('should provide fallback when network fails', () async {
-        // Arrange
-        final labels = ['test'];
-        final date = DateTime.now();
-        final fallbackResult = DiaryGenerationResult(
-          title: 'オフライン日記',
-          content: 'ネットワーク接続がない状態で生成された日記です。',
-        );
-
-        when(() => mockAiService.generateDiaryFromLabels(
-          labels: any(named: 'labels'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-          photoTimeLabels: any(named: 'photoTimeLabels'),
-        )).thenAnswer((_) async => fallbackResult);
-
-        // Act
-        final result = await mockAiService.generateDiaryFromLabels(
-          labels: labels,
-          date: date,
-        );
-
-        // Assert
-        expect(result, equals(fallbackResult));
-        expect(result.title, contains('オフライン'));
-      });
 
       test('should handle invalid image data gracefully', () async {
         // Arrange
@@ -441,7 +306,6 @@ void main() {
 
       test('should have all required interface methods', () {
         expect(mockAiService.isOnline, isA<Function>());
-        expect(mockAiService.generateDiaryFromLabels, isA<Function>());
         expect(mockAiService.generateDiaryFromImage, isA<Function>());
         expect(mockAiService.generateDiaryFromMultipleImages, isA<Function>());
         expect(mockAiService.generateTagsFromContent, isA<Function>());
@@ -459,15 +323,6 @@ void main() {
         expect(result.content, equals(content));
       });
 
-      test('PhotoTimeLabel should be properly constructed', () {
-        final time = DateTime(2024, 1, 15, 12, 0);
-        final labels = ['photo', 'test'];
-        
-        final photoTimeLabel = PhotoTimeLabel(time: time, labels: labels);
-        
-        expect(photoTimeLabel.time, equals(time));
-        expect(photoTimeLabel.labels, equals(labels));
-      });
     });
   });
 }

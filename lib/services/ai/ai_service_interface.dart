@@ -8,27 +8,12 @@ class DiaryGenerationResult {
   DiaryGenerationResult({required this.title, required this.content});
 }
 
-/// 写真の時刻とラベルのペア
-class PhotoTimeLabel {
-  final DateTime time;
-  final List<String> labels;
-
-  PhotoTimeLabel({required this.time, required this.labels});
-}
 
 /// AIサービスのインターフェース
 abstract class AiServiceInterface {
   /// インターネット接続があるかどうかを確認
   Future<bool> isOnline();
 
-  /// 検出されたラベルから日記のタイトルと本文を生成
-  Future<DiaryGenerationResult> generateDiaryFromLabels({
-    required List<String> labels,
-    required DateTime date,
-    String? location,
-    List<DateTime>? photoTimes,
-    List<PhotoTimeLabel>? photoTimeLabels,
-  });
 
   /// 画像から直接日記を生成（Vision API使用）
   Future<DiaryGenerationResult> generateDiaryFromImage({

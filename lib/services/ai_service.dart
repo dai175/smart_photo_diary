@@ -21,24 +21,6 @@ class AiService implements AiServiceInterface {
     return connectivityResult != ConnectivityResult.none;
   }
 
-  @override
-  Future<DiaryGenerationResult> generateDiaryFromLabels({
-    required List<String> labels,
-    required DateTime date,
-    String? location,
-    List<DateTime>? photoTimes,
-    List<PhotoTimeLabel>? photoTimeLabels,
-  }) async {
-    final online = await isOnline();
-    return await _diaryGenerator.generateFromLabels(
-      labels: labels,
-      date: date,
-      location: location,
-      photoTimes: photoTimes,
-      photoTimeLabels: photoTimeLabels,
-      isOnline: online,
-    );
-  }
 
   @override
   Future<DiaryGenerationResult> generateDiaryFromImage({

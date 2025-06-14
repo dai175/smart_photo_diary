@@ -64,17 +64,5 @@ class SettingsService {
 
 
   // 日記生成モード（常にvision固定）
-  DiaryGenerationMode get generationMode {
-    return DiaryGenerationMode.vision;
-  }
-
-  // 後方互換性のため残す（実際には使用されない）
-  Future<Result<void>> setGenerationMode(DiaryGenerationMode mode) async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        // 常にvisionモードなので何もしない
-      },
-      context: 'SettingsService.setGenerationMode',
-    );
-  }
+  static const DiaryGenerationMode generationMode = DiaryGenerationMode.vision;
 }

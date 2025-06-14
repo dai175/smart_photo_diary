@@ -16,63 +16,6 @@ class DiaryGenerator {
   }) : _apiClient = apiClient ?? GeminiApiClient(),
         _offlineService = offlineService ?? OfflineFallbackService();
 
-  /// 検出されたラベルから日記のタイトルと本文を生成
-  Future<DiaryGenerationResult> generateFromLabels({
-    required List<String> labels,
-    required DateTime date,
-    String? location,
-    List<DateTime>? photoTimes,
-    List<PhotoTimeLabel>? photoTimeLabels,
-    required bool isOnline,
-  }) async {
-    if (!isOnline) {
-      return _offlineService.generateDiary(labels, date, location, photoTimes);
-    }
-
-    try {
-      // 日付のフォーマット
-      final dateStr = DateFormat('yyyy年MM月dd日').format(date);
-      
-      // 写真ごとの時間情報を活用したプロンプトを作成
-      String timeInfo;
-      if (photoTimeLabels != null && photoTimeLabels.isNotEmpty) {
-        timeInfo = _buildTimeBasedPrompt(photoTimeLabels);
-      } else {
-        final timeOfDay = _getTimeOfDayForPhotos(date, photoTimes);
-        timeInfo = '時間帯: $timeOfDay\nキーワード: ${labels.join(', ')}';
-      }
-
-      // プロンプトの作成
-      final prompt = '''
-あなたは日記作成の専門家です。以下の情報から、その日の出来事を振り返る日記を日本語で作成してください。
-タイトルと本文を分けて、以下の形式で出力してください。
-
-【タイトル】
-（5-10文字程度の簡潔なタイトル）
-
-【本文】
-（150-200文字程度の自然で個人的な文体の本文。時系列に沿って出来事を描写してください）
-
-日付: $dateStr
-${location != null ? '場所: $location\n' : ''}
-$timeInfo
-''';
-
-      final response = await _apiClient.sendTextRequest(prompt: prompt);
-      
-      if (response != null) {
-        final content = _apiClient.extractTextFromResponse(response);
-        if (content != null) {
-          return _parseGeneratedDiary(content);
-        }
-      }
-      
-      return _offlineService.generateDiary(labels, date, location, photoTimes);
-    } catch (e) {
-      debugPrint('ラベルベース日記生成エラー: $e');
-      return _offlineService.generateDiary(labels, date, location, photoTimes);
-    }
-  }
 
   /// 画像から直接日記を生成
   Future<DiaryGenerationResult> generateFromImage({
@@ -244,27 +187,6 @@ ${location != null ? '場所: $location\n' : ''}
     }
   }
 
-  /// 写真ごとの時間とラベル情報から時系列プロンプトを構築
-  String _buildTimeBasedPrompt(List<PhotoTimeLabel> photoTimeLabels) {
-    if (photoTimeLabels.isEmpty) return '';
-    
-    // 時刻順にソート
-    final sortedPhotos = List<PhotoTimeLabel>.from(photoTimeLabels);
-    sortedPhotos.sort((a, b) => a.time.compareTo(b.time));
-    
-    final buffer = StringBuffer();
-    buffer.writeln('写真情報（時系列順）:');
-    
-    for (int i = 0; i < sortedPhotos.length; i++) {
-      final photo = sortedPhotos[i];
-      final timeStr = DateFormat('HH:mm').format(photo.time);
-      final timeOfDay = _getTimeOfDay(photo.time);
-      
-      buffer.writeln('${i + 1}. $timeStr頃（$timeOfDay）: ${photo.labels.join(', ')}');
-    }
-    
-    return buffer.toString().trim();
-  }
 
   /// 1枚の画像を分析して説明を取得
   Future<String> _analyzeImage(Uint8List imageData, DateTime time, String? location) async {

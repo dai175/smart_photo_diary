@@ -106,13 +106,6 @@ class IntegrationTestHelpers {
     when(() => _mockPhotoService.getThumbnail(any(), width: any(named: 'width'), height: any(named: 'height'))).thenAnswer((_) async => null);
     
     // AI service defaults
-    when(() => _mockAiService.generateDiaryFromLabels(
-      labels: any(named: 'labels'),
-      date: any(named: 'date'),
-      location: any(named: 'location'),
-      photoTimes: any(named: 'photoTimes'),
-      photoTimeLabels: any(named: 'photoTimeLabels'),
-    )).thenAnswer((_) async => _createMockDiaryResult());
     
     when(() => _mockAiService.generateDiaryFromImage(
       imageData: any(named: 'imageData'),
@@ -185,14 +178,6 @@ class IntegrationTestHelpers {
 
   /// Setup mock AI diary generation
   static void setupMockDiaryGeneration(DiaryGenerationResult result) {
-    when(() => _mockAiService.generateDiaryFromLabels(
-      labels: any(named: 'labels'),
-      date: any(named: 'date'),
-      location: any(named: 'location'),
-      photoTimes: any(named: 'photoTimes'),
-      photoTimeLabels: any(named: 'photoTimeLabels'),
-    )).thenAnswer((_) async => result);
-    
     when(() => _mockAiService.generateDiaryFromImage(
       imageData: any(named: 'imageData'),
       date: any(named: 'date'),
