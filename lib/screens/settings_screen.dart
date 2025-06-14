@@ -93,7 +93,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         '設定を読み込み中...',
-                        style: AppTypography.titleLarge,
+                        style: AppTypography.titleLarge.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -195,7 +197,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Text(
                       'テーマ',
-                      style: AppTypography.titleMedium,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
@@ -230,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
@@ -246,7 +250,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     'ストレージ情報',
-                    style: AppTypography.titleMedium,
+                    style: AppTypography.titleMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
@@ -282,7 +288,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(
           '使用容量',
-          style: AppTypography.titleMedium,
+          style: AppTypography.titleMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         subtitle: Text(
           '合計: ${_storageInfo!.formattedTotalSize}',
@@ -295,7 +303,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: AppSpacing.cardRadius,
             ),
             child: Column(
@@ -334,14 +342,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Expanded(
           child: Text(
             label,
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
         Text(
           size,
-          style: AppTypography.withColor(
-            AppTypography.labelLarge,
-            color,
+          style: AppTypography.labelLarge.copyWith(
+            color: color,
           ),
         ),
       ],
@@ -377,7 +386,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     'バックアップ',
-                    style: AppTypography.titleMedium,
+                    style: AppTypography.titleMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
@@ -429,7 +440,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     '容量の整理',
-                    style: AppTypography.titleMedium,
+                    style: AppTypography.titleMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
@@ -476,7 +489,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Text(
                   'アプリバージョン',
-                  style: AppTypography.titleMedium,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
@@ -529,7 +544,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     'ライセンス',
-                    style: AppTypography.titleMedium,
+                    style: AppTypography.titleMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(

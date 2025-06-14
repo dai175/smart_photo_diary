@@ -182,16 +182,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         children: [
                           Text(
                             '${selectedDay.month}月${selectedDay.day}日の日記',
-                            style: AppTypography.withColor(
-                              AppTypography.titleLarge,
-                              AppColors.onPrimaryContainer,
+                            style: AppTypography.titleLarge.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           Text(
                             '${diaries.length}件の日記があります',
-                            style: AppTypography.withColor(
-                              AppTypography.bodyMedium,
-                              AppColors.onPrimaryContainer,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -280,9 +278,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                         ),
                                         child: Text(
                                           '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
-                                          style: AppTypography.withColor(
-                                            AppTypography.labelSmall,
-                                            AppColors.onPrimaryContainer,
+                                          style: AppTypography.labelSmall.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ),
@@ -372,7 +369,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       Text(
                         '統計データを読み込み中...',
-                        style: AppTypography.titleLarge,
+                        style: AppTypography.titleLarge.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -522,9 +521,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     Flexible(
                       child: Text(
                         value,
-                        style: AppTypography.withColor(
-                          AppTypography.headlineSmall,
-                          color,
+                        style: AppTypography.headlineSmall.copyWith(
+                          color: color,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -647,6 +645,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 rightChevronIcon: Icon(
                   Icons.chevron_right_rounded,
                   color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+                weekendStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
