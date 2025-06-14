@@ -234,55 +234,35 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         actions: [
           // 編集モード切替ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)
-            Container(
-              margin: const EdgeInsets.only(right: AppSpacing.xs),
-              child: MicroInteractions.bounceOnTap(
-                onTap: () {
-                  MicroInteractions.hapticTap();
-                  if (_isEditing) {
-                    _updateDiary();
-                  } else {
-                    setState(() {
-                      _isEditing = true;
-                    });
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.xs),
-                  ),
-                  child: Icon(
-                    _isEditing ? Icons.check_rounded : Icons.edit_rounded,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    size: AppSpacing.iconSm,
-                  ),
-                ),
+            IconButton(
+              onPressed: () {
+                MicroInteractions.hapticTap();
+                if (_isEditing) {
+                  _updateDiary();
+                } else {
+                  setState(() {
+                    _isEditing = true;
+                  });
+                }
+              },
+              icon: Icon(
+                _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
+              tooltip: _isEditing ? '保存' : '編集',
             ),
           // 削除ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)
-            Container(
-              margin: const EdgeInsets.only(right: AppSpacing.sm),
-              child: MicroInteractions.bounceOnTap(
-                onTap: () {
-                  MicroInteractions.hapticTap(intensity: VibrationIntensity.medium);
-                  _deleteDiary();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.xs),
-                  ),
-                  child: Icon(
-                    Icons.delete_rounded,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    size: AppSpacing.iconSm,
-                  ),
-                ),
+            IconButton(
+              onPressed: () {
+                MicroInteractions.hapticTap(intensity: VibrationIntensity.medium);
+                _deleteDiary();
+              },
+              icon: Icon(
+                Icons.delete_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
+              tooltip: '削除',
             ),
         ],
       ),
