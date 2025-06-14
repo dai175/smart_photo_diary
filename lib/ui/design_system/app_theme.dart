@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 import 'app_spacing.dart';
@@ -51,23 +52,17 @@ class AppTheme {
         ),
       ),
 
-      // Text Theme
-      textTheme: const TextTheme(
-        displayLarge: AppTypography.displayLarge,
-        displayMedium: AppTypography.displayMedium,
-        displaySmall: AppTypography.displaySmall,
+      // Text Theme - Google Fonts for Japanese support
+      textTheme: GoogleFonts.notoSansJpTextTheme(
+        ThemeData.light().textTheme,
+      ).copyWith(
         headlineLarge: AppTypography.headlineLarge,
         headlineMedium: AppTypography.headlineMedium,
         headlineSmall: AppTypography.headlineSmall,
         titleLarge: AppTypography.titleLarge,
         titleMedium: AppTypography.titleMedium,
-        titleSmall: AppTypography.titleSmall,
         bodyLarge: AppTypography.bodyLarge,
         bodyMedium: AppTypography.bodyMedium,
-        bodySmall: AppTypography.bodySmall,
-        labelLarge: AppTypography.labelLarge,
-        labelMedium: AppTypography.labelMedium,
-        labelSmall: AppTypography.labelSmall,
       ),
 
       // Card Theme
@@ -266,23 +261,17 @@ class AppTheme {
         ),
       ),
 
-      // Text Theme
-      textTheme: TextTheme(
-        displayLarge: AppTypography.withColor(AppTypography.displayLarge, AppColors.onBackgroundDark),
-        displayMedium: AppTypography.withColor(AppTypography.displayMedium, AppColors.onBackgroundDark),
-        displaySmall: AppTypography.withColor(AppTypography.displaySmall, AppColors.onBackgroundDark),
+      // Text Theme - Google Fonts for Japanese support (Dark)
+      textTheme: GoogleFonts.notoSansJpTextTheme(
+        ThemeData.dark().textTheme,
+      ).copyWith(
         headlineLarge: AppTypography.withColor(AppTypography.headlineLarge, AppColors.onBackgroundDark),
         headlineMedium: AppTypography.withColor(AppTypography.headlineMedium, AppColors.onBackgroundDark),
         headlineSmall: AppTypography.withColor(AppTypography.headlineSmall, AppColors.onBackgroundDark),
         titleLarge: AppTypography.withColor(AppTypography.titleLarge, AppColors.onBackgroundDark),
         titleMedium: AppTypography.withColor(AppTypography.titleMedium, AppColors.onBackgroundDark),
-        titleSmall: AppTypography.withColor(AppTypography.titleSmall, AppColors.onBackgroundDark),
         bodyLarge: AppTypography.withColor(AppTypography.bodyLarge, AppColors.onBackgroundDark),
         bodyMedium: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onBackgroundDark),
-        bodySmall: AppTypography.withColor(AppTypography.bodySmall, AppColors.onBackgroundDark),
-        labelLarge: AppTypography.withColor(AppTypography.labelLarge, AppColors.onBackgroundDark),
-        labelMedium: AppTypography.withColor(AppTypography.labelMedium, AppColors.onBackgroundDark),
-        labelSmall: AppTypography.withColor(AppTypography.labelSmall, AppColors.onBackgroundDark),
       ),
 
       // Card Theme

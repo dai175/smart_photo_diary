@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 
 /// Smart Photo Diary アプリケーションのタイポグラフィシステム
 /// Material Design 3 の Type Scale に基づいて設計
+/// Google Fontsによる日本語フォント対応はAppThemeで実装
 class AppTypography {
   AppTypography._();
-
-  // ============= FONT FAMILIES =============
-  static const String _primaryFontFamily = 'Roboto';
-  static const String _japaneseFontFamily = 'NotoSansJP';
 
   // ============= DISPLAY STYLES =============
   /// Display Large - 最大の見出し（57sp）
   static const TextStyle displayLarge = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 57,
     fontWeight: FontWeight.w400,
     letterSpacing: -0.25,
@@ -21,7 +17,6 @@ class AppTypography {
 
   /// Display Medium - 大きな見出し（45sp）
   static const TextStyle displayMedium = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 45,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -30,7 +25,6 @@ class AppTypography {
 
   /// Display Small - 中程度の見出し（36sp）
   static const TextStyle displaySmall = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 36,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -40,7 +34,6 @@ class AppTypography {
   // ============= HEADLINE STYLES =============
   /// Headline Large - 主要見出し（32sp）
   static const TextStyle headlineLarge = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 32,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -49,7 +42,6 @@ class AppTypography {
 
   /// Headline Medium - セカンダリ見出し（28sp）
   static const TextStyle headlineMedium = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 28,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -58,7 +50,6 @@ class AppTypography {
 
   /// Headline Small - 小見出し（24sp）
   static const TextStyle headlineSmall = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 24,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -68,7 +59,6 @@ class AppTypography {
   // ============= TITLE STYLES =============
   /// Title Large - 大きなタイトル（22sp）
   static const TextStyle titleLarge = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 22,
     fontWeight: FontWeight.w500,
     letterSpacing: 0,
@@ -77,7 +67,6 @@ class AppTypography {
 
   /// Title Medium - 中程度のタイトル（16sp）
   static const TextStyle titleMedium = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.15,
@@ -86,7 +75,7 @@ class AppTypography {
 
   /// Title Small - 小さなタイトル（14sp）
   static const TextStyle titleSmall = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
@@ -96,7 +85,7 @@ class AppTypography {
   // ============= LABEL STYLES =============
   /// Label Large - 大きなラベル（14sp）
   static const TextStyle labelLarge = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
@@ -105,7 +94,7 @@ class AppTypography {
 
   /// Label Medium - 中程度のラベル（12sp）
   static const TextStyle labelMedium = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 12,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
@@ -114,7 +103,7 @@ class AppTypography {
 
   /// Label Small - 小さなラベル（11sp）
   static const TextStyle labelSmall = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 11,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
@@ -124,7 +113,6 @@ class AppTypography {
   // ============= BODY STYLES =============
   /// Body Large - 大きな本文（16sp）
   static const TextStyle bodyLarge = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.5,
@@ -133,7 +121,6 @@ class AppTypography {
 
   /// Body Medium - 標準本文（14sp）
   static const TextStyle bodyMedium = TextStyle(
-    fontFamily: _primaryFontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.25,
@@ -142,7 +129,7 @@ class AppTypography {
 
   /// Body Small - 小さな本文（12sp）
   static const TextStyle bodySmall = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
@@ -152,7 +139,7 @@ class AppTypography {
   // ============= JAPANESE TEXT STYLES =============
   /// 日本語用の見出しスタイル
   static const TextStyle japaneseHeadline = TextStyle(
-    fontFamily: _japaneseFontFamily,
+    
     fontSize: 24,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -161,7 +148,7 @@ class AppTypography {
 
   /// 日本語用の本文スタイル
   static const TextStyle japaneseBody = TextStyle(
-    fontFamily: _japaneseFontFamily,
+    
     fontSize: 16,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -170,7 +157,7 @@ class AppTypography {
 
   /// 日本語用の小さな本文スタイル
   static const TextStyle japaneseBodySmall = TextStyle(
-    fontFamily: _japaneseFontFamily,
+    
     fontSize: 14,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -180,7 +167,7 @@ class AppTypography {
   // ============= SPECIAL STYLES =============
   /// アプリタイトル用スタイル
   static const TextStyle appTitle = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 20,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.15,
@@ -189,7 +176,7 @@ class AppTypography {
 
   /// 日記タイトル用スタイル
   static const TextStyle diaryTitle = TextStyle(
-    fontFamily: _japaneseFontFamily,
+    
     fontSize: 18,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -198,7 +185,7 @@ class AppTypography {
 
   /// 日記内容用スタイル
   static const TextStyle diaryContent = TextStyle(
-    fontFamily: _japaneseFontFamily,
+    
     fontSize: 16,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -207,7 +194,7 @@ class AppTypography {
 
   /// タグ用スタイル
   static const TextStyle tag = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 12,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.4,
@@ -216,7 +203,7 @@ class AppTypography {
 
   /// 統計数値用スタイル
   static const TextStyle statisticsNumber = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 32,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.5,
@@ -225,7 +212,7 @@ class AppTypography {
 
   /// 統計ラベル用スタイル
   static const TextStyle statisticsLabel = TextStyle(
-    fontFamily: _japaneseFontFamily,
+    
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -234,7 +221,7 @@ class AppTypography {
 
   /// ボタンテキスト用スタイル
   static const TextStyle button = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
@@ -243,7 +230,7 @@ class AppTypography {
 
   /// キャプション用スタイル
   static const TextStyle caption = TextStyle(
-    fontFamily: _primaryFontFamily,
+    
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
