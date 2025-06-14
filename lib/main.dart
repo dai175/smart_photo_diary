@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
@@ -97,6 +98,17 @@ class _MyAppState extends State<MyApp> {
         ),
         useMaterial3: true,
       ),
+      // 日本語ロケール設定
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja', 'JP'), // 日本語
+        Locale('en', 'US'), // 英語（フォールバック）
+      ],
+      locale: const Locale('ja', 'JP'), // デフォルトロケール
       home: HomeScreen(
         onThemeChanged: _onThemeChanged,
       ),
