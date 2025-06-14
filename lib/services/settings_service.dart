@@ -6,8 +6,6 @@ import '../core/result/result_extensions.dart';
 
 /// 日記生成方式の列挙型
 enum DiaryGenerationMode {
-  /// ラベル抽出方式（TensorFlow Lite → ラベル → Gemini Text API）
-  labels,
   /// 画像直接解析方式（画像 → Gemini Vision API）
   vision,
 }
@@ -39,7 +37,6 @@ class SettingsService {
 
   // テーマ設定のキー
   static const String _themeKey = 'theme_mode';
-  static const String _generationModeKey = 'diary_generation_mode';
 
   // テーマモード
   ThemeMode get themeMode {
@@ -66,34 +63,18 @@ class SettingsService {
   }
 
 
-  // 日記生成モード
+  // 日記生成モード（常にvision固定）
   DiaryGenerationMode get generationMode {
-    final modeIndex = _preferences?.getInt(_generationModeKey) ?? 0;
-    return DiaryGenerationMode.values[modeIndex];
+    return DiaryGenerationMode.vision;
   }
 
+  // 後方互換性のため残す（実際には使用されない）
   Future<Result<void>> setGenerationMode(DiaryGenerationMode mode) async {
     return ResultHelper.tryExecuteAsync(
       () async {
-        await _preferences?.setInt(_generationModeKey, mode.index);
+        // 常にvisionモードなので何もしない
       },
       context: 'SettingsService.setGenerationMode',
     );
   }
-
-  // 利用可能な生成モード
-  static final List<DiaryGenerationMode> availableModes = [
-    DiaryGenerationMode.labels,
-    DiaryGenerationMode.vision,
-  ];
-
-  static final List<String> modeNames = [
-    'プライバシー重視',
-    '精度重視',
-  ];
-
-  static final List<String> modeDescriptions = [
-    '写真をサーバーに送らず端末内で分析・精度は控えめ',
-    '写真をサーバーに送って分析・精度は高め',
-  ];
 }

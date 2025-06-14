@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
@@ -7,7 +6,6 @@ import '../screens/diary_screen.dart';
 import '../screens/diary_detail_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
-import '../screens/test_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
@@ -187,10 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
       const StatisticsScreen(),
     ];
 
-    // デバッグモードの場合のみテスト画面を追加
-    if (kDebugMode) {
-      screens.add(const TestScreen());
-    }
 
     // 設定画面を追加
     screens.add(SettingsScreen(
@@ -231,27 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<BottomNavigationBarItem> _buildNavigationItems() {
     final items = <BottomNavigationBarItem>[];
     
-    // 基本アイテム
-    for (int i = 0; i < 3; i++) {
+    // 全アイテムを追加
+    for (int i = 0; i < AppConstants.navigationIcons.length; i++) {
       items.add(BottomNavigationBarItem(
         icon: Icon(AppConstants.navigationIcons[i]),
         label: AppConstants.navigationLabels[i],
       ));
     }
-    
-    // デバッグモードのみテストアイテムを追加
-    if (kDebugMode) {
-      items.add(BottomNavigationBarItem(
-        icon: Icon(AppConstants.navigationIcons[3]),
-        label: AppConstants.navigationLabels[3],
-      ));
-    }
-    
-    // 設定アイテムを追加
-    items.add(BottomNavigationBarItem(
-      icon: Icon(AppConstants.navigationIcons[4]),
-      label: AppConstants.navigationLabels[4],
-    ));
     
     return items;
   }

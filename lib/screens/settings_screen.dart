@@ -141,8 +141,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       icon: Icons.palette,
       children: [
         _buildThemeSelector(),
-        const Divider(height: 1),
-        _buildGenerationModeSelector(),
       ],
     );
   }
@@ -279,100 +277,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
 
-  Widget _buildGenerationModeSelector() {
-    try {
-      return MicroInteractions.bounceOnTap(
-        onTap: () {
-          MicroInteractions.hapticTap();
-          _showGenerationModeDialog();
-        },
-        child: Container(
-          padding: AppSpacing.cardPadding,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppSpacing.sm),
-                ),
-                child: Icon(
-                  Icons.security_rounded,
-                  color: AppColors.accent,
-                  size: AppSpacing.iconSm,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'プライバシー設定',
-                      style: AppTypography.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      _getGenerationModeLabel(_settingsService.generationMode),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: AppSpacing.iconSm,
-              ),
-            ],
-          ),
-        ),
-      );
-    } catch (e) {
-      debugPrint('日記生成モード設定の読み込みエラー: $e');
-      return Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                Icons.security_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'プライバシー設定',
-                    style: AppTypography.titleMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    '設定の読み込み中...',
-                    style: AppTypography.withColor(
-                      AppTypography.bodyMedium,
-                      AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-  }
 
   Widget _buildStorageInfo() {
     if (_storageInfo == null) {
@@ -727,13 +631,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
 
-  String _getGenerationModeLabel(DiaryGenerationMode mode) {
-    final index = SettingsService.availableModes.indexOf(mode);
-    if (index >= 0 && index < SettingsService.modeNames.length) {
-      return SettingsService.modeNames[index];
-    }
-    return 'ラベル抽出方式';
-  }
 
   void _showThemeDialog() async {
     final selectedTheme = await DialogUtils.showRadioSelectionDialog<ThemeMode>(
@@ -811,46 +708,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     DialogUtils.showErrorDialog(context, message);
   }
 
-  void _showGenerationModeDialog() {
-    try {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('プライバシー設定'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: SettingsService.availableModes.map((mode) {
-                final index = SettingsService.availableModes.indexOf(mode);
-                return RadioListTile<DiaryGenerationMode>(
-                  title: Text(SettingsService.modeNames[index]),
-                  subtitle: Text(SettingsService.modeDescriptions[index]),
-                  value: mode,
-                  groupValue: _settingsService.generationMode,
-                  onChanged: (value) {
-                    if (value != null) {
-                      _settingsService.setGenerationMode(value);
-                      setState(() {});
-                      Navigator.pop(context);
-                    }
-                  },
-                );
-              }).toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('日記生成モードダイアログ表示エラー: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('設定の読み込みに失敗しました: $e')),
-      );
-    }
-  }
 }

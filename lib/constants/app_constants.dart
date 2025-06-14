@@ -70,7 +70,6 @@ class AppConstants {
     'ホーム',
     '日記',
     '統計',
-    'テスト',
     '設定',
   ];
   
@@ -79,7 +78,6 @@ class AppConstants {
     Icons.home,
     Icons.book,
     Icons.bar_chart,
-    Icons.science,
     Icons.settings,
   ];
   

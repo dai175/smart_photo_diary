@@ -6,7 +6,6 @@ import '../services/image_classifier_service.dart';
 import '../services/ai/ai_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
-import '../services/settings_service.dart';
 import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
@@ -80,11 +79,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     }
 
     try {
-      // 設定サービスから生成モードを取得
-      final settingsService = await SettingsService.getInstance();
-      final generationMode = settingsService.generationMode;
-
-      debugPrint('使用する生成モード: ${generationMode.name}');
+      debugPrint('Vision API方式で日記生成中...');
 
       // 写真の撮影日時を取得
       List<DateTime> photoTimes = [];
@@ -109,110 +104,60 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       DiaryGenerationResult result;
 
-      if (generationMode == DiaryGenerationMode.vision) {
-        // Vision API方式：画像を直接Geminiに送信
-        debugPrint('Vision API方式で日記生成中...');
+      // Vision API方式：画像を直接Geminiに送信
+      if (widget.selectedAssets.length == 1) {
+        // 単一写真の場合：従来通り
+        final firstAsset = widget.selectedAssets.first;
+        final imageData = await _photoService.getOriginalFile(firstAsset);
         
-        if (widget.selectedAssets.length == 1) {
-          // 単一写真の場合：従来通り
-          final firstAsset = widget.selectedAssets.first;
-          final imageData = await _photoService.getOriginalFile(firstAsset);
-          
-          if (imageData == null) {
-            throw Exception('写真データの取得に失敗しました');
-          }
-
-          result = await _aiService.generateDiaryFromImage(
-            imageData: imageData,
-            date: photoDateTime,
-          );
-        } else {
-          // 複数写真の場合：新しい順次処理方式を使用
-          debugPrint('複数写真の順次分析を開始...');
-          
-          // 全ての写真データを収集
-          final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
-          
-          for (final asset in widget.selectedAssets) {
-            final imageData = await _photoService.getOriginalFile(asset);
-            if (imageData != null) {
-              imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
-            }
-          }
-          
-          if (imagesWithTimes.isEmpty) {
-            throw Exception('写真データの取得に失敗しました');
-          }
-
-          // 進捗表示を開始
-          setState(() {
-            _isAnalyzingPhotos = true;
-            _totalPhotos = imagesWithTimes.length;
-            _currentPhotoIndex = 0;
-          });
-
-          result = await _aiService.generateDiaryFromMultipleImages(
-            imagesWithTimes: imagesWithTimes,
-            onProgress: (current, total) {
-              debugPrint('画像分析進捗: $current/$total');
-              setState(() {
-                _currentPhotoIndex = current;
-                _totalPhotos = total;
-              });
-            },
-          );
-          
-          // 進捗表示を終了
-          setState(() {
-            _isAnalyzingPhotos = false;
-          });
+        if (imageData == null) {
+          throw Exception('写真データの取得に失敗しました');
         }
-      } else {
-        // ラベル抽出方式：従来の方法
-        debugPrint('ラベル抽出方式で日記生成中...');
-        
-        // モデルのロード
-        await _imageClassifier.loadModel();
 
-        // 各写真からラベルを抽出し、時刻とペアにする
-        final List<PhotoTimeLabel> photoTimeLabels = [];
-        final List<String> allLabels = [];
+        result = await _aiService.generateDiaryFromImage(
+          imageData: imageData,
+          date: photoDateTime,
+        );
+      } else {
+        // 複数写真の場合：新しい順次処理方式を使用
+        debugPrint('複数写真の順次分析を開始...');
+        
+        // 全ての写真データを収集
+        final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
         
         for (final asset in widget.selectedAssets) {
-          final labels = await _imageClassifier.classifyAsset(asset);
-          allLabels.addAll(labels);
-          
-          // 写真ごとの時刻とラベルのペアを作成
-          if (labels.isNotEmpty) {
-            photoTimeLabels.add(PhotoTimeLabel(
-              time: asset.createDateTime,
-              labels: labels,
-            ));
+          final imageData = await _photoService.getOriginalFile(asset);
+          if (imageData != null) {
+            imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
           }
         }
-
-        // 重複を削除（全体のラベル）
-        final uniqueLabels = allLabels.toSet().toList();
-
-        debugPrint('検出されたラベル: $uniqueLabels');
-        debugPrint('写真ごとの時刻とラベル: ${photoTimeLabels.map((p) => '${p.time}: ${p.labels}').join(', ')}');
-
-        if (uniqueLabels.isEmpty) {
-          setState(() {
-            _isLoading = false;
-            _hasError = true;
-            _errorMessage = '写真から特徴を検出できませんでした';
-          });
-          return;
+        
+        if (imagesWithTimes.isEmpty) {
+          throw Exception('写真データの取得に失敗しました');
         }
 
-        // 日記を生成（写真ごとの時刻とラベル情報を使用）
-        result = await _aiService.generateDiaryFromLabels(
-          labels: uniqueLabels,
-          date: photoDateTime,
-          photoTimes: photoTimes,
-          photoTimeLabels: photoTimeLabels,
+        // 進捗表示を開始
+        setState(() {
+          _isAnalyzingPhotos = true;
+          _totalPhotos = imagesWithTimes.length;
+          _currentPhotoIndex = 0;
+        });
+
+        result = await _aiService.generateDiaryFromMultipleImages(
+          imagesWithTimes: imagesWithTimes,
+          onProgress: (current, total) {
+            debugPrint('画像分析進捗: $current/$total');
+            setState(() {
+              _currentPhotoIndex = current;
+              _totalPhotos = total;
+            });
+          },
         );
+        
+        // 進捗表示を終了
+        setState(() {
+          _isAnalyzingPhotos = false;
+        });
       }
 
       setState(() {
