@@ -251,9 +251,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     '読み込み中...',
-                    style: AppTypography.withColor(
-                      AppTypography.bodyMedium,
-                      AppColors.onSurfaceVariant,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -287,9 +286,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         subtitle: Text(
           '合計: ${_storageInfo!.formattedTotalSize}',
-          style: AppTypography.withColor(
-            AppTypography.bodyMedium,
-            AppColors.onSurfaceVariant,
+          style: AppTypography.bodyMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         children: [
@@ -485,9 +483,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _packageInfo != null 
                       ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
                       : '読み込み中...',
-                  style: AppTypography.withColor(
-                    AppTypography.bodyMedium,
-                    AppColors.onSurfaceVariant,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -537,9 +534,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     'オープンソースライセンス',
-                    style: AppTypography.withColor(
-                      AppTypography.bodyMedium,
-                      AppColors.onSurfaceVariant,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -547,7 +543,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: AppSpacing.iconSm,
             ),
           ],

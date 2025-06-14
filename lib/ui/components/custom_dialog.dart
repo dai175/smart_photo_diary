@@ -84,30 +84,33 @@ class CustomDialog extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(AppSpacing.lg),
-          topRight: Radius.circular(AppSpacing.lg),
+    return Builder(
+      builder: (context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(AppSpacing.lg),
+            topRight: Radius.circular(AppSpacing.lg),
+          ),
         ),
-      ),
       child: Column(
         children: [
           // アイコン
           if (icon != null) ...[
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: iconColor?.withValues(alpha: 0.2) ?? AppColors.primary.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon!,
-                size: AppSpacing.iconLg,
-                color: iconColor ?? AppColors.primary,
+            Builder(
+              builder: (context) => Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: iconColor?.withValues(alpha: 0.2) ?? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon!,
+                  size: AppSpacing.iconLg,
+                  color: iconColor ?? Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -115,15 +118,18 @@ class CustomDialog extends StatelessWidget {
           
           // タイトル
           if (title != null)
-            Text(
-              title!,
-              style: AppTypography.headlineSmall.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.onPrimaryContainer,
+            Builder(
+              builder: (context) => Text(
+                title!,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
         ],
+      ),
       ),
     );
   }
@@ -197,7 +203,7 @@ class CustomDialogAction extends StatelessWidget {
         ? AppColors.error 
         : isPrimary 
             ? AppColors.primary 
-            : AppColors.onSurfaceVariant;
+            : Theme.of(context).colorScheme.onSurfaceVariant;
 
     return MicroInteractions.bounceOnTap(
       onTap: onPressed ?? () {},
@@ -329,23 +335,28 @@ class PresetDialogs {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.primaryContainer.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-            child: const CircularProgressIndicator(
-              strokeWidth: 3,
+          Builder(
+            builder: (context) => Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+              ),
+              child: const CircularProgressIndicator(
+                strokeWidth: 3,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text(
-            message,
-            style: AppTypography.bodyLarge.copyWith(
-              fontWeight: FontWeight.w500,
+          Builder(
+            builder: (context) => Text(
+              message,
+              style: AppTypography.bodyLarge.copyWith(
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

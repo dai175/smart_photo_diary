@@ -169,6 +169,10 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `mocktail`: Testing framework for service mocking
 - `flutter_lints`: Code analysis with custom rules
 
+### Localization
+- `flutter_localizations`: Japanese locale support to ensure proper font rendering
+- Japanese locale (`ja_JP`) configured to prevent Chinese font variants in Japanese text
+
 ## Important Files
 
 ### Configuration
@@ -196,12 +200,20 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 - Project uses Japanese comments for business logic documentation
 - Test suite must maintain 100% success rate - all failing tests should be investigated and either fixed or removed
 
+### Japanese Language Development
+- **UI text**: All user-facing text is in Japanese
+- **Comments**: Business logic and complex algorithms documented in Japanese
+- **Variable names**: Use descriptive English names for code clarity
+- **Debug messages**: May use Japanese for user-facing debug information
+
 ### UI Design Guidelines
 - **No gradients**: All gradients have been removed for cleaner, simpler design
 - **Consistent headers**: All screens use standard AppBar styling with unified colors and typography
 - **Button consistency**: All buttons use solid colors (AppColors.primary/accent) instead of gradients
 - **Material Design 3**: Follow MD3 principles with emphasis on solid colors and clean layouts
 - **Typography standardization**: Section headings use AppTypography.headlineSmall (24sp) across all screens
+- **Theme-aware colors**: Always use `Theme.of(context).colorScheme` for dynamic colors instead of fixed AppColors
+- **Modal design**: Custom dialogs follow consistent design patterns with proper theme integration
 
 ### Error Handling Patterns
 
@@ -286,6 +298,17 @@ The project follows a comprehensive 3-tier testing strategy with **100% success 
 ### Platform Considerations
 The app supports multiple platforms but photo access requires platform-specific permissions handled by `permission_handler`.
 
+### Japanese Font Support
+- **Locale configuration**: MaterialApp configured with Japanese locale (`ja_JP`) to ensure proper font selection
+- **Font rendering**: Prevents Chinese font variants from displaying for Japanese text
+- **Debug tools**: Font debug screen available in settings for testing font rendering (`/debug/font_debug_screen.dart`)
+
+### Dark Theme Support
+- **Complete theme integration**: All UI components properly support both light and dark themes
+- **Text visibility**: All text colors use `Theme.of(context).colorScheme` instead of fixed AppColors for proper contrast
+- **Modal consistency**: Custom dialogs automatically adapt colors based on current theme
+- **Settings screen**: Proper contrast for secondary text and icons in dark mode
+
 ### Privacy and Local Storage
 All user data stays on device. Hive database files are stored in app documents directory. No cloud synchronization by design.
 
@@ -305,6 +328,10 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Database optimization**: Implemented Hive database compaction and storage cleanup functionality
 - **Enhanced export feature**: Added file picker integration for user-selectable export destinations
 - **Build configuration**: Resolved Java version warnings and optimized Android build settings
+- **Japanese font support**: Fixed font rendering issues with proper Japanese locale configuration
+- **Debug tools**: Added font debug screen for troubleshooting font-related issues
+- **Dark theme improvements**: Enhanced text visibility and modal contrast in dark mode
+- **Modal system enhancements**: Improved custom dialog design with proper theme integration
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging) are fully implemented and tested
