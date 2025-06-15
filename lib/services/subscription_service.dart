@@ -26,7 +26,7 @@ import '../constants/subscription_constants.dart';
 /// 
 /// ## 実装状況
 /// - Phase 1.3.1: 基本構造とシングルトンパターン ✅
-/// - Phase 1.3.2: Hive操作実装 (予定)
+/// - Phase 1.3.2: Hive操作実装 ✅
 /// - Phase 1.3.3: 使用量管理機能 (予定)
 /// - Phase 1.3.4: アクセス権限チェック (予定)
 class SubscriptionService {
@@ -114,13 +114,136 @@ class SubscriptionService {
   }
   
   // =================================================================
-  // 基本的なサービスメソッド（Phase 1.3.2以降で実装予定）
+  // Hive操作メソッド（Phase 1.3.2）
   // =================================================================
   
   /// 現在のサブスクリプション状態を取得
-  /// TODO: Phase 1.3.2で実装
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-    return Failure(ServiceException('Phase 1.3.2で実装予定'));
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final status = _subscriptionBox?.get(SubscriptionConstants.statusKey);
+      if (status == null) {
+        // 状態が存在しない場合は初期状態を作成
+        await _ensureInitialStatus();
+        final initialStatus = _subscriptionBox?.get(SubscriptionConstants.statusKey);
+        if (initialStatus == null) {
+          return Failure(ServiceException('Failed to create initial subscription status'));
+        }
+        return Success(initialStatus);
+      }
+      
+      return Success(status);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting current status - $e');
+      return Failure(ServiceException('Failed to get current status', details: e.toString()));
+    }
+  }
+  
+  /// サブスクリプション状態を更新
+  Future<Result<void>> updateStatus(SubscriptionStatus status) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      await _subscriptionBox?.put(SubscriptionConstants.statusKey, status);
+      debugPrint('SubscriptionService: Status updated successfully');
+      return const Success(null);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error updating status - $e');
+      return Failure(ServiceException('Failed to update status', details: e.toString()));
+    }
+  }
+  
+  /// サブスクリプション状態をリロード（強制再読み込み）
+  Future<Result<SubscriptionStatus>> refreshStatus() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      // Hiveボックスを再読み込み
+      await _subscriptionBox?.close();
+      _subscriptionBox = await Hive.openBox<SubscriptionStatus>(
+        SubscriptionConstants.hiveBoxName
+      );
+      
+      return await getCurrentStatus();
+    } catch (e) {
+      debugPrint('SubscriptionService: Error refreshing status - $e');
+      return Failure(ServiceException('Failed to refresh status', details: e.toString()));
+    }
+  }
+  
+  /// 指定されたプランでサブスクリプション状態を作成
+  Future<Result<SubscriptionStatus>> createStatus(SubscriptionPlan plan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final now = DateTime.now();
+      SubscriptionStatus newStatus;
+      
+      if (plan == SubscriptionPlan.basic) {
+        // Basicプランの場合
+        newStatus = SubscriptionStatus(
+          planId: plan.id,
+          isActive: true,
+          startDate: now,
+          expiryDate: null, // Basicプランは期限なし
+          autoRenewal: false,
+          monthlyUsageCount: 0,
+          lastResetDate: now,
+          transactionId: null,
+          lastPurchaseDate: null,
+        );
+      } else {
+        // Premiumプランの場合
+        final expiryDate = plan == SubscriptionPlan.premiumYearly
+            ? now.add(Duration(days: SubscriptionConstants.subscriptionYearDays))
+            : now.add(Duration(days: SubscriptionConstants.subscriptionMonthDays));
+            
+        newStatus = SubscriptionStatus(
+          planId: plan.id,
+          isActive: true,
+          startDate: now,
+          expiryDate: expiryDate,
+          autoRenewal: true,
+          monthlyUsageCount: 0,
+          lastResetDate: now,
+          transactionId: null,
+          lastPurchaseDate: now,
+        );
+      }
+      
+      await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
+      debugPrint('SubscriptionService: Created new status for plan: ${plan.id}');
+      return Success(newStatus);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error creating status - $e');
+      return Failure(ServiceException('Failed to create status', details: e.toString()));
+    }
+  }
+  
+  /// サブスクリプション状態を削除（テスト用）
+  @visibleForTesting
+  Future<Result<void>> clearStatus() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      await _subscriptionBox?.delete(SubscriptionConstants.statusKey);
+      debugPrint('SubscriptionService: Status cleared');
+      return const Success(null);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error clearing status - $e');
+      return Failure(ServiceException('Failed to clear status', details: e.toString()));
+    }
   }
   
   /// AI生成を使用できるかどうかをチェック

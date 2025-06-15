@@ -118,18 +118,164 @@ void main() {
       });
     });
     
-    group('インターフェース実装確認', () {
+    group('Hive操作実装確認 (Phase 1.3.2)', () {
       setUp(() async {
         subscriptionService = await SubscriptionService.getInstance();
       });
       
-      test('getCurrentStatus()は未実装エラーを返す', () async {
+      test('getCurrentStatus()は初期化後にBasicプランを返す', () async {
         // Act
         final result = await subscriptionService.getCurrentStatus();
         
         // Assert
-        expect(result.isFailure, isTrue);
-        expect(result.error.toString(), contains('Phase 1.3.2で実装予定'));
+        expect(result.isSuccess, isTrue);
+        final status = result.value;
+        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.isActive, isTrue);
+        expect(status.monthlyUsageCount, equals(0));
+      });
+      
+      test('updateStatus()でサブスクリプション状態を更新できる', () async {
+        // Arrange
+        final newStatus = SubscriptionStatus(
+          planId: SubscriptionPlan.premiumMonthly.id,
+          isActive: true,
+          startDate: DateTime.now(),
+          expiryDate: DateTime.now().add(const Duration(days: 30)),
+          autoRenewal: true,
+          monthlyUsageCount: 5,
+          lastResetDate: DateTime.now(),
+          transactionId: 'test_transaction_update',
+          lastPurchaseDate: DateTime.now(),
+        );
+        
+        // Act
+        final updateResult = await subscriptionService.updateStatus(newStatus);
+        final getResult = await subscriptionService.getCurrentStatus();
+        
+        // Assert
+        expect(updateResult.isSuccess, isTrue);
+        expect(getResult.isSuccess, isTrue);
+        final status = getResult.value;
+        expect(status.planId, equals(SubscriptionPlan.premiumMonthly.id));
+        expect(status.monthlyUsageCount, equals(5));
+        expect(status.transactionId, equals('test_transaction_update'));
+      });
+      
+      test('refreshStatus()でHiveボックスを再読み込みできる', () async {
+        // Arrange
+        final newStatus = SubscriptionStatus(
+          planId: SubscriptionPlan.premiumYearly.id,
+          isActive: true,
+          startDate: DateTime.now(),
+          expiryDate: DateTime.now().add(const Duration(days: 365)),
+          autoRenewal: true,
+          monthlyUsageCount: 15,
+          lastResetDate: DateTime.now(),
+          transactionId: 'test_refresh',
+          lastPurchaseDate: DateTime.now(),
+        );
+        
+        await subscriptionService.updateStatus(newStatus);
+        
+        // Act
+        final result = await subscriptionService.refreshStatus();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final status = result.value;
+        expect(status.planId, equals(SubscriptionPlan.premiumYearly.id));
+        expect(status.monthlyUsageCount, equals(15));
+        expect(status.transactionId, equals('test_refresh'));
+      });
+      
+      test('createStatus()でBasicプランの状態を作成できる', () async {
+        // Arrange
+        await subscriptionService.clearStatus();
+        
+        // Act
+        final result = await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final status = result.value;
+        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.isActive, isTrue);
+        expect(status.expiryDate, isNull); // Basicプランは期限なし
+        expect(status.autoRenewal, isFalse);
+        expect(status.monthlyUsageCount, equals(0));
+      });
+      
+      test('createStatus()でPremium月額プランの状態を作成できる', () async {
+        // Arrange
+        await subscriptionService.clearStatus();
+        
+        // Act
+        final result = await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final status = result.value;
+        expect(status.planId, equals(SubscriptionPlan.premiumMonthly.id));
+        expect(status.isActive, isTrue);
+        expect(status.expiryDate, isNotNull);
+        expect(status.autoRenewal, isTrue);
+        expect(status.monthlyUsageCount, equals(0));
+        
+        // 有効期限が月額プラン期間（30日）に設定されている
+        final expectedExpiry = status.startDate!.add(Duration(days: SubscriptionConstants.subscriptionMonthDays));
+        expect(status.expiryDate!.difference(expectedExpiry).inMinutes.abs(), lessThan(1));
+      });
+      
+      test('createStatus()でPremium年額プランの状態を作成できる', () async {
+        // Arrange
+        await subscriptionService.clearStatus();
+        
+        // Act
+        final result = await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final status = result.value;
+        expect(status.planId, equals(SubscriptionPlan.premiumYearly.id));
+        expect(status.isActive, isTrue);
+        expect(status.expiryDate, isNotNull);
+        expect(status.autoRenewal, isTrue);
+        expect(status.monthlyUsageCount, equals(0));
+        
+        // 有効期限が年額プラン期間（365日）に設定されている
+        final expectedExpiry = status.startDate!.add(Duration(days: SubscriptionConstants.subscriptionYearDays));
+        expect(status.expiryDate!.difference(expectedExpiry).inMinutes.abs(), lessThan(1));
+      });
+      
+      test('clearStatus()でサブスクリプション状態を削除できる', () async {
+        // Act
+        final clearResult = await subscriptionService.clearStatus();
+        final getResult = await subscriptionService.getCurrentStatus();
+        
+        // Assert
+        expect(clearResult.isSuccess, isTrue);
+        expect(getResult.isSuccess, isTrue);
+        // getCurrentStatus()は状態がない場合に初期状態を作成するため、Basicプランが返される
+        final status = getResult.value;
+        expect(status.planId, equals(SubscriptionPlan.basic.id));
+      });
+    });
+    
+    group('未実装メソッド確認', () {
+      setUp(() async {
+        subscriptionService = await SubscriptionService.getInstance();
+      });
+      
+      test('getCurrentStatus()は正常にBasicプランを返す', () async {
+        // Act
+        final result = await subscriptionService.getCurrentStatus();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final status = result.value;
+        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.isActive, isTrue);
       });
       
       test('canUseAiGeneration()は未実装エラーを返す', () async {
