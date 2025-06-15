@@ -84,11 +84,6 @@ class ServiceRegistration {
     );
     
     
-    // AiService (no dependencies for interface)
-    serviceLocator.registerFactory<AiServiceInterface>(
-      () => AiService()
-    );
-    
     // SubscriptionService (Hive依存のみ - コアサービス)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(
       () => SubscriptionService.getInstance()
@@ -99,11 +94,24 @@ class ServiceRegistration {
   static Future<void> _registerDependentServices() async {
     debugPrint('ServiceRegistration: Registering dependent services...');
     
+    // Phase 1.7.1.1: AiService with SubscriptionService dependency injection
+    serviceLocator.registerAsyncFactory<AiServiceInterface>(
+      () async {
+        // Get SubscriptionService dependency
+        final subscriptionService = await serviceLocator.getAsync<ISubscriptionService>();
+        
+        // Create AiService with dependency injection
+        return AiService(
+          subscriptionService: subscriptionService,
+        );
+      }
+    );
+    
     // DiaryService (depends on AiService and PhotoService)
     serviceLocator.registerAsyncFactory<DiaryServiceInterface>(
       () async {
         // Get dependencies
-        final aiService = serviceLocator.get<AiServiceInterface>();
+        final aiService = await serviceLocator.getAsync<AiServiceInterface>();
         final photoService = serviceLocator.get<PhotoServiceInterface>();
         
         // Create DiaryService with dependency injection

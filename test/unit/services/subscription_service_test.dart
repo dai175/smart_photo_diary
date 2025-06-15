@@ -403,11 +403,11 @@ void main() {
         await subscriptionService.updateStatus(modifiedStatus);
         
         // Act - リセットチェックを実行
-        final resetResult = await subscriptionService.resetMonthlyUsageIfNeeded();
+        await subscriptionService.resetMonthlyUsageIfNeeded();
         final newStatus = (await subscriptionService.getCurrentStatus()).value;
         
         // Assert
-        expect(resetResult.isSuccess, isTrue);
+        // resetMonthlyUsageIfNeededはvoidなので戻り値チェックなし
         expect(newStatus.monthlyUsageCount, equals(0)); // リセットされている
       });
       

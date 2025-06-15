@@ -56,6 +56,10 @@ abstract class ISubscriptionService {
   /// 使用量を手動でリセット（管理者・テスト用）
   Future<Result<void>> resetUsage();
   
+  /// 月次使用量を必要に応じてリセット（自動）
+  /// Phase 1.7.1.4: AiService統合で使用
+  Future<void> resetMonthlyUsageIfNeeded();
+  
   /// 次の使用量リセット日を取得
   Future<Result<DateTime>> getNextResetDate();
   

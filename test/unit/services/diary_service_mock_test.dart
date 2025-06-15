@@ -5,6 +5,7 @@ import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
@@ -266,7 +267,7 @@ void main() {
           content: any(named: 'content'),
           date: any(named: 'date'),
           photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => ['mock-tag']);
+        )).thenAnswer((_) async => Success(['mock-tag']));
 
         // Act & Assert - Verify mock is properly configured
         expect(mockAiService, isA<AiServiceInterface>());

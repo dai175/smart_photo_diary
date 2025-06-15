@@ -90,6 +90,11 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
+  Future<void> resetMonthlyUsageIfNeeded() async {
+    // テスト用のシンプルな実装
+  }
+
+  @override
   Future<Result<DateTime>> getNextResetDate() async {
     return Success(_currentStatus.nextResetDate);
   }

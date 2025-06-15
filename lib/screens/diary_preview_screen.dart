@@ -110,10 +110,16 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           throw Exception('写真データの取得に失敗しました');
         }
 
-        result = await _aiService.generateDiaryFromImage(
+        final resultFromAi = await _aiService.generateDiaryFromImage(
           imageData: imageData,
           date: photoDateTime,
         );
+        
+        if (resultFromAi.isFailure) {
+          throw Exception(resultFromAi.error.message);
+        }
+        
+        result = resultFromAi.value;
       } else {
         // 複数写真の場合：新しい順次処理方式を使用
         debugPrint('複数写真の順次分析を開始...');
@@ -139,7 +145,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           _currentPhotoIndex = 0;
         });
 
-        result = await _aiService.generateDiaryFromMultipleImages(
+        final resultFromAi = await _aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
           onProgress: (current, total) {
             debugPrint('画像分析進捗: $current/$total');
@@ -149,6 +155,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             });
           },
         );
+        
+        if (resultFromAi.isFailure) {
+          throw Exception(resultFromAi.error.message);
+        }
+        
+        result = resultFromAi.value;
         
         // 進捗表示を終了
         setState(() {

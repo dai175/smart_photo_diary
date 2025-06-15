@@ -187,15 +187,19 @@ class DiaryService implements DiaryServiceInterface {
     Future.delayed(Duration.zero, () async {
       try {
         debugPrint('バックグラウンドでタグ生成開始: ${entry.id}');
-        final tags = await _aiService.generateTagsFromContent(
+        final tagsResult = await _aiService.generateTagsFromContent(
           title: entry.title,
           content: entry.content,
           date: entry.date,
           photoCount: entry.photoIds.length,
         );
         
-        await entry.updateTags(tags);
-        debugPrint('タグ生成完了: ${entry.id} -> $tags');
+        if (tagsResult.isSuccess) {
+          await entry.updateTags(tagsResult.value);
+          debugPrint('タグ生成完了: ${entry.id} -> ${tagsResult.value}');
+        } else {
+          debugPrint('バックグラウンドタグ生成エラー: ${tagsResult.error}');
+        }
       } catch (e) {
         debugPrint('バックグラウンドタグ生成エラー: $e');
       }
@@ -213,16 +217,22 @@ class DiaryService implements DiaryServiceInterface {
     try {
       // キャッシュが無効または存在しない場合は新しく生成
       debugPrint('新しいタグを生成中: ${entry.id}');
-      final tags = await _aiService.generateTagsFromContent(
+      final tagsResult = await _aiService.generateTagsFromContent(
         title: entry.title,
         content: entry.content,
         date: entry.date,
         photoCount: entry.photoIds.length,
       );
       
-      // データベースに保存
-      await entry.updateTags(tags);
-      return tags;
+      if (tagsResult.isSuccess) {
+        // データベースに保存
+        await entry.updateTags(tagsResult.value);
+        return tagsResult.value;
+      } else {
+        debugPrint('タグ生成エラー: ${tagsResult.error}');
+        // エラー時はフォールバックタグを返す
+        return _generateFallbackTags(entry);
+      }
     } catch (e) {
       debugPrint('タグ生成エラー: $e');
       // エラー時はフォールバックタグを返す

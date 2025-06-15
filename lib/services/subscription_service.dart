@@ -554,24 +554,25 @@ class SubscriptionService implements ISubscriptionService {
   }
   
   /// 月次使用量リセットが必要かチェックしてリセット
-  Future<Result<void>> resetMonthlyUsageIfNeeded() async {
+  @override
+  Future<void> resetMonthlyUsageIfNeeded() async {
     try {
       if (!_isInitialized) {
-        return Failure(ServiceException('SubscriptionService is not initialized'));
+        throw ServiceException('SubscriptionService is not initialized');
       }
       
       final statusResult = await getCurrentStatus();
       if (statusResult.isFailure) {
-        return Failure(statusResult.error);
+        throw statusResult.error;
       }
       
       final status = statusResult.value;
       await _resetMonthlyUsageIfNeeded(status);
       
-      return const Success(null);
     } catch (e) {
       debugPrint('SubscriptionService: Error resetting monthly usage - $e');
-      return Failure(ServiceException('Failed to reset monthly usage', details: e.toString()));
+      // このメソッドは内部的に呼ばれるため、エラーは基本的に無視
+      // 致命的でない場合は処理を継続
     }
   }
   

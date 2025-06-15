@@ -8,6 +8,7 @@ import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 
 /// Mock PhotoService for integration testing
 class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
@@ -129,26 +130,26 @@ class TestServiceSetup {
       date: any(named: 'date'),
       location: any(named: 'location'),
       photoTimes: any(named: 'photoTimes'),
-    )).thenAnswer((_) async => DiaryGenerationResult(
+    )).thenAnswer((_) async => Success(DiaryGenerationResult(
       title: 'Mock Image Diary',
       content: 'Mock content from image analysis.',
-    ));
+    )));
     
     when(() => mock.generateDiaryFromMultipleImages(
       imagesWithTimes: any(named: 'imagesWithTimes'),
       location: any(named: 'location'),
       onProgress: any(named: 'onProgress'),
-    )).thenAnswer((_) async => DiaryGenerationResult(
+    )).thenAnswer((_) async => Success(DiaryGenerationResult(
       title: 'Mock Multi-Image Diary',
       content: 'Mock content from multiple images.',
-    ));
+    )));
     
     when(() => mock.generateTagsFromContent(
       title: any(named: 'title'),
       content: any(named: 'content'),
       date: any(named: 'date'),
       photoCount: any(named: 'photoCount'),
-    )).thenAnswer((_) async => ['mock', 'test', 'generated']);
+    )).thenAnswer((_) async => Success(['mock', 'test', 'generated']));
     
     return mock;
   }

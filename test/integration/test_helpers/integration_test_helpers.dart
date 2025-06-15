@@ -8,6 +8,7 @@ import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
@@ -124,15 +125,15 @@ class IntegrationTestHelpers {
       content: any(named: 'content'),
       date: any(named: 'date'),
       photoCount: any(named: 'photoCount'),
-    )).thenAnswer((_) async => ['テスト', 'タグ']);
+    )).thenAnswer((_) async => Success(['テスト', 'タグ']));
   }
 
   /// Create mock diary generation result
-  static DiaryGenerationResult _createMockDiaryResult() {
-    return DiaryGenerationResult(
+  static Result<DiaryGenerationResult> _createMockDiaryResult() {
+    return Success(DiaryGenerationResult(
       title: 'テスト日記のタイトル',
       content: 'これはテスト用に生成された日記の内容です。写真から素敵な思い出を記録しました。',
-    );
+    ));
   }
 
   /// Create mock AssetEntity for testing
@@ -174,7 +175,7 @@ class IntegrationTestHelpers {
   }
 
   /// Setup mock AI diary generation
-  static void setupMockDiaryGeneration(DiaryGenerationResult result) {
+  static void setupMockDiaryGeneration(Result<DiaryGenerationResult> result) {
     when(() => _mockAiService.generateDiaryFromImage(
       imageData: any(named: 'imageData'),
       date: any(named: 'date'),

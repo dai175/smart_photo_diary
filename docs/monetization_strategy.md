@@ -261,11 +261,11 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
 ### Phase 1-B: AiService使用量制限統合
 
 #### 1.7 AiService 使用量制限実装
-- [ ] **1.7.1 使用量管理機能統合**
-  - [ ] 1.7.1.1 AiServiceにSubscriptionService依存注入
-  - [ ] 1.7.1.2 generateDiary前の制限チェック実装
-  - [ ] 1.7.1.3 使用量カウント統合
-  - [ ] 1.7.1.4 月次リセット処理統合
+- [✅] **1.7.1 使用量管理機能統合** *(Phase 1.7.1完了)*
+  - [✅] 1.7.1.1 AiServiceにSubscriptionService依存注入
+  - [✅] 1.7.1.2 generateDiary前の制限チェック実装
+  - [✅] 1.7.1.3 使用量カウント統合
+  - [✅] 1.7.1.4 月次リセット処理統合
 
 - [ ] **1.7.2 制限チェック・エラーハンドリング**
   - [ ] 1.7.2.1 プラン別制限チェック（Basic: 10回、Premium: 100回）
@@ -545,6 +545,16 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
 - [ ] **課金統合テスト**: *ユーザー実施待ち* - サンドボックス動作確認・購入復元フローテスト・エラーケースハンドリング
 - [✅] **テスト環境対応**: binding未初期化エラー解決、404個のユニットテスト・89個の統合テスト成功
 - [🔄] **実装状況**: Phase 1.6.1-1.6.2完全実装、1.6.3はユーザーテスト待ち
+
+### Phase 1.7.1 実装状況（完了）
+- [✅] **AiService依存注入**: SubscriptionService依存注入実装、ServiceRegistration更新
+- [✅] **使用量制限チェック**: generateDiary前の制限チェック実装（Basic: 10回、Premium: 100回）
+- [✅] **使用量カウント統合**: incrementAiUsage()呼び出し統合、成功時のカウント増加
+- [✅] **月次リセット処理統合**: resetMonthlyUsageIfNeeded()統合、自動リセット機能
+- [✅] **Result<T>パターン適用**: AiServiceInterface全メソッドでResult<T>適用
+- [✅] **インターフェース整合性**: DiaryGenerationResult → Result<DiaryGenerationResult>移行
+- [✅] **テスト修正完了**: 全476テスト成功、Result<T>パターン対応
+- [✅] **UI統合対応**: DiaryPreviewScreen等でResult<T>パターン対応完了
 
 ## KPI・メトリクス
 
