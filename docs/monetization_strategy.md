@@ -208,10 +208,10 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
   - [✅] 1.3.3.3 resetMonthlyUsageIfNeeded()実装
   - [✅] 1.3.3.4 月次リセット判定ロジック
 
-- [ ] **1.3.4 アクセス権限チェック**
-  - [ ] 1.3.4.1 canAccessPremiumFeatures()実装
-  - [ ] 1.3.4.2 canAccessWritingPrompts()実装
-  - [ ] 1.3.4.3 プラン別機能制限チェック
+- [✅] **1.3.4 アクセス権限チェック**
+  - [✅] 1.3.4.1 canAccessPremiumFeatures()実装
+  - [✅] 1.3.4.2 canAccessWritingPrompts()実装
+  - [✅] 1.3.4.3 プラン別機能制限チェック
 
 #### 1.4 Service Registration統合
 - [ ] **1.4.1 ServiceLocator統合**

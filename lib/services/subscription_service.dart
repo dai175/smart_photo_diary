@@ -28,7 +28,7 @@ import '../constants/subscription_constants.dart';
 /// - Phase 1.3.1: 基本構造とシングルトンパターン ✅
 /// - Phase 1.3.2: Hive操作実装 ✅
 /// - Phase 1.3.3: 使用量管理機能 ✅
-/// - Phase 1.3.4: アクセス権限チェック (予定)
+/// - Phase 1.3.4: アクセス権限チェック ✅
 class SubscriptionService {
   // シングルトンインスタンス
   static SubscriptionService? _instance;
@@ -510,10 +510,198 @@ class SubscriptionService {
     }
   }
   
+  // =================================================================
+  // アクセス権限チェックメソッド（Phase 1.3.4）
+  // =================================================================
+  
   /// プレミアム機能にアクセスできるかどうか
-  /// TODO: Phase 1.3.4で実装
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    return Failure(ServiceException('Phase 1.3.4で実装予定'));
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // Basicプランは基本機能のみ
+      if (currentPlan == SubscriptionPlan.basic) {
+        return const Success(false);
+      }
+      
+      // Premiumプランは有効期限をチェック
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Premium features access check - plan: ${currentPlan.id}, valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking premium features access - $e');
+      return Failure(ServiceException('Failed to check premium features access', details: e.toString()));
+    }
+  }
+  
+  /// ライティングプロンプト機能にアクセスできるかどうか
+  Future<Result<bool>> canAccessWritingPrompts() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // ライティングプロンプトは全プランで利用可能（Basicは限定版）
+      if (currentPlan == SubscriptionPlan.basic) {
+        debugPrint('SubscriptionService: Writing prompts access - Basic plan (limited prompts)');
+        return const Success(true); // Basicプランでも基本プロンプトは利用可能
+      }
+      
+      // Premiumプランは全プロンプトにアクセス可能（有効期限チェック）
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Writing prompts access - Premium plan, valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking writing prompts access - $e');
+      return Failure(ServiceException('Failed to check writing prompts access', details: e.toString()));
+    }
+  }
+  
+  /// 高度なフィルタ機能にアクセスできるかどうか
+  Future<Result<bool>> canAccessAdvancedFilters() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // 高度なフィルタはPremiumプランのみ
+      if (currentPlan == SubscriptionPlan.basic) {
+        return const Success(false);
+      }
+      
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Advanced filters access check - valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking advanced filters access - $e');
+      return Failure(ServiceException('Failed to check advanced filters access', details: e.toString()));
+    }
+  }
+  
+  /// データエクスポート機能にアクセスできるかどうか
+  Future<Result<bool>> canAccessDataExport() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // データエクスポートは全プランで利用可能（Basicは基本形式のみ）
+      if (currentPlan == SubscriptionPlan.basic) {
+        debugPrint('SubscriptionService: Data export access - Basic plan (JSON only)');
+        return const Success(true); // BasicプランでもJSON形式は利用可能
+      }
+      
+      // Premiumプランは複数形式でエクスポート可能
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Data export access - Premium plan, valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking data export access - $e');
+      return Failure(ServiceException('Failed to check data export access', details: e.toString()));
+    }
+  }
+  
+  /// 統計ダッシュボード機能にアクセスできるかどうか
+  Future<Result<bool>> canAccessStatsDashboard() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // 統計ダッシュボードはPremiumプランのみ
+      if (currentPlan == SubscriptionPlan.basic) {
+        return const Success(false);
+      }
+      
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Stats dashboard access check - valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking stats dashboard access - $e');
+      return Failure(ServiceException('Failed to check stats dashboard access', details: e.toString()));
+    }
+  }
+  
+  /// プラン別の機能制限情報を取得
+  Future<Result<Map<String, bool>>> getFeatureAccess() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final premiumFeaturesResult = await canAccessPremiumFeatures();
+      final writingPromptsResult = await canAccessWritingPrompts();
+      final advancedFiltersResult = await canAccessAdvancedFilters();
+      final dataExportResult = await canAccessDataExport();
+      final statsDashboardResult = await canAccessStatsDashboard();
+      
+      if (premiumFeaturesResult.isFailure) return Failure(premiumFeaturesResult.error);
+      if (writingPromptsResult.isFailure) return Failure(writingPromptsResult.error);
+      if (advancedFiltersResult.isFailure) return Failure(advancedFiltersResult.error);
+      if (dataExportResult.isFailure) return Failure(dataExportResult.error);
+      if (statsDashboardResult.isFailure) return Failure(statsDashboardResult.error);
+      
+      final featureAccess = {
+        'premiumFeatures': premiumFeaturesResult.value,
+        'writingPrompts': writingPromptsResult.value,
+        'advancedFilters': advancedFiltersResult.value,
+        'dataExport': dataExportResult.value,
+        'statsDashboard': statsDashboardResult.value,
+      };
+      
+      debugPrint('SubscriptionService: Feature access map - $featureAccess');
+      return Success(featureAccess);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting feature access - $e');
+      return Failure(ServiceException('Failed to get feature access', details: e.toString()));
+    }
   }
   
   // =================================================================

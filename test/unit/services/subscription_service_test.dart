@@ -472,13 +472,186 @@ void main() {
         expect(result.value, isTrue); // Basic plan with 0 usage should allow generation
       });
       
-      test('canAccessPremiumFeatures()は未実装エラーを返す', () async {
+      test('canAccessPremiumFeatures()はBasicプランでfalseを返す', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
         // Act
         final result = await subscriptionService.canAccessPremiumFeatures();
         
         // Assert
-        expect(result.isFailure, isTrue);
-        expect(result.error.toString(), contains('Phase 1.3.4で実装予定'));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse); // Basicプランは基本機能のみ
+      });
+      
+      test('canAccessPremiumFeatures()は有効なPremiumプランでtrueを返す', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        
+        // Act
+        final result = await subscriptionService.canAccessPremiumFeatures();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // 有効なPremiumプランは全機能利用可能
+      });
+      
+      test('canAccessPremiumFeatures()は期限切れPremiumプランでfalseを返す', () async {
+        // Arrange - 期限切れのPremiumプランを作成
+        final expiredStatus = SubscriptionStatus(
+          planId: SubscriptionPlan.premiumMonthly.id,
+          isActive: true,
+          startDate: DateTime.now().subtract(const Duration(days: 60)),
+          expiryDate: DateTime.now().subtract(const Duration(days: 30)), // 30日前に期限切れ
+          autoRenewal: false,
+          monthlyUsageCount: 0,
+          lastResetDate: DateTime.now(),
+          transactionId: 'expired_premium',
+          lastPurchaseDate: DateTime.now().subtract(const Duration(days: 60)),
+        );
+        
+        await subscriptionService.updateStatus(expiredStatus);
+        
+        // Act
+        final result = await subscriptionService.canAccessPremiumFeatures();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse); // 期限切れなのでアクセス不可
+      });
+    });
+    
+    group('機能別アクセス権限テスト (Phase 1.3.4)', () {
+      setUp(() async {
+        subscriptionService = await SubscriptionService.getInstance();
+      });
+      
+      test('canAccessWritingPrompts()は全プランでtrueを返す', () async {
+        // Basic プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        var result = await subscriptionService.canAccessWritingPrompts();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Basicプランでも基本プロンプトは利用可能
+        
+        // Premium プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        result = await subscriptionService.canAccessWritingPrompts();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Premiumプランでは全プロンプト利用可能
+      });
+      
+      test('canAccessAdvancedFilters()はPremiumプランのみtrueを返す', () async {
+        // Basic プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        var result = await subscriptionService.canAccessAdvancedFilters();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse); // Basicプランは高度なフィルタ利用不可
+        
+        // Premium プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        result = await subscriptionService.canAccessAdvancedFilters();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Premiumプランは高度なフィルタ利用可能
+      });
+      
+      test('canAccessDataExport()は全プランでtrueを返す', () async {
+        // Basic プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        var result = await subscriptionService.canAccessDataExport();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // BasicプランでもJSON形式は利用可能
+        
+        // Premium プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        result = await subscriptionService.canAccessDataExport();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Premiumプランでは複数形式利用可能
+      });
+      
+      test('canAccessStatsDashboard()はPremiumプランのみtrueを返す', () async {
+        // Basic プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        var result = await subscriptionService.canAccessStatsDashboard();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse); // Basicプランは統計ダッシュボード利用不可
+        
+        // Premium プランのテスト
+        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        result = await subscriptionService.canAccessStatsDashboard();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Premiumプランは統計ダッシュボード利用可能
+      });
+      
+      test('getFeatureAccess()でBasicプランの機能アクセス情報を取得できる', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // Act
+        final result = await subscriptionService.getFeatureAccess();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final features = result.value;
+        expect(features['premiumFeatures'], isFalse); // Premium機能は利用不可
+        expect(features['writingPrompts'], isTrue);   // 基本プロンプトは利用可能
+        expect(features['advancedFilters'], isFalse); // 高度なフィルタは利用不可
+        expect(features['dataExport'], isTrue);       // 基本エクスポートは利用可能
+        expect(features['statsDashboard'], isFalse);  // 統計ダッシュボードは利用不可
+      });
+      
+      test('getFeatureAccess()でPremiumプランの機能アクセス情報を取得できる', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        
+        // Act
+        final result = await subscriptionService.getFeatureAccess();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final features = result.value;
+        expect(features['premiumFeatures'], isTrue); // Premium機能は利用可能
+        expect(features['writingPrompts'], isTrue);  // 全プロンプトは利用可能
+        expect(features['advancedFilters'], isTrue); // 高度なフィルタは利用可能
+        expect(features['dataExport'], isTrue);      // 複数形式エクスポートは利用可能
+        expect(features['statsDashboard'], isTrue);  // 統計ダッシュボードは利用可能
+      });
+      
+      test('期限切れPremiumプランでは機能制限が適用される', () async {
+        // Arrange - 期限切れのPremiumプランを作成
+        final expiredStatus = SubscriptionStatus(
+          planId: SubscriptionPlan.premiumMonthly.id,
+          isActive: true,
+          startDate: DateTime.now().subtract(const Duration(days: 60)),
+          expiryDate: DateTime.now().subtract(const Duration(days: 30)), // 30日前に期限切れ
+          autoRenewal: false,
+          monthlyUsageCount: 0,
+          lastResetDate: DateTime.now(),
+          transactionId: 'expired_premium',
+          lastPurchaseDate: DateTime.now().subtract(const Duration(days: 60)),
+        );
+        
+        await subscriptionService.updateStatus(expiredStatus);
+        
+        // Act
+        final featureAccessResult = await subscriptionService.getFeatureAccess();
+        final premiumFeaturesResult = await subscriptionService.canAccessPremiumFeatures();
+        final advancedFiltersResult = await subscriptionService.canAccessAdvancedFilters();
+        final statsDashboardResult = await subscriptionService.canAccessStatsDashboard();
+        
+        // Assert
+        expect(featureAccessResult.isSuccess, isTrue);
+        expect(premiumFeaturesResult.isSuccess, isTrue);
+        expect(advancedFiltersResult.isSuccess, isTrue);
+        expect(statsDashboardResult.isSuccess, isTrue);
+        
+        expect(premiumFeaturesResult.value, isFalse); // 期限切れなので利用不可
+        expect(advancedFiltersResult.value, isFalse);  // 期限切れなので利用不可
+        expect(statsDashboardResult.value, isFalse);   // 期限切れなので利用不可
+        
+        final features = featureAccessResult.value;
+        expect(features['premiumFeatures'], isFalse); // 期限切れなので利用不可
+        expect(features['advancedFilters'], isFalse); // 期限切れなので利用不可
+        expect(features['statsDashboard'], isFalse);  // 期限切れなので利用不可
       });
     });
     
