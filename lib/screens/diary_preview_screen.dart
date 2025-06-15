@@ -12,7 +12,10 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/custom_card.dart';
+import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
+import '../core/errors/app_exceptions.dart';
+import '../services/interfaces/subscription_service_interface.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -116,6 +119,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
         
         if (resultFromAi.isFailure) {
+          // Phase 1.7.2.1: 使用量制限エラーの専用UI表示
+          if (resultFromAi.error is AiProcessingException && 
+              resultFromAi.error.message.contains('月間制限に達しました')) {
+            await _showUsageLimitDialog(resultFromAi.error.message);
+            return;
+          }
           throw Exception(resultFromAi.error.message);
         }
         
@@ -157,6 +166,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
         
         if (resultFromAi.isFailure) {
+          // Phase 1.7.2.1: 使用量制限エラーの専用UI表示
+          if (resultFromAi.error is AiProcessingException && 
+              resultFromAi.error.message.contains('月間制限に達しました')) {
+            await _showUsageLimitDialog(resultFromAi.error.message);
+            return;
+          }
           throw Exception(resultFromAi.error.message);
         }
         
@@ -248,6 +263,75 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
       }
     }
+  }
+
+  /// Phase 1.7.2.1: 使用量制限エラー専用ダイアログ表示
+  Future<void> _showUsageLimitDialog(String errorMessage) async {
+    try {
+      final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
+      
+      // プラン情報を取得
+      final planResult = await subscriptionService.getCurrentPlan();
+      final remainingResult = await subscriptionService.getRemainingGenerations();
+      final resetDateResult = await subscriptionService.getNextResetDate();
+      
+      final planName = planResult.isSuccess ? planResult.value.name : 'Basic';
+      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
+      final limit = planName == 'Basic' ? 10 : 100;
+      final nextResetDate = resetDateResult.isSuccess ? resetDateResult.value : DateTime.now().add(const Duration(days: 30));
+      
+      if (mounted) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => PresetDialogs.usageLimitReached(
+            planName: planName,
+            remaining: remaining,
+            limit: limit,
+            nextResetDate: nextResetDate,
+            onUpgrade: () {
+              Navigator.of(context).pop();
+              _navigateToUpgrade();
+            },
+            onDismiss: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // 前の画面に戻る
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('使用量制限ダイアログ表示エラー: $e');
+      // フォールバック: 基本的なエラーダイアログ
+      if (mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (context) => PresetDialogs.error(
+            title: 'AI生成の制限に達しました',
+            message: 'AI生成の月間制限に達したため、来月まで新しい日記を生成できません。',
+            onConfirm: () => Navigator.of(context).pop(),
+          ),
+        );
+        if (mounted) {
+          Navigator.of(context).pop(); // 前の画面に戻る
+        }
+      }
+    }
+  }
+
+  /// Phase 1.7.2.4: プラン変更誘導機能
+  void _navigateToUpgrade() {
+    // TODO: Phase 2で設定画面のサブスクリプション管理画面に遷移
+    // 現在は設定画面に遷移してプレースホルダーを表示
+    Navigator.of(context).pushNamed('/settings');
+    
+    // 一時的な案内メッセージ
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Premiumプランの設定は次のアップデートで実装予定です'),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   @override

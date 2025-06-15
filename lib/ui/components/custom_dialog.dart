@@ -362,4 +362,254 @@ class PresetDialogs {
       ),
     );
   }
+
+  /// Phase 1.7.2.1: 使用量制限エラー専用ダイアログ
+  static CustomDialog usageLimitReached({
+    required String planName,
+    required int remaining,
+    required int limit,
+    required DateTime nextResetDate,
+    VoidCallback? onUpgrade,
+    VoidCallback? onDismiss,
+  }) {
+    return CustomDialog(
+      icon: Icons.block_rounded,
+      iconColor: AppColors.warning,
+      title: 'AI生成の制限に達しました',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '現在のプラン（$planName）では、月間$limit回までAI日記生成をご利用いただけます。',
+            style: AppTypography.bodyMedium.copyWith(
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.warningContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '今月の残り回数:',
+                      style: AppTypography.labelMedium,
+                    ),
+                    Text(
+                      '$remaining回',
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: remaining > 0 ? AppColors.success : AppColors.error,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'リセット日:',
+                      style: AppTypography.labelMedium,
+                    ),
+                    Text(
+                      '${nextResetDate.month}月${nextResetDate.day}日',
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Premiumプランにアップグレードすると、月間100回まで生成できます。',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+      actions: [
+        CustomDialogAction(
+          text: '後で',
+          onPressed: onDismiss,
+        ),
+        CustomDialogAction(
+          text: 'Premiumにアップグレード',
+          isPrimary: true,
+          icon: Icons.upgrade_rounded,
+          onPressed: onUpgrade,
+        ),
+      ],
+    );
+  }
+
+  /// Phase 1.7.2.3: 使用量カウンター表示ダイアログ
+  static CustomDialog usageStatus({
+    required String planName,
+    required int used,
+    required int limit,
+    required int remaining,
+    required DateTime nextResetDate,
+    VoidCallback? onUpgrade,
+    VoidCallback? onDismiss,
+  }) {
+    final usagePercentage = used / limit;
+    final isNearLimit = usagePercentage >= 0.8;
+    
+    return CustomDialog(
+      icon: Icons.analytics_rounded,
+      iconColor: isNearLimit ? AppColors.warning : AppColors.info,
+      title: 'AI生成の使用状況',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '現在のプラン: $planName',
+            style: AppTypography.titleMedium.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          
+          // 使用量プログレスバー
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '使用量',
+                      style: AppTypography.labelMedium,
+                    ),
+                    Text(
+                      '$used / $limit回',
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                
+                // プログレスバー
+                Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: usagePercentage.clamp(0.0, 1.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isNearLimit ? AppColors.warning : AppColors.primary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '残り回数:',
+                      style: AppTypography.labelMedium,
+                    ),
+                    Text(
+                      '$remaining回',
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: remaining > 0 ? AppColors.success : AppColors.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: AppSpacing.md),
+          
+          // リセット情報
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: AppColors.infoContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(AppSpacing.xs),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.refresh_rounded,
+                  size: AppSpacing.iconSm,
+                  color: AppColors.info,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '${nextResetDate.month}月${nextResetDate.day}日にリセット',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.info,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // アップグレード案内（Basic プランの場合）
+          if (planName == 'Basic') ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Premiumプランなら月間100回まで利用できます',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        CustomDialogAction(
+          text: '閉じる',
+          onPressed: onDismiss,
+        ),
+        if (planName == 'Basic')
+          CustomDialogAction(
+            text: 'アップグレード',
+            isPrimary: true,
+            icon: Icons.upgrade_rounded,
+            onPressed: onUpgrade,
+          ),
+      ],
+    );
+  }
 }

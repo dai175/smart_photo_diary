@@ -260,23 +260,23 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
 
 ### Phase 1-B: AiService使用量制限統合
 
-#### 1.7 AiService 使用量制限実装
+#### 1.7 AiService 使用量制限実装 *(Phase 1.7完了)*
 - [✅] **1.7.1 使用量管理機能統合** *(Phase 1.7.1完了)*
   - [✅] 1.7.1.1 AiServiceにSubscriptionService依存注入
   - [✅] 1.7.1.2 generateDiary前の制限チェック実装
   - [✅] 1.7.1.3 使用量カウント統合
   - [✅] 1.7.1.4 月次リセット処理統合
 
-- [ ] **1.7.2 制限チェック・エラーハンドリング**
-  - [ ] 1.7.2.1 プラン別制限チェック（Basic: 10回、Premium: 100回）
-  - [ ] 1.7.2.2 制限超過時の適切なエラーメッセージ
-  - [ ] 1.7.2.3 Result<T>パターンでのエラーハンドリング強化
-  - [ ] 1.7.2.4 アップグレード促進メッセージ
+- [✅] **1.7.2 制限チェック・エラーハンドリング強化** *(Phase 1.7.2完了)*
+  - [✅] 1.7.2.1 使用量制限エラーのUI表示対応
+  - [✅] 1.7.2.2 制限達成時の代替案提示
+  - [✅] 1.7.2.3 使用量カウンター表示機能
+  - [✅] 1.7.2.4 プラン変更誘導機能
 
-- [ ] **1.7.3 UI連携準備**
-  - [ ] 1.7.3.1 残り使用回数取得API
-  - [ ] 1.7.3.2 使用量リセット日表示API
-  - [ ] 1.7.3.3 制限状態チェックAPI
+- [✅] **1.7.3 UI連携準備** *(1.7.1-1.7.2で実装済み)*
+  - [✅] 1.7.3.1 残り使用回数取得API (AiService.getRemainingGenerations実装済み)
+  - [✅] 1.7.3.2 使用量リセット日表示API (AiService.getNextResetDate実装済み)
+  - [✅] 1.7.3.3 制限状態チェックAPI (AiService.canUseAiGeneration実装済み)
 
 #### 1.8 SettingsService 拡張
 - [ ] **1.8.1 サブスクリプション状態管理**
@@ -555,6 +555,16 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
 - [✅] **インターフェース整合性**: DiaryGenerationResult → Result<DiaryGenerationResult>移行
 - [✅] **テスト修正完了**: 全476テスト成功、Result<T>パターン対応
 - [✅] **UI統合対応**: DiaryPreviewScreen等でResult<T>パターン対応完了
+
+### Phase 1.7.2 実装状況（完了）
+- [✅] **使用量制限エラー専用UI**: CustomDialog拡張、PresetDialogs.usageLimitReached実装
+- [✅] **制限達成時の代替案提示**: Premiumアップグレード案内、制限リセット日表示
+- [✅] **使用量カウンター表示**: HomeScreen使用量ボタン、PresetDialogs.usageStatus実装
+- [✅] **プログレスバー表示**: 視覚的使用量表示、制限近接時の警告表示
+- [✅] **プラン変更誘導**: アップグレードナビゲーション、Phase 2準備完了
+- [✅] **エラーハンドリング強化**: AiProcessingException検出、専用ダイアログ表示
+- [✅] **フォールバック機能**: サービス取得失敗時の基本エラー表示
+- [✅] **コード品質維持**: flutter analyze 0エラー、BuildContext安全使用
 
 ## KPI・メトリクス
 

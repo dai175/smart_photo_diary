@@ -9,9 +9,12 @@ import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/components/custom_dialog.dart';
 import '../ui/animations/page_transitions.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
+import '../services/interfaces/subscription_service_interface.dart';
+import '../core/service_registration.dart';
 
 class HomeContentWidget extends StatelessWidget {
   final PhotoSelectionController photoController;
@@ -58,21 +61,32 @@ class HomeContentWidget extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
-      actions: onRefresh != null
-          ? [
-              Container(
-                margin: const EdgeInsets.only(right: AppSpacing.sm),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.refresh_rounded,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                  onPressed: () => onRefresh!(),
-                  tooltip: 'ホーム画面を更新',
-                ),
+      actions: [
+        // Phase 1.7.2.3: 使用量カウンター表示ボタン
+        Container(
+          margin: const EdgeInsets.only(right: AppSpacing.xs),
+          child: IconButton(
+            icon: Icon(
+              Icons.analytics_rounded,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onPressed: () => _showUsageStatus(context),
+            tooltip: 'AI生成の使用状況',
+          ),
+        ),
+        if (onRefresh != null)
+          Container(
+            margin: const EdgeInsets.only(right: AppSpacing.sm),
+            child: IconButton(
+              icon: Icon(
+                Icons.refresh_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
-            ]
-          : null,
+              onPressed: () => onRefresh!(),
+              tooltip: 'ホーム画面を更新',
+            ),
+          ),
+      ],
     );
   }
 
@@ -215,5 +229,85 @@ class HomeContentWidget extends StatelessWidget {
       onLoadRecentDiaries();
       photoController.clearSelection();
     });
+  }
+
+  /// Phase 1.7.2.3: 使用量状況表示メソッド
+  Future<void> _showUsageStatus(BuildContext context) async {
+    try {
+      final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
+      
+      // 使用量情報を取得
+      final statusResult = await subscriptionService.getCurrentStatus();
+      final planResult = await subscriptionService.getCurrentPlan();
+      final remainingResult = await subscriptionService.getRemainingGenerations();
+      final resetDateResult = await subscriptionService.getNextResetDate();
+      
+      if (statusResult.isFailure || planResult.isFailure) {
+        // エラー時はフォールバック表示
+        if (context.mounted) {
+          await showDialog<void>(
+            context: context,
+            builder: (context) => PresetDialogs.error(
+              title: '使用状況を取得できませんでした',
+              message: 'しばらく時間をおいてから再度お試しください。',
+              onConfirm: () => Navigator.of(context).pop(),
+            ),
+          );
+        }
+        return;
+      }
+      
+      final plan = planResult.value;
+      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
+      final nextResetDate = resetDateResult.isSuccess ? resetDateResult.value : DateTime.now().add(const Duration(days: 30));
+      
+      final limit = plan.name == 'Basic' ? 10 : 100;
+      final used = limit - remaining;
+      
+      if (context.mounted) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => PresetDialogs.usageStatus(
+            planName: plan.name,
+            used: used.clamp(0, limit),
+            limit: limit,
+            remaining: remaining.clamp(0, limit),
+            nextResetDate: nextResetDate,
+            onUpgrade: plan.name == 'Basic' ? () {
+              Navigator.of(context).pop();
+              _navigateToUpgrade(context);
+            } : null,
+            onDismiss: () => Navigator.of(context).pop(),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('使用量状況取得エラー: $e');
+      if (context.mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (context) => PresetDialogs.error(
+            title: 'エラーが発生しました',
+            message: '使用状況の取得中にエラーが発生しました。',
+            onConfirm: () => Navigator.of(context).pop(),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Phase 1.7.2.4: プラン変更誘導機能
+  void _navigateToUpgrade(BuildContext context) {
+    // TODO: Phase 2で設定画面のサブスクリプション管理画面に遷移
+    Navigator.of(context).pushNamed('/settings');
+    
+    // 一時的な案内メッセージ
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Premiumプランの設定は次のアップデートで実装予定です'),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 }
