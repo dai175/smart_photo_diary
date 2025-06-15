@@ -370,5 +370,276 @@ void main() {
         expect(string, contains('monthlyUsageCount: 5/100'));
       });
     });
+
+    // =================================================================
+    // Phase 1.5.2.1: 詳細な状態管理テスト
+    // =================================================================
+    
+    group('Phase 1.5.2.1: 状態管理詳細テスト', () {
+      group('プラン変更テスト', () {
+        test('BasicからPremium月額への変更', () async {
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          expect(status.planId, equals('basic'));
+          expect(status.expiryDate, isNull);
+          
+          status.changePlan(SubscriptionPlan.premiumMonthly);
+          
+          expect(status.planId, equals('premium_monthly'));
+          expect(status.isActive, isTrue);
+          expect(status.autoRenewal, isTrue);
+          expect(status.expiryDate, isNotNull);
+          expect(status.startDate, isNotNull);
+          
+          // 月額プランの期限は約30日後
+          final expectedExpiry = status.startDate!.add(const Duration(days: 30));
+          expect(status.expiryDate!.difference(expectedExpiry).inDays.abs(), lessThan(2));
+        });
+
+        test('BasicからPremium年額への変更', () async {
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          status.changePlan(SubscriptionPlan.premiumYearly);
+          
+          expect(status.planId, equals('premium_yearly'));
+          expect(status.isActive, isTrue);
+          expect(status.autoRenewal, isTrue);
+          expect(status.expiryDate, isNotNull);
+          
+          // 年額プランの期限は約365日後
+          final expectedExpiry = status.startDate!.add(const Duration(days: 365));
+          expect(status.expiryDate!.difference(expectedExpiry).inDays.abs(), lessThan(2));
+        });
+
+        test('Premium月額から年額への変更', () async {
+          final status = SubscriptionStatus.createPremium(
+            startDate: DateTime.now(),
+            plan: SubscriptionPlan.premiumMonthly,
+          );
+          await testBox.add(status);
+          
+          final originalStartDate = status.startDate;
+          status.changePlan(SubscriptionPlan.premiumYearly);
+          
+          expect(status.planId, equals('premium_yearly'));
+          expect(status.isActive, isTrue);
+          expect(status.autoRenewal, isTrue);
+          expect(status.startDate, equals(originalStartDate)); // 開始日は保持
+          
+          // 年額プランの新しい期限
+          final expectedExpiry = originalStartDate!.add(const Duration(days: 365));
+          expect(status.expiryDate!.difference(expectedExpiry).inDays.abs(), lessThan(2));
+        });
+
+        test('PremiumからBasicへのダウングレード', () async {
+          final status = SubscriptionStatus.createPremium(
+            startDate: DateTime.now(),
+            plan: SubscriptionPlan.premiumYearly,
+          );
+          await testBox.add(status);
+          
+          status.changePlan(SubscriptionPlan.basic);
+          
+          expect(status.planId, equals('basic'));
+          expect(status.isActive, isTrue);
+          expect(status.autoRenewal, isFalse);
+          expect(status.expiryDate, isNull); // Basicプランは期限なし
+        });
+
+        test('将来の有効日でプラン変更予約', () async {
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          final futureDate = DateTime.now().add(const Duration(days: 7));
+          status.changePlan(SubscriptionPlan.premiumYearly, effectiveDate: futureDate);
+          
+          expect(status.planId, equals('premium_yearly'));
+          expect(status.planChangeDate, equals(futureDate));
+        });
+      });
+
+      group('サブスクリプション状態検証テスト', () {
+        test('有効なPremiumプランの検証', () {
+          final status = SubscriptionStatus.createPremium(
+            startDate: DateTime.now().subtract(const Duration(days: 30)),
+            plan: SubscriptionPlan.premiumYearly,
+          );
+          
+          expect(status.isValid, isTrue);
+          expect(status.isExpired, isFalse);
+          expect(status.canUseAiGeneration, isTrue);
+        });
+
+        test('期限切れPremiumプランの検証', () {
+          final pastDate = DateTime.now().subtract(const Duration(days: 1));
+          final status = SubscriptionStatus(
+            planId: 'premium_yearly',
+            isActive: true,
+            startDate: DateTime.now().subtract(const Duration(days: 400)),
+            expiryDate: pastDate,
+          );
+          
+          expect(status.isValid, isFalse);
+          expect(status.isExpired, isTrue);
+          expect(status.canUseAiGeneration, isFalse);
+        });
+
+        test('非アクティブなプランの検証', () {
+          final status = SubscriptionStatus(
+            planId: 'premium_yearly',
+            isActive: false,
+            expiryDate: DateTime.now().add(const Duration(days: 30)),
+          );
+          
+          expect(status.isValid, isFalse);
+          expect(status.canUseAiGeneration, isFalse);
+        });
+
+        test('Basicプランでも非アクティブでは無効', () {
+          final status = SubscriptionStatus.createDefault();
+          status.isActive = false; // 非アクティブにする
+          
+          expect(status.isValid, isFalse); // 非アクティブでは無効
+          expect(status.isExpired, isFalse); // ただし期限切れではない
+        });
+      });
+
+      group('使用量制限管理テスト', () {
+        test('Basicプランで制限に達した場合', () async {
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          // 制限(10回)まで使用
+          for (int i = 0; i < 10; i++) {
+            expect(status.canUseAiGeneration, isTrue);
+            status.incrementAiUsage();
+          }
+          
+          expect(status.hasReachedMonthlyLimit, isTrue);
+          expect(status.canUseAiGeneration, isFalse);
+          expect(status.remainingGenerations, equals(0));
+        });
+
+        test('Premiumプランで制限に達した場合', () async {
+          final status = SubscriptionStatus.createPremium(
+            startDate: DateTime.now(),
+            plan: SubscriptionPlan.premiumYearly,
+          );
+          await testBox.add(status);
+          
+          // 制限(100回)まで使用
+          for (int i = 0; i < 100; i++) {
+            status.incrementAiUsage();
+          }
+          
+          expect(status.hasReachedMonthlyLimit, isTrue);
+          expect(status.canUseAiGeneration, isFalse);
+          expect(status.remainingGenerations, equals(0));
+        });
+
+        test('制限を超えた場合の動作', () async {
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          // 制限を超えて使用
+          for (int i = 0; i < 15; i++) {
+            status.incrementAiUsage();
+          }
+          
+          expect(status.monthlyUsageCount, equals(15));
+          expect(status.remainingGenerations, equals(0)); // 負の値にならない
+          expect(status.canUseAiGeneration, isFalse);
+        });
+      });
+
+      group('複雑な状態遷移テスト', () {
+        test('Premium購入→使用→キャンセル→復元の流れ', () async {
+          // 1. Basic状態から開始
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          expect(status.planId, equals('basic'));
+          expect(status.remainingGenerations, equals(10));
+          
+          // 2. Premiumに変更
+          status.changePlan(SubscriptionPlan.premiumYearly);
+          expect(status.planId, equals('premium_yearly'));
+          expect(status.remainingGenerations, equals(100));
+          expect(status.canAccessPremiumFeatures, isTrue);
+          
+          // 3. AI機能を使用
+          for (int i = 0; i < 25; i++) {
+            status.incrementAiUsage();
+          }
+          expect(status.monthlyUsageCount, equals(25));
+          expect(status.remainingGenerations, equals(75));
+          
+          // 4. キャンセル
+          status.cancel();
+          expect(status.planId, equals('basic'));
+          expect(status.isActive, isFalse);
+          expect(status.canAccessPremiumFeatures, isFalse);
+          
+          // 5. 復元
+          status.restore();
+          status.changePlan(SubscriptionPlan.premiumYearly); // プランを戻す
+          expect(status.isActive, isTrue);
+          expect(status.canAccessPremiumFeatures, isTrue);
+          expect(status.monthlyUsageCount, equals(25)); // 使用量は保持
+        });
+
+        test('月次リセット後の状態確認', () async {
+          final status = SubscriptionStatus.createDefault();
+          await testBox.add(status);
+          
+          // 使用量を設定
+          for (int i = 0; i < 5; i++) {
+            status.incrementAiUsage();
+          }
+          expect(status.monthlyUsageCount, equals(5));
+          
+          // 手動でリセット（月次リセットのシミュレーション）
+          status.resetUsage();
+          
+          expect(status.monthlyUsageCount, equals(0));
+          expect(status.remainingGenerations, equals(10));
+          expect(status.canUseAiGeneration, isTrue);
+          expect(status.lastResetDate, isNotNull);
+        });
+      });
+
+      group('エラーケース処理テスト', () {
+        test('不正なプランIDでの初期化', () {
+          final status = SubscriptionStatus(planId: 'invalid_plan');
+          
+          // 不正なプランIDの場合、Basicプランにフォールバック
+          expect(status.currentPlan, equals(SubscriptionPlan.basic));
+          expect(status.remainingGenerations, equals(10));
+        });
+
+        test('開始日なしでPremiumプラン作成時のエラー', () {
+          expect(() => SubscriptionStatus.createPremium(
+            startDate: DateTime.now(),
+            plan: SubscriptionPlan.basic, // Basicプランは不正
+          ), throwsArgumentError);
+        });
+
+        test('期限日が過去の場合の処理', () {
+          final pastDate = DateTime.now().subtract(const Duration(days: 100));
+          final status = SubscriptionStatus(
+            planId: 'premium_yearly',
+            isActive: true,
+            startDate: DateTime.now().subtract(const Duration(days: 200)),
+            expiryDate: pastDate,
+          );
+          
+          expect(status.isExpired, isTrue);
+          expect(status.isValid, isFalse);
+          expect(status.daysUntilExpiry, equals(0));
+        });
+      });
+    });
   });
 }
