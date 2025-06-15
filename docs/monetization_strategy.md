@@ -181,10 +181,10 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
   - [✅] 1.2.1.2 flutter pub get実行
   - [✅] 1.2.1.3 基本的なimport確認
 
-- [ ] **1.2.2 Hive設定**
-  - [ ] 1.2.2.1 SubscriptionStatus用TypeAdapter生成
-  - [ ] 1.2.2.2 build_runner実行
-  - [ ] 1.2.2.3 main.dartでアダプター登録
+- [✅] **1.2.2 Hive設定**
+  - [✅] 1.2.2.1 SubscriptionStatus用TypeAdapter生成
+  - [✅] 1.2.2.2 build_runner実行
+  - [✅] 1.2.2.3 main.dartでアダプター登録
 
 - [ ] **1.2.3 Service Registration準備**
   - [ ] 1.2.3.1 service_registration.dartに登録準備
