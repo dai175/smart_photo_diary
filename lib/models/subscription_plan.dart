@@ -23,6 +23,18 @@ enum SubscriptionPlan {
   /// - 年額割引（22%OFF）
   premiumYearly;
 
+  /// プランID（文字列識別子）
+  String get id {
+    switch (this) {
+      case SubscriptionPlan.basic:
+        return SubscriptionConstants.basicPlanId;
+      case SubscriptionPlan.premiumMonthly:
+        return SubscriptionConstants.premiumMonthlyPlanId;
+      case SubscriptionPlan.premiumYearly:
+        return SubscriptionConstants.premiumYearlyPlanId;
+    }
+  }
+
   /// プラン表示名
   String get displayName {
     switch (this) {

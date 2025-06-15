@@ -43,6 +43,19 @@ class SubscriptionConstants {
   static const String premiumMonthlyProductId = 'smart_photo_diary_premium_monthly';
 
   // ========================================
+  // Hive設定
+  // ========================================
+  
+  /// サブスクリプション状態管理用のHiveボックス名
+  static const String hiveBoxName = 'subscription_box';
+  
+  /// サブスクリプション状態のキー
+  static const String statusKey = 'subscription_status';
+  
+  /// 通貨設定
+  static const String currency = 'JPY';
+
+  // ========================================
   // プラン識別子
   // ========================================
   
