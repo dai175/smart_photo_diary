@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'dart:io';
 
@@ -135,29 +136,29 @@ void main() {
       expect(supportResult.value, isFalse); // Basicプランはfalse
     });
 
-    test('Phase 1.6 プレースホルダーメソッドが適切なエラーを返す', () async {
+    test('Phase 1.6 購入機能がテスト環境で適切なエラーを返す', () async {
       // Arrange - サービス登録を初期化
       await ServiceRegistration.initialize();
       final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
       
-      // Act & Assert - Phase 1.6メソッドのエラー動作確認
+      // Act & Assert - Phase 1.6メソッドのテスト環境での動作確認
       
-      // 商品情報取得
+      // 商品情報取得（テスト環境では In-App Purchase 未対応のため失敗）
       final productsResult = await subscriptionService.getProducts();
-      expect(productsResult.isSuccess, isTrue);
-      expect(productsResult.value.length, equals(2)); // Monthly & Yearly
+      expect(productsResult.isFailure, isTrue);
+      expect(productsResult.error.toString(), contains('In-App Purchase not available'));
       
-      // 購入機能（未実装）
+      // 購入機能（テスト環境では失敗）
       final purchaseResult = await subscriptionService.purchasePlan(
-        subscriptionService.getAvailablePlans().value.first
+        SubscriptionPlan.premiumMonthly
       );
-      expect(purchaseResult.isSuccess, isTrue);
-      expect(purchaseResult.value.status.name, equals('pending'));
+      expect(purchaseResult.isFailure, isTrue);
+      expect(purchaseResult.error.toString(), contains('In-App Purchase not available'));
       
-      // 復元機能（未実装）
+      // 復元機能（テスト環境では失敗）
       final restoreResult = await subscriptionService.restorePurchases();
-      expect(restoreResult.isSuccess, isTrue);
-      expect(restoreResult.value, isEmpty);
+      expect(restoreResult.isFailure, isTrue);
+      expect(restoreResult.error.toString(), contains('In-App Purchase not available'));
       
       // 検証機能（未実装）
       final validateResult = await subscriptionService.validatePurchase('test_transaction');
@@ -170,9 +171,9 @@ void main() {
       );
       expect(changeResult.isFailure, isTrue);
       
-      // キャンセル（未実装）
+      // キャンセル（実装済み）
       final cancelResult = await subscriptionService.cancelSubscription();
-      expect(cancelResult.isFailure, isTrue);
+      expect(cancelResult.isSuccess, isTrue);
     });
 
     test('Stream機能が基本動作する', () async {

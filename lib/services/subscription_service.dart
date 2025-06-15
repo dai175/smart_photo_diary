@@ -1,13 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'dart:async';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/subscription_status.dart';
 import '../models/subscription_plan.dart';
 import '../constants/subscription_constants.dart';
+import '../config/in_app_purchase_config.dart';
 import 'interfaces/subscription_service_interface.dart';
 import 'logging_service.dart';
+
+// 型エイリアスで名前衝突を解決
+import 'package:in_app_purchase/in_app_purchase.dart' as iap;
+import 'interfaces/subscription_service_interface.dart' as ssi;
 
 /// SubscriptionService
 /// 
@@ -44,6 +51,17 @@ class SubscriptionService implements ISubscriptionService {
   
   // ロギングサービス
   LoggingService? _loggingService;
+  
+  // In-App Purchase関連
+  InAppPurchase? _inAppPurchase;
+  StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  
+  // 購入状態ストリーム
+  final StreamController<PurchaseResult> _purchaseStreamController = 
+      StreamController<PurchaseResult>.broadcast();
+  
+  // 購入処理中フラグ
+  bool _isPurchasing = false;
   
   // プライベートコンストラクタ
   SubscriptionService._();
@@ -83,6 +101,9 @@ class SubscriptionService implements ISubscriptionService {
       
       // 初期状態の作成（まだ状態が存在しない場合）
       await _ensureInitialStatus();
+      
+      // In-App Purchase初期化
+      await _initializeInAppPurchase();
       
       _isInitialized = true;
       _log('SubscriptionService initialization completed successfully', level: LogLevel.info);
@@ -955,158 +976,11 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
   
-  // =================================================================
-  // 購入・復元メソッド（Phase 1.6 - プレースホルダー実装）
-  // =================================================================
-  
-  /// In-App Purchase商品情報を取得
-  @override
-  Future<Result<List<PurchaseProduct>>> getProducts() async {
-    try {
-      debugPrint('SubscriptionService: Getting products (Phase 1.6 placeholder)');
-      // Phase 1.6でin_app_purchase統合時に実装
-      const products = [
-        PurchaseProduct(
-          id: 'smart_photo_diary_premium_monthly',
-          title: 'Premium Monthly',
-          description: 'Smart Photo Diary Premium Monthly Plan',
-          price: '¥300',
-          priceAmount: 300.0,
-          currencyCode: 'JPY',
-          plan: SubscriptionPlan.premiumMonthly,
-        ),
-        PurchaseProduct(
-          id: 'smart_photo_diary_premium_yearly',
-          title: 'Premium Yearly',
-          description: 'Smart Photo Diary Premium Yearly Plan',
-          price: '¥2,800',
-          priceAmount: 2800.0,
-          currencyCode: 'JPY',
-          plan: SubscriptionPlan.premiumYearly,
-        ),
-      ];
-      return const Success(products);
-    } catch (e) {
-      debugPrint('SubscriptionService: Error getting products - $e');
-      return Failure(ServiceException('Failed to get products', details: e.toString()));
-    }
-  }
-  
-  /// プランを購入
-  @override
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    try {
-      debugPrint('SubscriptionService: Purchasing plan (Phase 1.6 placeholder): ${plan.id}');
-      // Phase 1.6でin_app_purchase統合時に実装
-      const result = PurchaseResult(
-        status: PurchaseStatus.pending,
-        errorMessage: 'Purchase functionality not yet implemented',
-      );
-      return const Success(result);
-    } catch (e) {
-      debugPrint('SubscriptionService: Error purchasing plan - $e');
-      return Failure(ServiceException('Failed to purchase plan', details: e.toString()));
-    }
-  }
-  
-  /// 購入を復元
-  @override
-  Future<Result<List<PurchaseResult>>> restorePurchases() async {
-    try {
-      debugPrint('SubscriptionService: Restoring purchases (Phase 1.6 placeholder)');
-      // Phase 1.6でin_app_purchase統合時に実装
-      return const Success([]);
-    } catch (e) {
-      debugPrint('SubscriptionService: Error restoring purchases - $e');
-      return Failure(ServiceException('Failed to restore purchases', details: e.toString()));
-    }
-  }
-  
-  /// 購入状態を検証
-  @override
-  Future<Result<bool>> validatePurchase(String transactionId) async {
-    try {
-      debugPrint('SubscriptionService: Validating purchase (Phase 1.6 placeholder): $transactionId');
-      // Phase 1.6でin_app_purchase統合時に実装
-      return const Success(false);
-    } catch (e) {
-      debugPrint('SubscriptionService: Error validating purchase - $e');
-      return Failure(ServiceException('Failed to validate purchase', details: e.toString()));
-    }
-  }
-  
-  /// プランを変更
-  @override
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    try {
-      debugPrint('SubscriptionService: Changing plan (Phase 1.6 placeholder): ${newPlan.id}');
-      // Phase 1.6でin_app_purchase統合時に実装
-      return Failure(ServiceException('Plan change functionality not yet implemented'));
-    } catch (e) {
-      debugPrint('SubscriptionService: Error changing plan - $e');
-      return Failure(ServiceException('Failed to change plan', details: e.toString()));
-    }
-  }
-  
-  /// サブスクリプションをキャンセル
-  @override
-  Future<Result<void>> cancelSubscription() async {
-    try {
-      debugPrint('SubscriptionService: Cancelling subscription (Phase 1.6 placeholder)');
-      // Phase 1.6でin_app_purchase統合時に実装
-      return Failure(ServiceException('Subscription cancellation functionality not yet implemented'));
-    } catch (e) {
-      debugPrint('SubscriptionService: Error cancelling subscription - $e');
-      return Failure(ServiceException('Failed to cancel subscription', details: e.toString()));
-    }
-  }
-  
-  // =================================================================
-  // 状態監視・通知（Phase 1.6 - プレースホルダー実装）
-  // =================================================================
-  
-  /// サブスクリプション状態変更を監視
-  @override
-  Stream<SubscriptionStatus> get statusStream {
-    // Phase 1.6で実装予定 - 現在はプレースホルダー
-    return Stream.periodic(const Duration(minutes: 5), (_) async {
-      final statusResult = await getCurrentStatus();
-      return statusResult.isSuccess ? statusResult.value : null;
-    }).asyncMap((statusFuture) => statusFuture).where((status) => status != null).cast<SubscriptionStatus>();
-  }
-  
-  /// 購入状態変更を監視
-  @override
-  Stream<PurchaseResult> get purchaseStream {
-    // Phase 1.6でin_app_purchase統合時に実装
-    return Stream.empty();
-  }
   
   // =================================================================
   // サービスのライフサイクル管理
   // =================================================================
   
-  /// サービスを破棄
-  @override
-  Future<void> dispose() async {
-    try {
-      debugPrint('SubscriptionService: Disposing service...');
-      
-      // Hiveボックスを閉じる
-      await _subscriptionBox?.close();
-      _subscriptionBox = null;
-      
-      // フラグをリセット
-      _isInitialized = false;
-      
-      debugPrint('SubscriptionService: Service disposed successfully');
-    } catch (e) {
-      debugPrint('SubscriptionService: Error disposing service - $e');
-      // エラーでもサービスを破棄する
-      _subscriptionBox = null;
-      _isInitialized = false;
-    }
-  }
   
   // =================================================================
   // インターフェース実装完了 - ServiceLocator統合用
@@ -1134,11 +1008,6 @@ class SubscriptionService implements ISubscriptionService {
   @visibleForTesting
   Box<SubscriptionStatus>? get subscriptionBox => _subscriptionBox;
   
-  /// テスト用のインスタンスリセット
-  @visibleForTesting
-  static void resetForTesting() {
-    _instance = null;
-  }
   
   // =================================================================
   // Phase 1.4.2: エラーハンドリング統合
@@ -1215,5 +1084,545 @@ class SubscriptionService implements ISubscriptionService {
           );
     
     return Failure(serviceException);
+  }
+  
+  // =================================================================
+  // Phase 1.6.2: In-App Purchase機能実装
+  // =================================================================
+  
+  /// In-App Purchase初期化処理
+  Future<void> _initializeInAppPurchase() async {
+    try {
+      _log('Initializing In-App Purchase...', level: LogLevel.info);
+      
+      // テスト環境やbinding未初期化の場合のエラーハンドリング
+      try {
+        // In-App Purchase利用可能性チェック
+        final bool isAvailable = await InAppPurchase.instance.isAvailable();
+        if (!isAvailable) {
+          _log('In-App Purchase not available on this device', level: LogLevel.warning);
+          return;
+        }
+        
+        _inAppPurchase = InAppPurchase.instance;
+        
+        // 購入ストリームの監視開始
+        _purchaseSubscription = _inAppPurchase!.purchaseStream.listen(
+          _onPurchaseUpdated,
+          onError: _onPurchaseError,
+          onDone: () => _log('Purchase stream completed', level: LogLevel.debug),
+        );
+        
+        _log('In-App Purchase initialization completed', level: LogLevel.info);
+        
+      } catch (bindingError) {
+        // テスト環境でよくある binding 未初期化エラーをキャッチ
+        if (bindingError.toString().contains('Binding has not yet been initialized')) {
+          _log('In-App Purchase not available (test environment)', 
+               level: LogLevel.warning);
+          return;
+        }
+        // その他のエラーは再スロー
+        rethrow;
+      }
+      
+    } catch (e) {
+      _log('Failed to initialize In-App Purchase', 
+           level: LogLevel.error, 
+           error: e);
+      _log('Error details: $e', level: LogLevel.error);
+      // In-App Purchase初期化失敗は致命的エラーではない
+    }
+  }
+  
+  /// 購入状態更新ハンドラー
+  void _onPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) async {
+    for (final purchaseDetails in purchaseDetailsList) {
+      await _processPurchaseUpdate(purchaseDetails);
+    }
+  }
+  
+  /// 購入エラーハンドラー
+  void _onPurchaseError(dynamic error) {
+    _log('Purchase stream error', level: LogLevel.error, error: error);
+    
+    // エラー情報をストリームに送信
+    final errorResult = PurchaseResult(
+      status: ssi.PurchaseStatus.error,
+      errorMessage: error.toString(),
+    );
+    _purchaseStreamController.add(errorResult);
+  }
+  
+  /// 購入状態更新の処理
+  Future<void> _processPurchaseUpdate(PurchaseDetails purchaseDetails) async {
+    try {
+      _log('Processing purchase update: ${purchaseDetails.status}', level: LogLevel.info);
+      
+      switch (purchaseDetails.status) {
+        case iap.PurchaseStatus.purchased:
+          await _handlePurchaseCompleted(purchaseDetails);
+          break;
+          
+        case iap.PurchaseStatus.restored:
+          await _handlePurchaseRestored(purchaseDetails);
+          break;
+          
+        case iap.PurchaseStatus.error:
+          await _handlePurchaseError(purchaseDetails);
+          break;
+          
+        case iap.PurchaseStatus.canceled:
+          await _handlePurchaseCanceled(purchaseDetails);
+          break;
+          
+        case iap.PurchaseStatus.pending:
+          await _handlePurchasePending(purchaseDetails);
+          break;
+      }
+      
+      // 購入完了処理（プラットフォーム側への完了通知）
+      if (purchaseDetails.pendingCompletePurchase) {
+        await _inAppPurchase!.completePurchase(purchaseDetails);
+        _log('Purchase completion confirmed to platform', level: LogLevel.debug);
+      }
+      
+    } catch (e) {
+      _log('Error processing purchase update', level: LogLevel.error, error: e);
+    }
+  }
+  
+  /// 購入完了処理
+  Future<void> _handlePurchaseCompleted(PurchaseDetails purchaseDetails) async {
+    try {
+      _log('Purchase completed: ${purchaseDetails.productID}', level: LogLevel.info);
+      
+      // 商品IDからプランを特定
+      final plan = InAppPurchaseConfig.getSubscriptionPlan(purchaseDetails.productID);
+      
+      // サブスクリプション状態を更新
+      await _updateSubscriptionFromPurchase(purchaseDetails, plan);
+      
+      // 購入結果をストリームに送信
+      final result = PurchaseResult(
+        status: ssi.PurchaseStatus.purchased,
+        productId: purchaseDetails.productID,
+        transactionId: purchaseDetails.purchaseID,
+        purchaseDate: DateTime.now(),
+        plan: plan,
+      );
+      _purchaseStreamController.add(result);
+      
+      _isPurchasing = false;
+      
+    } catch (e) {
+      _log('Error handling purchase completion', level: LogLevel.error, error: e);
+      await _handlePurchaseError(purchaseDetails);
+    }
+  }
+  
+  /// 購入復元処理
+  Future<void> _handlePurchaseRestored(PurchaseDetails purchaseDetails) async {
+    try {
+      _log('Purchase restored: ${purchaseDetails.productID}', level: LogLevel.info);
+      
+      // 復元の場合も購入完了と同様の処理
+      await _handlePurchaseCompleted(purchaseDetails);
+      
+      // ストリームの状態を復元として更新
+      final result = PurchaseResult(
+        status: ssi.PurchaseStatus.restored,
+        productId: purchaseDetails.productID,
+        transactionId: purchaseDetails.purchaseID,
+        purchaseDate: DateTime.now(),
+        plan: InAppPurchaseConfig.getSubscriptionPlan(purchaseDetails.productID),
+      );
+      _purchaseStreamController.add(result);
+      
+    } catch (e) {
+      _log('Error handling purchase restoration', level: LogLevel.error, error: e);
+    }
+  }
+  
+  /// 購入エラー処理
+  Future<void> _handlePurchaseError(PurchaseDetails purchaseDetails) async {
+    _log('Purchase error: ${purchaseDetails.error?.message}', level: LogLevel.error);
+    
+    final result = PurchaseResult(
+      status: ssi.PurchaseStatus.error,
+      productId: purchaseDetails.productID,
+      errorMessage: purchaseDetails.error?.message ?? 'Unknown purchase error',
+    );
+    _purchaseStreamController.add(result);
+    
+    _isPurchasing = false;
+  }
+  
+  /// 購入キャンセル処理
+  Future<void> _handlePurchaseCanceled(PurchaseDetails purchaseDetails) async {
+    _log('Purchase canceled: ${purchaseDetails.productID}', level: LogLevel.info);
+    
+    final result = PurchaseResult(
+      status: ssi.PurchaseStatus.cancelled,
+      productId: purchaseDetails.productID,
+    );
+    _purchaseStreamController.add(result);
+    
+    _isPurchasing = false;
+  }
+  
+  /// 購入保留処理
+  Future<void> _handlePurchasePending(PurchaseDetails purchaseDetails) async {
+    _log('Purchase pending: ${purchaseDetails.productID}', level: LogLevel.info);
+    
+    final result = PurchaseResult(
+      status: ssi.PurchaseStatus.pending,
+      productId: purchaseDetails.productID,
+    );
+    _purchaseStreamController.add(result);
+  }
+  
+  /// 購入からサブスクリプション状態を更新
+  Future<void> _updateSubscriptionFromPurchase(
+    PurchaseDetails purchaseDetails, 
+    SubscriptionPlan plan,
+  ) async {
+    try {
+      final now = DateTime.now();
+      
+      // 有効期限を計算
+      DateTime expiryDate;
+      switch (plan) {
+        case SubscriptionPlan.premiumMonthly:
+          expiryDate = now.add(const Duration(days: 30));
+          break;
+        case SubscriptionPlan.premiumYearly:
+          expiryDate = now.add(const Duration(days: 365));
+          break;
+        case SubscriptionPlan.basic:
+          // Basicプランは購入対象外
+          throw ArgumentError('Basic plan cannot be purchased');
+      }
+      
+      // 新しいサブスクリプション状態を作成
+      final newStatus = SubscriptionStatus(
+        planId: plan.id,
+        isActive: true,
+        startDate: now,
+        expiryDate: expiryDate,
+        autoRenewal: true,
+        monthlyUsageCount: 0,
+        lastResetDate: now,
+        transactionId: purchaseDetails.purchaseID ?? '',
+        lastPurchaseDate: now,
+      );
+      
+      // Hiveに保存
+      const statusKey = SubscriptionConstants.statusKey;
+      await _subscriptionBox!.put(statusKey, newStatus);
+      
+      _log('Subscription status updated from purchase', level: LogLevel.info);
+      
+    } catch (e) {
+      _log('Error updating subscription from purchase', level: LogLevel.error, error: e);
+      rethrow;
+    }
+  }
+  
+  // =================================================================
+  // Phase 1.6.2.1: 商品情報取得実装
+  // =================================================================
+  
+  @override
+  Future<Result<List<PurchaseProduct>>> getProducts() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      if (_inAppPurchase == null) {
+        return Failure(ServiceException('In-App Purchase not available'));
+      }
+      
+      _log('Fetching product information...', level: LogLevel.info);
+      
+      // 商品IDリストを取得
+      final productIds = InAppPurchaseConfig.allProductIds.toSet();
+      
+      // ストアから商品情報を取得
+      final ProductDetailsResponse response = await _inAppPurchase!.queryProductDetails(productIds);
+      
+      if (response.error != null) {
+        return Failure(ServiceException(
+          'Failed to fetch product details',
+          details: response.error.toString(),
+        ));
+      }
+      
+      // 見つからない商品があるかチェック
+      if (response.notFoundIDs.isNotEmpty) {
+        _log('Products not found: ${response.notFoundIDs}', level: LogLevel.warning);
+      }
+      
+      // ProductDetailsをPurchaseProductに変換
+      final products = response.productDetails.map((productDetail) {
+        final plan = InAppPurchaseConfig.getSubscriptionPlan(productDetail.id);
+        
+        return PurchaseProduct(
+          id: productDetail.id,
+          title: productDetail.title,
+          description: productDetail.description,
+          price: productDetail.price,
+          priceAmount: double.tryParse(productDetail.rawPrice.toString()) ?? 0.0,
+          currencyCode: productDetail.currencyCode,
+          plan: plan,
+        );
+      }).toList();
+      
+      _log('Successfully fetched ${products.length} products', level: LogLevel.info);
+      
+      return Success(products);
+      
+    } catch (e) {
+      return _handleError(e, 'getProducts');
+    }
+  }
+  
+  // =================================================================
+  // Phase 1.6.2.2: 購入フロー実装
+  // =================================================================
+  
+  @override
+  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      if (_inAppPurchase == null) {
+        return Failure(ServiceException('In-App Purchase not available'));
+      }
+      
+      if (_isPurchasing) {
+        return Failure(ServiceException('Another purchase is already in progress'));
+      }
+      
+      if (plan == SubscriptionPlan.basic) {
+        return Failure(ServiceException('Basic plan cannot be purchased'));
+      }
+      
+      _log('Starting purchase for plan: ${plan.id}', level: LogLevel.info);
+      _isPurchasing = true;
+      
+      // 商品IDを取得
+      final productId = InAppPurchaseConfig.getProductId(plan);
+      
+      // 商品詳細を取得
+      final productResponse = await _inAppPurchase!.queryProductDetails({productId});
+      
+      if (productResponse.error != null) {
+        _isPurchasing = false;
+        return Failure(ServiceException(
+          'Failed to get product details for purchase',
+          details: productResponse.error.toString(),
+        ));
+      }
+      
+      if (productResponse.productDetails.isEmpty) {
+        _isPurchasing = false;
+        return Failure(ServiceException('Product not found: $productId'));
+      }
+      
+      final productDetails = productResponse.productDetails.first;
+      
+      // 購入リクエストを作成
+      final PurchaseParam purchaseParam = PurchaseParam(
+        productDetails: productDetails,
+      );
+      
+      // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
+      final bool success = await _inAppPurchase!.buyNonConsumable(
+        purchaseParam: purchaseParam,
+      );
+      
+      if (!success) {
+        _isPurchasing = false;
+        return Failure(ServiceException('Failed to initiate purchase'));
+      }
+      
+      _log('Purchase initiated successfully', level: LogLevel.info);
+      
+      // 購入結果は購入ストリームで非同期に処理される
+      // ここでは購入開始の成功を返す
+      return Success(PurchaseResult(
+        status: ssi.PurchaseStatus.pending,
+        productId: productId,
+        plan: plan,
+      ));
+      
+    } catch (e) {
+      _isPurchasing = false;
+      return _handleError(e, 'purchasePlan', details: plan.id);
+    }
+  }
+  
+  // =================================================================
+  // Phase 1.6.2.3: 購入状態監視実装
+  // =================================================================
+  
+  @override
+  Stream<PurchaseResult> get purchaseStream => _purchaseStreamController.stream;
+  
+  /// サブスクリプション状態変更を監視
+  @override
+  Stream<SubscriptionStatus> get statusStream {
+    // 現在は基本的な実装のみ
+    // 将来的にはリアルタイム更新を追加予定
+    return Stream.periodic(const Duration(minutes: 5), (_) async {
+      final statusResult = await getCurrentStatus();
+      return statusResult.isSuccess ? statusResult.value : null;
+    }).asyncMap((statusFuture) => statusFuture).where((status) => status != null).cast<SubscriptionStatus>();
+  }
+  
+  // =================================================================
+  // Phase 1.6.2.4: 復元機能実装
+  // =================================================================
+  
+  @override
+  Future<Result<List<PurchaseResult>>> restorePurchases() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      if (_inAppPurchase == null) {
+        return Failure(ServiceException('In-App Purchase not available'));
+      }
+      
+      _log('Starting purchase restoration...', level: LogLevel.info);
+      
+      // 復元処理を開始
+      await _inAppPurchase!.restorePurchases();
+      
+      _log('Purchase restoration initiated', level: LogLevel.info);
+      
+      // 復元結果は購入ストリームで非同期に処理される
+      // ここでは復元開始の成功を返す
+      return Success([PurchaseResult(
+        status: ssi.PurchaseStatus.pending,
+      )]);
+      
+    } catch (e) {
+      return _handleError(e, 'restorePurchases');
+    }
+  }
+  
+  @override
+  Future<Result<bool>> validatePurchase(String transactionId) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      _log('Validating purchase: $transactionId', level: LogLevel.info);
+      
+      // 現在の実装では基本的なローカル検証のみ
+      // 将来的にサーバーサイド検証を追加予定
+      
+      // トランザクションIDの存在確認
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final isValid = status.transactionId == transactionId && 
+                     _isSubscriptionValid(status);
+      
+      _log('Purchase validation result: $isValid', level: LogLevel.info);
+      
+      return Success(isValid);
+      
+    } catch (e) {
+      return _handleError(e, 'validatePurchase', details: transactionId);
+    }
+  }
+  
+  @override
+  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
+    // Phase 1.6では未実装（将来実装予定）
+    return Failure(ServiceException(
+      'Plan change is not yet implemented',
+      details: 'This feature will be available in future versions',
+    ));
+  }
+  
+  @override
+  Future<Result<void>> cancelSubscription() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      _log('Canceling subscription...', level: LogLevel.info);
+      
+      // プラットフォーム側での自動更新停止はユーザーが設定アプリで行う
+      // ここではローカル状態の更新のみ実行
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final currentStatus = statusResult.value;
+      
+      // 自動更新フラグを無効化
+      final updatedStatus = SubscriptionStatus(
+        planId: currentStatus.planId,
+        isActive: currentStatus.isActive,
+        startDate: currentStatus.startDate,
+        expiryDate: currentStatus.expiryDate,
+        autoRenewal: false, // 自動更新を無効化
+        monthlyUsageCount: currentStatus.monthlyUsageCount,
+        lastResetDate: currentStatus.lastResetDate,
+        transactionId: currentStatus.transactionId,
+        lastPurchaseDate: currentStatus.lastPurchaseDate,
+      );
+      
+      const statusKey = SubscriptionConstants.statusKey;
+      await _subscriptionBox!.put(statusKey, updatedStatus);
+      
+      _log('Subscription auto-renewal disabled', level: LogLevel.info);
+      
+      return const Success(null);
+      
+    } catch (e) {
+      return _handleError(e, 'cancelSubscription');
+    }
+  }
+  
+  /// サービス破棄処理
+  @override
+  Future<void> dispose() async {
+    _log('Disposing SubscriptionService...', level: LogLevel.info);
+    
+    // 購入ストリーム監視を停止
+    await _purchaseSubscription?.cancel();
+    _purchaseSubscription = null;
+    
+    // ストリームコントローラーを閉じる
+    await _purchaseStreamController.close();
+    
+    // In-App Purchaseリソースをクリア
+    _inAppPurchase = null;
+    
+    _log('SubscriptionService disposed', level: LogLevel.info);
+  }
+  
+  /// テスト用リセットメソッド
+  static void resetForTesting() {
+    _instance?._purchaseSubscription?.cancel();
+    _instance?._purchaseStreamController.close();
+    _instance = null;
   }
 }
