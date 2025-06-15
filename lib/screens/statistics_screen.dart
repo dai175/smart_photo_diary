@@ -120,18 +120,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildMarker(int count) {
-    return Container(
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        color: count > 1 ? AppColors.error : AppColors.success,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          count > 9 ? '9+' : count.toString(),
-          style: AppTypography.labelSmall.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
+    return Builder(
+      builder: (context) => Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          color: count > 1 
+              ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8)
+              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            count > 9 ? '9+' : count.toString(),
+            style: AppTypography.labelSmall.copyWith(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
@@ -591,29 +596,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 holidayTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                 outsideTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 selectedDecoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 todayDecoration: BoxDecoration(
                   color: AppColors.accent,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accent.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
-                markerDecoration: const BoxDecoration(
-                  color: AppColors.success,
+                markerDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
                 ),
                 markersMaxCount: 3,
