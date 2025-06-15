@@ -176,10 +176,10 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
   - [✅] 1.1.3.5 Result<T>パターン採用・戻り値定義
 
 #### 1.2 依存関係・基盤整備
-- [ ] **1.2.1 必要パッケージ追加**
-  - [ ] 1.2.1.1 pubspec.yamlにin_app_purchase追加
-  - [ ] 1.2.1.2 flutter pub get実行
-  - [ ] 1.2.1.3 基本的なimport確認
+- [✅] **1.2.1 必要パッケージ追加**
+  - [✅] 1.2.1.1 pubspec.yamlにin_app_purchase追加
+  - [✅] 1.2.1.2 flutter pub get実行
+  - [✅] 1.2.1.3 基本的なimport確認
 
 - [ ] **1.2.2 Hive設定**
   - [ ] 1.2.2.1 SubscriptionStatus用TypeAdapter生成
