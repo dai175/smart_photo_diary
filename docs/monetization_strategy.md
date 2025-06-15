@@ -153,27 +153,27 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
 **優先度: 高** | **期限: リリース前必須** | **担当: 開発チーム**
 
 #### 1.1 基本モデル・インターフェース定義
-- [ ] **1.1.1 SubscriptionPlan enum定義**
-  - [ ] 1.1.1.1 Basic, Premium プラン定義
-  - [ ] 1.1.1.2 価格設定（Basic: ¥0, Premium: ¥2,800/年）
-  - [ ] 1.1.1.3 AI生成制限設定（Basic: 10回/月, Premium: 100回/月）
-  - [ ] 1.1.1.4 機能フラグ設定（ライティングプロンプト等）
-  - [ ] 1.1.1.5 ヘルパーメソッド実装（fromId, 機能リスト等）
+- [✅] **1.1.1 SubscriptionPlan enum定義**
+  - [✅] 1.1.1.1 Basic, Premium プラン定義（3プラン: basic, premiumMonthly, premiumYearly）
+  - [✅] 1.1.1.2 価格設定（Basic: ¥0, Premium月額: ¥300, Premium年額: ¥2,800）
+  - [✅] 1.1.1.3 AI生成制限設定（Basic: 10回/月, Premium: 100回/月）
+  - [✅] 1.1.1.4 機能フラグ設定（ライティングプロンプト等）
+  - [✅] 1.1.1.5 ヘルパーメソッド実装（fromId, 機能リスト等）
 
-- [ ] **1.1.2 SubscriptionStatus model作成**
-  - [ ] 1.1.2.1 Hive model定義・アノテーション
-  - [ ] 1.1.2.2 基本プロパティ定義（planId, isActive, 日付等）
-  - [ ] 1.1.2.3 使用量管理プロパティ（monthlyUsageCount等）
-  - [ ] 1.1.2.4 状態チェックメソッド（isValid, isExpired等）
-  - [ ] 1.1.2.5 使用量管理メソッド（increment, reset等）
-  - [ ] 1.1.2.6 プラン更新・キャンセルメソッド
+- [✅] **1.1.2 SubscriptionStatus model作成**
+  - [✅] 1.1.2.1 Hive model定義・アノテーション
+  - [✅] 1.1.2.2 基本プロパティ定義（planId, isActive, 日付等）
+  - [✅] 1.1.2.3 使用量管理プロパティ（monthlyUsageCount等）
+  - [✅] 1.1.2.4 状態チェックメソッド（isValid, isExpired等）
+  - [✅] 1.1.2.5 使用量管理メソッド（increment, reset等）
+  - [✅] 1.1.2.6 プラン更新・キャンセルメソッド
 
-- [ ] **1.1.3 ISubscriptionService インターフェース作成**
-  - [ ] 1.1.3.1 基本的なサービスメソッド定義
-  - [ ] 1.1.3.2 使用量管理メソッド定義
-  - [ ] 1.1.3.3 購入・復元メソッド定義
-  - [ ] 1.1.3.4 アクセス権限チェックメソッド定義
-  - [ ] 1.1.3.5 Result<T>パターン採用・戻り値定義
+- [✅] **1.1.3 ISubscriptionService インターフェース作成**
+  - [✅] 1.1.3.1 基本的なサービスメソッド定義
+  - [✅] 1.1.3.2 使用量管理メソッド定義
+  - [✅] 1.1.3.3 購入・復元メソッド定義
+  - [✅] 1.1.3.4 アクセス権限チェックメソッド定義
+  - [✅] 1.1.3.5 Result<T>パターン採用・戻り値定義
 
 #### 1.2 依存関係・基盤整備
 - [ ] **1.2.1 必要パッケージ追加**
@@ -489,6 +489,15 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
 - [✅] 完了
 - [⚠️] 遅延・課題あり
 - [❌] ブロック中
+
+### Phase 1.1 実装状況（完了）
+- [✅] **SubscriptionConstants**: 定数管理クラス実装済み
+- [✅] **SubscriptionPlan**: 3プラン対応enum実装済み（basic, premiumMonthly, premiumYearly）
+- [✅] **SubscriptionStatus**: Hiveモデル実装済み
+- [✅] **ISubscriptionService**: インターフェース定義完了
+- [✅] **全テスト**: 44テストケース実装・成功
+- [✅] **品質確認**: Flutter analyze 0問題
+- [✅] **月額/年額分離**: 完全対応済み
 
 ## KPI・メトリクス
 

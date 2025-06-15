@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
 import 'constants/app_constants.dart';
 import 'models/diary_entry.dart';
+import 'models/subscription_status.dart';
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
 import 'core/service_registration.dart';
@@ -20,6 +21,7 @@ Future<void> main() async {
 
   // アダプターの登録
   Hive.registerAdapter(DiaryEntryAdapter());
+  Hive.registerAdapter(SubscriptionStatusAdapter());
 
   // 環境変数の初期化
   await EnvironmentConfig.initialize();
