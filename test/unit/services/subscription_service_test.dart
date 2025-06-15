@@ -262,7 +262,192 @@ void main() {
       });
     });
     
-    group('未実装メソッド確認', () {
+    group('使用量管理機能確認 (Phase 1.3.3)', () {
+      setUp(() async {
+        subscriptionService = await SubscriptionService.getInstance();
+      });
+      
+      test('canUseAiGeneration()はBasicプランで制限内なら使用可能', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // Act
+        final result = await subscriptionService.canUseAiGeneration();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Basic: 10回制限、0回使用なので使用可能
+      });
+      
+      test('incrementAiUsage()で使用量を正しくインクリメントできる', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // Act
+        final incrementResult = await subscriptionService.incrementAiUsage();
+        final statusResult = await subscriptionService.getCurrentStatus();
+        
+        // Assert
+        expect(incrementResult.isSuccess, isTrue);
+        expect(statusResult.isSuccess, isTrue);
+        expect(statusResult.value.monthlyUsageCount, equals(1));
+      });
+      
+      test('incrementAiUsage()を複数回実行して制限に達する', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // Act - Basic制限の10回まで使用
+        for (int i = 0; i < 10; i++) {
+          final result = await subscriptionService.incrementAiUsage();
+          expect(result.isSuccess, isTrue);
+        }
+        
+        // 11回目は制限エラー
+        final limitResult = await subscriptionService.incrementAiUsage();
+        
+        // Assert
+        expect(limitResult.isFailure, isTrue);
+        expect(limitResult.error.toString(), contains('Monthly AI generation limit reached'));
+      });
+      
+      test('canUseAiGeneration()は制限に達すると使用不可を返す', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // 制限まで使用
+        for (int i = 0; i < 10; i++) {
+          await subscriptionService.incrementAiUsage();
+        }
+        
+        // Act
+        final result = await subscriptionService.canUseAiGeneration();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse); // 制限に達したので使用不可
+      });
+      
+      test('getRemainingAiGenerations()で残り回数を取得できる', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        
+        // 5回使用
+        for (int i = 0; i < 5; i++) {
+          await subscriptionService.incrementAiUsage();
+        }
+        
+        // Act
+        final result = await subscriptionService.getRemainingAiGenerations();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(95)); // Premium: 100回制限 - 5回使用 = 95回
+      });
+      
+      test('getNextResetDate()で翌月1日を取得できる', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // Act
+        final result = await subscriptionService.getNextResetDate();
+        
+        // Assert
+        expect(result.isSuccess, isTrue);
+        final nextReset = result.value;
+        final now = DateTime.now();
+        
+        // 翌月の1日であることを確認
+        if (now.month == 12) {
+          expect(nextReset.year, equals(now.year + 1));
+          expect(nextReset.month, equals(1));
+        } else {
+          expect(nextReset.year, equals(now.year));
+          expect(nextReset.month, equals(now.month + 1));
+        }
+        expect(nextReset.day, equals(1));
+      });
+      
+      test('月次使用量リセットが正しく動作する', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        
+        // 使用量を増やす
+        await subscriptionService.incrementAiUsage();
+        await subscriptionService.incrementAiUsage();
+        
+        // 前月の日付でリセット日を設定（手動でテスト）
+        final status = (await subscriptionService.getCurrentStatus()).value;
+        final previousMonth = DateTime(
+          DateTime.now().month == 1 ? DateTime.now().year - 1 : DateTime.now().year,
+          DateTime.now().month == 1 ? 12 : DateTime.now().month - 1,
+          1
+        );
+        
+        final modifiedStatus = SubscriptionStatus(
+          planId: status.planId,
+          isActive: status.isActive,
+          startDate: status.startDate,
+          expiryDate: status.expiryDate,
+          autoRenewal: status.autoRenewal,
+          monthlyUsageCount: status.monthlyUsageCount,
+          lastResetDate: previousMonth, // 前月に設定
+          transactionId: status.transactionId,
+          lastPurchaseDate: status.lastPurchaseDate,
+        );
+        
+        await subscriptionService.updateStatus(modifiedStatus);
+        
+        // Act - リセットチェックを実行
+        final resetResult = await subscriptionService.resetMonthlyUsageIfNeeded();
+        final newStatus = (await subscriptionService.getCurrentStatus()).value;
+        
+        // Assert
+        expect(resetResult.isSuccess, isTrue);
+        expect(newStatus.monthlyUsageCount, equals(0)); // リセットされている
+      });
+      
+      test('Premiumプランは制限が100回に設定される', () async {
+        // Arrange
+        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        
+        // Act
+        final remainingResult = await subscriptionService.getRemainingAiGenerations();
+        
+        // Assert
+        expect(remainingResult.isSuccess, isTrue);
+        expect(remainingResult.value, equals(100)); // Premium制限
+      });
+      
+      test('期限切れのPremiumプランでは使用不可', () async {
+        // Arrange - 期限切れのPremiumプランを作成
+        final expiredStatus = SubscriptionStatus(
+          planId: SubscriptionPlan.premiumMonthly.id,
+          isActive: true,
+          startDate: DateTime.now().subtract(const Duration(days: 60)),
+          expiryDate: DateTime.now().subtract(const Duration(days: 30)), // 30日前に期限切れ
+          autoRenewal: false,
+          monthlyUsageCount: 0,
+          lastResetDate: DateTime.now(),
+          transactionId: 'expired_premium',
+          lastPurchaseDate: DateTime.now().subtract(const Duration(days: 60)),
+        );
+        
+        await subscriptionService.updateStatus(expiredStatus);
+        
+        // Act
+        final canUseResult = await subscriptionService.canUseAiGeneration();
+        final remainingResult = await subscriptionService.getRemainingAiGenerations();
+        
+        // Assert
+        expect(canUseResult.isSuccess, isTrue);
+        expect(canUseResult.value, isFalse); // 期限切れなので使用不可
+        expect(remainingResult.isSuccess, isTrue);
+        expect(remainingResult.value, equals(0)); // 期限切れなので0
+      });
+    });
+    
+    group('Phase 1.3.4 未実装メソッド確認', () {
       setUp(() async {
         subscriptionService = await SubscriptionService.getInstance();
       });
@@ -278,13 +463,13 @@ void main() {
         expect(status.isActive, isTrue);
       });
       
-      test('canUseAiGeneration()は未実装エラーを返す', () async {
+      test('canUseAiGeneration()は正常に動作する', () async {
         // Act
         final result = await subscriptionService.canUseAiGeneration();
         
         // Assert
-        expect(result.isFailure, isTrue);
-        expect(result.error.toString(), contains('Phase 1.3.3で実装予定'));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue); // Basic plan with 0 usage should allow generation
       });
       
       test('canAccessPremiumFeatures()は未実装エラーを返す', () async {

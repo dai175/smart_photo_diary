@@ -27,7 +27,7 @@ import '../constants/subscription_constants.dart';
 /// ## 実装状況
 /// - Phase 1.3.1: 基本構造とシングルトンパターン ✅
 /// - Phase 1.3.2: Hive操作実装 ✅
-/// - Phase 1.3.3: 使用量管理機能 (予定)
+/// - Phase 1.3.3: 使用量管理機能 ✅
 /// - Phase 1.3.4: アクセス権限チェック (予定)
 class SubscriptionService {
   // シングルトンインスタンス
@@ -246,10 +246,268 @@ class SubscriptionService {
     }
   }
   
+  // =================================================================
+  // 使用量管理メソッド（Phase 1.3.3）
+  // =================================================================
+  
   /// AI生成を使用できるかどうかをチェック
-  /// TODO: Phase 1.3.3で実装
   Future<Result<bool>> canUseAiGeneration() async {
-    return Failure(ServiceException('Phase 1.3.3で実装予定'));
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      
+      // サブスクリプションが有効でない場合は使用不可
+      if (!_isSubscriptionValid(status)) {
+        debugPrint('SubscriptionService: Subscription is not valid');
+        return const Success(false);
+      }
+      
+      // 月次使用量をリセット（必要に応じて）
+      await _resetMonthlyUsageIfNeeded(status);
+      
+      // 更新された状態を再取得
+      final updatedStatusResult = await getCurrentStatus();
+      if (updatedStatusResult.isFailure) {
+        return Failure(updatedStatusResult.error);
+      }
+      
+      final updatedStatus = updatedStatusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(updatedStatus.planId);
+      final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
+      
+      final canUse = updatedStatus.monthlyUsageCount < monthlyLimit;
+      debugPrint('SubscriptionService: AI generation check - usage: ${updatedStatus.monthlyUsageCount}/$monthlyLimit, canUse: $canUse');
+      
+      return Success(canUse);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking AI generation usage - $e');
+      return Failure(ServiceException('Failed to check AI generation usage', details: e.toString()));
+    }
+  }
+  
+  /// AI生成使用量をインクリメント
+  Future<Result<void>> incrementAiUsage() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      
+      // サブスクリプションが有効でない場合はインクリメント不可
+      if (!_isSubscriptionValid(status)) {
+        return Failure(ServiceException('Cannot increment usage: subscription is not valid'));
+      }
+      
+      // 使用量リセットをチェック
+      await _resetMonthlyUsageIfNeeded(status);
+      
+      // 最新の状態を取得
+      final latestStatusResult = await getCurrentStatus();
+      if (latestStatusResult.isFailure) {
+        return Failure(latestStatusResult.error);
+      }
+      
+      final latestStatus = latestStatusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(latestStatus.planId);
+      final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
+      
+      // 制限チェック
+      if (latestStatus.monthlyUsageCount >= monthlyLimit) {
+        return Failure(ServiceException('Monthly AI generation limit reached: ${latestStatus.monthlyUsageCount}/$monthlyLimit'));
+      }
+      
+      // 使用量をインクリメント
+      final updatedStatus = SubscriptionStatus(
+        planId: latestStatus.planId,
+        isActive: latestStatus.isActive,
+        startDate: latestStatus.startDate,
+        expiryDate: latestStatus.expiryDate,
+        autoRenewal: latestStatus.autoRenewal,
+        monthlyUsageCount: latestStatus.monthlyUsageCount + 1,
+        lastResetDate: latestStatus.lastResetDate,
+        transactionId: latestStatus.transactionId,
+        lastPurchaseDate: latestStatus.lastPurchaseDate,
+      );
+      
+      await _subscriptionBox?.put(SubscriptionConstants.statusKey, updatedStatus);
+      debugPrint('SubscriptionService: AI usage incremented to ${updatedStatus.monthlyUsageCount}/$monthlyLimit');
+      
+      return const Success(null);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error incrementing AI usage - $e');
+      return Failure(ServiceException('Failed to increment AI usage', details: e.toString()));
+    }
+  }
+  
+  /// 月次使用量リセットが必要かチェックしてリセット
+  Future<Result<void>> resetMonthlyUsageIfNeeded() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      await _resetMonthlyUsageIfNeeded(status);
+      
+      return const Success(null);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error resetting monthly usage - $e');
+      return Failure(ServiceException('Failed to reset monthly usage', details: e.toString()));
+    }
+  }
+  
+  /// 残りAI生成回数を取得
+  Future<Result<int>> getRemainingAiGenerations() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      
+      // サブスクリプションが有効でない場合は0
+      if (!_isSubscriptionValid(status)) {
+        return const Success(0);
+      }
+      
+      // 月次使用量をリセット（必要に応じて）
+      await _resetMonthlyUsageIfNeeded(status);
+      
+      // 更新された状態を再取得
+      final updatedStatusResult = await getCurrentStatus();
+      if (updatedStatusResult.isFailure) {
+        return Failure(updatedStatusResult.error);
+      }
+      
+      final updatedStatus = updatedStatusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(updatedStatus.planId);
+      final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
+      final remaining = monthlyLimit - updatedStatus.monthlyUsageCount;
+      
+      return Success(remaining > 0 ? remaining : 0);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting remaining generations - $e');
+      return Failure(ServiceException('Failed to get remaining generations', details: e.toString()));
+    }
+  }
+  
+  /// 次の使用量リセット日を取得
+  Future<Result<DateTime>> getNextResetDate() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final nextResetDate = _calculateNextResetDate(status.lastResetDate);
+      
+      return Success(nextResetDate);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting next reset date - $e');
+      return Failure(ServiceException('Failed to get next reset date', details: e.toString()));
+    }
+  }
+  
+  // =================================================================
+  // 内部使用量管理ヘルパーメソッド
+  // =================================================================
+  
+  /// サブスクリプションが有効かどうかをチェック
+  bool _isSubscriptionValid(SubscriptionStatus status) {
+    if (!status.isActive) return false;
+    
+    final currentPlan = SubscriptionPlan.fromId(status.planId);
+    
+    // Basicプランは常に有効
+    if (currentPlan == SubscriptionPlan.basic) return true;
+    
+    // Premiumプランは有効期限をチェック
+    if (status.expiryDate == null) return false;
+    return DateTime.now().isBefore(status.expiryDate!);
+  }
+  
+  /// 月次使用量リセットが必要かチェックしてリセット（内部用）
+  Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
+    final now = DateTime.now();
+    final currentMonth = _getCurrentMonth();
+    final statusMonth = _getUsageMonth(status);
+    
+    if (statusMonth != currentMonth) {
+      debugPrint('SubscriptionService: Resetting monthly usage - previous month: $statusMonth, current: $currentMonth');
+      
+      final resetStatus = SubscriptionStatus(
+        planId: status.planId,
+        isActive: status.isActive,
+        startDate: status.startDate,
+        expiryDate: status.expiryDate,
+        autoRenewal: status.autoRenewal,
+        monthlyUsageCount: 0, // リセット
+        lastResetDate: now,
+        transactionId: status.transactionId,
+        lastPurchaseDate: status.lastPurchaseDate,
+      );
+      
+      await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
+    }
+  }
+  
+  /// 現在の月を YYYY-MM 形式で取得
+  String _getCurrentMonth() {
+    final now = DateTime.now();
+    return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
+  }
+  
+  /// SubscriptionStatusから使用量月を取得
+  String _getUsageMonth(SubscriptionStatus status) {
+    if (status.lastResetDate != null) {
+      final resetDate = status.lastResetDate!;
+      return '${resetDate.year.toString().padLeft(4, '0')}-${resetDate.month.toString().padLeft(2, '0')}';
+    }
+    // lastResetDateがnullの場合は現在月を返す
+    return _getCurrentMonth();
+  }
+  
+  /// 次のリセット日を計算
+  DateTime _calculateNextResetDate(DateTime? lastResetDate) {
+    final baseDate = lastResetDate ?? DateTime.now();
+    final currentYear = baseDate.year;
+    final currentMonth = baseDate.month;
+    
+    // 翌月の1日を計算
+    if (currentMonth == 12) {
+      return DateTime(currentYear + 1, 1, 1);
+    } else {
+      return DateTime(currentYear, currentMonth + 1, 1);
+    }
   }
   
   /// プレミアム機能にアクセスできるかどうか

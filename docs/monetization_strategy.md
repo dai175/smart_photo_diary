@@ -202,11 +202,11 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
   - [✅] 1.3.2.3 基本的な読み書きメソッド実装
   - [✅] 1.3.2.4 初期状態作成（Basic プラン）
 
-- [ ] **1.3.3 使用量管理機能**
-  - [ ] 1.3.3.1 canUseAiGeneration()実装
-  - [ ] 1.3.3.2 incrementAiUsage()実装
-  - [ ] 1.3.3.3 resetMonthlyUsageIfNeeded()実装
-  - [ ] 1.3.3.4 月次リセット判定ロジック
+- [✅] **1.3.3 使用量管理機能**
+  - [✅] 1.3.3.1 canUseAiGeneration()実装
+  - [✅] 1.3.3.2 incrementAiUsage()実装
+  - [✅] 1.3.3.3 resetMonthlyUsageIfNeeded()実装
+  - [✅] 1.3.3.4 月次リセット判定ロジック
 
 - [ ] **1.3.4 アクセス権限チェック**
   - [ ] 1.3.4.1 canAccessPremiumFeatures()実装
