@@ -9,6 +9,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
+import '../constants/app_icons.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -176,7 +177,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.calendar_today_rounded,
+                          AppIcons.calendarToday,
                           color: Theme.of(context).colorScheme.onPrimary,
                           size: AppSpacing.iconSm,
                         ),
@@ -347,7 +348,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             margin: const EdgeInsets.only(right: AppSpacing.sm),
             child: IconButton(
               icon: Icon(
-                Icons.refresh_rounded,
+                AppIcons.homeRefresh,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: _loadStatistics,
@@ -433,7 +434,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   '総記録数',
                   '$_totalEntries',
                   '日記',
-                  Icons.book_rounded,
+                  AppIcons.statisticsTotal,
                   AppColors.primary,
                 ),
               ),
@@ -446,7 +447,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   '連続記録数',
                   '$_currentStreak',
                   '日',
-                  Icons.local_fire_department_rounded,
+                  AppIcons.statisticsStreak,
                   AppColors.error,
                 ),
               ),
@@ -463,7 +464,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   '最長連続記録',
                   '$_longestStreak',
                   '日',
-                  Icons.emoji_events_rounded,
+                  AppIcons.statisticsRecord,
                   AppColors.warning,
                 ),
               ),
@@ -476,7 +477,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   '今月の記録',
                   '${_getMonthlyCount()}',
                   '日記',
-                  Icons.calendar_month_rounded,
+                  AppIcons.statisticsMonth,
                   AppColors.success,
                 ),
               ),
@@ -630,11 +631,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ),
                 formatButtonVisible: false,
                 leftChevronIcon: Icon(
-                  Icons.chevron_left_rounded,
+                  AppIcons.calendarPrev,
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 rightChevronIcon: Icon(
-                  Icons.chevron_right_rounded,
+                  AppIcons.calendarNext,
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),

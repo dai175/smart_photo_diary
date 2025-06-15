@@ -73,12 +73,12 @@ class AppConstants {
     '設定',
   ];
   
-  // アイコン
+  // アイコン（AppIconsから参照）
   static const List<IconData> navigationIcons = [
-    Icons.home,
-    Icons.book,
-    Icons.bar_chart,
-    Icons.settings,
+    Icons.home_filled,           // より温かみのあるホームアイコン
+    Icons.menu_book_rounded,     // 本を開いた印象的なアイコン
+    Icons.insights_rounded,      // より分析的で魅力的な統計アイコン
+    Icons.tune_rounded,          // 調整・カスタマイズのイメージ
   ];
   
   // アニメーション

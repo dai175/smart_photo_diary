@@ -11,6 +11,7 @@ import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
+import '../constants/app_icons.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -120,7 +121,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ),
               border: InputBorder.none,
               prefixIcon: Icon(
-                Icons.search_rounded,
+                AppIcons.search,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
@@ -133,7 +134,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       leading: _controller.isSearching 
         ? IconButton(
             icon: Icon(
-              Icons.arrow_back_rounded,
+              AppIcons.actionBack,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
             onPressed: _controller.stopSearch,
@@ -144,7 +145,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             if (_controller.searchQuery.isNotEmpty)
               IconButton(
                 icon: Icon(
-                  Icons.clear_rounded,
+                  AppIcons.searchClear,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: _controller.clearSearch,
@@ -153,14 +154,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
         : [
             IconButton(
               icon: Icon(
-                Icons.refresh_rounded,
+                AppIcons.homeRefresh,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: _controller.refresh,
             ),
             IconButton(
               icon: Icon(
-                Icons.search_rounded,
+                AppIcons.searchStart,
                 color: Theme.of(context).colorScheme.onPrimary,
               ), 
               onPressed: _controller.startSearch,
@@ -169,7 +170,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
               margin: const EdgeInsets.only(right: AppSpacing.sm),
               child: IconButton(
                 icon: Icon(
-                  Icons.tune_rounded,
+                  _controller.currentFilter.isActive 
+                    ? AppIcons.filterActive
+                    : AppIcons.filter,
                   color: _controller.currentFilter.isActive 
                     ? AppColors.accent 
                     : Theme.of(context).colorScheme.onPrimary,

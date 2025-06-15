@@ -9,6 +9,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
+import '../constants/app_icons.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -66,7 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: const EdgeInsets.only(right: AppSpacing.sm),
             child: IconButton(
               icon: Icon(
-                Icons.refresh_rounded,
+                AppIcons.settingsRefresh,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: _loadSettings,
@@ -185,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(AppSpacing.sm),
                 ),
                 child: Icon(
-                  Icons.brightness_6_rounded,
+                  AppIcons.settingsTheme,
                   color: AppColors.warning,
                   size: AppSpacing.iconSm,
                 ),
@@ -212,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               Icon(
-                Icons.chevron_right_rounded,
+                AppIcons.actionForward,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconSm,
               ),
@@ -281,7 +282,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             borderRadius: BorderRadius.circular(AppSpacing.sm),
           ),
           child: Icon(
-            Icons.storage_rounded,
+            AppIcons.settingsStorage,
             color: AppColors.info,
             size: AppSpacing.iconSm,
           ),
@@ -374,7 +375,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
-                Icons.file_download_outlined,
+                AppIcons.settingsExport,
                 color: AppColors.success,
                 size: AppSpacing.iconSm,
               ),
@@ -401,7 +402,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              AppIcons.actionForward,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: AppSpacing.iconSm,
             ),
@@ -428,7 +429,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
-                Icons.cleaning_services_rounded,
+                AppIcons.settingsCleanup,
                 color: AppColors.error,
                 size: AppSpacing.iconSm,
               ),
@@ -455,7 +456,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              AppIcons.actionForward,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: AppSpacing.iconSm,
             ),
@@ -477,7 +478,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
             child: Icon(
-              Icons.info_outline_rounded,
+              AppIcons.settingsInfo,
               color: AppColors.primary,
               size: AppSpacing.iconSm,
             ),
@@ -559,7 +560,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              AppIcons.actionForward,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: AppSpacing.iconSm,
             ),
