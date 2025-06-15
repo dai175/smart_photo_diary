@@ -183,7 +183,11 @@ void main() {
         
         // Assert
         expect(result.isSuccess, isTrue);
-        final status = result.value;
+        
+        // refreshStatus後に現在の状態を確認
+        final statusResult = await subscriptionService.getCurrentStatus();
+        expect(statusResult.isSuccess, isTrue);
+        final status = statusResult.value;
         expect(status.planId, equals(SubscriptionPlan.premiumYearly.id));
         expect(status.monthlyUsageCount, equals(15));
         expect(status.transactionId, equals('test_refresh'));

@@ -7,8 +7,8 @@ import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
-// TODO: Phase 1.3で有効化
-// import '../services/interfaces/subscription_service_interface.dart';
+import '../services/interfaces/subscription_service_interface.dart';
+import '../services/subscription_service.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -23,7 +23,7 @@ import 'service_locator.dart';
 /// 2. SettingsService - アプリ設定管理
 /// 3. StorageService - ストレージ操作
 /// 4. AiService - AI日記生成
-/// 5. SubscriptionService - サブスクリプション管理 (Phase 1.3で追加予定)
+/// 5. SubscriptionService - サブスクリプション管理 ✅
 /// 
 /// ### Phase 2: Dependent Services
 /// 1. DiaryService - 日記管理（AiService, PhotoServiceに依存）
@@ -89,11 +89,10 @@ class ServiceRegistration {
       () => AiService()
     );
     
-    // TODO: Phase 1.3で実装予定
     // SubscriptionService (Hive依存のみ - コアサービス)
-    // serviceLocator.registerAsyncFactory<ISubscriptionService>(
-    //   () => SubscriptionService.getInstance()
-    // );
+    serviceLocator.registerAsyncFactory<ISubscriptionService>(
+      () => SubscriptionService.getInstance()
+    );
   }
   
   /// Register services that have dependencies on other services

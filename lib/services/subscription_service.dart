@@ -5,6 +5,7 @@ import '../core/errors/app_exceptions.dart';
 import '../models/subscription_status.dart';
 import '../models/subscription_plan.dart';
 import '../constants/subscription_constants.dart';
+import 'interfaces/subscription_service_interface.dart';
 
 /// SubscriptionService
 /// 
@@ -29,7 +30,7 @@ import '../constants/subscription_constants.dart';
 /// - Phase 1.3.2: Hive操作実装 ✅
 /// - Phase 1.3.3: 使用量管理機能 ✅
 /// - Phase 1.3.4: アクセス権限チェック ✅
-class SubscriptionService {
+class SubscriptionService implements ISubscriptionService {
   // シングルトンインスタンス
   static SubscriptionService? _instance;
   
@@ -117,7 +118,62 @@ class SubscriptionService {
   // Hive操作メソッド（Phase 1.3.2）
   // =================================================================
   
+  // =================================================================
+  // プラン管理メソッド（Phase 1.4.1）
+  // =================================================================
+  
+  /// 利用可能なプラン一覧を取得
+  @override
+  Result<List<SubscriptionPlan>> getAvailablePlans() {
+    try {
+      const availablePlans = [
+        SubscriptionPlan.basic,
+        SubscriptionPlan.premiumMonthly,
+        SubscriptionPlan.premiumYearly,
+      ];
+      return const Success(availablePlans);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting available plans - $e');
+      return Failure(ServiceException('Failed to get available plans', details: e.toString()));
+    }
+  }
+  
+  /// 特定のプラン情報を取得
+  @override
+  Result<SubscriptionPlan> getPlan(String planId) {
+    try {
+      final plan = SubscriptionPlan.fromId(planId);
+      return Success(plan);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting plan for ID: $planId - $e');
+      return Failure(ServiceException('Failed to get plan', details: e.toString()));
+    }
+  }
+  
+  /// 現在のプランを取得
+  @override
+  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final plan = SubscriptionPlan.fromId(status.planId);
+      return Success(plan);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting current plan - $e');
+      return Failure(ServiceException('Failed to get current plan', details: e.toString()));
+    }
+  }
+  
   /// 現在のサブスクリプション状態を取得
+  @override
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     try {
       if (!_isInitialized) {
@@ -159,7 +215,8 @@ class SubscriptionService {
   }
   
   /// サブスクリプション状態をリロード（強制再読み込み）
-  Future<Result<SubscriptionStatus>> refreshStatus() async {
+  @override
+  Future<Result<void>> refreshStatus() async {
     try {
       if (!_isInitialized) {
         return Failure(ServiceException('SubscriptionService is not initialized'));
@@ -171,12 +228,13 @@ class SubscriptionService {
         SubscriptionConstants.hiveBoxName
       );
       
-      return await getCurrentStatus();
+      return const Success(null);
     } catch (e) {
       debugPrint('SubscriptionService: Error refreshing status - $e');
       return Failure(ServiceException('Failed to refresh status', details: e.toString()));
     }
   }
+  
   
   /// 指定されたプランでサブスクリプション状態を作成
   Future<Result<SubscriptionStatus>> createStatus(SubscriptionPlan plan) async {
@@ -250,7 +308,71 @@ class SubscriptionService {
   // 使用量管理メソッド（Phase 1.3.3）
   // =================================================================
   
+  /// 残りAI生成回数を取得（インターフェース用エイリアス）
+  @override
+  Future<Result<int>> getRemainingGenerations() async {
+    return await getRemainingAiGenerations();
+  }
+  
+  /// 今月の使用量を取得
+  @override
+  Future<Result<int>> getMonthlyUsage() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      return Success(status.monthlyUsageCount);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting monthly usage - $e');
+      return Failure(ServiceException('Failed to get monthly usage', details: e.toString()));
+    }
+  }
+  
+  /// 使用量を手動でリセット（管理者・テスト用）
+  @override
+  Future<Result<void>> resetUsage() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final resetStatus = SubscriptionStatus(
+        planId: status.planId,
+        isActive: status.isActive,
+        startDate: status.startDate,
+        expiryDate: status.expiryDate,
+        autoRenewal: status.autoRenewal,
+        monthlyUsageCount: 0, // リセット
+        lastResetDate: DateTime.now(),
+        transactionId: status.transactionId,
+        lastPurchaseDate: status.lastPurchaseDate,
+      );
+      
+      await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
+      debugPrint('SubscriptionService: Usage manually reset');
+      
+      return const Success(null);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error resetting usage - $e');
+      return Failure(ServiceException('Failed to reset usage', details: e.toString()));
+    }
+  }
+  
   /// AI生成を使用できるかどうかをチェック
+  @override
   Future<Result<bool>> canUseAiGeneration() async {
     try {
       if (!_isInitialized) {
@@ -294,6 +416,7 @@ class SubscriptionService {
   }
   
   /// AI生成使用量をインクリメント
+  @override
   Future<Result<void>> incrementAiUsage() async {
     try {
       if (!_isInitialized) {
@@ -416,6 +539,7 @@ class SubscriptionService {
   }
   
   /// 次の使用量リセット日を取得
+  @override
   Future<Result<DateTime>> getNextResetDate() async {
     try {
       if (!_isInitialized) {
@@ -515,6 +639,7 @@ class SubscriptionService {
   // =================================================================
   
   /// プレミアム機能にアクセスできるかどうか
+  @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
     try {
       if (!_isInitialized) {
@@ -546,6 +671,7 @@ class SubscriptionService {
   }
   
   /// ライティングプロンプト機能にアクセスできるかどうか
+  @override
   Future<Result<bool>> canAccessWritingPrompts() async {
     try {
       if (!_isInitialized) {
@@ -578,6 +704,7 @@ class SubscriptionService {
   }
   
   /// 高度なフィルタ機能にアクセスできるかどうか
+  @override
   Future<Result<bool>> canAccessAdvancedFilters() async {
     try {
       if (!_isInitialized) {
@@ -704,12 +831,242 @@ class SubscriptionService {
     }
   }
   
+  /// 高度な分析にアクセスできるかどうか
+  @override
+  Future<Result<bool>> canAccessAdvancedAnalytics() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // 高度な分析はPremiumプランのみ
+      if (currentPlan == SubscriptionPlan.basic) {
+        return const Success(false);
+      }
+      
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Advanced analytics access check - valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking advanced analytics access - $e');
+      return Failure(ServiceException('Failed to check advanced analytics access', details: e.toString()));
+    }
+  }
+  
+  /// 優先サポートにアクセスできるかどうか
+  @override
+  Future<Result<bool>> canAccessPrioritySupport() async {
+    try {
+      if (!_isInitialized) {
+        return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+      
+      final status = statusResult.value;
+      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      
+      // 優先サポートはPremiumプランのみ
+      if (currentPlan == SubscriptionPlan.basic) {
+        return const Success(false);
+      }
+      
+      final isPremiumValid = _isSubscriptionValid(status);
+      debugPrint('SubscriptionService: Priority support access check - valid: $isPremiumValid');
+      
+      return Success(isPremiumValid);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error checking priority support access - $e');
+      return Failure(ServiceException('Failed to check priority support access', details: e.toString()));
+    }
+  }
+  
+  // =================================================================
+  // 購入・復元メソッド（Phase 1.6 - プレースホルダー実装）
+  // =================================================================
+  
+  /// In-App Purchase商品情報を取得
+  @override
+  Future<Result<List<PurchaseProduct>>> getProducts() async {
+    try {
+      debugPrint('SubscriptionService: Getting products (Phase 1.6 placeholder)');
+      // Phase 1.6でin_app_purchase統合時に実装
+      const products = [
+        PurchaseProduct(
+          id: 'smart_photo_diary_premium_monthly',
+          title: 'Premium Monthly',
+          description: 'Smart Photo Diary Premium Monthly Plan',
+          price: '¥300',
+          priceAmount: 300.0,
+          currencyCode: 'JPY',
+          plan: SubscriptionPlan.premiumMonthly,
+        ),
+        PurchaseProduct(
+          id: 'smart_photo_diary_premium_yearly',
+          title: 'Premium Yearly',
+          description: 'Smart Photo Diary Premium Yearly Plan',
+          price: '¥2,800',
+          priceAmount: 2800.0,
+          currencyCode: 'JPY',
+          plan: SubscriptionPlan.premiumYearly,
+        ),
+      ];
+      return const Success(products);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting products - $e');
+      return Failure(ServiceException('Failed to get products', details: e.toString()));
+    }
+  }
+  
+  /// プランを購入
+  @override
+  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
+    try {
+      debugPrint('SubscriptionService: Purchasing plan (Phase 1.6 placeholder): ${plan.id}');
+      // Phase 1.6でin_app_purchase統合時に実装
+      const result = PurchaseResult(
+        status: PurchaseStatus.pending,
+        errorMessage: 'Purchase functionality not yet implemented',
+      );
+      return const Success(result);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error purchasing plan - $e');
+      return Failure(ServiceException('Failed to purchase plan', details: e.toString()));
+    }
+  }
+  
+  /// 購入を復元
+  @override
+  Future<Result<List<PurchaseResult>>> restorePurchases() async {
+    try {
+      debugPrint('SubscriptionService: Restoring purchases (Phase 1.6 placeholder)');
+      // Phase 1.6でin_app_purchase統合時に実装
+      return const Success([]);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error restoring purchases - $e');
+      return Failure(ServiceException('Failed to restore purchases', details: e.toString()));
+    }
+  }
+  
+  /// 購入状態を検証
+  @override
+  Future<Result<bool>> validatePurchase(String transactionId) async {
+    try {
+      debugPrint('SubscriptionService: Validating purchase (Phase 1.6 placeholder): $transactionId');
+      // Phase 1.6でin_app_purchase統合時に実装
+      return const Success(false);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error validating purchase - $e');
+      return Failure(ServiceException('Failed to validate purchase', details: e.toString()));
+    }
+  }
+  
+  /// プランを変更
+  @override
+  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
+    try {
+      debugPrint('SubscriptionService: Changing plan (Phase 1.6 placeholder): ${newPlan.id}');
+      // Phase 1.6でin_app_purchase統合時に実装
+      return Failure(ServiceException('Plan change functionality not yet implemented'));
+    } catch (e) {
+      debugPrint('SubscriptionService: Error changing plan - $e');
+      return Failure(ServiceException('Failed to change plan', details: e.toString()));
+    }
+  }
+  
+  /// サブスクリプションをキャンセル
+  @override
+  Future<Result<void>> cancelSubscription() async {
+    try {
+      debugPrint('SubscriptionService: Cancelling subscription (Phase 1.6 placeholder)');
+      // Phase 1.6でin_app_purchase統合時に実装
+      return Failure(ServiceException('Subscription cancellation functionality not yet implemented'));
+    } catch (e) {
+      debugPrint('SubscriptionService: Error cancelling subscription - $e');
+      return Failure(ServiceException('Failed to cancel subscription', details: e.toString()));
+    }
+  }
+  
+  // =================================================================
+  // 状態監視・通知（Phase 1.6 - プレースホルダー実装）
+  // =================================================================
+  
+  /// サブスクリプション状態変更を監視
+  @override
+  Stream<SubscriptionStatus> get statusStream {
+    // Phase 1.6で実装予定 - 現在はプレースホルダー
+    return Stream.periodic(const Duration(minutes: 5), (_) async {
+      final statusResult = await getCurrentStatus();
+      return statusResult.isSuccess ? statusResult.value : null;
+    }).asyncMap((statusFuture) => statusFuture).where((status) => status != null).cast<SubscriptionStatus>();
+  }
+  
+  /// 購入状態変更を監視
+  @override
+  Stream<PurchaseResult> get purchaseStream {
+    // Phase 1.6でin_app_purchase統合時に実装
+    return Stream.empty();
+  }
+  
+  // =================================================================
+  // サービスのライフサイクル管理
+  // =================================================================
+  
+  /// サービスを破棄
+  @override
+  Future<void> dispose() async {
+    try {
+      debugPrint('SubscriptionService: Disposing service...');
+      
+      // Hiveボックスを閉じる
+      await _subscriptionBox?.close();
+      _subscriptionBox = null;
+      
+      // フラグをリセット
+      _isInitialized = false;
+      
+      debugPrint('SubscriptionService: Service disposed successfully');
+    } catch (e) {
+      debugPrint('SubscriptionService: Error disposing service - $e');
+      // エラーでもサービスを破棄する
+      _subscriptionBox = null;
+      _isInitialized = false;
+    }
+  }
+  
+  // =================================================================
+  // インターフェース実装完了 - ServiceLocator統合用
+  // =================================================================
+  
+  @override
+  bool get isInitialized => _isInitialized;
+  
+  @override
+  Future<Result<void>> initialize() async {
+    try {
+      await _initialize();
+      return const Success(null);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error in public initialize - $e');
+      return Failure(ServiceException('Failed to initialize service', details: e.toString()));
+    }
+  }
+  
   // =================================================================
   // 内部ヘルパーメソッド
   // =================================================================
-  
-  /// 初期化状態確認
-  bool get isInitialized => _isInitialized;
   
   /// Hiveボックス取得（テスト用）
   @visibleForTesting
