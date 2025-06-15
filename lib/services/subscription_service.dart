@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import '../core/errors/error_handler.dart';
 import '../models/subscription_status.dart';
 import '../models/subscription_plan.dart';
 import '../constants/subscription_constants.dart';
 import 'interfaces/subscription_service_interface.dart';
+import 'logging_service.dart';
 
 /// SubscriptionService
 /// 
@@ -40,6 +42,9 @@ class SubscriptionService implements ISubscriptionService {
   // 初期化フラグ
   bool _isInitialized = false;
   
+  // ロギングサービス
+  LoggingService? _loggingService;
+  
   // プライベートコンストラクタ
   SubscriptionService._();
   
@@ -61,12 +66,15 @@ class SubscriptionService implements ISubscriptionService {
   /// 既に初期化済みの場合は何もしない
   Future<void> _initialize() async {
     if (_isInitialized) {
-      debugPrint('SubscriptionService: Already initialized');
+      _log('SubscriptionService already initialized', level: LogLevel.debug);
       return;
     }
     
     try {
-      debugPrint('SubscriptionService: Initializing...');
+      _log('Initializing SubscriptionService...', level: LogLevel.info);
+      
+      // LoggingServiceを取得
+      _loggingService = await LoggingService.getInstance();
       
       // Hiveボックスを開く
       _subscriptionBox = await Hive.openBox<SubscriptionStatus>(
@@ -77,11 +85,17 @@ class SubscriptionService implements ISubscriptionService {
       await _ensureInitialStatus();
       
       _isInitialized = true;
-      debugPrint('SubscriptionService: Initialization completed');
+      _log('SubscriptionService initialization completed successfully', level: LogLevel.info);
       
     } catch (e) {
-      debugPrint('SubscriptionService: Initialization failed - $e');
-      rethrow;
+      final errorContext = 'SubscriptionService._initialize';
+      _log('SubscriptionService initialization failed', 
+           level: LogLevel.error, 
+           error: e, 
+           context: errorContext);
+      
+      // ErrorHandlerを使用して適切な例外に変換
+      throw ErrorHandler.handleError(e, context: errorContext);
     }
   }
   
@@ -126,15 +140,21 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Result<List<SubscriptionPlan>> getAvailablePlans() {
     try {
+      _log('Getting available subscription plans', level: LogLevel.debug);
+      
       const availablePlans = [
         SubscriptionPlan.basic,
         SubscriptionPlan.premiumMonthly,
         SubscriptionPlan.premiumYearly,
       ];
+      
+      _log('Successfully retrieved ${availablePlans.length} available plans', 
+           level: LogLevel.debug,
+           data: {'planCount': availablePlans.length});
+           
       return const Success(availablePlans);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting available plans - $e');
-      return Failure(ServiceException('Failed to get available plans', details: e.toString()));
+      return _handleError(e, 'getAvailablePlans');
     }
   }
   
@@ -142,11 +162,19 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Result<SubscriptionPlan> getPlan(String planId) {
     try {
+      _log('Getting plan by ID', 
+           level: LogLevel.debug,
+           data: {'planId': planId});
+      
       final plan = SubscriptionPlan.fromId(planId);
+      
+      _log('Successfully retrieved plan', 
+           level: LogLevel.debug,
+           data: {'planId': planId, 'planName': plan.name});
+           
       return Success(plan);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting plan for ID: $planId - $e');
-      return Failure(ServiceException('Failed to get plan', details: e.toString()));
+      return _handleError(e, 'getPlan', details: 'planId: $planId');
     }
   }
   
@@ -154,21 +182,34 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
     try {
+      _log('Getting current subscription plan', level: LogLevel.debug);
+      
       if (!_isInitialized) {
-        return Failure(ServiceException('SubscriptionService is not initialized'));
+        return _handleError(
+          StateError('Service not initialized'), 
+          'getCurrentPlan',
+          details: 'SubscriptionService must be initialized before use'
+        );
       }
       
       final statusResult = await getCurrentStatus();
       if (statusResult.isFailure) {
+        _log('Failed to get current status', 
+             level: LogLevel.warning,
+             error: statusResult.error);
         return Failure(statusResult.error);
       }
       
       final status = statusResult.value;
       final plan = SubscriptionPlan.fromId(status.planId);
+      
+      _log('Successfully retrieved current plan', 
+           level: LogLevel.debug,
+           data: {'planId': plan.id, 'planName': plan.name});
+           
       return Success(plan);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting current plan - $e');
-      return Failure(ServiceException('Failed to get current plan', details: e.toString()));
+      return _handleError(e, 'getCurrentPlan');
     }
   }
   
@@ -375,8 +416,14 @@ class SubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canUseAiGeneration() async {
     try {
+      _log('Checking AI generation usage availability', level: LogLevel.debug);
+      
       if (!_isInitialized) {
-        return Failure(ServiceException('SubscriptionService is not initialized'));
+        return _handleError(
+          StateError('Service not initialized'), 
+          'canUseAiGeneration',
+          details: 'SubscriptionService must be initialized before use'
+        );
       }
       
       final statusResult = await getCurrentStatus();
@@ -388,7 +435,9 @@ class SubscriptionService implements ISubscriptionService {
       
       // サブスクリプションが有効でない場合は使用不可
       if (!_isSubscriptionValid(status)) {
-        debugPrint('SubscriptionService: Subscription is not valid');
+        _log('Subscription is not valid - AI generation unavailable', 
+             level: LogLevel.warning,
+             data: {'planId': status.planId, 'isActive': status.isActive});
         return const Success(false);
       }
       
@@ -406,12 +455,19 @@ class SubscriptionService implements ISubscriptionService {
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
       
       final canUse = updatedStatus.monthlyUsageCount < monthlyLimit;
-      debugPrint('SubscriptionService: AI generation check - usage: ${updatedStatus.monthlyUsageCount}/$monthlyLimit, canUse: $canUse');
+      
+      _log('AI generation availability check completed', 
+           level: LogLevel.debug,
+           data: {
+             'usage': updatedStatus.monthlyUsageCount,
+             'limit': monthlyLimit,
+             'canUse': canUse,
+             'planId': currentPlan.id
+           });
       
       return Success(canUse);
     } catch (e) {
-      debugPrint('SubscriptionService: Error checking AI generation usage - $e');
-      return Failure(ServiceException('Failed to check AI generation usage', details: e.toString()));
+      return _handleError(e, 'canUseAiGeneration');
     }
   }
   
@@ -1076,5 +1132,82 @@ class SubscriptionService implements ISubscriptionService {
   @visibleForTesting
   static void resetForTesting() {
     _instance = null;
+  }
+  
+  // =================================================================
+  // Phase 1.4.2: エラーハンドリング統合
+  // =================================================================
+  
+  /// 統一ログ出力メソッド
+  /// 
+  /// LoggingServiceが利用可能な場合は構造化ログを使用し、
+  /// 利用不可の場合はdebugPrintにフォールバック
+  void _log(String message, {
+    LogLevel level = LogLevel.info,
+    dynamic error,
+    String? context,
+    Map<String, dynamic>? data,
+  }) {
+    final logContext = context ?? 'SubscriptionService';
+    
+    if (_loggingService != null) {
+      // 構造化ログを使用
+      switch (level) {
+        case LogLevel.debug:
+          _loggingService!.debug(message, context: logContext, data: data);
+          break;
+        case LogLevel.info:
+          _loggingService!.info(message, context: logContext, data: data);
+          break;
+        case LogLevel.warning:
+          _loggingService!.warning(message, context: logContext, data: data);
+          break;
+        case LogLevel.error:
+          _loggingService!.error(message, context: logContext, error: data);
+          break;
+      }
+      
+      // エラーオブジェクトがある場合は追加ログ
+      if (error != null) {
+        _loggingService!.error('Error details: $error', context: logContext);
+      }
+    } else {
+      // フォールバックとしてdebugPrintを使用
+      final prefix = level == LogLevel.error ? 'ERROR' : 
+                     level == LogLevel.warning ? 'WARNING' : 
+                     level == LogLevel.debug ? 'DEBUG' : 'INFO';
+      
+      debugPrint('[$prefix] $logContext: $message');
+      if (error != null) {
+        debugPrint('[$prefix] $logContext: Error - $error');
+      }
+    }
+  }
+  
+  /// Result<T>パターンでのエラーハンドリングヘルパー
+  /// 
+  /// 例外をキャッチし、適切なServiceExceptionとFailureに変換
+  Result<T> _handleError<T>(dynamic error, String operation, {String? details}) {
+    final errorContext = 'SubscriptionService.$operation';
+    final message = 'Operation failed: $operation${details != null ? ' - $details' : ''}';
+    
+    _log(message, 
+         level: LogLevel.error, 
+         error: error, 
+         context: errorContext);
+    
+    // ErrorHandlerを使用して適切な例外に変換
+    final handledException = ErrorHandler.handleError(error, context: errorContext);
+    
+    // ServiceExceptionに変換
+    final serviceException = handledException is ServiceException 
+        ? handledException 
+        : ServiceException(
+            'Failed to $operation',
+            details: details ?? error.toString(),
+            originalError: error,
+          );
+    
+    return Failure(serviceException);
   }
 }
