@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/main.dart';
 import 'package:smart_photo_diary/constants/app_constants.dart';
+import 'package:smart_photo_diary/constants/app_icons.dart';
 import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
 
@@ -60,15 +61,11 @@ void main() {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // Test navigation to each tab
-      final tabs = [
-        Icons.home,
-        Icons.book,
-        Icons.bar_chart, // Was Icons.analytics
-        Icons.settings,
-      ];
+      // Test navigation to each tab using AppIcons constants
+      final tabs = AppIcons.navigationIcons;
 
-      for (final tabIcon in tabs) {
+      for (int i = 0; i < tabs.length; i++) {
+        final tabIcon = tabs[i];
         final tab = find.byIcon(tabIcon);
         if (tab.evaluate().isNotEmpty) {
           await tester.tap(tab);
@@ -80,9 +77,9 @@ void main() {
         }
       }
       
-      // At least home and settings should always be present
-      expect(find.byIcon(Icons.home), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+      // At least home and settings should always be present (using AppIcons)
+      expect(find.byIcon(AppIcons.navigationIcons[0]), findsOneWidget); // Home
+      expect(find.byIcon(AppIcons.navigationIcons[3]), findsOneWidget); // Settings
 
       // Assert
       expect(tester.takeException(), isNull);
