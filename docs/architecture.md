@@ -11,7 +11,6 @@
 - **DiaryService**: 中央データ管理、Hiveデータベース操作
 - **PhotoService**: 写真アクセスと権限管理（photo_manager）
 - **AiService**: AI日記生成（Google Gemini API + オフラインフォールバック）
-- **ImageClassifierService**: 未使用（将来削除予定）
 - **SettingsService**: アプリ設定管理（SharedPreferences）
 - **StorageService**: ファイルシステム操作、データエクスポート
 - **LoggingService**: 構造化ログとパフォーマンス監視
@@ -51,7 +50,6 @@
 ### ファイルシステム
 - 写真ファイル参照
 - エクスポートデータ（JSON）
-- ML モデルファイル
 
 ## UI/UX アーキテクチャ
 
@@ -91,10 +89,6 @@
 - 効率的なキャッシュ戦略
 - RepaintBoundary最適化
 
-### ML推論
-- モデル最適化（量子化）
-- バックグラウンド実行
-- メモリ効率的な処理
 
 ## テストアーキテクチャ
 

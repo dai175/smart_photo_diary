@@ -4,7 +4,6 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
-import 'package:smart_photo_diary/services/image_classifier_service.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
@@ -19,8 +18,6 @@ class MockAiServiceInterface extends Mock implements AiServiceInterface {}
 /// Mock DiaryService for integration testing
 class MockDiaryServiceInterface extends Mock implements DiaryServiceInterface {}
 
-/// Mock ImageClassifierService for integration testing
-class MockImageClassifierService extends Mock implements ImageClassifierService {}
 
 /// Mock SettingsService for integration testing
 class MockSettingsService extends Mock implements SettingsService {}
@@ -44,7 +41,6 @@ class TestServiceSetup {
   static MockPhotoServiceInterface? _mockPhotoService;
   static MockAiServiceInterface? _mockAiService;
   static MockDiaryServiceInterface? _mockDiaryService;
-  static MockImageClassifierService? _mockImageClassifierService;
   static MockSettingsService? _mockSettingsService;
   static MockStorageService? _mockStorageService;
 
@@ -63,10 +59,6 @@ class TestServiceSetup {
     return _mockDiaryService ??= _createDiaryServiceMock();
   }
 
-  /// Get or create mock ImageClassifierService with default behavior
-  static MockImageClassifierService getImageClassifierService() {
-    return _mockImageClassifierService ??= _createImageClassifierServiceMock();
-  }
 
   /// Get or create mock SettingsService with default behavior
   static MockSettingsService getSettingsService() {
@@ -83,7 +75,6 @@ class TestServiceSetup {
     _mockPhotoService = null;
     _mockAiService = null;
     _mockDiaryService = null;
-    _mockImageClassifierService = null;
     _mockSettingsService = null;
     _mockStorageService = null;
   }
@@ -94,7 +85,6 @@ class TestServiceSetup {
     getPhotoService();
     getAiService();
     getDiaryService();
-    getImageClassifierService();
     getSettingsService();
     getStorageService();
   }
@@ -199,17 +189,6 @@ class TestServiceSetup {
     return mock;
   }
 
-  static MockImageClassifierService _createImageClassifierServiceMock() {
-    final mock = MockImageClassifierService();
-    
-    // Default mock behavior for ImageClassifierService
-    // Note: Setup basic mocks that are commonly used, specific tests can override these
-    when(() => mock.loadModel()).thenAnswer((_) async {});
-    when(() => mock.classifyAsset(any(), maxResults: any(named: 'maxResults')))
-        .thenAnswer((_) async => ['object', 'scene', 'activity']);
-    
-    return mock;
-  }
 
   static MockSettingsService _createSettingsServiceMock() {
     final mock = MockSettingsService();

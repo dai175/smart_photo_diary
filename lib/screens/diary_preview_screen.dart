@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
-import '../services/image_classifier_service.dart';
 import '../services/ai/ai_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
@@ -27,7 +26,6 @@ class DiaryPreviewScreen extends StatefulWidget {
 }
 
 class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
-  late final ImageClassifierService _imageClassifier;
   late final AiServiceInterface _aiService;
   late final PhotoServiceInterface _photoService;
 
@@ -52,7 +50,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     _contentController = TextEditingController();
     
     // サービスロケータからサービスを取得
-    _imageClassifier = ServiceRegistration.get<ImageClassifierService>();
     _aiService = ServiceRegistration.get<AiServiceInterface>();
     _photoService = ServiceRegistration.get<PhotoServiceInterface>();
     
@@ -61,7 +58,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
   @override
   void dispose() {
-    _imageClassifier.dispose();
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();

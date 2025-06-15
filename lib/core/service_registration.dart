@@ -7,7 +7,6 @@ import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
-import '../services/image_classifier_service.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -64,10 +63,6 @@ class ServiceRegistration {
       () => StorageService.getInstance()
     );
     
-    // ImageClassifierService (no dependencies)
-    serviceLocator.registerFactory<ImageClassifierService>(
-      () => ImageClassifierService()
-    );
     
     // AiService (no dependencies for interface)
     serviceLocator.registerFactory<AiServiceInterface>(

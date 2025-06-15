@@ -9,7 +9,6 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
-import 'package:smart_photo_diary/services/image_classifier_service.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import '../mocks/mock_services.dart';
@@ -74,19 +73,17 @@ class IntegrationTestHelpers {
     
     // Create additional required mock services
     final mockDiaryService = MockDiaryServiceInterface();
-    final mockImageClassifierService = MockImageClassifierService();
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
     
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
-    _setupAdditionalMockBehaviors(mockDiaryService, mockImageClassifierService, mockSettingsService, mockStorageService);
+    _setupAdditionalMockBehaviors(mockDiaryService, mockSettingsService, mockStorageService);
     
     // Register all mock services
     _serviceLocator.registerSingleton<PhotoServiceInterface>(_mockPhotoService);
     _serviceLocator.registerSingleton<AiServiceInterface>(_mockAiService);
     _serviceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
-    _serviceLocator.registerSingleton<ImageClassifierService>(mockImageClassifierService);
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<StorageService>(mockStorageService);
   }
@@ -304,7 +301,6 @@ class IntegrationTestHelpers {
   /// Setup additional mock service behaviors
   static void _setupAdditionalMockBehaviors(
     MockDiaryServiceInterface mockDiaryService,
-    MockImageClassifierService mockImageClassifierService,
     MockSettingsService mockSettingsService,
     MockStorageService mockStorageService,
   ) {
@@ -317,8 +313,6 @@ class IntegrationTestHelpers {
     when(() => mockDiaryService.getDiaryEntry(any())).thenAnswer((_) async => null);
     when(() => mockDiaryService.getTagsForEntry(any())).thenAnswer((_) async => []);
     
-    // Image classifier defaults - basic mock setup
-    when(() => mockImageClassifierService.classifyImage(any())).thenAnswer((_) async => []);
     
     // Settings service defaults - basic mock setup
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
