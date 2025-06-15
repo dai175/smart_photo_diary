@@ -748,11 +748,17 @@ class SubscriptionService implements ISubscriptionService {
         return const Success(true); // Basicプランでも基本プロンプトは利用可能
       }
       
-      // Premiumプランは全プロンプトにアクセス可能（有効期限チェック）
+      // Premiumプランの場合
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint('SubscriptionService: Writing prompts access - Premium plan, valid: $isPremiumValid');
-      
-      return Success(isPremiumValid);
+      if (isPremiumValid) {
+        // 有効なPremiumプランは全プロンプトにアクセス可能
+        debugPrint('SubscriptionService: Writing prompts access - Premium plan, valid: $isPremiumValid');
+        return const Success(true);
+      } else {
+        // 期限切れ・非アクティブなPremiumプランでも基本プロンプトアクセスは可能
+        debugPrint('SubscriptionService: Writing prompts access - Premium plan expired/inactive, basic access only');
+        return const Success(true);
+      }
     } catch (e) {
       debugPrint('SubscriptionService: Error checking writing prompts access - $e');
       return Failure(ServiceException('Failed to check writing prompts access', details: e.toString()));
