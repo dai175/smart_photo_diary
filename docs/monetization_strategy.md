@@ -186,9 +186,9 @@ Smart Photo Diaryは、以下の2つのプランを提供します：
   - [✅] 1.2.2.2 build_runner実行
   - [✅] 1.2.2.3 main.dartでアダプター登録
 
-- [ ] **1.2.3 Service Registration準備**
-  - [ ] 1.2.3.1 service_registration.dartに登録準備
-  - [ ] 1.2.3.2 初期化順序検討・設計
+- [✅] **1.2.3 Service Registration準備**
+  - [✅] 1.2.3.1 service_registration.dartに登録準備
+  - [✅] 1.2.3.2 初期化順序検討・設計
 
 #### 1.3 SubscriptionService基本実装
 - [ ] **1.3.1 シングルトンパターン実装**

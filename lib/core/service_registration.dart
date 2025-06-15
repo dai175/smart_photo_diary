@@ -7,12 +7,32 @@ import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
+// TODO: Phase 1.3で有効化
+// import '../services/interfaces/subscription_service_interface.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
 /// 
 /// This class handles the registration of all services in the ServiceLocator.
 /// It provides a centralized place to configure dependency injection.
+/// 
+/// ## Service Initialization Order
+/// 
+/// ### Phase 1: Core Services (No Dependencies)
+/// 1. PhotoService - 写真アクセス機能
+/// 2. SettingsService - アプリ設定管理
+/// 3. StorageService - ストレージ操作
+/// 4. AiService - AI日記生成
+/// 5. SubscriptionService - サブスクリプション管理 (Phase 1.3で追加予定)
+/// 
+/// ### Phase 2: Dependent Services
+/// 1. DiaryService - 日記管理（AiService, PhotoServiceに依存）
+/// 
+/// ## Subscription Service Dependencies
+/// - **直接依存**: Hive (データ永続化)
+/// - **間接依存**: なし
+/// - **登録場所**: Core Services (_registerCoreServices)
+/// - **登録タイプ**: AsyncFactory (Hive初期化が必要)
 class ServiceRegistration {
   static bool _isInitialized = false;
   
@@ -68,6 +88,12 @@ class ServiceRegistration {
     serviceLocator.registerFactory<AiServiceInterface>(
       () => AiService()
     );
+    
+    // TODO: Phase 1.3で実装予定
+    // SubscriptionService (Hive依存のみ - コアサービス)
+    // serviceLocator.registerAsyncFactory<ISubscriptionService>(
+    //   () => SubscriptionService.getInstance()
+    // );
   }
   
   /// Register services that have dependencies on other services
