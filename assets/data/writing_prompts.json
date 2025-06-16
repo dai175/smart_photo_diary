@@ -1,0 +1,600 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-12-16T00:00:00.000Z",
+  "description": "Smart Photo Diary - Writing Prompts for Premium Feature",
+  "totalPrompts": 59,
+  "basicPrompts": 5,
+  "premiumPrompts": 54,
+  "prompts": [
+    {
+      "id": "basic_daily_001",
+      "text": "今日一番印象に残った瞬間は何でしたか？",
+      "category": "daily",
+      "isPremiumOnly": false,
+      "tags": ["日常", "印象", "瞬間", "今日"],
+      "description": "日常の中で心に残った特別な瞬間を振り返る基本的なプロンプト",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "basic_daily_002",
+      "text": "今日の気持ちを一言で表すとしたら何ですか？",
+      "category": "daily",
+      "isPremiumOnly": false,
+      "tags": ["日常", "気持ち", "感情", "今日"],
+      "description": "感情を言語化することで自己理解を促進する",
+      "priority": 75,
+      "isActive": true
+    },
+    {
+      "id": "basic_daily_003",
+      "text": "今日発見した小さな良いことは何ですか？",
+      "category": "daily",
+      "isPremiumOnly": false,
+      "tags": ["日常", "発見", "良いこと", "小さな幸せ"],
+      "description": "日常の小さな喜びに注目してポジティブ思考を育成",
+      "priority": 70,
+      "isActive": true
+    },
+    {
+      "id": "basic_gratitude_001",
+      "text": "今日感謝したい人は誰ですか？なぜですか？",
+      "category": "gratitude",
+      "isPremiumOnly": false,
+      "tags": ["感謝", "人", "大切", "ありがとう"],
+      "description": "具体的な感謝の対象を明確にして関係性を深める",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "basic_gratitude_002",
+      "text": "今日あって良かったと思うことは何ですか？",
+      "category": "gratitude",
+      "isPremiumOnly": false,
+      "tags": ["感謝", "幸せ", "良かった", "恵み"],
+      "description": "日常の恵みに気づき感謝の気持ちを育む",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_001",
+      "text": "今日経験したことの中で、5年後の自分にとって重要だと思うことは何ですか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "将来", "重要", "成長", "価値"],
+      "description": "日常の出来事を長期的視点で捉え直す深い内省プロンプト",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_002",
+      "text": "今日の自分を色で表現するとしたら何色ですか？その理由も教えてください。",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "色", "表現", "感情", "創造性"],
+      "description": "感情を色という抽象的概念で表現する創造的プロンプト",
+      "priority": 75,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_003",
+      "text": "今日一番集中していた時間は何をしている時でしたか？その時の気持ちはどうでしたか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "集中", "フロー", "気持ち", "体験"],
+      "description": "フロー状態の体験を記録して充実感を深める",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_004",
+      "text": "今日学んだ新しいことや気づきはありますか？それはどのように役立ちそうですか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "学び", "気づき", "成長", "応用"],
+      "description": "日常の学びを意識化して成長を促進する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_005",
+      "text": "今日の自分が昨日の自分より成長した点はありますか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "成長", "変化", "進歩", "比較"],
+      "description": "継続的な自己成長の実感を促進する",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_006",
+      "text": "今日出会った人やものとの関わりで、心が動いた瞬間はありましたか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "出会い", "心", "関わり", "感動"],
+      "description": "人間関係や新しい体験への感受性を高める",
+      "priority": 75,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_007",
+      "text": "今日の一日を振り返って、自分らしいと感じた行動や選択はありますか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "自分らしさ", "行動", "選択", "アイデンティティ"],
+      "description": "自己一貫性の確認と自己理解の深化",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_daily_008",
+      "text": "今日感じたストレスや不安があるとすれば、それを乗り越えるために何ができそうですか？",
+      "category": "daily",
+      "isPremiumOnly": true,
+      "tags": ["日常", "ストレス", "不安", "乗り越える", "対処"],
+      "description": "困難への対処法を考え問題解決能力を育成する",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_travel_001",
+      "text": "この場所で五感で感じたことを詳しく記録してみませんか？",
+      "category": "travel",
+      "isPremiumOnly": true,
+      "tags": ["旅行", "五感", "体験", "記録", "詳細"],
+      "description": "旅行体験を五感を通して鮮明に記録する",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_travel_002",
+      "text": "地元の人との交流で印象に残った話や体験はありますか？",
+      "category": "travel",
+      "isPremiumOnly": true,
+      "tags": ["旅行", "地元", "交流", "文化", "体験"],
+      "description": "文化的交流の価値と学びを記録する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_travel_003",
+      "text": "この旅行で予期していなかった発見や驚きは何でしたか？",
+      "category": "travel",
+      "isPremiumOnly": true,
+      "tags": ["旅行", "発見", "驚き", "予期しない", "学び"],
+      "description": "予期しない体験の価値を記録し学びを深める",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_travel_004",
+      "text": "この場所の雰囲気や文化が、自分の価値観や考え方に与えた影響はありますか？",
+      "category": "travel",
+      "isPremiumOnly": true,
+      "tags": ["旅行", "文化", "価値観", "影響", "変化"],
+      "description": "旅行による内的変化と成長を記録する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_travel_005",
+      "text": "帰宅後もこの旅行の経験をどのように活かしていきたいですか？",
+      "category": "travel",
+      "isPremiumOnly": true,
+      "tags": ["旅行", "経験", "活かす", "将来", "応用"],
+      "description": "旅行体験を日常生活に統合する方法を考える",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_travel_006",
+      "text": "この旅行で撮った写真の中で一番思い出深いものはどれですか？その理由は？",
+      "category": "travel",
+      "isPremiumOnly": true,
+      "tags": ["旅行", "写真", "思い出", "記録", "意味"],
+      "description": "写真と記憶を結びつけて思い出を鮮明に保存する",
+      "priority": 75,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_001",
+      "text": "今日の仕事で一番やりがいを感じた瞬間はいつでしたか？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "やりがい", "達成感", "瞬間", "満足"],
+      "description": "仕事の意義と価値を実感する瞬間を記録する",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_002",
+      "text": "今日解決した課題から学んだことは何ですか？次回どう活かせますか？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "課題", "解決", "学び", "応用"],
+      "description": "問題解決からの学びを明確化し将来に活かす",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_003",
+      "text": "今日チームメンバーとの協力で印象的だったことはありますか？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "チーム", "協力", "関係性", "連携"],
+      "description": "チームワークの価値と協力関係を振り返る",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_004",
+      "text": "今日身につけたスキルや知識は将来のキャリアにどう役立ちそうですか？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "スキル", "知識", "キャリア", "成長"],
+      "description": "専門的成長を長期的視点で捉える",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_005",
+      "text": "今日の仕事を通じて、自分が提供できた価値は何ですか？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "価値", "貢献", "成果", "影響"],
+      "description": "自分の仕事の価値と社会的意義を認識する",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_006",
+      "text": "今日直面した困難をどのように乗り越えましたか？その過程で得たものは？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "困難", "乗り越える", "過程", "成長"],
+      "description": "困難克服の過程を記録し成長を実感する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_work_007",
+      "text": "今日の仕事で感じた責任感や使命感はどのようなものでしたか？",
+      "category": "work",
+      "isPremiumOnly": true,
+      "tags": ["仕事", "責任感", "使命感", "意識", "役割"],
+      "description": "職業的アイデンティティと使命感を明確化する",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_gratitude_001",
+      "text": "困難な状況の中でも感謝できることはありますか？それはなぜですか？",
+      "category": "gratitude",
+      "isPremiumOnly": true,
+      "tags": ["感謝", "困難", "逆境", "学び", "成長"],
+      "description": "逆境の中からも感謝の視点を見つける深い感謝練習",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_gratitude_002",
+      "text": "自分自身の成長や変化について、感謝したいことはありますか？",
+      "category": "gratitude",
+      "isPremiumOnly": true,
+      "tags": ["感謝", "成長", "変化", "自分", "進歩"],
+      "description": "自己成長への感謝を通して自己肯定感を高める",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_gratitude_003",
+      "text": "今日の環境や状況で当たり前だと思っているけれど、実は恵まれていることは何ですか？",
+      "category": "gratitude",
+      "isPremiumOnly": true,
+      "tags": ["感謝", "当たり前", "恵み", "環境", "気づき"],
+      "description": "当たり前の恵みに気づき感謝の視点を広げる",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_gratitude_004",
+      "text": "過去の経験で、今になって感謝できるようになったことはありますか？",
+      "category": "gratitude",
+      "isPremiumOnly": true,
+      "tags": ["感謝", "過去", "経験", "時間", "理解"],
+      "description": "時間の経過による理解の深化と感謝の発見",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_gratitude_005",
+      "text": "今日受けた小さな親切や思いやりで心が温かくなったことはありますか？",
+      "category": "gratitude",
+      "isPremiumOnly": true,
+      "tags": ["感謝", "親切", "思いやり", "温かい", "人間性"],
+      "description": "人間の優しさへの感謝を記録し人への信頼を深める",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_gratitude_006",
+      "text": "未来への希望や可能性について、どんなことに感謝していますか？",
+      "category": "gratitude",
+      "isPremiumOnly": true,
+      "tags": ["感謝", "未来", "希望", "可能性", "展望"],
+      "description": "未来への感謝を通して前向きな気持ちを育む",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_001",
+      "text": "自分の価値観の中で一番大切にしているものは何ですか？それはなぜですか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "価値観", "大切", "理由", "信念"],
+      "description": "核となる価値観の明確化と理由の探求",
+      "priority": 95,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_002",
+      "text": "最近自分が変化したと感じることはありますか？その変化をどう思いますか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "変化", "成長", "自己認識", "評価"],
+      "description": "自己変化の認識と評価を通して成長を実感する",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_003",
+      "text": "人生で一番影響を受けた出来事や人について振り返ってみませんか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "影響", "出来事", "人", "人生"],
+      "description": "人生の転換点や重要な影響を振り返る",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_004",
+      "text": "自分の強みと弱みについて、最近気づいたことはありますか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "強み", "弱み", "気づき", "自己理解"],
+      "description": "自己理解を深めて強みを活かし弱みを改善する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_005",
+      "text": "理想の自分と現在の自分の違いは何ですか？どうすれば近づけそうですか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "理想", "現在", "違い", "目標"],
+      "description": "理想と現実のギャップを認識し改善への道筋を考える",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_006",
+      "text": "最近した重要な決断について振り返ってみませんか？その判断基準は何でしたか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "決断", "判断", "基準", "選択"],
+      "description": "意思決定プロセスを振り返り判断力を向上させる",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_007",
+      "text": "過去の失敗や挫折から学んだ一番大きな教訓は何ですか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "失敗", "挫折", "教訓", "学び"],
+      "description": "困難な経験からの学びを明確化し成長につなげる",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_reflection_008",
+      "text": "10年後の自分はどんな人になっていたいですか？そのために今何ができますか？",
+      "category": "reflection",
+      "isPremiumOnly": true,
+      "tags": ["振り返り", "将来", "目標", "行動", "計画"],
+      "description": "長期的ビジョンを描き現在の行動につなげる",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_creative_001",
+      "text": "この写真からどんな物語を想像できますか？自由に創作してみてください。",
+      "category": "creative",
+      "isPremiumOnly": true,
+      "tags": ["創作", "物語", "想像", "自由", "表現"],
+      "description": "写真を起点とした創造的ストーリーテリング",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_creative_002",
+      "text": "もしこの瞬間に魔法が使えるとしたら、何をしてみたいですか？",
+      "category": "creative",
+      "isPremiumOnly": true,
+      "tags": ["創作", "魔法", "想像", "願望", "ファンタジー"],
+      "description": "制約のない想像力を解放する創造的プロンプト",
+      "priority": 75,
+      "isActive": true
+    },
+    {
+      "id": "premium_creative_003",
+      "text": "この場面を詩や短歌で表現するとしたら、どんな言葉が浮かびますか？",
+      "category": "creative",
+      "isPremiumOnly": true,
+      "tags": ["創作", "詩", "短歌", "言葉", "表現"],
+      "description": "感情や体験を詩的言語で表現する練習",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_creative_004",
+      "text": "この写真の10年後、100年後の未来を想像して描写してみませんか？",
+      "category": "creative",
+      "isPremiumOnly": true,
+      "tags": ["創作", "未来", "想像", "時間", "変化"],
+      "description": "時間の流れを想像し未来を創造的に描く",
+      "priority": 75,
+      "isActive": true
+    },
+    {
+      "id": "premium_creative_005",
+      "text": "この体験を絵画、音楽、舞踊で表現するとしたら、どんな作品になりそうですか？",
+      "category": "creative",
+      "isPremiumOnly": true,
+      "tags": ["創作", "絵画", "音楽", "舞踊", "芸術"],
+      "description": "体験を多様な芸術形式で表現する創造性の拡張",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_creative_006",
+      "text": "この写真に写っていないものの中で、一番重要だと思うものは何ですか？",
+      "category": "creative",
+      "isPremiumOnly": true,
+      "tags": ["創作", "想像", "隠れた", "重要", "視点"],
+      "description": "見えないものを想像し多角的視点を育成する",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_wellness_001",
+      "text": "今日の身体の状態はどうですか？どんなサインを感じますか？",
+      "category": "wellness",
+      "isPremiumOnly": true,
+      "tags": ["健康", "身体", "状態", "サイン", "意識"],
+      "description": "身体の声に耳を傾け健康意識を高める",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_wellness_002",
+      "text": "今日の心の状態を天気に例えるとしたら何ですか？その理由は？",
+      "category": "wellness",
+      "isPremiumOnly": true,
+      "tags": ["健康", "心", "天気", "比喩", "感情"],
+      "description": "感情状態を比喩で表現し内面を客観視する",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_wellness_003",
+      "text": "最近の睡眠や食事、運動について振り返ってみませんか？改善したいことはありますか？",
+      "category": "wellness",
+      "isPremiumOnly": true,
+      "tags": ["健康", "睡眠", "食事", "運動", "改善"],
+      "description": "基本的な健康習慣を振り返り改善点を見つける",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_wellness_004",
+      "text": "今日ストレスを感じた場面があれば、どのように対処しましたか？",
+      "category": "wellness",
+      "isPremiumOnly": true,
+      "tags": ["健康", "ストレス", "対処", "管理", "方法"],
+      "description": "ストレス管理方法を振り返り改善する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_wellness_005",
+      "text": "心身のバランスを整えるために、今一番必要だと思うことは何ですか？",
+      "category": "wellness",
+      "isPremiumOnly": true,
+      "tags": ["健康", "バランス", "心身", "必要", "整える"],
+      "description": "ホリスティックな健康観でバランスを考える",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_wellness_006",
+      "text": "今日リラックスできた瞬間はいつでしたか？その時何を感じましたか？",
+      "category": "wellness",
+      "isPremiumOnly": true,
+      "tags": ["健康", "リラックス", "瞬間", "感覚", "癒し"],
+      "description": "リラクゼーションの体験を記録し再現性を高める",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_001",
+      "text": "今日大切な人との時間で印象深かった会話はありますか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "会話", "大切な人", "印象", "時間"],
+      "description": "meaningful conversationを振り返り関係性を深める",
+      "priority": 90,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_002",
+      "text": "最近誰かに対して感じた感謝や愛情を具体的に表現してみませんか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "感謝", "愛情", "表現", "具体的"],
+      "description": "感情を言語化し関係性の価値を認識する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_003",
+      "text": "今日誰かを理解しようと努力した瞬間はありましたか？どんな発見がありましたか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "理解", "努力", "発見", "共感"],
+      "description": "他者理解への努力と共感能力の向上を記録する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_004",
+      "text": "最近のコミュニケーションで学んだことや改善したいことはありますか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "コミュニケーション", "学び", "改善", "スキル"],
+      "description": "コミュニケーション能力の向上を目指す振り返り",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_005",
+      "text": "今日誰かの支えになったり、逆に支えられたりした経験はありますか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "支え", "相互", "経験", "絆"],
+      "description": "相互支援の体験を通して絆の深さを実感する",
+      "priority": 85,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_006",
+      "text": "新しく出会った人や深まった関係性について、どんな変化を感じますか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "出会い", "関係性", "変化", "成長"],
+      "description": "人間関係の発展と変化を記録し関係性を大切にする",
+      "priority": 80,
+      "isActive": true
+    },
+    {
+      "id": "premium_relationships_007",
+      "text": "人との関わりの中で今日一番温かい気持ちになったのはどんな時でしたか？",
+      "category": "relationships",
+      "isPremiumOnly": true,
+      "tags": ["人間関係", "温かい", "気持ち", "関わり", "感動"],
+      "description": "人間の温かさを実感し人への信頼を深める",
+      "priority": 85,
+      "isActive": true
+    }
+  ]
+}
