@@ -24,13 +24,16 @@ void main() {
       TestWidgetsFlutterBinding.ensureInitialized();
       
       // SharedPreferencesのプラットフォームチャンネルをモック
-      const MethodChannel('plugins.flutter.io/shared_preferences')
-          .setMockMethodCallHandler((MethodCall methodCall) async {
-        if (methodCall.method == 'getAll') {
-          return <String, Object>{}; // 空の設定を返す
-        }
-        return null;
-      });
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/shared_preferences'),
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'getAll') {
+            return <String, Object>{}; // 空の設定を返す
+          }
+          return null;
+        },
+      );
       
       // ServiceLocatorのリセット
       ServiceLocator().clear();
