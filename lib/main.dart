@@ -6,6 +6,7 @@ import 'config/environment_config.dart';
 import 'constants/app_constants.dart';
 import 'models/diary_entry.dart';
 import 'models/subscription_status.dart';
+import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
 import 'core/service_registration.dart';
@@ -22,6 +23,9 @@ Future<void> main() async {
   // アダプターの登録
   Hive.registerAdapter(DiaryEntryAdapter());
   Hive.registerAdapter(SubscriptionStatusAdapter());
+  Hive.registerAdapter(PromptCategoryAdapter());
+  Hive.registerAdapter(WritingPromptAdapter());
+  Hive.registerAdapter(PromptUsageHistoryAdapter());
 
   // 環境変数の初期化
   await EnvironmentConfig.initialize();
