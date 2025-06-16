@@ -46,7 +46,7 @@ class AiService implements AiServiceInterface {
         // 月次リセット処理統合 (Phase 1.7.1.4)
         await _subscriptionService.resetMonthlyUsageIfNeeded();
         
-        // プラン別制限チェック（Basic: 10回、Premium: 100回）
+        // プラン別制限チェック（制限値はSubscriptionConstantsで管理）
         final canUseResult = await _subscriptionService.canUseAiGeneration();
         if (canUseResult.isFailure) {
           return Failure(canUseResult.error);
@@ -109,7 +109,7 @@ class AiService implements AiServiceInterface {
         // 月次リセット処理統合 (Phase 1.7.1.4)
         await _subscriptionService.resetMonthlyUsageIfNeeded();
         
-        // プラン別制限チェック（Basic: 10回、Premium: 100回）
+        // プラン別制限チェック（制限値はSubscriptionConstantsで管理）
         final canUseResult = await _subscriptionService.canUseAiGeneration();
         if (canUseResult.isFailure) {
           return Failure(canUseResult.error);

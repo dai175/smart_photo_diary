@@ -16,6 +16,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
+import '../models/subscription_plan.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -275,9 +276,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       final remainingResult = await subscriptionService.getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
       
-      final planName = planResult.isSuccess ? planResult.value.name : 'Basic';
+      final plan = planResult.isSuccess ? planResult.value : SubscriptionPlan.basic;
       final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
-      final limit = planName == 'Basic' ? 10 : 100;
+      final limit = plan.monthlyAiGenerationLimit;
       final nextResetDate = resetDateResult.isSuccess ? resetDateResult.value : DateTime.now().add(const Duration(days: 30));
       
       if (mounted) {
@@ -285,7 +286,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           context: context,
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
-            planName: planName,
+            planName: plan.name,
             remaining: remaining,
             limit: limit,
             nextResetDate: nextResetDate,

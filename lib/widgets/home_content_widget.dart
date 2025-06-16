@@ -261,7 +261,7 @@ class HomeContentWidget extends StatelessWidget {
       final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final nextResetDate = resetDateResult.isSuccess ? resetDateResult.value : DateTime.now().add(const Duration(days: 30));
       
-      final limit = plan.name == 'Basic' ? 10 : 100;
+      final limit = plan.monthlyAiGenerationLimit;
       final used = limit - remaining;
       
       if (context.mounted) {

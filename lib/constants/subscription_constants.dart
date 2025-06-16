@@ -129,8 +129,8 @@ class SubscriptionConstants {
   // ========================================
   
   /// Basic プランの機能リスト
-  static const List<String> basicFeatures = [
-    '月10回までのAI日記生成',
+  static final List<String> basicFeatures = [
+    '月$basicMonthlyAiLimit回までのAI日記生成',
     '写真選択・保存機能（最大3枚）',
     '基本的な検索・フィルタ',
     'ローカルストレージ',
@@ -139,8 +139,8 @@ class SubscriptionConstants {
   ];
   
   /// Premium プランの機能リスト
-  static const List<String> premiumFeatures = [
-    '月100回までのAI日記生成',
+  static final List<String> premiumFeatures = [
+    '月$premiumMonthlyAiLimit回までのAI日記生成',
     'ライティングプロンプト機能',
     '高度なフィルタ・検索機能',
     'タグベース検索',

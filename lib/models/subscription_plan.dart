@@ -6,21 +6,21 @@ import '../constants/subscription_constants.dart';
 /// このenumは価格、機能制限、機能フラグを管理します。
 enum SubscriptionPlan {
   /// Basic プラン（無料）
-  /// - 月10回までのAI生成
   /// - 基本機能のみ
+  /// - 制限値はSubscriptionConstantsで管理
   basic,
   
   /// Premium 月額プラン（有料）
-  /// - 月100回までのAI生成
   /// - ライティングプロンプト機能
   /// - 高度なフィルタ・検索機能
+  /// - 制限値はSubscriptionConstantsで管理
   premiumMonthly,
   
   /// Premium 年額プラン（有料・お得）
-  /// - 月100回までのAI生成
   /// - ライティングプロンプト機能
   /// - 高度なフィルタ・検索機能
   /// - 年額割引（22%OFF）
+  /// - 制限値はSubscriptionConstantsで管理
   premiumYearly;
 
   /// プランID（文字列識別子）

@@ -3,6 +3,7 @@ import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
 import '../animations/micro_interactions.dart';
+import '../../constants/subscription_constants.dart';
 
 /// カスタムダイアログウィジェット
 /// Smart Photo Diaryアプリのデザインシステムに合わせたモーダル
@@ -436,7 +437,7 @@ class PresetDialogs {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Premiumプランにアップグレードすると、月間100回まで生成できます。',
+            'Premiumプランにアップグレードすると、月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで生成できます。',
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w500,
@@ -587,7 +588,7 @@ class PresetDialogs {
           if (planName == 'Basic') ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Premiumプランなら月間100回まで利用できます',
+              'Premiumプランなら月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用できます',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w500,
