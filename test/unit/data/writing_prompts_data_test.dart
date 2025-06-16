@@ -9,6 +9,9 @@ void main() {
     late List<WritingPrompt> allPrompts;
     
     setUpAll(() async {
+      // Flutter バインディングを初期化
+      TestWidgetsFlutterBinding.ensureInitialized();
+      
       // JSONファイルを読み込み
       final String jsonString = await rootBundle.loadString('assets/data/writing_prompts.json');
       promptsData = json.decode(jsonString);
@@ -145,7 +148,11 @@ void main() {
         
         // 疑問符で終わるプロンプトが多いことを確認（ただし必須ではない）
         if (prompt.text.contains('？') || prompt.text.contains('ですか')) {
-          expect(prompt.text, anyOf(endsWith('？'), endsWith('ですか？')));
+          expect(prompt.text, anyOf(
+            endsWith('？'), 
+            endsWith('ですか？'),
+            endsWith('。') // 「ですか？その理由も教えてください。」のような形式も許可
+          ));
         }
         
         // 説明の長さチェック
