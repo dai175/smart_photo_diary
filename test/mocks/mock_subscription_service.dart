@@ -141,6 +141,12 @@ class MockSubscriptionService implements ISubscriptionService {
     _expiryDate = date;
     _statusUpdates.add(_currentStatus);
   }
+
+  /// テスト用: 自動更新設定
+  void setAutoRenewal(bool autoRenewal) {
+    _autoRenewal = autoRenewal;
+    _statusUpdates.add(_currentStatus);
+  }
   
   /// テスト用: 全状態をリセット
   void resetToDefaults() {
