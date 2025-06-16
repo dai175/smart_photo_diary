@@ -4,10 +4,13 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 
 /// Mock PhotoService for integration testing
@@ -19,6 +22,8 @@ class MockAiServiceInterface extends Mock implements AiServiceInterface {}
 /// Mock DiaryService for integration testing
 class MockDiaryServiceInterface extends Mock implements DiaryServiceInterface {}
 
+/// Mock SubscriptionService for integration testing
+class MockSubscriptionServiceInterface extends Mock implements ISubscriptionService {}
 
 /// Mock SettingsService for integration testing
 class MockSettingsService extends Mock implements SettingsService {}
@@ -232,5 +237,17 @@ void registerMockFallbacks() {
     photoIds: [],
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
+  ));
+  registerFallbackValue(SubscriptionPlan.basic);
+  registerFallbackValue(SubscriptionStatus(
+    planId: 'basic',
+    isActive: true,
+    startDate: DateTime.now(),
+    expiryDate: null,
+    monthlyUsageCount: 0,
+    lastResetDate: DateTime.now(),
+    autoRenewal: false,
+    transactionId: null,
+    lastPurchaseDate: null,
   ));
 }

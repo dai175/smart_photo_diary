@@ -5,11 +5,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import '../mocks/mock_services.dart';
@@ -74,17 +77,19 @@ class IntegrationTestHelpers {
     
     // Create additional required mock services
     final mockDiaryService = MockDiaryServiceInterface();
+    final mockSubscriptionService = MockSubscriptionServiceInterface();
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
     
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
-    _setupAdditionalMockBehaviors(mockDiaryService, mockSettingsService, mockStorageService);
+    _setupAdditionalMockBehaviors(mockDiaryService, mockSubscriptionService, mockSettingsService, mockStorageService);
     
     // Register all mock services
     _serviceLocator.registerSingleton<PhotoServiceInterface>(_mockPhotoService);
     _serviceLocator.registerSingleton<AiServiceInterface>(_mockAiService);
     _serviceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
+    _serviceLocator.registerSingleton<ISubscriptionService>(mockSubscriptionService);
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<StorageService>(mockStorageService);
   }
@@ -302,6 +307,7 @@ class IntegrationTestHelpers {
   /// Setup additional mock service behaviors
   static void _setupAdditionalMockBehaviors(
     MockDiaryServiceInterface mockDiaryService,
+    MockSubscriptionServiceInterface mockSubscriptionService,
     MockSettingsService mockSettingsService,
     MockStorageService mockStorageService,
   ) {
@@ -314,6 +320,27 @@ class IntegrationTestHelpers {
     when(() => mockDiaryService.getDiaryEntry(any())).thenAnswer((_) async => null);
     when(() => mockDiaryService.getTagsForEntry(any())).thenAnswer((_) async => []);
     
+    // Subscription service defaults - basic mock setup
+    when(() => mockSubscriptionService.isInitialized).thenReturn(true);
+    when(() => mockSubscriptionService.initialize()).thenAnswer((_) async => const Success(null));
+    when(() => mockSubscriptionService.getCurrentStatus()).thenAnswer((_) async => Success(
+      SubscriptionStatus(
+        planId: 'basic',
+        isActive: true,
+        startDate: DateTime.now(),
+        expiryDate: null,
+        monthlyUsageCount: 0,
+        lastResetDate: DateTime.now(),
+        autoRenewal: false,
+        transactionId: null,
+        lastPurchaseDate: null,
+      ),
+    ));
+    when(() => mockSubscriptionService.getCurrentPlan()).thenAnswer((_) async => const Success(SubscriptionPlan.basic));
+    when(() => mockSubscriptionService.canUseAiGeneration()).thenAnswer((_) async => const Success(true));
+    when(() => mockSubscriptionService.getRemainingGenerations()).thenAnswer((_) async => const Success(10));
+    when(() => mockSubscriptionService.getMonthlyUsage()).thenAnswer((_) async => const Success(0));
+    when(() => mockSubscriptionService.getNextResetDate()).thenAnswer((_) async => Success(DateTime.now().add(const Duration(days: 30))));
     
     // Settings service defaults - basic mock setup
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);

@@ -388,16 +388,17 @@ class PresetDialogs {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.warningContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-              border: Border.all(
-                color: AppColors.warning.withValues(alpha: 0.3),
-                width: 1,
+          Builder(
+            builder: (context) => Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
-            ),
             child: Column(
               children: [
                 Row(
@@ -405,7 +406,9 @@ class PresetDialogs {
                   children: [
                     Text(
                       '今月の残り回数:',
-                      style: AppTypography.labelMedium,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       '$remaining回',
@@ -422,17 +425,21 @@ class PresetDialogs {
                   children: [
                     Text(
                       'リセット日:',
-                      style: AppTypography.labelMedium,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       '${nextResetDate.month}月${nextResetDate.day}日',
                       style: AppTypography.labelMedium.copyWith(
                         fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
                 ),
               ],
+            ),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -491,12 +498,13 @@ class PresetDialogs {
           const SizedBox(height: AppSpacing.lg),
           
           // 使用量プログレスバー
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
+          Builder(
+            builder: (context) => Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
             child: Column(
               children: [
                 Row(
@@ -504,12 +512,15 @@ class PresetDialogs {
                   children: [
                     Text(
                       '使用量',
-                      style: AppTypography.labelMedium,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       '$used / $limit回',
                       style: AppTypography.labelLarge.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -520,7 +531,7 @@ class PresetDialogs {
                 Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: FractionallySizedBox(
@@ -541,7 +552,9 @@ class PresetDialogs {
                   children: [
                     Text(
                       '残り回数:',
-                      style: AppTypography.labelMedium,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       '$remaining回',
@@ -554,33 +567,36 @@ class PresetDialogs {
                 ),
               ],
             ),
+            ),
           ),
           
           const SizedBox(height: AppSpacing.md),
           
           // リセット情報
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: AppColors.infoContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppSpacing.xs),
-            ),
+          Builder(
+            builder: (context) => Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
+              ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.refresh_rounded,
                   size: AppSpacing.iconSm,
-                  color: AppColors.info,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   '${nextResetDate.month}月${nextResetDate.day}日にリセット',
                   style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.info,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ],
+            ),
             ),
           ),
           
