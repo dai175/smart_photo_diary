@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Smart Photo Diary is a Flutter mobile application that generates diary entries from photos using AI. The app operates completely offline with local storage and privacy-first design.
+Smart Photo Diary is a Flutter mobile application that generates diary entries from photos using AI. The app implements a freemium monetization model with Basic (free) and Premium subscription tiers. Core features include AI-powered diary generation, writing prompts, and complete offline functionality with privacy-first design.
 
 ## Development Commands
 
@@ -104,6 +104,7 @@ The app follows a service-oriented architecture with singleton services using la
 - **`SettingsService`**: App configuration stored in SharedPreferences with Result<T> pattern for write operations
 - **`StorageService`**: File system operations, data export functionality with user-selectable destinations, and database optimization
 - **`LoggingService`**: Structured logging with levels and performance monitoring
+- **`SubscriptionService`**: In-App Purchase integration for Premium subscriptions, implements `ISubscriptionService`
 
 ### Error Handling Architecture
 
@@ -134,7 +135,10 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 ### Data Models
 - **`DiaryEntry`**: Primary data model with Hive annotations for local storage
 - **`DiaryFilter`**: Filtering and search criteria for diary queries
-- Uses `build_runner` for generating Hive adapters (`diary_entry.g.dart`)
+- **`WritingPrompt`**: Writing prompt model with categories, tags, and Premium/Basic classification
+- **`SubscriptionPlan`**: Subscription plan definitions (Basic, Premium Monthly/Yearly)
+- **`SubscriptionStatus`**: Current subscription state with usage tracking
+- Uses `build_runner` for generating Hive adapters (`diary_entry.g.dart`, `writing_prompt.g.dart`)
 
 ### AI/ML Architecture
 - **On-device**: TensorFlow Lite MobileNet v2 model for image classification
@@ -146,6 +150,13 @@ The app implements a **Result<T> pattern** for functional error handling, provid
   - `OfflineFallbackService`: Offline mode diary generation
 - **Environment Management**: EnvironmentConfig provides robust API key management with validation
 - **Assets**: ML models bundled in `assets/models/` directory
+
+### Monetization Architecture
+- **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts)
+- **In-App Purchase Integration**: Uses `in_app_purchase` plugin for subscription management
+- **Usage Tracking**: AI generation counts with monthly reset functionality
+- **Writing Prompts System**: 59 curated prompts (5 Basic + 54 Premium) across 8 categories
+- **Plan Enforcement**: Feature access control based on subscription status
 
 ## Key Dependencies
 
@@ -163,6 +174,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `flutter_dotenv`: Environment variable management
 - `uuid`: Unique identifier generation for diary entries
 - `intl`: Internationalization and date formatting
+- `in_app_purchase`: Subscription and in-app purchase management
 
 ### Development
 - `build_runner` + `hive_generator`: Code generation for Hive adapters
@@ -187,6 +199,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 ### Assets
 - `assets/models/mobilenet_v2_1.0_224_quant.tflite`: TensorFlow Lite model
 - `assets/models/labels.txt`: Image classification labels
+- `assets/data/writing_prompts.json`: Writing prompts data with metadata and categorization
 
 ## Development Notes
 
@@ -255,16 +268,25 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 ### Service Dependencies
 Services follow a clear dependency hierarchy:
 - `DiaryService` → `AiService` (for background tag generation)
+- `AiService` → `SubscriptionService` (for usage limit checking)
 - `AiService` → Connectivity checking for online/offline modes
 - All services use dependency injection rather than tight coupling
 
+### Writing Prompts System
+- **Data Structure**: JSON file with 59 prompts across 8 categories (daily, travel, work, gratitude, reflection, creative, wellness, relationships)
+- **Plan Distribution**: Basic users get 5 prompts (daily + gratitude), Premium users get all 59
+- **Utility Classes**: `PromptCategoryUtils` for filtering, statistics, and plan-based access control
+- **Quality Assurance**: Comprehensive test suite validates data integrity, prompt counts, and categorization
+
 ### Testing Architecture
-The project follows a comprehensive 3-tier testing strategy with **100% success rate** (133 passing tests):
+The project follows a comprehensive 3-tier testing strategy with **100% success rate** (144+ passing tests):
 
 #### Unit Tests (`test/unit/`)
 - **Pure logic testing** with mocked dependencies using `mocktail`
 - **Service mock tests**: `*_service_mock_test.dart` files test service interfaces without external dependencies
 - **Core utilities**: Test dependency injection, Result<T> pattern, and utility functions
+- **Data validation**: Writing prompts data integrity tests with 12 test cases
+- **Subscription system**: Comprehensive tests for monetization features and usage tracking
 - **Enhanced robustness**: All PhotoSelectionController methods include boundary checking and input validation
 
 #### Widget Tests (`test/widget/`)
@@ -315,7 +337,9 @@ All user data stays on device. Hive database files are stored in app documents d
 ## Development Status
 
 ### Recent Achievements
-- **Perfect test coverage**: 133 tests with 100% success rate across unit, widget, and integration tests
+- **Perfect test coverage**: 144+ tests with 100% success rate across unit, widget, and integration tests
+- **Monetization implementation**: Complete freemium model with In-App Purchase integration
+- **Writing prompts system**: 59 curated prompts with 8-category classification and plan-based access
 - **Result<T> pattern implementation**: Comprehensive functional error handling system with complete test coverage
 - **Enhanced error handling**: Standardized exception hierarchy with structured logging
 - **Service architecture refactoring**: Implemented dependency injection with ServiceLocator pattern
@@ -334,12 +358,13 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Modal system enhancements**: Improved custom dialog design with proper theme integration
 
 ### Current Architecture State
-- **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging) are fully implemented and tested
+- **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging, Subscription) are fully implemented and tested
 - **Functional error handling**: Result<T> pattern implemented with complete utilities and test coverage
 - **Robust error handling**: Comprehensive offline fallbacks, error recovery mechanisms, and structured logging
 - **Performance optimized**: Lazy initialization, efficient caching, optimized database operations, and performance monitoring
 - **Platform support**: Multi-platform support with proper permission handling
 - **High code quality**: Clean, well-documented codebase with strict adherence to Flutter best practices and functional programming patterns
+- **Monetization ready**: Complete subscription system with usage tracking, plan enforcement, and premium feature access
 
 ### Current Implementation State of Result<T>
 - **✅ Core implementation**: Complete Result<T> pattern with comprehensive API and 100% test coverage
@@ -481,3 +506,30 @@ Storage optimization features include:
 - **StorageService.exportData()**: Returns file path or null, uses FilePicker.platform.saveFile()
 - **StorageService.optimizeDatabase()**: Calls DiaryService.compactDatabase() and cleanup methods
 - **StorageInfo class**: Provides formatted storage size calculations and breakdown by data type
+
+## Monetization Strategy
+
+### Current Implementation Status
+The app implements a **two-tier freemium model** with the following structure:
+
+#### Basic Plan (Free)
+- 10 AI diary generations per month
+- Access to 5 basic writing prompts (daily + gratitude categories)
+- Core app functionality without premium features
+
+#### Premium Plan (¥300/month, ¥2,800/year)
+- 100 AI diary generations per month  
+- Access to all 59 writing prompts across 8 categories
+- Advanced filtering and analytics features
+- 7-day free trial period
+
+### Technical Implementation
+- **Subscription Management**: Complete In-App Purchase integration via `SubscriptionService`
+- **Usage Tracking**: Monthly AI generation counters with automatic reset
+- **Feature Access Control**: Plan-based access enforcement throughout the app
+- **Data Management**: Writing prompts categorized and filtered by subscription status
+
+### Development Phases Completed
+- **Phase 1**: Core subscription infrastructure and In-App Purchase integration
+- **Phase 2.1**: Writing prompts data structure and content creation (59 prompts)
+- **Current Status**: Ready for Phase 2.2 (PromptService implementation)
