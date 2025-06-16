@@ -53,6 +53,88 @@ class SubscriptionInfo {
 
   /// プランの機能一覧
   List<String> get planFeatures => currentPlan.features;
+
+  // ============================================================================
+  // Phase 1.8.2.4: UI用データフォーマット実装
+  // ============================================================================
+
+  /// 設定画面用のプラン状態表示文字列（問題がある場合のみ表示）
+  String? get planStatusDisplay {
+    if (!isActive) return '無効';
+    if (isPremium && periodInfo.isExpiryNear) return '期限間近';
+    return null; // 正常な状態では何も表示しない
+  }
+
+  /// 設定画面用の期限表示文字列
+  String? get expiryDisplayText {
+    if (periodInfo.expiryDate == null) return null;
+    
+    final expiry = periodInfo.expiryDate!;
+    final daysUntil = periodInfo.daysUntilExpiry ?? 0;
+    
+    if (daysUntil <= 0) return '期限切れ';
+    if (daysUntil <= 7) return '${expiry.month}/${expiry.day} (あと$daysUntil日)';
+    return '${expiry.month}/${expiry.day}';
+  }
+
+  /// 設定画面用の自動更新状態表示
+  String get autoRenewalDisplayText {
+    if (!isPremium) return '対象外';
+    return autoRenewalInfo.isAutoRenewalEnabled ? '有効' : '無効';
+  }
+
+  /// 設定画面用の使用量警告メッセージ
+  String? get usageWarningMessage {
+    if (usageStats.isNearLimit) {
+      final remaining = usageStats.remainingCount;
+      if (remaining == 0) return 'AI生成の制限に達しました';
+      return 'AI生成の残り回数が$remaining回です';
+    }
+    return null;
+  }
+
+  /// 設定画面用のプラン推奨メッセージ
+  String? get planRecommendationMessage {
+    if (isPremium) return null;
+    
+    final usageRate = usageStats.usageRate;
+    if (usageRate >= 0.8) {
+      return 'Premiumプランにアップグレードすると月間100回まで利用できます';
+    }
+    if (usageRate >= 0.5) {
+      return 'より多くAI生成を利用される場合はPremiumプランがおすすめです';
+    }
+    return null;
+  }
+
+  /// 設定画面用のリセット日表示
+  String get resetDateDisplayText {
+    final resetDate = status.nextResetDate;
+    final today = DateTime.now();
+    final daysUntilReset = resetDate.difference(today).inDays;
+    
+    if (daysUntilReset <= 0) return '今日';
+    if (daysUntilReset == 1) return '明日';
+    if (daysUntilReset <= 7) return '${resetDate.month}/${resetDate.day} (あと$daysUntilReset日)';
+    return '${resetDate.month}/${resetDate.day}';
+  }
+
+  /// 設定画面表示用の統合データ
+  SubscriptionDisplayData get displayData => SubscriptionDisplayData(
+    planName: planDisplayName,
+    planStatus: planStatusDisplay,
+    usageText: usageStats.usageDisplay,
+    remainingText: '${usageStats.remainingCount}回',
+    resetDateText: resetDateDisplayText,
+    expiryText: expiryDisplayText,
+    autoRenewalText: autoRenewalDisplayText,
+    warningMessage: usageWarningMessage,
+    recommendationMessage: planRecommendationMessage,
+    showUpgradeButton: !isPremium,
+    usageProgressValue: usageStats.usageRate,
+    isNearLimit: usageStats.isNearLimit,
+    isExpiryNear: periodInfo.isExpiryNear,
+  );
 }
 
 /// 使用量統計情報
@@ -207,4 +289,38 @@ class AutoRenewalInfo {
 
   /// 自動更新状態の表示テキスト
   String get statusDisplay => isAutoRenewalEnabled ? '有効' : '無効';
+}
+
+/// 設定画面表示用のデータクラス
+/// Phase 1.8.2.4: UI用データフォーマット実装
+class SubscriptionDisplayData {
+  final String planName;
+  final String? planStatus;
+  final String usageText;
+  final String remainingText;
+  final String resetDateText;
+  final String? expiryText;
+  final String autoRenewalText;
+  final String? warningMessage;
+  final String? recommendationMessage;
+  final bool showUpgradeButton;
+  final double usageProgressValue;
+  final bool isNearLimit;
+  final bool isExpiryNear;
+
+  const SubscriptionDisplayData({
+    required this.planName,
+    required this.planStatus,
+    required this.usageText,
+    required this.remainingText,
+    required this.resetDateText,
+    required this.expiryText,
+    required this.autoRenewalText,
+    required this.warningMessage,
+    required this.recommendationMessage,
+    required this.showUpgradeButton,
+    required this.usageProgressValue,
+    required this.isNearLimit,
+    required this.isExpiryNear,
+  });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
+import '../models/subscription_info.dart';
 import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -27,6 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsService _settingsService;
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
+  SubscriptionInfo? _subscriptionInfo;
   bool _isLoading = true;
 
   @override
@@ -44,6 +46,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _settingsService = await SettingsService.getInstance();
       _packageInfo = await PackageInfo.fromPlatform();
       _storageInfo = await StorageService.getInstance().getStorageInfo();
+      
+      // サブスクリプション情報を取得
+      final subscriptionResult = await _settingsService.getSubscriptionInfo();
+      if (subscriptionResult.isSuccess) {
+        _subscriptionInfo = subscriptionResult.value;
+      } else {
+        debugPrint('サブスクリプション情報の取得エラー: ${subscriptionResult.error}');
+      }
     } catch (e) {
       debugPrint('設定の読み込みエラー: $e');
     }
@@ -123,6 +133,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         FadeInWidget(
                           child: _buildThemeSelector(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 50),
+                          child: _buildSubscriptionStatus(),
                         ),
                         _buildDivider(),
                         SlideInWidget(
@@ -219,6 +234,301 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Phase 1.8.2.1: サブスクリプション状態表示
+  Widget _buildSubscriptionStatus() {
+    if (_subscriptionInfo == null) {
+      return Container(
+        padding: AppSpacing.cardPadding,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              child: Icon(
+                Icons.card_membership_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: AppSpacing.iconSm,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'サブスクリプション',
+                    style: AppTypography.titleMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '読み込み中...',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+      ),
+      child: ExpansionTile(
+        leading: Container(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: _subscriptionInfo!.isPremium 
+                ? AppColors.success.withValues(alpha: 0.2)
+                : AppColors.primary.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(AppSpacing.sm),
+          ),
+          child: Icon(
+            _subscriptionInfo!.isPremium 
+                ? Icons.star_rounded
+                : Icons.card_membership_rounded,
+            color: _subscriptionInfo!.isPremium 
+                ? AppColors.success
+                : AppColors.primary,
+            size: AppSpacing.iconSm,
+          ),
+        ),
+        title: Text(
+          'サブスクリプション',
+          style: AppTypography.titleMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          _subscriptionInfo!.displayData.planStatus != null
+              ? '現在のプラン: ${_subscriptionInfo!.displayData.planName} (${_subscriptionInfo!.displayData.planStatus})'
+              : '現在のプラン: ${_subscriptionInfo!.displayData.planName}',
+          style: AppTypography.bodyMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: AppSpacing.cardPadding,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: AppSpacing.cardRadius,
+            ),
+            child: Column(
+              children: [
+                _buildSubscriptionItem(
+                  'AI生成使用量',
+                  _subscriptionInfo!.displayData.usageText,
+                  _subscriptionInfo!.displayData.isNearLimit 
+                      ? AppColors.warning 
+                      : AppColors.primary,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _buildSubscriptionItem(
+                  '残り回数',
+                  _subscriptionInfo!.displayData.remainingText,
+                  _subscriptionInfo!.usageStats.remainingCount > 0 
+                      ? AppColors.success 
+                      : AppColors.error,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _buildSubscriptionItem(
+                  'リセット予定',
+                  _subscriptionInfo!.displayData.resetDateText,
+                  AppColors.info,
+                ),
+                if (_subscriptionInfo!.displayData.expiryText != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _buildSubscriptionItem(
+                    '有効期限',
+                    _subscriptionInfo!.displayData.expiryText!,
+                    _subscriptionInfo!.displayData.isExpiryNear 
+                        ? AppColors.warning 
+                        : AppColors.success,
+                  ),
+                ],
+                // 警告メッセージの表示
+                if (_subscriptionInfo!.displayData.warningMessage != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  _buildWarningMessage(_subscriptionInfo!.displayData.warningMessage!),
+                ],
+                // 推奨メッセージの表示
+                if (_subscriptionInfo!.displayData.recommendationMessage != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _buildRecommendationMessage(_subscriptionInfo!.displayData.recommendationMessage!),
+                ],
+                if (!_subscriptionInfo!.isPremium) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  _buildUpgradeButton(),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionItem(String label, String value, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.3),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: AppTypography.labelLarge.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWarningMessage(String message) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        border: Border.all(
+          color: AppColors.warning.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: AppColors.warning,
+            size: AppSpacing.iconSm,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.warning,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendationMessage(String message) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        border: Border.all(
+          color: AppColors.info.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            color: AppColors.info,
+            size: AppSpacing.iconSm,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.info,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpgradeButton() {
+    return MicroInteractions.bounceOnTap(
+      onTap: () {
+        MicroInteractions.hapticTap();
+        _showUpgradeDialog();
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(AppSpacing.md),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.upgrade_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'Premiumにアップグレード',
+              style: AppTypography.labelLarge.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -597,6 +907,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       widget.onThemeChanged?.call(selectedTheme);
       setState(() {});
     }
+  }
+
+  /// Phase 1.8.2.2: プラン変更・管理画面への遷移
+  void _showUpgradeDialog() {
+    DialogUtils.showSimpleDialog(
+      context,
+      'Premiumプランでは月間100回までAI日記生成が可能になり、高度なフィルタや統計機能もご利用いただけます。\n\n現在、アプリ内課金機能の準備中です。しばらくお待ちください。',
+    );
   }
 
 
