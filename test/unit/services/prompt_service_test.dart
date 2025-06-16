@@ -1,0 +1,359 @@
+// PromptService単体テスト
+//
+// PromptServiceの全機能をモックを使って包括的にテスト
+// JSON読み込み、キャッシュ、フィルタリング、検索機能を検証
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_photo_diary/services/prompt_service.dart';
+import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
+import 'package:smart_photo_diary/models/writing_prompt.dart';
+import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/core/service_locator.dart';
+
+/// テスト用の簡単なLoggingServiceモック
+class _MockLoggingService implements LoggingService {
+  @override
+  void info(String message, {String? context, dynamic data}) {
+    // テスト用なので何もしない
+  }
+  
+  @override
+  void warning(String message, {String? context, dynamic data}) {
+    // テスト用なので何もしない
+  }
+  
+  @override
+  void error(String message, {String? context, dynamic error, StackTrace? stackTrace}) {
+    // テスト用なので何もしない
+  }
+  
+  @override
+  void debug(String message, {String? context, dynamic data}) {
+    // テスト用なので何もしない
+  }
+  
+  @override
+  Stopwatch startTimer(String operation, {String? context}) {
+    return Stopwatch()..start();
+  }
+  
+  @override
+  void endTimer(Stopwatch stopwatch, String operation, {String? context}) {
+    // テスト用なので何もしない
+  }
+}
+
+void main() {
+  group('PromptService', () {
+    late IPromptService promptService;
+    
+    setUpAll(() async {
+      // Flutter バインディングを初期化
+      TestWidgetsFlutterBinding.ensureInitialized();
+    });
+    
+    setUp(() async {
+      // ServiceLocatorをリセット
+      ServiceLocator().clear();
+      
+      // LoggingServiceのモックを登録
+      ServiceLocator().registerFactory<LoggingService>(
+        () => _MockLoggingService(),
+      );
+      
+      // 各テスト前にインスタンスをリセット
+      PromptService.resetInstance();
+      promptService = PromptService.instance;
+    });
+    
+    tearDown(() {
+      // 各テスト後にクリーンアップ
+      ServiceLocator().clear();
+    });
+    
+    group('シングルトンパターン', () {
+      test('同じインスタンスが返される', () {
+        final instance1 = PromptService.instance;
+        final instance2 = PromptService.instance;
+        
+        expect(instance1, same(instance2));
+      });
+      
+      test('resetInstance()でインスタンスがリセットされる', () {
+        final instance1 = PromptService.instance;
+        
+        PromptService.resetInstance();
+        
+        final instance2 = PromptService.instance;
+        expect(instance1, isNot(same(instance2)));
+      });
+    });
+    
+    group('初期化', () {
+      test('初期化前はisInitializedがfalse', () {
+        expect(promptService.isInitialized, false);
+      });
+      
+      test('初期化が成功する', () async {
+        final result = await promptService.initialize();
+        
+        expect(result, true);
+        expect(promptService.isInitialized, true);
+      });
+      
+      test('重複初期化はスキップされる', () async {
+        await promptService.initialize();
+        expect(promptService.isInitialized, true);
+        
+        // 再度初期化を試行
+        final result = await promptService.initialize();
+        expect(result, true);
+        expect(promptService.isInitialized, true);
+      });
+    });
+    
+    group('プロンプト取得', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('全プロンプトを取得できる', () {
+        final prompts = promptService.getAllPrompts();
+        
+        expect(prompts, isNotEmpty);
+        expect(prompts.every((p) => p.isActive), true);
+      });
+      
+      test('Basicプラン用プロンプトを取得できる', () {
+        final prompts = promptService.getPromptsForPlan(isPremium: false);
+        
+        expect(prompts, isNotEmpty);
+        expect(prompts.every((p) => !p.isPremiumOnly), true);
+        
+        // Basicプランは日常と感謝カテゴリのみ
+        final categories = prompts.map((p) => p.category).toSet();
+        expect(categories, containsAll([PromptCategory.daily, PromptCategory.gratitude]));
+      });
+      
+      test('Premiumプラン用プロンプトを取得できる', () {
+        final prompts = promptService.getPromptsForPlan(isPremium: true);
+        
+        expect(prompts, isNotEmpty);
+        
+        // Premium用プロンプトも含まれる
+        final hasPremiumPrompts = prompts.any((p) => p.isPremiumOnly);
+        expect(hasPremiumPrompts, true);
+        
+        // 全カテゴリが含まれる
+        final categories = prompts.map((p) => p.category).toSet();
+        expect(categories.length, PromptCategory.values.length);
+      });
+      
+      test('カテゴリ別プロンプトを取得できる（Basic）', () {
+        final dailyPrompts = promptService.getPromptsByCategory(
+          PromptCategory.daily,
+          isPremium: false,
+        );
+        
+        expect(dailyPrompts, isNotEmpty);
+        expect(dailyPrompts.every((p) => p.category == PromptCategory.daily), true);
+        
+        // Basicプランなのでプレミアム限定プロンプトは含まれない
+        final hasBasicPrompts = dailyPrompts.any((p) => !p.isPremiumOnly);
+        expect(hasBasicPrompts, true);
+      });
+      
+      test('カテゴリ別プロンプトを取得できる（Premium）', () {
+        final travelPrompts = promptService.getPromptsByCategory(
+          PromptCategory.travel,
+          isPremium: true,
+        );
+        
+        expect(travelPrompts, isNotEmpty);
+        expect(travelPrompts.every((p) => p.category == PromptCategory.travel), true);
+        
+        // 旅行カテゴリはPremium限定
+        expect(travelPrompts.every((p) => p.isPremiumOnly), true);
+      });
+      
+      test('IDでプロンプトを取得できる', () {
+        final allPrompts = promptService.getAllPrompts();
+        final firstPrompt = allPrompts.first;
+        
+        final retrievedPrompt = promptService.getPromptById(firstPrompt.id);
+        
+        expect(retrievedPrompt, isNotNull);
+        expect(retrievedPrompt!.id, firstPrompt.id);
+        expect(retrievedPrompt.text, firstPrompt.text);
+      });
+      
+      test('存在しないIDの場合nullが返される', () {
+        final prompt = promptService.getPromptById('non_existent_id');
+        
+        expect(prompt, isNull);
+      });
+    });
+    
+    group('ランダム選択', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('Basicプラン用ランダムプロンプトを取得できる', () {
+        final prompt = promptService.getRandomPrompt(isPremium: false);
+        
+        expect(prompt, isNotNull);
+        expect(prompt!.isPremiumOnly, false);
+      });
+      
+      test('Premiumプラン用ランダムプロンプトを取得できる', () {
+        final prompt = promptService.getRandomPrompt(isPremium: true);
+        
+        expect(prompt, isNotNull);
+      });
+      
+      test('特定カテゴリからランダムプロンプトを取得できる', () {
+        final prompt = promptService.getRandomPrompt(
+          isPremium: true,
+          category: PromptCategory.daily,
+        );
+        
+        expect(prompt, isNotNull);
+        expect(prompt!.category, PromptCategory.daily);
+      });
+      
+      test('利用できないカテゴリの場合nullが返される', () {
+        // Basicプランで旅行カテゴリ（Premium限定）を要求
+        final prompt = promptService.getRandomPrompt(
+          isPremium: false,
+          category: PromptCategory.travel,
+        );
+        
+        expect(prompt, isNull);
+      });
+    });
+    
+    group('検索機能', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('テキスト検索ができる', () {
+        final results = promptService.searchPrompts(
+          '今日',
+          isPremium: true,
+        );
+        
+        expect(results, isNotEmpty);
+        expect(results.every((p) => p.text.contains('今日')), true);
+      });
+      
+      test('タグ検索ができる', () {
+        final results = promptService.searchPrompts(
+          '感謝',
+          isPremium: true,
+        );
+        
+        expect(results, isNotEmpty);
+        expect(results.every((p) => 
+            p.tags.any((tag) => tag.contains('感謝')) || 
+            p.text.contains('感謝')
+        ), true);
+      });
+      
+      test('空のクエリで全プロンプトが返される', () {
+        final allPrompts = promptService.getPromptsForPlan(isPremium: true);
+        final searchResults = promptService.searchPrompts('', isPremium: true);
+        
+        expect(searchResults.length, allPrompts.length);
+      });
+      
+      test('プラン制限が検索結果に適用される', () {
+        final results = promptService.searchPrompts(
+          '旅行',
+          isPremium: false,
+        );
+        
+        // Basicプランで旅行関連を検索しても結果は少ない（または空）
+        // 旅行カテゴリはPremium限定のため
+        expect(results.every((p) => !p.isPremiumOnly), true);
+      });
+    });
+    
+    group('統計情報', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('Basicプラン統計情報を取得できる', () {
+        final stats = promptService.getPromptStatistics(isPremium: false);
+        
+        expect(stats, isNotEmpty);
+        expect(stats.keys, contains(PromptCategory.daily));
+        expect(stats.keys, contains(PromptCategory.gratitude));
+        
+        // Premium限定カテゴリは0であることを確認
+        expect(stats[PromptCategory.travel], 0);
+      });
+      
+      test('Premiumプラン統計情報を取得できる', () {
+        final stats = promptService.getPromptStatistics(isPremium: true);
+        
+        expect(stats, isNotEmpty);
+        expect(stats.keys.length, PromptCategory.values.length);
+        
+        // 全カテゴリにプロンプトがあることを確認
+        for (final category in PromptCategory.values) {
+          expect(stats[category], greaterThan(0));
+        }
+      });
+    });
+    
+    group('キャッシュ管理', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('キャッシュクリアが動作する', () {
+        // プロンプトを取得してキャッシュを構築
+        promptService.getAllPrompts();
+        promptService.getPromptsForPlan(isPremium: true);
+        
+        // キャッシュクリア実行
+        promptService.clearCache();
+        
+        // キャッシュクリア後もデータ取得は正常に動作
+        final prompts = promptService.getAllPrompts();
+        expect(prompts, isNotEmpty);
+      });
+    });
+    
+    group('リセット機能', () {
+      test('リセットが正常に動作する', () async {
+        await promptService.initialize();
+        expect(promptService.isInitialized, true);
+        
+        promptService.reset();
+        
+        expect(promptService.isInitialized, false);
+      });
+      
+      test('リセット後の再初期化が可能', () async {
+        await promptService.initialize();
+        promptService.reset();
+        
+        final result = await promptService.initialize();
+        expect(result, true);
+        expect(promptService.isInitialized, true);
+      });
+    });
+    
+    group('エラーハンドリング', () {
+      test('初期化前のメソッド呼び出しでエラーが発生', () {
+        expect(() => promptService.getAllPrompts(), throwsStateError);
+        expect(() => promptService.getPromptsForPlan(isPremium: true), throwsStateError);
+        expect(() => promptService.getRandomPrompt(isPremium: true), throwsStateError);
+      });
+    });
+  });
+}

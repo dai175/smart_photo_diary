@@ -9,6 +9,9 @@ import '../services/settings_service.dart';
 import '../services/storage_service.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
+import '../services/interfaces/prompt_service_interface.dart';
+import '../services/prompt_service.dart';
+import '../services/logging_service.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -68,6 +71,11 @@ class ServiceRegistration {
   static Future<void> _registerCoreServices() async {
     debugPrint('ServiceRegistration: Registering core services...');
     
+    // LoggingService (基盤サービス - 他のサービスの依存関係として使用)
+    serviceLocator.registerAsyncFactory<LoggingService>(
+      () => LoggingService.getInstance()
+    );
+    
     // PhotoService (singleton pattern)
     serviceLocator.registerFactory<PhotoServiceInterface>(
       () => PhotoService.getInstance()
@@ -87,6 +95,15 @@ class ServiceRegistration {
     // SubscriptionService (Hive依存のみ - コアサービス)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(
       () => SubscriptionService.getInstance()
+    );
+    
+    // PromptService (JSONアセット読み込み - コアサービス)
+    serviceLocator.registerAsyncFactory<IPromptService>(
+      () async {
+        final service = PromptService.instance;
+        await service.initialize();
+        return service;
+      }
     );
   }
   
