@@ -243,6 +243,25 @@ class SubscriptionService implements ISubscriptionService {
         return Failure(ServiceException('SubscriptionService is not initialized'));
       }
       
+      // デバッグモードでプラン強制設定をチェック
+      if (kDebugMode) {
+        final forcePlan = EnvironmentConfig.forcePlan;
+        debugPrint('SubscriptionService.getCurrentStatus: デバッグモードチェック - forcePlan: $forcePlan');
+        if (forcePlan != null) {
+          // 強制プランに基づいて仮想的なSubscriptionStatusを作成
+          final forcedStatus = SubscriptionStatus(
+            planId: _getForcedPlanId(forcePlan),
+            isActive: true,
+            startDate: DateTime.now(),
+            expiryDate: DateTime.now().add(const Duration(days: 365)), // 1年間有効
+            monthlyUsageCount: 0,
+            lastResetDate: DateTime.now(),
+          );
+          debugPrint('SubscriptionService.getCurrentStatus: プラン強制設定により仮想ステータス作成: ${forcedStatus.planId}');
+          return Success(forcedStatus);
+        }
+      }
+      
       final status = _subscriptionBox?.get(SubscriptionConstants.statusKey);
       if (status == null) {
         // 状態が存在しない場合は初期状態を作成
@@ -713,6 +732,20 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
   
+  /// 強制プラン名からプランIDを取得
+  String _getForcedPlanId(String forcePlan) {
+    switch (forcePlan.toLowerCase()) {
+      case 'premium':
+      case 'premium_monthly':
+        return SubscriptionConstants.premiumMonthlyPlanId;
+      case 'premium_yearly':
+        return SubscriptionConstants.premiumYearlyPlanId;
+      case 'basic':
+      default:
+        return SubscriptionConstants.basicPlanId;
+    }
+  }
+  
   // =================================================================
   // アクセス権限チェックメソッド（Phase 1.3.4）
   // =================================================================
@@ -728,10 +761,13 @@ class SubscriptionService implements ISubscriptionService {
       // デバッグモードでプラン強制設定をチェック
       if (kDebugMode) {
         final forcePlan = EnvironmentConfig.forcePlan;
+        debugPrint('SubscriptionService: デバッグモードチェック - forcePlan: $forcePlan');
         if (forcePlan != null) {
           final forceResult = forcePlan.startsWith('premium');
           debugPrint('SubscriptionService: プラン強制設定により Premium アクセス: $forceResult (プラン: $forcePlan)');
           return Success(forceResult);
+        } else {
+          debugPrint('SubscriptionService: プラン強制設定なし、通常のプランチェックに進む');
         }
       }
       
