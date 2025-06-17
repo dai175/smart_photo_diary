@@ -55,6 +55,14 @@ ${location != null ? '場所: $location\n' : ''}''';
           : '''$basePrompt
 写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。''';
 
+      // デバッグログ: プロンプト統合確認
+      debugPrint('=== AI生成プロンプト統合確認 ===');
+      debugPrint('カスタムプロンプト: ${prompt ?? "なし"}');
+      debugPrint('統合後プロンプト長: ${finalPrompt.length}文字');
+      if (prompt != null) {
+        debugPrint('プロンプト統合: 成功');
+      }
+
       final response = await _apiClient.sendVisionRequest(
         prompt: finalPrompt,
         imageData: imageData,
@@ -282,6 +290,14 @@ $analysesText''';
         : '''$basePrompt
 
 これらの写真から読み取れる一日の流れや体験を、自然な日記の文体で表現してください。''';
+
+    // デバッグログ: 複数画像プロンプト統合確認
+    debugPrint('=== 複数画像AI生成プロンプト統合確認 ===');
+    debugPrint('カスタムプロンプト: ${customPrompt ?? "なし"}');
+    debugPrint('統合後プロンプト長: ${prompt.length}文字');
+    if (customPrompt != null) {
+      debugPrint('複数画像プロンプト統合: 成功');
+    }
 
     try {
       final response = await _apiClient.sendTextRequest(prompt: prompt);

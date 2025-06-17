@@ -153,6 +153,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           throw Exception('写真データの取得に失敗しました');
         }
 
+        // デバッグログ: プロンプト渡し確認
+        debugPrint('=== DiaryPreviewScreen AI生成開始 ===');
+        debugPrint('選択されたプロンプト: ${_selectedPrompt?.text ?? "なし"}');
+        debugPrint('プロンプトID: ${_selectedPrompt?.id ?? "なし"}');
+
         final resultFromAi = await _aiService.generateDiaryFromImage(
           imageData: imageData,
           date: photoDateTime,
@@ -194,6 +199,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           _totalPhotos = imagesWithTimes.length;
           _currentPhotoIndex = 0;
         });
+
+        // デバッグログ: 複数画像プロンプト渡し確認
+        debugPrint('=== DiaryPreviewScreen 複数画像AI生成開始 ===');
+        debugPrint('選択されたプロンプト: ${_selectedPrompt?.text ?? "なし"}');
+        debugPrint('プロンプトID: ${_selectedPrompt?.id ?? "なし"}');
 
         final resultFromAi = await _aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
