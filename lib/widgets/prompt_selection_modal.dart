@@ -110,7 +110,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
     return Container(
       padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(AppSpacing.lg),
           topRight: Radius.circular(AppSpacing.lg),
@@ -120,7 +120,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         children: [
           Icon(
             Icons.edit_note_rounded,
-            color: AppColors.accent,
+            color: Theme.of(context).colorScheme.primary,
             size: AppSpacing.iconMd,
           ),
           const SizedBox(width: AppSpacing.sm),
