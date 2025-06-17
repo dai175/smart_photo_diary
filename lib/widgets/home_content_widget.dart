@@ -269,12 +269,12 @@ class HomeContentWidget extends StatelessWidget {
           context: context,
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageStatus(
-            planName: plan.name,
+            planName: plan.displayName,
             used: used.clamp(0, limit),
             limit: limit,
             remaining: remaining.clamp(0, limit),
             nextResetDate: nextResetDate,
-            onUpgrade: plan.name == 'Basic' ? () {
+            onUpgrade: plan.displayName == 'Basic' ? () {
               Navigator.of(context).pop();
               _navigateToUpgrade(context);
             } : null,
