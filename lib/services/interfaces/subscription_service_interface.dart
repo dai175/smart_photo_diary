@@ -16,6 +16,7 @@ abstract class ISubscriptionService {
   Future<Result<void>> initialize();
   
   /// 現在のサブスクリプション状態を取得
+  /// デバッグモードでプラン強制設定がある場合、実際のデータは変更せずに返り値のみプレミアムプランとして返します
   Future<Result<SubscriptionStatus>> getCurrentStatus();
   
   /// サブスクリプション状態をリロード

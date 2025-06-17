@@ -236,6 +236,7 @@ class SubscriptionService implements ISubscriptionService {
   }
   
   /// 現在のサブスクリプション状態を取得
+  /// デバッグモードでプラン強制設定がある場合、実際のデータは変更せずに返り値のみプレミアムプランとして返します
   @override
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     try {
@@ -243,25 +244,7 @@ class SubscriptionService implements ISubscriptionService {
         return Failure(ServiceException('SubscriptionService is not initialized'));
       }
       
-      // デバッグモードでプラン強制設定をチェック
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        debugPrint('SubscriptionService.getCurrentStatus: デバッグモードチェック - forcePlan: $forcePlan');
-        if (forcePlan != null) {
-          // 強制プランに基づいて仮想的なSubscriptionStatusを作成
-          final forcedStatus = SubscriptionStatus(
-            planId: _getForcedPlanId(forcePlan),
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 365)), // 1年間有効
-            monthlyUsageCount: 0,
-            lastResetDate: DateTime.now(),
-          );
-          debugPrint('SubscriptionService.getCurrentStatus: プラン強制設定により仮想ステータス作成: ${forcedStatus.planId}');
-          return Success(forcedStatus);
-        }
-      }
-      
+      // 実際のデータベース状態を取得
       final status = _subscriptionBox?.get(SubscriptionConstants.statusKey);
       if (status == null) {
         // 状態が存在しない場合は初期状態を作成
@@ -271,6 +254,33 @@ class SubscriptionService implements ISubscriptionService {
           return Failure(ServiceException('Failed to create initial subscription status'));
         }
         return Success(initialStatus);
+      }
+      
+      // デバッグモードでプラン強制設定がある場合、返り値のみを動的に変更
+      if (kDebugMode) {
+        final forcePlan = EnvironmentConfig.forcePlan;
+        if (forcePlan != null) {
+          debugPrint('SubscriptionService.getCurrentStatus: プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）');
+          
+          // 実際のデータはそのままで、プランIDのみを強制設定に変更した状態を返す
+          final forcedStatus = SubscriptionStatus(
+            planId: _getForcedPlanId(forcePlan),
+            isActive: true,
+            startDate: status.startDate ?? DateTime.now(),
+            expiryDate: DateTime.now().add(const Duration(days: 365)),
+            monthlyUsageCount: status.monthlyUsageCount, // 実際の使用量を保持
+            usageMonth: status.usageMonth,
+            lastResetDate: status.lastResetDate,
+            autoRenewal: status.autoRenewal,
+            transactionId: status.transactionId,
+            lastPurchaseDate: status.lastPurchaseDate,
+            cancelDate: status.cancelDate,
+            planChangeDate: status.planChangeDate,
+            pendingPlanId: status.pendingPlanId,
+          );
+          
+          return Success(forcedStatus);
+        }
       }
       
       return Success(status);
@@ -520,6 +530,7 @@ class SubscriptionService implements ISubscriptionService {
         return Failure(ServiceException('SubscriptionService is not initialized'));
       }
       
+      // 常に最新の状態を取得（プラン強制設定により更新済み）
       final statusResult = await getCurrentStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);

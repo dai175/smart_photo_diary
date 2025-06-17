@@ -254,6 +254,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           debugPrint('プロンプト使用履歴記録エラー: $e');
         }
       }
+      
     } catch (e) {
       debugPrint('日記生成エラー: $e');
       setState(() {
