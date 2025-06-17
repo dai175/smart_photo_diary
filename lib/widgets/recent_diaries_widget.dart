@@ -46,10 +46,10 @@ class RecentDiariesWidget extends StatelessWidget {
       return Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: AppSpacing.cardRadius,
           border: Border.all(
-            color: AppColors.outline.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             style: BorderStyle.solid,
             width: 1,
           ),
@@ -59,14 +59,13 @@ class RecentDiariesWidget extends StatelessWidget {
             Icon(
               Icons.auto_stories_outlined,
               size: AppSpacing.iconLg,
-              color: AppColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               AppConstants.noDiariesMessage,
-              style: AppTypography.withColor(
-                AppTypography.bodyMedium,
-                AppColors.onSurfaceVariant,
+              style: AppTypography.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -99,7 +98,7 @@ class RecentDiariesWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              _buildDateLabel(diary.date),
+              _buildDateLabel(context, diary.date),
               const Spacer(),
               Icon(
                 Icons.chevron_right_rounded,
@@ -114,28 +113,27 @@ class RecentDiariesWidget extends StatelessWidget {
           _buildDiaryContent(context, diary.content),
           if (diary.tags?.isNotEmpty == true) ...[
             const SizedBox(height: AppSpacing.sm),
-            _buildTags(diary.tags!),
+            _buildTags(context, diary.tags!),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildDateLabel(DateTime date) {
+  Widget _buildDateLabel(BuildContext context, DateTime date) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primaryContainer,
+        color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: AppSpacing.chipRadius,
       ),
       child: Text(
         DateFormat('MM/dd').format(date),
-        style: AppTypography.withColor(
-          AppTypography.labelSmall,
-          AppColors.onPrimaryContainer,
+        style: AppTypography.labelSmall.copyWith(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),
       ),
     );
@@ -161,7 +159,7 @@ class RecentDiariesWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTags(List<String> tags) {
+  Widget _buildTags(BuildContext context, List<String> tags) {
     return Wrap(
       spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
@@ -174,14 +172,13 @@ class RecentDiariesWidget extends StatelessWidget {
                 vertical: AppSpacing.xxs,
               ),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                 borderRadius: AppSpacing.chipRadius,
               ),
               child: Text(
                 tag,
-                style: AppTypography.withColor(
-                  AppTypography.labelSmall,
-                  AppColors.accent,
+                style: AppTypography.labelSmall.copyWith(
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
             ),

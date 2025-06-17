@@ -234,27 +234,28 @@ class _DiaryScreenState extends State<DiaryScreen> {
             Container(
               padding: AppSpacing.cardPaddingLarge,
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: AppSpacing.cardRadiusLarge,
               ),
               child: Icon(
                 _controller.getEmptyStateIcon(),
                 size: AppSpacing.iconXl,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               _controller.getEmptyStateMessage(),
-              style: AppTypography.headlineSmall,
+              style: AppTypography.headlineSmall.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               _controller.getEmptyStateSubMessage(),
-              style: AppTypography.withColor(
-                AppTypography.bodyMedium,
-                AppColors.onSurfaceVariant,
+              style: AppTypography.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
