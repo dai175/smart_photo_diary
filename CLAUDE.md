@@ -157,7 +157,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts)
 - **In-App Purchase Integration**: Uses `in_app_purchase` plugin for subscription management
 - **Usage Tracking**: AI generation counts with monthly reset functionality
-- **Writing Prompts System**: 59 curated prompts (5 Basic + 54 Premium) across 8 categories
+- **Writing Prompts System**: 20 curated prompts (5 Basic + 15 Premium) across 8 categories
 - **Plan Enforcement**: Feature access control based on subscription status
 
 ## Key Dependencies
@@ -364,7 +364,7 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Perfect test coverage**: 585 tests with 100% success rate across unit, widget, and integration tests
 - **PromptService complete implementation**: Phase 2.2.1 fully implemented with JSON asset loading, 3-tier caching, and comprehensive search
 - **Monetization implementation**: Complete freemium model with In-App Purchase integration
-- **Writing prompts system**: 59 curated prompts with 8-category classification and plan-based access
+- **Writing prompts system**: 20 curated prompts with 8-category classification and plan-based access
 - **Result<T> pattern implementation**: Comprehensive functional error handling system with complete test coverage
 - **Enhanced error handling**: Standardized exception hierarchy with structured logging
 - **Service architecture refactoring**: Implemented dependency injection with ServiceLocator pattern
@@ -544,7 +544,7 @@ The app implements a **two-tier freemium model** with the following structure:
 
 #### Premium Plan (¥300/month, ¥2,800/year)
 - 100 AI diary generations per month  
-- Access to all 59 writing prompts across 8 categories
+- Access to all 20 writing prompts across 8 categories
 - Advanced filtering and analytics features
 - 7-day free trial period
 
