@@ -16,6 +16,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
+import '../services/interfaces/prompt_service_interface.dart';
 import '../models/subscription_plan.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
@@ -242,6 +243,17 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // 写真の撮影日時を保存
         _photoDateTime = photoDateTime;
       });
+      
+      // プロンプトが使用された場合のみ使用履歴を記録
+      if (_selectedPrompt != null) {
+        try {
+          final promptService = await ServiceRegistration.getAsync<IPromptService>();
+          await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
+          debugPrint('プロンプト使用履歴記録完了: ${_selectedPrompt!.id}');
+        } catch (e) {
+          debugPrint('プロンプト使用履歴記録エラー: $e');
+        }
+      }
     } catch (e) {
       debugPrint('日記生成エラー: $e');
       setState(() {

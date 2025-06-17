@@ -497,8 +497,8 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       _isRandomSelected = false;
     });
     
-    // プロンプトの使用履歴を記録
-    _promptService.recordPromptUsage(promptId: prompt.id);
+    // 使用履歴記録は実際に日記生成が完了した時点で行う
+    // ここでは選択のみ行い、履歴記録はしない
   }
 
 }
