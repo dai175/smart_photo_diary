@@ -4,9 +4,13 @@
 // 依存関係が適切に解決されることを検証
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
+import 'package:smart_photo_diary/services/prompt_service.dart';
+import 'package:smart_photo_diary/models/writing_prompt.dart';
+import '../../test_helpers/mock_platform_channels.dart';
 
 void main() {
   group('ServiceRegistration - PromptService統合テスト', () {
@@ -14,6 +18,12 @@ void main() {
     setUpAll(() async {
       // Flutter バインディングを初期化
       TestWidgetsFlutterBinding.ensureInitialized();
+      
+      // プラットフォームチャンネルをモック化
+      MockPlatformChannels.setupMocks();
+      
+      // Hiveを初期化（テスト用）
+      await Hive.initFlutter();
     });
     
     setUp(() async {
@@ -24,6 +34,20 @@ void main() {
     tearDown(() async {
       // 各テスト後にクリーンアップ
       ServiceRegistration.reset();
+      
+      // PromptServiceのシングルトンもリセット
+      PromptService.resetInstance();
+      
+      // Hive使用履歴Boxをクリア（テストデータ残存を避ける）
+      try {
+        if (Hive.isBoxOpen('prompt_usage_history')) {
+          final box = Hive.box<PromptUsageHistory>('prompt_usage_history');
+          await box.clear();
+          await box.close();
+        }
+      } catch (e) {
+        // テスト環境でのエラーは無視
+      }
     });
     
     test('PromptServiceがServiceLocatorに正しく登録される', () async {

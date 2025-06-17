@@ -359,7 +359,7 @@ class PromptService implements IPromptService {
     _allPrompts.clear();
     clearCache();
     
-    // 使用履歴Boxもリセット
+    // 使用履歴Boxもリセット（クローズはしない、nullに設定するだけ）
     _usageHistoryBox = null;
   }
   
@@ -423,7 +423,7 @@ class PromptService implements IPromptService {
   }) async {
     _ensureInitialized();
     
-    if (_usageHistoryBox == null) {
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
       return false;
     }
     
@@ -454,7 +454,7 @@ class PromptService implements IPromptService {
   }) {
     _ensureInitialized();
     
-    if (_usageHistoryBox == null) {
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
       return [];
     }
     
@@ -483,7 +483,7 @@ class PromptService implements IPromptService {
   }) {
     _ensureInitialized();
     
-    if (_usageHistoryBox == null) {
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
       return [];
     }
     
@@ -515,7 +515,7 @@ class PromptService implements IPromptService {
   Future<bool> clearUsageHistory({int? olderThanDays}) async {
     _ensureInitialized();
     
-    if (_usageHistoryBox == null) {
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
       return false;
     }
     
@@ -556,7 +556,7 @@ class PromptService implements IPromptService {
   Map<String, int> getUsageFrequencyStats({int days = 30}) {
     _ensureInitialized();
     
-    if (_usageHistoryBox == null) {
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
       return {};
     }
     
