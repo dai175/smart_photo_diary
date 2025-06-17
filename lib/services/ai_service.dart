@@ -39,6 +39,7 @@ class AiService implements AiServiceInterface {
     required DateTime date,
     String? location,
     List<DateTime>? photoTimes,
+    String? prompt,
   }) async {
     try {
       // Phase 1.7.1.2: generateDiary前の制限チェック実装
@@ -76,6 +77,7 @@ class AiService implements AiServiceInterface {
         date: date,
         location: location,
         photoTimes: photoTimes,
+        prompt: prompt,
         isOnline: online,
       );
 
@@ -101,6 +103,7 @@ class AiService implements AiServiceInterface {
   Future<Result<DiaryGenerationResult>> generateDiaryFromMultipleImages({
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
+    String? prompt,
     Function(int current, int total)? onProgress,
   }) async {
     try {
@@ -137,6 +140,7 @@ class AiService implements AiServiceInterface {
       final result = await _diaryGenerator.generateFromMultipleImages(
         imagesWithTimes: imagesWithTimes,
         location: location,
+        prompt: prompt,
         onProgress: onProgress,
         isOnline: online,
       );

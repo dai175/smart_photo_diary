@@ -23,6 +23,7 @@ class DiaryGenerator {
     required DateTime date,
     String? location,
     List<DateTime>? photoTimes,
+    String? prompt,
     required bool isOnline,
   }) async {
     if (!isOnline) {
@@ -31,7 +32,7 @@ class DiaryGenerator {
 
     try {
       // プロンプトの作成
-      final prompt = '''
+      final basePrompt = '''
 あなたは日記作成の専門家です。この写真を見て、その日の出来事を振り返る日記を日本語で作成してください。
 タイトルと本文を分けて、以下の形式で出力してください。
 
@@ -41,12 +42,21 @@ class DiaryGenerator {
 【本文】
 （150-200文字程度の自然で個人的な文体の本文${photoTimes != null && photoTimes.length > 1 ? '。時系列に沿って出来事を描写してください' : ''}）
 
-${location != null ? '場所: $location\n' : ''}
-写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。
-''';
+${location != null ? '場所: $location\n' : ''}''';
+
+      // カスタムプロンプトが指定されている場合は統合
+      final finalPrompt = prompt != null 
+          ? '''$basePrompt
+
+以下のヒントを参考にして日記を作成してください：
+「$prompt」
+
+写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。'''
+          : '''$basePrompt
+写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。''';
 
       final response = await _apiClient.sendVisionRequest(
-        prompt: prompt,
+        prompt: finalPrompt,
         imageData: imageData,
       );
 
@@ -68,6 +78,7 @@ ${location != null ? '場所: $location\n' : ''}
   Future<DiaryGenerationResult> generateFromMultipleImages({
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
+    String? prompt,
     Function(int current, int total)? onProgress,
     required bool isOnline,
   }) async {
@@ -105,7 +116,7 @@ ${location != null ? '場所: $location\n' : ''}
 
       // 全分析結果を統合して日記を生成
       final List<DateTime> photoTimesList = sortedImages.map<DateTime>((e) => e.time).toList();
-      return await _generateDiaryFromAnalyses(photoAnalyses, photoTimesList, location);
+      return await _generateDiaryFromAnalyses(photoAnalyses, photoTimesList, location, prompt);
       
     } catch (e) {
       debugPrint('複数画像日記生成エラー: $e');
@@ -232,6 +243,7 @@ ${location != null ? '場所: $location\n' : ''}
     List<String> photoAnalyses, 
     List<DateTime> photoTimes,
     String? location,
+    String? customPrompt,
   ) async {
     if (photoAnalyses.isEmpty) {
       return _offlineService.generateDiary([], DateTime.now(), location, photoTimes);
@@ -242,7 +254,7 @@ ${location != null ? '場所: $location\n' : ''}
     
     // 統合プロンプト
     final analysesText = photoAnalyses.join('\n');
-    final prompt = '''
+    final basePrompt = '''
 以下の写真分析結果から、その日の出来事を振り返る日記を日本語で作成してください。
 タイトルと本文を分けて、以下の形式で出力してください。
 
@@ -257,10 +269,19 @@ ${location != null ? '場所: $location\n' : ''}
 ${location != null ? '場所: $location\n' : ''}
 
 写真分析結果:
-$analysesText
+$analysesText''';
 
-これらの写真から読み取れる一日の流れや体験を、自然な日記の文体で表現してください。
-''';
+    // カスタムプロンプトが指定されている場合は統合
+    final prompt = customPrompt != null 
+        ? '''$basePrompt
+
+以下のヒントを参考にして日記を作成してください：
+「$customPrompt」
+
+これらの写真から読み取れる一日の流れや体験を、自然な日記の文体で表現してください。'''
+        : '''$basePrompt
+
+これらの写真から読み取れる一日の流れや体験を、自然な日記の文体で表現してください。''';
 
     try {
       final response = await _apiClient.sendTextRequest(prompt: prompt);

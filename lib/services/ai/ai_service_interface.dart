@@ -19,18 +19,22 @@ abstract class AiServiceInterface {
 
   /// 画像から直接日記を生成（Vision API使用）
   /// Phase 1.7.1: 使用量制限チェック統合
+  /// Phase 2.3.2: プロンプト統合対応
   Future<Result<DiaryGenerationResult>> generateDiaryFromImage({
     required Uint8List imageData,
     required DateTime date,
     String? location,
     List<DateTime>? photoTimes,
+    String? prompt,
   });
 
   /// 複数画像から順次日記を生成（Vision API使用）
   /// Phase 1.7.1: 使用量制限チェック統合
+  /// Phase 2.3.2: プロンプト統合対応
   Future<Result<DiaryGenerationResult>> generateDiaryFromMultipleImages({
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
+    String? prompt,
     Function(int current, int total)? onProgress,
   });
 

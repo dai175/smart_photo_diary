@@ -6,12 +6,13 @@ import '../screens/diary_preview_screen.dart';
 import '../screens/writing_prompts_screen.dart';
 import '../widgets/photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
+import '../widgets/prompt_selection_modal.dart';
+import '../models/writing_prompt.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/custom_dialog.dart';
-import '../ui/animations/page_transitions.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -164,7 +165,7 @@ class HomeContentWidget extends StatelessWidget {
       builder: (context, child) {
         return AnimatedButton(
           onPressed: photoController.selectedCount > 0
-              ? () => _navigateToDiaryPreview(context)
+              ? () => _showPromptSelectionModal(context)
               : null,
           width: double.infinity,
           height: AppSpacing.buttonHeightLg,
@@ -232,12 +233,32 @@ class HomeContentWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToDiaryPreview(BuildContext context) {
+  void _showPromptSelectionModal(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PromptSelectionModal(
+        onPromptSelected: (prompt) {
+          Navigator.of(context).pop();
+          _navigateToDiaryPreview(context, prompt);
+        },
+        onSkip: () {
+          Navigator.of(context).pop();
+          _navigateToDiaryPreview(context, null);
+        },
+      ),
+    );
+  }
+
+  void _navigateToDiaryPreview(BuildContext context, WritingPrompt? selectedPrompt) {
     Navigator.push(
       context,
-      DiaryPreviewScreen(
-        selectedAssets: photoController.selectedPhotos,
-      ).customRoute(),
+      MaterialPageRoute(
+        builder: (context) => DiaryPreviewScreen(
+          selectedAssets: photoController.selectedPhotos,
+          selectedPrompt: selectedPrompt,
+        ),
+      ),
     ).then((_) {
       onLoadRecentDiaries();
       photoController.clearSelection();
