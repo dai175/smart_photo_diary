@@ -277,8 +277,8 @@ Services follow a clear dependency hierarchy:
 
 ### Writing Prompts System  
 - **PromptService Implementation**: Complete Phase 2.2.1 implementation with singleton pattern, JSON asset loading, and 3-tier caching
-- **Data Structure**: JSON file with 59 prompts across 8 categories (daily, travel, work, gratitude, reflection, creative, wellness, relationships)
-- **Plan Distribution**: Basic users get 5 prompts (daily + gratitude), Premium users get all 59
+- **Data Structure**: JSON file with 20 prompts across 8 categories (daily, travel, work, gratitude, reflection, creative, wellness, relationships)
+- **Plan Distribution**: Basic users get 5 prompts (daily + gratitude), Premium users get all 20
 - **Caching Architecture**: Plan-based cache, category-based cache, and ID-based cache for optimal performance
 - **Search Capabilities**: Full-text search across prompt text, tags, and descriptions with plan enforcement
 - **Random Selection**: Weighted random selection based on priority values with category filtering
@@ -540,7 +540,7 @@ The app implements a **two-tier freemium model** with the following structure:
 
 ### Development Phases Completed
 - **Phase 1**: Core subscription infrastructure and In-App Purchase integration
-- **Phase 2.1**: Writing prompts data structure and content creation (59 prompts)
+- **Phase 2.1**: Writing prompts data structure and content creation (20 prompts)
 - **Phase 2.2**: PromptService implementation with complete backend functionality
 - **Phase 2.3.1**: WritingPromptsScreen UI implementation with navigation integration
 - **Current Status**: Ready for Phase 2.3.2 (写真選択画面統合)

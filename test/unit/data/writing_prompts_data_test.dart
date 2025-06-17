@@ -86,42 +86,42 @@ void main() {
     });
     
     test('category-specific prompt counts match specification', () {
-      // 日常カテゴリ: 3 Basic + 8 Premium = 11
+      // 日常カテゴリ: 3 Basic + 2 Premium = 5
       final dailyPrompts = allPrompts.where((p) => p.category == PromptCategory.daily).toList();
-      expect(dailyPrompts.length, 11);
+      expect(dailyPrompts.length, 5);
       
-      // 感謝カテゴリ: 2 Basic + 6 Premium = 8
+      // 感謝カテゴリ: 2 Basic + 2 Premium = 4
       final gratitudePrompts = allPrompts.where((p) => p.category == PromptCategory.gratitude).toList();
-      expect(gratitudePrompts.length, 8);
+      expect(gratitudePrompts.length, 4);
       
-      // 旅行カテゴリ: 6 Premium
+      // 旅行カテゴリ: 2 Premium
       final travelPrompts = allPrompts.where((p) => p.category == PromptCategory.travel).toList();
-      expect(travelPrompts.length, 6);
+      expect(travelPrompts.length, 2);
       expect(travelPrompts.every((p) => p.isPremiumOnly), true);
       
-      // 仕事カテゴリ: 7 Premium
+      // 仕事カテゴリ: 2 Premium
       final workPrompts = allPrompts.where((p) => p.category == PromptCategory.work).toList();
-      expect(workPrompts.length, 7);
+      expect(workPrompts.length, 2);
       expect(workPrompts.every((p) => p.isPremiumOnly), true);
       
-      // 振り返りカテゴリ: 8 Premium
+      // 振り返りカテゴリ: 2 Premium
       final reflectionPrompts = allPrompts.where((p) => p.category == PromptCategory.reflection).toList();
-      expect(reflectionPrompts.length, 8);
+      expect(reflectionPrompts.length, 2);
       expect(reflectionPrompts.every((p) => p.isPremiumOnly), true);
       
-      // 創作カテゴリ: 6 Premium
+      // 創作カテゴリ: 1 Premium
       final creativePrompts = allPrompts.where((p) => p.category == PromptCategory.creative).toList();
-      expect(creativePrompts.length, 6);
+      expect(creativePrompts.length, 1);
       expect(creativePrompts.every((p) => p.isPremiumOnly), true);
       
-      // 健康・ウェルネスカテゴリ: 6 Premium
+      // 健康・ウェルネスカテゴリ: 2 Premium
       final wellnessPrompts = allPrompts.where((p) => p.category == PromptCategory.wellness).toList();
-      expect(wellnessPrompts.length, 6);
+      expect(wellnessPrompts.length, 2);
       expect(wellnessPrompts.every((p) => p.isPremiumOnly), true);
       
-      // 人間関係カテゴリ: 7 Premium
+      // 人間関係カテゴリ: 2 Premium
       final relationshipsPrompts = allPrompts.where((p) => p.category == PromptCategory.relationships).toList();
-      expect(relationshipsPrompts.length, 7);
+      expect(relationshipsPrompts.length, 2);
       expect(relationshipsPrompts.every((p) => p.isPremiumOnly), true);
     });
     
