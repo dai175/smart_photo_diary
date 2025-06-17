@@ -86,10 +86,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _isInitializing = false; // 初期化完了
       });
       
-      // プロンプトが既に選択されている場合は自動的に日記生成を開始
-      if (_selectedPrompt != null) {
-        _loadModelAndGenerateDiary();
-      }
+      // プロンプトの有無に関わらず自動的に日記生成を開始
+      _loadModelAndGenerateDiary();
     }
   }
 
@@ -119,8 +117,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     });
 
     try {
-      debugPrint('Vision API方式で日記生成中...');
-
       // 写真の撮影日時を取得
       List<DateTime> photoTimes = [];
       
@@ -140,8 +136,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         photoDateTime = photoTimes[middleIndex];
       }
 
-      debugPrint('写真の撮影日時: $photoDateTime');
-
       DiaryGenerationResult result;
 
       // Vision API方式：画像を直接Geminiに送信
@@ -153,11 +147,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         if (imageData == null) {
           throw Exception('写真データの取得に失敗しました');
         }
-
-        // デバッグログ: プロンプト渡し確認
-        debugPrint('=== DiaryPreviewScreen AI生成開始 ===');
-        debugPrint('選択されたプロンプト: ${_selectedPrompt?.text ?? "なし"}');
-        debugPrint('プロンプトID: ${_selectedPrompt?.id ?? "なし"}');
 
         final resultFromAi = await _aiService.generateDiaryFromImage(
           imageData: imageData,
@@ -201,10 +190,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           _currentPhotoIndex = 0;
         });
 
-        // デバッグログ: 複数画像プロンプト渡し確認
-        debugPrint('=== DiaryPreviewScreen 複数画像AI生成開始 ===');
-        debugPrint('選択されたプロンプト: ${_selectedPrompt?.text ?? "なし"}');
-        debugPrint('プロンプトID: ${_selectedPrompt?.id ?? "なし"}');
 
         final resultFromAi = await _aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
@@ -217,6 +202,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             });
           },
         );
+        
         
         if (resultFromAi.isFailure) {
           // Phase 1.7.2.1: 使用量制限エラーの専用UI表示
@@ -249,14 +235,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         try {
           final promptService = await ServiceRegistration.getAsync<IPromptService>();
           await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
-          debugPrint('プロンプト使用履歴記録完了: ${_selectedPrompt!.id}');
         } catch (e) {
           debugPrint('プロンプト使用履歴記録エラー: $e');
         }
       }
       
     } catch (e) {
-      debugPrint('日記生成エラー: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;
