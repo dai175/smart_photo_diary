@@ -641,12 +641,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
               // ローディング表示（初期化中または日記生成中）
               if (_isInitializing || _isLoading)
-                SizedBox(
-                  height: 400,
-                  child: FadeInWidget(
-                    child: CustomCard(
+                FadeInWidget(
+                  child: CustomCard(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             padding: AppSpacing.cardPadding,
