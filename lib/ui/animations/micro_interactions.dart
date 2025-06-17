@@ -42,6 +42,23 @@ class MicroInteractions {
     );
   }
 
+  /// スケールタップ効果（bounceOnTapのエイリアス）
+  static Widget scaleOnTap({
+    required Widget child,
+    required VoidCallback onTap,
+    bool enableHaptic = true,
+    double scaleFactor = 0.96,
+    Duration duration = const Duration(milliseconds: 80),
+  }) {
+    return bounceOnTap(
+      child: child,
+      onTap: onTap,
+      enableHaptic: enableHaptic,
+      scaleFactor: scaleFactor,
+      duration: duration,
+    );
+  }
+
   /// プルリフレッシュ効果
   static Widget pullToRefresh({
     required Widget child,

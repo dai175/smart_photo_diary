@@ -11,6 +11,7 @@ import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../screens/writing_prompts_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -138,6 +139,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SlideInWidget(
                           delay: const Duration(milliseconds: 50),
                           child: _buildSubscriptionStatus(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 75),
+                          child: _buildWritingPromptsAction(),
                         ),
                         _buildDivider(),
                         SlideInWidget(
@@ -527,6 +533,83 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWritingPromptsAction() {
+    return MicroInteractions.bounceOnTap(
+      onTap: () {
+        MicroInteractions.hapticTap();
+        _navigateToWritingPrompts();
+      },
+      child: Container(
+        padding: AppSpacing.cardPadding,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              child: Icon(
+                Icons.edit_note_rounded,
+                color: AppColors.accent,
+                size: AppSpacing.iconSm,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'ライティングプロンプト',
+                        style: AppTypography.titleMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(AppSpacing.xs),
+                        ),
+                        child: Text(
+                          'Premium',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.warning,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '日記作成のヒントとなる59個のプロンプト',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              AppIcons.actionForward,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconSm,
             ),
           ],
         ),
@@ -975,6 +1058,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showErrorDialog(String message) {
     DialogUtils.showErrorDialog(context, message);
+  }
+
+  void _navigateToWritingPrompts() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WritingPromptsScreen(),
+      ),
+    );
   }
 
 }

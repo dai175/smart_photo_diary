@@ -3,8 +3,10 @@
 // カテゴリ仕様に基づいたプロンプト管理、フィルタリング、
 // 統計分析等の機能を提供します。
 
+import 'package:flutter/material.dart';
 import '../models/writing_prompt.dart';
 import '../constants/prompt_categories.dart';
+import '../ui/design_system/app_colors.dart';
 
 /// プロンプトカテゴリユーティリティ
 class PromptCategoryUtils {
@@ -243,6 +245,39 @@ class PromptCategoryUtils {
         return PromptCategorySpecs.wellnessCategory.expectedBenefits;
       case PromptCategory.relationships:
         return PromptCategorySpecs.relationshipsCategory.expectedBenefits;
+    }
+  }
+
+  /// カテゴリの表示名を取得
+  /// 
+  /// [category] 対象カテゴリ
+  /// 戻り値: カテゴリの日本語表示名
+  static String getCategoryDisplayName(PromptCategory category) {
+    return category.displayName;
+  }
+
+  /// カテゴリの色を取得
+  /// 
+  /// [category] 対象カテゴリ
+  /// 戻り値: カテゴリに対応する色
+  static Color getCategoryColor(PromptCategory category) {
+    switch (category) {
+      case PromptCategory.daily:
+        return AppColors.primary;
+      case PromptCategory.travel:
+        return AppColors.info;
+      case PromptCategory.work:
+        return AppColors.accent;
+      case PromptCategory.gratitude:
+        return AppColors.success;
+      case PromptCategory.reflection:
+        return AppColors.warning;
+      case PromptCategory.creative:
+        return const Color(0xFF9C27B0); // Purple
+      case PromptCategory.wellness:
+        return const Color(0xFF4CAF50); // Green
+      case PromptCategory.relationships:
+        return const Color(0xFFFF5722); // Deep Orange
     }
   }
 }

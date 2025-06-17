@@ -3,6 +3,7 @@ import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
 import '../screens/diary_preview_screen.dart';
+import '../screens/writing_prompts_screen.dart';
 import '../widgets/photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
 import '../ui/design_system/app_colors.dart';
@@ -72,6 +73,18 @@ class HomeContentWidget extends StatelessWidget {
             ),
             onPressed: () => _showUsageStatus(context),
             tooltip: 'AI生成の使用状況',
+          ),
+        ),
+        // Phase 2.3.1: ライティングプロンプトアクセスボタン
+        Container(
+          margin: const EdgeInsets.only(right: AppSpacing.xs),
+          child: IconButton(
+            icon: Icon(
+              Icons.edit_note_rounded,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onPressed: () => _navigateToWritingPrompts(context),
+            tooltip: 'ライティングプロンプト',
           ),
         ),
         if (onRefresh != null)
@@ -307,6 +320,16 @@ class HomeContentWidget extends StatelessWidget {
       const SnackBar(
         content: Text('Premiumプランの設定は次のアップデートで実装予定です'),
         duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// Phase 2.3.1: ライティングプロンプト画面への遷移
+  void _navigateToWritingPrompts(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WritingPromptsScreen(),
       ),
     );
   }
