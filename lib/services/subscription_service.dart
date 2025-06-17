@@ -9,6 +9,7 @@ import '../models/subscription_status.dart';
 import '../models/subscription_plan.dart';
 import '../constants/subscription_constants.dart';
 import '../config/in_app_purchase_config.dart';
+import '../config/environment_config.dart';
 import 'interfaces/subscription_service_interface.dart';
 import 'logging_service.dart';
 
@@ -724,6 +725,16 @@ class SubscriptionService implements ISubscriptionService {
         return Failure(ServiceException('SubscriptionService is not initialized'));
       }
       
+      // デバッグモードでプラン強制設定をチェック
+      if (kDebugMode) {
+        final forcePlan = EnvironmentConfig.forcePlan;
+        if (forcePlan != null) {
+          final forceResult = forcePlan.startsWith('premium');
+          debugPrint('SubscriptionService: プラン強制設定により Premium アクセス: $forceResult (プラン: $forcePlan)');
+          return Success(forceResult);
+        }
+      }
+      
       final statusResult = await getCurrentStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
@@ -754,6 +765,15 @@ class SubscriptionService implements ISubscriptionService {
     try {
       if (!_isInitialized) {
         return Failure(ServiceException('SubscriptionService is not initialized'));
+      }
+      
+      // デバッグモードでプラン強制設定をチェック
+      if (kDebugMode) {
+        final forcePlan = EnvironmentConfig.forcePlan;
+        if (forcePlan != null) {
+          debugPrint('SubscriptionService: プラン強制設定により Writing Prompts アクセス: true (プラン: $forcePlan)');
+          return const Success(true); // 全プランでライティングプロンプトは利用可能
+        }
       }
       
       final statusResult = await getCurrentStatus();

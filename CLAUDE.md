@@ -325,6 +325,22 @@ The project follows a comprehensive 3-tier testing strategy with **100% success 
 - **Android permissions**: Release builds require INTERNET permissions in AndroidManifest.xml for API calls
 - **Asset bundling**: `.env` file is included as an asset in `pubspec.yaml` for release builds
 
+#### Development Plan Override (Debug Mode Only)
+For testing purposes, you can force a specific subscription plan in debug mode:
+- **Environment variable**: `FORCE_PLAN` in `.env` file
+- **Build-time constant**: `--dart-define=FORCE_PLAN=premium`
+- **Valid values**: `basic`, `premium`, `premium_monthly`, `premium_yearly`
+- **Security**: Automatically disabled in release builds (`kDebugMode` check)
+- **Usage examples**:
+  ```bash
+  # Via .env file
+  FORCE_PLAN=premium
+  
+  # Via build command
+  fvm flutter run --dart-define=FORCE_PLAN=premium
+  fvm flutter build apk --debug --dart-define=FORCE_PLAN=premium
+  ```
+
 ### Platform Considerations
 The app supports multiple platforms but photo access requires platform-specific permissions handled by `permission_handler`.
 
