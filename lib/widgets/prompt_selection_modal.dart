@@ -3,7 +3,6 @@ import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
-import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
@@ -267,16 +266,15 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       child: Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.accent.withValues(alpha: _isLoading ? 0.05 : (isSelected ? 0.2 : 0.1)),
-              AppColors.primary.withValues(alpha: _isLoading ? 0.05 : (isSelected ? 0.2 : 0.1)),
-            ],
-          ),
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
           borderRadius: AppSpacing.cardRadius,
           border: Border.all(
-            color: AppColors.accent.withValues(alpha: _isLoading ? 0.1 : (isSelected ? 0.6 : 0.3)),
-            width: isSelected ? 2 : 1.5,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
@@ -284,12 +282,16 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.accent,
+                color: isSelected 
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.shuffle_rounded,
-                color: Colors.white,
+                color: isSelected 
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
               ),
             ),
@@ -301,7 +303,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                   Text(
                     'ランダム選択',
                     style: AppTypography.titleSmall.copyWith(
-                      color: _isLoading ? AppColors.accent.withValues(alpha: 0.5) : AppColors.accent,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -318,13 +322,13 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             if (isSelected)
               Icon(
                 Icons.check_circle,
-                color: AppColors.accent,
+                color: Theme.of(context).colorScheme.primary,
                 size: 20,
               )
             else
               Icon(
                 Icons.auto_awesome_rounded,
-                color: AppColors.accent.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                 size: 20,
               ),
           ],
@@ -459,7 +463,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
               widget.onSkip();
             }
           },
-          backgroundColor: AppColors.primary,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
