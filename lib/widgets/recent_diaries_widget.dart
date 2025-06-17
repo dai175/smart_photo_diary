@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants/app_constants.dart';
 import '../models/diary_entry.dart';
-import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
@@ -46,7 +45,7 @@ class RecentDiariesWidget extends StatelessWidget {
       return Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: AppSpacing.cardRadius,
           border: Border.all(
             color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),

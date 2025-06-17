@@ -705,16 +705,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             ),
                           ] else ...[
                             Text(
-                              _selectedPrompt != null 
-                                  ? 'プロンプト付き日記を生成中...'
-                                  : '写真から日記を生成中...',
+                              '写真から日記を生成中...',
                               style: AppTypography.titleLarge,
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
-                              _selectedPrompt != null
-                                  ? 'AIが写真とプロンプトを組み合わせて分析しています'
-                                  : 'AIがあなたの写真を分析しています',
+                              'AIがあなたの写真を分析しています',
                               style: AppTypography.bodyMedium.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
