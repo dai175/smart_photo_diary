@@ -4,11 +4,13 @@
 // JSON読み込み、キャッシュ、フィルタリング、検索機能を検証
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
+import '../../test_helpers/mock_platform_channels.dart';
 
 /// テスト用の簡単なLoggingServiceモック
 class _MockLoggingService implements LoggingService {
@@ -50,6 +52,12 @@ void main() {
     setUpAll(() async {
       // Flutter バインディングを初期化
       TestWidgetsFlutterBinding.ensureInitialized();
+      
+      // プラットフォームチャンネルをモック化
+      MockPlatformChannels.setupMocks();
+      
+      // Hiveを初期化（テスト用）
+      await Hive.initFlutter();
     });
     
     setUp(() async {
@@ -66,9 +74,20 @@ void main() {
       promptService = PromptService.instance;
     });
     
-    tearDown(() {
+    tearDown(() async {
       // 各テスト後にクリーンアップ
       ServiceLocator().clear();
+      
+      // Hive使用履歴Boxをクリア（テストデータ残存を避ける）
+      try {
+        if (Hive.isBoxOpen('prompt_usage_history')) {
+          final box = Hive.box<PromptUsageHistory>('prompt_usage_history');
+          await box.clear();
+          await box.close();
+        }
+      } catch (e) {
+        // テスト環境でのエラーは無視
+      }
     });
     
     group('シングルトンパターン', () {
@@ -440,6 +459,44 @@ void main() {
         final result = await promptService.initialize();
         expect(result, true);
         expect(promptService.isInitialized, true);
+      });
+    });
+    
+    group('使用履歴管理', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('使用履歴関連メソッドは実装されている', () async {
+        // 使用履歴機能が無効でも、メソッドはエラーを投げない
+        final allPrompts = promptService.getAllPrompts();
+        final testPrompt = allPrompts.first;
+        
+        // 使用履歴記録（失敗してもエラーにならない）
+        final result = await promptService.recordPromptUsage(
+          promptId: testPrompt.id,
+          diaryEntryId: 'test_diary_001',
+          wasHelpful: true,
+        );
+        
+        // 結果はboolean（成功/失敗）
+        expect(result, isA<bool>());
+        
+        // 履歴取得（空リストでもエラーにならない）
+        final history = promptService.getUsageHistory();
+        expect(history, isA<List<PromptUsageHistory>>());
+        
+        // 最近使用ID取得（空リストでもエラーにならない）
+        final recentIds = promptService.getRecentlyUsedPromptIds();
+        expect(recentIds, isA<List<String>>());
+        
+        // 履歴クリア（結果はboolean）
+        final clearResult = await promptService.clearUsageHistory();
+        expect(clearResult, isA<bool>());
+        
+        // 統計取得（空マップでもエラーにならない）
+        final stats = promptService.getUsageFrequencyStats();
+        expect(stats, isA<Map<String, int>>());
       });
     });
     

@@ -13,6 +13,7 @@ import 'package:smart_photo_diary/models/writing_prompt.dart';
 class MockPromptService implements IPromptService {
   bool _isInitialized = false;
   final List<WritingPrompt> _mockPrompts = [];
+  final List<PromptUsageHistory> _mockUsageHistory = [];
   
   /// 初期化時に呼び出される設定用データ
   final List<WritingPrompt>? initialPrompts;
@@ -232,6 +233,102 @@ class MockPromptService implements IPromptService {
     return candidates.take(actualCount).toList();
   }
   
+  @override
+  Future<bool> recordPromptUsage({
+    required String promptId,
+    String? diaryEntryId,
+    bool wasHelpful = true,
+  }) async {
+    _ensureInitialized();
+    
+    final usage = PromptUsageHistory(
+      promptId: promptId,
+      diaryEntryId: diaryEntryId,
+      wasHelpful: wasHelpful,
+    );
+    
+    _mockUsageHistory.add(usage);
+    return true;
+  }
+  
+  @override
+  List<PromptUsageHistory> getUsageHistory({
+    int? limit,
+    String? promptId,
+  }) {
+    _ensureInitialized();
+    
+    var histories = _mockUsageHistory.where((h) => true).toList();
+    
+    if (promptId != null) {
+      histories = histories.where((h) => h.promptId == promptId).toList();
+    }
+    
+    histories.sort((a, b) => b.usedAt.compareTo(a.usedAt));
+    
+    if (limit != null && limit > 0) {
+      histories = histories.take(limit).toList();
+    }
+    
+    return histories;
+  }
+  
+  @override
+  List<String> getRecentlyUsedPromptIds({
+    int days = 7,
+    int limit = 10,
+  }) {
+    _ensureInitialized();
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final recentIds = <String>[];
+    
+    final sortedHistory = _mockUsageHistory
+        .where((h) => h.usedAt.isAfter(cutoffDate))
+        .toList();
+    
+    sortedHistory.sort((a, b) => b.usedAt.compareTo(a.usedAt));
+    
+    for (final history in sortedHistory) {
+      if (!recentIds.contains(history.promptId)) {
+        recentIds.add(history.promptId);
+        if (recentIds.length >= limit) break;
+      }
+    }
+    
+    return recentIds;
+  }
+  
+  @override
+  Future<bool> clearUsageHistory({int? olderThanDays}) async {
+    _ensureInitialized();
+    
+    if (olderThanDays == null) {
+      _mockUsageHistory.clear();
+    } else {
+      final cutoffDate = DateTime.now().subtract(Duration(days: olderThanDays));
+      _mockUsageHistory.removeWhere((h) => h.usedAt.isBefore(cutoffDate));
+    }
+    
+    return true;
+  }
+  
+  @override
+  Map<String, int> getUsageFrequencyStats({int days = 30}) {
+    _ensureInitialized();
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final stats = <String, int>{};
+    
+    for (final history in _mockUsageHistory) {
+      if (history.usedAt.isAfter(cutoffDate)) {
+        stats[history.promptId] = (stats[history.promptId] ?? 0) + 1;
+      }
+    }
+    
+    return stats;
+  }
+  
   /// テスト用のヘルパーメソッド
   void addMockPrompt(WritingPrompt prompt) {
     _mockPrompts.add(prompt);
@@ -239,6 +336,14 @@ class MockPromptService implements IPromptService {
   
   void clearMockPrompts() {
     _mockPrompts.clear();
+  }
+  
+  void addMockUsageHistory(PromptUsageHistory history) {
+    _mockUsageHistory.add(history);
+  }
+  
+  void clearMockUsageHistory() {
+    _mockUsageHistory.clear();
   }
   
   void _ensureInitialized() {
@@ -414,6 +519,105 @@ void main() {
       );
       
       expect(prompts, isEmpty);
+    });
+    
+    group('使用履歴管理', () {
+      test('プロンプト使用履歴を記録できる', () async {
+        await mockService.initialize();
+        
+        final result = await mockService.recordPromptUsage(
+          promptId: 'test_prompt_001',
+          diaryEntryId: 'diary_001',
+          wasHelpful: true,
+        );
+        
+        expect(result, true);
+        
+        final history = mockService.getUsageHistory();
+        expect(history.length, 1);
+        expect(history.first.promptId, 'test_prompt_001');
+        expect(history.first.diaryEntryId, 'diary_001');
+        expect(history.first.wasHelpful, true);
+      });
+      
+      test('使用履歴を取得できる', () async {
+        await mockService.initialize();
+        
+        // 複数の履歴を追加
+        await mockService.recordPromptUsage(promptId: 'prompt_001');
+        await mockService.recordPromptUsage(promptId: 'prompt_002');
+        await mockService.recordPromptUsage(promptId: 'prompt_001');
+        
+        final allHistory = mockService.getUsageHistory();
+        expect(allHistory.length, 3);
+        
+        // 特定プロンプトの履歴
+        final prompt001History = mockService.getUsageHistory(promptId: 'prompt_001');
+        expect(prompt001History.length, 2);
+        
+        // 件数制限
+        final limitedHistory = mockService.getUsageHistory(limit: 2);
+        expect(limitedHistory.length, 2);
+      });
+      
+      test('最近使用したプロンプトIDを取得できる', () async {
+        await mockService.initialize();
+        
+        // テスト用履歴を追加
+        final now = DateTime.now();
+        mockService.addMockUsageHistory(PromptUsageHistory(
+          promptId: 'recent_001',
+          usedAt: now.subtract(Duration(hours: 1)),
+        ));
+        mockService.addMockUsageHistory(PromptUsageHistory(
+          promptId: 'recent_002',
+          usedAt: now.subtract(Duration(hours: 2)),
+        ));
+        mockService.addMockUsageHistory(PromptUsageHistory(
+          promptId: 'old_001',
+          usedAt: now.subtract(Duration(days: 10)),
+        ));
+        
+        final recentIds = mockService.getRecentlyUsedPromptIds(days: 7);
+        expect(recentIds.length, 2);
+        expect(recentIds, contains('recent_001'));
+        expect(recentIds, contains('recent_002'));
+        expect(recentIds, isNot(contains('old_001')));
+      });
+      
+      test('使用履歴をクリアできる', () async {
+        await mockService.initialize();
+        
+        await mockService.recordPromptUsage(promptId: 'test_prompt');
+        expect(mockService.getUsageHistory().length, 1);
+        
+        final result = await mockService.clearUsageHistory();
+        expect(result, true);
+        expect(mockService.getUsageHistory(), isEmpty);
+      });
+      
+      test('使用頻度統計を取得できる', () async {
+        await mockService.initialize();
+        
+        // テスト用履歴を追加
+        final now = DateTime.now();
+        mockService.addMockUsageHistory(PromptUsageHistory(
+          promptId: 'frequent_001',
+          usedAt: now.subtract(Duration(days: 1)),
+        ));
+        mockService.addMockUsageHistory(PromptUsageHistory(
+          promptId: 'frequent_001',
+          usedAt: now.subtract(Duration(days: 2)),
+        ));
+        mockService.addMockUsageHistory(PromptUsageHistory(
+          promptId: 'frequent_002',
+          usedAt: now.subtract(Duration(days: 3)),
+        ));
+        
+        final stats = mockService.getUsageFrequencyStats(days: 30);
+        expect(stats['frequent_001'], 2);
+        expect(stats['frequent_002'], 1);
+      });
     });
   });
 }

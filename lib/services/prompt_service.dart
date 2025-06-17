@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../core/service_locator.dart';
 import '../services/logging_service.dart';
 import '../models/writing_prompt.dart';
@@ -21,12 +22,16 @@ import 'interfaces/prompt_service_interface.dart';
 class PromptService implements IPromptService {
   static PromptService? _instance;
   static const String _promptsAssetPath = 'assets/data/writing_prompts.json';
+  static const String _usageHistoryBoxName = 'prompt_usage_history';
   
   // プロンプトデータとキャッシュ
   List<WritingPrompt> _allPrompts = [];
   final Map<bool, List<WritingPrompt>> _planFilterCache = {};
   final Map<PromptCategory, List<WritingPrompt>> _categoryCache = {};
   final Map<String, WritingPrompt> _idCache = {};
+  
+  // 使用履歴管理
+  Box<PromptUsageHistory>? _usageHistoryBox;
   
   // 初期化状態管理
   bool _isInitialized = false;
@@ -70,6 +75,14 @@ class PromptService implements IPromptService {
       
       // キャッシュを生成
       await _buildCaches();
+      
+      // 使用履歴Box初期化（失敗してもPromptService自体は初期化完了とする）
+      try {
+        await _initializeUsageHistoryBox();
+      } catch (e) {
+        loggingService.warning('PromptService: 使用履歴機能は無効化されました（${e.toString()}）');
+        _usageHistoryBox = null;
+      }
       
       _isInitialized = true;
       loggingService.info('PromptService: 初期化完了（プロンプト数: ${_allPrompts.length}）');
@@ -173,6 +186,19 @@ class PromptService implements IPromptService {
     }
   }
   
+  /// 使用履歴Box初期化
+  Future<void> _initializeUsageHistoryBox() async {
+    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    
+    // 既存のBoxがあればクローズ
+    if (Hive.isBoxOpen(_usageHistoryBoxName)) {
+      await Hive.box<PromptUsageHistory>(_usageHistoryBoxName).close();
+    }
+    
+    _usageHistoryBox = await Hive.openBox<PromptUsageHistory>(_usageHistoryBoxName);
+    loggingService.info('PromptService: 使用履歴Box初期化完了（履歴数: ${_usageHistoryBox!.length}）');
+  }
+  
   @override
   List<WritingPrompt> getAllPrompts() {
     _ensureInitialized();
@@ -219,9 +245,15 @@ class PromptService implements IPromptService {
       candidates = getPromptsForPlan(isPremium: isPremium);
     }
     
-    // 除外IDを適用（重複回避ロジック）
+    // 手動除外IDを適用
     if (excludeIds != null && excludeIds.isNotEmpty) {
       candidates = candidates.where((prompt) => !excludeIds.contains(prompt.id)).toList();
+    }
+    
+    // 履歴ベースの重複回避（最近使用したプロンプトを除外）
+    final recentlyUsedIds = getRecentlyUsedPromptIds();
+    if (recentlyUsedIds.isNotEmpty) {
+      candidates = candidates.where((prompt) => !recentlyUsedIds.contains(prompt.id)).toList();
     }
     
     if (candidates.isEmpty) {
@@ -326,6 +358,9 @@ class PromptService implements IPromptService {
     _isInitialized = false;
     _allPrompts.clear();
     clearCache();
+    
+    // 使用履歴Boxもリセット
+    _usageHistoryBox = null;
   }
   
   @override
@@ -378,6 +413,163 @@ class PromptService implements IPromptService {
     }
     
     return selectedPrompts;
+  }
+  
+  @override
+  Future<bool> recordPromptUsage({
+    required String promptId,
+    String? diaryEntryId,
+    bool wasHelpful = true,
+  }) async {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null) {
+      return false;
+    }
+    
+    try {
+      final usage = PromptUsageHistory(
+        promptId: promptId,
+        diaryEntryId: diaryEntryId,
+        wasHelpful: wasHelpful,
+      );
+      
+      await _usageHistoryBox!.add(usage);
+      
+      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      loggingService.info('PromptService: プロンプト使用履歴記録完了（promptId: $promptId）');
+      
+      return true;
+    } catch (e) {
+      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      loggingService.error('PromptService: 使用履歴記録失敗', error: e);
+      return false;
+    }
+  }
+  
+  @override
+  List<PromptUsageHistory> getUsageHistory({
+    int? limit,
+    String? promptId,
+  }) {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null) {
+      return [];
+    }
+    
+    var histories = _usageHistoryBox!.values.toList();
+    
+    // 特定プロンプトIDでフィルタ
+    if (promptId != null) {
+      histories = histories.where((h) => h.promptId == promptId).toList();
+    }
+    
+    // 新しい順でソート
+    histories.sort((a, b) => b.usedAt.compareTo(a.usedAt));
+    
+    // 件数制限
+    if (limit != null && limit > 0) {
+      histories = histories.take(limit).toList();
+    }
+    
+    return histories;
+  }
+  
+  @override
+  List<String> getRecentlyUsedPromptIds({
+    int days = 7,
+    int limit = 10,
+  }) {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null) {
+      return [];
+    }
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    
+    final recentHistories = _usageHistoryBox!.values
+        .where((h) => h.usedAt.isAfter(cutoffDate))
+        .toList();
+    
+    // 新しい順でソート
+    recentHistories.sort((a, b) => b.usedAt.compareTo(a.usedAt));
+    
+    // プロンプトIDを抽出（重複除去）
+    final recentIds = <String>[];
+    for (final history in recentHistories) {
+      if (!recentIds.contains(history.promptId)) {
+        recentIds.add(history.promptId);
+        
+        if (recentIds.length >= limit) {
+          break;
+        }
+      }
+    }
+    
+    return recentIds;
+  }
+  
+  @override
+  Future<bool> clearUsageHistory({int? olderThanDays}) async {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null) {
+      return false;
+    }
+    
+    try {
+      if (olderThanDays == null) {
+        // 全削除
+        await _usageHistoryBox!.clear();
+      } else {
+        // 指定日数より古いもののみ削除
+        final cutoffDate = DateTime.now().subtract(Duration(days: olderThanDays));
+        final keysToDelete = <int>[];
+        
+        for (int i = 0; i < _usageHistoryBox!.length; i++) {
+          final history = _usageHistoryBox!.getAt(i);
+          if (history != null && history.usedAt.isBefore(cutoffDate)) {
+            keysToDelete.add(i);
+          }
+        }
+        
+        // 後ろから削除（インデックスのずれを防ぐため）
+        for (final key in keysToDelete.reversed) {
+          await _usageHistoryBox!.deleteAt(key);
+        }
+      }
+      
+      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      loggingService.info('PromptService: 使用履歴クリア完了');
+      
+      return true;
+    } catch (e) {
+      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      loggingService.error('PromptService: 使用履歴クリア失敗', error: e);
+      return false;
+    }
+  }
+  
+  @override
+  Map<String, int> getUsageFrequencyStats({int days = 30}) {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null) {
+      return {};
+    }
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final stats = <String, int>{};
+    
+    for (final history in _usageHistoryBox!.values) {
+      if (history.usedAt.isAfter(cutoffDate)) {
+        stats[history.promptId] = (stats[history.promptId] ?? 0) + 1;
+      }
+    }
+    
+    return stats;
   }
   
   /// 初期化チェック
