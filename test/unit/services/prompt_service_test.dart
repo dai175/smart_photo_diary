@@ -231,6 +231,101 @@ void main() {
         
         expect(prompt, isNull);
       });
+      
+      test('除外IDを指定して重複回避できる', () {
+        // 最初のプロンプトを取得
+        final firstPrompt = promptService.getRandomPrompt(isPremium: true);
+        expect(firstPrompt, isNotNull);
+        
+        // 最初のプロンプトを除外して次を取得
+        final secondPrompt = promptService.getRandomPrompt(
+          isPremium: true,
+          excludeIds: [firstPrompt!.id],
+        );
+        
+        if (secondPrompt != null) {
+          expect(secondPrompt.id, isNot(equals(firstPrompt.id)));
+        }
+      });
+      
+      test('複数除外IDを指定して重複回避できる', () {
+        // 複数のプロンプトを除外
+        final excludeIds = ['daily_basic_001', 'gratitude_basic_001'];
+        final prompt = promptService.getRandomPrompt(
+          isPremium: false,
+          excludeIds: excludeIds,
+        );
+        
+        if (prompt != null) {
+          expect(excludeIds.contains(prompt.id), isFalse);
+        }
+      });
+    });
+    
+    group('重複回避シーケンス', () {
+      setUp(() async {
+        await promptService.initialize();
+      });
+      
+      test('指定数の重複しないプロンプトを取得できる', () {
+        final prompts = promptService.getRandomPromptSequence(
+          count: 3,
+          isPremium: true,
+        );
+        
+        expect(prompts.length, lessThanOrEqualTo(3));
+        
+        // 重複チェック
+        final ids = prompts.map((p) => p.id).toSet();
+        expect(ids.length, equals(prompts.length));
+      });
+      
+      test('利用可能数を超える要求でも動作する', () {
+        // Basic用プロンプトは5個しかない
+        final prompts = promptService.getRandomPromptSequence(
+          count: 10,
+          isPremium: false,
+        );
+        
+        expect(prompts.length, lessThanOrEqualTo(5));
+        
+        // 重複チェック
+        final ids = prompts.map((p) => p.id).toSet();
+        expect(ids.length, equals(prompts.length));
+      });
+      
+      test('特定カテゴリから重複しないプロンプトを取得できる', () {
+        final prompts = promptService.getRandomPromptSequence(
+          count: 2,
+          isPremium: true,
+          category: PromptCategory.daily,
+        );
+        
+        expect(prompts.length, lessThanOrEqualTo(2));
+        expect(prompts.every((p) => p.category == PromptCategory.daily), isTrue);
+        
+        // 重複チェック
+        final ids = prompts.map((p) => p.id).toSet();
+        expect(ids.length, equals(prompts.length));
+      });
+      
+      test('0個要求で空リストが返される', () {
+        final prompts = promptService.getRandomPromptSequence(
+          count: 0,
+          isPremium: true,
+        );
+        
+        expect(prompts, isEmpty);
+      });
+      
+      test('負の数要求で空リストが返される', () {
+        final prompts = promptService.getRandomPromptSequence(
+          count: -1,
+          isPremium: true,
+        );
+        
+        expect(prompts, isEmpty);
+      });
     });
     
     group('検索機能', () {

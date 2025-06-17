@@ -128,12 +128,18 @@ class MockPromptService implements IPromptService {
   WritingPrompt? getRandomPrompt({
     required bool isPremium,
     PromptCategory? category,
+    List<String>? excludeIds,
   }) {
     _ensureInitialized();
     
-    final candidates = category != null
+    List<WritingPrompt> candidates = category != null
         ? getPromptsByCategory(category, isPremium: isPremium)
         : getPromptsForPlan(isPremium: isPremium);
+    
+    // 除外IDを適用
+    if (excludeIds != null && excludeIds.isNotEmpty) {
+      candidates = candidates.where((prompt) => !excludeIds.contains(prompt.id)).toList();
+    }
     
     if (candidates.isEmpty) return null;
     
@@ -199,6 +205,31 @@ class MockPromptService implements IPromptService {
   void reset() {
     _isInitialized = false;
     // プロンプトデータはリセットしない（テスト間で一貫性を保つため）
+  }
+  
+  @override
+  List<WritingPrompt> getRandomPromptSequence({
+    required int count,
+    required bool isPremium,
+    PromptCategory? category,
+  }) {
+    _ensureInitialized();
+    
+    if (count <= 0) {
+      return [];
+    }
+    
+    List<WritingPrompt> candidates = category != null
+        ? getPromptsByCategory(category, isPremium: isPremium)
+        : getPromptsForPlan(isPremium: isPremium);
+    
+    if (candidates.isEmpty) {
+      return [];
+    }
+    
+    // テスト用シンプルな実装：要求数か利用可能数の小さい方を返す
+    final actualCount = count > candidates.length ? candidates.length : count;
+    return candidates.take(actualCount).toList();
   }
   
   /// テスト用のヘルパーメソッド
@@ -336,6 +367,53 @@ void main() {
     test('初期化前のメソッド呼び出しでエラーが発生', () {
       expect(() => mockService.getAllPrompts(), throwsStateError);
       expect(() => mockService.getPromptsForPlan(isPremium: true), throwsStateError);
+    });
+    
+    test('除外IDを指定した重複回避が動作する', () async {
+      // 初期化
+      await mockService.initialize();
+      
+      // 最初のプロンプトを取得
+      final firstPrompt = mockService.getRandomPrompt(isPremium: true);
+      expect(firstPrompt, isNotNull);
+      
+      // 最初のプロンプトを除外して次を取得
+      final secondPrompt = mockService.getRandomPrompt(
+        isPremium: true,
+        excludeIds: [firstPrompt!.id],
+      );
+      
+      if (secondPrompt != null) {
+        expect(secondPrompt.id, isNot(equals(firstPrompt.id)));
+      }
+    });
+    
+    test('ランダムプロンプトシーケンスが動作する', () async {
+      // 初期化
+      await mockService.initialize();
+      
+      final prompts = mockService.getRandomPromptSequence(
+        count: 2,
+        isPremium: true,
+      );
+      
+      expect(prompts.length, lessThanOrEqualTo(2));
+      
+      // 重複チェック
+      final ids = prompts.map((p) => p.id).toSet();
+      expect(ids.length, equals(prompts.length));
+    });
+    
+    test('空のシーケンス要求が正しく処理される', () async {
+      // 初期化
+      await mockService.initialize();
+      
+      final prompts = mockService.getRandomPromptSequence(
+        count: 0,
+        isPremium: true,
+      );
+      
+      expect(prompts, isEmpty);
     });
   });
 }

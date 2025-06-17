@@ -38,10 +38,12 @@ abstract class IPromptService {
   /// 
   /// [isPremium] Premiumプランかどうか
   /// [category] 特定カテゴリから選択（省略可）
+  /// [excludeIds] 除外するプロンプトIDリスト（重複回避用）
   /// 戻り値: ランダム選択されたプロンプト（なければnull）
   WritingPrompt? getRandomPrompt({
     required bool isPremium,
     PromptCategory? category,
+    List<String>? excludeIds,
   });
   
   /// プロンプトを検索
@@ -81,4 +83,16 @@ abstract class IPromptService {
   /// 
   /// 初期化状態に戻し、再初期化を可能にする
   void reset();
+  
+  /// 重複回避を考慮したランダムプロンプトシーケンスを取得
+  /// 
+  /// [count] 取得する数量
+  /// [isPremium] Premiumプランかどうか
+  /// [category] 特定カテゴリから選択（省略可）
+  /// 戻り値: 重複しないランダムプロンプトリスト
+  List<WritingPrompt> getRandomPromptSequence({
+    required int count,
+    required bool isPremium,
+    PromptCategory? category,
+  });
 }

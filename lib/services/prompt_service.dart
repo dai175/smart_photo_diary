@@ -205,6 +205,7 @@ class PromptService implements IPromptService {
   WritingPrompt? getRandomPrompt({
     required bool isPremium,
     PromptCategory? category,
+    List<String>? excludeIds,
   }) {
     _ensureInitialized();
     
@@ -216,6 +217,11 @@ class PromptService implements IPromptService {
     } else {
       // 全プロンプトから選択
       candidates = getPromptsForPlan(isPremium: isPremium);
+    }
+    
+    // 除外IDを適用（重複回避ロジック）
+    if (excludeIds != null && excludeIds.isNotEmpty) {
+      candidates = candidates.where((prompt) => !excludeIds.contains(prompt.id)).toList();
     }
     
     if (candidates.isEmpty) {
@@ -320,6 +326,58 @@ class PromptService implements IPromptService {
     _isInitialized = false;
     _allPrompts.clear();
     clearCache();
+  }
+  
+  @override
+  List<WritingPrompt> getRandomPromptSequence({
+    required int count,
+    required bool isPremium,
+    PromptCategory? category,
+  }) {
+    _ensureInitialized();
+    
+    if (count <= 0) {
+      return [];
+    }
+    
+    List<WritingPrompt> candidates;
+    
+    if (category != null) {
+      // 特定カテゴリから選択
+      candidates = getPromptsByCategory(category, isPremium: isPremium);
+    } else {
+      // 全プロンプトから選択
+      candidates = getPromptsForPlan(isPremium: isPremium);
+    }
+    
+    if (candidates.isEmpty) {
+      return [];
+    }
+    
+    // 要求数がプロンプト総数を超える場合は、利用可能な分だけ返す
+    final actualCount = count > candidates.length ? candidates.length : count;
+    
+    final selectedPrompts = <WritingPrompt>[];
+    final excludeIds = <String>[];
+    
+    // 重複回避しながら指定数のプロンプトを選択
+    for (int i = 0; i < actualCount; i++) {
+      final prompt = getRandomPrompt(
+        isPremium: isPremium,
+        category: category,
+        excludeIds: excludeIds,
+      );
+      
+      if (prompt != null) {
+        selectedPrompts.add(prompt);
+        excludeIds.add(prompt.id);
+      } else {
+        // これ以上選択できるプロンプトがない場合は終了
+        break;
+      }
+    }
+    
+    return selectedPrompts;
   }
   
   /// 初期化チェック
