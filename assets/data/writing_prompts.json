@@ -8,7 +8,7 @@
   "prompts": [
     {
       "id": "basic_daily_001",
-      "text": "写真の中で最も印象的な瞬間について詳しく書いてください",
+      "text": "写真の中で最も印象的な瞬間",
       "category": "daily",
       "isPremiumOnly": false,
       "tags": ["日常", "印象", "瞬間", "写真"],
@@ -18,7 +18,7 @@
     },
     {
       "id": "basic_daily_002",
-      "text": "その時の気持ちや感情を詳しく表現してください",
+      "text": "その時の気持ちや感情",
       "category": "daily",
       "isPremiumOnly": false,
       "tags": ["日常", "気持ち", "感情", "表現"],
@@ -28,7 +28,7 @@
     },
     {
       "id": "basic_daily_003",
-      "text": "写真に写った小さな発見や良いことを見つけて書いてください",
+      "text": "写真に写った小さな発見や良いこと",
       "category": "daily",
       "isPremiumOnly": false,
       "tags": ["日常", "発見", "良いこと", "写真"],
@@ -38,7 +38,7 @@
     },
     {
       "id": "basic_gratitude_001",
-      "text": "この場面で感謝したい人や出来事について書いてください",
+      "text": "この場面で感謝したい人や出来事",
       "category": "gratitude",
       "isPremiumOnly": false,
       "tags": ["感謝", "人", "出来事", "写真"],
@@ -48,7 +48,7 @@
     },
     {
       "id": "basic_gratitude_002",
-      "text": "この体験があって良かったと思う理由を書いてください",
+      "text": "この体験があって良かったと思う理由",
       "category": "gratitude",
       "isPremiumOnly": false,
       "tags": ["感謝", "体験", "良かった", "理由"],
@@ -58,7 +58,7 @@
     },
     {
       "id": "premium_daily_001",
-      "text": "この体験が将来の自分にどう影響するか考えて書いてください",
+      "text": "この体験が将来の自分に与える影響",
       "category": "daily",
       "isPremiumOnly": true,
       "tags": ["日常", "将来", "影響", "成長"],
@@ -68,7 +68,7 @@
     },
     {
       "id": "premium_daily_002",
-      "text": "今日学んだ新しいことや気づきはありますか？それはどのように役立ちそうですか？",
+      "text": "今日学んだ新しいことや気づき",
       "category": "daily",
       "isPremiumOnly": true,
       "tags": ["日常", "学び", "気づき", "成長", "応用"],
@@ -78,7 +78,7 @@
     },
     {
       "id": "premium_travel_001",
-      "text": "この場所で感じた音、におい、感触を詳しく書いてください",
+      "text": "この場所で感じた音、におい、感触",
       "category": "travel",
       "isPremiumOnly": true,
       "tags": ["旅行", "五感", "音", "におい", "感触"],
@@ -88,7 +88,7 @@
     },
     {
       "id": "premium_travel_002",
-      "text": "この場所の雰囲気や文化が、自分の価値観や考え方に与えた影響はありますか？",
+      "text": "この場所の雰囲気や文化が与えた影響",
       "category": "travel",
       "isPremiumOnly": true,
       "tags": ["旅行", "文化", "価値観", "影響", "変化"],
@@ -98,7 +98,7 @@
     },
     {
       "id": "premium_work_001",
-      "text": "今日の仕事で一番やりがいを感じた瞬間はいつでしたか？",
+      "text": "今日の仕事で一番やりがいを感じた瞬間",
       "category": "work",
       "isPremiumOnly": true,
       "tags": ["仕事", "やりがい", "達成感", "瞬間", "満足"],
@@ -108,7 +108,7 @@
     },
     {
       "id": "premium_work_002",
-      "text": "今日解決した課題から学んだことは何ですか？次回どう活かせますか？",
+      "text": "今日解決した課題から学んだこと",
       "category": "work",
       "isPremiumOnly": true,
       "tags": ["仕事", "課題", "解決", "学び", "応用"],
@@ -118,7 +118,7 @@
     },
     {
       "id": "premium_gratitude_001",
-      "text": "困難な状況の中でも感謝できることはありますか？それはなぜですか？",
+      "text": "困難な状況の中でも感謝できること",
       "category": "gratitude",
       "isPremiumOnly": true,
       "tags": ["感謝", "困難", "逆境", "学び", "成長"],
@@ -128,7 +128,7 @@
     },
     {
       "id": "premium_gratitude_002",
-      "text": "今日受けた小さな親切や思いやりで心が温かくなったことはありますか？",
+      "text": "今日受けた小さな親切や思いやり",
       "category": "gratitude",
       "isPremiumOnly": true,
       "tags": ["感謝", "親切", "思いやり", "温かい", "人間性"],
@@ -138,7 +138,7 @@
     },
     {
       "id": "premium_reflection_001",
-      "text": "自分の価値観の中で一番大切にしているものは何ですか？それはなぜですか？",
+      "text": "自分の価値観の中で一番大切にしているもの",
       "category": "reflection",
       "isPremiumOnly": true,
       "tags": ["振り返り", "価値観", "大切", "理由", "信念"],
@@ -148,7 +148,7 @@
     },
     {
       "id": "premium_reflection_002",
-      "text": "理想の自分と現在の自分の違いは何ですか？どうすれば近づけそうですか？",
+      "text": "理想の自分と現在の自分の違い",
       "category": "reflection",
       "isPremiumOnly": true,
       "tags": ["振り返り", "理想", "現在", "違い", "目標"],
@@ -158,7 +158,7 @@
     },
     {
       "id": "premium_creative_001",
-      "text": "この写真から想像できる物語を自由に創作してください",
+      "text": "この写真から想像できる物語",
       "category": "creative",
       "isPremiumOnly": true,
       "tags": ["創作", "物語", "想像", "写真"],
@@ -168,7 +168,7 @@
     },
     {
       "id": "premium_wellness_001",
-      "text": "最近の睡眠や食事、運動について振り返ってみませんか？改善したいことはありますか？",
+      "text": "最近の睡眠や食事、運動について",
       "category": "wellness",
       "isPremiumOnly": true,
       "tags": ["健康", "睡眠", "食事", "運動", "改善"],
@@ -178,7 +178,7 @@
     },
     {
       "id": "premium_wellness_002",
-      "text": "心身のバランスを整えるために、今一番必要だと思うことは何ですか？",
+      "text": "心身のバランスを整えるために必要なこと",
       "category": "wellness",
       "isPremiumOnly": true,
       "tags": ["健康", "バランス", "心身", "必要", "整える"],
@@ -188,7 +188,7 @@
     },
     {
       "id": "premium_relationships_001",
-      "text": "今日大切な人との時間で印象深かった会話はありますか？",
+      "text": "今日大切な人との時間で印象深かった会話",
       "category": "relationships",
       "isPremiumOnly": true,
       "tags": ["人間関係", "会話", "大切な人", "印象", "時間"],
@@ -198,7 +198,7 @@
     },
     {
       "id": "premium_relationships_002",
-      "text": "人との関わりの中で今日一番温かい気持ちになったのはどんな時でしたか？",
+      "text": "人との関わりの中で今日一番温かい気持ちになった瞬間",
       "category": "relationships",
       "isPremiumOnly": true,
       "tags": ["人間関係", "温かい", "気持ち", "関わり", "感動"],

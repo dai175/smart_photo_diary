@@ -143,7 +143,7 @@ void main() {
     test('prompts have meaningful content', () {
       for (final prompt in allPrompts) {
         // プロンプトテキストの長さチェック
-        expect(prompt.text.length, greaterThan(10));
+        expect(prompt.text.length, greaterThanOrEqualTo(5));
         expect(prompt.text.length, lessThan(200));
         
         // 疑問符で終わるプロンプトが多いことを確認（ただし必須ではない）
