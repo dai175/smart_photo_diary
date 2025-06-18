@@ -5,7 +5,6 @@
 
 import 'package:flutter/material.dart';
 import '../models/writing_prompt.dart';
-import '../constants/prompt_categories.dart';
 import '../ui/design_system/app_colors.dart';
 
 /// プロンプトカテゴリユーティリティ

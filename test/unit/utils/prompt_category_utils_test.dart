@@ -68,9 +68,9 @@ void main() {
         expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.emotion), 5);
         expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.emotionDepth), 0);
         expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.sensoryEmotion), 0);
-        // 従来カテゴリも維持
-        expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.daily), 3);
-        expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.gratitude), 2);
+        // レガシーカテゴリはプロンプトなし
+        expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.daily), 0);
+        expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.gratitude), 0);
         expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.travel), 0);
         expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.work), 0);
         expect(PromptCategoryUtils.getBasicPromptCount(PromptCategory.reflection), 0);
@@ -86,18 +86,18 @@ void main() {
         expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionGrowth), 2);
         expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionConnection), 2);
         expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionDiscovery), 2);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionFantasy), 2);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionFantasy), 1);
         expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionHealing), 2);
         expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.emotionEnergy), 2);
-        // 従来カテゴリ
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.daily), 8);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.travel), 6);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.work), 7);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.gratitude), 6);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.reflection), 8);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.creative), 6);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.wellness), 6);
-        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.relationships), 7);
+        // レガシーカテゴリはプロンプトなし
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.daily), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.travel), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.work), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.gratitude), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.reflection), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.creative), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.wellness), 0);
+        expect(PromptCategoryUtils.getPremiumPromptCount(PromptCategory.relationships), 0);
       });
     });
     
@@ -109,11 +109,11 @@ void main() {
         );
         expect(
           PromptCategoryUtils.getTotalPromptCount(PromptCategory.daily, isPremium: false),
-          3,
+          0,  // レガシーカテゴリはプロンプトなし
         );
         expect(
           PromptCategoryUtils.getTotalPromptCount(PromptCategory.gratitude, isPremium: false),
-          2,
+          0,  // レガシーカテゴリはプロンプトなし
         );
       });
       
@@ -128,15 +128,15 @@ void main() {
         );
         expect(
           PromptCategoryUtils.getTotalPromptCount(PromptCategory.daily, isPremium: true),
-          11, // 3 basic + 8 premium
+          0, // レガシーカテゴリはプロンプトなし
         );
         expect(
           PromptCategoryUtils.getTotalPromptCount(PromptCategory.gratitude, isPremium: true),
-          8, // 2 basic + 6 premium
+          0, // レガシーカテゴリはプロンプトなし
         );
         expect(
           PromptCategoryUtils.getTotalPromptCount(PromptCategory.travel, isPremium: true),
-          6, // 0 basic + 6 premium
+          0, // レガシーカテゴリはプロンプトなし
         );
       });
     });
@@ -156,18 +156,18 @@ void main() {
           PromptCategoryUtils.getCategoryDescription(PromptCategory.sensoryEmotion),
           '五感を通じて感情を表現するプロンプト',
         );
-        // 従来カテゴリも維持
+        // レガシーカテゴリ（非推奨）
         expect(
           PromptCategoryUtils.getCategoryDescription(PromptCategory.daily),
-          '日々の出来事や感情を記録し、日常の価値を再発見する',
+          '日常の出来事や感情を記録（非推奨）',
         );
         expect(
           PromptCategoryUtils.getCategoryDescription(PromptCategory.travel),
-          '旅行体験を深く記録し、文化的発見と思い出を鮮明に保存する',
+          '旅行体験の記録（非推奨）',
         );
         expect(
           PromptCategoryUtils.getCategoryDescription(PromptCategory.gratitude),
-          'ポジティブ心理学に基づいた感謝の記録で心理的健康を向上させる',
+          '感謝の記録（非推奨）',
         );
       });
     });
@@ -190,21 +190,18 @@ void main() {
         expect(sensoryEmotionTags, contains('五感'));
         expect(sensoryEmotionTags, contains('音'));
         
-        // 従来カテゴリ
+        // レガシーカテゴリ（簡素化されたタグ）
         final dailyTags = PromptCategoryUtils.getRecommendedTags(PromptCategory.daily);
         expect(dailyTags, contains('日常'));
-        expect(dailyTags, contains('気持ち'));
-        expect(dailyTags, contains('発見'));
+        expect(dailyTags, contains('出来事'));
         
         final travelTags = PromptCategoryUtils.getRecommendedTags(PromptCategory.travel);
         expect(travelTags, contains('旅行'));
-        expect(travelTags, contains('発見'));
-        expect(travelTags, contains('文化'));
+        expect(travelTags, contains('体験'));
         
         final gratitudeTags = PromptCategoryUtils.getRecommendedTags(PromptCategory.gratitude);
         expect(gratitudeTags, contains('感謝'));
         expect(gratitudeTags, contains('幸せ'));
-        expect(gratitudeTags, contains('大切'));
       });
     });
     
@@ -408,18 +405,15 @@ void main() {
         expect(sensoryEmotionBenefits, contains('感覚的記憶の向上'));
         expect(sensoryEmotionBenefits, contains('豊かな表現力'));
         
-        // 従来カテゴリ
+        // レガシーカテゴリ（簡素化された利点）
         final dailyBenefits = PromptCategoryUtils.getExpectedBenefits(PromptCategory.daily);
-        expect(dailyBenefits, contains('日記習慣の継続促進'));
-        expect(dailyBenefits, contains('日常生活への意識向上'));
+        expect(dailyBenefits, contains('日記習慣の形成'));
         
         final workBenefits = PromptCategoryUtils.getExpectedBenefits(PromptCategory.work);
-        expect(workBenefits, contains('キャリア発展の記録'));
-        expect(workBenefits, contains('スキル向上の自覚'));
+        expect(workBenefits, contains('キャリア発展支援'));
         
         final gratitudeBenefits = PromptCategoryUtils.getExpectedBenefits(PromptCategory.gratitude);
-        expect(gratitudeBenefits, contains('心理的ウェルビーイングの向上'));
-        expect(gratitudeBenefits, contains('ポジティブ思考の強化'));
+        expect(gratitudeBenefits, contains('感謝の心育成'));
       });
     });
   });
