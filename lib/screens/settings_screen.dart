@@ -339,10 +339,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                 ),
-                Icon(
-                  _subscriptionExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: AppSpacing.iconSm,
+                AnimatedRotation(
+                  turns: _subscriptionExpanded ? 0.25 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    AppIcons.actionForward,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: AppSpacing.iconSm,
+                  ),
                 ),
               ],
             ),
@@ -653,10 +657,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                 ),
-                Icon(
-                  _storageExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: AppSpacing.iconSm,
+                AnimatedRotation(
+                  turns: _storageExpanded ? 0.25 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    AppIcons.actionForward,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: AppSpacing.iconSm,
+                  ),
                 ),
               ],
             ),
