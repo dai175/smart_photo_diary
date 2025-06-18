@@ -21,7 +21,16 @@ void main() {
 
     test('displayNames returns all category names', () {
       final names = PromptCategory.displayNames;
-      expect(names.length, 8);
+      expect(names.length, 17);
+      expect(names, contains('感情'));
+      expect(names, contains('感情深掘り'));
+      expect(names, contains('感情五感'));
+      expect(names, contains('感情成長'));
+      expect(names, contains('感情つながり'));
+      expect(names, contains('感情発見'));
+      expect(names, contains('感情幻想'));
+      expect(names, contains('感情癒し'));
+      expect(names, contains('感情エネルギー'));
       expect(names, contains('日常'));
       expect(names, contains('旅行'));
       expect(names, contains('仕事'));

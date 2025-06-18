@@ -131,14 +131,15 @@ void main() {
       
       // 検索実行
       final searchResults = promptService.searchPrompts(
-        '今日',
+        '写真',
         isPremium: true,
       );
       
       expect(searchResults, isNotEmpty);
       expect(searchResults.every((p) => 
-          p.text.contains('今日') || 
-          p.tags.any((tag) => tag.contains('今日'))
+          p.text.contains('写真') || 
+          p.tags.any((tag) => tag.contains('写真')) ||
+          p.description?.contains('写真') == true
       ), true);
     });
     
