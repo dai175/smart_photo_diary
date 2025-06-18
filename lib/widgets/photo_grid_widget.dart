@@ -69,7 +69,7 @@ class PhotoGridWidget extends StatelessWidget {
     if (controller.photoAssets.isEmpty) {
       return SizedBox(
         height: AppConstants.photoGridHeight,
-        child: _buildEmptyState(),
+        child: _buildEmptyState(context),
       );
     }
 
@@ -113,7 +113,7 @@ class PhotoGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -121,21 +121,20 @@ class PhotoGridWidget extends StatelessWidget {
           Container(
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              color: AppColors.primaryContainer.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
               borderRadius: AppSpacing.cardRadius,
             ),
             child: Icon(
               Icons.photo_library_outlined,
               size: AppSpacing.iconLg,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             AppConstants.noPhotosMessage,
-            style: AppTypography.withColor(
-              AppTypography.bodyMedium,
-              AppColors.onSurfaceVariant,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
