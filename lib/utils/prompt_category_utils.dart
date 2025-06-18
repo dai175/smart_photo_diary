@@ -88,23 +88,16 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return 0;  // Premium専用カテゴリ
       
-      // 従来カテゴリ（後方互換性）
+      // 従来カテゴリ（レガシー、プロンプトなし）
       case PromptCategory.daily:
-        return PromptCategorySpecs.dailyCategory.basicPromptCount;
       case PromptCategory.gratitude:
-        return PromptCategorySpecs.gratitudeCategory.basicPromptCount;
       case PromptCategory.travel:
-        return PromptCategorySpecs.travelCategory.basicPromptCount;
       case PromptCategory.work:
-        return PromptCategorySpecs.workCategory.basicPromptCount;
       case PromptCategory.reflection:
-        return PromptCategorySpecs.reflectionCategory.basicPromptCount;
       case PromptCategory.creative:
-        return PromptCategorySpecs.creativeCategory.basicPromptCount;
       case PromptCategory.wellness:
-        return PromptCategorySpecs.wellnessCategory.basicPromptCount;
       case PromptCategory.relationships:
-        return PromptCategorySpecs.relationshipsCategory.basicPromptCount;
+        return 0; // レガシーカテゴリにはプロンプトなし
     }
   }
   
@@ -119,32 +112,25 @@ class PromptCategoryUtils {
         return 0;  // Basic専用カテゴリ
       case PromptCategory.emotionDepth:
       case PromptCategory.sensoryEmotion:
-        return 2;  // 各2個のPremiumプロンプト
       case PromptCategory.emotionGrowth:
       case PromptCategory.emotionConnection:
       case PromptCategory.emotionDiscovery:
-      case PromptCategory.emotionFantasy:
       case PromptCategory.emotionHealing:
       case PromptCategory.emotionEnergy:
-        return 2;  // 各2個程度のPremiumプロンプト
+        return 2;  // 各2個のPremiumプロンプト
+      case PromptCategory.emotionFantasy:
+        return 1;  // 1個のPremiumプロンプト
       
-      // 従来カテゴリ（後方互換性）
+      // 従来カテゴリ（レガシー、プロンプトなし）
       case PromptCategory.daily:
-        return PromptCategorySpecs.dailyCategory.premiumPromptCount;
       case PromptCategory.gratitude:
-        return PromptCategorySpecs.gratitudeCategory.premiumPromptCount;
       case PromptCategory.travel:
-        return PromptCategorySpecs.travelCategory.premiumPromptCount;
       case PromptCategory.work:
-        return PromptCategorySpecs.workCategory.premiumPromptCount;
       case PromptCategory.reflection:
-        return PromptCategorySpecs.reflectionCategory.premiumPromptCount;
       case PromptCategory.creative:
-        return PromptCategorySpecs.creativeCategory.premiumPromptCount;
       case PromptCategory.wellness:
-        return PromptCategorySpecs.wellnessCategory.premiumPromptCount;
       case PromptCategory.relationships:
-        return PromptCategorySpecs.relationshipsCategory.premiumPromptCount;
+        return 0; // レガシーカテゴリにはプロンプトなし
     }
   }
   
@@ -187,23 +173,23 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return 'エネルギーや活力を感じるプロンプト';
       
-      // 従来カテゴリ（後方互換性）
+      // 従来カテゴリ（レガシー、使用されません）
       case PromptCategory.daily:
-        return PromptCategorySpecs.dailyCategory.description;
+        return '日常の出来事や感情を記録（非推奨）';
       case PromptCategory.travel:
-        return PromptCategorySpecs.travelCategory.description;
+        return '旅行体験の記録（非推奨）';
       case PromptCategory.work:
-        return PromptCategorySpecs.workCategory.description;
+        return '仕事での成長記録（非推奨）';
       case PromptCategory.gratitude:
-        return PromptCategorySpecs.gratitudeCategory.description;
+        return '感謝の記録（非推奨）';
       case PromptCategory.reflection:
-        return PromptCategorySpecs.reflectionCategory.description;
+        return '内省と振り返り（非推奨）';
       case PromptCategory.creative:
-        return PromptCategorySpecs.creativeCategory.description;
+        return '創作活動支援（非推奨）';
       case PromptCategory.wellness:
-        return PromptCategorySpecs.wellnessCategory.description;
+        return '健康とウェルネス（非推奨）';
       case PromptCategory.relationships:
-        return PromptCategorySpecs.relationshipsCategory.description;
+        return '人間関係の記録（非推奨）';
     }
   }
   
@@ -233,23 +219,23 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return ['感情エネルギー', 'エネルギー', '活力', '生命力'];
       
-      // 従来カテゴリ（後方互換性）
+      // 従来カテゴリ（レガシー、使用されません）
       case PromptCategory.daily:
-        return PromptCategorySpecs.dailyCategory.recommendedTags;
+        return ['日常', '出来事'];
       case PromptCategory.travel:
-        return PromptCategorySpecs.travelCategory.recommendedTags;
+        return ['旅行', '体験'];
       case PromptCategory.work:
-        return PromptCategorySpecs.workCategory.recommendedTags;
+        return ['仕事', '成長'];
       case PromptCategory.gratitude:
-        return PromptCategorySpecs.gratitudeCategory.recommendedTags;
+        return ['感謝', '幸せ'];
       case PromptCategory.reflection:
-        return PromptCategorySpecs.reflectionCategory.recommendedTags;
+        return ['振り返り', '内省'];
       case PromptCategory.creative:
-        return PromptCategorySpecs.creativeCategory.recommendedTags;
+        return ['創作', '表現'];
       case PromptCategory.wellness:
-        return PromptCategorySpecs.wellnessCategory.recommendedTags;
+        return ['健康', 'ウェルネス'];
       case PromptCategory.relationships:
-        return PromptCategorySpecs.relationshipsCategory.recommendedTags;
+        return ['人間関係', 'つながり'];
     }
   }
   
@@ -337,23 +323,23 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return ['活力の向上', 'モチベーション増加', 'ポジティブ思考'];
       
-      // 従来カテゴリ（後方互換性）
+      // 従来カテゴリ（レガシー、使用されません）
       case PromptCategory.daily:
-        return PromptCategorySpecs.dailyCategory.expectedBenefits;
+        return ['日記習慣の形成'];
       case PromptCategory.travel:
-        return PromptCategorySpecs.travelCategory.expectedBenefits;
+        return ['旅行記録の質向上'];
       case PromptCategory.work:
-        return PromptCategorySpecs.workCategory.expectedBenefits;
+        return ['キャリア発展支援'];
       case PromptCategory.gratitude:
-        return PromptCategorySpecs.gratitudeCategory.expectedBenefits;
+        return ['感謝の心育成'];
       case PromptCategory.reflection:
-        return PromptCategorySpecs.reflectionCategory.expectedBenefits;
+        return ['自己理解の深化'];
       case PromptCategory.creative:
-        return PromptCategorySpecs.creativeCategory.expectedBenefits;
+        return ['創造性の向上'];
       case PromptCategory.wellness:
-        return PromptCategorySpecs.wellnessCategory.expectedBenefits;
+        return ['健康意識の向上'];
       case PromptCategory.relationships:
-        return PromptCategorySpecs.relationshipsCategory.expectedBenefits;
+        return ['人間関係の改善'];
     }
   }
 
