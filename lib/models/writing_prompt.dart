@@ -3,32 +3,62 @@ import 'package:hive/hive.dart';
 
 part 'writing_prompt.g.dart';
 
-/// ライティングプロンプトのカテゴリ定義
-/// Premiumプラン限定機能として使用されます
+/// ライティングプロンプトのカテゴリ定義（感情深掘り型対応）
+/// 感情中心のプロンプトカテゴリを提供します
 @HiveType(typeId: 3)
 enum PromptCategory {
+  // 基本感情カテゴリ（Basic用）
   @HiveField(0)
-  daily('daily', '日常'),
+  emotion('emotion', '感情'),
   
+  // Premium感情深掘りカテゴリ
   @HiveField(1)
-  travel('travel', '旅行'),
+  emotionDepth('emotion_depth', '感情深掘り'),
   
   @HiveField(2)
-  work('work', '仕事'),
+  sensoryEmotion('sensory_emotion', '感情五感'),
   
   @HiveField(3)
-  gratitude('gratitude', '感謝'),
+  emotionGrowth('emotion_growth', '感情成長'),
   
   @HiveField(4)
-  reflection('reflection', '振り返り'),
+  emotionConnection('emotion_connection', '感情つながり'),
   
   @HiveField(5)
-  creative('creative', '創作'),
+  emotionDiscovery('emotion_discovery', '感情発見'),
   
   @HiveField(6)
-  wellness('wellness', '健康・ウェルネス'),
+  emotionFantasy('emotion_fantasy', '感情幻想'),
   
   @HiveField(7)
+  emotionHealing('emotion_healing', '感情癒し'),
+  
+  @HiveField(8)
+  emotionEnergy('emotion_energy', '感情エネルギー'),
+  
+  // 従来カテゴリ（後方互換性のため残す）
+  @HiveField(9)
+  daily('daily', '日常'),
+  
+  @HiveField(10)
+  travel('travel', '旅行'),
+  
+  @HiveField(11)
+  work('work', '仕事'),
+  
+  @HiveField(12)
+  gratitude('gratitude', '感謝'),
+  
+  @HiveField(13)
+  reflection('reflection', '振り返り'),
+  
+  @HiveField(14)
+  creative('creative', '創作'),
+  
+  @HiveField(15)
+  wellness('wellness', '健康・ウェルネス'),
+  
+  @HiveField(16)
   relationships('relationships', '人間関係');
 
   const PromptCategory(this.id, this.displayName);

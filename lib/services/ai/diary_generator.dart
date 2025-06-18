@@ -17,6 +17,66 @@ class DiaryGenerator {
         _offlineService = offlineService ?? OfflineFallbackService();
 
 
+  /// プロンプト種別を分析
+  String _analyzePromptType(String? prompt) {
+    if (prompt == null) return 'general';
+    
+    final lowerPrompt = prompt.toLowerCase();
+    
+    // 感情系キーワード
+    if (lowerPrompt.contains('感情') || lowerPrompt.contains('気持ち') || 
+        lowerPrompt.contains('感じ') || lowerPrompt.contains('心')) {
+      return 'emotion';
+    }
+    
+    // 成長・発見系キーワード
+    if (lowerPrompt.contains('成長') || lowerPrompt.contains('変化') || 
+        lowerPrompt.contains('発見') || lowerPrompt.contains('気づき')) {
+      return 'growth';
+    }
+    
+    // つながり系キーワード
+    if (lowerPrompt.contains('つながり') || lowerPrompt.contains('人') || 
+        lowerPrompt.contains('関係')) {
+      return 'connection';
+    }
+    
+    // 癒し系キーワード
+    if (lowerPrompt.contains('癒し') || lowerPrompt.contains('平和') || 
+        lowerPrompt.contains('安らぎ')) {
+      return 'healing';
+    }
+    
+    return 'emotion';  // デフォルトは感情型
+  }
+
+  /// プロンプト種別に応じた最適化パラメータを取得
+  Map<String, dynamic> _getOptimizationParams(String promptType) {
+    switch (promptType) {
+      case 'growth':
+        return {
+          'maxTokens': 320,  // 成長系は少し長めの記述
+          'emphasis': '成長と変化に焦点を当てて',
+        };
+      case 'connection':
+        return {
+          'maxTokens': 310,  // つながり系は人間関係の描写
+          'emphasis': '人とのつながりや関係性を重視して',
+        };
+      case 'healing':
+        return {
+          'maxTokens': 290,  // 癒し系は静かで穏やかな文体
+          'emphasis': '穏やかで心安らぐ文体で',
+        };
+      case 'emotion':
+      default:
+        return {
+          'maxTokens': 300,  // 感情系は標準
+          'emphasis': '感情の深みを大切にして',
+        };
+    }
+  }
+
   /// 画像から直接日記を生成
   Future<DiaryGenerationResult> generateFromImage({
     required Uint8List imageData,
@@ -31,41 +91,67 @@ class DiaryGenerator {
     }
 
     try {
-      // プロンプトの作成
+      // プロンプト種別分析と最適化パラメータ取得
+      final promptType = _analyzePromptType(prompt);
+      final optimParams = _getOptimizationParams(promptType);
+      final emphasis = optimParams['emphasis'] as String;
+      final maxTokens = optimParams['maxTokens'] as int;
+
+      // プロンプトの作成（感情深掘り型対応）
       final basePrompt = '''
-あなたは日記作成の専門家です。この写真を見て、その日の出来事を振り返る日記を日本語で作成してください。
+あなたは感情豊かな日記作成の専門家です。この写真を見て、その瞬間の感情や心の動きを中心とした日記を日本語で作成してください。
+単なる出来事の記録ではなく、写真から感じる気持ちや感情を深く掘り下げた個人的な日記を書いてください。
+
 タイトルと本文を分けて、以下の形式で出力してください。
 
 【タイトル】
-（5-10文字程度の簡潔なタイトル）
+（5-10文字程度で感情や印象を表現する簡潔なタイトル）
 
 【本文】
-（150-200文字程度の自然で個人的な文体の本文${photoTimes != null && photoTimes.length > 1 ? '。時系列に沿って出来事を描写してください' : ''}）
+（150-200文字程度で、感情や心の動きを中心とした自然で個人的な文体の本文${photoTimes != null && photoTimes.length > 1 ? '。時系列に沿って感情の変化を描写してください' : ''}）
 
 ${location != null ? '場所: $location\n' : ''}''';
 
-      // カスタムプロンプトが指定されている場合は統合
+      // カスタムプロンプトが指定されている場合は統合（感情深掘り型対応）
       final finalPrompt = prompt != null 
           ? '''$basePrompt
 
-以下のヒントを参考にして日記を作成してください：
+以下のライティングプロンプトを参考にして、写真から感じたことを深く掘り下げて日記を作成してください：
+
 「$prompt」
 
-写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。'''
-          : '''$basePrompt
-写真の内容を詳しく観察して、その時の気持ちや体験を想像しながら書いてください。''';
+写真を見ながら以下の観点で日記を書いてください：
+- 写真を見て最初に感じた気持ちや感情
+- なぜその感情が生まれたのかの理由や背景
+- その瞬間に感じた心の動きや印象
+- 写真の場面で特に心に残った部分や要素
+- その体験から得られた気づきや発見
 
-      // デバッグログ: プロンプト統合確認
+$emphasis、個人的で心に響く日記を作成してください。'''
+          : '''$basePrompt
+
+写真の内容を詳しく観察して、以下の点を意識して日記を書いてください：
+- 写真を見て感じる気持ちや感情
+- その瞬間の心の状態や印象
+- 写真から読み取れる雰囲気や感覚
+- 自分にとって意味のある部分や気づき
+
+感情豊かで個人的な日記を作成してください。''';
+
+      // デバッグログ: プロンプト統合確認（感情深掘り型対応）
       debugPrint('=== AI生成プロンプト統合確認 ===');
       debugPrint('カスタムプロンプト: ${prompt ?? "なし"}');
+      debugPrint('プロンプト種別: $promptType');
+      debugPrint('最適化パラメータ: maxTokens=$maxTokens, emphasis=$emphasis');
       debugPrint('統合後プロンプト長: ${finalPrompt.length}文字');
       if (prompt != null) {
-        debugPrint('プロンプト統合: 成功');
+        debugPrint('感情深掘り型プロンプト統合: 成功');
       }
 
       final response = await _apiClient.sendVisionRequest(
         prompt: finalPrompt,
         imageData: imageData,
+        maxOutputTokens: maxTokens,  // 生成ロジック最適化: プロンプト種別に応じた動的調整
       );
 
       if (response != null) {
@@ -257,20 +343,29 @@ ${location != null ? '場所: $location\n' : ''}
       return _offlineService.generateDiary([], DateTime.now(), location, photoTimes);
     }
 
+    // プロンプト種別分析と最適化パラメータ取得
+    final promptType = _analyzePromptType(customPrompt);
+    final optimParams = _getOptimizationParams(promptType);
+    final emphasis = optimParams['emphasis'] as String;
+    final baseMaxTokens = optimParams['maxTokens'] as int;
+    final multiImageMaxTokens = baseMaxTokens + 50;  // 複数画像は少し多めに
+
     final dateStr = DateFormat('yyyy年MM月dd日').format(photoTimes.first);
     final timeRange = _getTimeOfDayForPhotos(photoTimes.first, photoTimes);
     
-    // 統合プロンプト
+    // 統合プロンプト（感情深掘り型対応）
     final analysesText = photoAnalyses.join('\n');
     final basePrompt = '''
-以下の写真分析結果から、その日の出来事を振り返る日記を日本語で作成してください。
+以下の写真分析結果から、その日の感情や心の動きを中心とした日記を日本語で作成してください。
+単なる出来事の記録ではなく、一日を通して感じた気持ちや感情の変化を深く掘り下げた個人的な日記を書いてください。
+
 タイトルと本文を分けて、以下の形式で出力してください。
 
 【タイトル】
-（5-10文字程度の簡潔なタイトル）
+（5-10文字程度でその日の感情や印象を表現する簡潔なタイトル）
 
 【本文】
-（150-200文字程度の自然で個人的な文体の本文。時系列に沿って出来事を描写してください）
+（150-200文字程度で、感情や心の動きを中心とした自然で個人的な文体の本文。時系列に沿って感情の変化や発見を描写してください）
 
 日付: $dateStr
 時間帯: $timeRange
@@ -279,28 +374,47 @@ ${location != null ? '場所: $location\n' : ''}
 写真分析結果:
 $analysesText''';
 
-    // カスタムプロンプトが指定されている場合は統合
+    // カスタムプロンプトが指定されている場合は統合（感情深掘り型対応）
     final prompt = customPrompt != null 
         ? '''$basePrompt
 
-以下のヒントを参考にして日記を作成してください：
+以下のライティングプロンプトを参考にして、写真から感じたことを深く掘り下げて日記を作成してください：
+
 「$customPrompt」
 
-これらの写真から読み取れる一日の流れや体験を、自然な日記の文体で表現してください。'''
+写真の分析結果を踏まえ、以下の観点で日記を書いてください：
+- 一日を通して感じた感情の変化や流れ
+- 時間とともに変わっていく気持ちや印象
+- 各場面で心に残った瞬間や体験
+- 写真を振り返って感じる発見や気づき
+- その日の体験が自分に与えた影響
+
+$emphasis、時系列に沿って個人的で心に響く日記を作成してください。'''
         : '''$basePrompt
 
-これらの写真から読み取れる一日の流れや体験を、自然な日記の文体で表現してください。''';
+これらの写真から読み取れる一日の流れや体験を、以下の点を意識して日記に表現してください：
+- 一日を通して感じた感情の変化
+- 時間の経過とともに変わる気持ちや印象
+- 各場面で心に残った瞬間や体験
+- 写真を振り返って得られる気づきや発見
 
-    // デバッグログ: 複数画像プロンプト統合確認
+感情豊かで個人的な日記を作成してください。''';
+
+    // デバッグログ: 複数画像プロンプト統合確認（感情深掘り型対応）
     debugPrint('=== 複数画像AI生成プロンプト統合確認 ===');
     debugPrint('カスタムプロンプト: ${customPrompt ?? "なし"}');
+    debugPrint('プロンプト種別: $promptType');
+    debugPrint('最適化パラメータ: maxTokens=$multiImageMaxTokens, emphasis=$emphasis');
     debugPrint('統合後プロンプト長: ${prompt.length}文字');
     if (customPrompt != null) {
-      debugPrint('複数画像プロンプト統合: 成功');
+      debugPrint('複数画像感情深掘り型プロンプト統合: 成功');
     }
 
     try {
-      final response = await _apiClient.sendTextRequest(prompt: prompt);
+      final response = await _apiClient.sendTextRequest(
+        prompt: prompt,
+        maxOutputTokens: multiImageMaxTokens,  // 生成ロジック最適化: プロンプト種別に応じた動的調整
+      );
 
       if (response != null) {
         final content = _apiClient.extractTextFromResponse(response);

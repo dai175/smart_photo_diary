@@ -115,52 +115,97 @@ class PromptCategoryAdapter extends TypeAdapter<PromptCategory> {
   PromptCategory read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return PromptCategory.daily;
+        return PromptCategory.emotion;
       case 1:
-        return PromptCategory.travel;
+        return PromptCategory.emotionDepth;
       case 2:
-        return PromptCategory.work;
+        return PromptCategory.sensoryEmotion;
       case 3:
-        return PromptCategory.gratitude;
+        return PromptCategory.emotionGrowth;
       case 4:
-        return PromptCategory.reflection;
+        return PromptCategory.emotionConnection;
       case 5:
-        return PromptCategory.creative;
+        return PromptCategory.emotionDiscovery;
       case 6:
-        return PromptCategory.wellness;
+        return PromptCategory.emotionFantasy;
       case 7:
+        return PromptCategory.emotionHealing;
+      case 8:
+        return PromptCategory.emotionEnergy;
+      case 9:
+        return PromptCategory.daily;
+      case 10:
+        return PromptCategory.travel;
+      case 11:
+        return PromptCategory.work;
+      case 12:
+        return PromptCategory.gratitude;
+      case 13:
+        return PromptCategory.reflection;
+      case 14:
+        return PromptCategory.creative;
+      case 15:
+        return PromptCategory.wellness;
+      case 16:
         return PromptCategory.relationships;
       default:
-        return PromptCategory.daily;
+        return PromptCategory.emotion;
     }
   }
 
   @override
   void write(BinaryWriter writer, PromptCategory obj) {
     switch (obj) {
-      case PromptCategory.daily:
+      case PromptCategory.emotion:
         writer.writeByte(0);
         break;
-      case PromptCategory.travel:
+      case PromptCategory.emotionDepth:
         writer.writeByte(1);
         break;
-      case PromptCategory.work:
+      case PromptCategory.sensoryEmotion:
         writer.writeByte(2);
         break;
-      case PromptCategory.gratitude:
+      case PromptCategory.emotionGrowth:
         writer.writeByte(3);
         break;
-      case PromptCategory.reflection:
+      case PromptCategory.emotionConnection:
         writer.writeByte(4);
         break;
-      case PromptCategory.creative:
+      case PromptCategory.emotionDiscovery:
         writer.writeByte(5);
         break;
-      case PromptCategory.wellness:
+      case PromptCategory.emotionFantasy:
         writer.writeByte(6);
         break;
-      case PromptCategory.relationships:
+      case PromptCategory.emotionHealing:
         writer.writeByte(7);
+        break;
+      case PromptCategory.emotionEnergy:
+        writer.writeByte(8);
+        break;
+      case PromptCategory.daily:
+        writer.writeByte(9);
+        break;
+      case PromptCategory.travel:
+        writer.writeByte(10);
+        break;
+      case PromptCategory.work:
+        writer.writeByte(11);
+        break;
+      case PromptCategory.gratitude:
+        writer.writeByte(12);
+        break;
+      case PromptCategory.reflection:
+        writer.writeByte(13);
+        break;
+      case PromptCategory.creative:
+        writer.writeByte(14);
+        break;
+      case PromptCategory.wellness:
+        writer.writeByte(15);
+        break;
+      case PromptCategory.relationships:
+        writer.writeByte(16);
         break;
     }
   }

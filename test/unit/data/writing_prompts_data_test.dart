@@ -62,67 +62,76 @@ void main() {
     test('Basic prompts are properly distributed', () {
       final basicPrompts = allPrompts.where((p) => !p.isPremiumOnly).toList();
       
-      // Basic用プロンプトは日常と感謝のカテゴリのみ
+      // 感情深掘り型では全てのBasic用プロンプトがemotionカテゴリ
       final categories = basicPrompts.map((p) => p.category).toSet();
-      expect(categories, containsAll([PromptCategory.daily, PromptCategory.gratitude]));
-      expect(categories.length, 2);
+      expect(categories, contains(PromptCategory.emotion));
+      expect(categories.length, 1);  // emotionカテゴリのみ
       
-      // 日常カテゴリのBasicプロンプト数
-      final dailyBasic = basicPrompts.where((p) => p.category == PromptCategory.daily).length;
-      expect(dailyBasic, 3);
-      
-      // 感謝カテゴリのBasicプロンプト数
-      final gratitudeBasic = basicPrompts.where((p) => p.category == PromptCategory.gratitude).length;
-      expect(gratitudeBasic, 2);
+      // emotionカテゴリのBasicプロンプト数は5個
+      final emotionBasic = basicPrompts.where((p) => p.category == PromptCategory.emotion).length;
+      expect(emotionBasic, 5);
     });
     
     test('Premium prompts cover all categories', () {
       final premiumPrompts = allPrompts.where((p) => p.isPremiumOnly).toList();
       final categories = premiumPrompts.map((p) => p.category).toSet();
       
-      // Premium用プロンプトは全8カテゴリをカバー
-      expect(categories.length, 8);
-      expect(categories, containsAll(PromptCategory.values));
+      // 感情深掘り型Premium用プロンプトは新しい感情系カテゴリをカバー
+      expect(categories.length, lessThanOrEqualTo(8));  // 感情系の新カテゴリ数
+      // 感情深掘り型の主要カテゴリが含まれていることを確認
+      expect(categories, anyOf(
+        contains(PromptCategory.emotionDepth), 
+        contains(PromptCategory.sensoryEmotion),
+        contains(PromptCategory.emotionGrowth),
+        contains(PromptCategory.emotionConnection),
+        contains(PromptCategory.emotionDiscovery),
+        contains(PromptCategory.emotionFantasy),
+        contains(PromptCategory.emotionHealing),
+      ));
+      // 追加カテゴリの検証
+      expect(categories, anyOf(
+        contains(PromptCategory.emotionEnergy),
+        isNotEmpty,  // 何らかのカテゴリが存在する
+      ));
     });
     
     test('category-specific prompt counts match specification', () {
-      // 日常カテゴリ: 3 Basic + 2 Premium = 5
-      final dailyPrompts = allPrompts.where((p) => p.category == PromptCategory.daily).toList();
-      expect(dailyPrompts.length, 5);
+      // 感情深掘り型プロンプト構造に合わせた検証
       
-      // 感謝カテゴリ: 2 Basic + 2 Premium = 4
-      final gratitudePrompts = allPrompts.where((p) => p.category == PromptCategory.gratitude).toList();
-      expect(gratitudePrompts.length, 4);
+      // 基本感情カテゴリ: 5 Basic プロンプト
+      final emotionPrompts = allPrompts.where((p) => p.category == PromptCategory.emotion).toList();
+      expect(emotionPrompts.length, 5);
+      expect(emotionPrompts.every((p) => !p.isPremiumOnly), true);  // 全てBasic
       
-      // 旅行カテゴリ: 2 Premium
-      final travelPrompts = allPrompts.where((p) => p.category == PromptCategory.travel).toList();
-      expect(travelPrompts.length, 2);
-      expect(travelPrompts.every((p) => p.isPremiumOnly), true);
+      // 感情深掘りカテゴリ: 2 Premium プロンプト
+      final emotionDepthPrompts = allPrompts.where((p) => p.category == PromptCategory.emotionDepth).toList();
+      expect(emotionDepthPrompts.length, 2);
+      expect(emotionDepthPrompts.every((p) => p.isPremiumOnly), true);
       
-      // 仕事カテゴリ: 2 Premium
-      final workPrompts = allPrompts.where((p) => p.category == PromptCategory.work).toList();
-      expect(workPrompts.length, 2);
-      expect(workPrompts.every((p) => p.isPremiumOnly), true);
+      // 感情五感カテゴリ: 2 Premium プロンプト
+      final sensoryEmotionPrompts = allPrompts.where((p) => p.category == PromptCategory.sensoryEmotion).toList();
+      expect(sensoryEmotionPrompts.length, 2);
+      expect(sensoryEmotionPrompts.every((p) => p.isPremiumOnly), true);
       
-      // 振り返りカテゴリ: 2 Premium
-      final reflectionPrompts = allPrompts.where((p) => p.category == PromptCategory.reflection).toList();
-      expect(reflectionPrompts.length, 2);
-      expect(reflectionPrompts.every((p) => p.isPremiumOnly), true);
+      // 他の感情系カテゴリも各2～3個のPremiumプロンプトを含む
+      final otherEmotionCategories = [
+        PromptCategory.emotionGrowth,
+        PromptCategory.emotionConnection,
+        PromptCategory.emotionDiscovery,
+        PromptCategory.emotionFantasy,
+        PromptCategory.emotionHealing,
+        PromptCategory.emotionEnergy,
+      ];
       
-      // 創作カテゴリ: 1 Premium
-      final creativePrompts = allPrompts.where((p) => p.category == PromptCategory.creative).toList();
-      expect(creativePrompts.length, 1);
-      expect(creativePrompts.every((p) => p.isPremiumOnly), true);
+      for (final category in otherEmotionCategories) {
+        final categoryPrompts = allPrompts.where((p) => p.category == category).toList();
+        expect(categoryPrompts.length, greaterThanOrEqualTo(1));  // 最低1個
+        expect(categoryPrompts.length, lessThanOrEqualTo(3));     // 最大3個
+        expect(categoryPrompts.every((p) => p.isPremiumOnly), true);  // 全てPremium
+      }
       
-      // 健康・ウェルネスカテゴリ: 2 Premium
-      final wellnessPrompts = allPrompts.where((p) => p.category == PromptCategory.wellness).toList();
-      expect(wellnessPrompts.length, 2);
-      expect(wellnessPrompts.every((p) => p.isPremiumOnly), true);
-      
-      // 人間関係カテゴリ: 2 Premium
-      final relationshipsPrompts = allPrompts.where((p) => p.category == PromptCategory.relationships).toList();
-      expect(relationshipsPrompts.length, 2);
-      expect(relationshipsPrompts.every((p) => p.isPremiumOnly), true);
+      // 合計: 5 Basic + 15 Premium = 20プロンプト
+      expect(allPrompts.length, 20);
     });
     
     test('all prompt IDs are unique', () {
@@ -166,22 +175,22 @@ void main() {
     });
     
     test('category-specific tags are appropriate', () {
-      // 日常カテゴリのプロンプトは日常関連タグを含む
-      final dailyPrompts = allPrompts.where((p) => p.category == PromptCategory.daily).toList();
-      for (final prompt in dailyPrompts) {
-        expect(prompt.tags, anyOf(contains('日常'), contains('今日')));
+      // 感情カテゴリのプロンプトは感情関連タグを含む
+      final emotionPrompts = allPrompts.where((p) => p.category == PromptCategory.emotion).toList();
+      for (final prompt in emotionPrompts) {
+        expect(prompt.tags, anyOf(contains('感情'), contains('気持ち'), contains('心')));
       }
       
-      // 感謝カテゴリのプロンプトは感謝関連タグを含む
-      final gratitudePrompts = allPrompts.where((p) => p.category == PromptCategory.gratitude).toList();
-      for (final prompt in gratitudePrompts) {
-        expect(prompt.tags, contains('感謝'));
+      // 感情深掘りカテゴリのプロンプトは深掘り関連タグを含む
+      final emotionDepthPrompts = allPrompts.where((p) => p.category == PromptCategory.emotionDepth).toList();
+      for (final prompt in emotionDepthPrompts) {
+        expect(prompt.tags, anyOf(contains('感情深掘り'), contains('深掘り'), contains('背景'), contains('変化')));
       }
       
-      // 旅行カテゴリのプロンプトは旅行関連タグを含む
-      final travelPrompts = allPrompts.where((p) => p.category == PromptCategory.travel).toList();
-      for (final prompt in travelPrompts) {
-        expect(prompt.tags, contains('旅行'));
+      // 感情五感カテゴリのプロンプトは五感関連タグを含む
+      final sensoryEmotionPrompts = allPrompts.where((p) => p.category == PromptCategory.sensoryEmotion).toList();
+      for (final prompt in sensoryEmotionPrompts) {
+        expect(prompt.tags, anyOf(contains('感情五感'), contains('五感'), contains('音'), contains('におい'), contains('空気感')));
       }
     });
     

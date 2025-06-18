@@ -10,45 +10,62 @@ import '../ui/design_system/app_colors.dart';
 
 /// プロンプトカテゴリユーティリティ
 class PromptCategoryUtils {
-  /// プラン別に利用可能なカテゴリを取得
+  /// プラン別に利用可能なカテゴリを取得（感情深掘り型対応）
   /// 
   /// [isPremium] Premium プランかどうか
   /// 戻り値: 利用可能なカテゴリリスト
   static List<PromptCategory> getAvailableCategories({required bool isPremium}) {
     if (isPremium) {
-      // Premiumは全カテゴリ利用可能
-      return PromptCategory.values;
-    } else {
-      // Basicは限定カテゴリのみ
+      // Premiumは全感情深掘り型カテゴリ利用可能
       return [
-        PromptCategory.daily,     // 日常（基本）
-        PromptCategory.gratitude, // 感謝（一部）
+        PromptCategory.emotion,         // 基本感情（Basic用）
+        PromptCategory.emotionDepth,    // 感情深掘り
+        PromptCategory.sensoryEmotion,  // 感情五感
+        PromptCategory.emotionGrowth,   // 感情成長
+        PromptCategory.emotionConnection, // 感情つながり
+        PromptCategory.emotionDiscovery, // 感情発見
+        PromptCategory.emotionFantasy,  // 感情幻想
+        PromptCategory.emotionHealing,  // 感情癒し
+        PromptCategory.emotionEnergy,   // 感情エネルギー
+      ];
+    } else {
+      // Basicは基本感情カテゴリのみ
+      return [
+        PromptCategory.emotion,  // 基本感情
       ];
     }
   }
   
-  /// カテゴリがBasicプランで利用可能かチェック
+  /// カテゴリがBasicプランで利用可能かチェック（感情深掘り型対応）
   /// 
   /// [category] チェック対象のカテゴリ
   /// 戻り値: Basicプランで利用可能かどうか
   static bool isBasicAvailable(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return true;  // 基本感情はBasic利用可能
+      case PromptCategory.emotionDepth:
+      case PromptCategory.sensoryEmotion:
+      case PromptCategory.emotionGrowth:
+      case PromptCategory.emotionConnection:
+      case PromptCategory.emotionDiscovery:
+      case PromptCategory.emotionFantasy:
+      case PromptCategory.emotionHealing:
+      case PromptCategory.emotionEnergy:
+        return false;  // Premium感情カテゴリはBasic利用不可
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
-        return PromptCategorySpecs.dailyCategory.isBasicAvailable;
       case PromptCategory.gratitude:
-        return PromptCategorySpecs.gratitudeCategory.isBasicAvailable;
+        return true;   // 従来のBasicカテゴリ
       case PromptCategory.travel:
-        return PromptCategorySpecs.travelCategory.isBasicAvailable;
       case PromptCategory.work:
-        return PromptCategorySpecs.workCategory.isBasicAvailable;
       case PromptCategory.reflection:
-        return PromptCategorySpecs.reflectionCategory.isBasicAvailable;
       case PromptCategory.creative:
-        return PromptCategorySpecs.creativeCategory.isBasicAvailable;
       case PromptCategory.wellness:
-        return PromptCategorySpecs.wellnessCategory.isBasicAvailable;
       case PromptCategory.relationships:
-        return PromptCategorySpecs.relationshipsCategory.isBasicAvailable;
+        return false;  // 従来のPremiumカテゴリ
     }
   }
   
@@ -58,6 +75,20 @@ class PromptCategoryUtils {
   /// 戻り値: Basicプラン用プロンプト数
   static int getBasicPromptCount(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return 5;  // Basic感情カテゴリ
+      case PromptCategory.emotionDepth:
+      case PromptCategory.sensoryEmotion:
+      case PromptCategory.emotionGrowth:
+      case PromptCategory.emotionConnection:
+      case PromptCategory.emotionDiscovery:
+      case PromptCategory.emotionFantasy:
+      case PromptCategory.emotionHealing:
+      case PromptCategory.emotionEnergy:
+        return 0;  // Premium専用カテゴリ
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
         return PromptCategorySpecs.dailyCategory.basicPromptCount;
       case PromptCategory.gratitude:
@@ -83,6 +114,21 @@ class PromptCategoryUtils {
   /// 戻り値: Premium追加プロンプト数
   static int getPremiumPromptCount(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return 0;  // Basic専用カテゴリ
+      case PromptCategory.emotionDepth:
+      case PromptCategory.sensoryEmotion:
+        return 2;  // 各2個のPremiumプロンプト
+      case PromptCategory.emotionGrowth:
+      case PromptCategory.emotionConnection:
+      case PromptCategory.emotionDiscovery:
+      case PromptCategory.emotionFantasy:
+      case PromptCategory.emotionHealing:
+      case PromptCategory.emotionEnergy:
+        return 2;  // 各2個程度のPremiumプロンプト
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
         return PromptCategorySpecs.dailyCategory.premiumPromptCount;
       case PromptCategory.gratitude:
@@ -121,6 +167,27 @@ class PromptCategoryUtils {
   /// 戻り値: カテゴリの説明文
   static String getCategoryDescription(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return '基本的な感情や気持ちを探るプロンプト';
+      case PromptCategory.emotionDepth:
+        return '感情の奥深くを掘り下げるプロンプト';
+      case PromptCategory.sensoryEmotion:
+        return '五感を通じて感情を表現するプロンプト';
+      case PromptCategory.emotionGrowth:
+        return '感情的成長を促すプロンプト';
+      case PromptCategory.emotionConnection:
+        return '人とのつながりを感じるプロンプト';
+      case PromptCategory.emotionDiscovery:
+        return '新しい感情を発見するプロンプト';
+      case PromptCategory.emotionFantasy:
+        return '想像力を使った感情表現プロンプト';
+      case PromptCategory.emotionHealing:
+        return '心の癒しを求めるプロンプト';
+      case PromptCategory.emotionEnergy:
+        return 'エネルギーや活力を感じるプロンプト';
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
         return PromptCategorySpecs.dailyCategory.description;
       case PromptCategory.travel:
@@ -146,6 +213,27 @@ class PromptCategoryUtils {
   /// 戻り値: 推奨タグリスト
   static List<String> getRecommendedTags(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return ['感情', '気持ち', '心', '印象'];
+      case PromptCategory.emotionDepth:
+        return ['感情深掘り', '深掘り', '背景', '変化'];
+      case PromptCategory.sensoryEmotion:
+        return ['感情五感', '五感', '音', 'におい', '空気感'];
+      case PromptCategory.emotionGrowth:
+        return ['感情成長', '成長', '発展', '進歩'];
+      case PromptCategory.emotionConnection:
+        return ['感情つながり', 'つながり', '絆', '関係'];
+      case PromptCategory.emotionDiscovery:
+        return ['感情発見', '発見', '気づき', '新しい視点'];
+      case PromptCategory.emotionFantasy:
+        return ['感情幻想', '想像', '創造', 'ファンタジー'];
+      case PromptCategory.emotionHealing:
+        return ['感情癒し', '癒し', '平安', '安らぎ'];
+      case PromptCategory.emotionEnergy:
+        return ['感情エネルギー', 'エネルギー', '活力', '生命力'];
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
         return PromptCategorySpecs.dailyCategory.recommendedTags;
       case PromptCategory.travel:
@@ -229,6 +317,27 @@ class PromptCategoryUtils {
   /// 戻り値: 期待効果のリスト
   static List<String> getExpectedBenefits(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return ['感情の認識向上', '自己理解の深化', '心の整理'];
+      case PromptCategory.emotionDepth:
+        return ['感情の深い洞察', '内面の成長', '心の平穏'];
+      case PromptCategory.sensoryEmotion:
+        return ['五感の鋭敏化', '感覚的記憶の向上', '豊かな表現力'];
+      case PromptCategory.emotionGrowth:
+        return ['精神的成長', 'ストレス解消', '前向きな思考'];
+      case PromptCategory.emotionConnection:
+        return ['人間関係の改善', '共感力の向上', '絆の深化'];
+      case PromptCategory.emotionDiscovery:
+        return ['新しい視点の獲得', '創造性の向上', '自己発見'];
+      case PromptCategory.emotionFantasy:
+        return ['想像力の発達', '創造的思考', '心の解放'];
+      case PromptCategory.emotionHealing:
+        return ['心の癒し', 'リラクゼーション', '内面の平和'];
+      case PromptCategory.emotionEnergy:
+        return ['活力の向上', 'モチベーション増加', 'ポジティブ思考'];
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
         return PromptCategorySpecs.dailyCategory.expectedBenefits;
       case PromptCategory.travel:
@@ -262,6 +371,27 @@ class PromptCategoryUtils {
   /// 戻り値: カテゴリに対応する色
   static Color getCategoryColor(PromptCategory category) {
     switch (category) {
+      // 感情深掘り型カテゴリ
+      case PromptCategory.emotion:
+        return AppColors.primary;
+      case PromptCategory.emotionDepth:
+        return const Color(0xFF673AB7); // Deep Purple
+      case PromptCategory.sensoryEmotion:
+        return const Color(0xFF009688); // Teal
+      case PromptCategory.emotionGrowth:
+        return const Color(0xFF4CAF50); // Green
+      case PromptCategory.emotionConnection:
+        return const Color(0xFFE91E63); // Pink
+      case PromptCategory.emotionDiscovery:
+        return const Color(0xFF2196F3); // Blue
+      case PromptCategory.emotionFantasy:
+        return const Color(0xFF9C27B0); // Purple
+      case PromptCategory.emotionHealing:
+        return const Color(0xFF00BCD4); // Cyan
+      case PromptCategory.emotionEnergy:
+        return const Color(0xFFFF9800); // Orange
+      
+      // 従来カテゴリ（後方互換性）
       case PromptCategory.daily:
         return AppColors.primary;
       case PromptCategory.travel:
@@ -325,6 +455,18 @@ class CategoryStats {
 class PromptWeightConfig {
   /// カテゴリ別の基本重み（デフォルト選択確率）
   static const Map<PromptCategory, double> categoryWeights = {
+    // 感情深掘り型カテゴリ
+    PromptCategory.emotion: 1.0,         // 基本感情（最も頻繁）
+    PromptCategory.emotionDepth: 0.8,    // 感情深掘り（高頻度）
+    PromptCategory.sensoryEmotion: 0.7,  // 感情五感（やや高頻度）
+    PromptCategory.emotionGrowth: 0.6,   // 感情成長（中頻度）
+    PromptCategory.emotionConnection: 0.6, // 感情つながり（中頻度）
+    PromptCategory.emotionDiscovery: 0.5, // 感情発見（中低頻度）
+    PromptCategory.emotionFantasy: 0.3,  // 感情幻想（低頻度）
+    PromptCategory.emotionHealing: 0.7,  // 感情癒し（やや高頻度）
+    PromptCategory.emotionEnergy: 0.6,   // 感情エネルギー（中頻度）
+    
+    // 従来カテゴリ（後方互換性）
     PromptCategory.daily: 1.0,        // 標準（最も頻繁に使用される）
     PromptCategory.gratitude: 0.8,    // やや高頻度
     PromptCategory.reflection: 0.6,   // 中頻度
