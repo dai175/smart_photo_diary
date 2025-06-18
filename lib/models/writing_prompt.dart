@@ -3,8 +3,8 @@ import 'package:hive/hive.dart';
 
 part 'writing_prompt.g.dart';
 
-/// ライティングプロンプトのカテゴリ定義（感情深掘り型対応）
-/// 感情中心のプロンプトカテゴリを提供します
+/// ライティングプロンプトのカテゴリ定義（感情深掘り型）
+/// 感情中心のプロンプトカテゴリのみを提供します
 @HiveType(typeId: 3)
 enum PromptCategory {
   // 基本感情カテゴリ（Basic用）
@@ -34,32 +34,7 @@ enum PromptCategory {
   emotionHealing('emotion_healing', '感情癒し'),
   
   @HiveField(8)
-  emotionEnergy('emotion_energy', '感情エネルギー'),
-  
-  // 従来カテゴリ（後方互換性のため残す）
-  @HiveField(9)
-  daily('daily', '日常'),
-  
-  @HiveField(10)
-  travel('travel', '旅行'),
-  
-  @HiveField(11)
-  work('work', '仕事'),
-  
-  @HiveField(12)
-  gratitude('gratitude', '感謝'),
-  
-  @HiveField(13)
-  reflection('reflection', '振り返り'),
-  
-  @HiveField(14)
-  creative('creative', '創作'),
-  
-  @HiveField(15)
-  wellness('wellness', '健康・ウェルネス'),
-  
-  @HiveField(16)
-  relationships('relationships', '人間関係');
+  emotionEnergy('emotion_energy', '感情エネルギー');
 
   const PromptCategory(this.id, this.displayName);
   
@@ -73,7 +48,7 @@ enum PromptCategory {
   static PromptCategory fromId(String id) {
     return PromptCategory.values.firstWhere(
       (category) => category.id == id,
-      orElse: () => PromptCategory.daily,
+      orElse: () => PromptCategory.emotion,
     );
   }
   

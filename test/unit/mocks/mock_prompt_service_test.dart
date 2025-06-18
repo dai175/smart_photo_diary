@@ -33,7 +33,7 @@ class MockPromptService implements IPromptService {
       WritingPrompt(
         id: 'mock_basic_daily_001',
         text: '今日の気分はいかがですか？',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
         isPremiumOnly: false,
         tags: ['日常', '気分', '今日'],
         description: 'テスト用基本日常プロンプト',
@@ -43,7 +43,7 @@ class MockPromptService implements IPromptService {
       WritingPrompt(
         id: 'mock_basic_gratitude_001',
         text: '今日感謝したいことは何ですか？',
-        category: PromptCategory.gratitude,
+        category: PromptCategory.emotion,
         isPremiumOnly: false,
         tags: ['感謝', '今日', 'ありがとう'],
         description: 'テスト用基本感謝プロンプト',
@@ -55,7 +55,7 @@ class MockPromptService implements IPromptService {
       WritingPrompt(
         id: 'mock_premium_travel_001',
         text: 'この旅行で一番印象に残った瞬間は？',
-        category: PromptCategory.travel,
+        category: PromptCategory.emotionDepth,
         isPremiumOnly: true,
         tags: ['旅行', '印象', '瞬間'],
         description: 'テスト用Premium旅行プロンプト',
@@ -65,7 +65,7 @@ class MockPromptService implements IPromptService {
       WritingPrompt(
         id: 'mock_premium_work_001',
         text: '今日の仕事で成果を感じた瞬間は？',
-        category: PromptCategory.work,
+        category: PromptCategory.emotionGrowth,
         isPremiumOnly: true,
         tags: ['仕事', '成果', '達成感'],
         description: 'テスト用Premium仕事プロンプト',
@@ -75,7 +75,7 @@ class MockPromptService implements IPromptService {
       WritingPrompt(
         id: 'mock_premium_reflection_001',
         text: '最近の自分の成長を振り返ってみてください',
-        category: PromptCategory.reflection,
+        category: PromptCategory.emotionDiscovery,
         isPremiumOnly: true,
         tags: ['振り返り', '成長', '自己分析'],
         description: 'テスト用Premium振り返りプロンプト',
@@ -398,13 +398,13 @@ void main() {
     test('カテゴリ別フィルタリングが動作する', () async {
       await mockService.initialize();
       
-      final dailyPrompts = mockService.getPromptsByCategory(
-        PromptCategory.daily,
+      final emotionPrompts = mockService.getPromptsByCategory(
+        PromptCategory.emotion,
         isPremium: false,
       );
       
-      expect(dailyPrompts.length, 1);
-      expect(dailyPrompts.first.category, PromptCategory.daily);
+      expect(emotionPrompts.length, 2);
+      expect(emotionPrompts.first.category, PromptCategory.emotion);
     });
     
     test('ランダム選択が動作する', () async {
@@ -442,9 +442,9 @@ void main() {
       final stats = mockService.getPromptStatistics(isPremium: true);
       
       expect(stats, isNotEmpty);
-      expect(stats[PromptCategory.daily], 1);
-      expect(stats[PromptCategory.gratitude], 1);
-      expect(stats[PromptCategory.travel], 1);
+      expect(stats[PromptCategory.emotion], 2);
+      expect(stats[PromptCategory.emotionDepth], 1);
+      expect(stats[PromptCategory.emotionGrowth], 1);
     });
     
     test('カスタムプロンプトデータで初期化できる', () async {
@@ -452,7 +452,7 @@ void main() {
         WritingPrompt(
           id: 'custom_001',
           text: 'カスタムプロンプト',
-          category: PromptCategory.daily,
+          category: PromptCategory.emotion,
           isPremiumOnly: false,
           tags: ['カスタム'],
           description: 'カスタムテスト',

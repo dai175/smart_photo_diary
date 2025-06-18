@@ -4,24 +4,25 @@ import 'package:smart_photo_diary/models/writing_prompt.dart';
 void main() {
   group('PromptCategory', () {
     test('fromId returns correct category', () {
-      expect(PromptCategory.fromId('daily'), PromptCategory.daily);
-      expect(PromptCategory.fromId('travel'), PromptCategory.travel);
-      expect(PromptCategory.fromId('work'), PromptCategory.work);
-      expect(PromptCategory.fromId('gratitude'), PromptCategory.gratitude);
-      expect(PromptCategory.fromId('reflection'), PromptCategory.reflection);
-      expect(PromptCategory.fromId('creative'), PromptCategory.creative);
-      expect(PromptCategory.fromId('wellness'), PromptCategory.wellness);
-      expect(PromptCategory.fromId('relationships'), PromptCategory.relationships);
+      expect(PromptCategory.fromId('emotion'), PromptCategory.emotion);
+      expect(PromptCategory.fromId('emotion_depth'), PromptCategory.emotionDepth);
+      expect(PromptCategory.fromId('sensory_emotion'), PromptCategory.sensoryEmotion);
+      expect(PromptCategory.fromId('emotion_growth'), PromptCategory.emotionGrowth);
+      expect(PromptCategory.fromId('emotion_connection'), PromptCategory.emotionConnection);
+      expect(PromptCategory.fromId('emotion_discovery'), PromptCategory.emotionDiscovery);
+      expect(PromptCategory.fromId('emotion_fantasy'), PromptCategory.emotionFantasy);
+      expect(PromptCategory.fromId('emotion_healing'), PromptCategory.emotionHealing);
+      expect(PromptCategory.fromId('emotion_energy'), PromptCategory.emotionEnergy);
     });
 
-    test('fromId returns daily for unknown id', () {
-      expect(PromptCategory.fromId('unknown'), PromptCategory.daily);
-      expect(PromptCategory.fromId(''), PromptCategory.daily);
+    test('fromId returns emotion for unknown id', () {
+      expect(PromptCategory.fromId('unknown'), PromptCategory.emotion);
+      expect(PromptCategory.fromId(''), PromptCategory.emotion);
     });
 
     test('displayNames returns all category names', () {
       final names = PromptCategory.displayNames;
-      expect(names.length, 17);
+      expect(names.length, 9);
       expect(names, contains('感情'));
       expect(names, contains('感情深掘り'));
       expect(names, contains('感情五感'));
@@ -31,14 +32,6 @@ void main() {
       expect(names, contains('感情幻想'));
       expect(names, contains('感情癒し'));
       expect(names, contains('感情エネルギー'));
-      expect(names, contains('日常'));
-      expect(names, contains('旅行'));
-      expect(names, contains('仕事'));
-      expect(names, contains('感謝'));
-      expect(names, contains('振り返り'));
-      expect(names, contains('創作'));
-      expect(names, contains('健康・ウェルネス'));
-      expect(names, contains('人間関係'));
     });
   });
 
@@ -47,12 +40,12 @@ void main() {
       final prompt = WritingPrompt(
         id: 'test-1',
         text: 'What made you smile today?',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
       );
 
       expect(prompt.id, 'test-1');
       expect(prompt.text, 'What made you smile today?');
-      expect(prompt.category, PromptCategory.daily);
+      expect(prompt.category, PromptCategory.emotion);
       expect(prompt.isPremiumOnly, false);
       expect(prompt.tags, isEmpty);
       expect(prompt.description, isNull);
@@ -65,7 +58,7 @@ void main() {
       final prompt = WritingPrompt(
         id: 'premium-1',
         text: 'Describe a challenging decision you made this week',
-        category: PromptCategory.reflection,
+        category: PromptCategory.emotionDiscovery,
         isPremiumOnly: true,
         tags: ['decision', 'challenge', 'reflection'],
         description: 'Deep reflection prompt for personal growth',
@@ -82,7 +75,7 @@ void main() {
       final json = {
         'id': 'json-1',
         'text': 'What are you grateful for today?',
-        'category': 'gratitude',
+        'category': 'emotion',
         'isPremiumOnly': true,
         'tags': ['gratitude', 'mindfulness'],
         'description': 'Gratitude practice prompt',
@@ -95,7 +88,7 @@ void main() {
 
       expect(prompt.id, 'json-1');
       expect(prompt.text, 'What are you grateful for today?');
-      expect(prompt.category, PromptCategory.gratitude);
+      expect(prompt.category, PromptCategory.emotion);
       expect(prompt.isPremiumOnly, true);
       expect(prompt.tags, ['gratitude', 'mindfulness']);
       expect(prompt.description, 'Gratitude practice prompt');
@@ -107,7 +100,7 @@ void main() {
       final prompt = WritingPrompt(
         id: 'test-json',
         text: 'Describe your ideal day',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
         isPremiumOnly: false,
         tags: ['daily', 'vision'],
         description: 'Vision setting prompt',
@@ -118,7 +111,7 @@ void main() {
 
       expect(json['id'], 'test-json');
       expect(json['text'], 'Describe your ideal day');
-      expect(json['category'], 'daily');
+      expect(json['category'], 'emotion');
       expect(json['isPremiumOnly'], false);
       expect(json['tags'], ['daily', 'vision']);
       expect(json['description'], 'Vision setting prompt');
@@ -131,14 +124,14 @@ void main() {
       final basicPrompt = WritingPrompt(
         id: 'basic-1',
         text: 'Basic prompt',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
         isPremiumOnly: false,
       );
 
       final premiumPrompt = WritingPrompt(
         id: 'premium-1',
         text: 'Premium prompt',
-        category: PromptCategory.reflection,
+        category: PromptCategory.emotionDiscovery,
         isPremiumOnly: true,
       );
 
@@ -155,7 +148,7 @@ void main() {
       final inactivePrompt = WritingPrompt(
         id: 'inactive-1',
         text: 'Inactive prompt',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
         isActive: false,
       );
 
@@ -167,7 +160,7 @@ void main() {
       final prompt = WritingPrompt(
         id: 'search-1',
         text: 'What made you feel grateful today?',
-        category: PromptCategory.gratitude,
+        category: PromptCategory.emotion,
         tags: ['thankfulness', 'mindfulness'],
         description: 'A prompt about appreciating good things in life',
       );
@@ -194,19 +187,19 @@ void main() {
       final shortPrompt = WritingPrompt(
         id: 'short-1',
         text: 'Short prompt',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
       );
 
       final longPrompt = WritingPrompt(
         id: 'long-1',
         text: 'This is a very long prompt that contains more than fifty characters to test the isLongPrompt property',
-        category: PromptCategory.reflection,
+        category: PromptCategory.emotionDiscovery,
         priority: 90,
       );
 
       // categoryDisplayName
-      expect(shortPrompt.categoryDisplayName, '日常');
-      expect(longPrompt.categoryDisplayName, '振り返り');
+      expect(shortPrompt.categoryDisplayName, '感情');
+      expect(longPrompt.categoryDisplayName, '感情発見');
 
       // textLength
       expect(shortPrompt.textLength, 12);
@@ -230,7 +223,7 @@ void main() {
       final original = WritingPrompt(
         id: 'original',
         text: 'Original text',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
         isPremiumOnly: false,
         priority: 10,
       );
@@ -243,7 +236,7 @@ void main() {
 
       expect(copied.id, 'original'); // Unchanged
       expect(copied.text, 'Updated text'); // Changed
-      expect(copied.category, PromptCategory.daily); // Unchanged
+      expect(copied.category, PromptCategory.emotion); // Unchanged
       expect(copied.isPremiumOnly, true); // Changed
       expect(copied.priority, 80); // Changed
     });
@@ -252,19 +245,19 @@ void main() {
       final prompt1 = WritingPrompt(
         id: 'same-id',
         text: 'Text 1',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
       );
 
       final prompt2 = WritingPrompt(
         id: 'same-id',
         text: 'Text 2', // Different text
-        category: PromptCategory.travel, // Different category
+        category: PromptCategory.emotionDepth, // Different category
       );
 
       final prompt3 = WritingPrompt(
         id: 'different-id',
         text: 'Text 1',
-        category: PromptCategory.daily,
+        category: PromptCategory.emotion,
       );
 
       expect(prompt1, equals(prompt2)); // Same ID

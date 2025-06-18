@@ -132,22 +132,6 @@ class PromptCategoryAdapter extends TypeAdapter<PromptCategory> {
         return PromptCategory.emotionHealing;
       case 8:
         return PromptCategory.emotionEnergy;
-      case 9:
-        return PromptCategory.daily;
-      case 10:
-        return PromptCategory.travel;
-      case 11:
-        return PromptCategory.work;
-      case 12:
-        return PromptCategory.gratitude;
-      case 13:
-        return PromptCategory.reflection;
-      case 14:
-        return PromptCategory.creative;
-      case 15:
-        return PromptCategory.wellness;
-      case 16:
-        return PromptCategory.relationships;
       default:
         return PromptCategory.emotion;
     }
@@ -182,30 +166,6 @@ class PromptCategoryAdapter extends TypeAdapter<PromptCategory> {
         break;
       case PromptCategory.emotionEnergy:
         writer.writeByte(8);
-        break;
-      case PromptCategory.daily:
-        writer.writeByte(9);
-        break;
-      case PromptCategory.travel:
-        writer.writeByte(10);
-        break;
-      case PromptCategory.work:
-        writer.writeByte(11);
-        break;
-      case PromptCategory.gratitude:
-        writer.writeByte(12);
-        break;
-      case PromptCategory.reflection:
-        writer.writeByte(13);
-        break;
-      case PromptCategory.creative:
-        writer.writeByte(14);
-        break;
-      case PromptCategory.wellness:
-        writer.writeByte(15);
-        break;
-      case PromptCategory.relationships:
-        writer.writeByte(16);
         break;
     }
   }

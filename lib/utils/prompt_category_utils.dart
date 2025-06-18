@@ -53,18 +53,6 @@ class PromptCategoryUtils {
       case PromptCategory.emotionHealing:
       case PromptCategory.emotionEnergy:
         return false;  // Premium感情カテゴリはBasic利用不可
-      
-      // 従来カテゴリ（後方互換性）
-      case PromptCategory.daily:
-      case PromptCategory.gratitude:
-        return true;   // 従来のBasicカテゴリ
-      case PromptCategory.travel:
-      case PromptCategory.work:
-      case PromptCategory.reflection:
-      case PromptCategory.creative:
-      case PromptCategory.wellness:
-      case PromptCategory.relationships:
-        return false;  // 従来のPremiumカテゴリ
     }
   }
   
@@ -86,17 +74,6 @@ class PromptCategoryUtils {
       case PromptCategory.emotionHealing:
       case PromptCategory.emotionEnergy:
         return 0;  // Premium専用カテゴリ
-      
-      // 従来カテゴリ（レガシー、プロンプトなし）
-      case PromptCategory.daily:
-      case PromptCategory.gratitude:
-      case PromptCategory.travel:
-      case PromptCategory.work:
-      case PromptCategory.reflection:
-      case PromptCategory.creative:
-      case PromptCategory.wellness:
-      case PromptCategory.relationships:
-        return 0; // レガシーカテゴリにはプロンプトなし
     }
   }
   
@@ -119,17 +96,6 @@ class PromptCategoryUtils {
         return 2;  // 各2個のPremiumプロンプト
       case PromptCategory.emotionFantasy:
         return 1;  // 1個のPremiumプロンプト
-      
-      // 従来カテゴリ（レガシー、プロンプトなし）
-      case PromptCategory.daily:
-      case PromptCategory.gratitude:
-      case PromptCategory.travel:
-      case PromptCategory.work:
-      case PromptCategory.reflection:
-      case PromptCategory.creative:
-      case PromptCategory.wellness:
-      case PromptCategory.relationships:
-        return 0; // レガシーカテゴリにはプロンプトなし
     }
   }
   
@@ -172,23 +138,6 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return 'エネルギーや活力を感じるプロンプト';
       
-      // 従来カテゴリ（レガシー、使用されません）
-      case PromptCategory.daily:
-        return '日常の出来事や感情を記録（非推奨）';
-      case PromptCategory.travel:
-        return '旅行体験の記録（非推奨）';
-      case PromptCategory.work:
-        return '仕事での成長記録（非推奨）';
-      case PromptCategory.gratitude:
-        return '感謝の記録（非推奨）';
-      case PromptCategory.reflection:
-        return '内省と振り返り（非推奨）';
-      case PromptCategory.creative:
-        return '創作活動支援（非推奨）';
-      case PromptCategory.wellness:
-        return '健康とウェルネス（非推奨）';
-      case PromptCategory.relationships:
-        return '人間関係の記録（非推奨）';
     }
   }
   
@@ -218,23 +167,6 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return ['感情エネルギー', 'エネルギー', '活力', '生命力'];
       
-      // 従来カテゴリ（レガシー、使用されません）
-      case PromptCategory.daily:
-        return ['日常', '出来事'];
-      case PromptCategory.travel:
-        return ['旅行', '体験'];
-      case PromptCategory.work:
-        return ['仕事', '成長'];
-      case PromptCategory.gratitude:
-        return ['感謝', '幸せ'];
-      case PromptCategory.reflection:
-        return ['振り返り', '内省'];
-      case PromptCategory.creative:
-        return ['創作', '表現'];
-      case PromptCategory.wellness:
-        return ['健康', 'ウェルネス'];
-      case PromptCategory.relationships:
-        return ['人間関係', 'つながり'];
     }
   }
   
@@ -322,23 +254,6 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return ['活力の向上', 'モチベーション増加', 'ポジティブ思考'];
       
-      // 従来カテゴリ（レガシー、使用されません）
-      case PromptCategory.daily:
-        return ['日記習慣の形成'];
-      case PromptCategory.travel:
-        return ['旅行記録の質向上'];
-      case PromptCategory.work:
-        return ['キャリア発展支援'];
-      case PromptCategory.gratitude:
-        return ['感謝の心育成'];
-      case PromptCategory.reflection:
-        return ['自己理解の深化'];
-      case PromptCategory.creative:
-        return ['創造性の向上'];
-      case PromptCategory.wellness:
-        return ['健康意識の向上'];
-      case PromptCategory.relationships:
-        return ['人間関係の改善'];
     }
   }
 
@@ -376,23 +291,6 @@ class PromptCategoryUtils {
       case PromptCategory.emotionEnergy:
         return const Color(0xFFFF9800); // Orange
       
-      // 従来カテゴリ（後方互換性）
-      case PromptCategory.daily:
-        return AppColors.primary;
-      case PromptCategory.travel:
-        return AppColors.info;
-      case PromptCategory.work:
-        return AppColors.accent;
-      case PromptCategory.gratitude:
-        return AppColors.success;
-      case PromptCategory.reflection:
-        return AppColors.warning;
-      case PromptCategory.creative:
-        return const Color(0xFF9C27B0); // Purple
-      case PromptCategory.wellness:
-        return const Color(0xFF4CAF50); // Green
-      case PromptCategory.relationships:
-        return const Color(0xFFFF5722); // Deep Orange
     }
   }
 }
@@ -451,15 +349,6 @@ class PromptWeightConfig {
     PromptCategory.emotionHealing: 0.7,  // 感情癒し（やや高頻度）
     PromptCategory.emotionEnergy: 0.6,   // 感情エネルギー（中頻度）
     
-    // 従来カテゴリ（後方互換性）
-    PromptCategory.daily: 1.0,        // 標準（最も頻繁に使用される）
-    PromptCategory.gratitude: 0.8,    // やや高頻度
-    PromptCategory.reflection: 0.6,   // 中頻度
-    PromptCategory.travel: 0.4,       // 低頻度（旅行時のみ）
-    PromptCategory.work: 0.5,         // 中低頻度（平日中心）
-    PromptCategory.creative: 0.3,     // 低頻度（特別な時）
-    PromptCategory.wellness: 0.7,     // やや高頻度（健康意識向上）
-    PromptCategory.relationships: 0.6, // 中頻度（人間関係重視）
   };
   
   /// プロンプト優先度による重み調整

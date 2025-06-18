@@ -317,11 +317,11 @@ void main() {
         final prompts = promptService.getRandomPromptSequence(
           count: 2,
           isPremium: true,
-          category: PromptCategory.daily,
+          category: PromptCategory.emotion,
         );
         
         expect(prompts.length, lessThanOrEqualTo(2));
-        expect(prompts.every((p) => p.category == PromptCategory.daily), isTrue);
+        expect(prompts.every((p) => p.category == PromptCategory.emotion), isTrue);
         
         // 重複チェック
         final ids = prompts.map((p) => p.id).toSet();
