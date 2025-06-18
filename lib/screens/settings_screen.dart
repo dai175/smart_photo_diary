@@ -30,6 +30,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   StorageInfo? _storageInfo;
   SubscriptionInfo? _subscriptionInfo;
   bool _isLoading = true;
+  bool _subscriptionExpanded = false;
+  bool _storageExpanded = false;
 
   @override
   void initState() {
@@ -284,44 +286,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        dividerColor: Colors.transparent,
-      ),
-      child: ExpansionTile(
-        leading: Container(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: _subscriptionInfo!.isPremium 
-                ? AppColors.success.withValues(alpha: 0.2)
-                : AppColors.primary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-          ),
-          child: Icon(
-            _subscriptionInfo!.isPremium 
-                ? Icons.star_rounded
-                : Icons.card_membership_rounded,
-            color: _subscriptionInfo!.isPremium 
-                ? AppColors.success
-                : AppColors.primary,
-            size: AppSpacing.iconSm,
+    return Column(
+      children: [
+        MicroInteractions.bounceOnTap(
+          onTap: () {
+            setState(() {
+              _subscriptionExpanded = !_subscriptionExpanded;
+            });
+          },
+          child: Container(
+            padding: AppSpacing.cardPadding,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: _subscriptionInfo!.isPremium 
+                        ? AppColors.success.withValues(alpha: 0.2)
+                        : AppColors.primary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+                  ),
+                  child: Icon(
+                    _subscriptionInfo!.isPremium 
+                        ? Icons.star_rounded
+                        : Icons.card_membership_rounded,
+                    color: _subscriptionInfo!.isPremium 
+                        ? AppColors.success
+                        : AppColors.primary,
+                    size: AppSpacing.iconSm,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'サブスクリプション',
+                        style: AppTypography.titleMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        _subscriptionInfo!.displayData.planStatus != null
+                            ? '現在のプラン: ${_subscriptionInfo!.displayData.planName} (${_subscriptionInfo!.displayData.planStatus})'
+                            : '現在のプラン: ${_subscriptionInfo!.displayData.planName}',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  _subscriptionExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: AppSpacing.iconSm,
+                ),
+              ],
+            ),
           ),
         ),
-        title: Text(
-          'サブスクリプション',
-          style: AppTypography.titleMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          _subscriptionInfo!.displayData.planStatus != null
-              ? '現在のプラン: ${_subscriptionInfo!.displayData.planName} (${_subscriptionInfo!.displayData.planStatus})'
-              : '現在のプラン: ${_subscriptionInfo!.displayData.planName}',
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        children: [
+        if (_subscriptionExpanded) ...[
           Container(
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             padding: AppSpacing.cardPadding,
@@ -381,7 +408,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
         ],
-      ),
+      ],
     );
   }
 
@@ -581,36 +608,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        dividerColor: Colors.transparent,
-      ),
-      child: ExpansionTile(
-        leading: Container(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: AppColors.info.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-          ),
-          child: Icon(
-            AppIcons.settingsStorage,
-            color: AppColors.info,
-            size: AppSpacing.iconSm,
+    return Column(
+      children: [
+        MicroInteractions.bounceOnTap(
+          onTap: () {
+            setState(() {
+              _storageExpanded = !_storageExpanded;
+            });
+          },
+          child: Container(
+            padding: AppSpacing.cardPadding,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+                  ),
+                  child: Icon(
+                    AppIcons.settingsStorage,
+                    color: AppColors.info,
+                    size: AppSpacing.iconSm,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '使用容量',
+                        style: AppTypography.titleMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        '合計: ${_storageInfo!.formattedTotalSize}',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  _storageExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: AppSpacing.iconSm,
+                ),
+              ],
+            ),
           ),
         ),
-        title: Text(
-          '使用容量',
-          style: AppTypography.titleMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          '合計: ${_storageInfo!.formattedTotalSize}',
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        children: [
+        if (_storageExpanded) ...[
           Container(
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             padding: AppSpacing.cardPadding,
@@ -628,7 +680,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
         ],
-      ),
+      ],
     );
   }
 
