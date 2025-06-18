@@ -71,9 +71,16 @@ class SubscriptionInfo {
     
     final expiry = periodInfo.expiryDate!;
     final daysUntil = periodInfo.daysUntilExpiry ?? 0;
+    final now = DateTime.now();
     
     if (daysUntil <= 0) return '期限切れ';
     if (daysUntil <= 7) return '${expiry.month}/${expiry.day} (あと$daysUntil日)';
+    
+    // 年が異なる場合は年も表示
+    if (expiry.year != now.year) {
+      return '${expiry.year}/${expiry.month}/${expiry.day}';
+    }
+    
     return '${expiry.month}/${expiry.day}';
   }
 

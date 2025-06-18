@@ -263,11 +263,19 @@ class SubscriptionService implements ISubscriptionService {
           debugPrint('SubscriptionService.getCurrentStatus: プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）');
           
           // 実際のデータはそのままで、プランIDのみを強制設定に変更した状態を返す
+          final forcedPlanId = _getForcedPlanId(forcePlan);
+          final forcedPlan = SubscriptionPlan.fromId(forcedPlanId);
+          
+          // プランに応じて適切な有効期限を設定
+          final expiryDuration = forcedPlan == SubscriptionPlan.premiumYearly
+              ? const Duration(days: 365)
+              : const Duration(days: 30);
+          
           final forcedStatus = SubscriptionStatus(
-            planId: _getForcedPlanId(forcePlan),
+            planId: forcedPlanId,
             isActive: true,
             startDate: status.startDate ?? DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 365)),
+            expiryDate: DateTime.now().add(expiryDuration),
             monthlyUsageCount: status.monthlyUsageCount, // 実際の使用量を保持
             usageMonth: status.usageMonth,
             lastResetDate: status.lastResetDate,
