@@ -14,6 +14,10 @@ import '../services/logging_service.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
 import 'interfaces/prompt_service_interface.dart';
+import 'analytics/prompt_usage_analytics.dart';
+import 'analytics/category_popularity_reporter.dart';
+import 'analytics/user_behavior_analyzer.dart';
+import 'analytics/improvement_suggestion_tracker.dart';
 
 /// ライティングプロンプト管理サービス
 /// 
@@ -23,6 +27,7 @@ class PromptService implements IPromptService {
   static PromptService? _instance;
   static const String _promptsAssetPath = 'assets/data/writing_prompts.json';
   static const String _usageHistoryBoxName = 'prompt_usage_history';
+  static const String _suggestionImplementationBoxName = 'suggestion_implementations';
   
   // プロンプトデータとキャッシュ
   List<WritingPrompt> _allPrompts = [];
@@ -32,6 +37,9 @@ class PromptService implements IPromptService {
   
   // 使用履歴管理
   Box<PromptUsageHistory>? _usageHistoryBox;
+  
+  // 改善提案実装記録管理
+  Box<SuggestionImplementationRecord>? _suggestionImplementationBox;
   
   // 初期化状態管理
   bool _isInitialized = false;
@@ -82,6 +90,14 @@ class PromptService implements IPromptService {
       } catch (e) {
         loggingService.warning('PromptService: 使用履歴機能は無効化されました（${e.toString()}）');
         _usageHistoryBox = null;
+      }
+      
+      // 改善提案実装記録Box初期化（失敗してもPromptService自体は初期化完了とする）
+      try {
+        await _initializeSuggestionImplementationBox();
+      } catch (e) {
+        loggingService.warning('PromptService: 改善提案実装記録機能は無効化されました（${e.toString()}）');
+        _suggestionImplementationBox = null;
       }
       
       _isInitialized = true;
@@ -197,6 +213,19 @@ class PromptService implements IPromptService {
     
     _usageHistoryBox = await Hive.openBox<PromptUsageHistory>(_usageHistoryBoxName);
     loggingService.info('PromptService: 使用履歴Box初期化完了（履歴数: ${_usageHistoryBox!.length}）');
+  }
+  
+  /// 改善提案実装記録Box初期化
+  Future<void> _initializeSuggestionImplementationBox() async {
+    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    
+    // 既存のBoxがあればクローズ
+    if (Hive.isBoxOpen(_suggestionImplementationBoxName)) {
+      await Hive.box<SuggestionImplementationRecord>(_suggestionImplementationBoxName).close();
+    }
+    
+    _suggestionImplementationBox = await Hive.openBox<SuggestionImplementationRecord>(_suggestionImplementationBoxName);
+    loggingService.info('PromptService: 改善提案実装記録Box初期化完了（記録数: ${_suggestionImplementationBox!.length}）');
   }
   
   @override
@@ -361,6 +390,7 @@ class PromptService implements IPromptService {
     
     // 使用履歴Boxもリセット（クローズはしない、nullに設定するだけ）
     _usageHistoryBox = null;
+    _suggestionImplementationBox = null;
   }
   
   @override
@@ -570,6 +600,295 @@ class PromptService implements IPromptService {
     }
     
     return stats;
+  }
+  
+  @override
+  PromptFrequencyAnalysis analyzePromptFrequency({int days = 30}) {
+    _ensureInitialized();
+    
+    final usageData = getUsageFrequencyStats(days: days);
+    
+    return PromptUsageAnalytics.analyzePromptFrequency(
+      usageData: usageData,
+      periodDays: days,
+      allPrompts: _allPrompts,
+    );
+  }
+  
+  @override
+  CategoryPopularityAnalysis analyzeCategoryPopularity({
+    int days = 30,
+    bool isPremium = false,
+    bool comparePreviousPeriod = true,
+  }) {
+    _ensureInitialized();
+    
+    final usageData = getUsageFrequencyStats(days: days);
+    final availablePrompts = getPromptsForPlan(isPremium: isPremium);
+    
+    // 前期間のデータを取得（比較用）
+    Map<String, int>? previousPeriodData;
+    if (comparePreviousPeriod) {
+      previousPeriodData = _getPreviousPeriodUsageData(days);
+    }
+    
+    return PromptUsageAnalytics.analyzeCategoryPopularity(
+      usageData: usageData,
+      allPrompts: availablePrompts,
+      previousPeriodData: previousPeriodData,
+    );
+  }
+  
+  @override
+  UserBehaviorAnalysis analyzeUserBehavior({int days = 30}) {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
+      return const UserBehaviorAnalysis(
+        usagePatterns: {},
+        diversityIndex: 0.0,
+        averageSessionInterval: 0.0,
+        repeatUsageRate: 0.0,
+        averageSatisfaction: 0.0,
+      );
+    }
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final recentHistory = _usageHistoryBox!.values
+        .where((history) => history.usedAt.isAfter(cutoffDate))
+        .toList();
+    
+    return PromptUsageAnalytics.analyzeUserBehavior(
+      usageHistory: recentHistory,
+    );
+  }
+  
+  @override
+  List<PromptImprovementSuggestion> generateImprovementSuggestions({
+    int days = 30,
+    bool isPremium = false,
+  }) {
+    _ensureInitialized();
+    
+    final frequencyAnalysis = analyzePromptFrequency(days: days);
+    final categoryAnalysis = analyzeCategoryPopularity(
+      days: days,
+      isPremium: isPremium,
+    );
+    final behaviorAnalysis = analyzeUserBehavior(days: days);
+    final availablePrompts = getPromptsForPlan(isPremium: isPremium);
+    
+    return PromptUsageAnalytics.generateImprovementSuggestions(
+      frequencyAnalysis: frequencyAnalysis,
+      categoryAnalysis: categoryAnalysis,
+      behaviorAnalysis: behaviorAnalysis,
+      allPrompts: availablePrompts,
+    );
+  }
+  
+  @override
+  CategoryPopularityReport generateCategoryReport({
+    int days = 30,
+    bool isPremium = false,
+  }) {
+    _ensureInitialized();
+    
+    final analysis = analyzeCategoryPopularity(
+      days: days,
+      isPremium: isPremium,
+      comparePreviousPeriod: true,
+    );
+    
+    return CategoryPopularityReporter.generateDetailedReport(
+      analysis: analysis,
+      periodDays: days,
+    );
+  }
+  
+  @override
+  String getCategoryUsageSummary({
+    int days = 30,
+    bool isPremium = false,
+  }) {
+    _ensureInitialized();
+    
+    final analysis = analyzeCategoryPopularity(
+      days: days,
+      isPremium: isPremium,
+      comparePreviousPeriod: false,
+    );
+    
+    return CategoryPopularityReporter.generateQuickSummary(analysis);
+  }
+  
+  @override
+  List<CategoryRankingItem> getCategoryRanking({
+    int days = 30,
+    bool isPremium = false,
+    int topN = 5,
+  }) {
+    _ensureInitialized();
+    
+    final analysis = analyzeCategoryPopularity(
+      days: days,
+      isPremium: isPremium,
+      comparePreviousPeriod: false,
+    );
+    
+    return CategoryPopularityReporter.getCategoryRanking(
+      analysis: analysis,
+      topN: topN,
+    );
+  }
+
+  /// 前期間の使用データを取得（トレンド分析用）
+  Map<String, int> _getPreviousPeriodUsageData(int days) {
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
+      return {};
+    }
+    
+    final currentCutoff = DateTime.now().subtract(Duration(days: days));
+    final previousCutoff = DateTime.now().subtract(Duration(days: days * 2));
+    final stats = <String, int>{};
+    
+    for (final history in _usageHistoryBox!.values) {
+      if (history.usedAt.isAfter(previousCutoff) && 
+          history.usedAt.isBefore(currentCutoff)) {
+        stats[history.promptId] = (stats[history.promptId] ?? 0) + 1;
+      }
+    }
+    
+    return stats;
+  }
+
+  @override
+  DetailedBehaviorAnalysis analyzeDetailedUserBehavior({
+    int days = 30,
+    bool isPremium = false,
+  }) {
+    _ensureInitialized();
+    
+    if (_usageHistoryBox == null || !_usageHistoryBox!.isOpen) {
+      return UserBehaviorAnalyzer.analyzeDetailedBehavior(
+        usageHistory: [],
+        availablePrompts: [],
+      );
+    }
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final recentHistory = _usageHistoryBox!.values
+        .where((history) => history.usedAt.isAfter(cutoffDate))
+        .toList();
+    
+    final availablePrompts = getPromptsForPlan(isPremium: isPremium);
+    
+    return UserBehaviorAnalyzer.analyzeDetailedBehavior(
+      usageHistory: recentHistory,
+      availablePrompts: availablePrompts,
+    );
+  }
+
+  @override
+  Future<bool> saveSuggestionImplementation(SuggestionImplementationRecord record) async {
+    _ensureInitialized();
+    
+    if (_suggestionImplementationBox == null || !_suggestionImplementationBox!.isOpen) {
+      return false;
+    }
+    
+    try {
+      await _suggestionImplementationBox!.add(record);
+      
+      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      loggingService.info('PromptService: 改善提案実装記録保存完了（suggestionId: ${record.suggestionId}）');
+      
+      return true;
+    } catch (e) {
+      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      loggingService.error('PromptService: 改善提案実装記録保存失敗', error: e);
+      return false;
+    }
+  }
+
+  @override
+  List<SuggestionImplementationRecord> getSuggestionImplementations({
+    int? limit,
+    PersonalizationType? suggestionType,
+  }) {
+    _ensureInitialized();
+    
+    if (_suggestionImplementationBox == null || !_suggestionImplementationBox!.isOpen) {
+      return [];
+    }
+    
+    var implementations = _suggestionImplementationBox!.values.toList();
+    
+    // 特定提案タイプでフィルタ
+    if (suggestionType != null) {
+      implementations = implementations.where((impl) => impl.suggestionType == suggestionType).toList();
+    }
+    
+    // 新しい順でソート
+    implementations.sort((a, b) => b.implementedAt.compareTo(a.implementedAt));
+    
+    // 件数制限
+    if (limit != null && limit > 0) {
+      implementations = implementations.take(limit).toList();
+    }
+    
+    return implementations;
+  }
+
+  @override
+  SuggestionEffectivenessAnalysis analyzeSuggestionEffectiveness({int days = 90}) {
+    _ensureInitialized();
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final recentImplementations = getSuggestionImplementations()
+        .where((impl) => impl.implementedAt.isAfter(cutoffDate))
+        .toList();
+    
+    return ImprovementSuggestionTracker.analyzeEffectiveness(
+      implementations: recentImplementations,
+    );
+  }
+
+  @override
+  UserFeedbackAnalysis analyzeUserFeedback({int days = 90}) {
+    _ensureInitialized();
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final recentImplementations = getSuggestionImplementations()
+        .where((impl) => impl.implementedAt.isAfter(cutoffDate))
+        .toList();
+    
+    return ImprovementSuggestionTracker.analyzeFeedback(
+      implementations: recentImplementations,
+    );
+  }
+
+  @override
+  ContinuousImprovementData generateContinuousImprovementData({int days = 90}) {
+    _ensureInitialized();
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final recentImplementations = getSuggestionImplementations()
+        .where((impl) => impl.implementedAt.isAfter(cutoffDate))
+        .toList();
+    
+    final effectivenessAnalysis = ImprovementSuggestionTracker.analyzeEffectiveness(
+      implementations: recentImplementations,
+    );
+    
+    final feedbackAnalysis = ImprovementSuggestionTracker.analyzeFeedback(
+      implementations: recentImplementations,
+    );
+    
+    return ImprovementSuggestionTracker.generateContinuousImprovementData(
+      effectivenessAnalysis: effectivenessAnalysis,
+      feedbackAnalysis: feedbackAnalysis,
+      implementations: recentImplementations,
+    );
   }
   
   /// 初期化チェック

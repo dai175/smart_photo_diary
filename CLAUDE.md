@@ -100,7 +100,7 @@ The app follows a service-oriented architecture with singleton services using la
 - **`DiaryService`**: Central data management with Hive database operations, depends on `AiService` for tag generation
 - **`PhotoService`**: Photo access and permissions via `photo_manager` plugin, implements `PhotoServiceInterface`
 - **`AiService`**: AI diary generation with Google Gemini API and comprehensive offline fallbacks, implements `AiServiceInterface`
-- **`ImageClassifierService`**: On-device ML inference using TensorFlow Lite MobileNet v2
+- **`ImageClassifierService`**: On-device ML inference capabilities (placeholder for future ML integration)
 - **`SettingsService`**: App configuration stored in SharedPreferences with Result<T> pattern for write operations
 - **`StorageService`**: File system operations, data export functionality with user-selectable destinations, and database optimization
 - **`LoggingService`**: Structured logging with levels and performance monitoring
@@ -143,7 +143,6 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - Uses `build_runner` for generating Hive adapters (`diary_entry.g.dart`, `writing_prompt.g.dart`)
 
 ### AI/ML Architecture
-- **On-device**: TensorFlow Lite MobileNet v2 model for image classification
 - **Cloud AI**: Google Gemini 2.5 Flash integration for advanced diary generation
 - **AI Service Components**:
   - `GeminiApiClient`: Direct API integration with Google Gemini, enhanced with EnvironmentConfig
@@ -151,7 +150,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
   - `TagGenerator`: Automatic tag generation from content
   - `OfflineFallbackService`: Offline mode diary generation
 - **Environment Management**: EnvironmentConfig provides robust API key management with validation
-- **Assets**: ML models bundled in `assets/models/` directory
+- **Assets**: Writing prompts and configuration data in `assets/data/` directory
 
 ### Monetization Architecture
 - **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts)
@@ -165,7 +164,6 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 ### Core
 - `hive` + `hive_flutter`: Local NoSQL database for diary storage
 - `photo_manager`: Photo access and management with permission handling
-- `tflite_flutter`: On-device ML inference for image classification
 - `permission_handler`: Platform-specific permissions for photo access
 - `connectivity_plus`: Network status checking for AI service fallbacks
 - `shared_preferences`: Simple key-value storage for app settings
@@ -177,6 +175,8 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `uuid`: Unique identifier generation for diary entries
 - `intl`: Internationalization and date formatting
 - `in_app_purchase`: Subscription and in-app purchase management
+- `google_fonts`: Typography and font management
+- `image`: Image processing and manipulation utilities
 
 ### Development
 - `build_runner` + `hive_generator`: Code generation for Hive adapters
@@ -199,9 +199,8 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `lib/models/diary_entry.g.dart`: Auto-generated Hive adapter (do not edit manually)
 
 ### Assets
-- `assets/models/mobilenet_v2_1.0_224_quant.tflite`: TensorFlow Lite model
-- `assets/models/labels.txt`: Image classification labels
 - `assets/data/writing_prompts.json`: Writing prompts data with metadata and categorization
+- `assets/images/`: Application assets and icons
 
 ## Development Notes
 
@@ -287,7 +286,7 @@ Services follow a clear dependency hierarchy:
 - **Quality Assurance**: 45 comprehensive tests (26 unit + 11 mock + 8 integration) with 100% success rate
 
 ### Testing Architecture
-The project follows a comprehensive 3-tier testing strategy with **100% success rate** (585 passing tests):
+The project follows a comprehensive 3-tier testing strategy with **100% success rate** (661 passing tests):
 
 #### Unit Tests (`test/unit/`)
 - **Pure logic testing** with mocked dependencies using `mocktail`
@@ -361,7 +360,7 @@ All user data stays on device. Hive database files are stored in app documents d
 ## Development Status
 
 ### Recent Achievements
-- **Perfect test coverage**: 585 tests with 100% success rate across unit, widget, and integration tests
+- **Perfect test coverage**: 661 tests with 100% success rate across unit, widget, and integration tests
 - **PromptService complete implementation**: Phase 2.2.1 fully implemented with JSON asset loading, 3-tier caching, and comprehensive search
 - **Monetization implementation**: Complete freemium model with In-App Purchase integration
 - **Writing prompts system**: 20 curated prompts with 8-category classification and plan-based access
@@ -384,6 +383,7 @@ All user data stays on device. Hive database files are stored in app documents d
 - **UX workflow optimization**: Implemented modal-based prompt selection for streamlined diary creation
 - **Prompt-less generation**: Enhanced support for diary generation without writing prompts
 - **Loading state improvements**: Optimized loading indicators and message positioning for better user experience
+- **✅ Phase 2.4.2 使用量分析機能実装**: Complete implementation of comprehensive analytics system for prompt usage analysis, user behavior tracking, and continuous improvement
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging, Subscription, Prompt) are fully implemented and tested
@@ -408,6 +408,64 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Type complexity matters**: Result<void> is easier to adopt than Result<ComplexType>
 - **Testing is crucial**: Comprehensive test coverage (41 tests) ensured Result<T> reliability
 - **Documentation prevents confusion**: Clear migration strategy helps future development decisions
+
+## Analytics System Architecture
+
+### Usage Analytics Implementation (Phase 2.4.2)
+The application includes a comprehensive 4-layer analytics system for prompt usage analysis and continuous improvement:
+
+#### Layer 1: Basic Usage Frequency Analysis
+- **PromptUsageAnalytics**: Statistical analysis of prompt usage patterns
+- **Features**: Usage frequency distribution, prompt popularity ranking, diversity index calculation
+- **Output**: Total usage metrics, most/least popular prompts, usage health score
+
+#### Layer 2: Category Popularity Analysis  
+- **CategoryPopularityReporter**: Detailed reporting and visualization for category usage trends
+- **Features**: Category ranking, trend analysis with previous period comparison, formatted reports
+- **Output**: Category popularity distribution, growth/decline trends, detailed usage reports
+
+#### Layer 3: User Behavior Analysis
+- **UserBehaviorAnalyzer**: Advanced behavioral pattern recognition and analysis
+- **Features**: Time pattern analysis, usage trend detection, engagement scoring, consistency measurement
+- **Output**: Detailed behavior insights with time patterns, usage regularity, engagement levels
+
+#### Layer 4: Improvement Suggestion System
+- **ImprovementSuggestionTracker**: Effect measurement and feedback collection for continuous improvement
+- **Features**: Suggestion effectiveness analysis, user feedback tracking, continuous learning data generation
+- **Output**: Personalized recommendations, effect measurement, success/failure factor analysis
+
+#### Integration with PromptService
+All analytics functionality is fully integrated into the main PromptService:
+```dart
+// Usage frequency analysis
+final frequencyAnalysis = await promptService.analyzePromptFrequency(days: 30);
+
+// Category popularity with trends
+final categoryAnalysis = await promptService.analyzeCategoryPopularity(
+  days: 30, isPremium: true, comparePreviousPeriod: true);
+
+// Detailed user behavior analysis  
+final behaviorAnalysis = await promptService.analyzeDetailedUserBehavior(
+  days: 30, isPremium: true);
+
+// Improvement suggestions based on usage patterns
+final suggestions = await promptService.generateImprovementSuggestions(
+  days: 30, isPremium: true);
+```
+
+#### Data Persistence and Tracking
+- **Hive Database Integration**: All usage history and suggestion implementations stored locally
+- **Privacy-First Design**: No cloud synchronization, all analytics data stays on device
+- **Comprehensive Test Coverage**: 58+ dedicated analytics tests ensuring reliability
+- **Performance Optimized**: Efficient caching and lazy calculation for real-time analysis
+
+#### Statistical Algorithms and Data Science
+The analytics system implements several advanced statistical and machine learning algorithms:
+- **Shannon Entropy**: For measuring time consistency and behavioral pattern uniformity
+- **Gini Coefficient**: For analyzing inequality in usage distribution across categories
+- **Time Series Analysis**: Trend detection with weekly aggregation and change rate calculation
+- **Behavioral Pattern Recognition**: Engagement scoring with multi-factor analysis
+- **Recommendation Engine**: Personalized suggestions based on usage patterns and satisfaction metrics
 
 ## UI Error Display System
 
@@ -563,5 +621,6 @@ The app implements a **two-tier freemium model** with the following structure:
 - **Phase 2.2**: PromptService implementation with complete backend functionality
 - **Phase 2.3.1**: WritingPromptsScreen UI implementation with navigation integration
 - **Phase 2.3.2**: Photo selection integration with modal prompt selection workflow
-- **Phase 2.4**: Complete UX improvement with streamlined diary creation flow
-- **Current Status**: Production-ready monetization implementation with complete prompt system
+- **Phase 2.4.1**: Complete UX improvement with streamlined diary creation flow
+- **Phase 2.4.2**: Comprehensive usage analytics system with prompt usage analysis, user behavior tracking, and continuous improvement
+- **Current Status**: Production-ready monetization implementation with complete prompt system and advanced analytics
