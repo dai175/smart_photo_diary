@@ -450,44 +450,29 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   Widget _buildFooter(BuildContext context) {
     return Container(
       padding: AppSpacing.cardPadding,
-      child: SizedBox(
+      child: PrimaryButton(
+        onPressed: () {
+          if (_isRandomSelected) {
+            // ランダム選択の場合は実際のプロンプトを取得して渡す
+            final randomPrompt = _promptService.getRandomPrompt(isPremium: _isPremium);
+            widget.onPromptSelected(randomPrompt);
+          } else if (_selectedPrompt != null) {
+            widget.onPromptSelected(_selectedPrompt);
+          } else {
+            widget.onSkip();
+          }
+        },
         width: double.infinity,
-        child: AnimatedButton(
-          onPressed: () {
-            if (_isRandomSelected) {
-              // ランダム選択の場合は実際のプロンプトを取得して渡す
-              final randomPrompt = _promptService.getRandomPrompt(isPremium: _isPremium);
-              widget.onPromptSelected(randomPrompt);
-            } else if (_selectedPrompt != null) {
-              widget.onPromptSelected(_selectedPrompt);
-            } else {
-              widget.onSkip();
-            }
-          },
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                _isRandomSelected
-                    ? Icons.shuffle_rounded
-                    : (_selectedPrompt != null 
-                        ? Icons.auto_awesome_rounded
-                        : Icons.photo_camera_rounded),
-                size: AppSpacing.iconSm,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                _isRandomSelected
-                    ? 'ランダムプロンプトで作成'
-                    : (_selectedPrompt != null 
-                        ? 'このプロンプトで作成'
-                        : 'プロンプトなしで作成'),
-              ),
-            ],
-          ),
-        ),
+        text: _isRandomSelected
+            ? 'ランダムプロンプトで作成'
+            : (_selectedPrompt != null 
+                ? 'このプロンプトで作成'
+                : 'プロンプトなしで作成'),
+        icon: _isRandomSelected
+            ? Icons.shuffle_rounded
+            : (_selectedPrompt != null 
+                ? Icons.auto_awesome_rounded
+                : Icons.photo_camera_rounded),
       ),
     );
   }
