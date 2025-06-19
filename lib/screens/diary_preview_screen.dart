@@ -507,7 +507,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 child: Container(
                   padding: AppSpacing.cardPadding,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryContainer,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: AppSpacing.cardRadius,
                     boxShadow: AppSpacing.cardShadow,
                   ),
@@ -516,7 +516,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -533,14 +533,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             '日記の日付',
                             style: AppTypography.withColor(
                               AppTypography.labelMedium,
-                              AppColors.onPrimaryContainer,
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                             ),
                           ),
                           Text(
                             DateFormat('yyyy年MM月dd日').format(_photoDateTime),
                             style: AppTypography.withColor(
                               AppTypography.titleLarge,
-                              AppColors.onPrimaryContainer,
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                             ),
                           ),
                         ],
@@ -567,7 +567,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           children: [
                             Icon(
                               Icons.photo_library_rounded,
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               size: AppSpacing.iconMd,
                             ),
                             const SizedBox(width: AppSpacing.sm),
@@ -651,7 +651,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           Container(
                             padding: AppSpacing.cardPadding,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                               shape: BoxShape.circle,
                             ),
                             child: const CircularProgressIndicator(
@@ -684,7 +684,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 widthFactor: _totalPhotos > 0 ? _currentPhotoIndex / _totalPhotos : 0,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary,
+                                    color: Theme.of(context).colorScheme.primary,
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
@@ -822,7 +822,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             children: [
                               Icon(
                                 Icons.edit_rounded,
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                                 size: AppSpacing.iconMd,
                               ),
                               const SizedBox(width: AppSpacing.sm),
