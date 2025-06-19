@@ -129,9 +129,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
               style: AppTypography.titleMedium,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.close),
+          CircularIconButton(
+            icon: Icons.close,
             onPressed: () => Navigator.of(context).pop(),
+            size: 40.0,
           ),
         ],
       ),
