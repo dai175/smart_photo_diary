@@ -4,6 +4,7 @@ import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
 import '../animations/micro_interactions.dart';
 import '../../constants/subscription_constants.dart';
+import '../components/animated_button.dart';
 
 /// カスタムダイアログウィジェット
 /// Smart Photo Diaryアプリのデザインシステムに合わせたモーダル
@@ -200,56 +201,27 @@ class CustomDialogAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive 
-        ? AppColors.error 
-        : isPrimary 
-            ? AppColors.primary 
-            : Theme.of(context).colorScheme.onSurfaceVariant;
-
-    return MicroInteractions.bounceOnTap(
-      onTap: onPressed ?? () {},
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: isPrimary ? color : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.md),
-          border: isPrimary ? null : Border.all(
-            color: color.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(AppSpacing.md),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(
-                      icon!,
-                      size: AppSpacing.iconSm,
-                      color: isPrimary ? Colors.white : color,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                  ],
-                  Text(
-                    text,
-                    style: AppTypography.labelLarge.copyWith(
-                      color: isPrimary ? Colors.white : color,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    if (isPrimary) {
+      if (isDestructive) {
+        return DangerButton(
+          onPressed: onPressed,
+          text: text,
+          icon: icon,
+        );
+      } else {
+        return PrimaryButton(
+          onPressed: onPressed,
+          text: text,
+          icon: icon,
+        );
+      }
+    } else {
+      return SecondaryButton(
+        onPressed: onPressed,
+        text: text,
+        icon: icon,
+      );
+    }
   }
 }
 
