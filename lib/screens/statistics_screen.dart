@@ -594,7 +594,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: AppColors.accent,
+                  color: Theme.of(context).colorScheme.secondary,
                   shape: BoxShape.circle,
                 ),
                 markerDecoration: BoxDecoration(

@@ -868,12 +868,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.2),
+                color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
                 Icons.article_outlined,
-                color: AppColors.accent,
+                color: Theme.of(context).colorScheme.secondary,
                 size: AppSpacing.iconSm,
               ),
             ),

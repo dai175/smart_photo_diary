@@ -174,7 +174,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ? AppIcons.filterActive
                     : AppIcons.filter,
                   color: _controller.currentFilter.isActive 
-                    ? AppColors.accent 
+                    ? Theme.of(context).colorScheme.inversePrimary 
                     : Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: _showFilterBottomSheet,

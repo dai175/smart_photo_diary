@@ -358,8 +358,8 @@ class CategoryChip extends StatelessWidget {
         );
       case ChipCategory.activity:
         return _CategoryColors(
-          backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-          foregroundColor: AppColors.accentDark,
+          backgroundColor: AppColors.secondary.withValues(alpha: 0.2),
+          foregroundColor: AppColors.secondaryDark,
         );
       case ChipCategory.location:
         return _CategoryColors(
