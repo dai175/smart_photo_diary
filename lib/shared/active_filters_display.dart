@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/diary_filter.dart';
+import '../ui/components/animated_button.dart';
 
 class ActiveFiltersDisplay extends StatelessWidget {
   final DiaryFilter filter;
@@ -47,13 +48,8 @@ class ActiveFiltersDisplay extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              TextButton(
+              SmallButton(
                 onPressed: onClear,
-                style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
                 child: const Text('すべてクリア', style: TextStyle(fontSize: 12)),
               ),
             ],

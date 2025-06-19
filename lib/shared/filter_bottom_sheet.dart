@@ -174,9 +174,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextButton(
+                TextOnlyButton(
                   onPressed: _clearAllFilters,
-                  child: const Text('すべてクリア'),
+                  text: 'すべてクリア',
                 ),
               ],
             ),
