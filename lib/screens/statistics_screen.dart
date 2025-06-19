@@ -165,7 +165,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Container(
                   padding: AppSpacing.cardPadding,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryContainer,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: AppSpacing.cardRadius,
                   ),
                   child: Row(
@@ -173,7 +173,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -238,14 +238,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: AppColors.accent,
+                                    color: Theme.of(context).colorScheme.secondary,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
                                     child: Text(
                                       '${index + 1}',
                                       style: AppTypography.labelLarge.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        color: Theme.of(context).colorScheme.onSecondary,
                                       ),
                                     ),
                                   ),
@@ -279,7 +279,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                           vertical: AppSpacing.xxs,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primaryContainer,
+                                          color: Theme.of(context).colorScheme.primaryContainer,
                                           borderRadius: AppSpacing.chipRadius,
                                         ),
                                         child: Text(
