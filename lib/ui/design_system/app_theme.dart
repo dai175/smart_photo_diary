@@ -285,7 +285,150 @@ class AppTheme {
         margin: AppSpacing.cardMargin,
       ),
 
-      // その他のテーマ設定はライトテーマと同様...
+      // Elevated Button Theme (Dark)
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryLight,
+          foregroundColor: AppColors.onBackground,
+          elevation: AppSpacing.elevationSm,
+          shadowColor: Colors.black54,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppSpacing.buttonRadius,
+          ),
+          padding: AppSpacing.buttonPadding,
+          textStyle: AppTypography.button,
+          minimumSize: const Size(0, AppSpacing.buttonHeightMd),
+        ),
+      ),
+
+      // Outlined Button Theme (Dark)
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primaryLight,
+          side: const BorderSide(color: AppColors.primaryLight),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppSpacing.buttonRadius,
+          ),
+          padding: AppSpacing.buttonPadding,
+          textStyle: AppTypography.button,
+          minimumSize: const Size(0, AppSpacing.buttonHeightMd),
+        ),
+      ),
+
+      // Text Button Theme (Dark)
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primaryLight,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppSpacing.buttonRadius,
+          ),
+          padding: AppSpacing.buttonPaddingSmall,
+          textStyle: AppTypography.button,
+        ),
+      ),
+
+      // Floating Action Button Theme (Dark)
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primaryLight,
+        foregroundColor: AppColors.onBackground,
+        elevation: AppSpacing.elevationMd,
+        shape: CircleBorder(),
+      ),
+
+      // Input Decoration Theme (Dark)
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.primaryDark,
+        border: OutlineInputBorder(
+          borderRadius: AppSpacing.inputRadius,
+          borderSide: const BorderSide(color: AppColors.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppSpacing.inputRadius,
+          borderSide: const BorderSide(color: AppColors.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppSpacing.inputRadius,
+          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppSpacing.inputRadius,
+          borderSide: const BorderSide(color: AppColors.error),
+        ),
+        contentPadding: AppSpacing.inputPadding,
+        labelStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceDark),
+        hintStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceVariant),
+      ),
+
+      // List Tile Theme (Dark)
+      listTileTheme: const ListTileThemeData(
+        contentPadding: AppSpacing.listItemPadding,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppSpacing.cardRadius,
+        ),
+        textColor: AppColors.onSurfaceDark,
+        iconColor: AppColors.onSurfaceDark,
+      ),
+
+      // Icon Theme (Dark)
+      iconTheme: const IconThemeData(
+        color: AppColors.onSurfaceDark,
+        size: AppSpacing.iconMd,
+      ),
+
+      // Chip Theme (Dark)
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.primaryDark,
+        labelStyle: AppTypography.withColor(AppTypography.tag, AppColors.primaryLight),
+        shape: RoundedRectangleBorder(
+          borderRadius: AppSpacing.chipRadius,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xxs,
+        ),
+      ),
+
+      // Bottom Navigation Bar Theme (Dark)
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.surfaceDark,
+        selectedItemColor: AppColors.primaryLight,
+        unselectedItemColor: AppColors.onSurfaceVariant,
+        type: BottomNavigationBarType.fixed,
+        elevation: AppSpacing.elevationSm,
+      ),
+
+      // Tab Bar Theme (Dark)
+      tabBarTheme: TabBarThemeData(
+        labelColor: AppColors.primaryLight,
+        unselectedLabelColor: AppColors.onSurfaceVariant,
+        labelStyle: AppTypography.labelLarge,
+        unselectedLabelStyle: AppTypography.labelLarge,
+        indicator: const UnderlineTabIndicator(
+          borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
+        ),
+      ),
+
+      // Dialog Theme (Dark)
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surfaceDark,
+        elevation: AppSpacing.elevationLg,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppSpacing.cardRadiusLarge,
+        ),
+        titleTextStyle: AppTypography.withColor(AppTypography.headlineSmall, AppColors.onSurfaceDark),
+        contentTextStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceDark),
+      ),
+
+      // Snack Bar Theme (Dark)
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.onSurfaceDark,
+        contentTextStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.surfaceDark),
+        shape: RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 

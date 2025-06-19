@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/diary_filter.dart';
 import '../services/diary_service.dart';
 import '../constants/app_constants.dart';
+import '../ui/components/animated_button.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
@@ -269,22 +270,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // 適用ボタン
           Container(
             padding: const EdgeInsets.all(20),
-            child: SizedBox(
+            child: PrimaryButton(
+              onPressed: () {
+                widget.onApply(_currentFilter);
+                Navigator.pop(context);
+              },
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  widget.onApply(_currentFilter);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  _currentFilter.isActive
-                      ? 'フィルタを適用 (${_currentFilter.activeFilterCount})'
-                      : 'フィルタを適用',
-                ),
-              ),
+              text: _currentFilter.isActive
+                  ? 'フィルタを適用 (${_currentFilter.activeFilterCount})'
+                  : 'フィルタを適用',
+              icon: Icons.filter_alt,
             ),
           ),
         ],

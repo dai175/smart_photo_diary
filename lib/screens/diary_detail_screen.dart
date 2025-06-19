@@ -7,7 +7,6 @@ import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
-import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
@@ -276,7 +275,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: const CircularProgressIndicator(strokeWidth: 3),
@@ -309,12 +308,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
+                          color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.error_outline_rounded,
-                          color: AppColors.error,
+                          color: Theme.of(context).colorScheme.error,
                           size: AppSpacing.iconLg,
                         ),
                       ),
@@ -352,12 +351,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withValues(alpha: 0.1),
+                          color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.search_off_rounded,
-                          color: AppColors.warning,
+                          color: Theme.of(context).colorScheme.secondary,
                           size: AppSpacing.iconLg,
                         ),
                       ),
@@ -448,7 +447,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               width: double.infinity,
               padding: AppSpacing.cardPadding,
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: AppSpacing.cardRadius,
                 boxShadow: AppSpacing.cardShadow,
               ),
@@ -457,7 +456,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -475,14 +474,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           '日記の日付',
                           style: AppTypography.withColor(
                             AppTypography.labelMedium,
-                            AppColors.onPrimaryContainer,
+                            Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                         ),
                         Text(
                           DateFormat('yyyy年MM月dd日').format(_diaryEntry!.date),
                           style: AppTypography.withColor(
                             AppTypography.titleLarge,
-                            AppColors.onPrimaryContainer,
+                            Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                         ),
                       ],
@@ -495,7 +494,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         borderRadius: AppSpacing.chipRadius,
                       ),
                       child: Row(
@@ -535,7 +534,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       children: [
                         Icon(
                           Icons.photo_library_rounded,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           size: AppSpacing.iconMd,
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -579,7 +578,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     children: [
                       Icon(
                         _isEditing ? Icons.edit_rounded : Icons.article_rounded,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: AppSpacing.iconMd,
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -596,7 +595,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       ? Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: AppColors.outline.withValues(alpha: 0.2),
+                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                             ),
                             borderRadius: AppSpacing.inputRadius,
                             color: Theme.of(context).colorScheme.surface,
@@ -644,7 +643,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       ? Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: AppColors.outline.withValues(alpha: 0.2),
+                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                             ),
                             borderRadius: AppSpacing.inputRadius,
                             color: Theme.of(context).colorScheme.surface,
@@ -759,7 +758,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             width: 200,
             height: 240,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: AppSpacing.photoRadius,
             ),
             child: Center(
@@ -768,7 +767,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 height: 30,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                 ),
               ),
             ),
@@ -860,14 +859,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 vertical: AppSpacing.xxs,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: AppSpacing.chipRadius,
               ),
               child: Text(
                 tag,
                 style: AppTypography.withColor(
                   AppTypography.labelSmall,
-                  AppColors.onPrimaryContainer,
+                  Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
             )).toList(),

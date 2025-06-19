@@ -7,7 +7,6 @@ import '../widgets/photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
 import '../widgets/prompt_selection_modal.dart';
 import '../models/writing_prompt.dart';
-import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
@@ -48,7 +47,7 @@ class HomeContentWidget extends StatelessWidget {
       body: onRefresh != null
           ? MicroInteractions.pullToRefresh(
               onRefresh: onRefresh!,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               child: _buildMainContent(context),
             )
           : _buildMainContent(context),
@@ -124,7 +123,7 @@ class HomeContentWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.photo_camera_rounded,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 size: AppSpacing.iconMd,
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -150,6 +149,7 @@ class HomeContentWidget extends StatelessWidget {
     return ListenableBuilder(
       listenable: photoController,
       builder: (context, child) {
+        final theme = Theme.of(context);
         return AnimatedButton(
           onPressed: photoController.selectedCount > 0
               ? () => _showPromptSelectionModal(context)
@@ -157,13 +157,13 @@ class HomeContentWidget extends StatelessWidget {
           width: double.infinity,
           height: AppSpacing.buttonHeightLg,
           backgroundColor: photoController.selectedCount > 0 
-              ? AppColors.primary 
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
           foregroundColor: photoController.selectedCount > 0 
-              ? Colors.white 
-              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.onSurface.withValues(alpha: 0.6),
           shadowColor: photoController.selectedCount > 0 
-              ? AppColors.primary.withValues(alpha: 0.3) 
+              ? theme.colorScheme.primary.withValues(alpha: 0.3) 
               : null,
           elevation: photoController.selectedCount > 0 ? AppSpacing.elevationSm : 0,
           child: Row(
@@ -199,7 +199,7 @@ class HomeContentWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.book_rounded,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 size: AppSpacing.iconMd,
               ),
               const SizedBox(width: AppSpacing.sm),
