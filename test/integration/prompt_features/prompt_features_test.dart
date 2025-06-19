@@ -7,7 +7,6 @@ import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
-import 'package:smart_photo_diary/utils/prompt_category_utils.dart';
 import '../../mocks/mock_subscription_service.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
