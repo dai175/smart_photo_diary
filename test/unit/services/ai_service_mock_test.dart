@@ -63,7 +63,7 @@ void main() {
         final imageData = Uint8List.fromList([0, 1, 2, 3]);
         final date = DateTime(2024, 1, 15, 12, 0);
         final expectedResult = Success(DiaryGenerationResult(
-          title: '写真から生成された日記',
+          title: '体験から生成された日記',
           content: '画像から素敵な思い出を記録しました。',
         ));
 
@@ -99,7 +99,7 @@ void main() {
           (imageData: Uint8List.fromList([3, 4, 5]), time: DateTime(2024, 1, 15, 11, 0)),
         ];
         final expectedResult = Success(DiaryGenerationResult(
-          title: '複数の写真から生成された日記',
+          title: '複数の体験から生成された日記',
           content: '複数の画像から素敵な一日の物語を作成しました。',
         ));
 

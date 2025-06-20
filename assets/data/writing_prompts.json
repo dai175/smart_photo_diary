@@ -8,17 +8,17 @@
   "prompts": [
     {
       "id": "basic_emotion_001",
-      "text": "この写真を見て最初に感じた気持ち",
+      "text": "この瞬間に最初に感じた気持ち",
       "category": "emotion",
       "isPremiumOnly": false,
       "tags": ["感情", "第一印象", "直感", "気持ち"],
-      "description": "写真を見た瞬間の素直な感情を記録する",
+      "description": "体験した瞬間の素直な感情を記録する",
       "priority": 90,
       "isActive": true
     },
     {
       "id": "basic_emotion_002",
-      "text": "写真の場面で心が動いた理由",
+      "text": "この場面で心が動いた理由",
       "category": "emotion",
       "isPremiumOnly": false,
       "tags": ["感情", "理由", "心", "動機"],
@@ -28,21 +28,21 @@
     },
     {
       "id": "basic_emotion_003",
-      "text": "この写真で心が温かくなった部分",
+      "text": "この体験で心が温かくなった部分",
       "category": "emotion",
       "isPremiumOnly": false,
       "tags": ["感情", "温かい", "ポジティブ", "癒し"],
-      "description": "写真の中で心地よさや温かさを感じた要素を記録",
+      "description": "体験の中で心地よさや温かさを感じた要素を記録",
       "priority": 80,
       "isActive": true
     },
     {
       "id": "basic_emotion_004",
-      "text": "この写真で「ありがたい」と感じること",
+      "text": "この体験で「ありがたい」と感じること",
       "category": "emotion",
       "isPremiumOnly": false,
       "tags": ["感情", "感謝", "ありがたい", "幸せ"],
-      "description": "写真の瞬間に感じる感謝の気持ちを言葉にする",
+      "description": "この瞬間に感じる感謝の気持ちを言葉にする",
       "priority": 88,
       "isActive": true
     },
@@ -52,7 +52,7 @@
       "category": "emotion",
       "isPremiumOnly": false,
       "tags": ["感情", "自分らしさ", "アイデンティティ", "自然"],
-      "description": "写真の中で自分らしくいられた瞬間や要素を発見",
+      "description": "この体験で自分らしくいられた瞬間や要素を発見",
       "priority": 82,
       "isActive": true
     },
@@ -78,7 +78,7 @@
     },
     {
       "id": "premium_sensory_emotion_001",
-      "text": "写真から思い出す音やにおいが呼び起こす感情",
+      "text": "この体験で思い出す音やにおいが呼び起こす感情",
       "category": "sensory_emotion",
       "isPremiumOnly": true,
       "tags": ["感情五感", "音", "におい", "思い出", "呼び起こし"],
@@ -98,17 +98,17 @@
     },
     {
       "id": "premium_emotion_growth_001",
-      "text": "この写真の瞬間に感じた成長や変化",
+      "text": "この瞬間に感じた成長や変化",
       "category": "emotion_growth",
       "isPremiumOnly": true,
       "tags": ["感情成長", "変化", "成長", "発見", "自己認識"],
-      "description": "写真の瞬間に感じる自分の成長や内面の変化を記録",
+      "description": "この瞬間に感じる自分の成長や内面の変化を記録",
       "priority": 90,
       "isActive": true
     },
     {
       "id": "premium_emotion_growth_002",
-      "text": "この写真で過去の自分との違いを感じる部分",
+      "text": "この体験で過去の自分との違いを感じる部分",
       "category": "emotion_growth",
       "isPremiumOnly": true,
       "tags": ["感情成長", "過去", "比較", "進歩", "変化"],
@@ -118,11 +118,11 @@
     },
     {
       "id": "premium_emotion_connection_001",
-      "text": "この写真で感じる人とのつながりや絆",
+      "text": "この体験で感じる人とのつながりや絆",
       "category": "emotion_connection",
       "isPremiumOnly": true,
       "tags": ["感情つながり", "絆", "関係性", "愛情", "コミュニティ"],
-      "description": "写真を通して感じる人との深いつながりや関係性を探る",
+      "description": "この体験を通して感じる人との深いつながりや関係性を探る",
       "priority": 90,
       "isActive": true
     },
@@ -132,23 +132,23 @@
       "category": "emotion_connection",
       "isPremiumOnly": true,
       "tags": ["感情つながり", "安心感", "居心地", "安全", "所属感"],
-      "description": "写真の場面で感じる心の安らぎや所属感を記録",
+      "description": "この場面で感じる心の安らぎや所属感を記録",
       "priority": 85,
       "isActive": true
     },
     {
       "id": "premium_emotion_discovery_001",
-      "text": "この写真で新しく気づいた自分の感情",
+      "text": "この体験で新しく気づいた自分の感情",
       "category": "emotion_discovery",
       "isPremiumOnly": true,
       "tags": ["感情発見", "新発見", "気づき", "自己理解", "内省"],
-      "description": "写真を見て初めて認識する感情や内面の発見を記録",
+      "description": "この体験で初めて認識する感情や内面の発見を記録",
       "priority": 95,
       "isActive": true
     },
     {
       "id": "premium_emotion_discovery_002",
-      "text": "この写真で意外だった自分の反応や気持ち",
+      "text": "この体験で意外だった自分の反応や気持ち",
       "category": "emotion_discovery",
       "isPremiumOnly": true,
       "tags": ["感情発見", "意外", "反応", "予想外", "驚き"],
@@ -158,51 +158,51 @@
     },
     {
       "id": "premium_emotion_fantasy_001",
-      "text": "この写真で感じる懐かしさや憧れの感情",
+      "text": "この体験で感じる懐かしさや憧れの感情",
       "category": "emotion_fantasy",
       "isPremiumOnly": true,
       "tags": ["感情幻想", "懐かしさ", "憧れ", "ノスタルジア", "憧憬"],
-      "description": "写真が呼び起こす懐かしさや憧れの感情を探る",
+      "description": "この体験が呼び起こす懐かしさや憧れの感情を探る",
       "priority": 85,
       "isActive": true
     },
     {
       "id": "premium_emotion_healing_001",
-      "text": "この写真で心が癒された理由や感覚",
+      "text": "この体験で心が癒された理由や感覚",
       "category": "emotion_healing",
       "isPremiumOnly": true,
       "tags": ["感情癒し", "癒し", "理由", "感覚", "回復"],
-      "description": "写真が与える心の癒しの効果とその理由を探る",
+      "description": "この体験が与える心の癒しの効果とその理由を探る",
       "priority": 90,
       "isActive": true
     },
     {
       "id": "premium_emotion_healing_002",
-      "text": "この写真で感じる平和や安らぎの感情",
+      "text": "この体験で感じる平和や安らぎの感情",
       "category": "emotion_healing",
       "isPremiumOnly": true,
       "tags": ["感情癒し", "平和", "安らぎ", "静寂", "穏やか"],
-      "description": "写真から感じる心の平安や安らぎの質を記録",
+      "description": "この体験から感じる心の平安や安らぎの質を記録",
       "priority": 85,
       "isActive": true
     },
     {
       "id": "premium_emotion_energy_001",
-      "text": "この写真で感じるエネルギーや活力の源",
+      "text": "この体験で感じるエネルギーや活力の源",
       "category": "emotion_energy",
       "isPremiumOnly": true,
       "tags": ["感情エネルギー", "活力", "エネルギー", "源", "力"],
-      "description": "写真から感じる生命力やエネルギーの源泉を探る",
+      "description": "この体験から感じる生命力やエネルギーの源泉を探る",
       "priority": 90,
       "isActive": true
     },
     {
       "id": "premium_emotion_energy_002",
-      "text": "この写真で心が動かされた最も強い感情",
+      "text": "この体験で心が動かされた最も強い感情",
       "category": "emotion_energy",
       "isPremiumOnly": true,
       "tags": ["感情エネルギー", "強い感情", "動かされた", "インパクト", "印象"],
-      "description": "写真が与える最も強い感情的インパクトを記録",
+      "description": "この体験が与える最も強い感情的インパクトを記録",
       "priority": 85,
       "isActive": true
     }

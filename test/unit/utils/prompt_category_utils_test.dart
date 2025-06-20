@@ -142,7 +142,7 @@ void main() {
         testPrompts = [
           WritingPrompt(
             id: 'basic-emotion-1',
-            text: 'この写真を見てどんな気持ちになりましたか？',
+            text: 'この瞬間にどんな気持ちになりましたか？',
             category: PromptCategory.emotion,
             isPremiumOnly: false,
           ),

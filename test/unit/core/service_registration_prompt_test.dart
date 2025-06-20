@@ -131,15 +131,15 @@ void main() {
       
       // 検索実行
       final searchResults = promptService.searchPrompts(
-        '写真',
+        '感情',
         isPremium: true,
       );
       
       expect(searchResults, isNotEmpty);
       expect(searchResults.every((p) => 
-          p.text.contains('写真') || 
-          p.tags.any((tag) => tag.contains('写真')) ||
-          p.description?.contains('写真') == true
+          p.text.contains('感情') || 
+          p.tags.any((tag) => tag.contains('感情')) ||
+          p.description?.contains('感情') == true
       ), true);
     });
     
