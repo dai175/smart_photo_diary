@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 import '../services/diary_service.dart';
 import '../models/diary_entry.dart';
 import 'diary_detail_screen.dart';
@@ -184,27 +185,42 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${selectedDay.month}月${selectedDay.day}日の日記',
-                            style: AppTypography.titleLarge.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '日記の日付',
+                              style: AppTypography.withColor(
+                                AppTypography.labelMedium,
+                                Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${diaries.length}件の日記があります',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            Text(
+                              DateFormat('yyyy年MM月dd日').format(selectedDay),
+                              style: AppTypography.withColor(
+                                AppTypography.titleLarge,
+                                Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                
+                // 日記件数
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Text(
+                    '${diaries.length}件の日記があります',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
                 
                 // 日記リスト
                 ConstrainedBox(
