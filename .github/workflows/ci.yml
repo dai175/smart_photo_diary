@@ -96,7 +96,16 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
         
       - name: Create .env file
-        run: echo "GEMINI_API_KEY=dummy_key_for_build" > .env
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -n "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+            echo "✅ Using real API key for build"
+          else
+            echo "GEMINI_API_KEY=dummy_key_for_build" > .env
+            echo "⚠️ Using dummy API key (GEMINI_API_KEY secret not set)"
+          fi
         
       - name: Build debug APK
         run: flutter build apk --debug
@@ -148,7 +157,16 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
         
       - name: Create .env file
-        run: echo "GEMINI_API_KEY=dummy_key_for_build" > .env
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -n "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+            echo "✅ Using real API key for build"
+          else
+            echo "GEMINI_API_KEY=dummy_key_for_build" > .env
+            echo "⚠️ Using dummy API key (GEMINI_API_KEY secret not set)"
+          fi
         
       - name: Install CocoaPods dependencies
         run: |
