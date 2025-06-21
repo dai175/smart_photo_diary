@@ -380,15 +380,15 @@ The project includes 4 automated workflows with distinct purposes:
 
 #### 1. **ci.yml** - Continuous Integration
 - **Trigger**: Push/PR to main/develop branches
-- **Purpose**: Code quality validation and testing
-- **API Key**: Uses dummy keys for testing (no real API calls needed)
-- **Actions**: Run tests, analyze code, build debug/release APKs and iOS builds
-- **Artifacts**: Upload build artifacts for verification
+- **Purpose**: Code quality validation and testing only
+- **API Key**: Uses `dummy_key_for_ci` (unified dummy key for all CI builds)
+- **Actions**: Run tests, analyze code, build debug/release APKs and iOS builds for verification
+- **Artifacts**: No artifacts uploaded (builds are for verification only, contain dummy API keys)
 
 #### 2. **release.yml** - GitHub Releases
 - **Trigger**: Version tags (`v*`) or manual execution
 - **Purpose**: Create GitHub Releases with downloadable builds
-- **API Key**: Uses `${{ secrets.GEMINI_API_KEY }}` for functional builds
+- **API Key**: Requires `${{ secrets.GEMINI_API_KEY }}` (fails if not set)
 - **Output**: APK, AAB, iOS archive with SHA256 checksums
 - **Target**: Developers, testers, direct distribution
 
@@ -396,14 +396,14 @@ The project includes 4 automated workflows with distinct purposes:
 - **Trigger**: Version tags (`v*`) or manual execution  
 - **Purpose**: Automated deployment to Google Play Store
 - **Requirements**: Google Play Console setup, service account, app registration
-- **API Key**: Uses `${{ secrets.GEMINI_API_KEY }}` (validated with error handling)
+- **API Key**: Requires `${{ secrets.GEMINI_API_KEY }}` (fails if not set)
 - **Output**: Signed AAB uploaded to Play Store (internal/alpha/beta/production tracks)
 
 #### 4. **ios-deploy.yml** - App Store
 - **Trigger**: Version tags (`v*`) or manual execution
 - **Purpose**: Automated deployment to TestFlight/App Store
 - **Requirements**: App Store Connect setup, certificates, app registration
-- **API Key**: Uses `${{ secrets.GEMINI_API_KEY }}` (validated with error handling)
+- **API Key**: Requires `${{ secrets.GEMINI_API_KEY }}` (fails if not set)
 - **Output**: Signed IPA uploaded to TestFlight or App Store
 
 ### Required GitHub Secrets
@@ -434,9 +434,11 @@ IOS_TEAM_ID=apple_team_id
 - **Store Distribution**: Use android-deploy.yml and ios-deploy.yml after store setup
 
 ### Important Notes
-- Store deployment workflows will fail until apps are registered in respective stores
-- CI workflow intentionally uses dummy API keys to avoid unnecessary API usage during testing
-- All workflows include proper error handling and validation for missing secrets
+- **CI vs Production**: CI uses dummy API keys and produces no artifacts; production workflows require real secrets
+- **Secret Validation**: All production workflows (release, android-deploy, ios-deploy) fail immediately if GEMINI_API_KEY is not set
+- **Store Registration**: Store deployment workflows will fail until apps are registered in respective stores
+- **API Key Security**: CI workflows intentionally use dummy keys to avoid exposing real API keys during testing
+- **Workflow Triggers**: Only ci.yml runs on normal pushes; production workflows require version tags or manual execution
 
 ## Development Status
 
