@@ -54,7 +54,7 @@ dependencies:
   package_info_plus: ^8.0.3
   file_picker: ^8.1.4
   google_fonts: ^6.2.1
-  in_app_purchase: ^3.2.0
+  in_app_purchase: ^3.1.13
 
 dev_dependencies:
   flutter_test:
