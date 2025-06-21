@@ -79,7 +79,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "❌ Error: GEMINI_API_KEY secret is not set"
+            echo "Please add GEMINI_API_KEY to GitHub repository secrets"
+            exit 1
+          fi
           echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+          echo "✅ Production .env file created with real API key"
           
       - name: Install CocoaPods dependencies
         run: |
