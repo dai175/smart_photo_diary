@@ -16,11 +16,7 @@ class DiaryCardWidget extends StatelessWidget {
   final DiaryEntry entry;
   final VoidCallback onTap;
 
-  const DiaryCardWidget({
-    super.key,
-    required this.entry,
-    required this.onTap,
-  });
+  const DiaryCardWidget({super.key, required this.entry, required this.onTap});
 
   // タグを取得（永続化キャッシュ優先）
   Future<List<String>> _generateTags() async {
@@ -30,7 +26,7 @@ class DiaryCardWidget extends StatelessWidget {
     } catch (e) {
       // エラー時はフォールバックタグを返す（時間帯のみ）
       final fallbackTags = <String>[];
-      
+
       final hour = entry.date.hour;
       if (hour >= 5 && hour < 12) {
         fallbackTags.add('朝');
@@ -41,7 +37,7 @@ class DiaryCardWidget extends StatelessWidget {
       } else {
         fallbackTags.add('夜');
       }
-      
+
       return fallbackTags;
     }
   }
@@ -95,7 +91,7 @@ class DiaryCardWidget extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.md),
 
           // タイトル
@@ -243,10 +239,10 @@ class DiaryCardWidget extends StatelessWidget {
             ],
           );
         }
-        
+
         final tags = snapshot.data ?? [];
         if (tags.isEmpty) return const SizedBox();
-        
+
         return Wrap(
           spacing: AppSpacing.xs,
           runSpacing: AppSpacing.xs,
@@ -267,15 +263,30 @@ class DiaryCardWidget extends StatelessWidget {
 
   ChipCategory _getCategoryForTag(String tag) {
     // タグの内容に基づいてカテゴリを判定
-    if (tag.contains('朝') || tag.contains('昼') || tag.contains('夕') || tag.contains('夜')) {
+    if (tag.contains('朝') ||
+        tag.contains('昼') ||
+        tag.contains('夕') ||
+        tag.contains('夜')) {
       return ChipCategory.general;
-    } else if (tag.contains('楽し') || tag.contains('嬉し') || tag.contains('悲し') || tag.contains('怒り')) {
+    } else if (tag.contains('楽し') ||
+        tag.contains('嬉し') ||
+        tag.contains('悲し') ||
+        tag.contains('怒り')) {
       return ChipCategory.emotion;
-    } else if (tag.contains('料理') || tag.contains('食事') || tag.contains('食べ') || tag.contains('グルメ')) {
+    } else if (tag.contains('料理') ||
+        tag.contains('食事') ||
+        tag.contains('食べ') ||
+        tag.contains('グルメ')) {
       return ChipCategory.food;
-    } else if (tag.contains('公園') || tag.contains('家') || tag.contains('店') || tag.contains('場所')) {
+    } else if (tag.contains('公園') ||
+        tag.contains('家') ||
+        tag.contains('店') ||
+        tag.contains('場所')) {
       return ChipCategory.location;
-    } else if (tag.contains('運動') || tag.contains('散歩') || tag.contains('スポーツ') || tag.contains('旅行')) {
+    } else if (tag.contains('運動') ||
+        tag.contains('散歩') ||
+        tag.contains('スポーツ') ||
+        tag.contains('旅行')) {
       return ChipCategory.activity;
     }
     return ChipCategory.general;

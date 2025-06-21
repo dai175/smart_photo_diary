@@ -36,7 +36,9 @@ void main() {
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
-    testWidgets('should display permission message without photos access', (WidgetTester tester) async {
+    testWidgets('should display permission message without photos access', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       IntegrationTestHelpers.setupMockPhotoPermission(false);
 
@@ -52,7 +54,9 @@ void main() {
       expect(find.text(AppConstants.requestPermissionButton), findsOneWidget);
     });
 
-    testWidgets('should navigate between bottom navigation tabs', (WidgetTester tester) async {
+    testWidgets('should navigate between bottom navigation tabs', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       IntegrationTestHelpers.setupMockPhotoPermission(true);
       IntegrationTestHelpers.setupMockTodayPhotos([]);
@@ -71,15 +75,18 @@ void main() {
           await tester.tap(tab);
           await tester.pump(const Duration(milliseconds: 300));
           await tester.pump();
-          
+
           // Should remain stable
           expect(find.byType(BottomNavigationBar), findsOneWidget);
         }
       }
-      
+
       // At least home and settings should always be present (using AppIcons)
       expect(find.byIcon(AppIcons.navigationIcons[0]), findsOneWidget); // Home
-      expect(find.byIcon(AppIcons.navigationIcons[3]), findsOneWidget); // Settings
+      expect(
+        find.byIcon(AppIcons.navigationIcons[3]),
+        findsOneWidget,
+      ); // Settings
 
       // Assert
       expect(tester.takeException(), isNull);

@@ -48,9 +48,9 @@ void main() {
 
       // テスト用使用データ
       testUsageData = {
-        'emotion_001': 15,      // 最も使用頻度が高い
-        'emotion_depth_001': 8,  // 中程度
-        'sensory_001': 3,       // 低頻度
+        'emotion_001': 15, // 最も使用頻度が高い
+        'emotion_depth_001': 8, // 中程度
+        'sensory_001': 3, // 低頻度
         // 'unused_001'は使用なし
       };
 
@@ -123,8 +123,8 @@ void main() {
         );
 
         expect(analysis.usageDistribution[15], 1); // 15回使用: 1プロンプト
-        expect(analysis.usageDistribution[8], 1);  // 8回使用: 1プロンプト
-        expect(analysis.usageDistribution[3], 1);  // 3回使用: 1プロンプト
+        expect(analysis.usageDistribution[8], 1); // 8回使用: 1プロンプト
+        expect(analysis.usageDistribution[3], 1); // 3回使用: 1プロンプト
       });
     });
 
@@ -138,7 +138,10 @@ void main() {
         expect(analysis.categoryUsageCount[PromptCategory.emotion], 15);
         expect(analysis.categoryUsageCount[PromptCategory.emotionDepth], 8);
         expect(analysis.categoryUsageCount[PromptCategory.sensoryEmotion], 3);
-        expect(analysis.categoryUsageCount[PromptCategory.emotionHealing], isNull);
+        expect(
+          analysis.categoryUsageCount[PromptCategory.emotionHealing],
+          isNull,
+        );
 
         expect(analysis.mostPopularCategory, PromptCategory.emotion);
       });
@@ -150,19 +153,25 @@ void main() {
         );
 
         final totalUsage = 26;
-        expect(analysis.getCategoryUsageRate(PromptCategory.emotion), 
-               closeTo(15 / totalUsage, 0.01));
-        expect(analysis.getCategoryUsageRate(PromptCategory.emotionDepth), 
-               closeTo(8 / totalUsage, 0.01));
-        expect(analysis.getCategoryUsageRate(PromptCategory.sensoryEmotion), 
-               closeTo(3 / totalUsage, 0.01));
+        expect(
+          analysis.getCategoryUsageRate(PromptCategory.emotion),
+          closeTo(15 / totalUsage, 0.01),
+        );
+        expect(
+          analysis.getCategoryUsageRate(PromptCategory.emotionDepth),
+          closeTo(8 / totalUsage, 0.01),
+        );
+        expect(
+          analysis.getCategoryUsageRate(PromptCategory.sensoryEmotion),
+          closeTo(3 / totalUsage, 0.01),
+        );
       });
 
       test('前期間データとの比較でトレンドが計算される', () {
         final previousData = {
-          'emotion_001': 10,      // 15から10へ: +50%増加
+          'emotion_001': 10, // 15から10へ: +50%増加
           'emotion_depth_001': 12, // 8から12へ: -33%減少
-          'sensory_001': 3,       // 変化なし
+          'sensory_001': 3, // 変化なし
         };
 
         final analysis = PromptUsageAnalytics.analyzeCategoryPopularity(
@@ -172,10 +181,14 @@ void main() {
         );
 
         expect(analysis.trends, isNotNull);
-        expect(analysis.trends![PromptCategory.emotion]!.direction, 
-               TrendDirection.increasing);
-        expect(analysis.trends![PromptCategory.emotionDepth]!.direction, 
-               TrendDirection.decreasing);
+        expect(
+          analysis.trends![PromptCategory.emotion]!.direction,
+          TrendDirection.increasing,
+        );
+        expect(
+          analysis.trends![PromptCategory.emotionDepth]!.direction,
+          TrendDirection.decreasing,
+        );
       });
     });
 
@@ -198,7 +211,10 @@ void main() {
 
         // 使用履歴から計算される時間帯パターンをチェック
         expect(analysis.usagePatterns, isMap);
-        expect(analysis.usagePatterns.keys.any((key) => key.startsWith('hour_')), isTrue);
+        expect(
+          analysis.usagePatterns.keys.any((key) => key.startsWith('hour_')),
+          isTrue,
+        );
       });
 
       test('空の履歴でも正常に処理される', () {
@@ -276,7 +292,9 @@ void main() {
         );
 
         final unusedSuggestion = suggestions.firstWhere(
-          (s) => s.type == SuggestionType.improvePrompt && s.target == 'unused_prompts',
+          (s) =>
+              s.type == SuggestionType.improvePrompt &&
+              s.target == 'unused_prompts',
           orElse: () => throw StateError('未使用プロンプト提案が見つからない'),
         );
 
@@ -309,8 +327,10 @@ void main() {
 
         if (suggestions.length > 1) {
           for (int i = 0; i < suggestions.length - 1; i++) {
-            expect(suggestions[i].priority, 
-                   greaterThanOrEqualTo(suggestions[i + 1].priority));
+            expect(
+              suggestions[i].priority,
+              greaterThanOrEqualTo(suggestions[i + 1].priority),
+            );
           }
         }
       });

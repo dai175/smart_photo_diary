@@ -10,52 +10,72 @@ import '../integration/mocks/mock_services.dart';
 /// Widget test specific service setup to avoid service registration errors
 class WidgetTestServiceSetup {
   static bool _isInitialized = false;
-  
+
   /// Initialize widget test environment
   static void initializeForWidgetTests() {
     if (_isInitialized) return;
-    
+
     // Register all fallback values
     registerMockFallbacks();
-    
+
     _isInitialized = true;
   }
-  
+
   /// Setup service locator with mocks for a widget test
   static ServiceLocator setupServiceLocatorForWidget() {
     final serviceLocator = ServiceLocator();
-    
+
     // Register all mock services
-    serviceLocator.registerSingleton<PhotoServiceInterface>(TestServiceSetup.getPhotoService());
-    serviceLocator.registerSingleton<AiServiceInterface>(TestServiceSetup.getAiService());
-    serviceLocator.registerSingleton<DiaryServiceInterface>(TestServiceSetup.getDiaryService());
-    serviceLocator.registerSingleton<SettingsService>(TestServiceSetup.getSettingsService());
-    serviceLocator.registerSingleton<StorageService>(TestServiceSetup.getStorageService());
-    
+    serviceLocator.registerSingleton<PhotoServiceInterface>(
+      TestServiceSetup.getPhotoService(),
+    );
+    serviceLocator.registerSingleton<AiServiceInterface>(
+      TestServiceSetup.getAiService(),
+    );
+    serviceLocator.registerSingleton<DiaryServiceInterface>(
+      TestServiceSetup.getDiaryService(),
+    );
+    serviceLocator.registerSingleton<SettingsService>(
+      TestServiceSetup.getSettingsService(),
+    );
+    serviceLocator.registerSingleton<StorageService>(
+      TestServiceSetup.getStorageService(),
+    );
+
     return serviceLocator;
   }
-  
+
   /// Setup global ServiceRegistration with mocks for widgets that use ServiceRegistration.get<T>()
   static void setupGlobalServiceRegistration() {
     // Clear any existing ServiceLocator
     final globalServiceLocator = ServiceLocator();
     globalServiceLocator.clear();
-    
+
     // Register mock services globally
-    globalServiceLocator.registerSingleton<PhotoServiceInterface>(TestServiceSetup.getPhotoService());
-    globalServiceLocator.registerSingleton<AiServiceInterface>(TestServiceSetup.getAiService());
-    globalServiceLocator.registerSingleton<DiaryServiceInterface>(TestServiceSetup.getDiaryService());
-    globalServiceLocator.registerSingleton<SettingsService>(TestServiceSetup.getSettingsService());
-    globalServiceLocator.registerSingleton<StorageService>(TestServiceSetup.getStorageService());
+    globalServiceLocator.registerSingleton<PhotoServiceInterface>(
+      TestServiceSetup.getPhotoService(),
+    );
+    globalServiceLocator.registerSingleton<AiServiceInterface>(
+      TestServiceSetup.getAiService(),
+    );
+    globalServiceLocator.registerSingleton<DiaryServiceInterface>(
+      TestServiceSetup.getDiaryService(),
+    );
+    globalServiceLocator.registerSingleton<SettingsService>(
+      TestServiceSetup.getSettingsService(),
+    );
+    globalServiceLocator.registerSingleton<StorageService>(
+      TestServiceSetup.getStorageService(),
+    );
   }
-  
+
   /// Quick setup for widget tests - call this in setUpAll
   static void setUpForWidgetGroup() {
     setUpAll(() {
       initializeForWidgetTests();
     });
   }
-  
+
   /// Setup for individual widget tests - call this in setUp
   static void setUpForWidgetTest() {
     setUp(() {
@@ -63,7 +83,7 @@ class WidgetTestServiceSetup {
       TestServiceSetup.clearAllMocks();
     });
   }
-  
+
   /// Clean up widget test environment
   static void tearDownWidgetGroup() {
     tearDownAll(() {

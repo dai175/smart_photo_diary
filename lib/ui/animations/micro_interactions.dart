@@ -6,7 +6,9 @@ class MicroInteractions {
   MicroInteractions._();
 
   /// ハプティックフィードバック付きのタップ効果
-  static void hapticTap({VibrationIntensity intensity = VibrationIntensity.light}) {
+  static void hapticTap({
+    VibrationIntensity intensity = VibrationIntensity.light,
+  }) {
     switch (intensity) {
       case VibrationIntensity.light:
         HapticFeedback.lightImpact();
@@ -129,10 +131,7 @@ class MicroInteractions {
       tween: Tween<double>(begin: 0.0, end: 1.0),
       curve: curve,
       builder: (context, value, child) {
-        return Transform.scale(
-          scale: value,
-          child: child,
-        );
+        return Transform.scale(scale: value, child: child);
       },
       child: child,
     );
@@ -170,18 +169,12 @@ class _BounceWrapperState extends State<_BounceWrapper>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: widget.scaleFactor,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -254,18 +247,12 @@ class _PulseWidgetState extends State<PulseWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _scaleAnimation = Tween<double>(
       begin: widget.minScale,
       end: widget.maxScale,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.enabled) {
       _controller.repeat(reverse: true);
@@ -336,18 +323,12 @@ class _FloatingWidgetState extends State<FloatingWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _offsetAnimation = Tween<double>(
       begin: -widget.offset,
       end: widget.offset,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.enabled) {
       _controller.repeat(reverse: true);
@@ -420,18 +401,12 @@ class _BreatheWidgetState extends State<BreatheWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _opacityAnimation = Tween<double>(
       begin: widget.minOpacity,
       end: widget.maxOpacity,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.enabled) {
       _controller.repeat(reverse: true);
@@ -466,10 +441,7 @@ class _BreatheWidgetState extends State<BreatheWidget>
     return AnimatedBuilder(
       animation: _opacityAnimation,
       builder: (context, child) {
-        return Opacity(
-          opacity: _opacityAnimation.value,
-          child: widget.child,
-        );
+        return Opacity(opacity: _opacityAnimation.value, child: widget.child);
       },
     );
   }

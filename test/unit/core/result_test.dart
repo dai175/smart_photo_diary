@@ -30,7 +30,7 @@ void main() {
         String? callbackValue;
 
         result.onSuccess((v) => callbackValue = v);
-        
+
         expect(callbackValue, value);
       });
 
@@ -40,7 +40,7 @@ void main() {
         bool callbackExecuted = false;
 
         result.onFailure((_) => callbackExecuted = true);
-        
+
         expect(callbackExecuted, false);
       });
 
@@ -58,10 +58,7 @@ void main() {
         const value = 'test value';
         final result = Success(value);
 
-        final folded = result.fold(
-          (v) => 'success: $v',
-          (e) => 'failure: $e',
-        );
+        final folded = result.fold((v) => 'success: $v', (e) => 'failure: $e');
 
         expect(folded, 'success: $value');
       });
@@ -93,7 +90,7 @@ void main() {
         bool callbackExecuted = false;
 
         result.onSuccess((_) => callbackExecuted = true);
-        
+
         expect(callbackExecuted, false);
       });
 
@@ -103,7 +100,7 @@ void main() {
         AppException? callbackError;
 
         result.onFailure((e) => callbackError = e);
-        
+
         expect(callbackError, error);
       });
 
@@ -121,10 +118,7 @@ void main() {
         final error = ServiceException('test error');
         final result = Failure<String>(error);
 
-        final folded = result.fold(
-          (v) => 'success: $v',
-          (e) => 'failure: $e',
-        );
+        final folded = result.fold((v) => 'success: $v', (e) => 'failure: $e');
 
         expect(folded, 'failure: $error');
       });
@@ -178,7 +172,9 @@ void main() {
       });
 
       test('should execute async operation successfully', () async {
-        final result = await ResultHelper.tryExecuteAsync(() async => 'success');
+        final result = await ResultHelper.tryExecuteAsync(
+          () async => 'success',
+        );
 
         expect(result.isSuccess, true);
         expect(result.value, 'success');
@@ -194,11 +190,7 @@ void main() {
       });
 
       test('should combine successful results', () {
-        final results = [
-          Success('a'),
-          Success('b'),
-          Success('c'),
-        ];
+        final results = [Success('a'), Success('b'), Success('c')];
 
         final combined = ResultHelper.combine(results);
 
@@ -208,11 +200,7 @@ void main() {
 
       test('should return first failure when combining', () {
         final error = ServiceException('test error');
-        final results = [
-          Success('a'),
-          Failure<String>(error),
-          Success('c'),
-        ];
+        final results = [Success('a'), Failure<String>(error), Success('c')];
 
         final combined = ResultHelper.combine(results);
 
@@ -256,10 +244,7 @@ void main() {
 
       test('should create result from null value', () {
         final error = ServiceException('null error');
-        final result = ResultHelper.fromNullable<String>(
-          null,
-          () => error,
-        );
+        final result = ResultHelper.fromNullable<String>(null, () => error);
 
         expect(result.isFailure, true);
         expect(result.error, error);
@@ -318,7 +303,9 @@ void main() {
     test('should map async result successfully', () async {
       Future<Result<String>> futureResult = Future.value(Success('test'));
 
-      final mapped = await futureResult.mapAsync((value) async => value.toUpperCase());
+      final mapped = await futureResult.mapAsync(
+        (value) async => value.toUpperCase(),
+      );
 
       expect(mapped.isSuccess, true);
       expect(mapped.value, 'TEST');
@@ -338,7 +325,7 @@ void main() {
     test('should get value or null from future result', () async {
       Future<Result<String>> futureSuccess = Future.value(Success('test'));
       Future<Result<String>> futureFailure = Future.value(
-        Failure(ServiceException('error'))
+        Failure(ServiceException('error')),
       );
 
       final successValue = await futureSuccess.getValueOrNull();
@@ -351,7 +338,7 @@ void main() {
     test('should get or default from future result', () async {
       Future<Result<String>> futureSuccess = Future.value(Success('test'));
       Future<Result<String>> futureFailure = Future.value(
-        Failure(ServiceException('error'))
+        Failure(ServiceException('error')),
       );
 
       final successValue = await futureSuccess.getOrDefault('default');

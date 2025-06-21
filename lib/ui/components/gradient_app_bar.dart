@@ -84,8 +84,8 @@ class GradientAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-        (toolbarHeight ?? kToolbarHeight) + (bottom?.preferredSize.height ?? 0),
-      );
+    (toolbarHeight ?? kToolbarHeight) + (bottom?.preferredSize.height ?? 0),
+  );
 
   @override
   State<GradientAppBar> createState() => _GradientAppBarState();
@@ -99,20 +99,16 @@ class _GradientAppBarState extends State<GradientAppBar>
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.enableGradientAnimation) {
       _animationController = AnimationController(
         duration: widget.animationDuration,
         vsync: this,
       );
 
-      _gradientAnimation = Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ));
+      _gradientAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      );
 
       _animationController.repeat(reverse: true);
     } else {
@@ -170,7 +166,8 @@ class _GradientAppBarState extends State<GradientAppBar>
             flexibleSpace: widget.flexibleSpace,
             bottom: widget.bottom,
             shape: widget.shape,
-            systemOverlayStyle: widget.systemOverlayStyle ??
+            systemOverlayStyle:
+                widget.systemOverlayStyle ??
                 SystemUiOverlayStyle(
                   statusBarColor: Colors.transparent,
                   statusBarIconBrightness: _getStatusBarIconBrightness(),
@@ -193,7 +190,7 @@ class _GradientAppBarState extends State<GradientAppBar>
         baseGradient.end as Alignment,
         _gradientAnimation.value,
       )!;
-      
+
       final animatedEnd = Alignment.lerp(
         baseGradient.end as Alignment,
         baseGradient.begin as Alignment,
@@ -207,7 +204,7 @@ class _GradientAppBarState extends State<GradientAppBar>
         stops: baseGradient.stops,
       );
     }
-    
+
     return baseGradient;
   }
 
@@ -224,7 +221,8 @@ class _GradientAppBarState extends State<GradientAppBar>
 /// アプリバーのバリエーション
 
 /// ホーム画面用のグラデーションアプリバー
-class HomeGradientAppBar extends StatelessWidget implements PreferredSizeWidget {
+class HomeGradientAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const HomeGradientAppBar({
     super.key,
     required this.title,
@@ -322,7 +320,8 @@ class TransparentAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// カスタムFlexibleSpaceを持つアプリバー
-class FlexibleGradientAppBar extends StatelessWidget implements PreferredSizeWidget {
+class FlexibleGradientAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const FlexibleGradientAppBar({
     super.key,
     required this.title,

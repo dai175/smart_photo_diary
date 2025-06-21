@@ -25,5 +25,9 @@ abstract class PhotoServiceInterface {
   Future<dynamic> getOriginalFile(AssetEntity asset);
 
   /// 写真のサムネイルを取得する（後方互換性）
-  Future<dynamic> getThumbnail(AssetEntity asset, {int width = 200, int height = 200});
+  Future<dynamic> getThumbnail(
+    AssetEntity asset, {
+    int width = 200,
+    int height = 200,
+  });
 }

@@ -47,9 +47,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     try {
       _diaryService = await DiaryService.getInstance();
       _allDiaries = await _diaryService.getSortedDiaryEntries();
-      
+
       _calculateStatistics();
-      
+
       setState(() {
         _isLoading = false;
       });
@@ -63,7 +63,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   void _calculateStatistics() {
     _totalEntries = _allDiaries.length;
-    
+
     // 日記データをマップに変換（日付をキーとして、複数日記対応）
     _diaryMap = {};
     for (final diary in _allDiaries) {
@@ -86,14 +86,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     // 日付順にソート（降順）
-    final sortedDates = _diaryMap.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
+    final sortedDates = _diaryMap.keys.toList()..sort((a, b) => b.compareTo(a));
 
     // 現在の連続記録日数を計算
     _currentStreak = 0;
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    
+
     DateTime checkDate = todayDate;
     while (_diaryMap.containsKey(checkDate)) {
       _currentStreak++;
@@ -106,10 +105,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     DateTime? previousDate;
 
     for (final date in sortedDates.reversed) {
-      if (previousDate == null || 
-          date.difference(previousDate).inDays == 1) {
+      if (previousDate == null || date.difference(previousDate).inDays == 1) {
         currentCount++;
-        _longestStreak = _longestStreak > currentCount ? _longestStreak : currentCount;
+        _longestStreak = _longestStreak > currentCount
+            ? _longestStreak
+            : currentCount;
       } else {
         currentCount = 1;
       }
@@ -128,7 +128,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         width: 22,
         height: 22,
         decoration: BoxDecoration(
-          color: count > 1 
+          color: count > 1
               ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8)
               : Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
           shape: BoxShape.circle,
@@ -146,7 +146,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  void _showDiarySelectionDialog(BuildContext context, List<DiaryEntry> diaries, DateTime selectedDay) {
+  void _showDiarySelectionDialog(
+    BuildContext context,
+    List<DiaryEntry> diaries,
+    DateTime selectedDay,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -193,14 +197,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               '日記の日付',
                               style: AppTypography.withColor(
                                 AppTypography.labelMedium,
-                                Theme.of(context).colorScheme.onPrimaryContainer,
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                               ),
                             ),
                             Text(
                               DateFormat('yyyy年MM月dd日').format(selectedDay),
                               style: AppTypography.withColor(
                                 AppTypography.titleLarge,
-                                Theme.of(context).colorScheme.onPrimaryContainer,
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ],
@@ -210,7 +218,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                
+
                 // 日記件数
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -221,7 +229,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ),
                 ),
-                
+
                 // 日記リスト
                 ConstrainedBox(
                   constraints: const BoxConstraints(
@@ -234,19 +242,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     itemBuilder: (context, index) {
                       final diary = diaries[index];
                       final title = diary.title.isNotEmpty ? diary.title : '無題';
-                      
+
                       return SlideInWidget(
                         delay: Duration(milliseconds: 100 * index),
                         child: Container(
                           margin: EdgeInsets.only(
-                            bottom: index < diaries.length - 1 ? AppSpacing.sm : 0,
+                            bottom: index < diaries.length - 1
+                                ? AppSpacing.sm
+                                : 0,
                           ),
                           child: CustomCard(
                             onTap: () {
                               Navigator.of(context).pop();
                               Navigator.push(
                                 context,
-                                DiaryDetailScreen(diaryId: diary.id).customRoute(),
+                                DiaryDetailScreen(
+                                  diaryId: diary.id,
+                                ).customRoute(),
                               );
                             },
                             child: Row(
@@ -255,14 +267,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
                                     child: Text(
                                       '${index + 1}',
                                       style: AppTypography.labelLarge.copyWith(
-                                        color: Theme.of(context).colorScheme.onSecondary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSecondary,
                                       ),
                                     ),
                                   ),
@@ -270,13 +286,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         title,
-                                        style: AppTypography.titleMedium.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface,
-                                        ),
+                                        style: AppTypography.titleMedium
+                                            .copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
+                                            ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -286,7 +306,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppTypography.bodySmall.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(height: AppSpacing.xs),
@@ -296,14 +318,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                           vertical: AppSpacing.xxs,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primaryContainer,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primaryContainer,
                                           borderRadius: AppSpacing.chipRadius,
                                         ),
                                         child: Text(
                                           '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
-                                          style: AppTypography.labelSmall.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          ),
+                                          style: AppTypography.labelSmall
+                                              .copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                              ),
                                         ),
                                       ),
                                     ],
@@ -311,7 +338,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 ),
                                 Icon(
                                   Icons.chevron_right_rounded,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                   size: AppSpacing.iconSm,
                                 ),
                               ],
@@ -322,9 +351,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     },
                   ),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.lg),
-                
+
                 // アクションボタン
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -376,7 +405,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                          color: AppColors.primaryContainer.withValues(
+                            alpha: 0.3,
+                          ),
                           shape: BoxShape.circle,
                         ),
                         child: const CircularProgressIndicator(strokeWidth: 3),
@@ -411,17 +442,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 統計カード群
-                    FadeInWidget(
-                      child: _buildStatisticsCards(),
-                    ),
+                    FadeInWidget(child: _buildStatisticsCards()),
                     const SizedBox(height: AppSpacing.xl),
-                    
+
                     // カレンダーセクション
                     SlideInWidget(
                       delay: const Duration(milliseconds: 200),
                       child: _buildCalendarSection(),
                     ),
-                    
+
                     const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
@@ -497,7 +526,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, String unit, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    String unit,
+    IconData icon,
+    Color color,
+  ) {
     return CustomCard(
       elevation: AppSpacing.elevationSm,
       child: Row(
@@ -508,11 +543,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -566,60 +597,77 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TableCalendar(
-              firstDay: DateTime.utc(2020),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              calendarFormat: CalendarFormat.month,
-              eventLoader: _getEventsForDay,
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                if (!isSameDay(_selectedDay, selectedDay)) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  });
-                  
-                  // 選択した日に日記がある場合は選択ダイアログまたは直接遷移
-                  final diaries = _diaryMap[DateTime(selectedDay.year, selectedDay.month, selectedDay.day)];
-                  if (diaries != null && diaries.isNotEmpty) {
-                    if (diaries.length == 1) {
-                      // 1つの日記の場合は直接遷移
-                      Navigator.push(
-                        context,
-                        DiaryDetailScreen(diaryId: diaries.first.id).customRoute(),
-                      );
-                    } else {
-                      // 複数の日記がある場合は選択ダイアログを表示
-                      _showDiarySelectionDialog(context, diaries, selectedDay);
-                    }
+            firstDay: DateTime.utc(2020),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: CalendarFormat.month,
+            eventLoader: _getEventsForDay,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              if (!isSameDay(_selectedDay, selectedDay)) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+
+                // 選択した日に日記がある場合は選択ダイアログまたは直接遷移
+                final diaries =
+                    _diaryMap[DateTime(
+                      selectedDay.year,
+                      selectedDay.month,
+                      selectedDay.day,
+                    )];
+                if (diaries != null && diaries.isNotEmpty) {
+                  if (diaries.length == 1) {
+                    // 1つの日記の場合は直接遷移
+                    Navigator.push(
+                      context,
+                      DiaryDetailScreen(
+                        diaryId: diaries.first.id,
+                      ).customRoute(),
+                    );
+                  } else {
+                    // 複数の日記がある場合は選択ダイアログを表示
+                    _showDiarySelectionDialog(context, diaries, selectedDay);
                   }
                 }
-              },
+              }
+            },
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
             },
-              calendarStyle: CalendarStyle(
-                defaultTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                weekendTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
-                holidayTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
-                outsideTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                selectedDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                todayDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  shape: BoxShape.circle,
-                ),
-                markerDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
-                  shape: BoxShape.circle,
-                ),
-                markersMaxCount: 3,
-                cellMargin: const EdgeInsets.all(4),
+            calendarStyle: CalendarStyle(
+              defaultTextStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
+              weekendTextStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              holidayTextStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              outsideTextStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                shape: BoxShape.circle,
+              ),
+              markerDecoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              markersMaxCount: 3,
+              cellMargin: const EdgeInsets.all(4),
+            ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, day, events) {
                 if (events.isNotEmpty) {
@@ -633,32 +681,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 return null;
               },
             ),
-              headerStyle: HeaderStyle(
-                titleCentered: true,
-                titleTextStyle: AppTypography.titleLarge.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                formatButtonVisible: false,
-                leftChevronIcon: Icon(
-                  AppIcons.calendarPrev,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                rightChevronIcon: Icon(
-                  AppIcons.calendarNext,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+            headerStyle: HeaderStyle(
+              titleCentered: true,
+              titleTextStyle: AppTypography.titleLarge.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-                weekendStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              formatButtonVisible: false,
+              leftChevronIcon: Icon(
+                AppIcons.calendarPrev,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              rightChevronIcon: Icon(
+                AppIcons.calendarNext,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekdayStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+              weekendStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
         ],
       ),
@@ -669,17 +717,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final now = DateTime.now();
     final currentMonth = DateTime(now.year, now.month);
     final nextMonth = DateTime(now.year, now.month + 1);
-    
+
     // 今月記録した日数を計算（同じ日に複数の日記があっても1日としてカウント）
     final monthlyDates = <DateTime>{};
     for (final diary in _allDiaries) {
       if (diary.date.isAfter(currentMonth.subtract(const Duration(days: 1))) &&
           diary.date.isBefore(nextMonth)) {
-        final date = DateTime(diary.date.year, diary.date.month, diary.date.day);
+        final date = DateTime(
+          diary.date.year,
+          diary.date.month,
+          diary.date.day,
+        );
         monthlyDates.add(date);
       }
     }
-    
+
     return monthlyDates.length;
   }
 }

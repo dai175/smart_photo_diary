@@ -24,10 +24,10 @@ void main() {
       };
 
       final categoryUsageRate = {
-        PromptCategory.emotion: 0.4,         // 40%
-        PromptCategory.emotionDepth: 0.3,    // 30%
-        PromptCategory.sensoryEmotion: 0.2,  // 20%
-        PromptCategory.emotionGrowth: 0.1,   // 10%
+        PromptCategory.emotion: 0.4, // 40%
+        PromptCategory.emotionDepth: 0.3, // 30%
+        PromptCategory.sensoryEmotion: 0.2, // 20%
+        PromptCategory.emotionGrowth: 0.1, // 10%
         PromptCategory.emotionConnection: 0.0, // 0%
       };
 
@@ -137,10 +137,16 @@ void main() {
         expect(trendSummary.decliningCategories, 1); // emotionDepth
         expect(trendSummary.stableCategories, 1); // sensoryEmotion
 
-        expect(trendSummary.fastestGrowingCategory, PromptCategory.emotionGrowth);
+        expect(
+          trendSummary.fastestGrowingCategory,
+          PromptCategory.emotionGrowth,
+        );
         expect(trendSummary.maxGrowthRate, 100.0);
 
-        expect(trendSummary.fastestDecliningCategory, PromptCategory.emotionDepth);
+        expect(
+          trendSummary.fastestDecliningCategory,
+          PromptCategory.emotionDepth,
+        );
         expect(trendSummary.maxDeclineRate, -10.0);
       });
     });
@@ -154,12 +160,16 @@ void main() {
           averageUsagePerPrompt: const {},
         );
 
-        final summary = CategoryPopularityReporter.generateQuickSummary(emptyAnalysis);
+        final summary = CategoryPopularityReporter.generateQuickSummary(
+          emptyAnalysis,
+        );
         expect(summary, 'まだプロンプトの使用履歴がありません。');
       });
 
       test('使用履歴ありで適切なサマリーが生成される', () {
-        final summary = CategoryPopularityReporter.generateQuickSummary(testAnalysis);
+        final summary = CategoryPopularityReporter.generateQuickSummary(
+          testAnalysis,
+        );
 
         expect(summary, contains('50回'));
         expect(summary, contains('4カテゴリ'));
@@ -176,7 +186,7 @@ void main() {
         );
 
         expect(ranking.length, 3);
-        
+
         expect(ranking[0].rank, 1);
         expect(ranking[0].category, PromptCategory.emotion);
         expect(ranking[0].usageCount, 20);
@@ -199,7 +209,12 @@ void main() {
 
         // emotionConnectionは使用回数0なので除外される
         expect(ranking.length, 4);
-        expect(ranking.any((item) => item.category == PromptCategory.emotionConnection), false);
+        expect(
+          ranking.any(
+            (item) => item.category == PromptCategory.emotionConnection,
+          ),
+          false,
+        );
       });
 
       test('利用可能カテゴリ数より多いtopNを指定しても正常動作', () {

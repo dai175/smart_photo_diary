@@ -9,13 +9,13 @@ enum SubscriptionPlan {
   /// - 基本機能のみ
   /// - 制限値はSubscriptionConstantsで管理
   basic,
-  
+
   /// Premium 月額プラン（有料）
   /// - ライティングプロンプト機能
   /// - 高度なフィルタ・検索機能
   /// - 制限値はSubscriptionConstantsで管理
   premiumMonthly,
-  
+
   /// Premium 年額プラン（有料・お得）
   /// - ライティングプロンプト機能
   /// - 高度なフィルタ・検索機能
@@ -187,7 +187,9 @@ enum SubscriptionPlan {
 
   /// 日平均生成回数目安
   double get dailyAverageGenerations {
-    return SubscriptionConstants.calculateDailyAverage(monthlyAiGenerationLimit);
+    return SubscriptionConstants.calculateDailyAverage(
+      monthlyAiGenerationLimit,
+    );
   }
 
   /// プラン説明文
@@ -213,6 +215,7 @@ enum SubscriptionPlan {
 
   /// プレミアムプランかどうか
   bool get isPremium {
-    return this == SubscriptionPlan.premiumMonthly || this == SubscriptionPlan.premiumYearly;
+    return this == SubscriptionPlan.premiumMonthly ||
+        this == SubscriptionPlan.premiumYearly;
   }
 }

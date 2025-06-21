@@ -28,10 +28,7 @@ class ListAnimations {
   }) {
     return SizeTransition(
       sizeFactor: animation,
-      child: FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      child: FadeTransition(opacity: animation, child: child),
     );
   }
 
@@ -44,18 +41,11 @@ class ListAnimations {
       position: Tween<Offset>(
         begin: const Offset(1.0, 0.0),
         end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-      )),
-      child: FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+      child: FadeTransition(opacity: animation, child: child),
     );
   }
 }
-
 
 /// アニメーション付きリストビルダー
 class AnimatedListBuilder extends StatefulWidget {
@@ -91,12 +81,13 @@ class _AnimatedListBuilderState extends State<AnimatedListBuilder>
     super.initState();
     _controller = AnimationController(
       duration: Duration(
-        milliseconds: widget.animationDuration.inMilliseconds + 
-                     (widget.staggerDelay.inMilliseconds * widget.itemCount),
+        milliseconds:
+            widget.animationDuration.inMilliseconds +
+            (widget.staggerDelay.inMilliseconds * widget.itemCount),
       ),
       vsync: this,
     );
-    
+
     // アニメーション開始
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.forward();
@@ -156,18 +147,12 @@ class _FadeInWidgetState extends State<FadeInWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _animation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
 
     // 遅延後にアニメーション開始
     _delayTimer = Timer(widget.delay, () {
@@ -186,10 +171,7 @@ class _FadeInWidgetState extends State<FadeInWidget>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: widget.child,
-    );
+    return FadeTransition(opacity: _animation, child: widget.child);
   }
 }
 
@@ -226,26 +208,17 @@ class _SlideInWidgetState extends State<SlideInWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _slideAnimation = Tween<Offset>(
       begin: widget.begin,
       end: widget.end,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     // 遅延後にアニメーション開始
     _delayTimer = Timer(widget.delay, () {
@@ -266,10 +239,7 @@ class _SlideInWidgetState extends State<SlideInWidget>
   Widget build(BuildContext context) {
     return SlideTransition(
       position: _slideAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: widget.child,
-      ),
+      child: FadeTransition(opacity: _fadeAnimation, child: widget.child),
     );
   }
 }

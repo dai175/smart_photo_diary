@@ -60,7 +60,7 @@ void main() {
           effectivenessScore: 0.75,
           measurementPeriodDays: 21,
         ),
-        
+
         // 失敗事例
         SuggestionImplementationRecord(
           suggestionId: 'content_opt_001',
@@ -83,7 +83,7 @@ void main() {
           effectivenessScore: 0.2,
           measurementPeriodDays: 10,
         ),
-        
+
         // 中程度の事例
         SuggestionImplementationRecord(
           suggestionId: 'category_rec_001',
@@ -106,7 +106,7 @@ void main() {
           effectivenessScore: 0.55,
           measurementPeriodDays: 12,
         ),
-        
+
         // フィードバックなし事例
         SuggestionImplementationRecord(
           suggestionId: 'notification_001',
@@ -161,7 +161,10 @@ void main() {
         );
 
         expect(analysis.totalImplementations, 5);
-        expect(analysis.successfulImplementations, 3); // 効果スコア0.6以上かつ満足度4以上またはnull
+        expect(
+          analysis.successfulImplementations,
+          3,
+        ); // 効果スコア0.6以上かつ満足度4以上またはnull
         expect(analysis.overallSuccessRate, 0.6); // 3/5
         expect(analysis.averageEffectivenessScore, isA<double>());
         expect(analysis.averageUserSatisfaction, isA<double>());
@@ -173,8 +176,14 @@ void main() {
         );
 
         expect(analysis.successRateByType, isNotEmpty);
-        expect(analysis.successRateByType[PersonalizationType.timeAdjustment], 1.0);
-        expect(analysis.successRateByType[PersonalizationType.contentOptimization], 0.0);
+        expect(
+          analysis.successRateByType[PersonalizationType.timeAdjustment],
+          1.0,
+        );
+        expect(
+          analysis.successRateByType[PersonalizationType.contentOptimization],
+          0.0,
+        );
       });
 
       test('最も効果的なタイプが特定される', () {
@@ -246,7 +255,10 @@ void main() {
         );
 
         expect(analysis.keywordFrequency, isNotEmpty);
-        expect(analysis.keywordFrequency.keys, anyOf([contains('役に立ちました'), contains('とても')]));
+        expect(
+          analysis.keywordFrequency.keys,
+          anyOf([contains('役に立ちました'), contains('とても')]),
+        );
       });
 
       test('改善要望エリアが特定される', () {
@@ -254,7 +266,10 @@ void main() {
           implementations: testImplementations,
         );
 
-        expect(analysis.improvementAreas, contains(PersonalizationType.contentOptimization));
+        expect(
+          analysis.improvementAreas,
+          contains(PersonalizationType.contentOptimization),
+        );
       });
 
       test('フィードバックなしでエラーが発生しない', () {
@@ -283,18 +298,20 @@ void main() {
 
     group('generateContinuousImprovementData', () {
       test('継続的改善データが生成される', () {
-        final effectivenessAnalysis = ImprovementSuggestionTracker.analyzeEffectiveness(
-          implementations: testImplementations,
-        );
+        final effectivenessAnalysis =
+            ImprovementSuggestionTracker.analyzeEffectiveness(
+              implementations: testImplementations,
+            );
         final feedbackAnalysis = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: testImplementations,
         );
 
-        final improvementData = ImprovementSuggestionTracker.generateContinuousImprovementData(
-          effectivenessAnalysis: effectivenessAnalysis,
-          feedbackAnalysis: feedbackAnalysis,
-          implementations: testImplementations,
-        );
+        final improvementData =
+            ImprovementSuggestionTracker.generateContinuousImprovementData(
+              effectivenessAnalysis: effectivenessAnalysis,
+              feedbackAnalysis: feedbackAnalysis,
+              implementations: testImplementations,
+            );
 
         expect(improvementData.patternScores, isNotEmpty);
         expect(improvementData.successFactors, isNotEmpty);
@@ -307,56 +324,79 @@ void main() {
       });
 
       test('パターンスコアが適切に計算される', () {
-        final effectivenessAnalysis = ImprovementSuggestionTracker.analyzeEffectiveness(
-          implementations: testImplementations,
-        );
+        final effectivenessAnalysis =
+            ImprovementSuggestionTracker.analyzeEffectiveness(
+              implementations: testImplementations,
+            );
         final feedbackAnalysis = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: testImplementations,
         );
 
-        final improvementData = ImprovementSuggestionTracker.generateContinuousImprovementData(
-          effectivenessAnalysis: effectivenessAnalysis,
-          feedbackAnalysis: feedbackAnalysis,
-          implementations: testImplementations,
-        );
+        final improvementData =
+            ImprovementSuggestionTracker.generateContinuousImprovementData(
+              effectivenessAnalysis: effectivenessAnalysis,
+              feedbackAnalysis: feedbackAnalysis,
+              implementations: testImplementations,
+            );
 
-        expect(improvementData.patternScores['effectivenessPattern'], isA<double>());
-        expect(improvementData.patternScores['satisfactionPattern'], isA<double>());
-        expect(improvementData.patternScores['feedbackVolumePattern'], isA<double>());
-        expect(improvementData.patternScores['diversityPattern'], isA<double>());
+        expect(
+          improvementData.patternScores['effectivenessPattern'],
+          isA<double>(),
+        );
+        expect(
+          improvementData.patternScores['satisfactionPattern'],
+          isA<double>(),
+        );
+        expect(
+          improvementData.patternScores['feedbackVolumePattern'],
+          isA<double>(),
+        );
+        expect(
+          improvementData.patternScores['diversityPattern'],
+          isA<double>(),
+        );
       });
 
       test('成功要因が特定される', () {
-        final effectivenessAnalysis = ImprovementSuggestionTracker.analyzeEffectiveness(
-          implementations: testImplementations,
-        );
+        final effectivenessAnalysis =
+            ImprovementSuggestionTracker.analyzeEffectiveness(
+              implementations: testImplementations,
+            );
         final feedbackAnalysis = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: testImplementations,
         );
 
-        final improvementData = ImprovementSuggestionTracker.generateContinuousImprovementData(
-          effectivenessAnalysis: effectivenessAnalysis,
-          feedbackAnalysis: feedbackAnalysis,
-          implementations: testImplementations,
-        );
+        final improvementData =
+            ImprovementSuggestionTracker.generateContinuousImprovementData(
+              effectivenessAnalysis: effectivenessAnalysis,
+              feedbackAnalysis: feedbackAnalysis,
+              implementations: testImplementations,
+            );
 
         expect(improvementData.successFactors, isNotEmpty);
-        expect(improvementData.successFactors.any((factor) => factor.contains('効果スコア') || factor.contains('測定期間')), true);
+        expect(
+          improvementData.successFactors.any(
+            (factor) => factor.contains('効果スコア') || factor.contains('測定期間'),
+          ),
+          true,
+        );
       });
 
       test('推奨アクションが生成される', () {
-        final effectivenessAnalysis = ImprovementSuggestionTracker.analyzeEffectiveness(
-          implementations: testImplementations,
-        );
+        final effectivenessAnalysis =
+            ImprovementSuggestionTracker.analyzeEffectiveness(
+              implementations: testImplementations,
+            );
         final feedbackAnalysis = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: testImplementations,
         );
 
-        final improvementData = ImprovementSuggestionTracker.generateContinuousImprovementData(
-          effectivenessAnalysis: effectivenessAnalysis,
-          feedbackAnalysis: feedbackAnalysis,
-          implementations: testImplementations,
-        );
+        final improvementData =
+            ImprovementSuggestionTracker.generateContinuousImprovementData(
+              effectivenessAnalysis: effectivenessAnalysis,
+              feedbackAnalysis: feedbackAnalysis,
+              implementations: testImplementations,
+            );
 
         expect(improvementData.recommendedActions, isNotEmpty);
       });
@@ -432,7 +472,7 @@ void main() {
       test('改善度計算が正常に動作', () {
         final record = testImplementations.first;
         final improvement = record.getImprovementRate('primaryMetric');
-        
+
         expect(improvement, isA<double>());
         expect(improvement, greaterThan(0)); // 0.3 -> 0.7なので改善
       });
@@ -440,7 +480,7 @@ void main() {
       test('成功判定が正常に動作', () {
         final successfulRecord = testImplementations.first;
         expect(successfulRecord.isSuccessful, true);
-        
+
         final failedRecord = testImplementations[2];
         expect(failedRecord.isSuccessful, false);
       });
@@ -448,7 +488,7 @@ void main() {
       test('toString()が適切な形式で出力される', () {
         final record = testImplementations.first;
         final str = record.toString();
-        
+
         expect(str, contains('SuggestionImplementationRecord'));
         expect(str, contains('timeAdjustment'));
         expect(str, contains('85.0%'));
@@ -460,7 +500,7 @@ void main() {
         final analysis = ImprovementSuggestionTracker.analyzeEffectiveness(
           implementations: testImplementations,
         );
-        
+
         final str = analysis.toString();
         expect(str, contains('SuggestionEffectivenessAnalysis'));
         expect(str, contains('60.0%')); // 成功率
@@ -473,7 +513,7 @@ void main() {
         final analysis = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: testImplementations,
         );
-        
+
         final str = analysis.toString();
         expect(str, contains('UserFeedbackAnalysis'));
         expect(str, contains('feedbacks: 4'));
@@ -482,19 +522,21 @@ void main() {
 
     group('ContinuousImprovementData', () {
       test('toString()が適切な形式で出力される', () {
-        final effectivenessAnalysis = ImprovementSuggestionTracker.analyzeEffectiveness(
-          implementations: testImplementations,
-        );
+        final effectivenessAnalysis =
+            ImprovementSuggestionTracker.analyzeEffectiveness(
+              implementations: testImplementations,
+            );
         final feedbackAnalysis = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: testImplementations,
         );
 
-        final improvementData = ImprovementSuggestionTracker.generateContinuousImprovementData(
-          effectivenessAnalysis: effectivenessAnalysis,
-          feedbackAnalysis: feedbackAnalysis,
-          implementations: testImplementations,
-        );
-        
+        final improvementData =
+            ImprovementSuggestionTracker.generateContinuousImprovementData(
+              effectivenessAnalysis: effectivenessAnalysis,
+              feedbackAnalysis: feedbackAnalysis,
+              implementations: testImplementations,
+            );
+
         final str = improvementData.toString();
         expect(str, contains('ContinuousImprovementData'));
         expect(str, contains('confidence:'));
@@ -505,39 +547,46 @@ void main() {
     group('Edge Cases', () {
       test('単一実装での分析', () {
         final singleImplementation = [testImplementations.first];
-        
+
         final effectiveness = ImprovementSuggestionTracker.analyzeEffectiveness(
           implementations: singleImplementation,
         );
         final feedback = ImprovementSuggestionTracker.analyzeFeedback(
           implementations: singleImplementation,
         );
-        
+
         expect(effectiveness.totalImplementations, 1);
         expect(feedback.totalFeedbacks, 1);
       });
 
       test('全て同じタイプの実装での分析', () {
         final sameTypeImplementations = testImplementations
-            .map((impl) => SuggestionImplementationRecord(
-                  suggestionId: impl.suggestionId,
-                  suggestionType: PersonalizationType.timeAdjustment,
-                  implementedAt: impl.implementedAt,
-                  baselineMetrics: impl.baselineMetrics,
-                  afterMetrics: impl.afterMetrics,
-                  userSatisfaction: impl.userSatisfaction,
-                  userFeedback: impl.userFeedback,
-                  effectivenessScore: impl.effectivenessScore,
-                  measurementPeriodDays: impl.measurementPeriodDays,
-                ))
+            .map(
+              (impl) => SuggestionImplementationRecord(
+                suggestionId: impl.suggestionId,
+                suggestionType: PersonalizationType.timeAdjustment,
+                implementedAt: impl.implementedAt,
+                baselineMetrics: impl.baselineMetrics,
+                afterMetrics: impl.afterMetrics,
+                userSatisfaction: impl.userSatisfaction,
+                userFeedback: impl.userFeedback,
+                effectivenessScore: impl.effectivenessScore,
+                measurementPeriodDays: impl.measurementPeriodDays,
+              ),
+            )
             .toList();
-        
+
         final analysis = ImprovementSuggestionTracker.analyzeEffectiveness(
           implementations: sameTypeImplementations,
         );
-        
+
         expect(analysis.successRateByType.keys.length, 1);
-        expect(analysis.successRateByType.containsKey(PersonalizationType.timeAdjustment), true);
+        expect(
+          analysis.successRateByType.containsKey(
+            PersonalizationType.timeAdjustment,
+          ),
+          true,
+        );
       });
 
       test('極端な値での信頼性', () {
@@ -565,11 +614,11 @@ void main() {
             measurementPeriodDays: 3,
           ),
         ];
-        
+
         final analysis = ImprovementSuggestionTracker.analyzeEffectiveness(
           implementations: extremeImplementations,
         );
-        
+
         expect(analysis.overallSuccessRate, 0.5);
         expect(analysis.averageEffectivenessScore, 0.5);
       });

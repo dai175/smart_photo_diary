@@ -9,9 +9,8 @@ class DiaryGenerationResult {
   DiaryGenerationResult({required this.title, required this.content});
 }
 
-
 /// AIサービスのインターフェース
-/// 
+///
 /// Phase 1.7.1更新: Result<T>パターンと使用量制限統合
 abstract class AiServiceInterface {
   /// インターネット接続があるかどうかを確認
@@ -48,13 +47,13 @@ abstract class AiServiceInterface {
   });
 
   // Phase 1.7.3: UI連携準備メソッド追加
-  
+
   /// 残りAI生成回数を取得
   Future<Result<int>> getRemainingGenerations();
-  
+
   /// 使用量リセット日を取得
   Future<Result<DateTime>> getNextResetDate();
-  
+
   /// 制限状態をチェック
   Future<Result<bool>> canUseAiGeneration();
 }

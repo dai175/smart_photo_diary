@@ -7,8 +7,8 @@ import 'gemini_api_client.dart';
 class TagGenerator {
   final GeminiApiClient _apiClient;
 
-  TagGenerator({GeminiApiClient? apiClient}) 
-      : _apiClient = apiClient ?? GeminiApiClient();
+  TagGenerator({GeminiApiClient? apiClient})
+    : _apiClient = apiClient ?? GeminiApiClient();
 
   /// 日記の内容からタグを自動生成
   Future<List<String>> generateTags({
@@ -27,7 +27,8 @@ class TagGenerator {
       final timeOfDay = _getTimeOfDay(date);
 
       // タグ生成用プロンプト
-      final prompt = '''
+      final prompt =
+          '''
 以下の日記の内容から、適切なタグを3-5個生成してください。
 タグは日記の内容を表現する短い単語（1-3文字程度）で、カテゴリ分けに役立つものにしてください。
 
@@ -56,27 +57,28 @@ class TagGenerator {
 
       if (response != null) {
         final tagText = _apiClient.extractTextFromResponse(response);
-        
+
         if (tagText != null && tagText.isNotEmpty) {
           // カンマ区切りでタグを分割
-          final tags = tagText.trim()
+          final tags = tagText
+              .trim()
               .split(',')
               .map((tag) => tag.trim())
               .where((tag) => tag.isNotEmpty)
               .take(5)
               .toList();
-          
+
           // 基本タグ（時間帯）を追加
           final baseTags = _generateBasicTags(date, photoCount);
           final allTags = [...baseTags, ...tags];
-          
+
           // 似たようなタグを統合
           final filteredTags = _filterSimilarTags(allTags);
-          
+
           return filteredTags.take(5).toList();
         }
       }
-      
+
       debugPrint('タグ生成 API エラーまたはレスポンスなし');
       return _generateOfflineTags(title, content, date, photoCount);
     } catch (e) {
@@ -86,13 +88,21 @@ class TagGenerator {
   }
 
   /// オフライン時のタグ生成（基本的な情報のみ）
-  List<String> _generateOfflineTags(String title, String content, DateTime date, int photoCount) {
+  List<String> _generateOfflineTags(
+    String title,
+    String content,
+    DateTime date,
+    int photoCount,
+  ) {
     final tags = _generateBasicTags(date, photoCount);
-    
+
     // シンプルなキーワード検索
     final fullText = '$title $content'.toLowerCase();
-    
-    if (fullText.contains('食事') || fullText.contains('朝食') || fullText.contains('昼食') || fullText.contains('夕食')) {
+
+    if (fullText.contains('食事') ||
+        fullText.contains('朝食') ||
+        fullText.contains('昼食') ||
+        fullText.contains('夕食')) {
       tags.add('食事');
     }
     if (fullText.contains('散歩') || fullText.contains('歩')) {
@@ -122,37 +132,43 @@ class TagGenerator {
     if (fullText.contains('リラックス') || fullText.contains('癒し')) {
       tags.add('リラックス');
     }
-    
+
     // 似たようなタグを統合
     final filteredTags = _filterSimilarTags(tags);
-    
+
     return filteredTags.take(5).toList();
   }
 
   /// 基本タグ（時間帯）を生成
   List<String> _generateBasicTags(DateTime date, int photoCount) {
     final tags = <String>[];
-    
+
     // 時間帯タグ
     final timeOfDay = _getTimeOfDay(date);
     tags.add(timeOfDay);
-    
+
     return tags;
   }
 
   /// 時間帯の文字列を取得
   String _getTimeOfDay(DateTime date) {
     final hour = date.hour;
-    if (hour >= AiConstants.morningStartHour && hour < AiConstants.afternoonStartHour) return '朝';
-    if (hour >= AiConstants.afternoonStartHour && hour < AiConstants.eveningStartHour) return '昼';
-    if (hour >= AiConstants.eveningStartHour && hour < AiConstants.nightStartHour) return '夕方';
+    if (hour >= AiConstants.morningStartHour &&
+        hour < AiConstants.afternoonStartHour)
+      return '朝';
+    if (hour >= AiConstants.afternoonStartHour &&
+        hour < AiConstants.eveningStartHour)
+      return '昼';
+    if (hour >= AiConstants.eveningStartHour &&
+        hour < AiConstants.nightStartHour)
+      return '夕方';
     return '夜';
   }
 
   /// 似たようなタグを統合・フィルタリング
   List<String> _filterSimilarTags(List<String> tags) {
     final filteredTags = <String>[];
-    
+
     // 類似タグのマッピング
     final similarTagGroups = {
       '食事': ['朝食', '昼食', '夕食', 'ご飯', '食べ物', '料理', 'グルメ'],
@@ -171,17 +187,17 @@ class TagGenerator {
       '映画': ['動画', 'ムービー', '視聴'],
       '音楽': ['歌', '楽器', 'ライブ'],
     };
-    
+
     final usedGroups = <String>{};
-    
+
     for (final tag in tags) {
       bool grouped = false;
-      
+
       // 各グループをチェック
       for (final entry in similarTagGroups.entries) {
         final groupName = entry.key;
         final groupTags = entry.value;
-        
+
         // このタグがグループに属するかチェック
         if (groupTags.contains(tag) || tag == groupName) {
           if (!usedGroups.contains(groupName)) {
@@ -192,13 +208,13 @@ class TagGenerator {
           break;
         }
       }
-      
+
       // どのグループにも属さない場合はそのまま追加
       if (!grouped && !filteredTags.contains(tag)) {
         filteredTags.add(tag);
       }
     }
-    
+
     return filteredTags;
   }
 }

@@ -3,7 +3,6 @@ import 'package:smart_photo_diary/constants/subscription_constants.dart';
 
 void main() {
   group('SubscriptionConstants', () {
-    
     group('価格設定テスト', () {
       test('Basic プランの価格が正しく設定されている', () {
         expect(SubscriptionConstants.basicYearlyPrice, equals(0));
@@ -22,7 +21,8 @@ void main() {
       });
 
       test('年額割引率計算が正しく動作する', () {
-        final discountPercentage = SubscriptionConstants.calculateDiscountPercentage();
+        final discountPercentage =
+            SubscriptionConstants.calculateDiscountPercentage();
         final expectedPercentage = ((300 * 12 - 2800) / (300 * 12)) * 100;
         expect(discountPercentage, closeTo(expectedPercentage, 0.01));
         expect(discountPercentage, closeTo(22.22, 0.01));
@@ -40,12 +40,12 @@ void main() {
 
       test('日平均計算が正しく動作する', () {
         final basicDaily = SubscriptionConstants.calculateDailyAverage(
-          SubscriptionConstants.basicMonthlyAiLimit
+          SubscriptionConstants.basicMonthlyAiLimit,
         );
         final premiumDaily = SubscriptionConstants.calculateDailyAverage(
-          SubscriptionConstants.premiumMonthlyAiLimit
+          SubscriptionConstants.premiumMonthlyAiLimit,
         );
-        
+
         expect(basicDaily, closeTo(10 / 30.0, 0.01));
         expect(premiumDaily, closeTo(100 / 30.0, 0.01));
       });
@@ -53,18 +53,28 @@ void main() {
 
     group('商品IDテスト', () {
       test('Premium商品IDが正しく設定されている', () {
-        expect(SubscriptionConstants.premiumYearlyProductId, 
-               equals('smart_photo_diary_premium_yearly'));
-        expect(SubscriptionConstants.premiumMonthlyProductId, 
-               equals('smart_photo_diary_premium_monthly'));
+        expect(
+          SubscriptionConstants.premiumYearlyProductId,
+          equals('smart_photo_diary_premium_yearly'),
+        );
+        expect(
+          SubscriptionConstants.premiumMonthlyProductId,
+          equals('smart_photo_diary_premium_monthly'),
+        );
       });
     });
 
     group('プラン識別子テスト', () {
       test('プランIDが正しく設定されている', () {
         expect(SubscriptionConstants.basicPlanId, equals('basic'));
-        expect(SubscriptionConstants.premiumMonthlyPlanId, equals('premium_monthly'));
-        expect(SubscriptionConstants.premiumYearlyPlanId, equals('premium_yearly'));
+        expect(
+          SubscriptionConstants.premiumMonthlyPlanId,
+          equals('premium_monthly'),
+        );
+        expect(
+          SubscriptionConstants.premiumYearlyPlanId,
+          equals('premium_yearly'),
+        );
       });
 
       test('プラン表示名が正しく設定されている', () {
@@ -105,17 +115,21 @@ void main() {
       test('プラン説明文が設定されている', () {
         expect(SubscriptionConstants.basicDescription, isNotEmpty);
         expect(SubscriptionConstants.premiumDescription, isNotEmpty);
-        expect(SubscriptionConstants.basicDescription, 
-               equals('日記を試してみたい新規ユーザー、軽いユーザー向け'));
-        expect(SubscriptionConstants.premiumDescription, 
-               equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'));
+        expect(
+          SubscriptionConstants.basicDescription,
+          equals('日記を試してみたい新規ユーザー、軽いユーザー向け'),
+        );
+        expect(
+          SubscriptionConstants.premiumDescription,
+          equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'),
+        );
       });
     });
 
     group('機能リストテスト', () {
       test('Basic プランの機能リストが正しく設定されている', () {
         final features = SubscriptionConstants.basicFeatures;
-        
+
         expect(features, isA<List<String>>());
         expect(features.length, equals(6));
         expect(features, contains('月10回までのAI日記生成'));
@@ -128,7 +142,7 @@ void main() {
 
       test('Premium プランの機能リストが正しく設定されている', () {
         final features = SubscriptionConstants.premiumFeatures;
-        
+
         expect(features, isA<List<String>>());
         expect(features.length, equals(9));
         expect(features, contains('月100回までのAI日記生成'));
@@ -154,11 +168,23 @@ void main() {
 
       test('プランIDから価格を取得できる', () {
         expect(SubscriptionConstants.getPriceByPlanId('basic'), equals(0));
-        expect(SubscriptionConstants.getPriceByPlanId('premium_monthly'), equals(300));
-        expect(SubscriptionConstants.getPriceByPlanId('premium_yearly'), equals(2800));
+        expect(
+          SubscriptionConstants.getPriceByPlanId('premium_monthly'),
+          equals(300),
+        );
+        expect(
+          SubscriptionConstants.getPriceByPlanId('premium_yearly'),
+          equals(2800),
+        );
         expect(SubscriptionConstants.getPriceByPlanId('BASIC'), equals(0));
-        expect(SubscriptionConstants.getPriceByPlanId('PREMIUM_MONTHLY'), equals(300));
-        expect(SubscriptionConstants.getPriceByPlanId('PREMIUM_YEARLY'), equals(2800));
+        expect(
+          SubscriptionConstants.getPriceByPlanId('PREMIUM_MONTHLY'),
+          equals(300),
+        );
+        expect(
+          SubscriptionConstants.getPriceByPlanId('PREMIUM_YEARLY'),
+          equals(2800),
+        );
       });
 
       test('不正なプランIDで例外が発生する', () {
@@ -170,11 +196,23 @@ void main() {
 
       test('プランIDから制限回数を取得できる', () {
         expect(SubscriptionConstants.getLimitByPlanId('basic'), equals(10));
-        expect(SubscriptionConstants.getLimitByPlanId('premium_monthly'), equals(100));
-        expect(SubscriptionConstants.getLimitByPlanId('premium_yearly'), equals(100));
+        expect(
+          SubscriptionConstants.getLimitByPlanId('premium_monthly'),
+          equals(100),
+        );
+        expect(
+          SubscriptionConstants.getLimitByPlanId('premium_yearly'),
+          equals(100),
+        );
         expect(SubscriptionConstants.getLimitByPlanId('BASIC'), equals(10));
-        expect(SubscriptionConstants.getLimitByPlanId('PREMIUM_MONTHLY'), equals(100));
-        expect(SubscriptionConstants.getLimitByPlanId('PREMIUM_YEARLY'), equals(100));
+        expect(
+          SubscriptionConstants.getLimitByPlanId('PREMIUM_MONTHLY'),
+          equals(100),
+        );
+        expect(
+          SubscriptionConstants.getLimitByPlanId('PREMIUM_YEARLY'),
+          equals(100),
+        );
       });
 
       test('不正なプランIDで制限回数取得時に例外が発生する', () {
@@ -189,22 +227,28 @@ void main() {
       test('価格設定の妥当性', () {
         // Basic は無料
         expect(SubscriptionConstants.basicYearlyPrice, equals(0));
-        
+
         // Premium の年額は月額×12より安い（割引がある）
         final monthlyTotal = SubscriptionConstants.premiumMonthlyPrice * 12;
-        expect(SubscriptionConstants.premiumYearlyPrice, lessThan(monthlyTotal));
-        
+        expect(
+          SubscriptionConstants.premiumYearlyPrice,
+          lessThan(monthlyTotal),
+        );
+
         // 割引率は正の値
-        final discountPercentage = SubscriptionConstants.calculateDiscountPercentage();
+        final discountPercentage =
+            SubscriptionConstants.calculateDiscountPercentage();
         expect(discountPercentage, greaterThan(0));
         expect(discountPercentage, lessThan(100));
       });
 
       test('AI制限設定の妥当性', () {
         // Premium は Basic より多い制限
-        expect(SubscriptionConstants.premiumMonthlyAiLimit, 
-               greaterThan(SubscriptionConstants.basicMonthlyAiLimit));
-        
+        expect(
+          SubscriptionConstants.premiumMonthlyAiLimit,
+          greaterThan(SubscriptionConstants.basicMonthlyAiLimit),
+        );
+
         // 制限回数は正の値
         expect(SubscriptionConstants.basicMonthlyAiLimit, greaterThan(0));
         expect(SubscriptionConstants.premiumMonthlyAiLimit, greaterThan(0));
@@ -215,20 +259,24 @@ void main() {
         expect(SubscriptionConstants.subscriptionYearDays, greaterThan(0));
         expect(SubscriptionConstants.subscriptionMonthDays, greaterThan(0));
         expect(SubscriptionConstants.freeTrialDays, greaterThan(0));
-        
+
         // 年は月より長い
-        expect(SubscriptionConstants.subscriptionYearDays, 
-               greaterThan(SubscriptionConstants.subscriptionMonthDays));
+        expect(
+          SubscriptionConstants.subscriptionYearDays,
+          greaterThan(SubscriptionConstants.subscriptionMonthDays),
+        );
       });
 
       test('機能リストの妥当性', () {
         // 機能リストは空でない
         expect(SubscriptionConstants.basicFeatures, isNotEmpty);
         expect(SubscriptionConstants.premiumFeatures, isNotEmpty);
-        
+
         // Premium は Basic より多い機能
-        expect(SubscriptionConstants.premiumFeatures.length, 
-               greaterThan(SubscriptionConstants.basicFeatures.length));
+        expect(
+          SubscriptionConstants.premiumFeatures.length,
+          greaterThan(SubscriptionConstants.basicFeatures.length),
+        );
       });
     });
   });

@@ -8,16 +8,16 @@ import 'subscription_status.dart';
 class SubscriptionInfo {
   /// 現在のプラン
   final SubscriptionPlan currentPlan;
-  
+
   /// サブスクリプション状態
   final SubscriptionStatus status;
-  
+
   /// 使用量統計
   final UsageStatistics usageStats;
-  
+
   /// プラン期限情報
   final PlanPeriodInfo periodInfo;
-  
+
   /// 自動更新情報
   final AutoRenewalInfo autoRenewalInfo;
 
@@ -32,7 +32,7 @@ class SubscriptionInfo {
   /// ファクトリコンストラクタ - SubscriptionStatusから構築
   factory SubscriptionInfo.fromStatus(SubscriptionStatus status) {
     final plan = SubscriptionPlan.fromId(status.planId);
-    
+
     return SubscriptionInfo(
       currentPlan: plan,
       status: status,
@@ -68,19 +68,19 @@ class SubscriptionInfo {
   /// 設定画面用の期限表示文字列
   String? get expiryDisplayText {
     if (periodInfo.expiryDate == null) return null;
-    
+
     final expiry = periodInfo.expiryDate!;
     final daysUntil = periodInfo.daysUntilExpiry ?? 0;
     final now = DateTime.now();
-    
+
     if (daysUntil <= 0) return '期限切れ';
     if (daysUntil <= 7) return '${expiry.month}/${expiry.day} (あと$daysUntil日)';
-    
+
     // 年が異なる場合は年も表示
     if (expiry.year != now.year) {
       return '${expiry.year}/${expiry.month}/${expiry.day}';
     }
-    
+
     return '${expiry.month}/${expiry.day}';
   }
 
@@ -103,7 +103,7 @@ class SubscriptionInfo {
   /// 設定画面用のプラン推奨メッセージ
   String? get planRecommendationMessage {
     if (isPremium) return null;
-    
+
     final usageRate = usageStats.usageRate;
     if (usageRate >= 0.8) {
       return 'Premiumプランにアップグレードすると月間100回まで利用できます';
@@ -119,10 +119,11 @@ class SubscriptionInfo {
     final resetDate = status.nextResetDate;
     final today = DateTime.now();
     final daysUntilReset = resetDate.difference(today).inDays;
-    
+
     if (daysUntilReset <= 0) return '今日';
     if (daysUntilReset == 1) return '明日';
-    if (daysUntilReset <= 7) return '${resetDate.month}/${resetDate.day} (あと$daysUntilReset日)';
+    if (daysUntilReset <= 7)
+      return '${resetDate.month}/${resetDate.day} (あと$daysUntilReset日)';
     return '${resetDate.month}/${resetDate.day}';
   }
 
@@ -148,16 +149,16 @@ class SubscriptionInfo {
 class UsageStatistics {
   /// 今月の使用回数
   final int currentMonthUsage;
-  
+
   /// 月間制限回数
   final int monthlyLimit;
-  
+
   /// 残り使用可能回数
   final int remainingCount;
-  
+
   /// 使用率（0.0 - 1.0）
   final double usageRate;
-  
+
   /// 制限に近いかどうか（80%以上で警告）
   final bool isNearLimit;
 
@@ -170,12 +171,15 @@ class UsageStatistics {
   });
 
   /// ファクトリコンストラクタ
-  factory UsageStatistics.fromStatus(SubscriptionStatus status, SubscriptionPlan plan) {
+  factory UsageStatistics.fromStatus(
+    SubscriptionStatus status,
+    SubscriptionPlan plan,
+  ) {
     final usage = status.monthlyUsageCount;
     final limit = plan.monthlyAiGenerationLimit;
     final remaining = (limit - usage).clamp(0, limit);
     final rate = limit > 0 ? usage / limit : 0.0;
-    
+
     return UsageStatistics(
       currentMonthUsage: usage,
       monthlyLimit: limit,
@@ -187,7 +191,7 @@ class UsageStatistics {
 
   /// 使用率の表示用文字列（例: "70%"）
   String get usageRateDisplay => '${(usageRate * 100).round()}%';
-  
+
   /// 使用状況の表示用文字列（例: "7/10回"）
   String get usageDisplay => '$currentMonthUsage/$monthlyLimit回';
 }
@@ -196,16 +200,16 @@ class UsageStatistics {
 class PlanPeriodInfo {
   /// 購入開始日
   final DateTime? startDate;
-  
+
   /// プラン有効期限（Basicプランの場合はnull）
   final DateTime? expiryDate;
-  
+
   /// 次回更新日（自動更新の場合）
   final DateTime? nextRenewalDate;
-  
+
   /// 期限切れまでの日数（有効期限がある場合）
   final int? daysUntilExpiry;
-  
+
   /// 期限が近いかどうか（7日以内で警告）
   final bool isExpiryNear;
 
@@ -218,7 +222,10 @@ class PlanPeriodInfo {
   });
 
   /// ファクトリコンストラクタ
-  factory PlanPeriodInfo.fromStatus(SubscriptionStatus status, SubscriptionPlan plan) {
+  factory PlanPeriodInfo.fromStatus(
+    SubscriptionStatus status,
+    SubscriptionPlan plan,
+  ) {
     final now = DateTime.now();
     final expiry = status.expiryDate;
     int? daysUntilExpiry;
@@ -241,18 +248,18 @@ class PlanPeriodInfo {
   /// 期限の表示用文字列
   String? get expiryDisplay {
     if (expiryDate == null) return null;
-    
+
     return '${expiryDate!.month}月${expiryDate!.day}日';
   }
 
   /// 期限までの表示用文字列
   String? get daysUntilExpiryDisplay {
     if (daysUntilExpiry == null) return null;
-    
+
     if (daysUntilExpiry! < 0) return '期限切れ';
     if (daysUntilExpiry! == 0) return '本日期限切れ';
     if (daysUntilExpiry! == 1) return '明日期限切れ';
-    
+
     return 'あと$daysUntilExpiry日';
   }
 }
@@ -261,10 +268,10 @@ class PlanPeriodInfo {
 class AutoRenewalInfo {
   /// 自動更新が有効かどうか
   final bool isAutoRenewalEnabled;
-  
+
   /// 自動更新の説明テキスト
   final String autoRenewalDescription;
-  
+
   /// 自動更新管理のディープリンクURL（プラットフォーム別）
   final String? managementUrl;
 
@@ -282,7 +289,8 @@ class AutoRenewalInfo {
     if (status.autoRenewal) {
       description = '自動更新が有効です。期限前に自動的に更新されます。';
       // TODO: プラットフォーム判定してディープリンクを設定
-      managementUrl = 'https://apps.apple.com/account/subscriptions'; // iOS用（実際はプラットフォーム判定が必要）
+      managementUrl =
+          'https://apps.apple.com/account/subscriptions'; // iOS用（実際はプラットフォーム判定が必要）
     } else {
       description = '自動更新は無効です。期限切れ前に手動で更新してください。';
     }

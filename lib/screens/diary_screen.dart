@@ -43,7 +43,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     ).then((result) {
       // 詳細画面から戻ってきたときに日記一覧を再読み込み
       _controller.loadDiaryEntries();
-      
+
       // 削除された場合の追加処理（必要に応じて）
       if (result == true) {
         debugPrint('日記が削除されました');
@@ -91,7 +91,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   onRemoveSearch: _controller.removeSearchFilter,
                 ),
               ),
-              
+
               // 日記一覧
               Expanded(
                 child: MicroInteractions.pullToRefresh(
@@ -109,78 +109,80 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: _controller.isSearching 
-        ? TextField(
-            controller: _controller.searchController,
-            autofocus: true,
-            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-            decoration: InputDecoration(
-              hintText: 'タイトルや本文を検索...',
-              hintStyle: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+      title: _controller.isSearching
+          ? TextField(
+              controller: _controller.searchController,
+              autofocus: true,
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              decoration: InputDecoration(
+                hintText: 'タイトルや本文を検索...',
+                hintStyle: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onPrimary.withValues(alpha: 0.7),
+                ),
+                border: InputBorder.none,
+                prefixIcon: Icon(
+                  AppIcons.search,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
-              border: InputBorder.none,
-              prefixIcon: Icon(
-                AppIcons.search,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            onChanged: _controller.performSearch,
-          )
-        : const Text('日記一覧'),
+              onChanged: _controller.performSearch,
+            )
+          : const Text('日記一覧'),
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
-      leading: _controller.isSearching 
-        ? IconButton(
-            icon: Icon(
-              AppIcons.actionBack,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-            onPressed: _controller.stopSearch,
-          )
-        : null,
-      actions: _controller.isSearching 
-        ? [
-            if (_controller.searchQuery.isNotEmpty)
+      leading: _controller.isSearching
+          ? IconButton(
+              icon: Icon(
+                AppIcons.actionBack,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: _controller.stopSearch,
+            )
+          : null,
+      actions: _controller.isSearching
+          ? [
+              if (_controller.searchQuery.isNotEmpty)
+                IconButton(
+                  icon: Icon(
+                    AppIcons.searchClear,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  onPressed: _controller.clearSearch,
+                ),
+            ]
+          : [
               IconButton(
                 icon: Icon(
-                  AppIcons.searchClear,
+                  AppIcons.homeRefresh,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
-                onPressed: _controller.clearSearch,
+                onPressed: _controller.refresh,
               ),
-          ]
-        : [
-            IconButton(
-              icon: Icon(
-                AppIcons.homeRefresh,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: _controller.refresh,
-            ),
-            IconButton(
-              icon: Icon(
-                AppIcons.searchStart,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ), 
-              onPressed: _controller.startSearch,
-            ),
-            Container(
-              margin: const EdgeInsets.only(right: AppSpacing.sm),
-              child: IconButton(
+              IconButton(
                 icon: Icon(
-                  _controller.currentFilter.isActive 
-                    ? AppIcons.filterActive
-                    : AppIcons.filter,
-                  color: _controller.currentFilter.isActive 
-                    ? Theme.of(context).colorScheme.inversePrimary 
-                    : Theme.of(context).colorScheme.onPrimary,
+                  AppIcons.searchStart,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
-                onPressed: _showFilterBottomSheet,
+                onPressed: _controller.startSearch,
               ),
-            ),
-          ],
+              Container(
+                margin: const EdgeInsets.only(right: AppSpacing.sm),
+                child: IconButton(
+                  icon: Icon(
+                    _controller.currentFilter.isActive
+                        ? AppIcons.filterActive
+                        : AppIcons.filter,
+                    color: _controller.currentFilter.isActive
+                        ? Theme.of(context).colorScheme.inversePrimary
+                        : Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  onPressed: _showFilterBottomSheet,
+                ),
+              ),
+            ],
     );
   }
 
@@ -190,9 +192,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         padding: AppSpacing.screenPadding,
         itemCount: 6,
         itemBuilder: (context, index) => Padding(
-          padding: EdgeInsets.only(
-            bottom: index < 5 ? AppSpacing.md : 0,
-          ),
+          padding: EdgeInsets.only(bottom: index < 5 ? AppSpacing.md : 0),
           child: const DiaryCardShimmer(),
         ),
       );
@@ -209,7 +209,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
             begin: const Offset(0.0, 0.2),
             child: Padding(
               padding: EdgeInsets.only(
-                bottom: index < _controller.diaryEntries.length - 1 ? AppSpacing.lg : 0,
+                bottom: index < _controller.diaryEntries.length - 1
+                    ? AppSpacing.lg
+                    : 0,
               ),
               child: DiaryCardWidget(
                 entry: entry,
@@ -234,7 +236,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
             Container(
               padding: AppSpacing.cardPaddingLarge,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: AppSpacing.cardRadiusLarge,
               ),
               child: Icon(
@@ -259,7 +263,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            if (_controller.currentFilter.isActive && !_controller.isSearching) ...[
+            if (_controller.currentFilter.isActive &&
+                !_controller.isSearching) ...[
               const SizedBox(height: AppSpacing.xl),
               PrimaryButton(
                 onPressed: _controller.clearAllFilters,

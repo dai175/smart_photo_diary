@@ -15,7 +15,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      
+
       // Color Scheme
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
@@ -45,7 +45,10 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: AppTypography.withColor(AppTypography.appTitle, Colors.white),
+        titleTextStyle: AppTypography.withColor(
+          AppTypography.appTitle,
+          Colors.white,
+        ),
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
@@ -53,26 +56,23 @@ class AppTheme {
       ),
 
       // Text Theme - Google Fonts for Japanese support
-      textTheme: GoogleFonts.notoSansJpTextTheme(
-        ThemeData.light().textTheme,
-      ).copyWith(
-        headlineLarge: AppTypography.headlineLarge,
-        headlineMedium: AppTypography.headlineMedium,
-        headlineSmall: AppTypography.headlineSmall,
-        titleLarge: AppTypography.titleLarge,
-        titleMedium: AppTypography.titleMedium,
-        bodyLarge: AppTypography.bodyLarge,
-        bodyMedium: AppTypography.bodyMedium,
-      ),
+      textTheme: GoogleFonts.notoSansJpTextTheme(ThemeData.light().textTheme)
+          .copyWith(
+            headlineLarge: AppTypography.headlineLarge,
+            headlineMedium: AppTypography.headlineMedium,
+            headlineSmall: AppTypography.headlineSmall,
+            titleLarge: AppTypography.titleLarge,
+            titleMedium: AppTypography.titleMedium,
+            bodyLarge: AppTypography.bodyLarge,
+            bodyMedium: AppTypography.bodyMedium,
+          ),
 
       // Card Theme
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: AppSpacing.elevationSm,
         shadowColor: AppColors.shadow,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.cardRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
         margin: AppSpacing.cardMargin,
       ),
 
@@ -83,9 +83,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: AppSpacing.elevationSm,
           shadowColor: AppColors.shadow,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.buttonRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           padding: AppSpacing.buttonPadding,
           textStyle: AppTypography.button,
           minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -97,9 +95,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.primary),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.buttonRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           padding: AppSpacing.buttonPadding,
           textStyle: AppTypography.button,
           minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -110,9 +106,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.buttonRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           padding: AppSpacing.buttonPaddingSmall,
           textStyle: AppTypography.button,
         ),
@@ -148,15 +142,16 @@ class AppTheme {
         ),
         contentPadding: AppSpacing.inputPadding,
         labelStyle: AppTypography.bodyMedium,
-        hintStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceVariant),
+        hintStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.onSurfaceVariant,
+        ),
       ),
 
       // List Tile Theme
       listTileTheme: const ListTileThemeData(
         contentPadding: AppSpacing.listItemPadding,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.cardRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
       ),
 
       // Icon Theme
@@ -168,10 +163,11 @@ class AppTheme {
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.primaryContainer,
-        labelStyle: AppTypography.withColor(AppTypography.tag, AppColors.onPrimaryContainer),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.chipRadius,
+        labelStyle: AppTypography.withColor(
+          AppTypography.tag,
+          AppColors.onPrimaryContainer,
         ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xxs,
@@ -202,20 +198,25 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         elevation: AppSpacing.elevationLg,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.cardRadiusLarge,
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadiusLarge),
+        titleTextStyle: AppTypography.withColor(
+          AppTypography.headlineSmall,
+          AppColors.onSurface,
         ),
-        titleTextStyle: AppTypography.withColor(AppTypography.headlineSmall, AppColors.onSurface),
-        contentTextStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurface),
+        contentTextStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.onSurface,
+        ),
       ),
 
       // Snack Bar Theme
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.onSurface,
-        contentTextStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.surface),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.buttonRadius,
+        contentTextStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.surface,
         ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -226,7 +227,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      
+
       // Color Scheme
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryLight,
@@ -254,7 +255,10 @@ class AppTheme {
         foregroundColor: AppColors.onSurfaceDark,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: AppTypography.withColor(AppTypography.appTitle, AppColors.onSurfaceDark),
+        titleTextStyle: AppTypography.withColor(
+          AppTypography.appTitle,
+          AppColors.onSurfaceDark,
+        ),
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
@@ -262,26 +266,44 @@ class AppTheme {
       ),
 
       // Text Theme - Google Fonts for Japanese support (Dark)
-      textTheme: GoogleFonts.notoSansJpTextTheme(
-        ThemeData.dark().textTheme,
-      ).copyWith(
-        headlineLarge: AppTypography.withColor(AppTypography.headlineLarge, AppColors.onBackgroundDark),
-        headlineMedium: AppTypography.withColor(AppTypography.headlineMedium, AppColors.onBackgroundDark),
-        headlineSmall: AppTypography.withColor(AppTypography.headlineSmall, AppColors.onBackgroundDark),
-        titleLarge: AppTypography.withColor(AppTypography.titleLarge, AppColors.onBackgroundDark),
-        titleMedium: AppTypography.withColor(AppTypography.titleMedium, AppColors.onBackgroundDark),
-        bodyLarge: AppTypography.withColor(AppTypography.bodyLarge, AppColors.onBackgroundDark),
-        bodyMedium: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onBackgroundDark),
-      ),
+      textTheme: GoogleFonts.notoSansJpTextTheme(ThemeData.dark().textTheme)
+          .copyWith(
+            headlineLarge: AppTypography.withColor(
+              AppTypography.headlineLarge,
+              AppColors.onBackgroundDark,
+            ),
+            headlineMedium: AppTypography.withColor(
+              AppTypography.headlineMedium,
+              AppColors.onBackgroundDark,
+            ),
+            headlineSmall: AppTypography.withColor(
+              AppTypography.headlineSmall,
+              AppColors.onBackgroundDark,
+            ),
+            titleLarge: AppTypography.withColor(
+              AppTypography.titleLarge,
+              AppColors.onBackgroundDark,
+            ),
+            titleMedium: AppTypography.withColor(
+              AppTypography.titleMedium,
+              AppColors.onBackgroundDark,
+            ),
+            bodyLarge: AppTypography.withColor(
+              AppTypography.bodyLarge,
+              AppColors.onBackgroundDark,
+            ),
+            bodyMedium: AppTypography.withColor(
+              AppTypography.bodyMedium,
+              AppColors.onBackgroundDark,
+            ),
+          ),
 
       // Card Theme
       cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: AppSpacing.elevationSm,
         shadowColor: Colors.black54,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.cardRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
         margin: AppSpacing.cardMargin,
       ),
 
@@ -292,9 +314,7 @@ class AppTheme {
           foregroundColor: AppColors.onBackground,
           elevation: AppSpacing.elevationSm,
           shadowColor: Colors.black54,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.buttonRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           padding: AppSpacing.buttonPadding,
           textStyle: AppTypography.button,
           minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -306,9 +326,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryLight,
           side: const BorderSide(color: AppColors.primaryLight),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.buttonRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           padding: AppSpacing.buttonPadding,
           textStyle: AppTypography.button,
           minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -319,9 +337,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primaryLight,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.buttonRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           padding: AppSpacing.buttonPaddingSmall,
           textStyle: AppTypography.button,
         ),
@@ -356,16 +372,20 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error),
         ),
         contentPadding: AppSpacing.inputPadding,
-        labelStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceDark),
-        hintStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceVariant),
+        labelStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.onSurfaceDark,
+        ),
+        hintStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.onSurfaceVariant,
+        ),
       ),
 
       // List Tile Theme (Dark)
       listTileTheme: const ListTileThemeData(
         contentPadding: AppSpacing.listItemPadding,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.cardRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
         textColor: AppColors.onSurfaceDark,
         iconColor: AppColors.onSurfaceDark,
       ),
@@ -379,10 +399,11 @@ class AppTheme {
       // Chip Theme (Dark)
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.primaryDark,
-        labelStyle: AppTypography.withColor(AppTypography.tag, AppColors.primaryLight),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.chipRadius,
+        labelStyle: AppTypography.withColor(
+          AppTypography.tag,
+          AppColors.primaryLight,
         ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xxs,
@@ -413,20 +434,25 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceDark,
         elevation: AppSpacing.elevationLg,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.cardRadiusLarge,
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadiusLarge),
+        titleTextStyle: AppTypography.withColor(
+          AppTypography.headlineSmall,
+          AppColors.onSurfaceDark,
         ),
-        titleTextStyle: AppTypography.withColor(AppTypography.headlineSmall, AppColors.onSurfaceDark),
-        contentTextStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.onSurfaceDark),
+        contentTextStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.onSurfaceDark,
+        ),
       ),
 
       // Snack Bar Theme (Dark)
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.onSurfaceDark,
-        contentTextStyle: AppTypography.withColor(AppTypography.bodyMedium, AppColors.surfaceDark),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.buttonRadius,
+        contentTextStyle: AppTypography.withColor(
+          AppTypography.bodyMedium,
+          AppColors.surfaceDark,
         ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
         behavior: SnackBarBehavior.floating,
       ),
     );

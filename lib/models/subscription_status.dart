@@ -100,18 +100,22 @@ class SubscriptionStatus extends HiveObject {
     if (effectiveDate != null) {
       planChangeDate = effectiveDate;
     }
-    
+
     // Premium プランの場合は有効期限を設定
     if (newPlan.isPremium) {
       startDate ??= DateTime.now();
-      
+
       // 年額プランと月額プランで有効期限を設定
       if (newPlan.isYearly) {
-        expiryDate = startDate!.add(Duration(days: SubscriptionConstants.subscriptionYearDays));
+        expiryDate = startDate!.add(
+          Duration(days: SubscriptionConstants.subscriptionYearDays),
+        );
       } else {
-        expiryDate = startDate!.add(Duration(days: SubscriptionConstants.subscriptionMonthDays));
+        expiryDate = startDate!.add(
+          Duration(days: SubscriptionConstants.subscriptionMonthDays),
+        );
       }
-      
+
       isActive = true;
       autoRenewal = true;
     } else {
@@ -120,17 +124,17 @@ class SubscriptionStatus extends HiveObject {
       isActive = true;
       autoRenewal = false;
     }
-    
+
     save();
   }
 
   /// サブスクリプションが有効かどうかをチェック
   bool get isValid {
     if (!isActive) return false;
-    
+
     // Basic プランは常に有効
     if (currentPlan == SubscriptionPlan.basic) return true;
-    
+
     // Premium プランは有効期限をチェック
     if (expiryDate == null) return false;
     return DateTime.now().isBefore(expiryDate!);
@@ -191,13 +195,13 @@ class SubscriptionStatus extends HiveObject {
   void cancel({DateTime? effectiveDate}) {
     autoRenewal = false;
     cancelDate = effectiveDate ?? DateTime.now();
-    
+
     // 即座にキャンセルする場合
     if (effectiveDate == null || effectiveDate.isBefore(DateTime.now())) {
       isActive = false;
       planId = SubscriptionConstants.basicPlanId;
     }
-    
+
     save();
   }
 
@@ -277,11 +281,15 @@ class SubscriptionStatus extends HiveObject {
     if (!plan.isPremium) {
       throw ArgumentError('Premium plan required, got: $plan');
     }
-    
-    final expiryDate = plan.isYearly 
-        ? startDate.add(Duration(days: SubscriptionConstants.subscriptionYearDays))
-        : startDate.add(Duration(days: SubscriptionConstants.subscriptionMonthDays));
-    
+
+    final expiryDate = plan.isYearly
+        ? startDate.add(
+            Duration(days: SubscriptionConstants.subscriptionYearDays),
+          )
+        : startDate.add(
+            Duration(days: SubscriptionConstants.subscriptionMonthDays),
+          );
+
     return SubscriptionStatus(
       planId: plan.planId,
       isActive: true,

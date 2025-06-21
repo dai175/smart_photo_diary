@@ -56,23 +56,26 @@ void main() {
       });
     });
 
-
     group('generateDiaryFromImage', () {
       test('should generate diary from image data', () async {
         // Arrange
         final imageData = Uint8List.fromList([0, 1, 2, 3]);
         final date = DateTime(2024, 1, 15, 12, 0);
-        final expectedResult = Success(DiaryGenerationResult(
-          title: '体験から生成された日記',
-          content: '画像から素敵な思い出を記録しました。',
-        ));
+        final expectedResult = Success(
+          DiaryGenerationResult(
+            title: '体験から生成された日記',
+            content: '画像から素敵な思い出を記録しました。',
+          ),
+        );
 
-        when(() => mockAiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-        )).thenAnswer((_) async => expectedResult);
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+          ),
+        ).thenAnswer((_) async => expectedResult);
 
         // Act
         final result = await mockAiService.generateDiaryFromImage(
@@ -82,12 +85,14 @@ void main() {
 
         // Assert
         expect(result, equals(expectedResult));
-        verify(() => mockAiService.generateDiaryFromImage(
-          imageData: imageData,
-          date: date,
-          location: null,
-          photoTimes: null,
-        )).called(1);
+        verify(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: imageData,
+            date: date,
+            location: null,
+            photoTimes: null,
+          ),
+        ).called(1);
       });
     });
 
@@ -95,19 +100,29 @@ void main() {
       test('should generate diary from multiple images', () async {
         // Arrange
         final imagesWithTimes = [
-          (imageData: Uint8List.fromList([0, 1, 2]), time: DateTime(2024, 1, 15, 10, 0)),
-          (imageData: Uint8List.fromList([3, 4, 5]), time: DateTime(2024, 1, 15, 11, 0)),
+          (
+            imageData: Uint8List.fromList([0, 1, 2]),
+            time: DateTime(2024, 1, 15, 10, 0),
+          ),
+          (
+            imageData: Uint8List.fromList([3, 4, 5]),
+            time: DateTime(2024, 1, 15, 11, 0),
+          ),
         ];
-        final expectedResult = Success(DiaryGenerationResult(
-          title: '複数の体験から生成された日記',
-          content: '複数の画像から素敵な一日の物語を作成しました。',
-        ));
+        final expectedResult = Success(
+          DiaryGenerationResult(
+            title: '複数の体験から生成された日記',
+            content: '複数の画像から素敵な一日の物語を作成しました。',
+          ),
+        );
 
-        when(() => mockAiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: any(named: 'location'),
-          onProgress: any(named: 'onProgress'),
-        )).thenAnswer((_) async => expectedResult);
+        when(
+          () => mockAiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: any(named: 'location'),
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).thenAnswer((_) async => expectedResult);
 
         // Act
         final result = await mockAiService.generateDiaryFromMultipleImages(
@@ -124,13 +139,17 @@ void main() {
           (imageData: Uint8List.fromList([0, 1]), time: DateTime.now()),
           (imageData: Uint8List.fromList([2, 3]), time: DateTime.now()),
         ];
-        
-        when(() => mockAiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: any(named: 'location'),
-          onProgress: any(named: 'onProgress'),
-        )).thenAnswer((_) async {
-          return Success(DiaryGenerationResult(title: 'Test', content: 'Test content'));
+
+        when(
+          () => mockAiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: any(named: 'location'),
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).thenAnswer((_) async {
+          return Success(
+            DiaryGenerationResult(title: 'Test', content: 'Test content'),
+          );
         });
 
         // Act
@@ -142,11 +161,13 @@ void main() {
         );
 
         // Assert
-        verify(() => mockAiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: imagesWithTimes,
-          location: null,
-          onProgress: any(named: 'onProgress'),
-        )).called(1);
+        verify(
+          () => mockAiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: imagesWithTimes,
+            location: null,
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).called(1);
       });
     });
 
@@ -159,12 +180,14 @@ void main() {
         const photoCount = 5;
         final expectedTags = Success(['公園', 'ピクニック', '友達', '天気', '楽しい']);
 
-        when(() => mockAiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => expectedTags);
+        when(
+          () => mockAiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => expectedTags);
 
         // Act
         final result = await mockAiService.generateTagsFromContent(
@@ -179,12 +202,14 @@ void main() {
         expect(result.value.length, equals(5));
         expect(result.value, contains('公園'));
         expect(result.value, contains('友達'));
-        verify(() => mockAiService.generateTagsFromContent(
-          title: title,
-          content: content,
-          date: date,
-          photoCount: photoCount,
-        )).called(1);
+        verify(
+          () => mockAiService.generateTagsFromContent(
+            title: title,
+            content: content,
+            date: date,
+            photoCount: photoCount,
+          ),
+        ).called(1);
       });
 
       test('should generate tags for short content', () async {
@@ -195,12 +220,14 @@ void main() {
         const photoCount = 1;
         final expectedTags = Success(['散歩', '短時間']);
 
-        when(() => mockAiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => expectedTags);
+        when(
+          () => mockAiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => expectedTags);
 
         // Act
         final result = await mockAiService.generateTagsFromContent(
@@ -223,12 +250,14 @@ void main() {
         const photoCount = 0;
         final expectedTags = Success(<String>[]);
 
-        when(() => mockAiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => expectedTags);
+        when(
+          () => mockAiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => expectedTags);
 
         // Act
         final result = await mockAiService.generateTagsFromContent(
@@ -250,12 +279,14 @@ void main() {
         const photoCount = 2;
         final expectedTags = Success(['朝', '早朝', '散歩', '時間']);
 
-        when(() => mockAiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => expectedTags);
+        when(
+          () => mockAiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => expectedTags);
 
         // Act
         final result = await mockAiService.generateTagsFromContent(
@@ -272,22 +303,25 @@ void main() {
     });
 
     group('Error Handling', () {
-
       test('should handle invalid image data gracefully', () async {
         // Arrange
         final invalidImageData = Uint8List.fromList([]);
         final date = DateTime.now();
-        final fallbackResult = Success(DiaryGenerationResult(
-          title: 'エラー時の日記',
-          content: '画像の処理中にエラーが発生しましたが、代替の日記を生成しました。',
-        ));
+        final fallbackResult = Success(
+          DiaryGenerationResult(
+            title: 'エラー時の日記',
+            content: '画像の処理中にエラーが発生しましたが、代替の日記を生成しました。',
+          ),
+        );
 
-        when(() => mockAiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-        )).thenAnswer((_) async => fallbackResult);
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+          ),
+        ).thenAnswer((_) async => fallbackResult);
 
         // Act
         final result = await mockAiService.generateDiaryFromImage(
@@ -317,13 +351,12 @@ void main() {
       test('DiaryGenerationResult should be properly constructed', () {
         const title = 'テストタイトル';
         const content = 'テストコンテンツ';
-        
+
         final result = DiaryGenerationResult(title: title, content: content);
-        
+
         expect(result.title, equals(title));
         expect(result.content, equals(content));
       });
-
     });
   });
 }

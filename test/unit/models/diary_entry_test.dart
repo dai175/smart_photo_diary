@@ -120,24 +120,27 @@ void main() {
         expect(entry.hasValidTags, isTrue);
       });
 
-      test('should return false when tags were generated more than 7 days ago', () {
-        // Arrange
-        final oldTagsDate = DateTime.now().subtract(const Duration(days: 8));
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: testDate,
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: testCreatedAt,
-          updatedAt: testUpdatedAt,
-          cachedTags: ['tag1'],
-          tagsGeneratedAt: oldTagsDate,
-        );
+      test(
+        'should return false when tags were generated more than 7 days ago',
+        () {
+          // Arrange
+          final oldTagsDate = DateTime.now().subtract(const Duration(days: 8));
+          final entry = DiaryEntry(
+            id: 'test-id',
+            date: testDate,
+            title: 'Test Title',
+            content: 'Test Content',
+            photoIds: ['photo1'],
+            createdAt: testCreatedAt,
+            updatedAt: testUpdatedAt,
+            cachedTags: ['tag1'],
+            tagsGeneratedAt: oldTagsDate,
+          );
 
-        // Act & Assert
-        expect(entry.hasValidTags, isFalse);
-      });
+          // Act & Assert
+          expect(entry.hasValidTags, isFalse);
+        },
+      );
 
       test('should return true for tags generated exactly 6 days ago', () {
         // Arrange
@@ -178,23 +181,26 @@ void main() {
         );
       });
 
-      test('should return copy with unchanged fields when no parameters provided', () {
-        // Act
-        final copy = originalEntry.copyWith();
+      test(
+        'should return copy with unchanged fields when no parameters provided',
+        () {
+          // Act
+          final copy = originalEntry.copyWith();
 
-        // Assert
-        expect(copy.id, equals(originalEntry.id));
-        expect(copy.date, equals(originalEntry.date));
-        expect(copy.title, equals(originalEntry.title));
-        expect(copy.content, equals(originalEntry.content));
-        expect(copy.photoIds, equals(originalEntry.photoIds));
-        expect(copy.createdAt, equals(originalEntry.createdAt));
-        expect(copy.updatedAt, equals(originalEntry.updatedAt));
-        expect(copy.cachedTags, equals(originalEntry.cachedTags));
-        expect(copy.tagsGeneratedAt, equals(originalEntry.tagsGeneratedAt));
-        expect(copy.location, equals(originalEntry.location));
-        expect(copy.tags, equals(originalEntry.tags));
-      });
+          // Assert
+          expect(copy.id, equals(originalEntry.id));
+          expect(copy.date, equals(originalEntry.date));
+          expect(copy.title, equals(originalEntry.title));
+          expect(copy.content, equals(originalEntry.content));
+          expect(copy.photoIds, equals(originalEntry.photoIds));
+          expect(copy.createdAt, equals(originalEntry.createdAt));
+          expect(copy.updatedAt, equals(originalEntry.updatedAt));
+          expect(copy.cachedTags, equals(originalEntry.cachedTags));
+          expect(copy.tagsGeneratedAt, equals(originalEntry.tagsGeneratedAt));
+          expect(copy.location, equals(originalEntry.location));
+          expect(copy.tags, equals(originalEntry.tags));
+        },
+      );
 
       test('should return copy with modified title and content', () {
         // Arrange

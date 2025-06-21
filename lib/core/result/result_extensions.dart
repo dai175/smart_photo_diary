@@ -15,8 +15,8 @@ class ResultHelper {
     try {
       return Success(operation());
     } catch (e) {
-      final exception = e is AppException 
-          ? e 
+      final exception = e is AppException
+          ? e
           : ServiceException(
               context != null ? '[$context] 処理中にエラーが発生しました' : '処理中にエラーが発生しました',
               originalError: e,
@@ -34,10 +34,12 @@ class ResultHelper {
       final result = await operation();
       return Success(result);
     } catch (e) {
-      final exception = e is AppException 
-          ? e 
+      final exception = e is AppException
+          ? e
           : ServiceException(
-              context != null ? '[$context] 非同期処理中にエラーが発生しました' : '非同期処理中にエラーが発生しました',
+              context != null
+                  ? '[$context] 非同期処理中にエラーが発生しました'
+                  : '非同期処理中にエラーが発生しました',
               originalError: e,
             );
       return Failure(exception);
@@ -47,14 +49,14 @@ class ResultHelper {
   /// 複数のResultを組み合わせて、全て成功時のみ成功を返す
   static Result<List<T>> combine<T>(List<Result<T>> results) {
     final values = <T>[];
-    
+
     for (final result in results) {
       if (result.isFailure) {
         return Failure(result.error);
       }
       values.add(result.value);
     }
-    
+
     return Success(values);
   }
 
@@ -79,10 +81,7 @@ class ResultHelper {
   }
 
   /// null許可型からResultを作成
-  static Result<T> fromNullable<T>(
-    T? value,
-    AppException Function() onNull,
-  ) {
+  static Result<T> fromNullable<T>(T? value, AppException Function() onNull) {
     if (value != null) {
       return Success(value);
     }
@@ -126,16 +125,16 @@ extension FutureResultExtensions<T> on Future<Result<T>> {
 extension ListResultExtensions<T> on List<Result<T>> {
   /// 成功したResultのみを抽出
   List<T> getSuccessValues() {
-    return where((result) => result.isSuccess)
-        .map((result) => result.value)
-        .toList();
+    return where(
+      (result) => result.isSuccess,
+    ).map((result) => result.value).toList();
   }
 
   /// 失敗したResultのみを抽出
   List<AppException> getFailureErrors() {
-    return where((result) => result.isFailure)
-        .map((result) => result.error)
-        .toList();
+    return where(
+      (result) => result.isFailure,
+    ).map((result) => result.error).toList();
   }
 
   /// 全て成功かどうかを判定
@@ -145,6 +144,8 @@ extension ListResultExtensions<T> on List<Result<T>> {
   bool get allFailure => every((result) => result.isFailure);
 
   /// 最初の失敗を取得
-  Result<T>? get firstFailure => 
-      cast<Result<T>?>().firstWhere((result) => result?.isFailure == true, orElse: () => null);
+  Result<T>? get firstFailure => cast<Result<T>?>().firstWhere(
+    (result) => result?.isFailure == true,
+    orElse: () => null,
+  );
 }

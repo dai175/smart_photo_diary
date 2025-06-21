@@ -50,13 +50,9 @@ class _LoadingShimmerState extends State<LoadingShimmer>
       vsync: this,
     );
 
-    _animation = Tween<double>(
-      begin: -2.0,
-      end: 2.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _animation = Tween<double>(begin: -2.0, end: 2.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     if (widget.enabled) {
       _animationController.repeat();
@@ -88,7 +84,8 @@ class _LoadingShimmerState extends State<LoadingShimmer>
     }
 
     final baseColor = widget.baseColor ?? AppColors.surfaceVariant;
-    final highlightColor = widget.highlightColor ?? Colors.white.withValues(alpha: 0.8);
+    final highlightColor =
+        widget.highlightColor ?? Colors.white.withValues(alpha: 0.8);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -117,7 +114,8 @@ class _LoadingShimmerState extends State<LoadingShimmer>
     final double gradientWidth = bounds.width;
     final double gradientCenter = gradientWidth / 2;
     final double animationValue = _animation.value;
-    final double shimmerPosition = gradientCenter + (animationValue * gradientCenter);
+    final double shimmerPosition =
+        gradientCenter + (animationValue * gradientCenter);
 
     List<double> stops;
     List<Color> colors;
@@ -129,8 +127,10 @@ class _LoadingShimmerState extends State<LoadingShimmer>
       stops = [0.0, 1.0, 1.0];
       colors = [baseColor, baseColor, baseColor];
     } else {
-      final double shimmerStart = (shimmerPosition - gradientCenter * 0.3) / gradientWidth;
-      final double shimmerEnd = (shimmerPosition + gradientCenter * 0.3) / gradientWidth;
+      final double shimmerStart =
+          (shimmerPosition - gradientCenter * 0.3) / gradientWidth;
+      final double shimmerEnd =
+          (shimmerPosition + gradientCenter * 0.3) / gradientWidth;
 
       stops = [
         (shimmerStart - 0.1).clamp(0.0, 1.0),
@@ -140,13 +140,7 @@ class _LoadingShimmerState extends State<LoadingShimmer>
         (shimmerEnd + 0.1).clamp(0.0, 1.0),
       ];
 
-      colors = [
-        baseColor,
-        baseColor,
-        highlightColor,
-        baseColor,
-        baseColor,
-      ];
+      colors = [baseColor, baseColor, highlightColor, baseColor, baseColor];
     }
 
     return LinearGradient(
@@ -188,10 +182,13 @@ class _LoadingShimmerState extends State<LoadingShimmer>
 enum ShimmerDirection {
   /// 左から右
   ltr,
+
   /// 右から左
   rtl,
+
   /// 上から下
   ttb,
+
   /// 下から上
   btt,
 }
@@ -259,11 +256,7 @@ class CardShimmer extends StatelessWidget {
 
 /// アバター/プロフィール画像用シマー
 class AvatarShimmer extends StatelessWidget {
-  const AvatarShimmer({
-    super.key,
-    this.size = 48,
-    this.enabled = true,
-  });
+  const AvatarShimmer({super.key, this.size = 48, this.enabled = true});
 
   final double size;
   final bool enabled;
@@ -348,17 +341,9 @@ class ListItemShimmer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextShimmer(
-                    enabled: false,
-                    width: 150,
-                    height: 16,
-                  ),
+                  TextShimmer(enabled: false, width: 150, height: 16),
                   const SizedBox(height: AppSpacing.xs),
-                  TextShimmer(
-                    enabled: false,
-                    width: 100,
-                    height: 12,
-                  ),
+                  TextShimmer(enabled: false, width: 100, height: 12),
                 ],
               ),
             ),
@@ -382,10 +367,7 @@ class ListItemShimmer extends StatelessWidget {
 
 /// 日記カード用シマー
 class DiaryCardShimmer extends StatelessWidget {
-  const DiaryCardShimmer({
-    super.key,
-    this.enabled = true,
-  });
+  const DiaryCardShimmer({super.key, this.enabled = true});
 
   final bool enabled;
 
@@ -406,19 +388,15 @@ class DiaryCardShimmer extends StatelessWidget {
             // 日付
             TextShimmer(enabled: false, width: 120, height: 14),
             const SizedBox(height: AppSpacing.sm),
-            
+
             // タイトル
             TextShimmer(enabled: false, width: 200, height: 18),
             const SizedBox(height: AppSpacing.lg),
-            
+
             // 画像
-            ImageShimmer(
-              enabled: false,
-              width: double.infinity,
-              height: 150,
-            ),
+            ImageShimmer(enabled: false, width: double.infinity, height: 150),
             const SizedBox(height: AppSpacing.lg),
-            
+
             // 本文
             TextShimmer(enabled: false, width: double.infinity, height: 14),
             const SizedBox(height: AppSpacing.xs),
@@ -426,7 +404,7 @@ class DiaryCardShimmer extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             TextShimmer(enabled: false, width: 180, height: 14),
             const SizedBox(height: AppSpacing.lg),
-            
+
             // タグ
             Row(
               children: [

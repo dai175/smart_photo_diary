@@ -12,16 +12,16 @@ import 'prompt_usage_analytics.dart';
 class DetailedBehaviorAnalysis {
   /// 基本行動分析
   final UserBehaviorAnalysis basicAnalysis;
-  
+
   /// 時間パターン分析
   final TimePatternAnalysis timePattern;
-  
+
   /// 使用傾向分析
   final UsageTrendAnalysis usageTrend;
-  
+
   /// エンゲージメント分析
   final EngagementAnalysis engagement;
-  
+
   /// パーソナライゼーション提案
   final List<PersonalizationSuggestion> personalizationSuggestions;
 
@@ -35,18 +35,19 @@ class DetailedBehaviorAnalysis {
 
   /// 総合スコア（0-1）
   double get overallScore {
-    return (basicAnalysis.getHealthScore() + 
-            timePattern.consistencyScore + 
-            engagement.engagementScore) / 3.0;
+    return (basicAnalysis.getHealthScore() +
+            timePattern.consistencyScore +
+            engagement.engagementScore) /
+        3.0;
   }
 
   @override
   String toString() {
     return 'DetailedBehaviorAnalysis('
-           'overall: ${(overallScore * 100).toStringAsFixed(1)}%, '
-           'health: ${(basicAnalysis.getHealthScore() * 100).toStringAsFixed(1)}%, '
-           'consistency: ${(timePattern.consistencyScore * 100).toStringAsFixed(1)}%, '
-           'engagement: ${(engagement.engagementScore * 100).toStringAsFixed(1)}%)';
+        'overall: ${(overallScore * 100).toStringAsFixed(1)}%, '
+        'health: ${(basicAnalysis.getHealthScore() * 100).toStringAsFixed(1)}%, '
+        'consistency: ${(timePattern.consistencyScore * 100).toStringAsFixed(1)}%, '
+        'engagement: ${(engagement.engagementScore * 100).toStringAsFixed(1)}%)';
   }
 }
 
@@ -54,22 +55,22 @@ class DetailedBehaviorAnalysis {
 class TimePatternAnalysis {
   /// 時間帯別使用パターン
   final Map<int, int> hourlyPattern;
-  
+
   /// 曜日別使用パターン
   final Map<int, int> weekdayPattern;
-  
+
   /// 最も活発な時間帯
   final int? peakHour;
-  
+
   /// 最も活発な曜日
   final int? peakWeekday;
-  
+
   /// 使用時間の一貫性スコア（0-1）
   final double consistencyScore;
-  
+
   /// 平均セッション長（分）
   final double averageSessionDuration;
-  
+
   /// 連続使用日数の最大値
   final int maxConsecutiveDays;
 
@@ -102,13 +103,17 @@ class TimePatternAnalysis {
 
   @override
   String toString() {
-    final peakHourDesc = peakHour != null ? getHourDescription(peakHour!) : '不明';
-    final peakWeekdayDesc = peakWeekday != null ? getWeekdayDescription(peakWeekday!) : '不明';
-    
+    final peakHourDesc = peakHour != null
+        ? getHourDescription(peakHour!)
+        : '不明';
+    final peakWeekdayDesc = peakWeekday != null
+        ? getWeekdayDescription(peakWeekday!)
+        : '不明';
+
     return 'TimePatternAnalysis('
-           'peak: $peakHourDesc時間帯、$peakWeekdayDesc曜日, '
-           'consistency: ${(consistencyScore * 100).toStringAsFixed(1)}%, '
-           'maxConsecutive: $maxConsecutiveDays日)';
+        'peak: $peakHourDesc時間帯、$peakWeekdayDesc曜日, '
+        'consistency: ${(consistencyScore * 100).toStringAsFixed(1)}%, '
+        'maxConsecutive: $maxConsecutiveDays日)';
   }
 }
 
@@ -116,16 +121,16 @@ class TimePatternAnalysis {
 class UsageTrendAnalysis {
   /// 週次使用回数の推移
   final List<WeeklyUsage> weeklyTrends;
-  
+
   /// 使用頻度の変化率（週あたり％）
   final double frequencyChangeRate;
-  
+
   /// 使用の規則性（0-1、1が最も規則的）
   final double regularity;
-  
+
   /// 使用量の季節性指数
   final double seasonalityIndex;
-  
+
   /// トレンド方向
   final UsageTrendDirection direction;
 
@@ -151,11 +156,11 @@ class UsageTrendAnalysis {
         directionText = '安定';
         break;
     }
-    
+
     return 'UsageTrendAnalysis('
-           'direction: $directionText, '
-           'change: ${frequencyChangeRate.toStringAsFixed(1)}%/週, '
-           'regularity: ${(regularity * 100).toStringAsFixed(1)}%)';
+        'direction: $directionText, '
+        'change: ${frequencyChangeRate.toStringAsFixed(1)}%/週, '
+        'regularity: ${(regularity * 100).toStringAsFixed(1)}%)';
   }
 }
 
@@ -163,40 +168,33 @@ class UsageTrendAnalysis {
 class WeeklyUsage {
   /// 週の開始日
   final DateTime weekStart;
-  
+
   /// その週の使用回数
   final int usageCount;
 
-  const WeeklyUsage({
-    required this.weekStart,
-    required this.usageCount,
-  });
+  const WeeklyUsage({required this.weekStart, required this.usageCount});
 }
 
 /// 使用トレンド方向
-enum UsageTrendDirection {
-  increasing,
-  decreasing,
-  stable,
-}
+enum UsageTrendDirection { increasing, decreasing, stable }
 
 /// エンゲージメント分析
 class EngagementAnalysis {
   /// エンゲージメントスコア（0-1）
   final double engagementScore;
-  
+
   /// プロンプト完了率
   final double completionRate;
-  
+
   /// 平均満足度
   final double averageSatisfaction;
-  
+
   /// リピート使用率
   final double repeatUsageRate;
-  
+
   /// 探索度（新しいプロンプトを試す傾向）
   final double explorationRate;
-  
+
   /// ロイヤルティスコア（継続利用の強さ）
   final double loyaltyScore;
 
@@ -221,10 +219,10 @@ class EngagementAnalysis {
   @override
   String toString() {
     return 'EngagementAnalysis('
-           'level: $engagementLevel, '
-           'satisfaction: ${(averageSatisfaction * 100).toStringAsFixed(1)}%, '
-           'exploration: ${(explorationRate * 100).toStringAsFixed(1)}%, '
-           'loyalty: ${(loyaltyScore * 100).toStringAsFixed(1)}%)';
+        'level: $engagementLevel, '
+        'satisfaction: ${(averageSatisfaction * 100).toStringAsFixed(1)}%, '
+        'exploration: ${(explorationRate * 100).toStringAsFixed(1)}%, '
+        'loyalty: ${(loyaltyScore * 100).toStringAsFixed(1)}%)';
   }
 }
 
@@ -232,16 +230,16 @@ class EngagementAnalysis {
 class PersonalizationSuggestion {
   /// 提案タイプ
   final PersonalizationType type;
-  
+
   /// 提案内容
   final String suggestion;
-  
+
   /// 優先度（1-5）
   final int priority;
-  
+
   /// 根拠データ
   final Map<String, dynamic> evidence;
-  
+
   /// 期待される効果
   final String expectedImpact;
 
@@ -256,9 +254,9 @@ class PersonalizationSuggestion {
   @override
   String toString() {
     return 'PersonalizationSuggestion('
-           'type: $type, '
-           'priority: $priority, '
-           'suggestion: $suggestion)';
+        'type: $type, '
+        'priority: $priority, '
+        'suggestion: $suggestion)';
   }
 }
 
@@ -266,24 +264,27 @@ class PersonalizationSuggestion {
 enum PersonalizationType {
   /// 時間調整
   timeAdjustment,
+
   /// カテゴリ推奨
   categoryRecommendation,
+
   /// 頻度調整
   frequencyAdjustment,
+
   /// コンテンツ最適化
   contentOptimization,
+
   /// 通知設定
   notificationSetting,
 }
 
 /// ユーザー行動分析器
-/// 
+///
 /// プロンプト使用履歴から詳細な行動パターンを分析し、
 /// パーソナライゼーション提案を生成する
 class UserBehaviorAnalyzer {
-  
   /// 詳細行動分析を実行
-  /// 
+  ///
   /// [usageHistory] 使用履歴データ
   /// [availablePrompts] 利用可能プロンプト
   /// 戻り値: 詳細行動分析結果
@@ -363,7 +364,9 @@ class UserBehaviorAnalyzer {
   }
 
   /// 時間パターンを分析
-  static TimePatternAnalysis _analyzeTimePatterns(List<PromptUsageHistory> usageHistory) {
+  static TimePatternAnalysis _analyzeTimePatterns(
+    List<PromptUsageHistory> usageHistory,
+  ) {
     final hourlyPattern = <int, int>{};
     final weekdayPattern = <int, int>{};
     final usageDates = <DateTime>{};
@@ -371,7 +374,11 @@ class UserBehaviorAnalyzer {
     for (final history in usageHistory) {
       final hour = history.usedAt.hour;
       final weekday = history.usedAt.weekday;
-      final date = DateTime(history.usedAt.year, history.usedAt.month, history.usedAt.day);
+      final date = DateTime(
+        history.usedAt.year,
+        history.usedAt.month,
+        history.usedAt.day,
+      );
 
       hourlyPattern[hour] = (hourlyPattern[hour] ?? 0) + 1;
       weekdayPattern[weekday] = (weekdayPattern[weekday] ?? 0) + 1;
@@ -381,22 +388,31 @@ class UserBehaviorAnalyzer {
     // ピーク時間とピーク曜日を特定
     int? peakHour;
     int? peakWeekday;
-    
+
     if (hourlyPattern.isNotEmpty) {
-      final maxHourEntry = hourlyPattern.entries.reduce((a, b) => a.value > b.value ? a : b);
+      final maxHourEntry = hourlyPattern.entries.reduce(
+        (a, b) => a.value > b.value ? a : b,
+      );
       peakHour = maxHourEntry.key;
     }
-    
+
     if (weekdayPattern.isNotEmpty) {
-      final maxWeekdayEntry = weekdayPattern.entries.reduce((a, b) => a.value > b.value ? a : b);
+      final maxWeekdayEntry = weekdayPattern.entries.reduce(
+        (a, b) => a.value > b.value ? a : b,
+      );
       peakWeekday = maxWeekdayEntry.key;
     }
 
     // 一貫性スコアを計算（エントロピーベース）
-    final consistencyScore = _calculateConsistencyScore(hourlyPattern, weekdayPattern);
+    final consistencyScore = _calculateConsistencyScore(
+      hourlyPattern,
+      weekdayPattern,
+    );
 
     // 平均セッション長を計算（分単位）
-    final averageSessionDuration = _calculateAverageSessionDuration(usageHistory);
+    final averageSessionDuration = _calculateAverageSessionDuration(
+      usageHistory,
+    );
 
     // 連続使用日数を計算
     final maxConsecutiveDays = _calculateMaxConsecutiveDays(usageDates);
@@ -413,7 +429,9 @@ class UserBehaviorAnalyzer {
   }
 
   /// 使用傾向を分析
-  static UsageTrendAnalysis _analyzeUsageTrends(List<PromptUsageHistory> usageHistory) {
+  static UsageTrendAnalysis _analyzeUsageTrends(
+    List<PromptUsageHistory> usageHistory,
+  ) {
     if (usageHistory.length < 2) {
       return const UsageTrendAnalysis(
         weeklyTrends: [],
@@ -478,28 +496,37 @@ class UserBehaviorAnalyzer {
     // リピート使用率
     final promptCounts = <String, int>{};
     for (final history in usageHistory) {
-      promptCounts[history.promptId] = (promptCounts[history.promptId] ?? 0) + 1;
+      promptCounts[history.promptId] =
+          (promptCounts[history.promptId] ?? 0) + 1;
     }
     final repeatUsage = promptCounts.values.where((count) => count > 1).length;
-    final repeatUsageRate = promptCounts.isNotEmpty ? repeatUsage / promptCounts.length : 0.0;
+    final repeatUsageRate = promptCounts.isNotEmpty
+        ? repeatUsage / promptCounts.length
+        : 0.0;
 
     // 探索度計算
     final uniquePromptsUsed = promptCounts.length;
     final totalPromptsAvailable = availablePrompts.length;
-    final explorationRate = totalPromptsAvailable > 0 ? uniquePromptsUsed / totalPromptsAvailable : 0.0;
+    final explorationRate = totalPromptsAvailable > 0
+        ? uniquePromptsUsed / totalPromptsAvailable
+        : 0.0;
 
     // ロイヤルティスコア（継続性と頻度の組み合わせ）
     final daySpan = _calculateDaySpan(usageHistory);
     final averageFrequency = daySpan > 0 ? usageHistory.length / daySpan : 0.0;
-    final loyaltyScore = min(1.0, (averageFrequency / 3.0) * averageSatisfaction); // 1日3回を最大として正規化
+    final loyaltyScore = min(
+      1.0,
+      (averageFrequency / 3.0) * averageSatisfaction,
+    ); // 1日3回を最大として正規化
 
     // 完了率（簡易的に満足度と同じとする）
     final completionRate = averageSatisfaction;
 
     // 総合エンゲージメントスコア
-    final engagementScore = (averageSatisfaction * 0.3 + 
-                           explorationRate * 0.3 + 
-                           loyaltyScore * 0.4);
+    final engagementScore =
+        (averageSatisfaction * 0.3 +
+        explorationRate * 0.3 +
+        loyaltyScore * 0.4);
 
     return EngagementAnalysis(
       engagementScore: engagementScore,
@@ -522,56 +549,61 @@ class UserBehaviorAnalyzer {
 
     // 時間最適化提案
     if (timePattern.peakHour != null && timePattern.consistencyScore < 0.6) {
-      suggestions.add(PersonalizationSuggestion(
-        type: PersonalizationType.timeAdjustment,
-        suggestion: '${timePattern.getHourDescription(timePattern.peakHour!)}時間帯（${timePattern.peakHour}時頃）に通知を設定することで、より一貫した使用習慣を作ることができます。',
-        priority: 4,
-        evidence: {
-          'peakHour': timePattern.peakHour!,
-          'consistencyScore': timePattern.consistencyScore,
-        },
-        expectedImpact: '使用の一貫性向上',
-      ));
+      suggestions.add(
+        PersonalizationSuggestion(
+          type: PersonalizationType.timeAdjustment,
+          suggestion:
+              '${timePattern.getHourDescription(timePattern.peakHour!)}時間帯（${timePattern.peakHour}時頃）に通知を設定することで、より一貫した使用習慣を作ることができます。',
+          priority: 4,
+          evidence: {
+            'peakHour': timePattern.peakHour!,
+            'consistencyScore': timePattern.consistencyScore,
+          },
+          expectedImpact: '使用の一貫性向上',
+        ),
+      );
     }
 
     // 頻度調整提案
     if (usageTrend.direction == UsageTrendDirection.decreasing) {
-      suggestions.add(PersonalizationSuggestion(
-        type: PersonalizationType.frequencyAdjustment,
-        suggestion: '使用頻度が減少傾向にあります。週2-3回のリマインダー設定で、習慣を維持することをお勧めします。',
-        priority: 5,
-        evidence: {
-          'direction': usageTrend.direction.toString(),
-          'changeRate': usageTrend.frequencyChangeRate,
-        },
-        expectedImpact: '継続的な利用促進',
-      ));
+      suggestions.add(
+        PersonalizationSuggestion(
+          type: PersonalizationType.frequencyAdjustment,
+          suggestion: '使用頻度が減少傾向にあります。週2-3回のリマインダー設定で、習慣を維持することをお勧めします。',
+          priority: 5,
+          evidence: {
+            'direction': usageTrend.direction.toString(),
+            'changeRate': usageTrend.frequencyChangeRate,
+          },
+          expectedImpact: '継続的な利用促進',
+        ),
+      );
     }
 
     // エンゲージメント向上提案
     if (engagement.explorationRate < 0.3) {
-      suggestions.add(PersonalizationSuggestion(
-        type: PersonalizationType.contentOptimization,
-        suggestion: '新しいプロンプトの探索率が低いです。お気に入りカテゴリ以外からのランダム選択を時々試してみませんか？',
-        priority: 3,
-        evidence: {
-          'explorationRate': engagement.explorationRate,
-        },
-        expectedImpact: 'プロンプト多様性の向上',
-      ));
+      suggestions.add(
+        PersonalizationSuggestion(
+          type: PersonalizationType.contentOptimization,
+          suggestion: '新しいプロンプトの探索率が低いです。お気に入りカテゴリ以外からのランダム選択を時々試してみませんか？',
+          priority: 3,
+          evidence: {'explorationRate': engagement.explorationRate},
+          expectedImpact: 'プロンプト多様性の向上',
+        ),
+      );
     }
 
     // 満足度改善提案
     if (engagement.averageSatisfaction < 0.7) {
-      suggestions.add(PersonalizationSuggestion(
-        type: PersonalizationType.categoryRecommendation,
-        suggestion: '満足度を向上させるため、より具体的で感情に深く関わるプロンプトカテゴリを試してみることをお勧めします。',
-        priority: 4,
-        evidence: {
-          'satisfaction': engagement.averageSatisfaction,
-        },
-        expectedImpact: 'ユーザー満足度の向上',
-      ));
+      suggestions.add(
+        PersonalizationSuggestion(
+          type: PersonalizationType.categoryRecommendation,
+          suggestion: '満足度を向上させるため、より具体的で感情に深く関わるプロンプトカテゴリを試してみることをお勧めします。',
+          priority: 4,
+          evidence: {'satisfaction': engagement.averageSatisfaction},
+          expectedImpact: 'ユーザー満足度の向上',
+        ),
+      );
     }
 
     return suggestions..sort((a, b) => b.priority.compareTo(a.priority));
@@ -589,7 +621,10 @@ class UserBehaviorAnalyzer {
 
     // 時間帯の一貫性（エントロピーの逆数）
     if (hourlyPattern.isNotEmpty) {
-      final totalHourly = hourlyPattern.values.fold<int>(0, (sum, count) => sum + count);
+      final totalHourly = hourlyPattern.values.fold<int>(
+        0,
+        (sum, count) => sum + count,
+      );
       double entropy = 0.0;
       for (final count in hourlyPattern.values) {
         final probability = count / totalHourly;
@@ -601,7 +636,10 @@ class UserBehaviorAnalyzer {
 
     // 曜日の一貫性
     if (weekdayPattern.isNotEmpty) {
-      final totalWeekday = weekdayPattern.values.fold<int>(0, (sum, count) => sum + count);
+      final totalWeekday = weekdayPattern.values.fold<int>(
+        0,
+        (sum, count) => sum + count,
+      );
       double entropy = 0.0;
       for (final count in weekdayPattern.values) {
         final probability = count / totalWeekday;
@@ -615,12 +653,15 @@ class UserBehaviorAnalyzer {
   }
 
   /// 平均セッション長を計算（分単位）
-  static double _calculateAverageSessionDuration(List<PromptUsageHistory> usageHistory) {
+  static double _calculateAverageSessionDuration(
+    List<PromptUsageHistory> usageHistory,
+  ) {
     // 簡易的に同じ日の使用を1セッションとして計算
     final dailySessions = <String, List<DateTime>>{};
-    
+
     for (final history in usageHistory) {
-      final dateKey = '${history.usedAt.year}-${history.usedAt.month}-${history.usedAt.day}';
+      final dateKey =
+          '${history.usedAt.year}-${history.usedAt.month}-${history.usedAt.day}';
       dailySessions[dateKey] ??= [];
       dailySessions[dateKey]!.add(history.usedAt);
     }
@@ -633,7 +674,10 @@ class UserBehaviorAnalyzer {
     for (final times in dailySessions.values) {
       if (times.length > 1) {
         times.sort();
-        final duration = times.last.difference(times.first).inMinutes.toDouble();
+        final duration = times.last
+            .difference(times.first)
+            .inMinutes
+            .toDouble();
         totalDuration += duration;
       } else {
         totalDuration += 5.0; // 単発使用は5分と仮定
@@ -666,7 +710,9 @@ class UserBehaviorAnalyzer {
   }
 
   /// 週次トレンドを生成
-  static List<WeeklyUsage> _generateWeeklyTrends(List<PromptUsageHistory> usageHistory) {
+  static List<WeeklyUsage> _generateWeeklyTrends(
+    List<PromptUsageHistory> usageHistory,
+  ) {
     final weeklyData = <DateTime, int>{};
 
     for (final history in usageHistory) {
@@ -683,7 +729,9 @@ class UserBehaviorAnalyzer {
     }
 
     return weeklyData.entries
-        .map((entry) => WeeklyUsage(weekStart: entry.key, usageCount: entry.value))
+        .map(
+          (entry) => WeeklyUsage(weekStart: entry.key, usageCount: entry.value),
+        )
         .toList()
       ..sort((a, b) => a.weekStart.compareTo(b.weekStart));
   }
@@ -695,8 +743,12 @@ class UserBehaviorAnalyzer {
     final firstHalf = weeklyTrends.take(weeklyTrends.length ~/ 2).toList();
     final secondHalf = weeklyTrends.skip(weeklyTrends.length ~/ 2).toList();
 
-    final firstHalfAvg = firstHalf.fold<int>(0, (sum, w) => sum + w.usageCount) / firstHalf.length;
-    final secondHalfAvg = secondHalf.fold<int>(0, (sum, w) => sum + w.usageCount) / secondHalf.length;
+    final firstHalfAvg =
+        firstHalf.fold<int>(0, (sum, w) => sum + w.usageCount) /
+        firstHalf.length;
+    final secondHalfAvg =
+        secondHalf.fold<int>(0, (sum, w) => sum + w.usageCount) /
+        secondHalf.length;
 
     if (firstHalfAvg == 0) return 0.0;
 
@@ -712,7 +764,10 @@ class UserBehaviorAnalyzer {
 
     final intervals = <double>[];
     for (int i = 1; i < sortedHistory.length; i++) {
-      final interval = sortedHistory[i].usedAt.difference(sortedHistory[i - 1].usedAt).inHours.toDouble();
+      final interval = sortedHistory[i].usedAt
+          .difference(sortedHistory[i - 1].usedAt)
+          .inHours
+          .toDouble();
       intervals.add(interval);
     }
 
@@ -720,17 +775,21 @@ class UserBehaviorAnalyzer {
 
     // 標準偏差の逆数で規則性を測定
     final mean = intervals.reduce((a, b) => a + b) / intervals.length;
-    final variance = intervals.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) / intervals.length;
+    final variance =
+        intervals.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) /
+        intervals.length;
     final stdDev = sqrt(variance);
 
     return stdDev > 0 ? 1.0 / (1.0 + stdDev / mean) : 1.0;
   }
 
   /// 季節性指数を計算
-  static double _calculateSeasonalityIndex(List<PromptUsageHistory> usageHistory) {
+  static double _calculateSeasonalityIndex(
+    List<PromptUsageHistory> usageHistory,
+  ) {
     // 簡易的な季節性分析（月別変動）
     final monthlyUsage = <int, int>{};
-    
+
     for (final history in usageHistory) {
       final month = history.usedAt.month;
       monthlyUsage[month] = (monthlyUsage[month] ?? 0) + 1;
@@ -740,7 +799,9 @@ class UserBehaviorAnalyzer {
 
     final values = monthlyUsage.values.toList();
     final mean = values.reduce((a, b) => a + b) / values.length;
-    final variance = values.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) / values.length;
+    final variance =
+        values.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) /
+        values.length;
 
     return sqrt(variance) / mean; // 変動係数
   }
@@ -752,6 +813,10 @@ class UserBehaviorAnalyzer {
     final sortedHistory = usageHistory.toList()
       ..sort((a, b) => a.usedAt.compareTo(b.usedAt));
 
-    return sortedHistory.last.usedAt.difference(sortedHistory.first.usedAt).inDays.toDouble() + 1;
+    return sortedHistory.last.usedAt
+            .difference(sortedHistory.first.usedAt)
+            .inDays
+            .toDouble() +
+        1;
   }
 }

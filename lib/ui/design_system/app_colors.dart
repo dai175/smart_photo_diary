@@ -10,7 +10,7 @@ class AppColors {
   static const Color primary = Color(0xFF5C8DAD);
   static const Color primaryLight = Color(0xFF8BB5D3);
   static const Color primaryDark = Color(0xFF3A5F7D);
-  
+
   /// Primary コンテナ
   static const Color primaryContainer = Color(0xFFE3F2FD);
   static const Color onPrimaryContainer = Color(0xFF1A237E);
@@ -20,7 +20,7 @@ class AppColors {
   static const Color secondary = Color(0xFF9C27B0);
   static const Color secondaryLight = Color(0xFFBA68C8);
   static const Color secondaryDark = Color(0xFF7B1FA2);
-  
+
   /// Secondary コンテナ
   static const Color secondaryContainer = Color(0xFFF3E5F5);
   static const Color onSecondaryContainer = Color(0xFF4A148C);
@@ -35,12 +35,12 @@ class AppColors {
   /// 背景色
   static const Color background = Color(0xFFFAFAFA);
   static const Color backgroundDark = Color(0xFF121212);
-  
+
   /// サーフェス色
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1E1E1E);
   static const Color surfaceVariant = Color(0xFFF5F5F5);
-  
+
   /// アウトライン
   static const Color outline = Color(0xFFE0E0E0);
   static const Color outlineVariant = Color(0xFFF5F5F5);
@@ -86,7 +86,7 @@ class AppColors {
     colors: [primary, primaryLight],
   );
 
-  /// セカンダリーグラデーション  
+  /// セカンダリーグラデーション
   static const LinearGradient secondaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -105,9 +105,9 @@ class AppColors {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0xFFE1BEE7),  // 薄紫
-      Color(0xFFFFCDD2),  // 薄ピンク
-      Color(0xFFFFF9C4),  // 薄黄
+      Color(0xFFE1BEE7), // 薄紫
+      Color(0xFFFFCDD2), // 薄ピンク
+      Color(0xFFFFF9C4), // 薄黄
     ],
   );
 
@@ -117,10 +117,10 @@ class AppColors {
     end: Alignment.bottomRight,
     stops: [0.0, 0.3, 0.7, 1.0],
     colors: [
-      Color(0xFF667eea),  // 青紫
-      Color(0xFF764ba2),  // 紫
-      Color(0xFFf093fb),  // ピンク
-      Color(0xFFf5576c),  // 赤ピンク
+      Color(0xFF667eea), // 青紫
+      Color(0xFF764ba2), // 紫
+      Color(0xFFf093fb), // ピンク
+      Color(0xFFf5576c), // 赤ピンク
     ],
   );
 

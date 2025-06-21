@@ -53,11 +53,13 @@ class HomeContentWidget extends StatelessWidget {
           : _buildMainContent(context),
     );
   }
-  
+
   PreferredSizeWidget _buildHeader(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Text('${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日'),
+      title: Text(
+        '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
+      ),
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
@@ -92,25 +94,25 @@ class HomeContentWidget extends StatelessWidget {
 
   Widget _buildMainContent(BuildContext context) {
     return ListView(
-        padding: AppSpacing.screenPadding,
-        children: [
-          FadeInWidget(
-            delay: const Duration(milliseconds: 100),
-            child: _buildPhotoSection(context),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          FadeInWidget(
-            delay: const Duration(milliseconds: 200),
-            child: _buildCreateDiaryButton(context),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          FadeInWidget(
-            delay: const Duration(milliseconds: 300),
-            child: _buildRecentDiariesSection(context),
-          ),
-          const SizedBox(height: AppConstants.bottomNavPadding),
-        ],
-      );
+      padding: AppSpacing.screenPadding,
+      children: [
+        FadeInWidget(
+          delay: const Duration(milliseconds: 100),
+          child: _buildPhotoSection(context),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        FadeInWidget(
+          delay: const Duration(milliseconds: 200),
+          child: _buildCreateDiaryButton(context),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        FadeInWidget(
+          delay: const Duration(milliseconds: 300),
+          child: _buildRecentDiariesSection(context),
+        ),
+        const SizedBox(height: AppConstants.bottomNavPadding),
+      ],
+    );
   }
 
   Widget _buildPhotoSection(BuildContext context) {
@@ -127,10 +129,7 @@ class HomeContentWidget extends StatelessWidget {
                 size: AppSpacing.iconMd,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                '今日の写真',
-                style: AppTypography.titleLarge,
-              ),
+              Text('今日の写真', style: AppTypography.titleLarge),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -156,22 +155,24 @@ class HomeContentWidget extends StatelessWidget {
               : null,
           width: double.infinity,
           height: AppSpacing.buttonHeightLg,
-          backgroundColor: photoController.selectedCount > 0 
+          backgroundColor: photoController.selectedCount > 0
               ? theme.colorScheme.primary
               : theme.colorScheme.surfaceContainerHighest,
-          foregroundColor: photoController.selectedCount > 0 
+          foregroundColor: photoController.selectedCount > 0
               ? theme.colorScheme.onPrimary
               : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          shadowColor: photoController.selectedCount > 0 
-              ? theme.colorScheme.primary.withValues(alpha: 0.3) 
+          shadowColor: photoController.selectedCount > 0
+              ? theme.colorScheme.primary.withValues(alpha: 0.3)
               : null,
-          elevation: photoController.selectedCount > 0 ? AppSpacing.elevationSm : 0,
+          elevation: photoController.selectedCount > 0
+              ? AppSpacing.elevationSm
+              : 0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                photoController.selectedCount > 0 
-                    ? Icons.auto_awesome_rounded 
+                photoController.selectedCount > 0
+                    ? Icons.auto_awesome_rounded
                     : Icons.photo_camera_outlined,
                 size: AppSpacing.iconSm,
               ),
@@ -203,10 +204,7 @@ class HomeContentWidget extends StatelessWidget {
                 size: AppSpacing.iconMd,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                '最近の日記',
-                style: AppTypography.titleLarge,
-              ),
+              Text('最近の日記', style: AppTypography.titleLarge),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -237,7 +235,10 @@ class HomeContentWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToDiaryPreview(BuildContext context, WritingPrompt? selectedPrompt) {
+  void _navigateToDiaryPreview(
+    BuildContext context,
+    WritingPrompt? selectedPrompt,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -255,14 +256,16 @@ class HomeContentWidget extends StatelessWidget {
   /// Phase 1.7.2.3: 使用量状況表示メソッド
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
-      final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
-      
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+
       // 使用量情報を取得
       final statusResult = await subscriptionService.getCurrentStatus();
       final planResult = await subscriptionService.getCurrentPlan();
-      final remainingResult = await subscriptionService.getRemainingGenerations();
+      final remainingResult = await subscriptionService
+          .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
-      
+
       if (statusResult.isFailure || planResult.isFailure) {
         // エラー時はフォールバック表示
         if (context.mounted) {
@@ -277,14 +280,16 @@ class HomeContentWidget extends StatelessWidget {
         }
         return;
       }
-      
+
       final plan = planResult.value;
       final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
-      final nextResetDate = resetDateResult.isSuccess ? resetDateResult.value : DateTime.now().add(const Duration(days: 30));
-      
+      final nextResetDate = resetDateResult.isSuccess
+          ? resetDateResult.value
+          : DateTime.now().add(const Duration(days: 30));
+
       final limit = plan.monthlyAiGenerationLimit;
       final used = limit - remaining;
-      
+
       if (context.mounted) {
         await showDialog<void>(
           context: context,
@@ -295,10 +300,12 @@ class HomeContentWidget extends StatelessWidget {
             limit: limit,
             remaining: remaining.clamp(0, limit),
             nextResetDate: nextResetDate,
-            onUpgrade: plan.displayName == 'Basic' ? () {
-              Navigator.of(context).pop();
-              _navigateToUpgrade(context);
-            } : null,
+            onUpgrade: plan.displayName == 'Basic'
+                ? () {
+                    Navigator.of(context).pop();
+                    _navigateToUpgrade(context);
+                  }
+                : null,
             onDismiss: () => Navigator.of(context).pop(),
           ),
         );
@@ -322,7 +329,7 @@ class HomeContentWidget extends StatelessWidget {
   void _navigateToUpgrade(BuildContext context) {
     // TODO: Phase 2で設定画面のサブスクリプション管理画面に遷移
     Navigator.of(context).pushNamed('/settings');
-    
+
     // 一時的な案内メッセージ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -331,5 +338,4 @@ class HomeContentWidget extends StatelessWidget {
       ),
     );
   }
-
 }

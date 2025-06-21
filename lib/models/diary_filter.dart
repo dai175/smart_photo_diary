@@ -16,18 +16,30 @@ class DiaryFilter {
 
   bool get isActive {
     return dateRange != null ||
-           selectedTags.isNotEmpty ||
-           timeOfDay.isNotEmpty ||
-           (searchText != null && searchText!.isNotEmpty);
+        selectedTags.isNotEmpty ||
+        timeOfDay.isNotEmpty ||
+        (searchText != null && searchText!.isNotEmpty);
   }
 
   bool matches(DiaryEntry entry) {
     // 日付範囲フィルタ
     if (dateRange != null) {
-      final entryDate = DateTime(entry.date.year, entry.date.month, entry.date.day);
-      final startDate = DateTime(dateRange!.start.year, dateRange!.start.month, dateRange!.start.day);
-      final endDate = DateTime(dateRange!.end.year, dateRange!.end.month, dateRange!.end.day);
-      
+      final entryDate = DateTime(
+        entry.date.year,
+        entry.date.month,
+        entry.date.day,
+      );
+      final startDate = DateTime(
+        dateRange!.start.year,
+        dateRange!.start.month,
+        dateRange!.start.day,
+      );
+      final endDate = DateTime(
+        dateRange!.end.year,
+        dateRange!.end.month,
+        dateRange!.end.day,
+      );
+
       if (entryDate.isBefore(startDate) || entryDate.isAfter(endDate)) {
         return false;
       }
@@ -41,13 +53,11 @@ class DiaryFilter {
       }
     }
 
-
-
     // 時間帯フィルタ
     if (timeOfDay.isNotEmpty) {
       final hour = entry.date.hour;
       String entryTimeOfDay;
-      
+
       if (hour >= 5 && hour < 12) {
         entryTimeOfDay = '朝';
       } else if (hour >= 12 && hour < 18) {
@@ -57,7 +67,7 @@ class DiaryFilter {
       } else {
         entryTimeOfDay = '夜';
       }
-      
+
       if (!timeOfDay.contains(entryTimeOfDay)) {
         return false;
       }
@@ -68,7 +78,7 @@ class DiaryFilter {
       final searchLower = searchText!.toLowerCase();
       final titleMatch = entry.title.toLowerCase().contains(searchLower);
       final contentMatch = entry.content.toLowerCase().contains(searchLower);
-      
+
       if (!titleMatch && !contentMatch) {
         return false;
       }
@@ -106,11 +116,11 @@ class DiaryFilter {
 
   List<String> get activeFilterLabels {
     final labels = <String>[];
-    
+
     if (dateRange != null) {
       labels.add('期間指定');
     }
-    
+
     if (selectedTags.isNotEmpty) {
       if (selectedTags.length == 1) {
         labels.add('#${selectedTags.first}');
@@ -118,9 +128,7 @@ class DiaryFilter {
         labels.add('タグ(${selectedTags.length})');
       }
     }
-    
-    
-    
+
     if (timeOfDay.isNotEmpty) {
       if (timeOfDay.length == 1) {
         labels.add(timeOfDay.first);
@@ -128,11 +136,11 @@ class DiaryFilter {
         labels.add('時間帯(${timeOfDay.length})');
       }
     }
-    
+
     if (searchText != null && searchText!.isNotEmpty) {
       labels.add('検索: ${searchText!}');
     }
-    
+
     return labels;
   }
 }

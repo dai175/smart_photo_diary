@@ -3,40 +3,40 @@ import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
 
 /// Smart Photo Diary 統一ボタンシステム
-/// 
+///
 /// ## ボタン統一ガイドライン
-/// 
+///
 /// このファイルには、アプリ全体で統一されたボタンコンポーネントが含まれています。
 /// 全てのボタンは Material Design 3 に準拠し、テーマ認識色を使用してライト・ダーク
 /// テーマに完全対応しています。
-/// 
+///
 /// ## 利用可能なボタンタイプ
-/// 
+///
 /// ### プライマリーボタン
 /// - `PrimaryButton`: メインアクション用（保存、送信など）
 /// - `DangerButton`: 危険な操作用（削除、リセットなど）
-/// 
-/// ### セカンダリーボタン  
+///
+/// ### セカンダリーボタン
 /// - `SecondaryButton`: サブアクション用（境界線あり）
 /// - `AccentButton`: アクセント色の強調ボタン
 /// - `SurfaceButton`: サーフェス色の控えめなボタン
-/// 
+///
 /// ### その他のボタン
 /// - `TextOnlyButton`: テキストのみボタン（軽量アクション用）
 /// - `IconTextButton`: アイコン+テキストボタン
 /// - `SmallButton`: 小さいサイズのボタン
 /// - `CircularIconButton`: 丸型アイコンボタン
-/// 
+///
 /// ## 設計原則
-/// 
+///
 /// - **テーマ認識**: `Theme.of(context).colorScheme` を使用
 /// - **ソリッドカラー**: グラデーション廃止、単色のみ使用
 /// - **一貫したサイズ**: 標準48dp、小32dp、大56dp
 /// - **統一されたアニメーション**: 150ms のスケール・エレベーション
 /// - **アクセシビリティ**: 十分なコントラストと最小タッチターゲット
-/// 
+///
 /// ## 使用例
-/// 
+///
 /// ```dart
 /// // プライマリーアクション
 /// PrimaryButton(
@@ -44,13 +44,13 @@ import '../design_system/app_typography.dart';
 ///   text: '保存',
 ///   icon: Icons.save,
 /// )
-/// 
-/// // セカンダリーアクション  
+///
+/// // セカンダリーアクション
 /// SecondaryButton(
 ///   onPressed: () => cancel(),
 ///   text: 'キャンセル',
 /// )
-/// 
+///
 /// // 危険な操作
 /// DangerButton(
 ///   onPressed: () => delete(),
@@ -58,7 +58,7 @@ import '../design_system/app_typography.dart';
 ///   icon: Icons.delete,
 /// )
 /// ```
-/// 
+///
 /// ## アニメーション付きのカスタムボタンコンポーネント
 /// 基底クラス - 他のボタンはこれを継承して実装されています
 class AnimatedButton extends StatefulWidget {
@@ -136,7 +136,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
-  
+
   // bool _isPressed = false; // 将来的に使用予定
 
   @override
@@ -147,21 +147,20 @@ class _AnimatedButtonState extends State<AnimatedButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
-    _elevationAnimation = Tween<double>(
-      begin: widget.elevation ?? AppSpacing.elevationSm,
-      end: (widget.elevation ?? AppSpacing.elevationSm) * 0.5,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _elevationAnimation =
+        Tween<double>(
+          begin: widget.elevation ?? AppSpacing.elevationSm,
+          end: (widget.elevation ?? AppSpacing.elevationSm) * 0.5,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
@@ -198,10 +197,11 @@ class _AnimatedButtonState extends State<AnimatedButton>
     final borderRadius = widget.borderRadius ?? AppSpacing.buttonRadius;
     final elevation = widget.elevation ?? AppSpacing.elevationSm;
     final shadowColor = widget.shadowColor ?? theme.colorScheme.shadow;
-    
+
     // テーマ認識色を使用
     final backgroundColor = widget.backgroundColor ?? theme.colorScheme.primary;
-    final foregroundColor = widget.foregroundColor ?? theme.colorScheme.onPrimary;
+    final foregroundColor =
+        widget.foregroundColor ?? theme.colorScheme.onPrimary;
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -216,20 +216,22 @@ class _AnimatedButtonState extends State<AnimatedButton>
               color: backgroundColor,
               borderRadius: borderRadius,
               border: widget.border,
-              boxShadow: elevation > 0 ? [
-                BoxShadow(
-                  color: shadowColor,
-                  blurRadius: widget.enableScaleAnimation
-                      ? _elevationAnimation.value
-                      : elevation,
-                  offset: Offset(
-                    0,
-                    widget.enableScaleAnimation
-                        ? _elevationAnimation.value / 2
-                        : elevation / 2,
-                  ),
-                ),
-              ] : null,
+              boxShadow: elevation > 0
+                  ? [
+                      BoxShadow(
+                        color: shadowColor,
+                        blurRadius: widget.enableScaleAnimation
+                            ? _elevationAnimation.value
+                            : elevation,
+                        offset: Offset(
+                          0,
+                          widget.enableScaleAnimation
+                              ? _elevationAnimation.value / 2
+                              : elevation / 2,
+                        ),
+                      ),
+                    ]
+                  : null,
             ),
             child: Material(
               color: Colors.transparent,
@@ -249,7 +251,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 child: Container(
                   padding: widget.padding ?? AppSpacing.buttonPaddingSmall,
                   child: DefaultTextStyle(
-                    style: AppTypography.withColor(AppTypography.button, foregroundColor),
+                    style: AppTypography.withColor(
+                      AppTypography.button,
+                      foregroundColor,
+                    ),
                     textAlign: TextAlign.center,
                     child: IconTheme(
                       data: IconThemeData(color: foregroundColor),
@@ -300,7 +305,9 @@ class PrimaryButton extends StatelessWidget {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  theme.colorScheme.onPrimary,
+                ),
               ),
             )
           : Row(
@@ -342,10 +349,7 @@ class SecondaryButton extends StatelessWidget {
       backgroundColor: Colors.transparent,
       foregroundColor: theme.colorScheme.primary,
       border: Border.fromBorderSide(
-        BorderSide(
-          color: theme.colorScheme.primary,
-          width: 1.5,
-        ),
+        BorderSide(color: theme.colorScheme.primary, width: 1.5),
       ),
       elevation: 0,
       child: Row(
@@ -488,7 +492,7 @@ class SurfaceButton extends StatelessWidget {
     return AnimatedButton(
       onPressed: onPressed,
       width: width,
-      backgroundColor: theme.brightness == Brightness.light 
+      backgroundColor: theme.brightness == Brightness.light
           ? const Color(0xFFE8E8E8) // ライトモードでより濃いグレー
           : theme.colorScheme.surfaceContainerHighest,
       foregroundColor: theme.colorScheme.onSurface,
@@ -540,7 +544,9 @@ class DangerButton extends StatelessWidget {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onError),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  theme.colorScheme.onError,
+                ),
               ),
             )
           : Row(
@@ -628,7 +634,9 @@ class IconTextButton extends StatelessWidget {
       width: width,
       backgroundColor: backgroundColor ?? theme.colorScheme.primary,
       foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
-      padding: isCompact ? AppSpacing.buttonPaddingSmall : AppSpacing.buttonPadding,
+      padding: isCompact
+          ? AppSpacing.buttonPaddingSmall
+          : AppSpacing.buttonPadding,
       height: isCompact ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeightMd,
       child: Row(
         mainAxisSize: MainAxisSize.min,

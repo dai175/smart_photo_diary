@@ -14,7 +14,7 @@ abstract class TestServiceInterface {
 class TestServiceImpl implements TestServiceInterface {
   final String _name;
   TestServiceImpl(this._name);
-  
+
   @override
   String getName() => _name;
 }
@@ -22,7 +22,7 @@ class TestServiceImpl implements TestServiceInterface {
 class AsyncTestService {
   final String value;
   AsyncTestService(this.value);
-  
+
   static Future<AsyncTestService> create(String value) async {
     // Simulate async initialization
     await Future.delayed(const Duration(milliseconds: 10));
@@ -88,7 +88,7 @@ void main() {
       test('should register and create instance from factory', () {
         // Arrange
         serviceLocator.registerFactory<TestService>(
-          () => TestService('factory-test')
+          () => TestService('factory-test'),
         );
 
         // Act
@@ -101,7 +101,7 @@ void main() {
       test('should create singleton after first factory call', () {
         // Arrange
         serviceLocator.registerFactory<TestService>(
-          () => TestService('factory-singleton')
+          () => TestService('factory-singleton'),
         );
 
         // Act
@@ -116,7 +116,7 @@ void main() {
       test('should support interface-based factory registration', () {
         // Arrange
         serviceLocator.registerFactory<TestServiceInterface>(
-          () => TestServiceImpl('factory-interface')
+          () => TestServiceImpl('factory-interface'),
         );
 
         // Act
@@ -131,7 +131,7 @@ void main() {
       test('should register and create instance from async factory', () async {
         // Arrange
         serviceLocator.registerAsyncFactory<AsyncTestService>(
-          () => AsyncTestService.create('async-test')
+          () => AsyncTestService.create('async-test'),
         );
 
         // Act
@@ -144,7 +144,7 @@ void main() {
       test('should create singleton after first async factory call', () async {
         // Arrange
         serviceLocator.registerAsyncFactory<AsyncTestService>(
-          () => AsyncTestService.create('async-singleton')
+          () => AsyncTestService.create('async-singleton'),
         );
 
         // Act
@@ -156,19 +156,22 @@ void main() {
         expect(first.value, equals('async-singleton'));
       });
 
-      test('should return existing singleton for getAsync after registration', () async {
-        // Arrange
-        serviceLocator.registerAsyncFactory<AsyncTestService>(
-          () => AsyncTestService.create('existing-async')
-        );
-        final first = await serviceLocator.getAsync<AsyncTestService>();
+      test(
+        'should return existing singleton for getAsync after registration',
+        () async {
+          // Arrange
+          serviceLocator.registerAsyncFactory<AsyncTestService>(
+            () => AsyncTestService.create('existing-async'),
+          );
+          final first = await serviceLocator.getAsync<AsyncTestService>();
 
-        // Act
-        final second = await serviceLocator.getAsync<AsyncTestService>();
+          // Act
+          final second = await serviceLocator.getAsync<AsyncTestService>();
 
-        // Assert
-        expect(first, same(second));
-      });
+          // Assert
+          expect(first, same(second));
+        },
+      );
     });
 
     group('Error Handling', () {
@@ -176,28 +179,32 @@ void main() {
         // Act & Assert
         expect(
           () => serviceLocator.get<TestService>(),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Service of type TestService is not registered'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Service of type TestService is not registered'),
+            ),
+          ),
         );
       });
 
       test('should throw exception for async service used with sync get', () {
         // Arrange
         serviceLocator.registerAsyncFactory<AsyncTestService>(
-          () => AsyncTestService.create('error-test')
+          () => AsyncTestService.create('error-test'),
         );
 
         // Act & Assert
         expect(
           () => serviceLocator.get<AsyncTestService>(),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('requires async initialization'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('requires async initialization'),
+            ),
+          ),
         );
       });
 
@@ -205,11 +212,13 @@ void main() {
         // Act & Assert
         expect(
           () => serviceLocator.getAsync<AsyncTestService>(),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Service of type AsyncTestService is not registered'),
-          )),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Service of type AsyncTestService is not registered'),
+            ),
+          ),
         );
       });
     });
@@ -248,7 +257,7 @@ void main() {
         // Arrange
         serviceLocator.registerSingleton<TestService>(TestService('test1'));
         serviceLocator.registerFactory<TestServiceInterface>(
-          () => TestServiceImpl('test2')
+          () => TestServiceImpl('test2'),
         );
         expect(serviceLocator.registeredTypes.length, equals(2));
 
@@ -263,7 +272,7 @@ void main() {
         // Arrange
         serviceLocator.registerSingleton<TestService>(TestService('test'));
         serviceLocator.registerFactory<TestServiceInterface>(
-          () => TestServiceImpl('test')
+          () => TestServiceImpl('test'),
         );
 
         // Act

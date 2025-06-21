@@ -75,16 +75,11 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -92,9 +87,7 @@ class _MyAppState extends State<MyApp> {
       title: AppConstants.appTitle,
       themeMode: _themeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
@@ -115,10 +108,7 @@ class _MyAppState extends State<MyApp> {
         Locale('en', 'US'), // 英語（フォールバック）
       ],
       locale: const Locale('ja', 'JP'), // デフォルトロケール
-      home: HomeScreen(
-        onThemeChanged: _onThemeChanged,
-      ),
+      home: HomeScreen(onThemeChanged: _onThemeChanged),
     );
   }
 }
-

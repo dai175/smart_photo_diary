@@ -8,7 +8,7 @@ class DiaryScreenController extends BaseErrorController {
   // 日記データ
   List<DiaryEntry> _diaryEntries = [];
   DiaryFilter _currentFilter = DiaryFilter.empty;
-  
+
   // 検索機能
   bool _isSearching = false;
   String _searchQuery = '';
@@ -64,7 +64,8 @@ class DiaryScreenController extends BaseErrorController {
   }
 
   void removeTimeOfDayFilter(String time) {
-    final newTimeOfDay = Set<String>.from(_currentFilter.timeOfDay)..remove(time);
+    final newTimeOfDay = Set<String>.from(_currentFilter.timeOfDay)
+      ..remove(time);
     applyFilter(_currentFilter.copyWith(timeOfDay: newTimeOfDay));
   }
 
@@ -108,7 +109,7 @@ class DiaryScreenController extends BaseErrorController {
   Future<void> _searchDiaryEntries(String query) async {
     final result = await safeExecute(() async {
       final diaryService = await DiaryService.getInstance();
-      
+
       if (query.isEmpty) {
         // 検索クエリが空の場合は通常のフィルタを適用
         return await diaryService.getFilteredDiaryEntries(_currentFilter);

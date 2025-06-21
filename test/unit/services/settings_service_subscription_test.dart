@@ -8,7 +8,7 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import '../../../test/mocks/mock_subscription_service.dart';
 
 /// SettingsService - Phase 1.8.1 サブスクリプション状態管理APIのテスト
-/// 
+///
 /// 実装内容:
 /// - 1.8.1.1: SettingsServiceにサブスクリプション情報取得API追加
 /// - 1.8.1.2: 購入日・期限情報管理機能実装
@@ -22,27 +22,29 @@ void main() {
     setUpAll(() async {
       // Flutter binding初期化
       TestWidgetsFlutterBinding.ensureInitialized();
-      
+
       // SharedPreferencesのプラットフォームチャンネルをモック
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
-        const MethodChannel('plugins.flutter.io/shared_preferences'),
-        (MethodCall methodCall) async {
-          if (methodCall.method == 'getAll') {
-            return <String, Object>{}; // 空の設定を返す
-          }
-          return null;
-        },
-      );
-      
+            const MethodChannel('plugins.flutter.io/shared_preferences'),
+            (MethodCall methodCall) async {
+              if (methodCall.method == 'getAll') {
+                return <String, Object>{}; // 空の設定を返す
+              }
+              return null;
+            },
+          );
+
       // ServiceLocatorのリセット
       ServiceLocator().clear();
-      
+
       // MockSubscriptionServiceの登録
       mockSubscriptionService = MockSubscriptionService();
       await mockSubscriptionService.initialize();
-      ServiceLocator().registerSingleton<ISubscriptionService>(mockSubscriptionService);
-      
+      ServiceLocator().registerSingleton<ISubscriptionService>(
+        mockSubscriptionService,
+      );
+
       // SettingsServiceの取得
       settingsService = await SettingsService.getInstance();
     });
@@ -65,7 +67,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final info = result.value;
         expect(info, isA<SubscriptionInfo>());
         expect(info.currentPlan, equals(SubscriptionPlan.basic));
@@ -92,7 +94,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final info = result.value;
         expect(info.currentPlan, equals(SubscriptionPlan.premiumMonthly));
         expect(info.isPremium, isTrue);
@@ -107,7 +109,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final periodInfo = result.value;
         expect(periodInfo.startDate, isNotNull);
         expect(periodInfo.expiryDate, isNull); // Basicプランは期限なし
@@ -120,7 +122,7 @@ void main() {
         // Arrange
         final now = DateTime.now();
         final expiryDate = now.add(const Duration(days: 30));
-        
+
         mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
         mockSubscriptionService.setExpiryDate(expiryDate);
 
@@ -129,7 +131,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final periodInfo = result.value;
         expect(periodInfo.expiryDate, isNotNull);
         expect(periodInfo.daysUntilExpiry, greaterThan(0));
@@ -139,8 +141,12 @@ void main() {
       test('期限が近い場合に警告フラグが正しく設定される', () async {
         // Arrange
         final now = DateTime.now();
-        final expiryDate = DateTime(now.year, now.month, now.day).add(const Duration(days: 5)); // 5日後
-        
+        final expiryDate = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).add(const Duration(days: 5)); // 5日後
+
         mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
         mockSubscriptionService.setExpiryDate(expiryDate);
 
@@ -149,7 +155,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final periodInfo = result.value;
         expect(periodInfo.isExpiryNear, isTrue); // 7日以内なので警告
         expect(periodInfo.daysUntilExpiry, lessThanOrEqualTo(5));
@@ -164,9 +170,12 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final autoRenewalInfo = result.value;
-        expect(autoRenewalInfo.isAutoRenewalEnabled, isFalse); // Basicプランは自動更新なし
+        expect(
+          autoRenewalInfo.isAutoRenewalEnabled,
+          isFalse,
+        ); // Basicプランは自動更新なし
         expect(autoRenewalInfo.autoRenewalDescription, contains('無効'));
         expect(autoRenewalInfo.statusDisplay, equals('無効'));
       });
@@ -181,7 +190,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final autoRenewalInfo = result.value;
         expect(autoRenewalInfo.isAutoRenewalEnabled, isTrue);
         expect(autoRenewalInfo.autoRenewalDescription, contains('有効'));
@@ -200,7 +209,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final usageStats = result.value;
         expect(usageStats.currentMonthUsage, equals(3));
         expect(usageStats.monthlyLimit, equals(10)); // Basicプランの制限
@@ -220,7 +229,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final usageStats = result.value;
         expect(usageStats.isNearLimit, isTrue);
         expect(usageStats.usageRate, greaterThanOrEqualTo(0.8));
@@ -286,7 +295,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final info = result.value;
         expect(info.currentPlan, equals(SubscriptionPlan.premiumMonthly));
         expect(info.usageStats.currentMonthUsage, equals(25));

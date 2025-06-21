@@ -33,7 +33,7 @@ class ErrorDisplayService {
     String? retryButtonText,
   }) async {
     final displayConfig = config ?? _getDefaultConfigForError(error);
-    
+
     // ログ出力
     if (displayConfig.logError) {
       try {
@@ -55,16 +55,34 @@ class ErrorDisplayService {
     // 表示方法に応じて適切なウィジェットで表示
     switch (displayConfig.method) {
       case ErrorDisplayMethod.snackBar:
-        await _showSnackBarError(context, error, displayConfig, onRetry, retryButtonText);
+        await _showSnackBarError(
+          context,
+          error,
+          displayConfig,
+          onRetry,
+          retryButtonText,
+        );
         break;
       case ErrorDisplayMethod.dialog:
-        await _showDialogError(context, error, displayConfig, onRetry, retryButtonText);
+        await _showDialogError(
+          context,
+          error,
+          displayConfig,
+          onRetry,
+          retryButtonText,
+        );
         break;
       case ErrorDisplayMethod.inline:
         // インラインエラーは直接ウィジェットで表示されるため、ここでは何もしない
         break;
       case ErrorDisplayMethod.fullScreen:
-        await _showFullScreenError(context, error, displayConfig, onRetry, retryButtonText);
+        await _showFullScreenError(
+          context,
+          error,
+          displayConfig,
+          onRetry,
+          retryButtonText,
+        );
         break;
     }
   }
@@ -99,10 +117,7 @@ class ErrorDisplayService {
     if (!context.mounted) return;
 
     final snackBar = SnackBar(
-      content: ErrorSnackBarContent(
-        error: error,
-        severity: config.severity,
-      ),
+      content: ErrorSnackBarContent(error: error, severity: config.severity),
       duration: config.duration ?? AppConstants.defaultAnimationDuration,
       behavior: SnackBarBehavior.floating,
       backgroundColor: _getColorForSeverity(context, config.severity),

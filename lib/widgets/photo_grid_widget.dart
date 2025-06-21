@@ -40,7 +40,6 @@ class PhotoGridWidget extends StatelessWidget {
     );
   }
 
-
   Widget _buildPhotoGrid(BuildContext context) {
     if (controller.isLoading) {
       return SizedBox(
@@ -73,10 +72,7 @@ class PhotoGridWidget extends StatelessWidget {
       );
     }
 
-    return SizedBox(
-      height: AppConstants.photoGridHeight,
-      child: _buildGrid(),
-    );
+    return SizedBox(height: AppConstants.photoGridHeight, child: _buildGrid());
   }
 
   Widget _buildPermissionRequest() {
@@ -121,7 +117,9 @@ class PhotoGridWidget extends StatelessWidget {
           Container(
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.3),
               borderRadius: AppSpacing.cardRadius,
             ),
             child: Icon(
@@ -160,7 +158,7 @@ class PhotoGridWidget extends StatelessWidget {
   Widget _buildPhotoItem(int index) {
     final isSelected = controller.selected[index];
     final isUsed = controller.isPhotoUsed(index);
-    
+
     // アクセシビリティ用のラベル作成
     String semanticLabel = '写真 ${index + 1}';
     if (isUsed) {
@@ -171,7 +169,7 @@ class PhotoGridWidget extends StatelessWidget {
     } else {
       semanticLabel += '、未選択';
     }
-    
+
     return RepaintBoundary(
       child: Semantics(
         label: semanticLabel,
@@ -206,7 +204,9 @@ class PhotoGridWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: AppSpacing.photoRadius,
       child: FutureBuilder<dynamic>(
-        future: ServiceRegistration.get<PhotoServiceInterface>().getThumbnail(controller.photoAssets[index]),
+        future: ServiceRegistration.get<PhotoServiceInterface>().getThumbnail(
+          controller.photoAssets[index],
+        ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
@@ -216,8 +216,14 @@ class PhotoGridWidget extends StatelessWidget {
                 height: AppConstants.photoThumbnailSize,
                 width: AppConstants.photoThumbnailSize,
                 fit: BoxFit.cover,
-                cacheHeight: (AppConstants.photoThumbnailSize * MediaQuery.of(context).devicePixelRatio).round(),
-                cacheWidth: (AppConstants.photoThumbnailSize * MediaQuery.of(context).devicePixelRatio).round(),
+                cacheHeight:
+                    (AppConstants.photoThumbnailSize *
+                            MediaQuery.of(context).devicePixelRatio)
+                        .round(),
+                cacheWidth:
+                    (AppConstants.photoThumbnailSize *
+                            MediaQuery.of(context).devicePixelRatio)
+                        .round(),
                 gaplessPlayback: true,
                 filterQuality: FilterQuality.medium,
               ),
@@ -236,7 +242,9 @@ class PhotoGridWidget extends StatelessWidget {
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
+                    ),
                   ),
                 ),
               ),
@@ -272,17 +280,15 @@ class PhotoGridWidget extends StatelessWidget {
 
   Widget _getSelectionIcon(int index) {
     if (controller.isPhotoUsed(index)) {
-      return Icon(
-        Icons.done_rounded,
-        color: AppColors.warning,
-        size: 18,
-      );
+      return Icon(Icons.done_rounded, color: AppColors.warning, size: 18);
     } else {
       return Icon(
         controller.selected[index]
             ? Icons.check_circle_rounded
             : Icons.radio_button_unchecked_rounded,
-        color: controller.selected[index] ? AppColors.success : AppColors.onSurfaceVariant,
+        color: controller.selected[index]
+            ? AppColors.success
+            : AppColors.onSurfaceVariant,
         size: 18,
       );
     }
@@ -312,7 +318,6 @@ class PhotoGridWidget extends StatelessWidget {
     );
   }
 
-
   Widget _buildSelectionCounter(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -320,8 +325,8 @@ class PhotoGridWidget extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: controller.selectedCount > 0 
-            ? AppColors.primaryContainer 
+        color: controller.selectedCount > 0
+            ? AppColors.primaryContainer
             : AppColors.surfaceVariant,
         borderRadius: AppSpacing.chipRadius,
       ),
@@ -331,8 +336,8 @@ class PhotoGridWidget extends StatelessWidget {
           Icon(
             Icons.photo_library_rounded,
             size: AppSpacing.iconSm,
-            color: controller.selectedCount > 0 
-                ? AppColors.primary 
+            color: controller.selectedCount > 0
+                ? AppColors.primary
                 : AppColors.onSurfaceVariant,
           ),
           const SizedBox(width: AppSpacing.xs),
@@ -340,8 +345,8 @@ class PhotoGridWidget extends StatelessWidget {
             '選択された写真: ${controller.selectedCount}/${AppConstants.maxPhotosSelection}枚',
             style: AppTypography.withColor(
               AppTypography.labelMedium,
-              controller.selectedCount > 0 
-                  ? AppColors.onPrimaryContainer 
+              controller.selectedCount > 0
+                  ? AppColors.onPrimaryContainer
                   : AppColors.onSurfaceVariant,
             ),
           ),

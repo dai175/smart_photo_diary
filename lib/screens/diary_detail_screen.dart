@@ -33,16 +33,14 @@ class DiaryDetailScreen extends StatefulWidget {
         const end = Offset.zero;
         const curve = Curves.easeOutCubic;
 
-        final tween = Tween(begin: begin, end: end).chain(
-          CurveTween(curve: curve),
-        );
+        final tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
     );
@@ -83,7 +81,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記エントリーを取得
       final entry = await diaryService.getDiaryEntry(widget.diaryId);
@@ -129,7 +128,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を更新
       final updatedEntry = _diaryEntry!.copyWith(
@@ -192,7 +192,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を削除
       await diaryService.deleteDiaryEntry(_diaryEntry!.id);
@@ -254,7 +255,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           if (!_isLoading && !_hasError && _diaryEntry != null)
             IconButton(
               onPressed: () {
-                MicroInteractions.hapticTap(intensity: VibrationIntensity.medium);
+                MicroInteractions.hapticTap(
+                  intensity: VibrationIntensity.medium,
+                );
                 _deleteDiary();
               },
               icon: Icon(
@@ -275,16 +278,15 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: const CircularProgressIndicator(strokeWidth: 3),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        '日記を読み込み中...',
-                        style: AppTypography.titleLarge,
-                      ),
+                      Text('日記を読み込み中...', style: AppTypography.titleLarge),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         '日記の内容と写真を取得しています',
@@ -308,7 +310,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.errorContainer.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -318,10 +322,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        'エラーが発生しました',
-                        style: AppTypography.titleLarge,
-                      ),
+                      Text('エラーが発生しました', style: AppTypography.titleLarge),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         _errorMessage,
@@ -351,7 +352,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .secondaryContainer
+                              .withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -361,10 +365,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        '日記が見つかりません',
-                        style: AppTypography.titleLarge,
-                      ),
+                      Text('日記が見つかりません', style: AppTypography.titleLarge),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         AppConstants.diaryNotFoundMessage,
@@ -385,7 +386,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               ),
             )
           : _buildDiaryDetail(),
-      bottomNavigationBar: _isEditing && !_isLoading && !_hasError && _diaryEntry != null
+      bottomNavigationBar:
+          _isEditing && !_isLoading && !_hasError && _diaryEntry != null
           ? SafeArea(
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -553,7 +555,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                              right: index == _photoAssets.length - 1 ? 0 : AppSpacing.md,
+                              right: index == _photoAssets.length - 1
+                                  ? 0
+                                  : AppSpacing.md,
                             ),
                             child: _buildPhotoItem(index),
                           );
@@ -589,13 +593,15 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   // タイトルセクション
                   _isEditing
                       ? Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withValues(alpha: 0.2),
                             ),
                             borderRadius: AppSpacing.inputRadius,
                             color: Theme.of(context).colorScheme.surface,
@@ -612,7 +618,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                               contentPadding: AppSpacing.inputPadding,
                               labelStyle: AppTypography.labelMedium,
                               hintStyle: AppTypography.bodyMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -623,27 +631,33 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                             Text(
                               'タイトル',
                               style: AppTypography.labelMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
-                              _diaryEntry!.title.isNotEmpty ? _diaryEntry!.title : '無題',
+                              _diaryEntry!.title.isNotEmpty
+                                  ? _diaryEntry!.title
+                                  : '無題',
                               style: AppTypography.titleMedium.copyWith(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],
                         ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   // 本文セクション
                   _isEditing
                       ? Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withValues(alpha: 0.2),
                             ),
                             borderRadius: AppSpacing.inputRadius,
                             color: Theme.of(context).colorScheme.surface,
@@ -663,7 +677,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                               contentPadding: AppSpacing.inputPadding,
                               labelStyle: AppTypography.labelMedium,
                               hintStyle: AppTypography.bodyMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               alignLabelWithHint: true,
                             ),
@@ -675,7 +691,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                             Text(
                               '本文',
                               style: AppTypography.labelMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
@@ -691,7 +709,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.lg),
 
           // メタデータセクション
@@ -720,13 +738,17 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   const SizedBox(height: AppSpacing.md),
                   _buildMetadataRow(
                     '作成日時',
-                    DateFormat('yyyy年MM月dd日 HH:mm').format(_diaryEntry!.createdAt),
+                    DateFormat(
+                      'yyyy年MM月dd日 HH:mm',
+                    ).format(_diaryEntry!.createdAt),
                     Icons.access_time_rounded,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _buildMetadataRow(
                     '更新日時',
-                    DateFormat('yyyy年MM月dd日 HH:mm').format(_diaryEntry!.updatedAt),
+                    DateFormat(
+                      'yyyy年MM月dd日 HH:mm',
+                    ).format(_diaryEntry!.updatedAt),
                     Icons.update_rounded,
                   ),
                   if ((_diaryEntry!.tags?.isNotEmpty ?? false)) ...[
@@ -737,7 +759,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.xxxl),
         ],
       ),
@@ -767,7 +789,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 height: 30,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ),
@@ -793,8 +817,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   width: 200,
                   height: 240,
                   fit: BoxFit.cover,
-                  cacheHeight: (240 * MediaQuery.of(context).devicePixelRatio).round(),
-                  cacheWidth: (200 * MediaQuery.of(context).devicePixelRatio).round(),
+                  cacheHeight: (240 * MediaQuery.of(context).devicePixelRatio)
+                      .round(),
+                  cacheWidth: (200 * MediaQuery.of(context).devicePixelRatio)
+                      .round(),
                   gaplessPlayback: true,
                   filterQuality: FilterQuality.medium,
                 ),
@@ -853,23 +879,27 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           child: Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
-            children: (_diaryEntry!.tags ?? []).map((tag) => Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xxs,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: AppSpacing.chipRadius,
-              ),
-              child: Text(
-                tag,
-                style: AppTypography.withColor(
-                  AppTypography.labelSmall,
-                  Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-              ),
-            )).toList(),
+            children: (_diaryEntry!.tags ?? [])
+                .map(
+                  (tag) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xxs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: AppSpacing.chipRadius,
+                    ),
+                    child: Text(
+                      tag,
+                      style: AppTypography.withColor(
+                        AppTypography.labelSmall,
+                        Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ],
@@ -901,10 +931,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: AppSpacing.cardRadiusLarge,
-                  child: Image.memory(
-                    imageData,
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.memory(imageData, fit: BoxFit.contain),
                 ),
               ),
             ),

@@ -23,7 +23,8 @@ class MockAiServiceInterface extends Mock implements AiServiceInterface {}
 class MockDiaryServiceInterface extends Mock implements DiaryServiceInterface {}
 
 /// Mock SubscriptionService for integration testing
-class MockSubscriptionServiceInterface extends Mock implements ISubscriptionService {}
+class MockSubscriptionServiceInterface extends Mock
+    implements ISubscriptionService {}
 
 /// Mock SettingsService for integration testing
 class MockSettingsService extends Mock implements SettingsService {}
@@ -65,7 +66,6 @@ class TestServiceSetup {
     return _mockDiaryService ??= _createDiaryServiceMock();
   }
 
-
   /// Get or create mock SettingsService with default behavior
   static MockSettingsService getSettingsService() {
     return _mockSettingsService ??= _createSettingsServiceMock();
@@ -98,122 +98,149 @@ class TestServiceSetup {
   // Private factory methods with default mock behavior
   static MockPhotoServiceInterface _createPhotoServiceMock() {
     final mock = MockPhotoServiceInterface();
-    
+
     // Default mock behavior for PhotoService
     when(() => mock.requestPermission()).thenAnswer((_) async => true);
-    when(() => mock.getTodayPhotos(limit: any(named: 'limit')))
-        .thenAnswer((_) async => []);
-    when(() => mock.getPhotosInDateRange(
-      startDate: any(named: 'startDate'),
-      endDate: any(named: 'endDate'),
-      limit: any(named: 'limit'),
-    )).thenAnswer((_) async => []);
-    when(() => mock.getThumbnail(
-      any(),
-      width: any(named: 'width'),
-      height: any(named: 'height'),
-    )).thenAnswer((_) async => null); // Return null to avoid invalid image data
-    when(() => mock.getPhotoData(any()))
-        .thenAnswer((_) async => [1, 2, 3, 4, 5]); // Mock image data
-    when(() => mock.getThumbnailData(any()))
-        .thenAnswer((_) async => [1, 2, 3]); // Mock thumbnail data
-    when(() => mock.getOriginalFile(any()))
-        .thenAnswer((_) async => 'mock_file_path');
-    
+    when(
+      () => mock.getTodayPhotos(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => []);
+    when(
+      () => mock.getPhotosInDateRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => []);
+    when(
+      () => mock.getThumbnail(
+        any(),
+        width: any(named: 'width'),
+        height: any(named: 'height'),
+      ),
+    ).thenAnswer((_) async => null); // Return null to avoid invalid image data
+    when(
+      () => mock.getPhotoData(any()),
+    ).thenAnswer((_) async => [1, 2, 3, 4, 5]); // Mock image data
+    when(
+      () => mock.getThumbnailData(any()),
+    ).thenAnswer((_) async => [1, 2, 3]); // Mock thumbnail data
+    when(
+      () => mock.getOriginalFile(any()),
+    ).thenAnswer((_) async => 'mock_file_path');
+
     return mock;
   }
 
   static MockAiServiceInterface _createAiServiceMock() {
     final mock = MockAiServiceInterface();
-    
+
     // Default mock behavior for AiService
     when(() => mock.isOnline()).thenAnswer((_) async => true);
-    
-    
-    when(() => mock.generateDiaryFromImage(
-      imageData: any(named: 'imageData'),
-      date: any(named: 'date'),
-      location: any(named: 'location'),
-      photoTimes: any(named: 'photoTimes'),
-    )).thenAnswer((_) async => Success(DiaryGenerationResult(
-      title: 'Mock Image Diary',
-      content: 'Mock content from image analysis.',
-    )));
-    
-    when(() => mock.generateDiaryFromMultipleImages(
-      imagesWithTimes: any(named: 'imagesWithTimes'),
-      location: any(named: 'location'),
-      onProgress: any(named: 'onProgress'),
-    )).thenAnswer((_) async => Success(DiaryGenerationResult(
-      title: 'Mock Multi-Image Diary',
-      content: 'Mock content from multiple images.',
-    )));
-    
-    when(() => mock.generateTagsFromContent(
-      title: any(named: 'title'),
-      content: any(named: 'content'),
-      date: any(named: 'date'),
-      photoCount: any(named: 'photoCount'),
-    )).thenAnswer((_) async => Success(['mock', 'test', 'generated']));
-    
+
+    when(
+      () => mock.generateDiaryFromImage(
+        imageData: any(named: 'imageData'),
+        date: any(named: 'date'),
+        location: any(named: 'location'),
+        photoTimes: any(named: 'photoTimes'),
+      ),
+    ).thenAnswer(
+      (_) async => Success(
+        DiaryGenerationResult(
+          title: 'Mock Image Diary',
+          content: 'Mock content from image analysis.',
+        ),
+      ),
+    );
+
+    when(
+      () => mock.generateDiaryFromMultipleImages(
+        imagesWithTimes: any(named: 'imagesWithTimes'),
+        location: any(named: 'location'),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).thenAnswer(
+      (_) async => Success(
+        DiaryGenerationResult(
+          title: 'Mock Multi-Image Diary',
+          content: 'Mock content from multiple images.',
+        ),
+      ),
+    );
+
+    when(
+      () => mock.generateTagsFromContent(
+        title: any(named: 'title'),
+        content: any(named: 'content'),
+        date: any(named: 'date'),
+        photoCount: any(named: 'photoCount'),
+      ),
+    ).thenAnswer((_) async => Success(['mock', 'test', 'generated']));
+
     return mock;
   }
 
   static MockDiaryServiceInterface _createDiaryServiceMock() {
     final mock = MockDiaryServiceInterface();
-    
+
     // Default mock behavior for DiaryService
     when(() => mock.getSortedDiaryEntries()).thenAnswer((_) async => []);
     when(() => mock.getDiaryEntry(any())).thenAnswer((_) async => null);
     when(() => mock.getTotalDiaryCount()).thenAnswer((_) async => 0);
-    when(() => mock.getAllTags()).thenAnswer((_) async => {'mock', 'test', 'tags'});
-    when(() => mock.getDiaryCountInPeriod(any(), any()))
-        .thenAnswer((_) async => 0);
-    when(() => mock.getFilteredDiaryEntries(any()))
-        .thenAnswer((_) async => []);
-    when(() => mock.getTagsForEntry(any()))
-        .thenAnswer((_) async => ['mock', 'test']);
-    when(() => mock.saveDiaryEntry(
-      date: any(named: 'date'),
-      title: any(named: 'title'),
-      content: any(named: 'content'),
-      photoIds: any(named: 'photoIds'),
-      location: any(named: 'location'),
-      tags: any(named: 'tags'),
-    )).thenAnswer((_) async => DiaryEntry(
-      id: 'mock-id',
-      date: DateTime.now(),
-      title: 'Mock Title',
-      content: 'Mock Content',
-      photoIds: [],
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ));
+    when(
+      () => mock.getAllTags(),
+    ).thenAnswer((_) async => {'mock', 'test', 'tags'});
+    when(
+      () => mock.getDiaryCountInPeriod(any(), any()),
+    ).thenAnswer((_) async => 0);
+    when(() => mock.getFilteredDiaryEntries(any())).thenAnswer((_) async => []);
+    when(
+      () => mock.getTagsForEntry(any()),
+    ).thenAnswer((_) async => ['mock', 'test']);
+    when(
+      () => mock.saveDiaryEntry(
+        date: any(named: 'date'),
+        title: any(named: 'title'),
+        content: any(named: 'content'),
+        photoIds: any(named: 'photoIds'),
+        location: any(named: 'location'),
+        tags: any(named: 'tags'),
+      ),
+    ).thenAnswer(
+      (_) async => DiaryEntry(
+        id: 'mock-id',
+        date: DateTime.now(),
+        title: 'Mock Title',
+        content: 'Mock Content',
+        photoIds: [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
     when(() => mock.updateDiaryEntry(any())).thenAnswer((_) async {});
     when(() => mock.deleteDiaryEntry(any())).thenAnswer((_) async {});
-    
+
     return mock;
   }
 
-
   static MockSettingsService _createSettingsServiceMock() {
     final mock = MockSettingsService();
-    
+
     // Default mock behavior for SettingsService
     // Note: Basic setup, tests should specify their own behavior
     // Most settings services have getBool, getString, getInt, set methods
     // We'll set up basic fallbacks here
-    
+
     return mock;
   }
 
   static MockStorageService _createStorageServiceMock() {
     final mock = MockStorageService();
-    
+
     // Default mock behavior for StorageService
     // Note: Basic setup, tests should specify their own behavior
     // We'll set up basic fallbacks here
-    
+
     return mock;
   }
 }
@@ -229,25 +256,29 @@ void registerMockFallbacks() {
   registerFallbackValue(Uint8List(0));
   registerFallbackValue(<({Uint8List imageData, DateTime time})>[]);
   registerFallbackValue(const DiaryFilter());
-  registerFallbackValue(DiaryEntry(
-    id: 'fallback-id',
-    date: DateTime.now(),
-    title: 'Fallback Title',
-    content: 'Fallback Content',
-    photoIds: [],
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  ));
+  registerFallbackValue(
+    DiaryEntry(
+      id: 'fallback-id',
+      date: DateTime.now(),
+      title: 'Fallback Title',
+      content: 'Fallback Content',
+      photoIds: [],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ),
+  );
   registerFallbackValue(SubscriptionPlan.basic);
-  registerFallbackValue(SubscriptionStatus(
-    planId: 'basic',
-    isActive: true,
-    startDate: DateTime.now(),
-    expiryDate: null,
-    monthlyUsageCount: 0,
-    lastResetDate: DateTime.now(),
-    autoRenewal: false,
-    transactionId: null,
-    lastPurchaseDate: null,
-  ));
+  registerFallbackValue(
+    SubscriptionStatus(
+      planId: 'basic',
+      isActive: true,
+      startDate: DateTime.now(),
+      expiryDate: null,
+      monthlyUsageCount: 0,
+      lastResetDate: DateTime.now(),
+      autoRenewal: false,
+      transactionId: null,
+      lastPurchaseDate: null,
+    ),
+  );
 }

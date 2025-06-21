@@ -26,7 +26,7 @@ class PromptSelectionModal extends StatefulWidget {
 class _PromptSelectionModalState extends State<PromptSelectionModal> {
   late final IPromptService _promptService;
   late final ISubscriptionService _subscriptionService;
-  
+
   bool _isLoading = true;
   bool _isPremium = false;
   List<WritingPrompt> _availablePrompts = [];
@@ -42,18 +42,24 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   Future<void> _initializeServices() async {
     try {
       _promptService = await ServiceRegistration.getAsync<IPromptService>();
-      _subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
-      
+      _subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+
       // Premium状態を取得
-      final accessResult = await _subscriptionService.canAccessPremiumFeatures();
+      final accessResult = await _subscriptionService
+          .canAccessPremiumFeatures();
       if (accessResult.isSuccess) {
         _isPremium = accessResult.value;
       }
-      
+
       // 利用可能なプロンプトを読み込み
-      _availablePrompts = _promptService.getPromptsForPlan(isPremium: _isPremium);
-      debugPrint('プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium');
-      
+      _availablePrompts = _promptService.getPromptsForPlan(
+        isPremium: _isPremium,
+      );
+      debugPrint(
+        'プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium',
+      );
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -74,10 +80,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        constraints: const BoxConstraints(
-          maxWidth: 500,
-          maxHeight: 600,
-        ),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         margin: AppSpacing.screenPadding,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
@@ -94,10 +97,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(context),
-            if (_isLoading)
-              _buildLoadingContent()
-            else
-              _buildContent(context),
+            if (_isLoading) _buildLoadingContent() else _buildContent(context),
             _buildFooter(context),
           ],
         ),
@@ -123,12 +123,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             size: AppSpacing.iconMd,
           ),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              'プロンプト選択',
-              style: AppTypography.titleMedium,
-            ),
-          ),
+          Expanded(child: Text('プロンプト選択', style: AppTypography.titleMedium)),
           CircularIconButton(
             icon: Icons.close,
             onPressed: () => Navigator.of(context).pop(),
@@ -143,26 +138,26 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
     return Container(
       height: 200,
       padding: AppSpacing.cardPadding,
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
   Widget _buildContent(BuildContext context) {
     return Expanded(
-      child: _availablePrompts.isEmpty 
+      child: _availablePrompts.isEmpty
           ? _buildEmptyState()
           : _buildPromptList(),
     );
   }
 
-
   Widget _buildPromptList() {
     return ListView.separated(
       padding: AppSpacing.cardPadding,
-      itemCount: _availablePrompts.length + 2, // +1 for no prompt, +1 for random selection
-      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+      itemCount:
+          _availablePrompts.length +
+          2, // +1 for no prompt, +1 for random selection
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         if (index == 0) {
           // プロンプトなしオプション
@@ -171,7 +166,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
           // ランダム選択ボタン
           return _buildRandomButton();
         }
-        
+
         final prompt = _availablePrompts[index - 2];
         return _buildPromptCard(prompt);
       },
@@ -180,7 +175,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   Widget _buildNoPromptOption() {
     final isSelected = _selectedPrompt == null && !_isRandomSelected;
-    
+
     return InkWell(
       onTap: () => setState(() {
         _selectedPrompt = null;
@@ -190,7 +185,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       child: Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
               : null,
           borderRadius: AppSpacing.cardRadius,
@@ -206,14 +201,14 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: isSelected 
+                color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.edit_off_rounded,
-                color: isSelected 
+                color: isSelected
                     ? Colors.white
                     : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
@@ -227,10 +222,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                   Text(
                     'プロンプトなし',
                     style: AppTypography.titleSmall.copyWith(
-                      color: isSelected 
+                      color: isSelected
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -257,17 +254,19 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   Widget _buildRandomButton() {
     final isSelected = _isRandomSelected;
-    
+
     return InkWell(
-      onTap: _isLoading ? null : () => setState(() {
-        _selectedPrompt = null;
-        _isRandomSelected = true;
-      }),
+      onTap: _isLoading
+          ? null
+          : () => setState(() {
+              _selectedPrompt = null;
+              _isRandomSelected = true;
+            }),
       borderRadius: AppSpacing.cardRadius,
       child: Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
               : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
           borderRadius: AppSpacing.cardRadius,
@@ -283,14 +282,14 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: isSelected 
+                color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.shuffle_rounded,
-                color: isSelected 
+                color: isSelected
                     ? Colors.white
                     : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
@@ -304,7 +303,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                   Text(
                     'ランダム選択',
                     style: AppTypography.titleSmall.copyWith(
-                      color: isSelected 
+                      color: isSelected
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -329,7 +328,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             else
               Icon(
                 Icons.auto_awesome_rounded,
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.7),
                 size: 20,
               ),
           ],
@@ -340,20 +341,24 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   Widget _buildPromptCard(WritingPrompt prompt) {
     final isSelected = _selectedPrompt?.id == prompt.id && !_isRandomSelected;
-    
+
     return InkWell(
       onTap: () => _selectPrompt(prompt),
       borderRadius: AppSpacing.cardRadius,
       child: Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: isSelected 
-              ? PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.15)
+          color: isSelected
+              ? PromptCategoryUtils.getCategoryColor(
+                  prompt.category,
+                ).withValues(alpha: 0.15)
               : null,
           borderRadius: AppSpacing.cardRadius,
           border: Border.all(
             color: isSelected
-                ? PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.5)
+                ? PromptCategoryUtils.getCategoryColor(
+                    prompt.category,
+                  ).withValues(alpha: 0.5)
                 : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
@@ -369,17 +374,21 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isSelected 
+                    color: isSelected
                         ? PromptCategoryUtils.getCategoryColor(prompt.category)
-                        : PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.2),
+                        : PromptCategoryUtils.getCategoryColor(
+                            prompt.category,
+                          ).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.xs),
                   ),
                   child: Text(
                     PromptCategoryUtils.getCategoryDisplayName(prompt.category),
                     style: AppTypography.labelSmall.copyWith(
-                      color: isSelected 
+                      color: isSelected
                           ? Colors.white
-                          : PromptCategoryUtils.getCategoryColor(prompt.category),
+                          : PromptCategoryUtils.getCategoryColor(
+                              prompt.category,
+                            ),
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
@@ -389,7 +398,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                 if (isSelected)
                   Icon(
                     Icons.check_circle,
-                    color: PromptCategoryUtils.getCategoryColor(prompt.category),
+                    color: PromptCategoryUtils.getCategoryColor(
+                      prompt.category,
+                    ),
                     size: 20,
                   ),
               ],
@@ -397,8 +408,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               prompt.text,
-              style: isSelected 
-                  ? AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)
+              style: isSelected
+                  ? AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w500,
+                    )
                   : AppTypography.bodyMedium,
             ),
             if (prompt.description != null) ...[
@@ -429,10 +442,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
               size: 48,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              'プロンプトが見つかりません',
-              style: AppTypography.titleMedium,
-            ),
+            Text('プロンプトが見つかりません', style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'プロンプトデータの読み込みに失敗しました',
@@ -454,7 +464,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         onPressed: () {
           if (_isRandomSelected) {
             // ランダム選択の場合は実際のプロンプトを取得して渡す
-            final randomPrompt = _promptService.getRandomPrompt(isPremium: _isPremium);
+            final randomPrompt = _promptService.getRandomPrompt(
+              isPremium: _isPremium,
+            );
             widget.onPromptSelected(randomPrompt);
           } else if (_selectedPrompt != null) {
             widget.onPromptSelected(_selectedPrompt);
@@ -465,14 +477,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         width: double.infinity,
         text: _isRandomSelected
             ? 'ランダムプロンプトで作成'
-            : (_selectedPrompt != null 
-                ? 'このプロンプトで作成'
-                : 'プロンプトなしで作成'),
+            : (_selectedPrompt != null ? 'このプロンプトで作成' : 'プロンプトなしで作成'),
         icon: _isRandomSelected
             ? Icons.shuffle_rounded
-            : (_selectedPrompt != null 
-                ? Icons.auto_awesome_rounded
-                : Icons.photo_camera_rounded),
+            : (_selectedPrompt != null
+                  ? Icons.auto_awesome_rounded
+                  : Icons.photo_camera_rounded),
       ),
     );
   }
@@ -482,9 +492,8 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       _selectedPrompt = prompt;
       _isRandomSelected = false;
     });
-    
+
     // 使用履歴記録は実際に日記生成が完了した時点で行う
     // ここでは選択のみ行い、履歴記録はしない
   }
-
 }

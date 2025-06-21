@@ -31,10 +31,7 @@ extension ResultUIExtensions<T> on Result<T> {
     Duration? duration,
   }) {
     if (isSuccess && context.mounted) {
-      context.showSuccess(
-        messageBuilder(value),
-        duration: duration,
-      );
+      context.showSuccess(messageBuilder(value), duration: duration);
     }
   }
 
@@ -50,10 +47,7 @@ extension ResultUIExtensions<T> on Result<T> {
     if (!context.mounted) return;
 
     if (isSuccess && onSuccess != null) {
-      context.showSuccess(
-        onSuccess(value),
-        duration: successDuration,
-      );
+      context.showSuccess(onSuccess(value), duration: successDuration);
     } else if (isFailure) {
       await context.showError(
         error,
@@ -111,7 +105,7 @@ extension FutureResultUIExtensions<T> on Future<Result<T>> {
   }) async {
     final result = await this;
     if (!context.mounted) return result;
-    
+
     await result.showErrorOnUI(
       context,
       config: config,
@@ -129,12 +123,8 @@ extension FutureResultUIExtensions<T> on Future<Result<T>> {
   }) async {
     final result = await this;
     if (!context.mounted) return result;
-    
-    result.showSuccessOnUI(
-      context,
-      messageBuilder,
-      duration: duration,
-    );
+
+    result.showSuccessOnUI(context, messageBuilder, duration: duration);
     return result;
   }
 
@@ -149,7 +139,7 @@ extension FutureResultUIExtensions<T> on Future<Result<T>> {
   }) async {
     final result = await this;
     if (!context.mounted) return result;
-    
+
     await result.showResultOnUI(
       context,
       onSuccess: onSuccess,
@@ -171,7 +161,7 @@ extension FutureResultUIExtensions<T> on Future<Result<T>> {
   }) async {
     final result = await this;
     if (!context.mounted) return result;
-    
+
     await result.showErrorOnUIIf(
       context,
       condition,
@@ -191,7 +181,7 @@ extension FutureResultUIExtensions<T> on Future<Result<T>> {
   }) async {
     final result = await this;
     if (!context.mounted) return result;
-    
+
     await result.showErrorOnUIOfType<E>(
       context,
       config: config,
@@ -275,7 +265,7 @@ class FutureResultUIBuilder<T> extends StatelessWidget {
           return onLoading ?? const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           final result = snapshot.data!;
-          
+
           // ダイアログエラー表示が有効な場合
           if (showDialogErrors && result.isFailure) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -286,7 +276,7 @@ class FutureResultUIBuilder<T> extends StatelessWidget {
               );
             });
           }
-          
+
           return ResultUIBuilder<T>(
             result: result,
             onSuccess: onSuccess,
@@ -303,7 +293,7 @@ class FutureResultUIBuilder<T> extends StatelessWidget {
                   'データの読み込み中にエラーが発生しました',
                   originalError: snapshot.error,
                 );
-          
+
           if (onError != null) {
             return onError!(error, onRetry);
           } else {

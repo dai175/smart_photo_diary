@@ -28,13 +28,13 @@ class IntegrationTestHelpers {
   static Future<void> setUpIntegrationEnvironment() async {
     // Initialize Flutter binding
     TestWidgetsFlutterBinding.ensureInitialized();
-    
+
     // Setup mock platform channels
     MockPlatformChannels.setupMocks();
-    
+
     // Initialize Hive for testing
     await _initializeHive();
-    
+
     // Setup service locator with mocks
     await _setupServiceLocator();
   }
@@ -44,10 +44,10 @@ class IntegrationTestHelpers {
     try {
       // Clear Hive data
       await Hive.deleteFromDisk();
-      
+
       // Clear service locator
       _serviceLocator.clear();
-      
+
       // Clear mock platform channels
       MockPlatformChannels.clearMocks();
     } catch (e) {
@@ -60,7 +60,7 @@ class IntegrationTestHelpers {
   static Future<void> _initializeHive() async {
     const testDirectory = '/tmp/smart_photo_diary_integration_test';
     await Hive.initFlutter(testDirectory);
-    
+
     // Register adapters if not already registered
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(DiaryEntryAdapter());
@@ -70,26 +70,33 @@ class IntegrationTestHelpers {
   /// Setup service locator with mock services
   static Future<void> _setupServiceLocator() async {
     _serviceLocator = ServiceLocator();
-    
+
     // Create mock services
     _mockPhotoService = MockPhotoServiceInterface();
     _mockAiService = MockAiServiceInterface();
-    
+
     // Create additional required mock services
     final mockDiaryService = MockDiaryServiceInterface();
     final mockSubscriptionService = MockSubscriptionServiceInterface();
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
-    
+
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
-    _setupAdditionalMockBehaviors(mockDiaryService, mockSubscriptionService, mockSettingsService, mockStorageService);
-    
+    _setupAdditionalMockBehaviors(
+      mockDiaryService,
+      mockSubscriptionService,
+      mockSettingsService,
+      mockStorageService,
+    );
+
     // Register all mock services
     _serviceLocator.registerSingleton<PhotoServiceInterface>(_mockPhotoService);
     _serviceLocator.registerSingleton<AiServiceInterface>(_mockAiService);
     _serviceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
-    _serviceLocator.registerSingleton<ISubscriptionService>(mockSubscriptionService);
+    _serviceLocator.registerSingleton<ISubscriptionService>(
+      mockSubscriptionService,
+    );
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<StorageService>(mockStorageService);
   }
@@ -97,48 +104,72 @@ class IntegrationTestHelpers {
   /// Setup default behaviors for mock services
   static void _setupDefaultMockBehaviors() {
     // Photo service defaults
-    when(() => _mockPhotoService.requestPermission()).thenAnswer((_) async => true);
+    when(
+      () => _mockPhotoService.requestPermission(),
+    ).thenAnswer((_) async => true);
     when(() => _mockPhotoService.getTodayPhotos()).thenAnswer((_) async => []);
-    when(() => _mockPhotoService.getPhotosInDateRange(
-      startDate: any(named: 'startDate'),
-      endDate: any(named: 'endDate'),
-    )).thenAnswer((_) async => []);
-    when(() => _mockPhotoService.getPhotoData(any())).thenAnswer((_) async => _createMockImageData().toList());
-    when(() => _mockPhotoService.getThumbnailData(any())).thenAnswer((_) async => _createMockImageData().toList());
-    when(() => _mockPhotoService.getOriginalFile(any())).thenAnswer((_) async => null);
-    when(() => _mockPhotoService.getThumbnail(any(), width: any(named: 'width'), height: any(named: 'height'))).thenAnswer((_) async => null);
-    
+    when(
+      () => _mockPhotoService.getPhotosInDateRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+      ),
+    ).thenAnswer((_) async => []);
+    when(
+      () => _mockPhotoService.getPhotoData(any()),
+    ).thenAnswer((_) async => _createMockImageData().toList());
+    when(
+      () => _mockPhotoService.getThumbnailData(any()),
+    ).thenAnswer((_) async => _createMockImageData().toList());
+    when(
+      () => _mockPhotoService.getOriginalFile(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => _mockPhotoService.getThumbnail(
+        any(),
+        width: any(named: 'width'),
+        height: any(named: 'height'),
+      ),
+    ).thenAnswer((_) async => null);
+
     // AI service defaults
-    
-    when(() => _mockAiService.generateDiaryFromImage(
-      imageData: any(named: 'imageData'),
-      date: any(named: 'date'),
-      location: any(named: 'location'),
-      photoTimes: any(named: 'photoTimes'),
-    )).thenAnswer((_) async => _createMockDiaryResult());
-    
-    when(() => _mockAiService.generateDiaryFromMultipleImages(
-      imagesWithTimes: any(named: 'imagesWithTimes'),
-      location: any(named: 'location'),
-      onProgress: any(named: 'onProgress'),
-    )).thenAnswer((_) async => _createMockDiaryResult());
-    
+
+    when(
+      () => _mockAiService.generateDiaryFromImage(
+        imageData: any(named: 'imageData'),
+        date: any(named: 'date'),
+        location: any(named: 'location'),
+        photoTimes: any(named: 'photoTimes'),
+      ),
+    ).thenAnswer((_) async => _createMockDiaryResult());
+
+    when(
+      () => _mockAiService.generateDiaryFromMultipleImages(
+        imagesWithTimes: any(named: 'imagesWithTimes'),
+        location: any(named: 'location'),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).thenAnswer((_) async => _createMockDiaryResult());
+
     when(() => _mockAiService.isOnline()).thenAnswer((_) async => true);
-    
-    when(() => _mockAiService.generateTagsFromContent(
-      title: any(named: 'title'),
-      content: any(named: 'content'),
-      date: any(named: 'date'),
-      photoCount: any(named: 'photoCount'),
-    )).thenAnswer((_) async => Success(['テスト', 'タグ']));
+
+    when(
+      () => _mockAiService.generateTagsFromContent(
+        title: any(named: 'title'),
+        content: any(named: 'content'),
+        date: any(named: 'date'),
+        photoCount: any(named: 'photoCount'),
+      ),
+    ).thenAnswer((_) async => Success(['テスト', 'タグ']));
   }
 
   /// Create mock diary generation result
   static Result<DiaryGenerationResult> _createMockDiaryResult() {
-    return Success(DiaryGenerationResult(
-      title: 'テスト日記のタイトル',
-      content: 'これはテスト用に生成された日記の内容です。写真から素敵な思い出を記録しました。',
-    ));
+    return Success(
+      DiaryGenerationResult(
+        title: 'テスト日記のタイトル',
+        content: 'これはテスト用に生成された日記の内容です。写真から素敵な思い出を記録しました。',
+      ),
+    );
   }
 
   /// Create mock AssetEntity for testing
@@ -147,18 +178,22 @@ class IntegrationTestHelpers {
       final mockAsset = MockAssetEntity();
       when(() => mockAsset.id).thenReturn('test-asset-$index');
       when(() => mockAsset.title).thenReturn('Test Photo $index');
-      when(() => mockAsset.createDateTime).thenReturn(
-        DateTime.now().subtract(Duration(days: index)),
-      );
-      when(() => mockAsset.modifiedDateTime).thenReturn(
-        DateTime.now().subtract(Duration(days: index)),
-      );
+      when(
+        () => mockAsset.createDateTime,
+      ).thenReturn(DateTime.now().subtract(Duration(days: index)));
+      when(
+        () => mockAsset.modifiedDateTime,
+      ).thenReturn(DateTime.now().subtract(Duration(days: index)));
       when(() => mockAsset.duration).thenReturn(0);
       when(() => mockAsset.width).thenReturn(1920);
       when(() => mockAsset.height).thenReturn(1080);
       when(() => mockAsset.type).thenReturn(AssetType.image);
-      when(() => mockAsset.thumbnailData).thenAnswer((_) async => _createMockImageData());
-      when(() => mockAsset.originBytes).thenAnswer((_) async => _createMockImageData());
+      when(
+        () => mockAsset.thumbnailData,
+      ).thenAnswer((_) async => _createMockImageData());
+      when(
+        () => mockAsset.originBytes,
+      ).thenAnswer((_) async => _createMockImageData());
       return mockAsset;
     });
   }
@@ -171,28 +206,36 @@ class IntegrationTestHelpers {
 
   /// Setup mock photos for today
   static void setupMockTodayPhotos(List<AssetEntity> assets) {
-    when(() => _mockPhotoService.getTodayPhotos()).thenAnswer((_) async => assets);
+    when(
+      () => _mockPhotoService.getTodayPhotos(),
+    ).thenAnswer((_) async => assets);
   }
 
   /// Setup mock photo permission
   static void setupMockPhotoPermission(bool hasPermission) {
-    when(() => _mockPhotoService.requestPermission()).thenAnswer((_) async => hasPermission);
+    when(
+      () => _mockPhotoService.requestPermission(),
+    ).thenAnswer((_) async => hasPermission);
   }
 
   /// Setup mock AI diary generation
   static void setupMockDiaryGeneration(Result<DiaryGenerationResult> result) {
-    when(() => _mockAiService.generateDiaryFromImage(
-      imageData: any(named: 'imageData'),
-      date: any(named: 'date'),
-      location: any(named: 'location'),
-      photoTimes: any(named: 'photoTimes'),
-    )).thenAnswer((_) async => result);
-    
-    when(() => _mockAiService.generateDiaryFromMultipleImages(
-      imagesWithTimes: any(named: 'imagesWithTimes'),
-      location: any(named: 'location'),
-      onProgress: any(named: 'onProgress'),
-    )).thenAnswer((_) async => result);
+    when(
+      () => _mockAiService.generateDiaryFromImage(
+        imageData: any(named: 'imageData'),
+        date: any(named: 'date'),
+        location: any(named: 'location'),
+        photoTimes: any(named: 'photoTimes'),
+      ),
+    ).thenAnswer((_) async => result);
+
+    when(
+      () => _mockAiService.generateDiaryFromMultipleImages(
+        imagesWithTimes: any(named: 'imagesWithTimes'),
+        location: any(named: 'location'),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).thenAnswer((_) async => result);
   }
 
   /// Pump and settle with extended timeout for integration tests
@@ -312,40 +355,68 @@ class IntegrationTestHelpers {
     MockStorageService mockStorageService,
   ) {
     // Diary service defaults - using correct interface methods
-    when(() => mockDiaryService.getSortedDiaryEntries()).thenAnswer((_) async => []);
-    when(() => mockDiaryService.getFilteredDiaryEntries(any())).thenAnswer((_) async => []);
-    when(() => mockDiaryService.getAllTags()).thenAnswer((_) async => <String>{});
-    when(() => mockDiaryService.getTotalDiaryCount()).thenAnswer((_) async => 0);
-    when(() => mockDiaryService.getDiaryCountInPeriod(any(), any())).thenAnswer((_) async => 0);
-    when(() => mockDiaryService.getDiaryEntry(any())).thenAnswer((_) async => null);
-    when(() => mockDiaryService.getTagsForEntry(any())).thenAnswer((_) async => []);
-    
+    when(
+      () => mockDiaryService.getSortedDiaryEntries(),
+    ).thenAnswer((_) async => []);
+    when(
+      () => mockDiaryService.getFilteredDiaryEntries(any()),
+    ).thenAnswer((_) async => []);
+    when(
+      () => mockDiaryService.getAllTags(),
+    ).thenAnswer((_) async => <String>{});
+    when(
+      () => mockDiaryService.getTotalDiaryCount(),
+    ).thenAnswer((_) async => 0);
+    when(
+      () => mockDiaryService.getDiaryCountInPeriod(any(), any()),
+    ).thenAnswer((_) async => 0);
+    when(
+      () => mockDiaryService.getDiaryEntry(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => mockDiaryService.getTagsForEntry(any()),
+    ).thenAnswer((_) async => []);
+
     // Subscription service defaults - basic mock setup
     when(() => mockSubscriptionService.isInitialized).thenReturn(true);
-    when(() => mockSubscriptionService.initialize()).thenAnswer((_) async => const Success(null));
-    when(() => mockSubscriptionService.getCurrentStatus()).thenAnswer((_) async => Success(
-      SubscriptionStatus(
-        planId: 'basic',
-        isActive: true,
-        startDate: DateTime.now(),
-        expiryDate: null,
-        monthlyUsageCount: 0,
-        lastResetDate: DateTime.now(),
-        autoRenewal: false,
-        transactionId: null,
-        lastPurchaseDate: null,
+    when(
+      () => mockSubscriptionService.initialize(),
+    ).thenAnswer((_) async => const Success(null));
+    when(() => mockSubscriptionService.getCurrentStatus()).thenAnswer(
+      (_) async => Success(
+        SubscriptionStatus(
+          planId: 'basic',
+          isActive: true,
+          startDate: DateTime.now(),
+          expiryDate: null,
+          monthlyUsageCount: 0,
+          lastResetDate: DateTime.now(),
+          autoRenewal: false,
+          transactionId: null,
+          lastPurchaseDate: null,
+        ),
       ),
-    ));
-    when(() => mockSubscriptionService.getCurrentPlan()).thenAnswer((_) async => const Success(SubscriptionPlan.basic));
-    when(() => mockSubscriptionService.canUseAiGeneration()).thenAnswer((_) async => const Success(true));
-    when(() => mockSubscriptionService.getRemainingGenerations()).thenAnswer((_) async => const Success(10));
-    when(() => mockSubscriptionService.getMonthlyUsage()).thenAnswer((_) async => const Success(0));
-    when(() => mockSubscriptionService.getNextResetDate()).thenAnswer((_) async => Success(DateTime.now().add(const Duration(days: 30))));
-    
+    );
+    when(
+      () => mockSubscriptionService.getCurrentPlan(),
+    ).thenAnswer((_) async => const Success(SubscriptionPlan.basic));
+    when(
+      () => mockSubscriptionService.canUseAiGeneration(),
+    ).thenAnswer((_) async => const Success(true));
+    when(
+      () => mockSubscriptionService.getRemainingGenerations(),
+    ).thenAnswer((_) async => const Success(10));
+    when(
+      () => mockSubscriptionService.getMonthlyUsage(),
+    ).thenAnswer((_) async => const Success(0));
+    when(() => mockSubscriptionService.getNextResetDate()).thenAnswer(
+      (_) async => Success(DateTime.now().add(const Duration(days: 30))),
+    );
+
     // Settings service defaults - basic mock setup
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
-    
-    // Storage service defaults - basic mock setup  
+
+    // Storage service defaults - basic mock setup
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
   }
 

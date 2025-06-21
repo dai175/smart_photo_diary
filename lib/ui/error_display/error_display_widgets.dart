@@ -18,10 +18,7 @@ class ErrorSnackBarContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          _getIconForSeverity(severity),
-          color: Colors.white,
-        ),
+        Icon(_getIconForSeverity(severity), color: Colors.white),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -76,8 +73,7 @@ class ErrorDialogWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(error.userMessage),
-          if (_shouldShowDetails(config.severity)) ...
-            _buildErrorDetails(),
+          if (_shouldShowDetails(config.severity)) ..._buildErrorDetails(),
         ],
       ),
       actions: _buildActions(context),
@@ -205,7 +201,10 @@ class ErrorInlineWidget extends StatelessWidget {
         vertical: AppConstants.smallPadding,
       ),
       decoration: BoxDecoration(
-        color: _getColorForSeverity(context, config.severity).withValues(alpha: 0.1),
+        color: _getColorForSeverity(
+          context,
+          config.severity,
+        ).withValues(alpha: 0.1),
         border: Border.all(
           color: _getColorForSeverity(context, config.severity),
         ),
@@ -248,8 +247,8 @@ class ErrorInlineWidget extends StatelessWidget {
               ),
             ],
           ),
-          if (config.showRetryButton && onRetry != null) ...
-            _buildRetryButton(context),
+          if (config.showRetryButton && onRetry != null)
+            ..._buildRetryButton(context),
         ],
       ),
     );
@@ -363,8 +362,8 @@ class ErrorFullScreenWidget extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
-                  if (_shouldShowDetails(config.severity)) ...
-                    _buildErrorDetails(context),
+                  if (_shouldShowDetails(config.severity))
+                    ..._buildErrorDetails(context),
                 ],
               ),
             ),
@@ -390,16 +389,16 @@ class ErrorFullScreenWidget extends StatelessWidget {
           children: [
             Text(
               '詳細情報:',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               error.message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
           ],
         ),
@@ -518,20 +517,19 @@ class SimpleErrorWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
-            if (onRetry != null) ...
-              [
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(retryButtonText ?? '再試行'),
-                ),
-              ],
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: Text(retryButtonText ?? '再試行'),
+              ),
+            ],
           ],
         ),
       ),

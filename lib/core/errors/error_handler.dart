@@ -6,7 +6,7 @@ class ErrorHandler {
   /// エラーをログに記録し、適切なAppExceptionに変換する
   static AppException handleError(dynamic error, {String? context}) {
     final contextMessage = context != null ? '[$context] ' : '';
-    
+
     // 既にAppExceptionの場合はそのまま返す
     if (error is AppException) {
       debugPrint('${contextMessage}AppException: ${error.message}');
@@ -16,16 +16,20 @@ class ErrorHandler {
     // 一般的なエラーの場合は適切なAppExceptionに変換
     final message = '$contextMessage予期しないエラーが発生しました';
     final exception = ServiceException(message, originalError: error);
-    
+
     debugPrint('${contextMessage}Error: $error');
     return exception;
   }
 
   /// エラーをログに記録する
-  static void logError(dynamic error, {String? context, StackTrace? stackTrace}) {
+  static void logError(
+    dynamic error, {
+    String? context,
+    StackTrace? stackTrace,
+  }) {
     final contextMessage = context != null ? '[$context] ' : '';
     debugPrint('${contextMessage}Error: $error');
-    
+
     if (stackTrace != null && kDebugMode) {
       debugPrint('${contextMessage}StackTrace: $stackTrace');
     }

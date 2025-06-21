@@ -6,6 +6,7 @@ import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock implementations for testing
 class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
@@ -32,7 +33,9 @@ void main() {
     group('Permission Management', () {
       test('should request permission successfully', () async {
         // Arrange
-        when(() => mockPhotoService.requestPermission()).thenAnswer((_) async => true);
+        when(
+          () => mockPhotoService.requestPermission(),
+        ).thenAnswer((_) async => true);
 
         // Act
         final result = await mockPhotoService.requestPermission();
@@ -44,7 +47,9 @@ void main() {
 
       test('should handle permission denied', () async {
         // Arrange
-        when(() => mockPhotoService.requestPermission()).thenAnswer((_) async => false);
+        when(
+          () => mockPhotoService.requestPermission(),
+        ).thenAnswer((_) async => false);
 
         // Act
         final result = await mockPhotoService.requestPermission();
@@ -59,8 +64,9 @@ void main() {
       test('should get today photos with default limit', () async {
         // Arrange
         final mockPhotos = [mockAssetEntity];
-        when(() => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => mockPhotos);
+        when(
+          () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => mockPhotos);
 
         // Act
         final result = await mockPhotoService.getTodayPhotos();
@@ -74,8 +80,9 @@ void main() {
       test('should get today photos with custom limit', () async {
         // Arrange
         final mockPhotos = List.generate(5, (index) => mockAssetEntity);
-        when(() => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => mockPhotos);
+        when(
+          () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => mockPhotos);
 
         // Act
         final result = await mockPhotoService.getTodayPhotos(limit: 5);
@@ -91,12 +98,14 @@ void main() {
         final startDate = DateTime(2024, 1, 1);
         final endDate = DateTime(2024, 1, 31);
         final mockPhotos = [mockAssetEntity];
-        
-        when(() => mockPhotoService.getPhotosInDateRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          limit: any(named: 'limit'),
-        )).thenAnswer((_) async => mockPhotos);
+
+        when(
+          () => mockPhotoService.getPhotosInDateRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => mockPhotos);
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -106,11 +115,13 @@ void main() {
 
         // Assert
         expect(result, equals(mockPhotos));
-        verify(() => mockPhotoService.getPhotosInDateRange(
-          startDate: startDate,
-          endDate: endDate,
-          limit: 100,
-        )).called(1);
+        verify(
+          () => mockPhotoService.getPhotosInDateRange(
+            startDate: startDate,
+            endDate: endDate,
+            limit: 100,
+          ),
+        ).called(1);
       });
 
       test('should get photos in date range with custom limit', () async {
@@ -118,12 +129,14 @@ void main() {
         final startDate = DateTime(2024, 1, 1);
         final endDate = DateTime(2024, 1, 31);
         final mockPhotos = List.generate(50, (index) => mockAssetEntity);
-        
-        when(() => mockPhotoService.getPhotosInDateRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          limit: any(named: 'limit'),
-        )).thenAnswer((_) async => mockPhotos);
+
+        when(
+          () => mockPhotoService.getPhotosInDateRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => mockPhotos);
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -142,8 +155,9 @@ void main() {
       test('should get photo data successfully', () async {
         // Arrange
         final mockData = [1, 2, 3, 4, 5];
-        when(() => mockPhotoService.getPhotoData(any()))
-            .thenAnswer((_) async => mockData);
+        when(
+          () => mockPhotoService.getPhotoData(any()),
+        ).thenAnswer((_) async => mockData);
 
         // Act
         final result = await mockPhotoService.getPhotoData(mockAssetEntity);
@@ -156,60 +170,72 @@ void main() {
       test('should get thumbnail data successfully', () async {
         // Arrange
         final mockThumbnailData = [10, 20, 30];
-        when(() => mockPhotoService.getThumbnailData(any()))
-            .thenAnswer((_) async => mockThumbnailData);
+        when(
+          () => mockPhotoService.getThumbnailData(any()),
+        ).thenAnswer((_) async => mockThumbnailData);
 
         // Act
         final result = await mockPhotoService.getThumbnailData(mockAssetEntity);
 
         // Assert
         expect(result, equals(mockThumbnailData));
-        verify(() => mockPhotoService.getThumbnailData(mockAssetEntity)).called(1);
+        verify(
+          () => mockPhotoService.getThumbnailData(mockAssetEntity),
+        ).called(1);
       });
 
       test('should get original file successfully', () async {
         // Arrange
         const mockFile = 'path/to/original/file.jpg';
-        when(() => mockPhotoService.getOriginalFile(any()))
-            .thenAnswer((_) async => mockFile);
+        when(
+          () => mockPhotoService.getOriginalFile(any()),
+        ).thenAnswer((_) async => mockFile);
 
         // Act
         final result = await mockPhotoService.getOriginalFile(mockAssetEntity);
 
         // Assert
         expect(result, equals(mockFile));
-        verify(() => mockPhotoService.getOriginalFile(mockAssetEntity)).called(1);
+        verify(
+          () => mockPhotoService.getOriginalFile(mockAssetEntity),
+        ).called(1);
       });
 
       test('should get thumbnail with default size', () async {
         // Arrange
         const mockThumbnail = 'thumbnail_data';
-        when(() => mockPhotoService.getThumbnail(
-          any(),
-          width: any(named: 'width'),
-          height: any(named: 'height'),
-        )).thenAnswer((_) async => mockThumbnail);
+        when(
+          () => mockPhotoService.getThumbnail(
+            any(),
+            width: any(named: 'width'),
+            height: any(named: 'height'),
+          ),
+        ).thenAnswer((_) async => mockThumbnail);
 
         // Act
         final result = await mockPhotoService.getThumbnail(mockAssetEntity);
 
         // Assert
         expect(result, equals(mockThumbnail));
-        verify(() => mockPhotoService.getThumbnail(
-          mockAssetEntity,
-          width: 200,
-          height: 200,
-        )).called(1);
+        verify(
+          () => mockPhotoService.getThumbnail(
+            mockAssetEntity,
+            width: 200,
+            height: 200,
+          ),
+        ).called(1);
       });
 
       test('should get thumbnail with custom size', () async {
         // Arrange
         const mockThumbnail = 'custom_thumbnail_data';
-        when(() => mockPhotoService.getThumbnail(
-          any(),
-          width: any(named: 'width'),
-          height: any(named: 'height'),
-        )).thenAnswer((_) async => mockThumbnail);
+        when(
+          () => mockPhotoService.getThumbnail(
+            any(),
+            width: any(named: 'width'),
+            height: any(named: 'height'),
+          ),
+        ).thenAnswer((_) async => mockThumbnail);
 
         // Act
         final result = await mockPhotoService.getThumbnail(
@@ -220,19 +246,22 @@ void main() {
 
         // Assert
         expect(result, equals(mockThumbnail));
-        verify(() => mockPhotoService.getThumbnail(
-          mockAssetEntity,
-          width: 300,
-          height: 300,
-        )).called(1);
+        verify(
+          () => mockPhotoService.getThumbnail(
+            mockAssetEntity,
+            width: 300,
+            height: 300,
+          ),
+        ).called(1);
       });
     });
 
     group('Error Handling', () {
       test('should handle permission request failure', () async {
         // Arrange
-        when(() => mockPhotoService.requestPermission())
-            .thenThrow(Exception('Permission request failed'));
+        when(
+          () => mockPhotoService.requestPermission(),
+        ).thenThrow(Exception('Permission request failed'));
 
         // Act & Assert
         expect(
@@ -243,8 +272,9 @@ void main() {
 
       test('should handle empty photo list', () async {
         // Arrange
-        when(() => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => []);
+        when(
+          () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await mockPhotoService.getTodayPhotos();
@@ -255,8 +285,9 @@ void main() {
 
       test('should handle null photo data', () async {
         // Arrange
-        when(() => mockPhotoService.getPhotoData(any()))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockPhotoService.getPhotoData(any()),
+        ).thenAnswer((_) async => null);
 
         // Act
         final result = await mockPhotoService.getPhotoData(mockAssetEntity);
@@ -267,8 +298,9 @@ void main() {
 
       test('should handle null thumbnail data', () async {
         // Arrange
-        when(() => mockPhotoService.getThumbnailData(any()))
-            .thenAnswer((_) async => null);
+        when(
+          () => mockPhotoService.getThumbnailData(any()),
+        ).thenAnswer((_) async => null);
 
         // Act
         final result = await mockPhotoService.getThumbnailData(mockAssetEntity);
@@ -281,12 +313,14 @@ void main() {
         // Arrange
         final startDate = DateTime(2024, 1, 31);
         final endDate = DateTime(2024, 1, 1); // End before start
-        
-        when(() => mockPhotoService.getPhotosInDateRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          limit: any(named: 'limit'),
-        )).thenAnswer((_) async => []);
+
+        when(
+          () => mockPhotoService.getPhotosInDateRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -302,8 +336,9 @@ void main() {
     group('Edge Cases', () {
       test('should handle very large limits', () async {
         // Arrange
-        when(() => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => []);
+        when(
+          () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await mockPhotoService.getTodayPhotos(limit: 999999);
@@ -315,8 +350,9 @@ void main() {
 
       test('should handle zero limit', () async {
         // Arrange
-        when(() => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => []);
+        when(
+          () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await mockPhotoService.getTodayPhotos(limit: 0);
@@ -329,12 +365,14 @@ void main() {
         // Arrange
         final futureDate = DateTime.now().add(const Duration(days: 30));
         final endDate = futureDate.add(const Duration(days: 1));
-        
-        when(() => mockPhotoService.getPhotosInDateRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          limit: any(named: 'limit'),
-        )).thenAnswer((_) async => []);
+
+        when(
+          () => mockPhotoService.getPhotosInDateRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -349,12 +387,14 @@ void main() {
       test('should handle same start and end dates', () async {
         // Arrange
         final sameDate = DateTime(2024, 1, 15);
-        
-        when(() => mockPhotoService.getPhotosInDateRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          limit: any(named: 'limit'),
-        )).thenAnswer((_) async => [mockAssetEntity]);
+
+        when(
+          () => mockPhotoService.getPhotosInDateRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => [mockAssetEntity]);
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -386,11 +426,15 @@ void main() {
     group('Performance', () {
       test('should handle multiple concurrent requests', () async {
         // Arrange
-        when(() => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => [mockAssetEntity]);
+        when(
+          () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => [mockAssetEntity]);
 
         // Act
-        final futures = List.generate(5, (_) => mockPhotoService.getTodayPhotos());
+        final futures = List.generate(
+          5,
+          (_) => mockPhotoService.getTodayPhotos(),
+        );
         final results = await Future.wait(futures);
 
         // Assert
@@ -404,11 +448,14 @@ void main() {
       test('should handle batch data retrieval', () async {
         // Arrange
         final assets = List.generate(10, (index) => mockAssetEntity);
-        when(() => mockPhotoService.getPhotoData(any()))
-            .thenAnswer((_) async => [1, 2, 3]);
+        when(
+          () => mockPhotoService.getPhotoData(any()),
+        ).thenAnswer((_) async => [1, 2, 3]);
 
         // Act
-        final futures = assets.map((asset) => mockPhotoService.getPhotoData(asset));
+        final futures = assets.map(
+          (asset) => mockPhotoService.getPhotoData(asset),
+        );
         final results = await Future.wait(futures);
 
         // Assert

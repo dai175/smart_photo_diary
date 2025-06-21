@@ -41,29 +41,15 @@ extension ErrorDisplayExtensions on BuildContext {
   }
 
   /// 成功メッセージを表示
-  void showSuccess(
-    String message, {
-    Duration? duration,
-  }) {
+  void showSuccess(String message, {Duration? duration}) {
     final errorDisplay = ErrorDisplayService();
-    errorDisplay.showSuccessMessage(
-      this,
-      message,
-      duration: duration,
-    );
+    errorDisplay.showSuccessMessage(this, message, duration: duration);
   }
 
   /// 情報メッセージを表示
-  void showInfo(
-    String message, {
-    Duration? duration,
-  }) {
+  void showInfo(String message, {Duration? duration}) {
     final errorDisplay = ErrorDisplayService();
-    errorDisplay.showInfoMessage(
-      this,
-      message,
-      duration: duration,
-    );
+    errorDisplay.showInfoMessage(this, message, duration: duration);
   }
 
   /// 警告メッセージを表示
@@ -149,10 +135,7 @@ extension FutureResultErrorExtensions<T> on Future<Result<T>> {
   }) async {
     final result = await this;
     if (result.isSuccess && context.mounted) {
-      context.showSuccess(
-        messageBuilder(result.value),
-        duration: duration,
-      );
+      context.showSuccess(messageBuilder(result.value), duration: duration);
     }
     return result;
   }
@@ -171,10 +154,7 @@ extension FutureResultErrorExtensions<T> on Future<Result<T>> {
     if (!context.mounted) return result;
 
     if (result.isSuccess && onSuccess != null) {
-      context.showSuccess(
-        onSuccess(result.value),
-        duration: successDuration,
-      );
+      context.showSuccess(onSuccess(result.value), duration: successDuration);
     } else if (result.isFailure) {
       await context.showError(
         result.error,
@@ -213,10 +193,7 @@ extension ResultErrorExtensions<T> on Result<T> {
     Duration? duration,
   }) {
     if (isSuccess && context.mounted) {
-      context.showSuccess(
-        messageBuilder(value),
-        duration: duration,
-      );
+      context.showSuccess(messageBuilder(value), duration: duration);
     }
   }
 }
@@ -248,10 +225,10 @@ class ErrorHandledAction {
       }
     } catch (e) {
       if (context.mounted) {
-        final exception = e is AppException 
-            ? e 
+        final exception = e is AppException
+            ? e
             : ServiceException('処理中にエラーが発生しました', originalError: e);
-        
+
         await context.showError(
           exception,
           config: errorConfig,
@@ -294,10 +271,10 @@ class ErrorHandledAction {
 
       return result;
     } catch (e) {
-      final exception = e is AppException 
-          ? e 
+      final exception = e is AppException
+          ? e
           : ServiceException('処理中にエラーが発生しました', originalError: e);
-      
+
       if (context.mounted && showErrors) {
         await context.showError(
           exception,
@@ -306,7 +283,7 @@ class ErrorHandledAction {
           retryButtonText: retryButtonText,
         );
       }
-      
+
       return Failure(exception);
     }
   }

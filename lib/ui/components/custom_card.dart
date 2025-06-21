@@ -74,7 +74,7 @@ class _CustomCardState extends State<CustomCard>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
-  
+
   bool _isHovered = false;
   // bool _isPressed = false; // 将来的に使用予定
 
@@ -86,21 +86,20 @@ class _CustomCardState extends State<CustomCard>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.98,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
-    _elevationAnimation = Tween<double>(
-      begin: widget.elevation ?? AppSpacing.elevationSm,
-      end: (widget.elevation ?? AppSpacing.elevationSm) + 2,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _elevationAnimation =
+        Tween<double>(
+          begin: widget.elevation ?? AppSpacing.elevationSm,
+          end: (widget.elevation ?? AppSpacing.elevationSm) + 2,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
@@ -148,7 +147,8 @@ class _CustomCardState extends State<CustomCard>
     final borderRadius = widget.borderRadius ?? AppSpacing.cardRadius;
     final elevation = widget.elevation ?? AppSpacing.elevationSm;
     final shadowColor = widget.shadowColor ?? AppColors.shadow;
-    final backgroundColor = widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
+    final backgroundColor =
+        widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -165,9 +165,7 @@ class _CustomCardState extends State<CustomCard>
               onTapUp: widget.onTap != null ? _handleTapUp : null,
               onTapCancel: widget.onTap != null ? _handleTapCancel : null,
               child: Transform.scale(
-                scale: widget.enableTapAnimation 
-                    ? _scaleAnimation.value 
-                    : 1.0,
+                scale: widget.enableTapAnimation ? _scaleAnimation.value : 1.0,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,

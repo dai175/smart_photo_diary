@@ -5,13 +5,10 @@ import '../ui/components/custom_dialog.dart';
 /// ダイアログ表示のユーティリティクラス
 class DialogUtils {
   /// 簡単なメッセージダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [message]: 表示するメッセージ
-  static Future<void> showSimpleDialog(
-    BuildContext context,
-    String message,
-  ) {
+  static Future<void> showSimpleDialog(BuildContext context, String message) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -30,7 +27,7 @@ class DialogUtils {
   }
 
   /// 成功メッセージダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [title]: ダイアログのタイトル
   /// [message]: 表示するメッセージ
@@ -52,7 +49,7 @@ class DialogUtils {
   }
 
   /// エラーメッセージダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [message]: 表示するエラーメッセージ
   /// [title]: ダイアログのタイトル（デフォルト: 'エラー'）
@@ -74,7 +71,7 @@ class DialogUtils {
   }
 
   /// 確認ダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [title]: ダイアログのタイトル
   /// [message]: 確認メッセージ
@@ -105,14 +102,11 @@ class DialogUtils {
   }
 
   /// ローディングダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [message]: ローディング中に表示するメッセージ
   /// 戻り値: ダイアログを閉じるためのNavigator.pop用のFuture
-  static Future<void> showLoadingDialog(
-    BuildContext context,
-    String message,
-  ) {
+  static Future<void> showLoadingDialog(BuildContext context, String message) {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -123,7 +117,7 @@ class DialogUtils {
   }
 
   /// ラジオボタン選択ダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [title]: ダイアログのタイトル
   /// [options]: 選択肢のリスト
@@ -175,7 +169,7 @@ class DialogUtils {
   }
 
   /// リスト選択ダイアログを表示
-  /// 
+  ///
   /// [context]: BuildContext
   /// [title]: ダイアログのタイトル
   /// [items]: 表示するアイテムのリスト

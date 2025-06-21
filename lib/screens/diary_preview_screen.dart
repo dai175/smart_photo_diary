@@ -25,11 +25,12 @@ import '../utils/prompt_category_utils.dart';
 class DiaryPreviewScreen extends StatefulWidget {
   /// 選択された写真アセット
   final List<AssetEntity> selectedAssets;
+
   /// 選択されたプロンプト（オプション）
   final WritingPrompt? selectedPrompt;
 
   const DiaryPreviewScreen({
-    super.key, 
+    super.key,
     required this.selectedAssets,
     this.selectedPrompt,
   });
@@ -47,7 +48,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   bool _hasError = false;
   String _errorMessage = '';
   DateTime _photoDateTime = DateTime.now(); // 写真の撮影日時
-  
+
   // 複数写真処理の進捗表示用
   int _currentPhotoIndex = 0;
   int _totalPhotos = 0;
@@ -65,14 +66,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     super.initState();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
-    
+
     // サービスロケータからサービスを取得
     _aiService = ServiceRegistration.get<AiServiceInterface>();
     _photoService = ServiceRegistration.get<PhotoServiceInterface>();
-    
+
     // 渡されたプロンプトがある場合は設定
     _selectedPrompt = widget.selectedPrompt;
-    
+
     _initializePromptServices();
   }
 
@@ -80,12 +81,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   Future<void> _initializePromptServices() async {
     // 少し待ってから初期化完了とする
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     if (mounted) {
       setState(() {
         _isInitializing = false; // 初期化完了
       });
-      
+
       // プロンプトの有無に関わらず自動的に日記生成を開始
       _loadModelAndGenerateDiary();
     }
@@ -119,12 +120,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     try {
       // 写真の撮影日時を取得
       List<DateTime> photoTimes = [];
-      
+
       // 全ての写真の撮影時刻を収集
       for (final asset in widget.selectedAssets) {
         photoTimes.add(asset.createDateTime);
       }
-      
+
       // 写真が複数ある場合は時間範囲を考慮、単一の場合はその時刻を使用
       DateTime photoDateTime;
       if (photoTimes.length == 1) {
@@ -143,7 +144,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // 単一写真の場合：従来通り
         final firstAsset = widget.selectedAssets.first;
         final imageData = await _photoService.getOriginalFile(firstAsset);
-        
+
         if (imageData == null) {
           throw Exception('写真データの取得に失敗しました');
         }
@@ -153,32 +154,35 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           date: photoDateTime,
           prompt: _selectedPrompt?.text,
         );
-        
+
         if (resultFromAi.isFailure) {
           // Phase 1.7.2.1: 使用量制限エラーの専用UI表示
-          if (resultFromAi.error is AiProcessingException && 
+          if (resultFromAi.error is AiProcessingException &&
               resultFromAi.error.message.contains('月間制限に達しました')) {
             await _showUsageLimitDialog(resultFromAi.error.message);
             return;
           }
           throw Exception(resultFromAi.error.message);
         }
-        
+
         result = resultFromAi.value;
       } else {
         // 複数写真の場合：新しい順次処理方式を使用
         debugPrint('複数写真の順次分析を開始...');
-        
+
         // 全ての写真データを収集
         final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
-        
+
         for (final asset in widget.selectedAssets) {
           final imageData = await _photoService.getOriginalFile(asset);
           if (imageData != null) {
-            imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
+            imagesWithTimes.add((
+              imageData: imageData,
+              time: asset.createDateTime,
+            ));
           }
         }
-        
+
         if (imagesWithTimes.isEmpty) {
           throw Exception('写真データの取得に失敗しました');
         }
@@ -189,7 +193,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           _totalPhotos = imagesWithTimes.length;
           _currentPhotoIndex = 0;
         });
-
 
         final resultFromAi = await _aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
@@ -202,20 +205,19 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             });
           },
         );
-        
-        
+
         if (resultFromAi.isFailure) {
           // Phase 1.7.2.1: 使用量制限エラーの専用UI表示
-          if (resultFromAi.error is AiProcessingException && 
+          if (resultFromAi.error is AiProcessingException &&
               resultFromAi.error.message.contains('月間制限に達しました')) {
             await _showUsageLimitDialog(resultFromAi.error.message);
             return;
           }
           throw Exception(resultFromAi.error.message);
         }
-        
+
         result = resultFromAi.value;
-        
+
         // 進捗表示を終了
         setState(() {
           _isAnalyzingPhotos = false;
@@ -229,17 +231,17 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // 写真の撮影日時を保存
         _photoDateTime = photoDateTime;
       });
-      
+
       // プロンプトが使用された場合のみ使用履歴を記録
       if (_selectedPrompt != null) {
         try {
-          final promptService = await ServiceRegistration.getAsync<IPromptService>();
+          final promptService =
+              await ServiceRegistration.getAsync<IPromptService>();
           await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
         } catch (e) {
           debugPrint('プロンプト使用履歴記録エラー: $e');
         }
       }
-      
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -266,7 +268,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       debugPrint('写真数: ${widget.selectedAssets.length}');
 
       // DiaryServiceのインスタンスを取得
-      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を保存
       await diaryService.saveDiaryEntryWithPhotos(
@@ -295,7 +298,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     } catch (e, stackTrace) {
       debugPrint('日記保存失敗: $e');
       debugPrint('スタックトレース: $stackTrace');
-      
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -317,18 +320,24 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   /// Phase 1.7.2.1: 使用量制限エラー専用ダイアログ表示
   Future<void> _showUsageLimitDialog(String errorMessage) async {
     try {
-      final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
-      
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+
       // プラン情報を取得
       final planResult = await subscriptionService.getCurrentPlan();
-      final remainingResult = await subscriptionService.getRemainingGenerations();
+      final remainingResult = await subscriptionService
+          .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
-      
-      final plan = planResult.isSuccess ? planResult.value : SubscriptionPlan.basic;
+
+      final plan = planResult.isSuccess
+          ? planResult.value
+          : SubscriptionPlan.basic;
       final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final limit = plan.monthlyAiGenerationLimit;
-      final nextResetDate = resetDateResult.isSuccess ? resetDateResult.value : DateTime.now().add(const Duration(days: 30));
-      
+      final nextResetDate = resetDateResult.isSuccess
+          ? resetDateResult.value
+          : DateTime.now().add(const Duration(days: 30));
+
       if (mounted) {
         await showDialog<void>(
           context: context,
@@ -373,7 +382,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     // TODO: Phase 2で設定画面のサブスクリプション管理画面に遷移
     // 現在は設定画面に遷移してプレースホルダーを表示
     Navigator.of(context).pushNamed('/settings');
-    
+
     // 一時的な案内メッセージ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -393,7 +402,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   /// 選択されたプロンプトの表示
   Widget _buildSelectedPromptDisplay() {
     if (_selectedPrompt == null) return const SizedBox.shrink();
-    
+
     return FadeInWidget(
       delay: const Duration(milliseconds: 50),
       child: CustomCard(
@@ -404,15 +413,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               children: [
                 Icon(
                   Icons.edit_note_rounded,
-                  color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category),
+                  color: PromptCategoryUtils.getCategoryColor(
+                    _selectedPrompt!.category,
+                  ),
                   size: AppSpacing.iconMd,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text(
-                    '使用中のプロンプト',
-                    style: AppTypography.titleMedium,
-                  ),
+                  child: Text('使用中のプロンプト', style: AppTypography.titleMedium),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -420,11 +428,15 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category),
+                    color: PromptCategoryUtils.getCategoryColor(
+                      _selectedPrompt!.category,
+                    ),
                     borderRadius: BorderRadius.circular(AppSpacing.sm),
                   ),
                   child: Text(
-                    PromptCategoryUtils.getCategoryDisplayName(_selectedPrompt!.category),
+                    PromptCategoryUtils.getCategoryDisplayName(
+                      _selectedPrompt!.category,
+                    ),
                     style: AppTypography.labelSmall.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -455,7 +467,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -466,7 +477,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         elevation: 2,
         actions: [
           // 再生成ボタン（プロンプトをスキップ）
-          if (!_isInitializing && !_isLoading && !_hasError && _selectedPrompt != null)
+          if (!_isInitializing &&
+              !_isLoading &&
+              !_hasError &&
+              _selectedPrompt != null)
             Container(
               margin: const EdgeInsets.only(right: AppSpacing.xs),
               child: IconButton(
@@ -552,8 +566,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               const SizedBox(height: AppSpacing.lg),
 
               // プロンプトが選択されている場合のみ表示
-              if (!_isInitializing && _selectedPrompt != null) _buildSelectedPromptDisplay(),
-              if (!_isInitializing && _selectedPrompt != null) const SizedBox(height: AppSpacing.lg),
+              if (!_isInitializing && _selectedPrompt != null)
+                _buildSelectedPromptDisplay(),
+              if (!_isInitializing && _selectedPrompt != null)
+                const SizedBox(height: AppSpacing.lg),
 
               // 選択された写真のプレビュー
               if (widget.selectedAssets.isNotEmpty)
@@ -586,7 +602,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  right: index < widget.selectedAssets.length - 1 ? AppSpacing.sm : 0,
+                                  right:
+                                      index < widget.selectedAssets.length - 1
+                                      ? AppSpacing.sm
+                                      : 0,
                                 ),
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -599,8 +618,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                       future: widget.selectedAssets[index]
                                           .thumbnailDataWithSize(
                                             ThumbnailSize(
-                                              (AppConstants.previewImageSize * 1.2).toInt(),
-                                              (AppConstants.previewImageSize * 1.2).toInt(),
+                                              (AppConstants.previewImageSize *
+                                                      1.2)
+                                                  .toInt(),
+                                              (AppConstants.previewImageSize *
+                                                      1.2)
+                                                  .toInt(),
                                             ),
                                           ),
                                       builder: (context, snapshot) {
@@ -619,10 +642,13 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                           height: 120,
                                           decoration: BoxDecoration(
                                             color: AppColors.surfaceVariant,
-                                            borderRadius: AppSpacing.photoRadius,
+                                            borderRadius:
+                                                AppSpacing.photoRadius,
                                           ),
                                           child: const Center(
-                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
                                           ),
                                         );
                                       },
@@ -644,14 +670,19 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 FadeInWidget(
                   child: CustomCard(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xl,
+                      ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             padding: AppSpacing.cardPadding,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.3),
                               shape: BoxShape.circle,
                             ),
                             child: const CircularProgressIndicator(
@@ -660,15 +691,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           ),
                           const SizedBox(height: AppSpacing.xl),
                           if (_isAnalyzingPhotos && _totalPhotos > 1) ...[
-                            Text(
-                              '写真を分析中...',
-                              style: AppTypography.titleLarge,
-                            ),
+                            Text('写真を分析中...', style: AppTypography.titleLarge),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
                               '$_currentPhotoIndex/$_totalPhotos枚完了',
                               style: AppTypography.bodyMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.md),
@@ -681,10 +711,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                               child: FractionallySizedBox(
                                 alignment: Alignment.centerLeft,
-                                widthFactor: _totalPhotos > 0 ? _currentPhotoIndex / _totalPhotos : 0,
+                                widthFactor: _totalPhotos > 0
+                                    ? _currentPhotoIndex / _totalPhotos
+                                    : 0,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
@@ -699,7 +733,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             Text(
                               'プロンプト機能の準備をしています',
                               style: AppTypography.bodyMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -712,7 +748,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             Text(
                               'AIがあなたの写真を分析しています',
                               style: AppTypography.bodyMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -724,10 +762,16 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                   vertical: AppSpacing.sm,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category).withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(AppSpacing.md),
+                                  color: PromptCategoryUtils.getCategoryColor(
+                                    _selectedPrompt!.category,
+                                  ).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.md,
+                                  ),
                                   border: Border.all(
-                                    color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category).withValues(alpha: 0.3),
+                                    color: PromptCategoryUtils.getCategoryColor(
+                                      _selectedPrompt!.category,
+                                    ).withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: Row(
@@ -736,16 +780,22 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                     Icon(
                                       Icons.edit_note_rounded,
                                       size: 16,
-                                      color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category),
+                                      color:
+                                          PromptCategoryUtils.getCategoryColor(
+                                            _selectedPrompt!.category,
+                                          ),
                                     ),
                                     const SizedBox(width: AppSpacing.xs),
                                     Flexible(
                                       child: Text(
-                                        _selectedPrompt!.text.length > 30 
+                                        _selectedPrompt!.text.length > 30
                                             ? '${_selectedPrompt!.text.substring(0, 30)}...'
                                             : _selectedPrompt!.text,
                                         style: AppTypography.bodySmall.copyWith(
-                                          color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category),
+                                          color:
+                                              PromptCategoryUtils.getCategoryColor(
+                                                _selectedPrompt!.category,
+                                              ),
                                           fontWeight: FontWeight.w500,
                                         ),
                                         textAlign: TextAlign.center,
@@ -839,8 +889,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category).withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(AppSpacing.xs),
+                                    color: PromptCategoryUtils.getCategoryColor(
+                                      _selectedPrompt!.category,
+                                    ).withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.xs,
+                                    ),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -848,13 +902,19 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                       Icon(
                                         Icons.edit_note_rounded,
                                         size: 12,
-                                        color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category),
+                                        color:
+                                            PromptCategoryUtils.getCategoryColor(
+                                              _selectedPrompt!.category,
+                                            ),
                                       ),
                                       const SizedBox(width: 2),
                                       Text(
                                         'プロンプト使用',
                                         style: AppTypography.labelSmall.copyWith(
-                                          color: PromptCategoryUtils.getCategoryColor(_selectedPrompt!.category),
+                                          color:
+                                              PromptCategoryUtils.getCategoryColor(
+                                                _selectedPrompt!.category,
+                                              ),
                                           fontSize: 10,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -885,7 +945,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 contentPadding: AppSpacing.inputPadding,
                                 labelStyle: AppTypography.labelMedium,
                                 hintStyle: AppTypography.bodyMedium.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -895,7 +957,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: AppColors.outline.withValues(alpha: 0.2),
+                                  color: AppColors.outline.withValues(
+                                    alpha: 0.2,
+                                  ),
                                 ),
                                 borderRadius: AppSpacing.inputRadius,
                                 color: Theme.of(context).colorScheme.surface,
@@ -906,7 +970,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 minLines: 8,
                                 textAlignVertical: TextAlignVertical.top,
                                 style: AppTypography.bodyLarge.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                                 decoration: InputDecoration(
                                   labelText: '本文',
@@ -915,7 +981,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                   contentPadding: AppSpacing.inputPadding,
                                   labelStyle: AppTypography.labelMedium,
                                   hintStyle: AppTypography.bodyMedium.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),

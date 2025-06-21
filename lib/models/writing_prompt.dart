@@ -10,40 +10,40 @@ enum PromptCategory {
   // 基本感情カテゴリ（Basic用）
   @HiveField(0)
   emotion('emotion', '感情'),
-  
+
   // Premium感情深掘りカテゴリ
   @HiveField(1)
   emotionDepth('emotion_depth', '感情深掘り'),
-  
+
   @HiveField(2)
   sensoryEmotion('sensory_emotion', '感情五感'),
-  
+
   @HiveField(3)
   emotionGrowth('emotion_growth', '感情成長'),
-  
+
   @HiveField(4)
   emotionConnection('emotion_connection', '感情つながり'),
-  
+
   @HiveField(5)
   emotionDiscovery('emotion_discovery', '感情発見'),
-  
+
   @HiveField(6)
   emotionFantasy('emotion_fantasy', '感情幻想'),
-  
+
   @HiveField(7)
   emotionHealing('emotion_healing', '感情癒し'),
-  
+
   @HiveField(8)
   emotionEnergy('emotion_energy', '感情エネルギー');
 
   const PromptCategory(this.id, this.displayName);
-  
+
   /// カテゴリID（JSON保存用）
   final String id;
-  
+
   /// 表示名（日本語）
   final String displayName;
-  
+
   /// IDからカテゴリを取得
   static PromptCategory fromId(String id) {
     return PromptCategory.values.firstWhere(
@@ -51,10 +51,12 @@ enum PromptCategory {
       orElse: () => PromptCategory.emotion,
     );
   }
-  
+
   /// 表示名のリストを取得
   static List<String> get displayNames {
-    return PromptCategory.values.map((category) => category.displayName).toList();
+    return PromptCategory.values
+        .map((category) => category.displayName)
+        .toList();
   }
 }
 
@@ -111,7 +113,7 @@ class WritingPrompt extends HiveObject {
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       description: json['description'] as String?,
       priority: json['priority'] as int? ?? 0,
-      createdAt: json['createdAt'] != null 
+      createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       isActive: json['isActive'] as bool? ?? true,
@@ -145,8 +147,8 @@ class WritingPrompt extends HiveObject {
   bool matchesKeyword(String keyword) {
     final lowerKeyword = keyword.toLowerCase();
     return text.toLowerCase().contains(lowerKeyword) ||
-           tags.any((tag) => tag.toLowerCase().contains(lowerKeyword)) ||
-           (description?.toLowerCase().contains(lowerKeyword) ?? false);
+        tags.any((tag) => tag.toLowerCase().contains(lowerKeyword)) ||
+        (description?.toLowerCase().contains(lowerKeyword) ?? false);
   }
 
   /// カテゴリの表示名を取得
@@ -275,9 +277,9 @@ class PromptUsageHistory extends HiveObject {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is PromptUsageHistory && 
-           other.promptId == promptId && 
-           other.usedAt == usedAt;
+    return other is PromptUsageHistory &&
+        other.promptId == promptId &&
+        other.usedAt == usedAt;
   }
 
   @override

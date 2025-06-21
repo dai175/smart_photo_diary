@@ -30,7 +30,8 @@ class OfflineFallbackService {
       content = '$dateStr、$timeOfDayに$locationText${labels[0]}について過ごしました。';
     } else {
       title = '${labels.first}と${labels.length - 1}つの出来事';
-      content = '$dateStr、$timeOfDayに$locationText${labels.join('や')}などについて過ごしました。';
+      content =
+          '$dateStr、$timeOfDayに$locationText${labels.join('や')}などについて過ごしました。';
     }
 
     return DiaryGenerationResult(title: title, content: content);
@@ -46,7 +47,7 @@ class OfflineFallbackService {
   ) {
     final dateStr = DateFormat('yyyy年MM月dd日').format(date);
     final timeOfDay = _getTimeOfDayForPhotos(date, photoTimes);
-    
+
     final locationText = location != null && location.isNotEmpty
         ? '$locationで'
         : '';
@@ -68,17 +69,19 @@ class OfflineFallbackService {
       if (photoCount == 1) {
         content = '$dateStr、$timeOfDayに$locationText撮った一枚の写真。この瞬間を記録に残しました。';
       } else {
-        content = '$dateStr、$timeOfDayに$locationText$photoCount枚の写真を撮影。様々な瞬間を記録に残した一日でした。';
+        content =
+            '$dateStr、$timeOfDayに$locationText$photoCount枚の写真を撮影。様々な瞬間を記録に残した一日でした。';
       }
     } else {
-      final keywordText = labels.length == 1 
+      final keywordText = labels.length == 1
           ? labels.first
           : '${labels.take(2).join('や')}など';
-      
+
       if (photoCount == 1) {
         content = '$dateStr、$timeOfDayに$locationText$keywordText の瞬間を写真に収めました。';
       } else {
-        content = '$dateStr、$timeOfDayに$locationText$keywordText について$photoCount枚の写真を撮影。充実した時間を過ごすことができました。';
+        content =
+            '$dateStr、$timeOfDayに$locationText$keywordText について$photoCount枚の写真を撮影。充実した時間を過ごすことができました。';
       }
     }
 
@@ -88,9 +91,15 @@ class OfflineFallbackService {
   /// 時間帯の文字列を取得
   String _getTimeOfDay(DateTime date) {
     final hour = date.hour;
-    if (hour >= AiConstants.morningStartHour && hour < AiConstants.afternoonStartHour) return '朝';
-    if (hour >= AiConstants.afternoonStartHour && hour < AiConstants.eveningStartHour) return '昼';
-    if (hour >= AiConstants.eveningStartHour && hour < AiConstants.nightStartHour) return '夕方';
+    if (hour >= AiConstants.morningStartHour &&
+        hour < AiConstants.afternoonStartHour)
+      return '朝';
+    if (hour >= AiConstants.afternoonStartHour &&
+        hour < AiConstants.eveningStartHour)
+      return '昼';
+    if (hour >= AiConstants.eveningStartHour &&
+        hour < AiConstants.nightStartHour)
+      return '夕方';
     return '夜';
   }
 
@@ -99,17 +108,17 @@ class OfflineFallbackService {
     if (photoTimes == null || photoTimes.isEmpty) {
       return _getTimeOfDay(baseDate);
     }
-    
+
     if (photoTimes.length == 1) {
       return _getTimeOfDay(photoTimes.first);
     }
-    
+
     // 複数写真の場合、異なる時間帯にまたがっているかチェック
     final timeOfDaySet = <String>{};
     for (final time in photoTimes) {
       timeOfDaySet.add(_getTimeOfDay(time));
     }
-    
+
     if (timeOfDaySet.length == 1) {
       // 全て同じ時間帯
       return timeOfDaySet.first;
@@ -131,11 +140,11 @@ class OfflineFallbackService {
   /// オフライン時の基本的なタグ生成
   List<String> generateBasicTags(DateTime date, int photoCount) {
     final tags = <String>[];
-    
+
     // 時間帯タグ
     final timeOfDay = _getTimeOfDay(date);
     tags.add(timeOfDay);
-    
+
     // 写真枚数に応じたタグ
     if (photoCount == 1) {
       tags.add('一枚');
@@ -144,11 +153,11 @@ class OfflineFallbackService {
     } else {
       tags.add('複数');
     }
-    
+
     // 曜日タグ
     final weekday = _getWeekdayName(date);
     tags.add(weekday);
-    
+
     return tags;
   }
 
@@ -163,7 +172,7 @@ class OfflineFallbackService {
     final positiveKeywords = ['笑顔', '楽しい', '嬉しい', '美味しい', '綺麗', '素敵', '幸せ'];
     final relaxKeywords = ['リラックス', '癒し', 'のんびり', '静か', '穏やか'];
     final activeKeywords = ['運動', 'スポーツ', '散歩', '活動', 'アクティブ'];
-    
+
     for (final label in labels) {
       if (positiveKeywords.any((keyword) => label.contains(keyword))) {
         return '楽しい';
@@ -175,14 +184,14 @@ class OfflineFallbackService {
         return 'アクティブ';
       }
     }
-    
+
     return '日常';
   }
 
   /// 季節に応じたテンプレート生成
   String getSeasonalTemplate(DateTime date) {
     final month = date.month;
-    
+
     if (month >= 3 && month <= 5) {
       // 春
       return '新緑の季節、';
@@ -201,7 +210,7 @@ class OfflineFallbackService {
   /// 時間帯に応じた挨拶テンプレート
   String getTimeGreeting(DateTime date) {
     final hour = date.hour;
-    
+
     if (hour >= 5 && hour < 12) {
       return '朝から';
     } else if (hour >= 12 && hour < 17) {

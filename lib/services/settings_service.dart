@@ -17,7 +17,7 @@ enum DiaryGenerationMode {
 class SettingsService {
   static SettingsService? _instance;
   static SharedPreferences? _preferences;
-  
+
   // Phase 1.8.1.1: SubscriptionService依存注入
   ISubscriptionService? _subscriptionService;
 
@@ -28,22 +28,28 @@ class SettingsService {
     try {
       _instance ??= SettingsService._();
       _preferences ??= await SharedPreferences.getInstance();
-      
+
       // Phase 1.8.1.1: SubscriptionService依存注入
       if (_instance!._subscriptionService == null) {
-        _instance!._subscriptionService = await ServiceLocator().getAsync<ISubscriptionService>();
+        _instance!._subscriptionService = await ServiceLocator()
+            .getAsync<ISubscriptionService>();
       }
-      
+
       return _instance!;
     } catch (error) {
-      throw ErrorHandler.handleError(error, context: 'SettingsService.getInstance');
+      throw ErrorHandler.handleError(
+        error,
+        context: 'SettingsService.getInstance',
+      );
     }
   }
 
   /// 同期的なサービスインスタンス取得（事前に初期化済みの場合のみ）
   static SettingsService get instance {
     if (_instance == null) {
-      throw StateError('SettingsService has not been initialized. Call getInstance() first.');
+      throw StateError(
+        'SettingsService has not been initialized. Call getInstance() first.',
+      );
     }
     return _instance!;
   }
@@ -54,27 +60,25 @@ class SettingsService {
   // テーマモード
   ThemeMode get themeMode {
     return ErrorHandler.safeExecuteSync(
-      () {
-        final themeModeIndex = _preferences?.getInt(_themeKey) ?? 0;
-        if (themeModeIndex < 0 || themeModeIndex >= ThemeMode.values.length) {
-          return ThemeMode.system;
-        }
-        return ThemeMode.values[themeModeIndex];
-      },
-      context: 'SettingsService.themeMode',
-      fallbackValue: ThemeMode.system,
-    ) ?? ThemeMode.system;
+          () {
+            final themeModeIndex = _preferences?.getInt(_themeKey) ?? 0;
+            if (themeModeIndex < 0 ||
+                themeModeIndex >= ThemeMode.values.length) {
+              return ThemeMode.system;
+            }
+            return ThemeMode.values[themeModeIndex];
+          },
+          context: 'SettingsService.themeMode',
+          fallbackValue: ThemeMode.system,
+        ) ??
+        ThemeMode.system;
   }
 
   Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        await _preferences?.setInt(_themeKey, themeMode.index);
-      },
-      context: 'SettingsService.setThemeMode',
-    );
+    return ResultHelper.tryExecuteAsync(() async {
+      await _preferences?.setInt(_themeKey, themeMode.index);
+    }, context: 'SettingsService.setThemeMode');
   }
-
 
   // 日記生成モード（常にvision固定）
   static const DiaryGenerationMode generationMode = DiaryGenerationMode.vision;
@@ -86,186 +90,159 @@ class SettingsService {
   /// Phase 1.8.1.1: 包括的なサブスクリプション情報を取得
   /// 設定画面表示で使用する統合されたサブスクリプション情報を返します
   Future<Result<SubscriptionInfo>> getSubscriptionInfo() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        // SubscriptionServiceから現在の状態を取得
-        final statusResult = await _subscriptionService!.getCurrentStatus();
-        if (statusResult.isFailure) {
-          throw statusResult.error;
-        }
+      // SubscriptionServiceから現在の状態を取得
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
 
-        // SubscriptionInfoに変換して返す
-        return SubscriptionInfo.fromStatus(statusResult.value);
-      },
-      context: 'SettingsService.getSubscriptionInfo',
-    );
+      // SubscriptionInfoに変換して返す
+      return SubscriptionInfo.fromStatus(statusResult.value);
+    }, context: 'SettingsService.getSubscriptionInfo');
   }
 
   /// Phase 1.8.1.2: 現在のプラン情報を取得
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final planResult = await _subscriptionService!.getCurrentPlan();
-        if (planResult.isFailure) {
-          throw planResult.error;
-        }
+      final planResult = await _subscriptionService!.getCurrentPlan();
+      if (planResult.isFailure) {
+        throw planResult.error;
+      }
 
-        return planResult.value;
-      },
-      context: 'SettingsService.getCurrentPlan',
-    );
+      return planResult.value;
+    }, context: 'SettingsService.getCurrentPlan');
   }
 
   /// Phase 1.8.1.2: プラン期限情報を取得
   Future<Result<PlanPeriodInfo>> getPlanPeriodInfo() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final statusResult = await _subscriptionService!.getCurrentStatus();
-        if (statusResult.isFailure) {
-          throw statusResult.error;
-        }
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
 
-        final planResult = await _subscriptionService!.getCurrentPlan();
-        if (planResult.isFailure) {
-          throw planResult.error;
-        }
+      final planResult = await _subscriptionService!.getCurrentPlan();
+      if (planResult.isFailure) {
+        throw planResult.error;
+      }
 
-        return PlanPeriodInfo.fromStatus(statusResult.value, planResult.value);
-      },
-      context: 'SettingsService.getPlanPeriodInfo',
-    );
+      return PlanPeriodInfo.fromStatus(statusResult.value, planResult.value);
+    }, context: 'SettingsService.getPlanPeriodInfo');
   }
 
   /// Phase 1.8.1.3: 自動更新状態情報を取得
   Future<Result<AutoRenewalInfo>> getAutoRenewalInfo() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final statusResult = await _subscriptionService!.getCurrentStatus();
-        if (statusResult.isFailure) {
-          throw statusResult.error;
-        }
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
 
-        return AutoRenewalInfo.fromStatus(statusResult.value);
-      },
-      context: 'SettingsService.getAutoRenewalInfo',
-    );
+      return AutoRenewalInfo.fromStatus(statusResult.value);
+    }, context: 'SettingsService.getAutoRenewalInfo');
   }
 
   /// Phase 1.8.1.4: 使用量統計情報を取得
   Future<Result<UsageStatistics>> getUsageStatistics() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final statusResult = await _subscriptionService!.getCurrentStatus();
-        if (statusResult.isFailure) {
-          throw statusResult.error;
-        }
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
 
-        final planResult = await _subscriptionService!.getCurrentPlan();
-        if (planResult.isFailure) {
-          throw planResult.error;
-        }
+      final planResult = await _subscriptionService!.getCurrentPlan();
+      if (planResult.isFailure) {
+        throw planResult.error;
+      }
 
-        return UsageStatistics.fromStatus(statusResult.value, planResult.value);
-      },
-      context: 'SettingsService.getUsageStatistics',
-    );
+      return UsageStatistics.fromStatus(statusResult.value, planResult.value);
+    }, context: 'SettingsService.getUsageStatistics');
   }
 
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）
   Future<Result<int>> getRemainingGenerations() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final result = await _subscriptionService!.getRemainingGenerations();
-        if (result.isFailure) {
-          throw result.error;
-        }
+      final result = await _subscriptionService!.getRemainingGenerations();
+      if (result.isFailure) {
+        throw result.error;
+      }
 
-        return result.value;
-      },
-      context: 'SettingsService.getRemainingGenerations',
-    );
+      return result.value;
+    }, context: 'SettingsService.getRemainingGenerations');
   }
 
   /// Phase 1.8.1.4: 次回リセット日を取得（既存のSubscriptionServiceメソッドのラッパー）
   Future<Result<DateTime>> getNextResetDate() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final result = await _subscriptionService!.getNextResetDate();
-        if (result.isFailure) {
-          throw result.error;
-        }
+      final result = await _subscriptionService!.getNextResetDate();
+      if (result.isFailure) {
+        throw result.error;
+      }
 
-        return result.value;
-      },
-      context: 'SettingsService.getNextResetDate',
-    );
+      return result.value;
+    }, context: 'SettingsService.getNextResetDate');
   }
 
   /// Phase 1.8.1.4: プラン変更可能かどうかを確認
   Future<Result<bool>> canChangePlan() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        // 現在の状態を確認して、プラン変更が可能かどうかを判定
-        final statusResult = await _subscriptionService!.getCurrentStatus();
-        if (statusResult.isFailure) {
-          throw statusResult.error;
-        }
+      // 現在の状態を確認して、プラン変更が可能かどうかを判定
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
 
-        // サブスクリプションが初期化されていればプラン変更可能
-        return _subscriptionService!.isInitialized;
-      },
-      context: 'SettingsService.canChangePlan',
-    );
+      // サブスクリプションが初期化されていればプラン変更可能
+      return _subscriptionService!.isInitialized;
+    }, context: 'SettingsService.canChangePlan');
   }
 
   /// Phase 1.8.1.4: プラン比較情報を取得
   Future<Result<List<SubscriptionPlan>>> getAvailablePlans() async {
-    return ResultHelper.tryExecuteAsync(
-      () async {
-        if (_subscriptionService == null) {
-          throw StateError('SubscriptionService is not initialized');
-        }
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
 
-        final result = _subscriptionService!.getAvailablePlans();
-        if (result.isFailure) {
-          throw result.error;
-        }
+      final result = _subscriptionService!.getAvailablePlans();
+      if (result.isFailure) {
+        throw result.error;
+      }
 
-        return result.value;
-      },
-      context: 'SettingsService.getAvailablePlans',
-    );
+      return result.value;
+    }, context: 'SettingsService.getAvailablePlans');
   }
 }

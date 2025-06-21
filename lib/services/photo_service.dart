@@ -8,9 +8,9 @@ import 'interfaces/photo_service_interface.dart';
 class PhotoService implements PhotoServiceInterface {
   // シングルトンパターン
   static PhotoService? _instance;
-  
+
   PhotoService._();
-  
+
   static PhotoService getInstance() {
     _instance ??= PhotoService._();
     return _instance!;
@@ -185,7 +185,10 @@ class PhotoService implements PhotoServiceInterface {
   Future<List<int>?> getThumbnailData(AssetEntity asset) async {
     try {
       final Uint8List? data = await asset.thumbnailDataWithSize(
-        const ThumbnailSize(AppConstants.defaultThumbnailWidth, AppConstants.defaultThumbnailHeight),
+        const ThumbnailSize(
+          AppConstants.defaultThumbnailWidth,
+          AppConstants.defaultThumbnailHeight,
+        ),
       );
       return data?.toList();
     } catch (e) {
@@ -205,7 +208,7 @@ class PhotoService implements PhotoServiceInterface {
   }) async {
     final DateTime startOfDay = DateTime(date.year, date.month, date.day);
     final DateTime endOfDay = startOfDay.add(const Duration(days: 1));
-    
+
     return await getPhotosInDateRange(
       startDate: startOfDay,
       endDate: endOfDay,
@@ -251,7 +254,9 @@ class PhotoService implements PhotoServiceInterface {
   ///
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリスト
-  Future<List<AssetEntity>> getAllPhotos({int limit = AppConstants.maxPhotoLimit}) async {
+  Future<List<AssetEntity>> getAllPhotos({
+    int limit = AppConstants.maxPhotoLimit,
+  }) async {
     // 権限チェック
     final bool hasPermission = await requestPermission();
     debugPrint('写真アクセス権限: $hasPermission');

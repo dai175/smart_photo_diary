@@ -14,22 +14,22 @@ class AppSpacing {
   static const double xxs = base * 0.25; // 2
 
   /// 極小スペース（4pt）
-  static const double xs = base * 0.5;   // 4
+  static const double xs = base * 0.5; // 4
 
   /// 小スペース（8pt）
-  static const double sm = base * 1.0;   // 8
+  static const double sm = base * 1.0; // 8
 
   /// 中スペース（12pt）
-  static const double md = base * 1.5;   // 12
+  static const double md = base * 1.5; // 12
 
   /// 大スペース（16pt）
-  static const double lg = base * 2.0;   // 16
+  static const double lg = base * 2.0; // 16
 
   /// 特大スペース（24pt）
-  static const double xl = base * 3.0;   // 24
+  static const double xl = base * 3.0; // 24
 
   /// 超特大スペース（32pt）
-  static const double xxl = base * 4.0;  // 32
+  static const double xxl = base * 4.0; // 32
 
   /// 巨大スペース（48pt）
   static const double xxxl = base * 6.0; // 48
@@ -73,8 +73,12 @@ class AppSpacing {
   // ============= PADDING PRESETS =============
   /// 画面端のパディング
   static const EdgeInsets screenPadding = EdgeInsets.all(lg);
-  static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(horizontal: lg);
-  static const EdgeInsets screenPaddingVertical = EdgeInsets.symmetric(vertical: lg);
+  static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(
+    horizontal: lg,
+  );
+  static const EdgeInsets screenPaddingVertical = EdgeInsets.symmetric(
+    vertical: lg,
+  );
 
   /// カードのパディング
   static const EdgeInsets cardPadding = EdgeInsets.all(lg);
@@ -228,13 +232,7 @@ class AppSpacing {
     double blurRadius = elevationMd,
     Offset offset = const Offset(0, 2),
   }) {
-    return [
-      BoxShadow(
-        color: color,
-        blurRadius: blurRadius,
-        offset: offset,
-      ),
-    ];
+    return [BoxShadow(color: color, blurRadius: blurRadius, offset: offset)];
   }
 
   /// ボーダーラディウスを作成

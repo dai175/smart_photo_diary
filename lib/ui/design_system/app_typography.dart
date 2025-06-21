@@ -75,7 +75,6 @@ class AppTypography {
 
   /// Title Small - 小さなタイトル（14sp）
   static const TextStyle titleSmall = TextStyle(
-    
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
@@ -85,7 +84,6 @@ class AppTypography {
   // ============= LABEL STYLES =============
   /// Label Large - 大きなラベル（14sp）
   static const TextStyle labelLarge = TextStyle(
-    
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
@@ -94,7 +92,6 @@ class AppTypography {
 
   /// Label Medium - 中程度のラベル（12sp）
   static const TextStyle labelMedium = TextStyle(
-    
     fontSize: 12,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
@@ -103,7 +100,6 @@ class AppTypography {
 
   /// Label Small - 小さなラベル（11sp）
   static const TextStyle labelSmall = TextStyle(
-    
     fontSize: 11,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
@@ -129,7 +125,6 @@ class AppTypography {
 
   /// Body Small - 小さな本文（12sp）
   static const TextStyle bodySmall = TextStyle(
-    
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
@@ -139,7 +134,6 @@ class AppTypography {
   // ============= JAPANESE TEXT STYLES =============
   /// 日本語用の見出しスタイル
   static const TextStyle japaneseHeadline = TextStyle(
-    
     fontSize: 24,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -148,7 +142,6 @@ class AppTypography {
 
   /// 日本語用の本文スタイル
   static const TextStyle japaneseBody = TextStyle(
-    
     fontSize: 16,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -157,7 +150,6 @@ class AppTypography {
 
   /// 日本語用の小さな本文スタイル
   static const TextStyle japaneseBodySmall = TextStyle(
-    
     fontSize: 14,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -167,7 +159,6 @@ class AppTypography {
   // ============= SPECIAL STYLES =============
   /// アプリタイトル用スタイル
   static const TextStyle appTitle = TextStyle(
-    
     fontSize: 20,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.15,
@@ -176,7 +167,6 @@ class AppTypography {
 
   /// 日記タイトル用スタイル
   static const TextStyle diaryTitle = TextStyle(
-    
     fontSize: 18,
     fontWeight: FontWeight.w600,
     letterSpacing: 0,
@@ -185,7 +175,6 @@ class AppTypography {
 
   /// 日記内容用スタイル
   static const TextStyle diaryContent = TextStyle(
-    
     fontSize: 16,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -194,7 +183,6 @@ class AppTypography {
 
   /// タグ用スタイル
   static const TextStyle tag = TextStyle(
-    
     fontSize: 12,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.4,
@@ -203,7 +191,6 @@ class AppTypography {
 
   /// 統計数値用スタイル
   static const TextStyle statisticsNumber = TextStyle(
-    
     fontSize: 32,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.5,
@@ -212,7 +199,6 @@ class AppTypography {
 
   /// 統計ラベル用スタイル
   static const TextStyle statisticsLabel = TextStyle(
-    
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
@@ -221,7 +207,6 @@ class AppTypography {
 
   /// ボタンテキスト用スタイル
   static const TextStyle button = TextStyle(
-    
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
@@ -230,7 +215,6 @@ class AppTypography {
 
   /// キャプション用スタイル
   static const TextStyle caption = TextStyle(
-    
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
@@ -254,18 +238,15 @@ class AppTypography {
   }
 
   /// テキストに影を追加
-  static TextStyle withShadow(TextStyle style, {
+  static TextStyle withShadow(
+    TextStyle style, {
     Color shadowColor = Colors.black26,
     double blurRadius = 2.0,
     Offset offset = const Offset(0, 1),
   }) {
     return style.copyWith(
       shadows: [
-        Shadow(
-          color: shadowColor,
-          blurRadius: blurRadius,
-          offset: offset,
-        ),
+        Shadow(color: shadowColor, blurRadius: blurRadius, offset: offset),
       ],
     );
   }

@@ -3,11 +3,10 @@ import 'package:smart_photo_diary/models/subscription_plan.dart';
 
 void main() {
   group('SubscriptionPlan', () {
-    
     group('基本プロパティテスト', () {
       test('Basic プランの基本プロパティが正しく設定されている', () {
         const plan = SubscriptionPlan.basic;
-        
+
         expect(plan.displayName, equals('Basic'));
         expect(plan.planId, equals('basic'));
         expect(plan.yearlyPrice, equals(0));
@@ -19,7 +18,7 @@ void main() {
 
       test('Premium Monthly プランの基本プロパティが正しく設定されている', () {
         const plan = SubscriptionPlan.premiumMonthly;
-        
+
         expect(plan.displayName, equals('Premium (月額)'));
         expect(plan.planId, equals('premium_monthly'));
         expect(plan.price, equals(300));
@@ -35,7 +34,7 @@ void main() {
 
       test('Premium Yearly プランの基本プロパティが正しく設定されている', () {
         const plan = SubscriptionPlan.premiumYearly;
-        
+
         expect(plan.displayName, equals('Premium (年額)'));
         expect(plan.planId, equals('premium_yearly'));
         expect(plan.price, equals(2800));
@@ -53,7 +52,7 @@ void main() {
     group('機能フラグテスト', () {
       test('Basic プランの機能フラグが正しく設定されている', () {
         const plan = SubscriptionPlan.basic;
-        
+
         expect(plan.hasWritingPrompts, isFalse);
         expect(plan.hasAdvancedFilters, isFalse);
         expect(plan.hasAdvancedAnalytics, isFalse);
@@ -62,7 +61,7 @@ void main() {
 
       test('Premium Monthly プランの機能フラグが正しく設定されている', () {
         const plan = SubscriptionPlan.premiumMonthly;
-        
+
         expect(plan.hasWritingPrompts, isTrue);
         expect(plan.hasAdvancedFilters, isTrue);
         expect(plan.hasAdvancedAnalytics, isTrue);
@@ -71,7 +70,7 @@ void main() {
 
       test('Premium Yearly プランの機能フラグが正しく設定されている', () {
         const plan = SubscriptionPlan.premiumYearly;
-        
+
         expect(plan.hasWritingPrompts, isTrue);
         expect(plan.hasAdvancedFilters, isTrue);
         expect(plan.hasAdvancedAnalytics, isTrue);
@@ -83,7 +82,7 @@ void main() {
       test('Basic プランの機能リストが正しく取得できる', () {
         const plan = SubscriptionPlan.basic;
         final features = plan.features;
-        
+
         expect(features, isA<List<String>>());
         expect(features.length, equals(6));
         expect(features, contains('月10回までのAI日記生成'));
@@ -97,11 +96,11 @@ void main() {
       test('Premium プランの機能リストが正しく取得できる', () {
         const monthlyPlan = SubscriptionPlan.premiumMonthly;
         const yearlyPlan = SubscriptionPlan.premiumYearly;
-        
+
         // 両プランとも同じ機能リストを持つ
         for (final plan in [monthlyPlan, yearlyPlan]) {
           final features = plan.features;
-          
+
           expect(features, isA<List<String>>());
           expect(features.length, equals(9));
           expect(features, contains('月100回までのAI日記生成'));
@@ -121,14 +120,14 @@ void main() {
       test('Basic プランの日平均生成回数が正しく計算される', () {
         const plan = SubscriptionPlan.basic;
         final dailyAverage = plan.dailyAverageGenerations;
-        
+
         expect(dailyAverage, closeTo(0.33, 0.01)); // 10/30 ≈ 0.33
       });
 
       test('Premium プランの日平均生成回数が正しく計算される', () {
         const monthlyPlan = SubscriptionPlan.premiumMonthly;
         const yearlyPlan = SubscriptionPlan.premiumYearly;
-        
+
         for (final plan in [monthlyPlan, yearlyPlan]) {
           final dailyAverage = plan.dailyAverageGenerations;
           expect(dailyAverage, closeTo(3.33, 0.01)); // 100/30 ≈ 3.33
@@ -136,26 +135,50 @@ void main() {
       });
 
       test('プラン説明文が正しく取得できる', () {
-        expect(SubscriptionPlan.basic.description, 
-               equals('日記を試してみたい新規ユーザー、軽いユーザー向け'));
-        expect(SubscriptionPlan.premiumMonthly.description, 
-               equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'));
-        expect(SubscriptionPlan.premiumYearly.description, 
-               equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'));
+        expect(
+          SubscriptionPlan.basic.description,
+          equals('日記を試してみたい新規ユーザー、軽いユーザー向け'),
+        );
+        expect(
+          SubscriptionPlan.premiumMonthly.description,
+          equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'),
+        );
+        expect(
+          SubscriptionPlan.premiumYearly.description,
+          equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'),
+        );
       });
     });
 
     group('fromIdメソッドテスト', () {
       test('正しいプランIDから対応するプランを取得できる', () {
-        expect(SubscriptionPlan.fromId('basic'), equals(SubscriptionPlan.basic));
-        expect(SubscriptionPlan.fromId('premium_monthly'), equals(SubscriptionPlan.premiumMonthly));
-        expect(SubscriptionPlan.fromId('premium_yearly'), equals(SubscriptionPlan.premiumYearly));
+        expect(
+          SubscriptionPlan.fromId('basic'),
+          equals(SubscriptionPlan.basic),
+        );
+        expect(
+          SubscriptionPlan.fromId('premium_monthly'),
+          equals(SubscriptionPlan.premiumMonthly),
+        );
+        expect(
+          SubscriptionPlan.fromId('premium_yearly'),
+          equals(SubscriptionPlan.premiumYearly),
+        );
       });
 
       test('大文字小文字を区別しない', () {
-        expect(SubscriptionPlan.fromId('BASIC'), equals(SubscriptionPlan.basic));
-        expect(SubscriptionPlan.fromId('Premium_Monthly'), equals(SubscriptionPlan.premiumMonthly));
-        expect(SubscriptionPlan.fromId('PREMIUM_YEARLY'), equals(SubscriptionPlan.premiumYearly));
+        expect(
+          SubscriptionPlan.fromId('BASIC'),
+          equals(SubscriptionPlan.basic),
+        );
+        expect(
+          SubscriptionPlan.fromId('Premium_Monthly'),
+          equals(SubscriptionPlan.premiumMonthly),
+        );
+        expect(
+          SubscriptionPlan.fromId('PREMIUM_YEARLY'),
+          equals(SubscriptionPlan.premiumYearly),
+        );
       });
 
       test('不正なプランIDでArgumentErrorが発生する', () {
@@ -177,7 +200,7 @@ void main() {
     group('enum値テスト', () {
       test('すべてのプランが存在する', () {
         final allPlans = SubscriptionPlan.values;
-        
+
         expect(allPlans.length, equals(3));
         expect(allPlans, contains(SubscriptionPlan.basic));
         expect(allPlans, contains(SubscriptionPlan.premiumMonthly));
@@ -187,7 +210,7 @@ void main() {
       test('各プランのplanIdが一意である', () {
         final planIds = SubscriptionPlan.values.map((p) => p.planId).toList();
         final uniqueIds = planIds.toSet();
-        
+
         expect(planIds.length, equals(uniqueIds.length));
       });
 
@@ -197,7 +220,7 @@ void main() {
             .where((id) => id.isNotEmpty)
             .toList();
         final uniqueIds = productIds.toSet();
-        
+
         expect(productIds.length, equals(uniqueIds.length));
       });
     });

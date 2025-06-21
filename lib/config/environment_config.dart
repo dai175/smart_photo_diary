@@ -12,22 +12,25 @@ class EnvironmentConfig {
     try {
       await dotenv.load();
       _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'];
-      
+
       // プラン強制設定を読み込み（デバッグモードでのみ有効）
       if (kDebugMode) {
-        final forcePlanValue = dotenv.env['FORCE_PLAN'] ?? 
-                              const String.fromEnvironment('FORCE_PLAN', defaultValue: '');
+        final forcePlanValue =
+            dotenv.env['FORCE_PLAN'] ??
+            const String.fromEnvironment('FORCE_PLAN', defaultValue: '');
         _cachedForcePlan = forcePlanValue.toLowerCase();
       } else {
         _cachedForcePlan = null; // 本番ビルドでは常にnull
       }
-      
+
       _isInitialized = true;
-      
+
       debugPrint('EnvironmentConfig初期化完了');
-      debugPrint('GEMINI_API_KEY: ${_cachedGeminiApiKey?.isNotEmpty == true ? "設定済み" : "未設定"}');
+      debugPrint(
+        'GEMINI_API_KEY: ${_cachedGeminiApiKey?.isNotEmpty == true ? "設定済み" : "未設定"}',
+      );
       debugPrint('FORCE_PLAN: $_cachedForcePlan');
-      
+
       if (_cachedGeminiApiKey?.isNotEmpty == true) {
         debugPrint('APIキープレビュー: ${_cachedGeminiApiKey!.substring(0, 8)}...');
       }
@@ -43,12 +46,12 @@ class EnvironmentConfig {
       debugPrint('警告: EnvironmentConfigが初期化されていません');
       return '';
     }
-    
+
     final key = _cachedGeminiApiKey ?? '';
     if (key.isEmpty) {
       debugPrint('警告: GEMINI_API_KEYが設定されていません');
     }
-    
+
     return key;
   }
 
@@ -56,9 +59,9 @@ class EnvironmentConfig {
   static bool get isInitialized => _isInitialized;
 
   /// APIキーが有効かどうかを確認
-  static bool get hasValidApiKey => 
-      _isInitialized && 
-      _cachedGeminiApiKey != null && 
+  static bool get hasValidApiKey =>
+      _isInitialized &&
+      _cachedGeminiApiKey != null &&
       _cachedGeminiApiKey!.isNotEmpty &&
       _cachedGeminiApiKey!.startsWith('AIza');
 
@@ -67,16 +70,21 @@ class EnvironmentConfig {
   static String? get forcePlan {
     if (!kDebugMode) return null; // 本番ビルドでは常にnull
     if (!_isInitialized) return null;
-    
+
     final plan = _cachedForcePlan;
     if (plan == null || plan.isEmpty) return null;
-    
+
     // 有効なプラン名のみ許可
-    const validPlans = ['basic', 'premium', 'premium_monthly', 'premium_yearly'];
+    const validPlans = [
+      'basic',
+      'premium',
+      'premium_monthly',
+      'premium_yearly',
+    ];
     if (validPlans.contains(plan)) {
       return plan;
     }
-    
+
     debugPrint('警告: 無効なFORCE_PLANが指定されました: $plan');
     debugPrint('有効な値: ${validPlans.join(', ')}');
     return null;
@@ -101,8 +109,12 @@ class EnvironmentConfig {
     debugPrint('=== Environment Config Debug ===');
     debugPrint('初期化状態: $_isInitialized');
     debugPrint('デバッグモード: $kDebugMode');
-    debugPrint('APIキー設定: ${_cachedGeminiApiKey?.isNotEmpty == true ? "有効" : "無効"}');
-    debugPrint('APIキー形式: ${_cachedGeminiApiKey?.startsWith('AIza') == true ? "正常" : "異常"}');
+    debugPrint(
+      'APIキー設定: ${_cachedGeminiApiKey?.isNotEmpty == true ? "有効" : "無効"}',
+    );
+    debugPrint(
+      'APIキー形式: ${_cachedGeminiApiKey?.startsWith('AIza') == true ? "正常" : "異常"}',
+    );
     debugPrint('プラン強制: $_cachedForcePlan');
     debugPrint('dotenv環境: ${dotenv.env.keys.length}個のキー');
     debugPrint('================================');

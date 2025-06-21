@@ -25,16 +25,13 @@ class RecentDiariesWidget extends StatelessWidget {
     return _buildContent(context);
   }
 
-
   Widget _buildContent(BuildContext context) {
     if (isLoading) {
       return Column(
         children: List.generate(
           3,
           (index) => Padding(
-            padding: EdgeInsets.only(
-              bottom: index < 2 ? AppSpacing.md : 0,
-            ),
+            padding: EdgeInsets.only(bottom: index < 2 ? AppSpacing.md : 0),
             child: const DiaryCardShimmer(),
           ),
         ),
@@ -77,12 +74,16 @@ class RecentDiariesWidget extends StatelessWidget {
       children: recentDiaries
           .asMap()
           .entries
-          .map((entry) => Padding(
-                padding: EdgeInsets.only(
-                  bottom: entry.key < recentDiaries.length - 1 ? AppSpacing.md : 0,
-                ),
-                child: _buildDiaryCard(context, entry.value),
-              ))
+          .map(
+            (entry) => Padding(
+              padding: EdgeInsets.only(
+                bottom: entry.key < recentDiaries.length - 1
+                    ? AppSpacing.md
+                    : 0,
+              ),
+              child: _buildDiaryCard(context, entry.value),
+            ),
+          )
           .toList(),
     );
   }
@@ -171,7 +172,9 @@ class RecentDiariesWidget extends StatelessWidget {
                 vertical: AppSpacing.xxs,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                color: Theme.of(
+                  context,
+                ).colorScheme.secondary.withValues(alpha: 0.1),
                 borderRadius: AppSpacing.chipRadius,
               ),
               child: Text(

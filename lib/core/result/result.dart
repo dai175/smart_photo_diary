@@ -1,7 +1,7 @@
 import '../errors/app_exceptions.dart';
 
 /// Result型 - 成功（Success）または失敗（Failure）を表現する型
-/// 
+///
 /// 例外をスローする代わりに、成功・失敗を明示的に表現することで、
 /// より安全で予測可能なエラーハンドリングを実現します。
 sealed class Result<T> {
@@ -18,7 +18,9 @@ sealed class Result<T> {
     if (this is Success<T>) {
       return (this as Success<T>).data;
     }
-    throw StateError('Result is not Success. Check isSuccess before accessing value.');
+    throw StateError(
+      'Result is not Success. Check isSuccess before accessing value.',
+    );
   }
 
   /// 失敗時のエラーを取得（成功時は例外をスロー）
@@ -26,7 +28,9 @@ sealed class Result<T> {
     if (this is Failure<T>) {
       return (this as Failure<T>).exception;
     }
-    throw StateError('Result is not Failure. Check isFailure before accessing error.');
+    throw StateError(
+      'Result is not Failure. Check isFailure before accessing error.',
+    );
   }
 
   /// 成功時の値を安全に取得（失敗時はnullを返す）
@@ -72,7 +76,9 @@ sealed class Result<T> {
         final result = await mapper((this as Success<T>).data);
         return Success(result);
       } catch (e) {
-        return Failure(ServiceException('非同期マップ処理中にエラーが発生しました', originalError: e));
+        return Failure(
+          ServiceException('非同期マップ処理中にエラーが発生しました', originalError: e),
+        );
       }
     }
     return Failure((this as Failure<T>).exception);
@@ -118,22 +124,17 @@ sealed class Result<T> {
 
   @override
   String toString() {
-    return fold(
-      (value) => 'Success($value)',
-      (error) => 'Failure($error)',
-    );
+    return fold((value) => 'Success($value)', (error) => 'Failure($error)');
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is Result<T> &&
         fold(
-          (value) => other.fold(
-            (otherValue) => value == otherValue,
-            (_) => false,
-          ),
+          (value) =>
+              other.fold((otherValue) => value == otherValue, (_) => false),
           (error) => other.fold(
             (_) => false,
             (otherError) => error.toString() == otherError.toString(),

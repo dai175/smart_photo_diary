@@ -10,7 +10,9 @@ import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
 class MockAiServiceInterface extends Mock implements AiServiceInterface {}
+
 class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
@@ -116,7 +118,7 @@ void main() {
         final mockAsset2 = MockAssetEntity();
         when(() => mockAsset1.id).thenReturn('asset1');
         when(() => mockAsset2.id).thenReturn('asset2');
-        
+
         final assets = [mockAsset1, mockAsset2];
 
         // Act - Test conversion logic
@@ -202,7 +204,7 @@ void main() {
       test('should identify morning time correctly', () {
         // Arrange & Act
         final morningTime = DateTime(2024, 1, 15, 8); // 8 AM
-        
+
         // Assert - Test time-based logic
         expect(morningTime.hour >= 6 && morningTime.hour < 12, isTrue);
       });
@@ -210,7 +212,7 @@ void main() {
       test('should identify afternoon time correctly', () {
         // Arrange & Act
         final afternoonTime = DateTime(2024, 1, 15, 15); // 3 PM
-        
+
         // Assert - Test time-based logic
         expect(afternoonTime.hour >= 12 && afternoonTime.hour < 18, isTrue);
       });
@@ -218,7 +220,7 @@ void main() {
       test('should identify evening time correctly', () {
         // Arrange & Act
         final eveningTime = DateTime(2024, 1, 15, 19); // 7 PM
-        
+
         // Assert - Test time-based logic
         expect(eveningTime.hour >= 18 && eveningTime.hour < 22, isTrue);
       });
@@ -226,7 +228,7 @@ void main() {
       test('should identify night time correctly', () {
         // Arrange & Act
         final nightTime = DateTime(2024, 1, 15, 23); // 11 PM
-        
+
         // Assert - Test time-based logic
         expect(nightTime.hour >= 22 || nightTime.hour < 6, isTrue);
       });
@@ -234,16 +236,16 @@ void main() {
       test('should generate appropriate fallback tag based on time', () {
         // Test the time-to-tag mapping logic
         final testCases = [
-          (DateTime(2024, 1, 15, 8), '朝'),   // Morning
-          (DateTime(2024, 1, 15, 15), '昼'),  // Afternoon
+          (DateTime(2024, 1, 15, 8), '朝'), // Morning
+          (DateTime(2024, 1, 15, 15), '昼'), // Afternoon
           (DateTime(2024, 1, 15, 19), '夕方'), // Evening
-          (DateTime(2024, 1, 15, 23), '夜'),   // Night
+          (DateTime(2024, 1, 15, 23), '夜'), // Night
         ];
 
         for (final (dateTime, expectedTag) in testCases) {
           String actualTag;
           final hour = dateTime.hour;
-          
+
           if (hour >= 6 && hour < 12) {
             actualTag = '朝';
           } else if (hour >= 12 && hour < 18) {
@@ -253,7 +255,7 @@ void main() {
           } else {
             actualTag = '夜';
           }
-          
+
           expect(actualTag, equals(expectedTag));
         }
       });
@@ -262,23 +264,27 @@ void main() {
     group('Dependency Injection Verification', () {
       test('should verify mock AI service interface', () {
         // Arrange
-        when(() => mockAiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => Success(['mock-tag']));
+        when(
+          () => mockAiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => Success(['mock-tag']));
 
         // Act & Assert - Verify mock is properly configured
         expect(mockAiService, isA<AiServiceInterface>());
-        
+
         // Verify the mock has not been called yet
-        verifyNever(() => mockAiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        ));
+        verifyNever(
+          () => mockAiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        );
       });
 
       test('should create instance with dependencies', () {

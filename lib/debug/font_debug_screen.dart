@@ -41,21 +41,36 @@ class _FontDebugScreenState extends State<FontDebugScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFontTest('Theme.headlineSmall', Theme.of(context).textTheme.headlineSmall),
-            _buildFontTest('Theme.titleLarge', Theme.of(context).textTheme.titleLarge),
-            _buildFontTest('Theme.bodyLarge', Theme.of(context).textTheme.bodyLarge),
-            _buildFontTest('Theme.labelLarge', Theme.of(context).textTheme.labelLarge),
-            
+            _buildFontTest(
+              'Theme.headlineSmall',
+              Theme.of(context).textTheme.headlineSmall,
+            ),
+            _buildFontTest(
+              'Theme.titleLarge',
+              Theme.of(context).textTheme.titleLarge,
+            ),
+            _buildFontTest(
+              'Theme.bodyLarge',
+              Theme.of(context).textTheme.bodyLarge,
+            ),
+            _buildFontTest(
+              'Theme.labelLarge',
+              Theme.of(context).textTheme.labelLarge,
+            ),
+
             const Divider(height: 40),
-            
+
             _buildManualFontTest('Sans-serif', 'sans-serif'),
             _buildManualFontTest('Android Default', null),
             _buildManualFontTest('Roboto', 'Roboto'),
             _buildManualFontTest('Default (null)', null),
-            
+
             const Divider(height: 40),
-            
-            const Text('テストテキスト（サイズ別）:', style: TextStyle(fontWeight: FontWeight.bold)),
+
+            const Text(
+              'テストテキスト（サイズ別）:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             _buildSizeTest('最適化', 12),
             _buildSizeTest('最適化', 16),
             _buildSizeTest('最適化', 20),
@@ -114,10 +129,7 @@ class _FontDebugScreenState extends State<FontDebugScreen> {
           const SizedBox(height: 8),
           Text(
             '最適化テスト - Manual font: $fontFamily',
-            style: TextStyle(
-              fontFamily: fontFamily,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontFamily: fontFamily, fontSize: 18),
           ),
         ],
       ),
@@ -141,10 +153,7 @@ class _FontDebugScreenState extends State<FontDebugScreen> {
             ),
           ),
           const SizedBox(width: 20),
-          Text(
-            text,
-            style: TextStyle(fontSize: size),
-          ),
+          Text(text, style: TextStyle(fontSize: size)),
         ],
       ),
     );

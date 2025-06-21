@@ -13,7 +13,7 @@ import '../ui/animations/micro_interactions.dart';
 import '../utils/prompt_category_utils.dart';
 
 /// ライティングプロンプト表示画面
-/// 
+///
 /// Premium機能として、ユーザーに書くヒントとなるプロンプトを表示します。
 /// カテゴリ別フィルタリング、ランダム表示、検索機能を提供します。
 class WritingPromptsScreen extends StatefulWidget {
@@ -26,13 +26,13 @@ class WritingPromptsScreen extends StatefulWidget {
 class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
   late IPromptService _promptService;
   late ISubscriptionService _subscriptionService;
-  
+
   bool _isLoading = true;
   bool _isPremium = false;
   List<WritingPrompt> _displayedPrompts = [];
   PromptCategory? _selectedCategory;
   String _searchQuery = '';
-  
+
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -50,14 +50,16 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
   Future<void> _initializeServices() async {
     try {
       _promptService = await ServiceLocator().getAsync<IPromptService>();
-      _subscriptionService = await ServiceLocator().getAsync<ISubscriptionService>();
-      
+      _subscriptionService = await ServiceLocator()
+          .getAsync<ISubscriptionService>();
+
       // Premium状態を取得
-      final accessResult = await _subscriptionService.canAccessPremiumFeatures();
+      final accessResult = await _subscriptionService
+          .canAccessPremiumFeatures();
       if (accessResult.isSuccess) {
         _isPremium = accessResult.value;
       }
-      
+
       // 初期プロンプトを読み込み
       await _loadPrompts();
     } catch (e) {
@@ -74,18 +76,24 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
   Future<void> _loadPrompts() async {
     try {
       List<WritingPrompt> prompts;
-      
+
       if (_searchQuery.isNotEmpty) {
         // 検索クエリがある場合
-        prompts = _promptService.searchPrompts(_searchQuery, isPremium: _isPremium);
+        prompts = _promptService.searchPrompts(
+          _searchQuery,
+          isPremium: _isPremium,
+        );
       } else if (_selectedCategory != null) {
         // カテゴリが選択されている場合
-        prompts = _promptService.getPromptsByCategory(_selectedCategory!, isPremium: _isPremium);
+        prompts = _promptService.getPromptsByCategory(
+          _selectedCategory!,
+          isPremium: _isPremium,
+        );
       } else {
         // 全プロンプトを表示
         prompts = _promptService.getPromptsForPlan(isPremium: _isPremium);
       }
-      
+
       setState(() {
         _displayedPrompts = prompts;
       });
@@ -116,7 +124,7 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
       isPremium: _isPremium,
       category: _selectedCategory,
     );
-    
+
     if (randomPrompt != null) {
       _showPromptDetail(randomPrompt);
     }
@@ -215,11 +223,7 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.star_rounded,
-                size: 64,
-                color: AppColors.warning,
-              ),
+              Icon(Icons.star_rounded, size: 64, color: AppColors.warning),
               const SizedBox(height: AppSpacing.lg),
               Text(
                 'Premium機能',
@@ -302,9 +306,12 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
           _buildCategoryChip('全て', null),
           const SizedBox(width: AppSpacing.sm),
           ...PromptCategory.values.map((category) {
-            final prompts = _promptService.getPromptsByCategory(category, isPremium: _isPremium);
+            final prompts = _promptService.getPromptsByCategory(
+              category,
+              isPremium: _isPremium,
+            );
             if (prompts.isEmpty) return const SizedBox.shrink();
-            
+
             return Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
               child: _buildCategoryChip(
@@ -320,7 +327,7 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
 
   Widget _buildCategoryChip(String label, PromptCategory? category) {
     final isSelected = _selectedCategory == category;
-    
+
     return MicroInteractions.scaleOnTap(
       onTap: () => _onCategorySelected(category),
       child: Container(
@@ -383,13 +390,19 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
                       vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.2),
+                      color: PromptCategoryUtils.getCategoryColor(
+                        prompt.category,
+                      ).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(AppSpacing.sm),
                     ),
                     child: Text(
-                      PromptCategoryUtils.getCategoryDisplayName(prompt.category),
+                      PromptCategoryUtils.getCategoryDisplayName(
+                        prompt.category,
+                      ),
                       style: AppTypography.labelSmall.copyWith(
-                        color: PromptCategoryUtils.getCategoryColor(prompt.category),
+                        color: PromptCategoryUtils.getCategoryColor(
+                          prompt.category,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -431,7 +444,9 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
                         vertical: AppSpacing.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(AppSpacing.sm),
                       ),
                       child: Text(
@@ -472,9 +487,7 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              _searchQuery.isNotEmpty
-                  ? '検索条件を変更してお試しください'
-                  : '別のカテゴリを選択してください',
+              _searchQuery.isNotEmpty ? '検索条件を変更してお試しください' : '別のカテゴリを選択してください',
               style: AppTypography.bodyMedium.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -512,7 +525,9 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
               Container(
                 padding: AppSpacing.cardPadding,
                 decoration: BoxDecoration(
-                  color: PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.1),
+                  color: PromptCategoryUtils.getCategoryColor(
+                    prompt.category,
+                  ).withValues(alpha: 0.1),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(AppSpacing.lg),
                     topRight: Radius.circular(AppSpacing.lg),
@@ -526,11 +541,15 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: PromptCategoryUtils.getCategoryColor(prompt.category),
+                        color: PromptCategoryUtils.getCategoryColor(
+                          prompt.category,
+                        ),
                         borderRadius: BorderRadius.circular(AppSpacing.sm),
                       ),
                       child: Text(
-                        PromptCategoryUtils.getCategoryDisplayName(prompt.category),
+                        PromptCategoryUtils.getCategoryDisplayName(
+                          prompt.category,
+                        ),
                         style: AppTypography.labelSmall.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -588,13 +607,19 @@ class _WritingPromptsScreenState extends State<WritingPromptsScreen> {
                               vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(AppSpacing.sm),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.sm,
+                              ),
                             ),
                             child: Text(
                               tag,
                               style: AppTypography.labelSmall.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           );

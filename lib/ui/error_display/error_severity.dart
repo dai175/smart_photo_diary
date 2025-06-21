@@ -2,13 +2,13 @@
 enum ErrorSeverity {
   /// 情報レベル - ユーザーが知っておくべき情報
   info,
-  
+
   /// 警告レベル - 注意が必要だが操作は継続可能
   warning,
-  
+
   /// エラーレベル - 操作が失敗したが回復可能
   error,
-  
+
   /// 重大レベル - アプリの機能に大きな影響がある
   critical,
 }
@@ -17,13 +17,13 @@ enum ErrorSeverity {
 enum ErrorDisplayMethod {
   /// SnackBar - 軽微な情報やエラー
   snackBar,
-  
+
   /// インラインエラー - 画面内に表示される継続的なエラー状態
   inline,
-  
+
   /// ダイアログ - 重要なエラーでユーザーの確認が必要
   dialog,
-  
+
   /// フルスクリーンエラー - アプリ全体に影響する重大なエラー
   fullScreen,
 }

@@ -14,11 +14,8 @@ import '../widgets/home_content_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
-  
-  const HomeScreen({
-    super.key,
-    this.onThemeChanged,
-  });
+
+  const HomeScreen({super.key, this.onThemeChanged});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,10 +23,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
+
   // コントローラー
   late final PhotoSelectionController _photoController;
-  
+
   // 最近の日記リスト
   List<DiaryEntry> _recentDiaries = [];
   bool _loadingDiaries = true;
@@ -41,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadTodayPhotos();
     _loadRecentDiaries();
   }
-  
+
   @override
   void dispose() {
     _photoController.dispose();
@@ -56,29 +53,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showUsedPhotoModal() {
     _showSimpleDialog(AppConstants.usedPhotoMessage);
   }
-  
+
   void _showSimpleDialog(String message) {
     DialogUtils.showSimpleDialog(context, message);
   }
 
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
-    await Future.wait([
-      _loadTodayPhotos(),
-      _loadRecentDiaries(),
-    ]);
+    await Future.wait([_loadTodayPhotos(), _loadRecentDiaries()]);
   }
 
   // 最近の日記を読み込む
   Future<void> _loadRecentDiaries() async {
     try {
       if (!mounted) return;
-      
+
       setState(() {
         _loadingDiaries = true;
       });
 
-      final diaryService = await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
       final allEntries = await diaryService.getSortedDiaryEntries();
 
       if (!mounted) return;
@@ -119,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // 権限リクエストと写真の読み込み
   Future<void> _loadTodayPhotos() async {
     if (!mounted) return;
-    
+
     _photoController.setLoading(true);
 
     try {
@@ -185,11 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
       const StatisticsScreen(),
     ];
 
-
     // 設定画面を追加
-    screens.add(SettingsScreen(
-      onThemeChanged: widget.onThemeChanged,
-    ));
+    screens.add(SettingsScreen(onThemeChanged: widget.onThemeChanged));
 
     return screens;
   }
@@ -210,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _currentIndex = index;
           });
-          
+
           // ホームタブに戻った時に最近の日記を再読み込み（使用済み写真状態を更新）
           if (index == 0) {
             _loadRecentDiaries();
@@ -220,19 +212,21 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
+
   // ナビゲーションアイテムを構築
   List<BottomNavigationBarItem> _buildNavigationItems() {
     final items = <BottomNavigationBarItem>[];
-    
+
     // 全アイテムを追加
     for (int i = 0; i < AppConstants.navigationIcons.length; i++) {
-      items.add(BottomNavigationBarItem(
-        icon: Icon(AppConstants.navigationIcons[i]),
-        label: AppConstants.navigationLabels[i],
-      ));
+      items.add(
+        BottomNavigationBarItem(
+          icon: Icon(AppConstants.navigationIcons[i]),
+          label: AppConstants.navigationLabels[i],
+        ),
+      );
     }
-    
+
     return items;
   }
 }

@@ -69,12 +69,10 @@ class CustomDialog extends StatelessWidget {
               children: [
                 // ヘッダー部分
                 if (icon != null || title != null) _buildHeader(),
-                
+
                 // コンテンツ部分
-                Flexible(
-                  child: _buildContent(),
-                ),
-                
+                Flexible(child: _buildContent()),
+
                 // アクション部分
                 if (actions != null && actions!.isNotEmpty) _buildActions(),
               ],
@@ -91,68 +89,78 @@ class CustomDialog extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          color: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(AppSpacing.lg),
             topRight: Radius.circular(AppSpacing.lg),
           ),
         ),
-      child: Column(
-        children: [
-          // アイコン
-          if (icon != null) ...[
-            Builder(
-              builder: (context) => Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: iconColor?.withValues(alpha: 0.2) ?? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon!,
-                  size: AppSpacing.iconLg,
-                  color: iconColor ?? Theme.of(context).colorScheme.primary,
+        child: Column(
+          children: [
+            // アイコン
+            if (icon != null) ...[
+              Builder(
+                builder: (context) => Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color:
+                        iconColor?.withValues(alpha: 0.2) ??
+                        Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon!,
+                    size: AppSpacing.iconLg,
+                    color: iconColor ?? Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
+            ],
+
+            // タイトル
+            if (title != null)
+              Builder(
+                builder: (context) => Text(
+                  title!,
+                  style: AppTypography.headlineSmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
-          
-          // タイトル
-          if (title != null)
-            Builder(
-              builder: (context) => Text(
-                title!,
-                style: AppTypography.headlineSmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-        ],
-      ),
+        ),
       ),
     );
   }
 
   Widget _buildContent() {
-    final effectivePadding = contentPadding ?? const EdgeInsets.all(AppSpacing.lg);
-    
+    final effectivePadding =
+        contentPadding ?? const EdgeInsets.all(AppSpacing.lg);
+
     return Container(
       width: double.infinity,
       padding: effectivePadding,
-      child: content ?? (message != null ? 
-        Builder(
-          builder: (context) => Text(
-            message!,
-            style: AppTypography.bodyLarge.copyWith(
-              height: 1.5,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ) : const SizedBox.shrink()),
+      child:
+          content ??
+          (message != null
+              ? Builder(
+                  builder: (context) => Text(
+                    message!,
+                    style: AppTypography.bodyLarge.copyWith(
+                      height: 1.5,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : const SizedBox.shrink()),
     );
   }
 
@@ -166,17 +174,21 @@ class CustomDialog extends StatelessWidget {
         AppSpacing.lg,
       ),
       child: Row(
-        mainAxisAlignment: actions!.length == 1 
-            ? MainAxisAlignment.center 
+        mainAxisAlignment: actions!.length == 1
+            ? MainAxisAlignment.center
             : MainAxisAlignment.spaceEvenly,
-        children: actions!.map((action) => Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: actions!.length > 1 ? AppSpacing.xs : 0,
-            ),
-            child: action,
-          ),
-        )).toList(),
+        children: actions!
+            .map(
+              (action) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: actions!.length > 1 ? AppSpacing.xs : 0,
+                  ),
+                  child: action,
+                ),
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -203,24 +215,12 @@ class CustomDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isPrimary) {
       if (isDestructive) {
-        return DangerButton(
-          onPressed: onPressed,
-          text: text,
-          icon: icon,
-        );
+        return DangerButton(onPressed: onPressed, text: text, icon: icon);
       } else {
-        return PrimaryButton(
-          onPressed: onPressed,
-          text: text,
-          icon: icon,
-        );
+        return PrimaryButton(onPressed: onPressed, text: text, icon: icon);
       }
     } else {
-      return SecondaryButton(
-        onPressed: onPressed,
-        text: text,
-        icon: icon,
-      );
+      return SecondaryButton(onPressed: onPressed, text: text, icon: icon);
     }
   }
 }
@@ -239,11 +239,7 @@ class PresetDialogs {
       title: title,
       message: message,
       actions: [
-        CustomDialogAction(
-          text: 'OK',
-          isPrimary: true,
-          onPressed: onConfirm,
-        ),
+        CustomDialogAction(text: 'OK', isPrimary: true, onPressed: onConfirm),
       ],
     );
   }
@@ -260,11 +256,7 @@ class PresetDialogs {
       title: title,
       message: message,
       actions: [
-        CustomDialogAction(
-          text: 'OK',
-          isPrimary: true,
-          onPressed: onConfirm,
-        ),
+        CustomDialogAction(text: 'OK', isPrimary: true, onPressed: onConfirm),
       ],
     );
   }
@@ -285,10 +277,7 @@ class PresetDialogs {
       title: title,
       message: message,
       actions: [
-        CustomDialogAction(
-          text: cancelText,
-          onPressed: onCancel,
-        ),
+        CustomDialogAction(text: cancelText, onPressed: onCancel),
         CustomDialogAction(
           text: confirmText,
           isPrimary: true,
@@ -300,9 +289,7 @@ class PresetDialogs {
   }
 
   /// ローディングダイアログ
-  static CustomDialog loading({
-    required String message,
-  }) {
+  static CustomDialog loading({required String message}) {
     return CustomDialog(
       barrierDismissible: false,
       content: Column(
@@ -312,12 +299,12 @@ class PresetDialogs {
             builder: (context) => Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
-              child: const CircularProgressIndicator(
-                strokeWidth: 3,
-              ),
+              child: const CircularProgressIndicator(strokeWidth: 3),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -354,9 +341,7 @@ class PresetDialogs {
         children: [
           Text(
             '現在のプラン（$planName）では、月間$limit回までAI日記生成をご利用いただけます。',
-            style: AppTypography.bodyMedium.copyWith(
-              height: 1.5,
-            ),
+            style: AppTypography.bodyMedium.copyWith(height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -364,54 +349,60 @@ class PresetDialogs {
             builder: (context) => Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.errorContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.error.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '今月の残り回数:',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '今月の残り回数:',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '$remaining回',
-                      style: AppTypography.labelLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: remaining > 0 ? AppColors.success : AppColors.error,
+                      Text(
+                        '$remaining回',
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: remaining > 0
+                              ? AppColors.success
+                              : AppColors.error,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'リセット日:',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'リセット日:',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${nextResetDate.month}月${nextResetDate.day}日',
-                      style: AppTypography.labelMedium.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      Text(
+                        '${nextResetDate.month}月${nextResetDate.day}日',
+                        style: AppTypography.labelMedium.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -426,10 +417,7 @@ class PresetDialogs {
         ],
       ),
       actions: [
-        CustomDialogAction(
-          text: '後で',
-          onPressed: onDismiss,
-        ),
+        CustomDialogAction(text: '後で', onPressed: onDismiss),
         CustomDialogAction(
           text: 'Premiumにアップグレード',
           isPrimary: true,
@@ -452,7 +440,7 @@ class PresetDialogs {
   }) {
     final usagePercentage = used / limit;
     final isNearLimit = usagePercentage >= 0.8;
-    
+
     return CustomDialog(
       icon: Icons.analytics_rounded,
       iconColor: isNearLimit ? AppColors.warning : AppColors.info,
@@ -468,110 +456,120 @@ class PresetDialogs {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
-          
+
           // 使用量プログレスバー
           Builder(
             builder: (context) => Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '使用量',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '使用量',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '$used / $limit回',
-                      style: AppTypography.labelLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      Text(
+                        '$used / $limit回',
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                
-                // プログレスバー
-                Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
+                    ],
                   ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: usagePercentage.clamp(0.0, 1.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isNearLimit ? AppColors.warning : AppColors.primary,
-                        borderRadius: BorderRadius.circular(4),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // プログレスバー
+                  Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: usagePercentage.clamp(0.0, 1.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isNearLimit
+                              ? AppColors.warning
+                              : AppColors.primary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '残り回数:',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '残り回数:',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '$remaining回',
-                      style: AppTypography.labelLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: remaining > 0 ? AppColors.success : AppColors.error,
+                      Text(
+                        '$remaining回',
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: remaining > 0
+                              ? AppColors.success
+                              : AppColors.error,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.md),
-          
+
           // リセット情報
           Builder(
             builder: (context) => Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(AppSpacing.xs),
               ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.refresh_rounded,
-                  size: AppSpacing.iconSm,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '${nextResetDate.month}月${nextResetDate.day}日にリセット',
-                  style: AppTypography.labelSmall.copyWith(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.refresh_rounded,
+                    size: AppSpacing.iconSm,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    '${nextResetDate.month}月${nextResetDate.day}日にリセット',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          
+
           // アップグレード案内（Basic プランの場合）
           if (planName == 'Basic') ...[
             const SizedBox(height: AppSpacing.md),
@@ -587,10 +585,7 @@ class PresetDialogs {
         ],
       ),
       actions: [
-        CustomDialogAction(
-          text: '閉じる',
-          onPressed: onDismiss,
-        ),
+        CustomDialogAction(text: '閉じる', onPressed: onDismiss),
         if (planName == 'Basic')
           CustomDialogAction(
             text: 'アップグレード',

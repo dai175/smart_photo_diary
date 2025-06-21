@@ -55,11 +55,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: _buildFilterChips(context),
-          ),
+          Wrap(spacing: 8, runSpacing: 4, children: _buildFilterChips(context)),
         ],
       ),
     );
@@ -70,44 +66,50 @@ class ActiveFiltersDisplay extends StatelessWidget {
 
     // 日付範囲チップ
     if (filter.dateRange != null) {
-      chips.add(_buildChip(
-        context: context,
-        label: '期間指定',
-        icon: Icons.calendar_today,
-        onRemove: onRemoveDateRange,
-      ));
+      chips.add(
+        _buildChip(
+          context: context,
+          label: '期間指定',
+          icon: Icons.calendar_today,
+          onRemove: onRemoveDateRange,
+        ),
+      );
     }
 
     // タグチップ
     for (final tag in filter.selectedTags) {
-      chips.add(_buildChip(
-        context: context,
-        label: '#$tag',
-        icon: Icons.tag,
-        onRemove: () => onRemoveTag?.call(tag),
-      ));
+      chips.add(
+        _buildChip(
+          context: context,
+          label: '#$tag',
+          icon: Icons.tag,
+          onRemove: () => onRemoveTag?.call(tag),
+        ),
+      );
     }
-
-
 
     // 時間帯チップ
     for (final time in filter.timeOfDay) {
-      chips.add(_buildChip(
-        context: context,
-        label: time,
-        icon: _getTimeIcon(time),
-        onRemove: () => onRemoveTimeOfDay?.call(time),
-      ));
+      chips.add(
+        _buildChip(
+          context: context,
+          label: time,
+          icon: _getTimeIcon(time),
+          onRemove: () => onRemoveTimeOfDay?.call(time),
+        ),
+      );
     }
 
     // 検索チップ
     if (filter.searchText != null && filter.searchText!.isNotEmpty) {
-      chips.add(_buildChip(
-        context: context,
-        label: '検索: ${filter.searchText!}',
-        icon: Icons.search,
-        onRemove: onRemoveSearch,
-      ));
+      chips.add(
+        _buildChip(
+          context: context,
+          label: '検索: ${filter.searchText!}',
+          icon: Icons.search,
+          onRemove: onRemoveSearch,
+        ),
+      );
     }
 
     return chips;
@@ -125,19 +127,17 @@ class ActiveFiltersDisplay extends StatelessWidget {
         size: 16,
         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
       ),
-      label: Text(
-        label,
-        style: const TextStyle(fontSize: 12),
-      ),
+      label: Text(label, style: const TextStyle(fontSize: 12)),
       deleteIcon: const Icon(Icons.close, size: 16),
       onDeleted: onRemove,
-      backgroundColor: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.secondaryContainer.withValues(alpha: 0.5),
       side: BorderSide.none,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
     );
   }
-
 
   IconData _getTimeIcon(String time) {
     switch (time) {

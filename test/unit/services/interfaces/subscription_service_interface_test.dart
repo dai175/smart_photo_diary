@@ -145,7 +145,8 @@ class MockSubscriptionService implements ISubscriptionService {
     final result = PurchaseResult(
       status: PurchaseStatus.purchased,
       productId: plan.productId,
-      transactionId: 'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
+      transactionId:
+          'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
       purchaseDate: DateTime.now(),
       plan: plan,
     );
@@ -208,18 +209,18 @@ void main() {
     group('基本サービスメソッドテスト', () {
       test('初期化が正しく動作する', () async {
         expect(service.isInitialized, isFalse);
-        
+
         final result = await service.initialize();
-        
+
         expect(result.isSuccess, isTrue);
         expect(service.isInitialized, isTrue);
       });
 
       test('現在の状態を取得できる', () async {
         await service.initialize();
-        
+
         final result = await service.getCurrentStatus();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isA<SubscriptionStatus>());
         expect(result.value.planId, equals('basic'));
@@ -227,9 +228,9 @@ void main() {
 
       test('状態をリフレッシュできる', () async {
         await service.initialize();
-        
+
         final result = await service.refreshStatus();
-        
+
         expect(result.isSuccess, isTrue);
       });
     });
@@ -237,7 +238,7 @@ void main() {
     group('プラン管理メソッドテスト', () {
       test('利用可能なプラン一覧を取得できる', () {
         final result = service.getAvailablePlans();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, equals(SubscriptionPlan.values));
         expect(result.value.length, equals(3));
@@ -246,26 +247,29 @@ void main() {
       test('特定のプラン情報を取得できる', () {
         final basicResult = service.getPlan('basic');
         final premiumYearlyResult = service.getPlan('premium_yearly');
-        
+
         expect(basicResult.isSuccess, isTrue);
         expect(basicResult.value, equals(SubscriptionPlan.basic));
-        
+
         expect(premiumYearlyResult.isSuccess, isTrue);
-        expect(premiumYearlyResult.value, equals(SubscriptionPlan.premiumYearly));
+        expect(
+          premiumYearlyResult.value,
+          equals(SubscriptionPlan.premiumYearly),
+        );
       });
 
       test('不正なプランIDでエラーが返される', () {
         final result = service.getPlan('invalid');
-        
+
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
       });
 
       test('現在のプランを取得できる', () async {
         await service.initialize();
-        
+
         final result = await service.getCurrentPlan();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, equals(SubscriptionPlan.basic));
       });
@@ -274,57 +278,57 @@ void main() {
     group('使用量管理メソッドテスト', () {
       test('AI生成の使用可否をチェックできる', () async {
         await service.initialize();
-        
+
         final result = await service.canUseAiGeneration();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue);
       });
 
       test('AI生成使用量をインクリメントできる', () async {
         await service.initialize();
-        
+
         final beforeUsage = await service.getMonthlyUsage();
         expect(beforeUsage.value, equals(0));
-        
+
         final incrementResult = await service.incrementAiUsage();
         expect(incrementResult.isSuccess, isTrue);
-        
+
         final afterUsage = await service.getMonthlyUsage();
         expect(afterUsage.value, equals(1));
       });
 
       test('残りAI生成回数を取得できる', () async {
         await service.initialize();
-        
+
         final result = await service.getRemainingGenerations();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, equals(10)); // Basic plan limit
       });
 
       test('使用量をリセットできる', () async {
         await service.initialize();
-        
+
         // 使用量を増やす
         await service.incrementAiUsage();
         await service.incrementAiUsage();
-        
+
         final beforeReset = await service.getMonthlyUsage();
         expect(beforeReset.value, equals(2));
-        
+
         final resetResult = await service.resetUsage();
         expect(resetResult.isSuccess, isTrue);
-        
+
         final afterReset = await service.getMonthlyUsage();
         expect(afterReset.value, equals(0));
       });
 
       test('次のリセット日を取得できる', () async {
         await service.initialize();
-        
+
         final result = await service.getNextResetDate();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isA<DateTime>());
       });
@@ -333,45 +337,45 @@ void main() {
     group('アクセス権限チェックメソッドテスト', () {
       test('プレミアム機能のアクセス権をチェックできる', () async {
         await service.initialize();
-        
+
         final result = await service.canAccessPremiumFeatures();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basic plan
       });
 
       test('ライティングプロンプトのアクセス権をチェックできる', () async {
         await service.initialize();
-        
+
         final result = await service.canAccessWritingPrompts();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basic plan
       });
 
       test('高度なフィルタのアクセス権をチェックできる', () async {
         await service.initialize();
-        
+
         final result = await service.canAccessAdvancedFilters();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basic plan
       });
 
       test('高度な分析のアクセス権をチェックできる', () async {
         await service.initialize();
-        
+
         final result = await service.canAccessAdvancedAnalytics();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basic plan
       });
 
       test('優先サポートのアクセス権をチェックできる', () async {
         await service.initialize();
-        
+
         final result = await service.canAccessPrioritySupport();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basic plan
       });
@@ -380,9 +384,9 @@ void main() {
     group('購入関連メソッドテスト', () {
       test('商品情報を取得できる', () async {
         await service.initialize();
-        
+
         final result = await service.getProducts();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isA<List<PurchaseProduct>>());
         expect(result.value.length, equals(1));
@@ -391,9 +395,11 @@ void main() {
 
       test('プランを購入できる', () async {
         await service.initialize();
-        
-        final result = await service.purchasePlan(SubscriptionPlan.premiumYearly);
-        
+
+        final result = await service.purchasePlan(
+          SubscriptionPlan.premiumYearly,
+        );
+
         expect(result.isSuccess, isTrue);
         expect(result.value.status, equals(PurchaseStatus.purchased));
         expect(result.value.plan, equals(SubscriptionPlan.premiumYearly));
@@ -402,41 +408,43 @@ void main() {
 
       test('購入を復元できる', () async {
         await service.initialize();
-        
+
         final result = await service.restorePurchases();
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isA<List<PurchaseResult>>());
       });
 
       test('購入を検証できる', () async {
         await service.initialize();
-        
+
         final result = await service.validatePurchase('test_transaction');
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue);
       });
 
       test('プランを変更できる', () async {
         await service.initialize();
-        
-        final changeResult = await service.changePlan(SubscriptionPlan.premiumYearly);
+
+        final changeResult = await service.changePlan(
+          SubscriptionPlan.premiumYearly,
+        );
         expect(changeResult.isSuccess, isTrue);
-        
+
         final currentPlan = await service.getCurrentPlan();
         expect(currentPlan.value, equals(SubscriptionPlan.premiumYearly));
       });
 
       test('サブスクリプションをキャンセルできる', () async {
         await service.initialize();
-        
+
         // Premium に変更してからキャンセル
         await service.changePlan(SubscriptionPlan.premiumYearly);
-        
+
         final cancelResult = await service.cancelSubscription();
         expect(cancelResult.isSuccess, isTrue);
-        
+
         final currentPlan = await service.getCurrentPlan();
         expect(currentPlan.value, equals(SubscriptionPlan.basic));
       });
@@ -445,26 +453,26 @@ void main() {
     group('ストリーム・ライフサイクルテスト', () {
       test('状態ストリームが利用できる', () async {
         await service.initialize();
-        
+
         final stream = service.statusStream;
-        
+
         expect(stream, isA<Stream<SubscriptionStatus>>());
-        
+
         final firstValue = await stream.first;
         expect(firstValue, isA<SubscriptionStatus>());
       });
 
       test('購入ストリームが利用できる', () async {
         await service.initialize();
-        
+
         final stream = service.purchaseStream;
-        
+
         expect(stream, isA<Stream<PurchaseResult>>());
       });
 
       test('サービスを破棄できる', () async {
         await service.initialize();
-        
+
         // disposeは例外を投げないことを確認
         await expectLater(service.dispose(), completes);
       });

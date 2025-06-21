@@ -10,9 +10,7 @@ class WidgetTestHelpers {
   static Widget wrapWithMaterialApp(Widget child, {ThemeData? theme}) {
     return MaterialApp(
       theme: theme ?? ThemeData(useMaterial3: true),
-      home: Scaffold(
-        body: child,
-      ),
+      home: Scaffold(body: child),
     );
   }
 
@@ -20,9 +18,7 @@ class WidgetTestHelpers {
   static Widget wrapWithScaffold(Widget child, {ThemeData? theme}) {
     return MaterialApp(
       theme: theme ?? ThemeData(useMaterial3: true),
-      home: Scaffold(
-        body: SafeArea(child: child),
-      ),
+      home: Scaffold(body: SafeArea(child: child)),
     );
   }
 
@@ -77,17 +73,17 @@ class WidgetTestHelpers {
   static Future<void> setUpTestEnvironment() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     MockPlatformChannels.setupMocks();
-    
+
     // Initialize Hive for testing
     await _initializeHive();
   }
-  
+
   /// Initialize Hive for testing
   static Future<void> _initializeHive() async {
     try {
       const testDirectory = '/tmp/smart_photo_diary_test';
       await Hive.initFlutter(testDirectory);
-      
+
       // Register adapters if not already registered
       if (!Hive.isAdapterRegistered(0)) {
         Hive.registerAdapter(DiaryEntryAdapter());
@@ -118,26 +114,38 @@ class WidgetTestHelpers {
 
   /// Find widget by type and verify it exists
   static void expectWidgetExists<T extends Widget>(Finder finder) {
-    expect(finder, findsOneWidget,
-        reason: 'Expected to find one ${T.toString()} widget');
+    expect(
+      finder,
+      findsOneWidget,
+      reason: 'Expected to find one ${T.toString()} widget',
+    );
   }
 
   /// Find multiple widgets by type and verify count
   static void expectWidgetCount<T extends Widget>(Finder finder, int count) {
-    expect(finder, findsNWidgets(count),
-        reason: 'Expected to find $count ${T.toString()} widgets');
+    expect(
+      finder,
+      findsNWidgets(count),
+      reason: 'Expected to find $count ${T.toString()} widgets',
+    );
   }
 
   /// Verify text exists in widget
   static void expectTextExists(String text) {
-    expect(find.text(text), findsOneWidget,
-        reason: 'Expected to find text: "$text"');
+    expect(
+      find.text(text),
+      findsOneWidget,
+      reason: 'Expected to find text: "$text"',
+    );
   }
 
   /// Verify text exists multiple times
   static void expectTextCount(String text, int count) {
-    expect(find.text(text), findsNWidgets(count),
-        reason: 'Expected to find text "$text" $count times');
+    expect(
+      find.text(text),
+      findsNWidgets(count),
+      reason: 'Expected to find text "$text" $count times',
+    );
   }
 
   /// Tap widget and pump
@@ -147,7 +155,10 @@ class WidgetTestHelpers {
   }
 
   /// Long press widget and pump
-  static Future<void> longPressAndPump(WidgetTester tester, Finder finder) async {
+  static Future<void> longPressAndPump(
+    WidgetTester tester,
+    Finder finder,
+  ) async {
     await tester.longPress(finder);
     await tester.pump();
   }
@@ -226,9 +237,6 @@ class WidgetTestHelpers {
     Widget child, {
     TextDirection textDirection = TextDirection.ltr,
   }) {
-    return Directionality(
-      textDirection: textDirection,
-      child: child,
-    );
+    return Directionality(textDirection: textDirection, child: child);
   }
 }

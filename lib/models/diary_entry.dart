@@ -89,8 +89,10 @@ class DiaryEntry extends HiveObject {
   // タグが有効かどうかをチェック（7日間有効）
   bool get hasValidTags {
     if (cachedTags == null || tagsGeneratedAt == null) return false;
-    
-    final daysSinceGeneration = DateTime.now().difference(tagsGeneratedAt!).inDays;
+
+    final daysSinceGeneration = DateTime.now()
+        .difference(tagsGeneratedAt!)
+        .inDays;
     return daysSinceGeneration < 7; // 7日以内なら有効
   }
 

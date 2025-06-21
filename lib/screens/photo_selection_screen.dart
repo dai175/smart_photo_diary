@@ -17,10 +17,7 @@ import '../utils/prompt_category_utils.dart';
 class PhotoSelectionScreen extends StatefulWidget {
   final WritingPrompt? selectedPrompt;
 
-  const PhotoSelectionScreen({
-    super.key,
-    this.selectedPrompt,
-  });
+  const PhotoSelectionScreen({super.key, this.selectedPrompt});
 
   @override
   State<PhotoSelectionScreen> createState() => _PhotoSelectionScreenState();
@@ -44,7 +41,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
 
   Future<void> _loadTodayPhotos() async {
     if (!mounted) return;
-    
+
     _photoController.setLoading(true);
 
     try {
@@ -92,7 +89,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
         children: [
           // 選択されたプロンプトの表示（ある場合）
           if (widget.selectedPrompt != null) _buildSelectedPrompt(),
-          
+
           // 写真グリッド
           Expanded(
             child: SingleChildScrollView(
@@ -106,7 +103,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
               ),
             ),
           ),
-          
+
           // 日記作成ボタン
           _buildCreateDiaryButton(),
         ],
@@ -116,15 +113,19 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
 
   Widget _buildSelectedPrompt() {
     final prompt = widget.selectedPrompt!;
-    
+
     return Container(
       margin: AppSpacing.screenPadding,
       padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.1),
+        color: PromptCategoryUtils.getCategoryColor(
+          prompt.category,
+        ).withValues(alpha: 0.1),
         borderRadius: AppSpacing.cardRadius,
         border: Border.all(
-          color: PromptCategoryUtils.getCategoryColor(prompt.category).withValues(alpha: 0.3),
+          color: PromptCategoryUtils.getCategoryColor(
+            prompt.category,
+          ).withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -190,10 +191,7 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
               size: AppSpacing.iconMd,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text(
-              '今日の写真',
-              style: AppTypography.titleLarge,
-            ),
+            Text('今日の写真', style: AppTypography.titleLarge),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -230,22 +228,28 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
                   : null,
               width: double.infinity,
               height: AppSpacing.buttonHeightLg,
-              backgroundColor: _photoController.selectedCount > 0 
-                  ? AppColors.primary 
-                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              foregroundColor: _photoController.selectedCount > 0 
-                  ? Colors.white 
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-              shadowColor: _photoController.selectedCount > 0 
-                  ? AppColors.primary.withValues(alpha: 0.3) 
+              backgroundColor: _photoController.selectedCount > 0
+                  ? AppColors.primary
+                  : Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.3),
+              foregroundColor: _photoController.selectedCount > 0
+                  ? Colors.white
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+              shadowColor: _photoController.selectedCount > 0
+                  ? AppColors.primary.withValues(alpha: 0.3)
                   : null,
-              elevation: _photoController.selectedCount > 0 ? AppSpacing.elevationSm : 0,
+              elevation: _photoController.selectedCount > 0
+                  ? AppSpacing.elevationSm
+                  : 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    _photoController.selectedCount > 0 
-                        ? Icons.auto_awesome_rounded 
+                    _photoController.selectedCount > 0
+                        ? Icons.auto_awesome_rounded
                         : Icons.photo_camera_outlined,
                     size: AppSpacing.iconSm,
                   ),

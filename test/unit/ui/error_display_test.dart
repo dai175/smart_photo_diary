@@ -118,10 +118,7 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    service.showSuccessMessage(
-                      context,
-                      '成功メッセージ',
-                    );
+                    service.showSuccessMessage(context, '成功メッセージ');
                   },
                   child: const Text('成功を表示'),
                 );
@@ -148,10 +145,7 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    service.showInfoMessage(
-                      context,
-                      '情報メッセージ',
-                    );
+                    service.showInfoMessage(context, '情報メッセージ');
                   },
                   child: const Text('情報を表示'),
                 );
@@ -245,8 +239,14 @@ void main() {
       expect(ErrorDisplayConfig.error.method, ErrorDisplayMethod.dialog);
       expect(ErrorDisplayConfig.error.logError, isTrue);
 
-      expect(ErrorDisplayConfig.criticalWithRetry.severity, ErrorSeverity.critical);
-      expect(ErrorDisplayConfig.criticalWithRetry.method, ErrorDisplayMethod.dialog);
+      expect(
+        ErrorDisplayConfig.criticalWithRetry.severity,
+        ErrorSeverity.critical,
+      );
+      expect(
+        ErrorDisplayConfig.criticalWithRetry.method,
+        ErrorDisplayMethod.dialog,
+      );
       expect(ErrorDisplayConfig.criticalWithRetry.dismissible, isFalse);
       expect(ErrorDisplayConfig.criticalWithRetry.showRetryButton, isTrue);
       expect(ErrorDisplayConfig.criticalWithRetry.logError, isTrue);
@@ -271,7 +271,10 @@ void main() {
       expect(ErrorDisplayMethod.values, contains(ErrorDisplayMethod.snackBar));
       expect(ErrorDisplayMethod.values, contains(ErrorDisplayMethod.inline));
       expect(ErrorDisplayMethod.values, contains(ErrorDisplayMethod.dialog));
-      expect(ErrorDisplayMethod.values, contains(ErrorDisplayMethod.fullScreen));
+      expect(
+        ErrorDisplayMethod.values,
+        contains(ErrorDisplayMethod.fullScreen),
+      );
     });
   });
 }

@@ -36,7 +36,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Future<void> _loadAvailableTags() async {
     try {
       // テスト時は注入されたサービスを使用、本番時は通常のgetInstance
-      final diaryService = widget.diaryService ?? await DiaryService.getInstance();
+      final diaryService =
+          widget.diaryService ?? await DiaryService.getInstance();
       final popularTags = await diaryService.getPopularTags(limit: 20);
       setState(() {
         _availableTags = popularTags;
@@ -55,7 +56,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       // まず開始日を選択
       final startDate = await showDatePicker(
         context: context,
-        initialDate: _currentFilter.dateRange?.start ?? DateTime.now().subtract(const Duration(days: 7)),
+        initialDate:
+            _currentFilter.dateRange?.start ??
+            DateTime.now().subtract(const Duration(days: 7)),
         firstDate: DateTime(2020),
         lastDate: DateTime.now(),
         helpText: '開始日を選択',
@@ -115,7 +118,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     });
   }
 
-
   void _toggleTimeOfDay(String time) {
     final newTimeOfDay = Set<String>.from(_currentFilter.timeOfDay);
     if (newTimeOfDay.contains(time)) {
@@ -129,7 +131,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     });
   }
 
-
   void _clearAllFilters() {
     setState(() {
       _currentFilter = DiaryFilter.empty;
@@ -141,11 +142,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return '${formatter.format(dateRange.start)} - ${formatter.format(dateRange.end)}';
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * AppConstants.bottomSheetHeightRatio,
+      height:
+          MediaQuery.of(context).size.height *
+          AppConstants.bottomSheetHeightRatio,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -170,14 +172,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               children: [
                 Text(
                   'フィルタ',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                TextOnlyButton(
-                  onPressed: _clearAllFilters,
-                  text: 'すべてクリア',
-                ),
+                TextOnlyButton(onPressed: _clearAllFilters, text: 'すべてクリア'),
               ],
             ),
           ),
@@ -197,9 +196,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       Card(
                         child: ListTile(
                           leading: const Icon(Icons.calendar_today),
-                          title: Text(_currentFilter.dateRange != null
-                              ? _formatDateRange(_currentFilter.dateRange!)
-                              : '期間を選択'),
+                          title: Text(
+                            _currentFilter.dateRange != null
+                                ? _formatDateRange(_currentFilter.dateRange!)
+                                : '期間を選択',
+                          ),
                           trailing: _currentFilter.dateRange != null
                               ? IconButton(
                                   icon: const Icon(Icons.clear),
@@ -222,28 +223,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           child: Center(child: CircularProgressIndicator()),
                         )
                       : _availableTags.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.all(20),
-                              child: Text(
-                                'タグがありません',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            )
-                          : Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _availableTags.map((tag) {
-                                final isSelected = _currentFilter.selectedTags.contains(tag);
-                                return FilterChip(
-                                  label: Text('#$tag'),
-                                  selected: isSelected,
-                                  onSelected: (_) => _toggleTag(tag),
-                                );
-                              }).toList(),
-                            ),
+                      ? const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                            'タグがありません',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        )
+                      : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _availableTags.map((tag) {
+                            final isSelected = _currentFilter.selectedTags
+                                .contains(tag);
+                            return FilterChip(
+                              label: Text('#$tag'),
+                              selected: isSelected,
+                              onSelected: (_) => _toggleTag(tag),
+                            );
+                          }).toList(),
+                        ),
                 ),
-
-
 
                 // 時間帯
                 _buildSection(
@@ -252,7 +252,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     spacing: 8,
                     runSpacing: 8,
                     children: ['朝', '昼', '夕方', '夜'].map((time) {
-                      final isSelected = _currentFilter.timeOfDay.contains(time);
+                      final isSelected = _currentFilter.timeOfDay.contains(
+                        time,
+                      );
                       return FilterChip(
                         label: Text(time),
                         selected: isSelected,
@@ -295,9 +297,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         child,

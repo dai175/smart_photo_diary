@@ -18,9 +18,7 @@ class DiaryService implements DiaryServiceInterface {
   final AiServiceInterface _aiService;
 
   // プライベートコンストラクタ（依存性注入用）
-  DiaryService._(
-    this._aiService,
-  );
+  DiaryService._(this._aiService);
 
   // 従来のシングルトンパターン（後方互換性のため保持）
   static Future<DiaryService> getInstance() async {
@@ -81,12 +79,11 @@ class DiaryService implements DiaryServiceInterface {
         debugPrint('_diaryBoxが未初期化です。再初期化します...');
         await _init();
       }
-      
 
       // 新しい日記エントリーを作成
       final now = DateTime.now();
       final id = _uuid.v4();
-      
+
       debugPrint('DiaryEntry作成中...');
       debugPrint('ID: $id');
       debugPrint('日付: $date');
@@ -144,7 +141,9 @@ class DiaryService implements DiaryServiceInterface {
 
   // 日付でソートされた日記エントリーを取得
   @override
-  Future<List<DiaryEntry>> getSortedDiaryEntries({bool descending = true}) async {
+  Future<List<DiaryEntry>> getSortedDiaryEntries({
+    bool descending = true,
+  }) async {
     final entries = await getAllDiaryEntries();
     entries.sort(
       (a, b) =>
@@ -193,7 +192,7 @@ class DiaryService implements DiaryServiceInterface {
           date: entry.date,
           photoCount: entry.photoIds.length,
         );
-        
+
         if (tagsResult.isSuccess) {
           await entry.updateTags(tagsResult.value);
           debugPrint('タグ生成完了: ${entry.id} -> ${tagsResult.value}');
@@ -213,7 +212,7 @@ class DiaryService implements DiaryServiceInterface {
     if (entry.hasValidTags) {
       return entry.cachedTags!;
     }
-    
+
     try {
       // キャッシュが無効または存在しない場合は新しく生成
       debugPrint('新しいタグを生成中: ${entry.id}');
@@ -223,7 +222,7 @@ class DiaryService implements DiaryServiceInterface {
         date: entry.date,
         photoCount: entry.photoIds.length,
       );
-      
+
       if (tagsResult.isSuccess) {
         // データベースに保存
         await entry.updateTags(tagsResult.value);
@@ -243,7 +242,7 @@ class DiaryService implements DiaryServiceInterface {
   // フォールバックタグを生成
   List<String> _generateFallbackTags(DiaryEntry entry) {
     final tags = <String>[];
-    
+
     // 時間帯タグのみ
     final hour = entry.date.hour;
     if (hour >= 5 && hour < 12) {
@@ -255,7 +254,7 @@ class DiaryService implements DiaryServiceInterface {
     } else {
       tags.add('夜');
     }
-    
+
     return tags;
   }
 
@@ -264,7 +263,7 @@ class DiaryService implements DiaryServiceInterface {
   Future<List<DiaryEntry>> getFilteredDiaryEntries(DiaryFilter filter) async {
     final allEntries = await getSortedDiaryEntries();
     if (!filter.isActive) return allEntries;
-    
+
     return allEntries.where((entry) => filter.matches(entry)).toList();
   }
 
@@ -273,13 +272,13 @@ class DiaryService implements DiaryServiceInterface {
   Future<Set<String>> getAllTags() async {
     if (_diaryBox == null) await _init();
     final allTags = <String>{};
-    
+
     for (final entry in _diaryBox!.values) {
       if (entry.cachedTags != null) {
         allTags.addAll(entry.cachedTags!);
       }
     }
-    
+
     return allTags;
   }
 
@@ -287,7 +286,7 @@ class DiaryService implements DiaryServiceInterface {
   Future<List<String>> getPopularTags({int limit = 10}) async {
     if (_diaryBox == null) await _init();
     final tagCounts = <String, int>{};
-    
+
     for (final entry in _diaryBox!.values) {
       if (entry.cachedTags != null) {
         for (final tag in entry.cachedTags!) {
@@ -295,10 +294,10 @@ class DiaryService implements DiaryServiceInterface {
         }
       }
     }
-    
+
     final sortedTags = tagCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
+
     return sortedTags.take(limit).map((e) => e.key).toList();
   }
 
@@ -312,9 +311,9 @@ class DiaryService implements DiaryServiceInterface {
   @override
   Future<int> getDiaryCountInPeriod(DateTime start, DateTime end) async {
     if (_diaryBox == null) await _init();
-    return _diaryBox!.values.where((entry) => 
-      entry.date.isAfter(start) && entry.date.isBefore(end)
-    ).length;
+    return _diaryBox!.values
+        .where((entry) => entry.date.isAfter(start) && entry.date.isBefore(end))
+        .length;
   }
 
   // 写真付きで日記エントリーを保存（後方互換性）

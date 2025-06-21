@@ -8,7 +8,7 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
 /// AIを使用して日記文を生成するサービスクラス（リファクタリング済み）
-/// 
+///
 /// Phase 1.7.1: SubscriptionService統合による使用量制限実装
 /// - generateDiary前の制限チェック
 /// - 使用量カウント統合
@@ -23,15 +23,14 @@ class AiService implements AiServiceInterface {
     TagGenerator? tagGenerator,
     ISubscriptionService? subscriptionService,
   }) : _diaryGenerator = diaryGenerator ?? DiaryGenerator(),
-        _tagGenerator = tagGenerator ?? TagGenerator(),
-        _subscriptionService = subscriptionService;
+       _tagGenerator = tagGenerator ?? TagGenerator(),
+       _subscriptionService = subscriptionService;
 
   @override
   Future<bool> isOnline() async {
     final connectivityResult = await Connectivity().checkConnectivity();
     return connectivityResult != ConnectivityResult.none;
   }
-
 
   @override
   Future<Result<DiaryGenerationResult>> generateDiaryFromImage({
@@ -46,20 +45,25 @@ class AiService implements AiServiceInterface {
       if (_subscriptionService != null) {
         // 月次リセット処理統合 (Phase 1.7.1.4)
         await _subscriptionService.resetMonthlyUsageIfNeeded();
-        
+
         // プラン別制限チェック（制限値はSubscriptionConstantsで管理）
         final canUseResult = await _subscriptionService.canUseAiGeneration();
         if (canUseResult.isFailure) {
           return Failure(canUseResult.error);
         }
-        
+
         if (!canUseResult.value) {
           // Phase 1.7.2.2: 制限超過時の適切なエラーメッセージ
           final currentPlanResult = await _subscriptionService.getCurrentPlan();
-          final planName = currentPlanResult.isSuccess ? currentPlanResult.value.name : 'Basic';
-          final remainingResult = await _subscriptionService.getRemainingGenerations();
-          final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
-          
+          final planName = currentPlanResult.isSuccess
+              ? currentPlanResult.value.name
+              : 'Basic';
+          final remainingResult = await _subscriptionService
+              .getRemainingGenerations();
+          final remaining = remainingResult.isSuccess
+              ? remainingResult.value
+              : 0;
+
           return Failure(
             AiProcessingException(
               'AI生成の月間制限に達しました。'
@@ -87,7 +91,6 @@ class AiService implements AiServiceInterface {
       }
 
       return Success(result);
-      
     } catch (e) {
       return Failure(
         AiProcessingException(
@@ -111,20 +114,25 @@ class AiService implements AiServiceInterface {
       if (_subscriptionService != null) {
         // 月次リセット処理統合 (Phase 1.7.1.4)
         await _subscriptionService.resetMonthlyUsageIfNeeded();
-        
+
         // プラン別制限チェック（制限値はSubscriptionConstantsで管理）
         final canUseResult = await _subscriptionService.canUseAiGeneration();
         if (canUseResult.isFailure) {
           return Failure(canUseResult.error);
         }
-        
+
         if (!canUseResult.value) {
           // Phase 1.7.2.2: 制限超過時の適切なエラーメッセージ
           final currentPlanResult = await _subscriptionService.getCurrentPlan();
-          final planName = currentPlanResult.isSuccess ? currentPlanResult.value.name : 'Basic';
-          final remainingResult = await _subscriptionService.getRemainingGenerations();
-          final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
-          
+          final planName = currentPlanResult.isSuccess
+              ? currentPlanResult.value.name
+              : 'Basic';
+          final remainingResult = await _subscriptionService
+              .getRemainingGenerations();
+          final remaining = remainingResult.isSuccess
+              ? remainingResult.value
+              : 0;
+
           return Failure(
             AiProcessingException(
               'AI生成の月間制限に達しました。'
@@ -151,7 +159,6 @@ class AiService implements AiServiceInterface {
       }
 
       return Success(result);
-      
     } catch (e) {
       return Failure(
         AiProcessingException(
@@ -180,9 +187,8 @@ class AiService implements AiServiceInterface {
         photoCount: photoCount,
         isOnline: online,
       );
-      
+
       return Success(result);
-      
     } catch (e) {
       return Failure(
         AiProcessingException(
@@ -195,40 +201,34 @@ class AiService implements AiServiceInterface {
   }
 
   // Phase 1.7.3: UI連携準備メソッド実装
-  
+
   @override
   Future<Result<int>> getRemainingGenerations() async {
     if (_subscriptionService == null) {
-      return Failure(
-        ServiceException('SubscriptionService is not available'),
-      );
+      return Failure(ServiceException('SubscriptionService is not available'));
     }
-    
+
     return await _subscriptionService.getRemainingGenerations();
   }
-  
+
   @override
   Future<Result<DateTime>> getNextResetDate() async {
     if (_subscriptionService == null) {
-      return Failure(
-        ServiceException('SubscriptionService is not available'),
-      );
+      return Failure(ServiceException('SubscriptionService is not available'));
     }
-    
+
     return await _subscriptionService.getNextResetDate();
   }
-  
+
   @override
   Future<Result<bool>> canUseAiGeneration() async {
     if (_subscriptionService == null) {
-      return Failure(
-        ServiceException('SubscriptionService is not available'),
-      );
+      return Failure(ServiceException('SubscriptionService is not available'));
     }
-    
+
     // 月次リセット処理統合
     await _subscriptionService.resetMonthlyUsageIfNeeded();
-    
+
     return await _subscriptionService.canUseAiGeneration();
   }
 }

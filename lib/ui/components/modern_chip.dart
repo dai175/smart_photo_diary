@@ -66,7 +66,7 @@ class _ModernChipState extends State<ModernChip>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  
+
   bool _isHovered = false;
   // bool _isPressed = false; // 将来的に使用予定
 
@@ -78,13 +78,9 @@ class _ModernChipState extends State<ModernChip>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -147,10 +143,7 @@ class _ModernChipState extends State<ModernChip>
                   color: _getBackgroundColor(colorData),
                   borderRadius: BorderRadius.circular(chipData.height / 2),
                   border: widget.style == ChipStyle.outlined
-                      ? Border.all(
-                          color: colorData.borderColor,
-                          width: 1.5,
-                        )
+                      ? Border.all(color: colorData.borderColor, width: 1.5)
                       : null,
                   boxShadow: widget.style == ChipStyle.elevated
                       ? [
@@ -190,7 +183,9 @@ class _ModernChipState extends State<ModernChip>
                         child: Icon(
                           widget.deleteIcon ?? Icons.close,
                           size: chipData.iconSize,
-                          color: colorData.foregroundColor.withValues(alpha: 0.7),
+                          color: colorData.foregroundColor.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                     ],
@@ -208,15 +203,17 @@ class _ModernChipState extends State<ModernChip>
     if (!widget.enabled) {
       return colorData.backgroundColor.withValues(alpha: 0.3);
     }
-    
+
     if (widget.style == ChipStyle.outlined) {
-      return _isHovered ? colorData.backgroundColor.withValues(alpha: 0.1) : Colors.transparent;
+      return _isHovered
+          ? colorData.backgroundColor.withValues(alpha: 0.1)
+          : Colors.transparent;
     }
-    
+
     if (_isHovered) {
       return colorData.hoverColor;
     }
-    
+
     return colorData.backgroundColor;
   }
 
@@ -258,7 +255,9 @@ class _ModernChipState extends State<ModernChip>
         backgroundColor: widget.backgroundColor ?? AppColors.primary,
         foregroundColor: widget.foregroundColor ?? Colors.white,
         borderColor: widget.backgroundColor ?? AppColors.primary,
-        hoverColor: (widget.backgroundColor ?? AppColors.primary).withValues(alpha: 0.8),
+        hoverColor: (widget.backgroundColor ?? AppColors.primary).withValues(
+          alpha: 0.8,
+        ),
       );
     }
 
@@ -267,7 +266,8 @@ class _ModernChipState extends State<ModernChip>
       backgroundColor: widget.backgroundColor ?? AppColors.primaryContainer,
       foregroundColor: widget.foregroundColor ?? AppColors.onPrimaryContainer,
       borderColor: widget.backgroundColor ?? AppColors.primary,
-      hoverColor: (widget.backgroundColor ?? AppColors.primaryContainer).withValues(alpha: 0.8),
+      hoverColor: (widget.backgroundColor ?? AppColors.primaryContainer)
+          .withValues(alpha: 0.8),
     );
   }
 }
@@ -332,7 +332,7 @@ class CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = _getCategoryColors(category);
-    
+
     return ModernChip(
       label: label,
       onTap: onTap,

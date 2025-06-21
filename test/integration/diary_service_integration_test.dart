@@ -9,7 +9,9 @@ import 'mocks/mock_services.dart';
 
 // Mock classes for integration testing with real database
 class MockAiServiceInterface extends Mock implements AiServiceInterface {}
+
 class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
@@ -27,7 +29,7 @@ void main() {
 
     setUp(() async {
       // Initialize services for integration testing
-      
+
       // Initialize DiaryService with real Hive database
       diaryService = await DiaryService.getInstance();
     });
@@ -76,7 +78,9 @@ void main() {
 
         // Act
         await diaryService.updateDiaryEntry(updatedEntry);
-        final retrievedEntry = await diaryService.getDiaryEntry(originalEntry.id);
+        final retrievedEntry = await diaryService.getDiaryEntry(
+          originalEntry.id,
+        );
 
         // Assert
         expect(retrievedEntry, isNotNull);
@@ -100,7 +104,6 @@ void main() {
         // Assert
         expect(retrievedEntry, isNull);
       });
-
     });
 
     group('Statistics Operations', () {
@@ -165,35 +168,40 @@ void main() {
         // Assert
         expect(count, equals(1));
       });
-
     });
 
     group('AssetEntity Conversion Integration', () {
-      test('should convert AssetEntity list to photo IDs with real data', () async {
-        // Arrange
-        final mockAsset1 = MockAssetEntity();
-        final mockAsset2 = MockAssetEntity();
-        when(() => mockAsset1.id).thenReturn('real_asset_1');
-        when(() => mockAsset2.id).thenReturn('real_asset_2');
-        
-        final testDate = DateTime(2024, 1, 15, 14, 30);
-        final assets = [mockAsset1, mockAsset2];
+      test(
+        'should convert AssetEntity list to photo IDs with real data',
+        () async {
+          // Arrange
+          final mockAsset1 = MockAssetEntity();
+          final mockAsset2 = MockAssetEntity();
+          when(() => mockAsset1.id).thenReturn('real_asset_1');
+          when(() => mockAsset2.id).thenReturn('real_asset_2');
 
-        // Act
-        final result = await diaryService.saveDiaryEntryWithPhotos(
-          date: testDate,
-          title: 'Asset Test',
-          content: 'Testing asset conversion',
-          photos: assets,
-        );
+          final testDate = DateTime(2024, 1, 15, 14, 30);
+          final assets = [mockAsset1, mockAsset2];
 
-        // Retrieve to verify
-        final retrievedEntry = await diaryService.getDiaryEntry(result.id);
+          // Act
+          final result = await diaryService.saveDiaryEntryWithPhotos(
+            date: testDate,
+            title: 'Asset Test',
+            content: 'Testing asset conversion',
+            photos: assets,
+          );
 
-        // Assert
-        expect(retrievedEntry, isNotNull);
-        expect(retrievedEntry!.photoIds, equals(['real_asset_1', 'real_asset_2']));
-      });
+          // Retrieve to verify
+          final retrievedEntry = await diaryService.getDiaryEntry(result.id);
+
+          // Assert
+          expect(retrievedEntry, isNotNull);
+          expect(
+            retrievedEntry!.photoIds,
+            equals(['real_asset_1', 'real_asset_2']),
+          );
+        },
+      );
     });
 
     group('Error Handling Integration', () {
@@ -216,12 +224,9 @@ void main() {
 
         // Act - Delete twice
         await diaryService.deleteDiaryEntry(entry.id);
-        
+
         // Should not throw error on second deletion
-        expect(
-          () => diaryService.deleteDiaryEntry(entry.id),
-          returnsNormally,
-        );
+        expect(() => diaryService.deleteDiaryEntry(entry.id), returnsNormally);
       });
     });
   });

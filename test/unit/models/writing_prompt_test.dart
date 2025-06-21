@@ -5,14 +5,38 @@ void main() {
   group('PromptCategory', () {
     test('fromId returns correct category', () {
       expect(PromptCategory.fromId('emotion'), PromptCategory.emotion);
-      expect(PromptCategory.fromId('emotion_depth'), PromptCategory.emotionDepth);
-      expect(PromptCategory.fromId('sensory_emotion'), PromptCategory.sensoryEmotion);
-      expect(PromptCategory.fromId('emotion_growth'), PromptCategory.emotionGrowth);
-      expect(PromptCategory.fromId('emotion_connection'), PromptCategory.emotionConnection);
-      expect(PromptCategory.fromId('emotion_discovery'), PromptCategory.emotionDiscovery);
-      expect(PromptCategory.fromId('emotion_fantasy'), PromptCategory.emotionFantasy);
-      expect(PromptCategory.fromId('emotion_healing'), PromptCategory.emotionHealing);
-      expect(PromptCategory.fromId('emotion_energy'), PromptCategory.emotionEnergy);
+      expect(
+        PromptCategory.fromId('emotion_depth'),
+        PromptCategory.emotionDepth,
+      );
+      expect(
+        PromptCategory.fromId('sensory_emotion'),
+        PromptCategory.sensoryEmotion,
+      );
+      expect(
+        PromptCategory.fromId('emotion_growth'),
+        PromptCategory.emotionGrowth,
+      );
+      expect(
+        PromptCategory.fromId('emotion_connection'),
+        PromptCategory.emotionConnection,
+      );
+      expect(
+        PromptCategory.fromId('emotion_discovery'),
+        PromptCategory.emotionDiscovery,
+      );
+      expect(
+        PromptCategory.fromId('emotion_fantasy'),
+        PromptCategory.emotionFantasy,
+      );
+      expect(
+        PromptCategory.fromId('emotion_healing'),
+        PromptCategory.emotionHealing,
+      );
+      expect(
+        PromptCategory.fromId('emotion_energy'),
+        PromptCategory.emotionEnergy,
+      );
     });
 
     test('fromId returns emotion for unknown id', () {
@@ -192,7 +216,8 @@ void main() {
 
       final longPrompt = WritingPrompt(
         id: 'long-1',
-        text: 'This is a very long prompt that contains more than fifty characters to test the isLongPrompt property',
+        text:
+            'This is a very long prompt that contains more than fifty characters to test the isLongPrompt property',
         category: PromptCategory.emotionDiscovery,
         priority: 90,
       );
@@ -299,11 +324,8 @@ void main() {
 
     test('equality works correctly', () {
       final time = DateTime(2024, 1, 1, 12, 0);
-      
-      final history1 = PromptUsageHistory(
-        promptId: 'prompt-1',
-        usedAt: time,
-      );
+
+      final history1 = PromptUsageHistory(promptId: 'prompt-1', usedAt: time);
 
       final history2 = PromptUsageHistory(
         promptId: 'prompt-1',
@@ -311,10 +333,7 @@ void main() {
         wasHelpful: false, // Different helpful status
       );
 
-      final history3 = PromptUsageHistory(
-        promptId: 'prompt-2',
-        usedAt: time,
-      );
+      final history3 = PromptUsageHistory(promptId: 'prompt-2', usedAt: time);
 
       expect(history1, equals(history2)); // Same prompt and time
       expect(history1, isNot(equals(history3))); // Different prompt

@@ -16,10 +16,7 @@ import '../constants/app_icons.dart';
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
 
-  const SettingsScreen({
-    super.key,
-    this.onThemeChanged,
-  });
+  const SettingsScreen({super.key, this.onThemeChanged});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -49,7 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _settingsService = await SettingsService.getInstance();
       _packageInfo = await PackageInfo.fromPlatform();
       _storageInfo = await StorageService.getInstance().getStorageInfo();
-      
+
       // サブスクリプション情報を取得
       final subscriptionResult = await _settingsService.getSubscriptionInfo();
       if (subscriptionResult.isSuccess) {
@@ -99,7 +96,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Container(
                         padding: AppSpacing.cardPadding,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                          color: AppColors.primaryContainer.withValues(
+                            alpha: 0.3,
+                          ),
                           shape: BoxShape.circle,
                         ),
                         child: const CircularProgressIndicator(strokeWidth: 3),
@@ -134,9 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     elevation: AppSpacing.elevationMd,
                     child: Column(
                       children: [
-                        FadeInWidget(
-                          child: _buildThemeSelector(),
-                        ),
+                        FadeInWidget(child: _buildThemeSelector()),
                         _buildDivider(),
                         SlideInWidget(
                           delay: const Duration(milliseconds: 50),
@@ -252,7 +249,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
@@ -302,16 +301,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: _subscriptionInfo!.isPremium 
+                    color: _subscriptionInfo!.isPremium
                         ? AppColors.success.withValues(alpha: 0.2)
                         : AppColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.sm),
                   ),
                   child: Icon(
-                    _subscriptionInfo!.isPremium 
+                    _subscriptionInfo!.isPremium
                         ? Icons.star_rounded
                         : Icons.card_membership_rounded,
-                    color: _subscriptionInfo!.isPremium 
+                    color: _subscriptionInfo!.isPremium
                         ? AppColors.success
                         : AppColors.primary,
                     size: AppSpacing.iconSm,
@@ -358,7 +357,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: AppSpacing.cardRadius,
             ),
             child: Column(
@@ -366,16 +367,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSubscriptionItem(
                   'AI生成使用量',
                   _subscriptionInfo!.displayData.usageText,
-                  _subscriptionInfo!.displayData.isNearLimit 
-                      ? AppColors.warning 
+                  _subscriptionInfo!.displayData.isNearLimit
+                      ? AppColors.warning
                       : AppColors.primary,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _buildSubscriptionItem(
                   '残り回数',
                   _subscriptionInfo!.displayData.remainingText,
-                  _subscriptionInfo!.usageStats.remainingCount > 0 
-                      ? AppColors.success 
+                  _subscriptionInfo!.usageStats.remainingCount > 0
+                      ? AppColors.success
                       : AppColors.error,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -389,20 +390,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSubscriptionItem(
                     '有効期限',
                     _subscriptionInfo!.displayData.expiryText!,
-                    _subscriptionInfo!.displayData.isExpiryNear 
-                        ? AppColors.warning 
+                    _subscriptionInfo!.displayData.isExpiryNear
+                        ? AppColors.warning
                         : AppColors.success,
                   ),
                 ],
                 // 警告メッセージの表示
                 if (_subscriptionInfo!.displayData.warningMessage != null) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _buildWarningMessage(_subscriptionInfo!.displayData.warningMessage!),
+                  _buildWarningMessage(
+                    _subscriptionInfo!.displayData.warningMessage!,
+                  ),
                 ],
                 // 推奨メッセージの表示
-                if (_subscriptionInfo!.displayData.recommendationMessage != null) ...[
+                if (_subscriptionInfo!.displayData.recommendationMessage !=
+                    null) ...[
                   const SizedBox(height: AppSpacing.md),
-                  _buildRecommendationMessage(_subscriptionInfo!.displayData.recommendationMessage!),
+                  _buildRecommendationMessage(
+                    _subscriptionInfo!.displayData.recommendationMessage!,
+                  ),
                 ],
                 if (!_subscriptionInfo!.isPremium) ...[
                   const SizedBox(height: AppSpacing.lg),
@@ -533,9 +539,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-
-
-
   Widget _buildStorageInfo() {
     if (_storageInfo == null) {
       return Container(
@@ -643,14 +646,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: AppSpacing.cardRadius,
             ),
             child: Column(
               children: [
-                _buildStorageItem('日記データ', _storageInfo!.formattedDiaryDataSize, AppColors.primary),
+                _buildStorageItem(
+                  '日記データ',
+                  _storageInfo!.formattedDiaryDataSize,
+                  AppColors.primary,
+                ),
                 const SizedBox(height: AppSpacing.md),
-                _buildStorageItem('画像データ（推定）', _storageInfo!.formattedImageDataSize, AppColors.success),
+                _buildStorageItem(
+                  '画像データ（推定）',
+                  _storageInfo!.formattedImageDataSize,
+                  AppColors.success,
+                ),
               ],
             ),
           ),
@@ -687,12 +700,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-        Text(
-          size,
-          style: AppTypography.labelLarge.copyWith(
-            color: color,
-          ),
-        ),
+        Text(size, style: AppTypography.labelLarge.copyWith(color: color)),
       ],
     );
   }
@@ -835,7 +843,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  _packageInfo != null 
+                  _packageInfo != null
                       ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
                       : '読み込み中...',
                   style: AppTypography.bodyMedium.copyWith(
@@ -868,7 +876,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.secondary.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               child: Icon(
@@ -920,8 +930,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-
-
   void _showThemeDialog() async {
     final selectedTheme = await DialogUtils.showRadioSelectionDialog<ThemeMode>(
       context,
@@ -930,7 +938,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _settingsService.themeMode,
       _getThemeModeLabel,
     );
-    
+
     if (selectedTheme != null) {
       _settingsService.setThemeMode(selectedTheme);
       widget.onThemeChanged?.call(selectedTheme);
@@ -946,16 +954,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-
   Future<void> _exportData() async {
     try {
       _showLoadingDialog('エクスポート中...');
-      
+
       final filePath = await StorageService.getInstance().exportData();
-      
+
       if (mounted) {
         Navigator.pop(context); // ローディングダイアログを閉じる
-        
+
         if (filePath != null) {
           _showSuccessDialog('エクスポート完了', 'バックアップファイルが正常に保存されました');
         } else {
@@ -973,12 +980,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _optimizeDatabase() async {
     try {
       _showLoadingDialog('最適化中...');
-      
+
       final success = await StorageService.getInstance().optimizeDatabase();
-      
+
       if (mounted) {
         Navigator.pop(context); // ローディングダイアログを閉じる
-        
+
         if (success) {
           await _loadSettings(); // ストレージ情報を再読み込み
           _showSuccessDialog('最適化完了', 'データベースの最適化が完了しました');
@@ -1005,6 +1012,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showErrorDialog(String message) {
     DialogUtils.showErrorDialog(context, message);
   }
-
-
 }

@@ -8,13 +8,13 @@ import '../ui/error_display/error_severity.dart';
 abstract class BaseErrorController extends ChangeNotifier {
   bool _isLoading = false;
   AppException? _lastError;
-  
+
   /// ローディング状態
   bool get isLoading => _isLoading;
-  
+
   /// 最後のエラー
   AppException? get lastError => _lastError;
-  
+
   /// エラーがあるか
   bool get hasError => _lastError != null;
 
@@ -56,8 +56,8 @@ abstract class BaseErrorController extends ChangeNotifier {
       clearError();
       return result;
     } catch (e) {
-      final exception = e is AppException 
-          ? e 
+      final exception = e is AppException
+          ? e
           : ServiceException(
               context != null ? '[$context] 処理中にエラーが発生しました' : '処理中にエラーが発生しました',
               originalError: e,
@@ -77,17 +77,17 @@ abstract class BaseErrorController extends ChangeNotifier {
       if (setLoadingState) setLoading(true);
       final result = await operation();
       if (setLoadingState) setLoading(false);
-      
+
       if (result.isSuccess) {
         clearError();
       } else {
         setError(result.error);
       }
-      
+
       return result;
     } catch (e) {
-      final exception = e is AppException 
-          ? e 
+      final exception = e is AppException
+          ? e
           : ServiceException(
               context != null ? '[$context] 処理中にエラーが発生しました' : '処理中にエラーが発生しました',
               originalError: e,
@@ -129,7 +129,7 @@ abstract class BaseErrorController extends ChangeNotifier {
       setLoadingState: setLoadingState,
       context: operationContext,
     );
-    
+
     if (result == null && _lastError != null && context.mounted) {
       await showErrorInUI(
         context,
@@ -138,7 +138,7 @@ abstract class BaseErrorController extends ChangeNotifier {
         retryButtonText: retryButtonText,
       );
     }
-    
+
     return result;
   }
 
@@ -158,7 +158,7 @@ abstract class BaseErrorController extends ChangeNotifier {
       setLoadingState: setLoadingState,
       context: operationContext,
     );
-    
+
     if (result.isFailure && showErrors) {
       if (context.mounted) {
         await showErrorInUI(
@@ -169,7 +169,7 @@ abstract class BaseErrorController extends ChangeNotifier {
         );
       }
     }
-    
+
     return result;
   }
 
@@ -185,7 +185,7 @@ abstract class BaseErrorController extends ChangeNotifier {
     String? retryButtonText,
   }) async {
     int attempts = 0;
-    
+
     Future<T?> attemptOperation() async {
       attempts++;
       return await safeExecute(
@@ -194,7 +194,7 @@ abstract class BaseErrorController extends ChangeNotifier {
         context: operationContext,
       );
     }
-    
+
     VoidCallback? onRetry;
     if (attempts < maxRetries) {
       onRetry = () async {
@@ -213,9 +213,9 @@ abstract class BaseErrorController extends ChangeNotifier {
         }
       };
     }
-    
+
     final result = await attemptOperation();
-    
+
     if (result == null && _lastError != null) {
       if (context.mounted) {
         await showErrorInUI(
@@ -226,7 +226,7 @@ abstract class BaseErrorController extends ChangeNotifier {
         );
       }
     }
-    
+
     return result;
   }
 }
