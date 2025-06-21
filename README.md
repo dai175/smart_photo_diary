@@ -27,7 +27,7 @@
 - **依存性注入**: ServiceLocatorによる疎結合設計
 - **Result<T>パターン**: 関数型エラーハンドリングで型安全性を確保
 - **インターフェース指向**: テスタビリティを重視した設計
-- **3層テスト戦略**: ユニット・ウィジェット・統合テスト（600+テスト、100%成功率）
+- **3層テスト戦略**: ユニット・ウィジェット・統合テスト（683テスト、100%成功率）
 
 ### 主要サービス
 - `DiaryService`: 日記データ管理（Hive DB）
@@ -40,7 +40,7 @@
 ## 🚀 技術スタック
 
 ### Core Framework
-- **Flutter 3.x**: FVM管理推奨、日本語ロケール対応
+- **Flutter 3.32.0**: FVM管理推奨、日本語ロケール対応
 - **Dart 3**: Records、Patterns、sealed classesを活用
 
 ### データストレージ
@@ -61,7 +61,7 @@
 - **Photo Manager**: フォトライブラリアクセス
 
 ### 収益化・分析
-- **In-App Purchase**: サブスクリプション管理
+- **In-App Purchase 3.1.10**: サブスクリプション管理（StoreKit 2互換性対応）
 - **Usage Analytics**: 4層分析システム（Shannon Entropy、Gini係数、時系列分析）
 - **Package Info Plus**: アプリバージョン管理
 
@@ -104,7 +104,7 @@ fvm flutter run
 
 ### テスト実行
 ```bash
-# 全テスト実行（600+テスト）
+# 全テスト実行（683テスト）
 fvm flutter test
 
 # テストカテゴリ別実行
@@ -132,6 +132,29 @@ fvm dart format .
 
 # 依存関係更新チェック
 fvm flutter pub outdated
+```
+
+## 🔄 CI/CD・自動化
+
+### GitHub Actions ワークフロー
+- **ci.yml**: コード品質・テスト自動実行（プッシュ時）
+- **release.yml**: GitHub Releases自動作成（バージョンタグ時）
+- **android-deploy.yml**: Google Play Store自動デプロイ
+- **ios-deploy.yml**: App Store/TestFlight自動デプロイ
+
+```bash
+# CI/CDトリガー例
+git push origin main                    # ci.yml実行
+git tag v1.0.0 && git push origin v1.0.0  # 全ワークフロー実行
+```
+
+### 必要なGitHub Secrets（本番用）
+```
+GEMINI_API_KEY              # Google Gemini API
+GOOGLE_PLAY_SERVICE_ACCOUNT # Android デプロイ
+APPSTORE_ISSUER_ID          # iOS デプロイ
+ANDROID_SIGNING_KEY         # Android 署名
+IOS_DISTRIBUTION_CERTIFICATE # iOS 署名
 ```
 
 ## 📦 ビルド・デプロイ
@@ -179,12 +202,14 @@ adb shell am start -n com.example.smart_photo_diary/.MainActivity
 - ✅ **分析システム**: 4層包括分析（使用量、行動パターン、改善提案）
 - ✅ **UI/UXシステム**: ダークテーマ、統一エラー表示、日本語フォント対応
 - ✅ **データ管理**: エクスポート機能、データベース最適化
+- ✅ **CI/CDパイプライン**: 4ワークフロー、自動テスト・ビルド・デプロイ
 
 ### テスト品質
-- **600+テスト**: 100%成功率維持
+- **683テスト**: 100%成功率維持
 - **3層テスト戦略**: ユニット、ウィジェット、統合テスト
 - **モック化対応**: 外部依存関係の完全分離
 - **継続的品質管理**: 静的解析エラー0件
+- **CI/CD統合**: GitHub Actionsによる自動テスト実行
 
 ### コード品質指標
 - **静的解析**: エラー・警告0件（クリーンコードベース）
