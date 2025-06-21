@@ -778,7 +778,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         if (!snapshot.hasData) {
           return Container(
             width: 200,
-            height: 240,
+            height: 200, // 正方形に変更
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: AppSpacing.photoRadius,
@@ -805,6 +805,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           },
           child: Container(
             width: 200,
+            constraints: const BoxConstraints(
+              minHeight: 150,
+              maxHeight: 300,
+            ),
             decoration: BoxDecoration(
               borderRadius: AppSpacing.photoRadius,
               boxShadow: AppSpacing.cardShadow,
@@ -815,10 +819,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 child: Image.memory(
                   snapshot.data!,
                   width: 200,
-                  height: 240,
-                  fit: BoxFit.cover,
-                  cacheHeight: (240 * MediaQuery.of(context).devicePixelRatio)
-                      .round(),
+                  fit: BoxFit.contain, // cover → contain に変更
                   cacheWidth: (200 * MediaQuery.of(context).devicePixelRatio)
                       .round(),
                   gaplessPlayback: true,
