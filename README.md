@@ -139,23 +139,38 @@ fvm flutter pub outdated
 ### GitHub Actions ワークフロー
 - **ci.yml**: コード品質・テスト自動実行（プッシュ時）
 - **release.yml**: GitHub Releases自動作成（バージョンタグ時）
-- **android-deploy.yml**: Google Play Store自動デプロイ
-- **ios-deploy.yml**: App Store/TestFlight自動デプロイ
+- **android-deploy.yml**: Google Play Store手動デプロイ
+- **ios-deploy.yml**: App Store/TestFlight手動デプロイ
 
+### 段階的リリースフロー（業界標準）
 ```bash
-# CI/CDトリガー例
-git push origin main                    # ci.yml実行
-git tag v1.0.0 && git push origin v1.0.0  # 全ワークフロー実行
+# 1. 開発時の品質チェック（自動）
+git push origin main                    # → ci.yml実行
+
+# 2. テスト配布（半自動）  
+git tag v1.0.0-beta
+git push origin v1.0.0-beta           # → release.yml実行（GitHub Releases）
+
+# 3. 本番配布（手動）
+# GitHub Actions画面で手動実行:
+# - android-deploy.yml → Google Play Store
+# - ios-deploy.yml → App Store/TestFlight
 ```
 
 ### 必要なGitHub Secrets（本番用）
 ```
-GEMINI_API_KEY              # Google Gemini API
+GEMINI_API_KEY              # Google Gemini API（全ワークフローで必須）
 GOOGLE_PLAY_SERVICE_ACCOUNT # Android デプロイ
-APPSTORE_ISSUER_ID          # iOS デプロイ
+APPSTORE_ISSUER_ID          # iOS デプロイ  
 ANDROID_SIGNING_KEY         # Android 署名
 IOS_DISTRIBUTION_CERTIFICATE # iOS 署名
 ```
+
+### リリース運用の特徴
+- **安全性重視**: 段階的展開でリスク最小化
+- **品質保証**: 各段階での人間による判断・承認
+- **柔軟性**: プラットフォーム別・タイミング別の個別制御
+- **業界標準**: 大手企業で採用される一般的なフロー
 
 ## 📦 ビルド・デプロイ
 

@@ -393,15 +393,15 @@ The project includes 4 automated workflows with distinct purposes:
 - **Target**: Developers, testers, direct distribution
 
 #### 3. **android-deploy.yml** - Google Play Store
-- **Trigger**: Version tags (`v*`) or manual execution  
-- **Purpose**: Automated deployment to Google Play Store
+- **Trigger**: Manual execution only (`workflow_dispatch`)
+- **Purpose**: Controlled deployment to Google Play Store
 - **Requirements**: Google Play Console setup, service account, app registration
 - **API Key**: Requires `${{ secrets.GEMINI_API_KEY }}` (fails if not set)
 - **Output**: Signed AAB uploaded to Play Store (internal/alpha/beta/production tracks)
 
 #### 4. **ios-deploy.yml** - App Store
-- **Trigger**: Version tags (`v*`) or manual execution
-- **Purpose**: Automated deployment to TestFlight/App Store
+- **Trigger**: Manual execution only (`workflow_dispatch`)
+- **Purpose**: Controlled deployment to TestFlight/App Store
 - **Requirements**: App Store Connect setup, certificates, app registration
 - **API Key**: Requires `${{ secrets.GEMINI_API_KEY }}` (fails if not set)
 - **Output**: Signed IPA uploaded to TestFlight or App Store
@@ -428,17 +428,33 @@ IOS_CERTIFICATE_PASSWORD=certificate_password
 IOS_TEAM_ID=apple_team_id
 ```
 
-### Deployment Strategy
-- **Development**: Use ci.yml for code validation
-- **Beta Testing**: Use release.yml for GitHub Releases distribution
-- **Store Distribution**: Use android-deploy.yml and ios-deploy.yml after store setup
+### Deployment Strategy (Industry Standard)
+- **Development**: Use ci.yml for code validation (automatic)
+- **Beta Testing**: Use release.yml for GitHub Releases distribution (tag-triggered)
+- **Store Distribution**: Use android-deploy.yml and ios-deploy.yml (manual execution only)
+
+### Staged Release Flow
+```bash
+# 1. Development Quality Checks (Automatic)
+git push origin main                    # → ci.yml execution
+
+# 2. Beta Distribution (Semi-automatic)
+git tag v1.0.0-beta
+git push origin v1.0.0-beta           # → release.yml execution
+
+# 3. Production Distribution (Manual)
+# Execute manually via GitHub Actions UI:
+# - android-deploy.yml → Google Play Store
+# - ios-deploy.yml → App Store/TestFlight
+```
 
 ### Important Notes
 - **CI vs Production**: CI uses dummy API keys and produces no artifacts; production workflows require real secrets
 - **Secret Validation**: All production workflows (release, android-deploy, ios-deploy) fail immediately if GEMINI_API_KEY is not set
 - **Store Registration**: Store deployment workflows will fail until apps are registered in respective stores
 - **API Key Security**: CI workflows intentionally use dummy keys to avoid exposing real API keys during testing
-- **Workflow Triggers**: Only ci.yml runs on normal pushes; production workflows require version tags or manual execution
+- **Manual Control**: Production deployments require manual execution for safety and quality control
+- **Industry Standard**: Follows best practices used by major tech companies for risk mitigation
 
 ## Development Status
 
