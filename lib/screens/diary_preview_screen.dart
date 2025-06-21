@@ -632,7 +632,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                             snapshot.data != null) {
                                           return Image.memory(
                                             snapshot.data!,
-                                            fit: BoxFit.cover,
+                                            fit: BoxFit.contain,
                                             width: 120,
                                             height: 120,
                                           );
