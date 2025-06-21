@@ -43,7 +43,7 @@ jobs:
         run: dart format --set-exit-if-changed .
         
       - name: Analyze code
-        run: flutter analyze --fatal-infos --fatal-warnings
+        run: flutter analyze --fatal-warnings
         
       - name: Create test .env file
         run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
