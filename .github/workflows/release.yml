@@ -96,13 +96,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          if [ -n "$GEMINI_API_KEY" ]; then
-            echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
-            echo "✅ Using real API key for release build"
-          else
-            echo "GEMINI_API_KEY=release_build_key" > .env
-            echo "⚠️ Using dummy API key (GEMINI_API_KEY secret not set)"
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "❌ Error: GEMINI_API_KEY secret is not set"
+            echo "Please add GEMINI_API_KEY to GitHub repository secrets for release builds"
+            exit 1
           fi
+          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+          echo "✅ Production .env file created with real API key"
         
       - name: Build Android APK
         run: flutter build apk --release
@@ -165,13 +165,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          if [ -n "$GEMINI_API_KEY" ]; then
-            echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
-            echo "✅ Using real API key for iOS release build"
-          else
-            echo "GEMINI_API_KEY=release_build_key" > .env
-            echo "⚠️ Using dummy API key (GEMINI_API_KEY secret not set)"
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "❌ Error: GEMINI_API_KEY secret is not set"
+            echo "Please add GEMINI_API_KEY to GitHub repository secrets for iOS release builds"
+            exit 1
           fi
+          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+          echo "✅ Production .env file created with real API key"
         
       - name: Install CocoaPods dependencies
         run: |

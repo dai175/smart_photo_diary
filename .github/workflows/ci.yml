@@ -40,7 +40,7 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
         
       - name: Create test .env file
-        run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
+        run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
         
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
@@ -97,7 +97,7 @@ jobs:
         
       - name: Create .env file for CI build
         run: |
-          echo "GEMINI_API_KEY=dummy_key_for_ci_build" > .env
+          echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
           echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
         
       - name: Build debug APK
@@ -160,7 +160,7 @@ jobs:
         
       - name: Create .env file for CI build
         run: |
-          echo "GEMINI_API_KEY=dummy_key_for_ci_build" > .env
+          echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
           echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
         
       - name: Install CocoaPods dependencies
