@@ -1,0 +1,164 @@
+name: Android Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'  # バージョンタグでトリガー (例: v1.0.0)
+  workflow_dispatch:  # 手動実行
+    inputs:
+      track:
+        description: 'Release track'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+env:
+  FLUTTER_VERSION: '3.8.0'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Run analyzer
+        run: flutter analyze --fatal-infos --fatal-warnings
+        
+      - name: Create test .env file
+        run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
+        
+      - name: Run tests
+        run: flutter test --reporter=expanded
+
+  android-deploy:
+    name: Deploy to Google Play
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production  # GitHub Environment for additional security
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Create production .env file
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+          
+      - name: Decode Android signing key
+        env:
+          ANDROID_SIGNING_KEY: ${{ secrets.ANDROID_SIGNING_KEY }}
+        run: |
+          echo "$ANDROID_SIGNING_KEY" | base64 --decode > android/app/upload-keystore.jks
+          
+      - name: Create key.properties
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+          
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+        
+      - name: Upload to Google Play Console
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+          packageName: com.example.smart_photo_diary
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ github.event.inputs.track || 'internal' }}
+          status: completed
+          inAppUpdatePriority: 2
+          
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f android/app/upload-keystore.jks
+          rm -f android/key.properties
+          rm -f .env
+          
+      - name: Create release summary
+        run: |
+          echo "## 🚀 Android Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: com.example.smart_photo_diary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Track**: ${{ github.event.inputs.track || 'internal' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Check Google Play Console for deployment status" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test the release in the selected track" >> $GITHUB_STEP_SUMMARY
+          echo "3. Promote to higher tracks when ready" >> $GITHUB_STEP_SUMMARY
+
+  notify:
+    name: Notify Deployment
+    needs: android-deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Notify success
+        if: needs.android-deploy.result == 'success'
+        run: |
+          echo "✅ Android deployment successful!"
+          echo "Track: ${{ github.event.inputs.track || 'internal' }}"
+          
+      - name: Notify failure
+        if: needs.android-deploy.result == 'failure'
+        run: |
+          echo "❌ Android deployment failed!"
+          echo "Please check the logs for details."
+          exit 1

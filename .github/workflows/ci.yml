@@ -1,0 +1,230 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.8.0'
+
+jobs:
+  quality-check:
+    name: Code Quality & Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Verify formatting
+        run: dart format --set-exit-if-changed .
+        
+      - name: Analyze code
+        run: flutter analyze --fatal-infos --fatal-warnings
+        
+      - name: Create test .env file
+        run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
+        
+      - name: Run tests
+        run: flutter test --coverage --reporter=expanded
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: coverage/lcov.info
+          fail_ci_if_error: false
+          
+      - name: Check test results
+        run: |
+          if [ -f coverage/lcov.info ]; then
+            echo "✅ Tests completed successfully"
+          else
+            echo "❌ Test coverage file not found"
+            exit 1
+          fi
+
+  build-android:
+    name: Build Android
+    needs: quality-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Create .env file
+        run: echo "GEMINI_API_KEY=dummy_key_for_build" > .env
+        
+      - name: Build debug APK
+        run: flutter build apk --debug
+        
+      - name: Build release APK (unsigned)
+        run: flutter build apk --release
+        
+      - name: Build release AAB (unsigned)
+        run: flutter build appbundle --release
+        
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+  build-ios:
+    name: Build iOS
+    needs: quality-check
+    runs-on: macos-latest
+    timeout-minutes: 45
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Create .env file
+        run: echo "GEMINI_API_KEY=dummy_key_for_build" > .env
+        
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+          
+      - name: Build iOS (debug, no codesign)
+        run: flutter build ios --debug --no-codesign
+        
+      - name: Build iOS (release, no codesign)
+        run: flutter build ios --release --no-codesign
+        
+      - name: Archive iOS build artifacts
+        run: |
+          cd build/ios/iphoneos
+          zip -r ios-build.zip Runner.app
+          
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-builds
+          path: build/ios/iphoneos/ios-build.zip
+          retention-days: 30
+
+  deployment-ready:
+    name: Deployment Ready Check
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-builds
+          path: ./artifacts/android
+          
+      - name: Download iOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-builds
+          path: ./artifacts/ios
+          
+      - name: Verify build artifacts
+        run: |
+          echo "🔍 Verifying build artifacts..."
+          
+          # Android verification
+          if [ -f "./artifacts/android/app-release.apk" ]; then
+            echo "✅ Android APK build successful"
+          else
+            echo "❌ Android APK not found"
+            exit 1
+          fi
+          
+          if [ -f "./artifacts/android/app-release.aab" ]; then
+            echo "✅ Android AAB build successful"
+          else
+            echo "❌ Android AAB not found"
+            exit 1
+          fi
+          
+          # iOS verification
+          if [ -f "./artifacts/ios/ios-build.zip" ]; then
+            echo "✅ iOS build successful"
+          else
+            echo "❌ iOS build not found"
+            exit 1
+          fi
+          
+          echo "🚀 All builds completed successfully!"
+          echo "📱 Ready for store deployment when configured"
+          
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android APK**: Ready for sideloading" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android AAB**: Ready for Google Play Store" >> $GITHUB_STEP_SUMMARY
+          echo "- **iOS Build**: Ready for App Store (requires code signing)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download artifacts for testing" >> $GITHUB_STEP_SUMMARY
+          echo "2. Configure store credentials for automatic deployment" >> $GITHUB_STEP_SUMMARY
+          echo "3. Set up code signing for iOS releases" >> $GITHUB_STEP_SUMMARY

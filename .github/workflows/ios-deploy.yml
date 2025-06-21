@@ -1,0 +1,195 @@
+name: iOS Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'  # バージョンタグでトリガー (例: v1.0.0)
+  workflow_dispatch:  # 手動実行
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'testflight'
+        type: choice
+        options:
+          - testflight
+          - appstore
+
+env:
+  FLUTTER_VERSION: '3.8.0'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Run analyzer
+        run: flutter analyze --fatal-infos --fatal-warnings
+        
+      - name: Create test .env file
+        run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
+        
+      - name: Run tests
+        run: flutter test --reporter=expanded
+
+  ios-deploy:
+    name: Deploy to App Store
+    needs: test
+    runs-on: macos-latest
+    environment: production  # GitHub Environment for additional security
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Create production .env file
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+          
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+          
+      - name: Import Code-Signing Certificates
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          
+      - name: Download Provisioning Profiles
+        uses: Apple-Actions/download-provisioning-profiles@v2
+        with:
+          bundle-id: com.example.smart-photo-diary
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+          
+      - name: Create ExportOptions.plist
+        run: |
+          cat > ios/Runner/ExportOptions.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>\${{ secrets.IOS_TEAM_ID }}</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>compileBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.example.smart-photo-diary</key>
+                  <string>Smart Photo Diary App Store</string>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+          
+      - name: Build iOS IPA
+        run: |
+          flutter build ipa --release \
+            --export-options-plist=ios/Runner/ExportOptions.plist
+            
+      - name: Upload to TestFlight
+        if: github.event.inputs.environment == 'testflight' || github.event.inputs.environment == ''
+        uses: Apple-Actions/upload-testflight-build@v1
+        with:
+          app-path: build/ios/ipa/smart_photo_diary.ipa
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+          
+      - name: Upload to App Store
+        if: github.event.inputs.environment == 'appstore'
+        uses: Apple-Actions/upload-testflight-build@v1
+        with:
+          app-path: build/ios/ipa/smart_photo_diary.ipa
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+          # Note: App Store submission requires additional review process
+          
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f .env
+          rm -f ios/Runner/ExportOptions.plist
+          
+      - name: Create release summary
+        run: |
+          echo "## 🍎 iOS Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bundle ID**: com.example.smart-photo-diary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment || 'testflight' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 Next Steps" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.environment }}" = "testflight" ] || [ -z "${{ github.event.inputs.environment }}" ]; then
+            echo "1. Check TestFlight for build processing status" >> $GITHUB_STEP_SUMMARY
+            echo "2. Add beta testers for testing" >> $GITHUB_STEP_SUMMARY
+            echo "3. Collect feedback and iterate" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "1. Check App Store Connect for submission status" >> $GITHUB_STEP_SUMMARY
+            echo "2. Wait for Apple review process" >> $GITHUB_STEP_SUMMARY
+            echo "3. Monitor for approval and release" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Notify Deployment
+    needs: ios-deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Notify success
+        if: needs.ios-deploy.result == 'success'
+        run: |
+          echo "✅ iOS deployment successful!"
+          echo "Environment: ${{ github.event.inputs.environment || 'testflight' }}"
+          
+      - name: Notify failure
+        if: needs.ios-deploy.result == 'failure'
+        run: |
+          echo "❌ iOS deployment failed!"
+          echo "Please check the logs for details."
+          exit 1

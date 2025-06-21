@@ -1,0 +1,325 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # バージョンタグでトリガー (例: v1.0.0, v1.2.3-beta)
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  FLUTTER_VERSION: '3.8.0'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Run analyzer
+        run: flutter analyze --fatal-infos --fatal-warnings
+        
+      - name: Create test .env file
+        run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
+        
+      - name: Run tests
+        run: flutter test --coverage --reporter=expanded
+        
+      - name: Verify test coverage
+        run: |
+          if [ -f coverage/lcov.info ]; then
+            echo "✅ Test coverage generated successfully"
+          else
+            echo "❌ Test coverage not found"
+            exit 1
+          fi
+
+  build-release:
+    name: Build Release Artifacts
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Create .env file
+        run: echo "GEMINI_API_KEY=release_build_key" > .env
+        
+      - name: Build Android APK
+        run: flutter build apk --release
+        
+      - name: Build Android AAB
+        run: flutter build appbundle --release
+        
+      - name: Rename artifacts with version
+        run: |
+          VERSION=${{ github.ref_name }}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/smart-photo-diary-${VERSION}.apk
+          cp build/app/outputs/bundle/release/app-release.aab \
+             build/app/outputs/bundle/release/smart-photo-diary-${VERSION}.aab
+             
+      - name: Generate checksums
+        run: |
+          cd build/app/outputs/flutter-apk
+          sha256sum smart-photo-diary-*.apk > smart-photo-diary-checksums.txt
+          cd ../bundle/release
+          sha256sum smart-photo-diary-*.aab >> smart-photo-diary-checksums.txt
+          
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            build/app/outputs/flutter-apk/smart-photo-diary-*.apk
+            build/app/outputs/bundle/release/smart-photo-diary-*.aab
+            build/app/outputs/bundle/release/smart-photo-diary-checksums.txt
+          retention-days: 90
+
+  build-ios-release:
+    name: Build iOS Release
+    needs: test
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+      - name: Create .env file
+        run: echo "GEMINI_API_KEY=release_build_key" > .env
+        
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+          
+      - name: Build iOS (release, no codesign)
+        run: flutter build ios --release --no-codesign
+        
+      - name: Archive iOS build
+        run: |
+          VERSION=${{ github.ref_name }}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          
+          cd build/ios/iphoneos
+          zip -r smart-photo-diary-ios-${VERSION}.zip Runner.app
+          
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-artifacts
+          path: build/ios/iphoneos/smart-photo-diary-ios-*.zip
+          retention-days: 90
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-release, build-ios-release]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: ./artifacts/android
+          
+      - name: Download iOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-release-artifacts
+          path: ./artifacts/ios
+          
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION=${{ github.ref_name }}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
+          
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << EOF
+          # Smart Photo Diary ${{ steps.version.outputs.version }}
+          
+          ## 🚀 新機能・改善
+          
+          ### 📱 アプリケーション
+          - AI日記生成機能の向上
+          - ユーザビリティの改善
+          - パフォーマンスの最適化
+          
+          ### 🔧 技術的改善
+          - コードの品質向上
+          - テストカバレッジの向上
+          - セキュリティの強化
+          
+          ## 📦 ダウンロード
+          
+          ### Android
+          - **APK**: サイドローディング用（開発者・テスター向け）
+          - **AAB**: Google Play Store配布用
+          
+          ### iOS
+          - **iOS Build**: App Store配布準備済み（コード署名が必要）
+          
+          ## 🔐 セキュリティ
+          
+          すべてのファイルにはSHA256チェックサムが含まれています。
+          ダウンロード後にファイルの整合性を確認してください。
+          
+          ## 📋 システム要件
+          
+          - **Android**: Android 5.0 (API level 21) 以上
+          - **iOS**: iOS 12.0 以上
+          - **Flutter**: ${{ env.FLUTTER_VERSION }}
+          
+          ## 🤝 サポート
+          
+          問題を発見した場合は、[Issues](https://github.com/dai175/smart_photo_diary/issues) でご報告ください。
+          EOF
+          
+          echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Smart Photo Diary ${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease || false }}
+        id: create_release
+        
+      - name: Upload Android APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/android/smart-photo-diary-${{ steps.version.outputs.version }}.apk
+          asset_name: smart-photo-diary-${{ steps.version.outputs.version }}.apk
+          asset_content_type: application/vnd.android.package-archive
+          
+      - name: Upload Android AAB
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/android/smart-photo-diary-${{ steps.version.outputs.version }}.aab
+          asset_name: smart-photo-diary-${{ steps.version.outputs.version }}.aab
+          asset_content_type: application/octet-stream
+          
+      - name: Upload iOS build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/ios/smart-photo-diary-ios-${{ steps.version.outputs.version }}.zip
+          asset_name: smart-photo-diary-ios-${{ steps.version.outputs.version }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload checksums
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/android/smart-photo-diary-checksums.txt
+          asset_name: smart-photo-diary-checksums.txt
+          asset_content_type: text/plain
+          
+      - name: Create release summary
+        run: |
+          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Release Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release URL**: ${{ steps.create_release.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pre-release**: ${{ github.event.inputs.prerelease || false }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Assets" >> $GITHUB_STEP_SUMMARY
+          echo "- Android APK" >> $GITHUB_STEP_SUMMARY
+          echo "- Android AAB (Play Store)" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS Build Archive" >> $GITHUB_STEP_SUMMARY
+          echo "- SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Release](${{ steps.create_release.outputs.html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download Assets](${{ steps.create_release.outputs.html_url }})" >> $GITHUB_STEP_SUMMARY
