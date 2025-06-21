@@ -51,6 +51,7 @@ linter:
     # Readability
     lines_longer_than_80_chars: false  # Disable 80 char limit (better for Japanese text)
     sort_child_properties_last: true  # Place child properties last
+    curly_braces_in_flow_control_structures: false  # Allow single-line if statements for conciseness
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

@@ -51,7 +51,7 @@ jobs:
         run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
         
       - name: Run analyzer
-        run: flutter analyze --fatal-warnings --no-fatal-infos
+        run: flutter analyze --fatal-warnings --fatal-infos
         
       - name: Run tests
         run: flutter test --reporter=expanded
