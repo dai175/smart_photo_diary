@@ -51,7 +51,7 @@ jobs:
   ios-deploy:
     name: Deploy to App Store
     needs: test
-    runs-on: macos-latest
+    runs-on: macos-15
     environment: production  # GitHub Environment for additional security
     timeout-minutes: 60
     
@@ -65,6 +65,9 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
+          
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
           
       - name: Get dependencies
         run: flutter pub get
