@@ -115,16 +115,17 @@ jobs:
           find build/ -name "*.apk" -o -name "*.aab" 2>/dev/null || echo "No APK/AAB files found"
           ls -la build/app/outputs/ 2>/dev/null || echo "outputs directory not found"
           
-      - name: Upload Android artifacts
+      - name: Upload Android artifacts (CI build - contains dummy API key)
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: android-builds
+          name: android-builds-ci-only
           path: |
             build/app/outputs/flutter-apk/app-debug.apk
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
-          retention-days: 30
+          retention-days: 7
+        # Note: This CI build contains dummy API keys and is for testing purposes only
 
   build-ios:
     name: Build iOS
@@ -170,12 +171,15 @@ jobs:
           cd build/ios/iphoneos
           zip -r ios-build.zip Runner.app
           
-      - name: Upload iOS artifacts
+      - name: Upload iOS artifacts (CI build - contains dummy API key)
         uses: actions/upload-artifact@v4
         with:
-          name: ios-builds
+          name: ios-builds-ci-only
           path: build/ios/iphoneos/ios-build.zip
-          retention-days: 30
+          retention-days: 7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Note: This CI build contains dummy API keys and is for testing purposes only
 
   deployment-ready:
     name: Deployment Ready Check
@@ -190,13 +194,13 @@ jobs:
       - name: Download Android artifacts
         uses: actions/download-artifact@v4
         with:
-          name: android-builds
+          name: android-builds-ci-only
           path: ./artifacts/android
           
       - name: Download iOS artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ios-builds
+          name: ios-builds-ci-only
           path: ./artifacts/ios
           
       - name: Verify build artifacts
