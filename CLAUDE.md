@@ -20,6 +20,22 @@ fvm dart run build_runner build
 fvm dart run build_runner build --delete-conflicting-outputs
 ```
 
+### CI/CD and GitHub Actions
+```bash
+# Trigger CI/CD pipeline (automatic on push/PR to main/develop)
+git push origin main
+
+# Create release (triggers release.yml workflow)
+git tag v1.0.0
+git push origin v1.0.0
+
+# Manual deployment workflows require GitHub Secrets:
+# - GEMINI_API_KEY: Google Gemini API key for production builds
+# - GOOGLE_PLAY_SERVICE_ACCOUNT: Android deployment credentials  
+# - APPSTORE_ISSUER_ID, APPSTORE_KEY_ID, APPSTORE_PRIVATE_KEY: iOS deployment
+# - ANDROID_SIGNING_KEY, ANDROID_KEYSTORE_PASSWORD: Android signing
+```
+
 ### Development
 ```bash
 # Run app in development (using FVM)
@@ -30,7 +46,7 @@ fvm flutter run
 
 ### Testing
 ```bash
-# Run all tests (using FVM) - Currently 585 tests with 100% success rate
+# Run all tests (using FVM) - Currently 683 tests with 100% success rate
 fvm flutter test
 
 # Run only unit tests (pure logic, mocked dependencies)
@@ -174,7 +190,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `flutter_dotenv`: Environment variable management
 - `uuid`: Unique identifier generation for diary entries
 - `intl`: Internationalization and date formatting
-- `in_app_purchase`: Subscription and in-app purchase management
+- `in_app_purchase: 3.1.10`: Subscription management (pinned version for StoreKit 2 compatibility)
 - `google_fonts`: Typography and font management
 - `image`: Image processing and manipulation utilities
 
@@ -286,7 +302,7 @@ Services follow a clear dependency hierarchy:
 - **Quality Assurance**: 45 comprehensive tests (26 unit + 11 mock + 8 integration) with 100% success rate
 
 ### Testing Architecture
-The project follows a comprehensive 3-tier testing strategy with **100% success rate** (661 passing tests):
+The project follows a comprehensive 3-tier testing strategy with **100% success rate** (683 passing tests):
 
 #### Unit Tests (`test/unit/`)
 - **Pure logic testing** with mocked dependencies using `mocktail`
@@ -357,10 +373,75 @@ The app supports multiple platforms but photo access requires platform-specific 
 ### Privacy and Local Storage
 All user data stays on device. Hive database files are stored in app documents directory. No cloud synchronization by design.
 
+## CI/CD and Deployment Architecture
+
+### GitHub Actions Workflows
+The project includes 4 automated workflows with distinct purposes:
+
+#### 1. **ci.yml** - Continuous Integration
+- **Trigger**: Push/PR to main/develop branches
+- **Purpose**: Code quality validation and testing
+- **API Key**: Uses dummy keys for testing (no real API calls needed)
+- **Actions**: Run tests, analyze code, build debug/release APKs and iOS builds
+- **Artifacts**: Upload build artifacts for verification
+
+#### 2. **release.yml** - GitHub Releases
+- **Trigger**: Version tags (`v*`) or manual execution
+- **Purpose**: Create GitHub Releases with downloadable builds
+- **API Key**: Uses `${{ secrets.GEMINI_API_KEY }}` for functional builds
+- **Output**: APK, AAB, iOS archive with SHA256 checksums
+- **Target**: Developers, testers, direct distribution
+
+#### 3. **android-deploy.yml** - Google Play Store
+- **Trigger**: Version tags (`v*`) or manual execution  
+- **Purpose**: Automated deployment to Google Play Store
+- **Requirements**: Google Play Console setup, service account, app registration
+- **API Key**: Uses `${{ secrets.GEMINI_API_KEY }}` (validated with error handling)
+- **Output**: Signed AAB uploaded to Play Store (internal/alpha/beta/production tracks)
+
+#### 4. **ios-deploy.yml** - App Store
+- **Trigger**: Version tags (`v*`) or manual execution
+- **Purpose**: Automated deployment to TestFlight/App Store
+- **Requirements**: App Store Connect setup, certificates, app registration
+- **API Key**: Uses `${{ secrets.GEMINI_API_KEY }}` (validated with error handling)
+- **Output**: Signed IPA uploaded to TestFlight or App Store
+
+### Required GitHub Secrets
+For production deployments, configure these repository secrets:
+```bash
+# Core API (required for all production builds)
+GEMINI_API_KEY=your_google_gemini_api_key
+
+# Android deployment (android-deploy.yml)
+GOOGLE_PLAY_SERVICE_ACCOUNT=service_account_json
+ANDROID_SIGNING_KEY=base64_encoded_keystore
+ANDROID_KEYSTORE_PASSWORD=keystore_password
+ANDROID_KEY_ALIAS=key_alias
+ANDROID_KEY_PASSWORD=key_password
+
+# iOS deployment (ios-deploy.yml)
+APPSTORE_ISSUER_ID=app_store_connect_issuer_id
+APPSTORE_KEY_ID=app_store_connect_key_id
+APPSTORE_PRIVATE_KEY=app_store_connect_private_key
+IOS_DISTRIBUTION_CERTIFICATE=p12_certificate_base64
+IOS_CERTIFICATE_PASSWORD=certificate_password
+IOS_TEAM_ID=apple_team_id
+```
+
+### Deployment Strategy
+- **Development**: Use ci.yml for code validation
+- **Beta Testing**: Use release.yml for GitHub Releases distribution
+- **Store Distribution**: Use android-deploy.yml and ios-deploy.yml after store setup
+
+### Important Notes
+- Store deployment workflows will fail until apps are registered in respective stores
+- CI workflow intentionally uses dummy API keys to avoid unnecessary API usage during testing
+- All workflows include proper error handling and validation for missing secrets
+
 ## Development Status
 
 ### Recent Achievements
-- **Perfect test coverage**: 661 tests with 100% success rate across unit, widget, and integration tests
+- **Perfect test coverage**: 683 tests with 100% success rate across unit, widget, and integration tests
 - **PromptService complete implementation**: Phase 2.2.1 fully implemented with JSON asset loading, 3-tier caching, and comprehensive search
 - **Monetization implementation**: Complete freemium model with In-App Purchase integration
 - **Writing prompts system**: 20 curated prompts with 8-category classification and plan-based access
@@ -384,6 +465,8 @@ All user data stays on device. Hive database files are stored in app documents d
 - **Prompt-less generation**: Enhanced support for diary generation without writing prompts
 - **Loading state improvements**: Optimized loading indicators and message positioning for better user experience
 - **✅ Phase 2.4.2 使用量分析機能実装**: Complete implementation of comprehensive analytics system for prompt usage analysis, user behavior tracking, and continuous improvement
+- **CI/CD Pipeline Implementation**: Complete GitHub Actions workflows for automated testing, building, and deployment to GitHub Releases, Google Play Store, and App Store
+- **Package Compatibility Resolution**: Fixed in_app_purchase compatibility issues with StoreKit 2 APIs by pinning to version 3.1.10
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging, Subscription, Prompt) are fully implemented and tested
