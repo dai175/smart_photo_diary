@@ -805,10 +805,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           },
           child: Container(
             width: 200,
-            constraints: const BoxConstraints(
-              minHeight: 150,
-              maxHeight: 300,
-            ),
+            constraints: const BoxConstraints(minHeight: 150, maxHeight: 300),
             decoration: BoxDecoration(
               borderRadius: AppSpacing.photoRadius,
               boxShadow: AppSpacing.cardShadow,
