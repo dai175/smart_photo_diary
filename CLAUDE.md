@@ -101,12 +101,29 @@ adb shell am start -n com.example.smart_photo_diary/.MainActivity
 # Analyze code (configured to suppress info-level lints for cleaner output)
 fvm flutter analyze
 
-# Fix formatting
+# Fix formatting (REQUIRED after any code changes)
 fvm dart format .
+
+# Check formatting without changing files (CI/CD safe)
+fvm dart format --set-exit-if-changed .
 
 # Check for outdated dependencies
 fvm flutter pub outdated
 ```
+
+### Code Formatting Requirements
+**IMPORTANT**: Always run `fvm dart format .` after making any code changes to ensure consistent formatting:
+
+```bash
+# Standard workflow after code changes:
+1. Make your code changes
+2. fvm dart format .        # Format code automatically
+3. fvm flutter analyze     # Check for issues
+4. fvm flutter test        # Run tests
+5. git add . && git commit  # Commit changes
+```
+
+The CI/CD pipeline uses `--set-exit-if-changed` flag and will fail if code is not properly formatted. This ensures consistent code style across the entire codebase.
 
 ## Architecture Overview
 
