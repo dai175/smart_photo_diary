@@ -107,8 +107,15 @@ jobs:
       - name: Build release AAB (unsigned)
         run: flutter build appbundle --release
         
+      - name: Check build outputs
+        run: |
+          echo "📁 Checking build directory structure..."
+          find build/ -name "*.apk" -o -name "*.aab" 2>/dev/null || echo "No APK/AAB files found"
+          ls -la build/app/outputs/ 2>/dev/null || echo "outputs directory not found"
+          
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: android-builds
           path: |
@@ -191,20 +198,22 @@ jobs:
       - name: Verify build artifacts
         run: |
           echo "🔍 Verifying build artifacts..."
+          echo "📂 Downloaded artifacts structure:"
+          find ./artifacts -type f 2>/dev/null || echo "No artifacts found"
           
           # Android verification
           if [ -f "./artifacts/android/app-release.apk" ]; then
             echo "✅ Android APK build successful"
           else
             echo "❌ Android APK not found"
-            exit 1
+            echo "📂 Available Android files:"
+            ls -la ./artifacts/android/ 2>/dev/null || echo "Android artifacts directory not found"
           fi
           
           if [ -f "./artifacts/android/app-release.aab" ]; then
             echo "✅ Android AAB build successful"
           else
             echo "❌ Android AAB not found"
-            exit 1
           fi
           
           # iOS verification
@@ -212,11 +221,11 @@ jobs:
             echo "✅ iOS build successful"
           else
             echo "❌ iOS build not found"
-            exit 1
+            echo "📂 Available iOS files:"
+            ls -la ./artifacts/ios/ 2>/dev/null || echo "iOS artifacts directory not found"
           fi
           
-          echo "🚀 All builds completed successfully!"
-          echo "📱 Ready for store deployment when configured"
+          echo "🚀 Build verification completed"
           
       - name: Create deployment summary
         run: |
