@@ -18,7 +18,7 @@ on:
           - production
 
 env:
-  FLUTTER_VERSION: '3.8.0'
+  FLUTTER_VERSION: '3.32.0'
 
 jobs:
   test:
@@ -38,6 +38,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
           cache: true
           
       - name: Get dependencies
@@ -75,6 +76,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
           cache: true
           
       - name: Get dependencies
