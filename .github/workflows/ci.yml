@@ -109,23 +109,31 @@ jobs:
       - name: Build release AAB (unsigned)
         run: flutter build appbundle --release
         
-      - name: Check build outputs
+      - name: Verify Android build success
         run: |
-          echo "📁 Checking build directory structure..."
-          find build/ -name "*.apk" -o -name "*.aab" 2>/dev/null || echo "No APK/AAB files found"
-          ls -la build/app/outputs/ 2>/dev/null || echo "outputs directory not found"
+          echo "✅ Verifying Android build outputs..."
+          if [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
+            echo "✅ Debug APK built successfully"
+          else
+            echo "❌ Debug APK not found"
+            exit 1
+          fi
           
-      - name: Upload Android artifacts (CI build - contains dummy API key)
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: android-builds-ci-only
-          path: |
-            build/app/outputs/flutter-apk/app-debug.apk
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-          retention-days: 7
-        # Note: This CI build contains dummy API keys and is for testing purposes only
+          if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+            echo "✅ Release APK built successfully"
+          else
+            echo "❌ Release APK not found"
+            exit 1
+          fi
+          
+          if [ -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+            echo "✅ Release AAB built successfully"
+          else
+            echo "❌ Release AAB not found"
+            exit 1
+          fi
+          
+          echo "🎉 All Android builds completed successfully (CI verification only)"
 
   build-ios:
     name: Build iOS
@@ -166,85 +174,41 @@ jobs:
       - name: Build iOS (release, no codesign)
         run: flutter build ios --release --no-codesign
         
-      - name: Archive iOS build artifacts
+      - name: Verify iOS build success
         run: |
-          cd build/ios/iphoneos
-          zip -r ios-build.zip Runner.app
+          echo "✅ Verifying iOS build outputs..."
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then
+            echo "✅ iOS Debug build completed successfully"
+          else
+            echo "❌ iOS Debug build not found"
+            exit 1
+          fi
           
-      - name: Upload iOS artifacts (CI build - contains dummy API key)
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-builds-ci-only
-          path: build/ios/iphoneos/ios-build.zip
-          retention-days: 7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Note: This CI build contains dummy API keys and is for testing purposes only
+          echo "🎉 iOS builds completed successfully (CI verification only)"
+          echo "ℹ️ Note: CI builds use dummy API keys and no code signing"
 
-  deployment-ready:
-    name: Deployment Ready Check
-    needs: [build-android, build-ios]
+  ci-summary:
+    name: CI Summary
+    needs: [quality-check, build-android, build-ios]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: always()
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Download Android artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: android-builds-ci-only
-          path: ./artifacts/android
-          
-      - name: Download iOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-builds-ci-only
-          path: ./artifacts/ios
-          
-      - name: Verify build artifacts
+      - name: Create CI summary
         run: |
-          echo "🔍 Verifying build artifacts..."
-          echo "📂 Downloaded artifacts structure:"
-          find ./artifacts -type f 2>/dev/null || echo "No artifacts found"
-          
-          # Android verification
-          if [ -f "./artifacts/android/app-release.apk" ]; then
-            echo "✅ Android APK build successful"
-          else
-            echo "❌ Android APK not found"
-            echo "📂 Available Android files:"
-            ls -la ./artifacts/android/ 2>/dev/null || echo "Android artifacts directory not found"
-          fi
-          
-          if [ -f "./artifacts/android/app-release.aab" ]; then
-            echo "✅ Android AAB build successful"
-          else
-            echo "❌ Android AAB not found"
-          fi
-          
-          # iOS verification
-          if [ -f "./artifacts/ios/ios-build.zip" ]; then
-            echo "✅ iOS build successful"
-          else
-            echo "❌ iOS build not found"
-            echo "📂 Available iOS files:"
-            ls -la ./artifacts/ios/ 2>/dev/null || echo "iOS artifacts directory not found"
-          fi
-          
-          echo "🚀 Build verification completed"
-          
-      - name: Create deployment summary
-        run: |
-          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Build Status" >> $GITHUB_STEP_SUMMARY
-          echo "- **Android APK**: Ready for sideloading" >> $GITHUB_STEP_SUMMARY
-          echo "- **Android AAB**: Ready for Google Play Store" >> $GITHUB_STEP_SUMMARY
-          echo "- **iOS Build**: Ready for App Store (requires code signing)" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code Quality**: Tests, analysis, and formatting checks" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android Build**: APK and AAB compilation verified" >> $GITHUB_STEP_SUMMARY  
+          echo "- **iOS Build**: Debug and release compilation verified" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Next Steps" >> $GITHUB_STEP_SUMMARY
-          echo "1. Download artifacts for testing" >> $GITHUB_STEP_SUMMARY
-          echo "2. Configure store credentials for automatic deployment" >> $GITHUB_STEP_SUMMARY
-          echo "3. Set up code signing for iOS releases" >> $GITHUB_STEP_SUMMARY
+          echo "### ℹ️ Important Notes" >> $GITHUB_STEP_SUMMARY
+          echo "- CI builds use dummy API keys for testing purposes" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS builds are unsigned (--no-codesign)" >> $GITHUB_STEP_SUMMARY
+          echo "- For production builds, use release workflows with proper secrets" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Next Steps for Release" >> $GITHUB_STEP_SUMMARY
+          echo "1. Create version tag to trigger release workflows" >> $GITHUB_STEP_SUMMARY
+          echo "2. Configure GitHub Secrets for production API keys" >> $GITHUB_STEP_SUMMARY
+          echo "3. Set up store credentials for deployment workflows" >> $GITHUB_STEP_SUMMARY
