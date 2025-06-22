@@ -10,21 +10,8 @@ class EnvironmentConfig {
   /// 環境変数を初期化
   static Future<void> initialize() async {
     try {
-      // まず.envファイルからの読み込みを試行
-      try {
-        await dotenv.load(fileName: ".env");
-        debugPrint('✅ .envファイルから環境変数を読み込み成功');
-      } catch (fileError) {
-        debugPrint('⚠️ .envファイル読み込み失敗: $fileError');
-        // アセットからの読み込みを試行（CI/CDビルド用）
-        try {
-          await dotenv.load();
-          debugPrint('✅ アセットから環境変数を読み込み成功');
-        } catch (assetError) {
-          debugPrint('⚠️ アセット読み込みも失敗: $assetError');
-          // 両方失敗した場合は空の環境変数で初期化
-        }
-      }
+      await dotenv.load();
+      debugPrint('✅ .envファイルから環境変数を読み込み成功');
 
       // 環境変数またはビルド時定数からAPIキーを取得
       _cachedGeminiApiKey =
