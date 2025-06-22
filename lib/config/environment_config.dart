@@ -10,22 +10,42 @@ class EnvironmentConfig {
   /// 環境変数を初期化
   static Future<void> initialize() async {
     try {
-      await dotenv.load(fileName: ".env");
-      _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'];
+      // まず.envファイルからの読み込みを試行
+      try {
+        await dotenv.load(fileName: ".env");
+        debugPrint('✅ .envファイルから環境変数を読み込み成功');
+      } catch (fileError) {
+        debugPrint('⚠️ .envファイル読み込み失敗: $fileError');
+        // アセットからの読み込みを試行（CI/CDビルド用）
+        try {
+          await dotenv.load();
+          debugPrint('✅ アセットから環境変数を読み込み成功');
+        } catch (assetError) {
+          debugPrint('⚠️ アセット読み込みも失敗: $assetError');
+          // 両方失敗した場合は空の環境変数で初期化
+        }
+      }
+
+      // 環境変数またはビルド時定数からAPIキーを取得
+      _cachedGeminiApiKey =
+          dotenv.env['GEMINI_API_KEY'] ??
+          const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
       // プラン強制設定を読み込み（デバッグモードでのみ有効）
       if (kDebugMode) {
         final forcePlanValue =
             dotenv.env['FORCE_PLAN'] ??
             const String.fromEnvironment('FORCE_PLAN', defaultValue: '');
-        _cachedForcePlan = forcePlanValue.toLowerCase();
+        _cachedForcePlan = forcePlanValue.isNotEmpty
+            ? forcePlanValue.toLowerCase()
+            : null;
       } else {
         _cachedForcePlan = null; // 本番ビルドでは常にnull
       }
 
       _isInitialized = true;
 
-      debugPrint('EnvironmentConfig初期化完了');
+      debugPrint('🚀 EnvironmentConfig初期化完了');
       debugPrint(
         'GEMINI_API_KEY: ${_cachedGeminiApiKey?.isNotEmpty == true ? "設定済み" : "未設定"}',
       );
@@ -35,7 +55,7 @@ class EnvironmentConfig {
         debugPrint('APIキープレビュー: ${_cachedGeminiApiKey!.substring(0, 8)}...');
       }
     } catch (e) {
-      debugPrint('環境変数読み込みエラー: $e');
+      debugPrint('❌ 環境変数初期化エラー: $e');
       _isInitialized = false;
     }
   }
