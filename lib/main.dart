@@ -28,10 +28,14 @@ Future<void> main() async {
   Hive.registerAdapter(PromptUsageHistoryAdapter());
 
   // 環境変数の初期化
+  debugPrint('🔧 EnvironmentConfig初期化開始...');
   await EnvironmentConfig.initialize();
+  debugPrint('🔧 EnvironmentConfig初期化完了: ${EnvironmentConfig.isInitialized}');
 
   // サービスロケータの初期化
+  debugPrint('🔧 ServiceRegistration初期化開始...');
   await ServiceRegistration.initialize();
+  debugPrint('🔧 ServiceRegistration初期化完了');
 
   runApp(const MyApp());
 }
