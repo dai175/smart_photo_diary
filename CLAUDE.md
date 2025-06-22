@@ -237,6 +237,25 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 
 ## Development Notes
 
+### Security Guidelines (CRITICAL)
+**Always prioritize security best practices over convenience:**
+
+1. **Environment Variables**:
+   - NEVER suggest including `.env` files in `assets/` or application bundles
+   - Always use project root placement: `/project-root/.env`
+   - Use `dotenv.load(fileName: ".env")` to load from root, not assets
+
+2. **API Key Management**:
+   - Local development: `.env` in project root (gitignored)
+   - CI/CD: GitHub Secrets with dynamic `.env` creation
+   - Production: Environment variables or secure platform storage
+   - NEVER bundle API keys in APK/IPA files
+
+3. **Security-First Decision Making**:
+   - When in doubt, choose the more secure option
+   - Verify industry best practices before suggesting solutions
+   - Consider long-term security implications of architectural decisions
+
 ### Code Generation
 Always run `fvm dart run build_runner build` after modifying Hive model classes to regenerate adapters.
 
@@ -352,10 +371,39 @@ The project follows a comprehensive 3-tier testing strategy with **100% success 
 - **Result<T> testing**: Comprehensive unit tests for functional error handling patterns
 
 ### Environment Variables and Configuration
-- **`.env` file**: Create in root directory for Google Gemini API keys and other configuration
+
+#### Security Best Practices
+**CRITICAL**: Always follow these security guidelines when handling environment variables and API keys:
+
+1. **NEVER include `.env` files in assets or application bundles**
+   - Assets are extractable from APK/IPA files, exposing API keys
+   - This is a major security vulnerability that can lead to API key theft
+
+2. **Proper `.env` file management**:
+   - **Local Development**: Place `.env` file in project root directory
+   - **Version Control**: Always add `.env` to `.gitignore` (never commit API keys)
+   - **CI/CD**: Use GitHub Secrets or environment variables, create `.env` dynamically
+   - **Production**: Use platform-specific secure storage or environment variables
+
+#### Implementation Details
+- **`.env` file location**: Project root directory (`/project-root/.env`)
 - **EnvironmentConfig**: Robust environment variable management with caching and validation (`lib/config/environment_config.dart`)
+- **Loading method**: `dotenv.load(fileName: ".env")` loads from project root, not assets
 - **Android permissions**: Release builds require INTERNET permissions in AndroidManifest.xml for API calls
-- **Asset bundling**: `.env` file is included as an asset in `pubspec.yaml` for release builds
+
+#### Environment Variable Loading Strategy
+```dart
+// CORRECT: Load from project root
+await dotenv.load(fileName: ".env");
+
+// INCORRECT: Load from assets (security risk)
+await dotenv.load(); // This loads from assets by default
+```
+
+#### CI/CD Environment Handling
+- **GitHub Actions**: Creates `.env` file dynamically from secrets before build
+- **Local Development**: Uses `.env` file from project root
+- **Production Builds**: API keys injected via CI/CD secrets, never bundled in assets
 
 #### Development Plan Override (Debug Mode Only)
 For testing purposes, you can force a specific subscription plan in debug mode:
