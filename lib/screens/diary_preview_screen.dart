@@ -634,9 +634,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                             width: 120,
                                             height: 120,
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainerHighest,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.surface,
                                               borderRadius:
                                                   AppSpacing.photoRadius,
                                             ),
