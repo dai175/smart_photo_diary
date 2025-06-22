@@ -807,6 +807,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             width: 200,
             constraints: const BoxConstraints(minHeight: 150, maxHeight: 300),
             decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: AppSpacing.photoRadius,
               boxShadow: AppSpacing.cardShadow,
             ),
@@ -929,7 +930,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: AppSpacing.cardRadiusLarge,
-                  child: Image.memory(imageData, fit: BoxFit.contain),
+                  child: Container(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    child: Image.memory(imageData, fit: BoxFit.contain),
+                  ),
                 ),
               ),
             ),

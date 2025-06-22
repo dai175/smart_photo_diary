@@ -630,11 +630,26 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                         if (snapshot.connectionState ==
                                                 ConnectionState.done &&
                                             snapshot.data != null) {
-                                          return Image.memory(
-                                            snapshot.data!,
-                                            fit: BoxFit.contain,
+                                          return Container(
                                             width: 120,
                                             height: 120,
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                              borderRadius:
+                                                  AppSpacing.photoRadius,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  AppSpacing.photoRadius,
+                                              child: Image.memory(
+                                                snapshot.data!,
+                                                fit: BoxFit.contain,
+                                                width: 120,
+                                                height: 120,
+                                              ),
+                                            ),
                                           );
                                         }
                                         return Container(
