@@ -10,7 +10,7 @@ class EnvironmentConfig {
   /// 環境変数を初期化
   static Future<void> initialize() async {
     try {
-      await dotenv.load();
+      await dotenv.load(fileName: ".env");
       _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'];
 
       // プラン強制設定を読み込み（デバッグモードでのみ有効）
