@@ -610,7 +610,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: AppSpacing.photoRadius,
-                                    boxShadow: AppSpacing.cardShadow,
                                   ),
                                   child: ClipRRect(
                                     borderRadius: AppSpacing.photoRadius,
