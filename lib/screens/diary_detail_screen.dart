@@ -809,7 +809,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: AppSpacing.photoRadius,
-              boxShadow: AppSpacing.cardShadow,
             ),
             child: ClipRRect(
               borderRadius: AppSpacing.photoRadius,
