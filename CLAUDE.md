@@ -256,6 +256,33 @@ The app implements a **Result<T> pattern** for functional error handling, provid
    - Verify industry best practices before suggesting solutions
    - Consider long-term security implications of architectural decisions
 
+### Git Operations and Development Rules (CRITICAL)
+**IMPORTANT**: Always follow these rules when working with Git and making code changes:
+
+#### Git Operations
+1. **Never commit without explicit user approval**:
+   - Complete code modifications and testing first
+   - Report changes and results to user
+   - Wait for user's explicit instruction to commit
+   - Confirm commit message with user before executing
+
+2. **Commit Guidelines**:
+   - Only commit when functionality is tested and confirmed working
+   - Never commit untested code or "work in progress"
+   - Use descriptive commit messages that explain the "why" not just "what"
+   - Follow the existing commit message format
+
+#### Security in Code
+1. **API Keys and Secrets**:
+   - NEVER hardcode API keys, passwords, or tokens in source code
+   - Use only environment variables, config files, or build-time constants
+   - If unsure about security implications, always ask user first
+
+2. **Git History Security**:
+   - Be aware that Git history is permanent and public when pushed
+   - If secrets are accidentally committed, immediately inform user
+   - Never attempt to "fix" security issues by adding new commits
+
 ### Code Generation
 Always run `fvm dart run build_runner build` after modifying Hive model classes to regenerate adapters.
 
