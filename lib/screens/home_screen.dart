@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
 
   // コントローラー
@@ -31,9 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<DiaryEntry> _recentDiaries = [];
   bool _loadingDiaries = true;
 
+  // 権限リクエスト中フラグ
+  bool _isRequestingPermission = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _photoController = PhotoSelectionController();
     _loadTodayPhotos();
     _loadRecentDiaries();
@@ -41,8 +45,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _photoController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // アプリがフォアグラウンドに戻った時に権限状態をチェック
+      _refreshHome();
+    }
   }
 
   // モーダル表示メソッド
@@ -108,20 +122,24 @@ class _HomeScreenState extends State<HomeScreen> {
       usedIds.addAll(entry.photoIds);
     }
     _photoController.setUsedPhotoIds(usedIds);
-    debugPrint('使用済み写真ID数: ${usedIds.length}');
   }
 
   // 権限リクエストと写真の読み込み
   Future<void> _loadTodayPhotos() async {
     if (!mounted) return;
 
+    // 既に権限リクエスト中の場合は処理をスキップ
+    if (_isRequestingPermission) {
+      return;
+    }
+
+    _isRequestingPermission = true;
     _photoController.setLoading(true);
 
     try {
       // 権限リクエスト
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
       final hasPermission = await photoService.requestPermission();
-      debugPrint('権限ステータス: $hasPermission');
 
       if (!mounted) return;
 
@@ -134,18 +152,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // 今日撮影された写真だけを取得
       final photos = await photoService.getTodayPhotos();
-      debugPrint('取得した写真数: ${photos.length}');
 
       if (!mounted) return;
 
       _photoController.setPhotoAssets(photos);
       _photoController.setLoading(false);
     } catch (e) {
-      debugPrint('写真読み込みエラー: $e');
       if (mounted) {
         _photoController.setPhotoAssets([]);
         _photoController.setLoading(false);
       }
+    } finally {
+      _isRequestingPermission = false;
     }
   }
 

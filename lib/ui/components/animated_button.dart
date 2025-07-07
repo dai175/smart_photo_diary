@@ -170,6 +170,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
   }
 
   void _handleTapDown(TapDownDetails details) {
+    debugPrint('AnimatedButton: _handleTapDown が呼び出されました');
     if (widget.enableScaleAnimation) {
       // setState(() => _isPressed = true);
       _animationController.forward();
@@ -181,7 +182,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
       // setState(() => _isPressed = false);
       _animationController.reverse();
     }
-    widget.onPressed?.call();
+    // onPressed?.call()をonTapに移動
   }
 
   void _handleTapCancel() {
@@ -240,7 +241,12 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTapDown: widget.onPressed != null ? _handleTapDown : null,
                 onTapUp: widget.onPressed != null ? _handleTapUp : null,
                 onTapCancel: widget.onPressed != null ? _handleTapCancel : null,
-                onTap: null, // ハンドルされているのでnull
+                onTap: widget.onPressed != null
+                    ? () {
+                        debugPrint('AnimatedButton: onTap が呼び出されました');
+                        widget.onPressed!();
+                      }
+                    : null, // メインのタップイベント
                 borderRadius: borderRadius,
                 splashColor: widget.enableSplashEffect
                     ? foregroundColor.withValues(alpha: 0.2)
@@ -294,7 +300,14 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedButton(
-      onPressed: isLoading ? null : onPressed,
+      onPressed: isLoading
+          ? null
+          : (onPressed != null
+                ? () {
+                    debugPrint('PrimaryButton: onPressed が呼び出されました');
+                    onPressed!();
+                  }
+                : null),
       width: width,
       backgroundColor: theme.colorScheme.primary,
       foregroundColor: theme.colorScheme.onPrimary,

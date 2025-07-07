@@ -41,6 +41,7 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoGrid(BuildContext context) {
+
     if (controller.isLoading) {
       return SizedBox(
         height: AppConstants.photoGridHeight,
@@ -102,7 +103,7 @@ class PhotoGridWidget extends StatelessWidget {
           PrimaryButton(
             onPressed: onRequestPermission,
             text: AppConstants.requestPermissionButton,
-            icon: Icons.settings_rounded,
+            icon: Icons.camera_alt,
           ),
         ],
       ),

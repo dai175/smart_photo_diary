@@ -5,6 +5,9 @@ abstract class PhotoServiceInterface {
   /// 写真アクセス権限をリクエストする
   Future<bool> requestPermission();
 
+  /// 権限が永続的に拒否されているかチェック
+  Future<bool> isPermissionPermanentlyDenied();
+
   /// 今日撮影された写真を取得する
   Future<List<AssetEntity>> getTodayPhotos({int limit = 20});
 
