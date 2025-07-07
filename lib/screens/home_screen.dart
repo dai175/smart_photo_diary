@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // 権限拒否時のダイアログを表示
   Future<void> _showPermissionDeniedDialog() async {
     if (!mounted) return;
-    
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // Limited Access時のダイアログを表示
   Future<void> _showLimitedAccessDialog() async {
     if (!mounted) return;
-    
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -130,7 +130,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               child: const Text('写真を選択'),
               onPressed: () async {
                 Navigator.of(context).pop();
-                final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+                final photoService =
+                    ServiceRegistration.get<PhotoServiceInterface>();
                 await photoService.presentLimitedLibraryPicker();
                 // 選択後に写真を再読み込み
                 _loadTodayPhotos();

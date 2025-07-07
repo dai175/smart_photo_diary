@@ -41,7 +41,6 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoGrid(BuildContext context) {
-
     if (controller.isLoading) {
       return SizedBox(
         height: AppConstants.photoGridHeight,

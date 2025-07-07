@@ -23,34 +23,36 @@ class PhotoService implements PhotoServiceInterface {
   Future<bool> requestPermission() async {
     try {
       debugPrint('=== PhotoService.requestPermission() 開始 ===');
-      
+
       // PhotoManagerでの権限チェック
       final pmState = await PhotoManager.requestPermissionExtend();
       debugPrint('PhotoManager権限状態: $pmState');
-      
+
       if (pmState.isAuth) {
         debugPrint('PhotoManagerで権限が付与されました');
         return true;
       }
-      
+
       // Limited access の場合も部分的に許可とみなす
       if (pmState == PermissionState.limited) {
         debugPrint('PhotoManagerで制限つきアクセスが許可されました');
         return true;
       }
-      
+
       // permission_handlerでも確認
       var status = await Permission.photos.status;
       debugPrint('permission_handler権限状態: $status');
-      
+
       // 権限が拒否されている場合は設定アプリを開く
       if (status.isPermanentlyDenied || status.isDenied || !pmState.isAuth) {
         debugPrint('権限が拒否されています。設定アプリを開きます。');
         // ここでは設定アプリを開かず、呼び出し元で判断してもらう
         return false;
       }
-      
-      debugPrint('=== PhotoService.requestPermission() 終了: ${pmState.isAuth} ===');
+
+      debugPrint(
+        '=== PhotoService.requestPermission() 終了: ${pmState.isAuth} ===',
+      );
       return pmState.isAuth;
     } catch (e) {
       debugPrint('権限リクエストエラー: $e');
@@ -67,7 +69,6 @@ class PhotoService implements PhotoServiceInterface {
       return false;
     }
   }
-
 
   /// 今日撮影された写真を取得する
   ///
