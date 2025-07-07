@@ -235,6 +235,17 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 - `assets/data/writing_prompts.json`: Writing prompts data with metadata and categorization
 - `assets/images/`: Application assets and icons
 
+### UI Components
+- `lib/ui/components/custom_dialog.dart`: Unified modal design system
+  - CustomDialog: Unified dialog component
+  - PresetDialogs: Standard dialogs for success, error, confirmation, usage limits
+  - CustomDialogAction: Unified button styles (Primary/Secondary/Danger)
+- `lib/screens/diary_preview_screen.dart`: Optimized diary preview screen
+  - Responsive content input field
+  - Natural layout adjustment functionality
+- `lib/screens/diary_detail_screen.dart`: Enhanced photo dialog functionality
+  - Optimized photo display modal
+
 ## Development Notes
 
 ### Security Guidelines (CRITICAL)
@@ -293,6 +304,14 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 - Project uses Japanese comments for business logic documentation
 - Test suite must maintain 100% success rate - all failing tests should be investigated and either fixed or removed
 
+### UI Development Guidelines
+- **Modal Design**: Always use CustomDialog for new modals and avoid AlertDialog
+- **Text Alignment**: Use left-aligned text (textAlign: TextAlign.left) for user-facing content
+- **Layout Constraints**: Avoid fixed heights and use natural layouts (Flexible, Expanded, etc.)
+- **Visual Consistency**: Follow design system for icons, colors, and button styles
+- **Responsive Design**: Create flexible layouts that adapt to different screen sizes and content lengths
+- **User Experience**: Prioritize intuitive interactions and visual feedback
+
 ### Japanese Language Development
 - **UI text**: All user-facing text is in Japanese
 - **Comments**: Business logic and complex algorithms documented in Japanese
@@ -306,7 +325,21 @@ Always run `fvm dart run build_runner build` after modifying Hive model classes 
 - **Material Design 3**: Follow MD3 principles with emphasis on solid colors and clean layouts
 - **Typography standardization**: Section headings use AppTypography.headlineSmall (24sp) across all screens
 - **Theme-aware colors**: Always use `Theme.of(context).colorScheme` for dynamic colors instead of fixed AppColors
-- **Modal design**: Custom dialogs follow consistent design patterns with proper theme integration
+- **Custom Dialog System**: Unified modal design with CustomDialog components
+  - Complete migration from AlertDialog to CustomDialog
+  - Standardized PresetDialogs (success, error, confirmation, usageLimit)
+  - Consistent icons, color schemes, and button styles
+- **Text Alignment Standards**: Left-aligned text following industry standards (textAlign: TextAlign.left)
+  - All modal text uses left alignment (except loading messages)
+  - Improved readability and natural reading flow
+- **Responsive Layout Design**: Natural layout design avoiding fixed heights
+  - Diary preview screen: Removed fixed height (400px) for natural sizing
+  - Content input field: minLines: 12, maxLines: null for long text support
+  - Optimized spacing for efficient screen space utilization
+- **Photo Dialog Optimization**: Enhanced photo display dialogs
+  - Proper close button positioning (top: -10, right: -10)
+  - Visual improvements with clipBehavior: Clip.none
+  - Optimized button size, background opacity, and border styling
 
 ### Error Handling Patterns
 
@@ -621,9 +654,15 @@ git push origin v1.0.0-beta           # → release.yml execution
 - **UX workflow optimization**: Implemented modal-based prompt selection for streamlined diary creation
 - **Prompt-less generation**: Enhanced support for diary generation without writing prompts
 - **Loading state improvements**: Optimized loading indicators and message positioning for better user experience
-- **✅ Phase 2.4.2 使用量分析機能実装**: Complete implementation of comprehensive analytics system for prompt usage analysis, user behavior tracking, and continuous improvement
+- **✅ Phase 2.4.2 Analytics System Implementation**: Complete implementation of comprehensive analytics system for prompt usage analysis, user behavior tracking, and continuous improvement
 - **CI/CD Pipeline Implementation**: Complete GitHub Actions workflows for automated testing, building, and deployment to GitHub Releases, Google Play Store, and App Store
 - **Package Compatibility Resolution**: Fixed in_app_purchase compatibility issues with StoreKit 2 APIs by pinning to version 3.1.10
+- **Unified Modal Design**: Consistent UI experience through CustomDialog components
+- **Photo Permission UX Enhancement**: Clear messaging and visually unified permission dialogs
+- **Diary Editing UX Optimization**: Improved editing experience with natural layouts and long text support
+- **Photo Display Enhancement**: Improved photo dialogs with intuitive interactions
+- **Text Standardization**: Enhanced readability with industry-standard left-aligned text
+- **Responsive Design Implementation**: Natural and efficient layout design avoiding fixed heights
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging, Subscription, Prompt) are fully implemented and tested
