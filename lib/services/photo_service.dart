@@ -24,7 +24,7 @@ class PhotoService implements PhotoServiceInterface {
     try {
       debugPrint('=== PhotoService.requestPermission() 開始 ===');
 
-      // PhotoManagerでの権限チェック
+      // まずはPhotoManagerで権限リクエスト（これがメイン）
       final pmState = await PhotoManager.requestPermissionExtend();
       debugPrint('PhotoManager権限状態: $pmState');
 
@@ -33,27 +33,46 @@ class PhotoService implements PhotoServiceInterface {
         return true;
       }
 
-      // Limited access の場合も部分的に許可とみなす
+      // Limited access の場合も部分的に許可とみなす（iOS専用）
       if (pmState == PermissionState.limited) {
         debugPrint('PhotoManagerで制限つきアクセスが許可されました');
         return true;
       }
 
-      // permission_handlerでも確認
-      var status = await Permission.photos.status;
-      debugPrint('permission_handler権限状態: $status');
+      // PhotoManagerで権限が拒否された場合、Androidでは追加でpermission_handlerを試す
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        debugPrint('Android: permission_handlerで追加の権限チェックを実行');
 
-      // 権限が拒否されている場合は設定アプリを開く
-      if (status.isPermanentlyDenied || status.isDenied || !pmState.isAuth) {
-        debugPrint('権限が拒否されています。設定アプリを開きます。');
-        // ここでは設定アプリを開かず、呼び出し元で判断してもらう
-        return false;
+        // Android 13以降は Permission.photos、それ以前は Permission.storage
+        Permission permission = Permission.photos;
+
+        var status = await permission.status;
+        debugPrint('permission_handler権限状態: $status');
+
+        // 権限が未決定または拒否の場合は明示的にリクエスト
+        if (status.isDenied) {
+          debugPrint('Android: 権限を明示的にリクエストします');
+          status = await permission.request();
+          debugPrint('Android: リクエスト後の権限状態: $status');
+
+          if (status.isGranted) {
+            debugPrint('Android: permission_handlerで権限が付与されました');
+            // PhotoManagerで再度確認
+            final pmStateAfter = await PhotoManager.requestPermissionExtend();
+            debugPrint('Android: PhotoManager再確認結果: $pmStateAfter');
+            return pmStateAfter.isAuth;
+          }
+        }
+
+        // 永続的に拒否されている場合
+        if (status.isPermanentlyDenied) {
+          debugPrint('Android: 権限が永続的に拒否されています');
+          return false;
+        }
       }
 
-      debugPrint(
-        '=== PhotoService.requestPermission() 終了: ${pmState.isAuth} ===',
-      );
-      return pmState.isAuth;
+      debugPrint('権限が拒否されています。pmState: $pmState');
+      return false;
     } catch (e) {
       debugPrint('権限リクエストエラー: $e');
       return false;
@@ -61,6 +80,7 @@ class PhotoService implements PhotoServiceInterface {
   }
 
   /// 権限が永続的に拒否されているかチェック
+  @override
   Future<bool> isPermissionPermanentlyDenied() async {
     try {
       final currentStatus = await Permission.photos.status;
@@ -235,6 +255,7 @@ class PhotoService implements PhotoServiceInterface {
   }
 
   /// Limited Photo Access時に写真選択画面を表示
+  @override
   Future<bool> presentLimitedLibraryPicker() async {
     try {
       await PhotoManager.presentLimited();
@@ -246,6 +267,7 @@ class PhotoService implements PhotoServiceInterface {
   }
 
   /// 現在の権限状態が Limited Access かチェック
+  @override
   Future<bool> isLimitedAccess() async {
     try {
       final pmState = await PhotoManager.requestPermissionExtend();
