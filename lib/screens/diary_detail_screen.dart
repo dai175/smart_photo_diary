@@ -909,10 +909,11 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
-        child: Stack(
-          children: [
-            Center(
-              child: Container(
+        child: Center(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
                 constraints: const BoxConstraints(
                   maxWidth: 400,
                   maxHeight: 600,
@@ -935,30 +936,34 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 40,
-              right: 20,
-              child: MicroInteractions.bounceOnTap(
-                onTap: () {
-                  MicroInteractions.hapticTap();
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.close_rounded,
-                    color: Colors.white,
-                    size: 24,
+              Positioned(
+                top: -10,
+                right: -10,
+                child: MicroInteractions.bounceOnTap(
+                  onTap: () {
+                    MicroInteractions.hapticTap();
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.7),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
