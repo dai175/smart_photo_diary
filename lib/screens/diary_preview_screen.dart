@@ -874,142 +874,134 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 )
               // 日記編集フィールド（初期化完了後、日記生成完了後）
               else if (!_isInitializing && !_isLoading && !_hasError)
-                SizedBox(
-                  height: 400,
-                  child: SlideInWidget(
-                    delay: const Duration(milliseconds: 200),
-                    child: CustomCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.edit_rounded,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: AppSpacing.iconMd,
+                SlideInWidget(
+                  delay: const Duration(milliseconds: 200),
+                  child: CustomCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.edit_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: AppSpacing.iconMd,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                '日記の内容',
+                                style: AppTypography.titleLarge,
                               ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: Text(
-                                  '日記の内容',
-                                  style: AppTypography.titleLarge,
+                            ),
+                            if (_selectedPrompt != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.xs,
+                                  vertical: 2,
                                 ),
-                              ),
-                              if (_selectedPrompt != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.xs,
-                                    vertical: 2,
+                                decoration: BoxDecoration(
+                                  color: PromptCategoryUtils.getCategoryColor(
+                                    _selectedPrompt!.category,
+                                  ).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.xs,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: PromptCategoryUtils.getCategoryColor(
-                                      _selectedPrompt!.category,
-                                    ).withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(
-                                      AppSpacing.xs,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.edit_note_rounded,
+                                      size: 12,
+                                      color:
+                                          PromptCategoryUtils.getCategoryColor(
+                                            _selectedPrompt!.category,
+                                          ),
                                     ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.edit_note_rounded,
-                                        size: 12,
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      'プロンプト使用',
+                                      style: AppTypography.labelSmall.copyWith(
                                         color:
                                             PromptCategoryUtils.getCategoryColor(
                                               _selectedPrompt!.category,
                                             ),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        'プロンプト使用',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color:
-                                              PromptCategoryUtils.getCategoryColor(
-                                                _selectedPrompt!.category,
-                                              ),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.outline.withValues(alpha: 0.2),
                               ),
-                              borderRadius: AppSpacing.inputRadius,
-                              color: Theme.of(context).colorScheme.surface,
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.outline.withValues(alpha: 0.2),
                             ),
-                            child: TextField(
-                              controller: _titleController,
-                              style: AppTypography.titleMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: 'タイトル',
-                                border: InputBorder.none,
-                                hintText: '日記のタイトルを入力',
-                                contentPadding: AppSpacing.inputPadding,
-                                labelStyle: AppTypography.labelMedium,
-                                hintStyle: AppTypography.bodyMedium.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
+                            borderRadius: AppSpacing.inputRadius,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                          child: TextField(
+                            controller: _titleController,
+                            style: AppTypography.titleMedium.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: 'タイトル',
+                              border: InputBorder.none,
+                              hintText: '日記のタイトルを入力',
+                              contentPadding: AppSpacing.inputPadding,
+                              labelStyle: AppTypography.labelMedium,
+                              hintStyle: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Flexible(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: AppColors.outline.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                ),
-                                borderRadius: AppSpacing.inputRadius,
-                                color: Theme.of(context).colorScheme.surface,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.outline.withValues(alpha: 0.2),
+                            ),
+                            borderRadius: AppSpacing.inputRadius,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                          child: TextField(
+                            controller: _contentController,
+                            maxLines: null,
+                            minLines: 12,
+                            textAlignVertical: TextAlignVertical.top,
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: '本文',
+                              hintText: '日記の内容を編集できます',
+                              border: InputBorder.none,
+                              contentPadding: AppSpacing.inputPadding,
+                              labelStyle: AppTypography.labelMedium,
+                              hintStyle: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
-                              child: TextField(
-                                controller: _contentController,
-                                maxLines: 8,
-                                minLines: 8,
-                                textAlignVertical: TextAlignVertical.top,
-                                style: AppTypography.bodyLarge.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: '本文',
-                                  hintText: '日記の内容を編集できます',
-                                  border: InputBorder.none,
-                                  contentPadding: AppSpacing.inputPadding,
-                                  labelStyle: AppTypography.labelMedium,
-                                  hintStyle: AppTypography.bodyMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
+                              alignLabelWithHint: true,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              // 底部パディング（キーボード用の余白）
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 100),
+              // 底部パディング（保存ボタン分の余白）
+              const SizedBox(height: AppSpacing.md),
             ],
           ),
         ),
