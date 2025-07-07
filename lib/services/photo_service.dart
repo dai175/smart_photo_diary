@@ -22,9 +22,36 @@ class PhotoService implements PhotoServiceInterface {
   @override
   Future<bool> requestPermission() async {
     try {
-      // PhotoManagerで権限をチェック・リクエスト
-      final PermissionState pmResult = await PhotoManager.requestPermissionExtend();
-      return pmResult.isAuth;
+      debugPrint('=== PhotoService.requestPermission() 開始 ===');
+      
+      // PhotoManagerでの権限チェック
+      final pmState = await PhotoManager.requestPermissionExtend();
+      debugPrint('PhotoManager権限状態: $pmState');
+      
+      if (pmState.isAuth) {
+        debugPrint('PhotoManagerで権限が付与されました');
+        return true;
+      }
+      
+      // Limited access の場合も部分的に許可とみなす
+      if (pmState == PermissionState.limited) {
+        debugPrint('PhotoManagerで制限つきアクセスが許可されました');
+        return true;
+      }
+      
+      // permission_handlerでも確認
+      var status = await Permission.photos.status;
+      debugPrint('permission_handler権限状態: $status');
+      
+      // 権限が拒否されている場合は設定アプリを開く
+      if (status.isPermanentlyDenied || status.isDenied || !pmState.isAuth) {
+        debugPrint('権限が拒否されています。設定アプリを開きます。');
+        // ここでは設定アプリを開かず、呼び出し元で判断してもらう
+        return false;
+      }
+      
+      debugPrint('=== PhotoService.requestPermission() 終了: ${pmState.isAuth} ===');
+      return pmState.isAuth;
     } catch (e) {
       debugPrint('権限リクエストエラー: $e');
       return false;
@@ -204,6 +231,28 @@ class PhotoService implements PhotoServiceInterface {
       endDate: endOfDay,
       limit: limit,
     );
+  }
+
+  /// Limited Photo Access時に写真選択画面を表示
+  Future<bool> presentLimitedLibraryPicker() async {
+    try {
+      await PhotoManager.presentLimited();
+      return true;
+    } catch (e) {
+      debugPrint('Limited Library Picker表示エラー: $e');
+      return false;
+    }
+  }
+
+  /// 現在の権限状態が Limited Access かチェック
+  Future<bool> isLimitedAccess() async {
+    try {
+      final pmState = await PhotoManager.requestPermissionExtend();
+      return pmState == PermissionState.limited;
+    } catch (e) {
+      debugPrint('権限状態チェックエラー: $e');
+      return false;
+    }
   }
 
   /// 写真のサムネイルを取得する（後方互換性のため保持）

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
@@ -70,6 +71,75 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _showSimpleDialog(String message) {
     DialogUtils.showSimpleDialog(context, message);
+  }
+
+  // 権限拒否時のダイアログを表示
+  Future<void> _showPermissionDeniedDialog() async {
+    if (!mounted) return;
+    
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('写真アクセス権限が必要です'),
+          content: const Text(
+            '日記作成に使用する写真を選択するために、写真ライブラリへのアクセス権限が必要です。\n\n設定アプリを開いて、写真へのアクセスを許可してください。',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('キャンセル'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('設定を開く'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Limited Access時のダイアログを表示
+  Future<void> _showLimitedAccessDialog() async {
+    if (!mounted) return;
+    
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('写真を追加選択'),
+          content: const Text(
+            '現在、選択された写真のみアクセス可能です。\n\n日記作成に使用したい写真を追加で選択しますか？',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('後で'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('写真を選択'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+                await photoService.presentLimitedLibraryPicker();
+                // 選択後に写真を再読み込み
+                _loadTodayPhotos();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // ホーム画面全体のリロード
@@ -147,6 +217,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       if (!hasPermission) {
         _photoController.setLoading(false);
+        // 権限が拒否された場合は説明ダイアログを表示
+        await _showPermissionDeniedDialog();
         return;
       }
 
@@ -154,6 +226,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final photos = await photoService.getTodayPhotos();
 
       if (!mounted) return;
+
+      // Limited Access で写真が少ない場合は追加選択を提案
+      if (photos.isEmpty) {
+        final isLimited = await photoService.isLimitedAccess();
+        if (isLimited) {
+          await _showLimitedAccessDialog();
+        }
+      }
 
       _photoController.setPhotoAssets(photos);
       _photoController.setLoading(false);

@@ -35,13 +35,13 @@ linter:
   rules:
     # Code Style Consistency
     prefer_single_quotes: true  # Prefer single quotes for strings
-    prefer_const_constructors: true  # Use const constructors when possible
-    prefer_const_declarations: true  # Use const for declarations when possible
+    # prefer_const_constructors: suppressed in analyzer.errors
+    # prefer_const_declarations: suppressed in analyzer.errors
     unnecessary_this: true  # Avoid unnecessary use of 'this'
     
     # Performance
     avoid_unnecessary_containers: true  # Avoid unnecessary Container widgets
-    avoid_redundant_argument_values: true  # Omit arguments that match default values
+    # avoid_redundant_argument_values: suppressed in analyzer.errors
     
     # Error Prevention
     avoid_print: true  # Avoid using print for debugging

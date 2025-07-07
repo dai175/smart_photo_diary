@@ -33,4 +33,10 @@ abstract class PhotoServiceInterface {
     int width = 200,
     int height = 200,
   });
+
+  /// Limited Photo Access時に写真選択画面を表示
+  Future<bool> presentLimitedLibraryPicker();
+
+  /// 現在の権限状態が Limited Access かチェック
+  Future<bool> isLimitedAccess();
 }
