@@ -131,7 +131,7 @@ class CustomDialog extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                 ),
               ),
           ],
@@ -157,7 +157,7 @@ class CustomDialog extends StatelessWidget {
                       height: 1.5,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                   ),
                 )
               : const SizedBox.shrink()),
@@ -342,7 +342,7 @@ class PresetDialogs {
           Text(
             '現在のプラン（$planName）では、月間$limit回までAI日記生成をご利用いただけます。',
             style: AppTypography.bodyMedium.copyWith(height: 1.5),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
           ),
           const SizedBox(height: AppSpacing.md),
           Builder(
@@ -412,7 +412,7 @@ class PresetDialogs {
               color: AppColors.primary,
               fontWeight: FontWeight.w500,
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
           ),
         ],
       ),
@@ -453,7 +453,7 @@ class PresetDialogs {
             style: AppTypography.titleMedium.copyWith(
               fontWeight: FontWeight.w600,
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
           ),
           const SizedBox(height: AppSpacing.lg),
 
@@ -579,7 +579,7 @@ class PresetDialogs {
                 color: AppColors.primary,
                 fontWeight: FontWeight.w500,
               ),
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
             ),
           ],
         ],

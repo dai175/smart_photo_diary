@@ -12,6 +12,8 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
+import '../ui/components/custom_dialog.dart';
+import '../ui/design_system/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -81,20 +83,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('写真アクセス権限が必要です'),
-          content: const Text(
-            '日記作成に使用する写真を選択するために、写真ライブラリへのアクセス権限が必要です。\n\n設定アプリを開いて、写真へのアクセスを許可してください。',
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('キャンセル'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+        return CustomDialog(
+          icon: Icons.photo_library_outlined,
+          iconColor: AppColors.warning,
+          title: '写真へのアクセスを許可',
+          message: '日記作成のために写真ライブラリへのアクセスが必要です。設定アプリで写真へのアクセスを許可してください。',
+          actions: [
+            CustomDialogAction(
+              text: 'キャンセル',
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: const Text('設定を開く'),
+            CustomDialogAction(
+              text: '設定を開く',
+              isPrimary: true,
+              icon: Icons.settings_rounded,
               onPressed: () async {
                 Navigator.of(context).pop();
                 await openAppSettings();
@@ -114,20 +116,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('写真を追加選択'),
-          content: const Text(
-            '現在、選択された写真のみアクセス可能です。\n\n日記作成に使用したい写真を追加で選択しますか？',
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('後で'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+        return CustomDialog(
+          icon: Icons.photo_library_outlined,
+          iconColor: AppColors.info,
+          title: '写真を追加選択',
+          message: '現在、選択された写真のみアクセス可能です。日記作成に使用したい写真を追加で選択しますか？',
+          actions: [
+            CustomDialogAction(
+              text: '後で',
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: const Text('写真を選択'),
+            CustomDialogAction(
+              text: '写真を選択',
+              isPrimary: true,
+              icon: Icons.add_photo_alternate_rounded,
               onPressed: () async {
                 Navigator.of(context).pop();
                 final photoService =
