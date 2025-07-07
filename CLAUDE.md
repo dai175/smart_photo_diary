@@ -451,6 +451,53 @@ For testing purposes, you can force a specific subscription plan in debug mode:
 ### Platform Considerations
 The app supports multiple platforms but photo access requires platform-specific permissions handled by `permission_handler`.
 
+### iOS Photo Permission Implementation
+**CRITICAL**: iOS photo permissions require specific implementation patterns for reliable operation:
+
+#### Required Info.plist Keys
+```xml
+<key>NSPhotoLibraryUsageDescription</key>
+<string>写真ライブラリにアクセスして、日記作成に使用する写真を取得します</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>写真ライブラリに新しい写真を保存します</string>
+<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+<true/>
+```
+
+#### Permission Implementation Strategy
+- **Dual Plugin Approach**: Use both `PhotoManager` and `permission_handler` for robust permission handling
+- **PhotoManager**: Primary for photo access and Limited Photo Access detection
+- **permission_handler**: Secondary for permission state checking and settings navigation
+
+#### Limited Photo Access Handling (iOS 14+)
+**IMPORTANT**: Limited Photo Access is a common user choice and must be properly supported:
+
+1. **Detection**: Use `PermissionState.limited` from PhotoManager
+2. **User Guidance**: Show explanatory dialog when photo count is low
+3. **Photo Selection**: Use `PhotoManager.presentLimited()` to show selection UI
+4. **Graceful Degradation**: App functions with selected photos only
+
+#### Permission State Management
+```dart
+// Correct approach for permission checking
+final pmState = await PhotoManager.requestPermissionExtend();
+if (pmState.isAuth || pmState == PermissionState.limited) {
+  // Both full and limited access are usable
+  return true;
+}
+```
+
+#### User Experience Best Practices
+- **Never surprise users**: Always show explanatory dialog before opening Settings
+- **Clear messaging**: Explain why permissions are needed and what Limited Access means
+- **Settings navigation**: Use `openAppSettings()` with proper user consent
+- **App lifecycle handling**: Check permissions when returning from Settings via `AppLifecycleState.resumed`
+
+#### Bundle ID Considerations
+- **Fresh permissions**: Changing Bundle ID resets all permission states
+- **Clean installs**: Always test with fresh app installs to verify permission flows
+- **Developer profiles**: Ensure proper signing and device trust for permission dialogs to appear
+
 ### Japanese Font Support
 - **Locale configuration**: MaterialApp configured with Japanese locale (`ja_JP`) to ensure proper font selection
 - **Font rendering**: Prevents Chinese font variants from displaying for Japanese text
@@ -807,6 +854,40 @@ The app implements a **two-tier freemium model** with the following structure:
 - **Usage Tracking**: Monthly AI generation counters with automatic reset
 - **Feature Access Control**: Plan-based access enforcement throughout the app
 - **Data Management**: Writing prompts categorized and filtered by subscription status
+
+### In-App Purchase Implementation Status
+**CRITICAL**: The app has complete technical implementation but requires App Store Connect setup:
+
+#### ✅ Fully Implemented (Code)
+- `in_app_purchase` plugin integration with StoreKit 2 compatibility (v3.1.10)
+- Complete `SubscriptionService` with purchase flow handling
+- Product ID configuration: `smart_photo_diary_premium_monthly`, `smart_photo_diary_premium_yearly`
+- Regional pricing support (JP: ¥300/¥2800, US: $2.99/$28.99, etc.)
+- Usage limit enforcement and plan-based feature access
+- Purchase restoration and error handling
+- Subscription state persistence with Hive database
+
+#### ❌ Pending (App Store Connect)
+- **Product registration** in App Store Connect required
+- **App Review approval** needed for subscription functionality
+- **Bundle ID registration** must match `com.focuswave.smartPhotoDiary`
+- **Pricing and availability** configuration in App Store Connect
+
+#### Development Testing
+Use environment variable for testing subscription features:
+```bash
+# In .env file (debug builds only)
+FORCE_PLAN=premium
+```
+
+#### Production Deployment Checklist
+1. Register products in App Store Connect with exact product IDs
+2. Configure pricing tiers and regional availability  
+3. Set up subscription groups and free trial periods
+4. Submit app for review with subscription functionality
+5. Test sandbox purchases before production release
+
+**Note**: All subscription logic is functional locally. Only the actual purchase transaction requires App Store Connect integration.
 
 ### Development Phases Completed
 - **Phase 1**: Core subscription infrastructure and In-App Purchase integration
