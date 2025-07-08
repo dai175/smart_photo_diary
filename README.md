@@ -6,10 +6,12 @@
 
 ### 基本機能
 - 📸 **AI日記生成**: Google Gemini APIを使用した高品質な日記の自動生成
-- 🎨 **直感的なUI/UX**: Material Design 3準拠の美しいダークテーマ対応デザイン
+- 🎨 **統一UI/UXデザイン**: Material Design 3準拠、CustomDialogによる一貫したモーダル設計
+- 📱 **レスポンシブレイアウト**: 自然なレイアウト設計、長文入力対応の編集体験
 - 🔒 **完全プライベート**: データはすべて端末内に保存（プライバシーファースト設計）
 - 📊 **統計・分析機能**: 日記の振り返りと使用パターン分析をサポート
 - 🌐 **オフライン対応**: ネットワーク接続なしでも基本機能が利用可能
+- 🖼️ **最適化された写真表示**: 改善された写真ダイアログと直感的な操作性
 
 ### 収益化システム（フリーミアムモデル）
 - **Basic（無料）**: 月10回のAI生成、基本プロンプト5種類
@@ -215,6 +217,10 @@ adb shell am start -n com.example.smart_photo_diary/.MainActivity
 - ✅ **ライティングプロンプト**: 20プロンプト、8カテゴリ、高度検索
 - ✅ **AI日記生成**: Google Gemini API、オフラインフォールバック
 - ✅ **分析システム**: 4層包括分析（使用量、行動パターン、改善提案）
+- ✅ **統一モーダルデザイン**: CustomDialogによる一貫したUI体験
+- ✅ **写真権限UX**: 改善された権限ダイアログと説明文
+- ✅ **レスポンシブ編集画面**: 自然なレイアウトと長文入力最適化
+- ✅ **テキスト標準化**: 業界標準準拠の左揃えテキスト
 - ✅ **UI/UXシステム**: ダークテーマ、統一エラー表示、日本語フォント対応
 - ✅ **データ管理**: エクスポート機能、データベース最適化
 - ✅ **CI/CDパイプライン**: 4ワークフロー、自動テスト・ビルド・デプロイ
@@ -239,10 +245,26 @@ adb shell am start -n com.example.smart_photo_diary/.MainActivity
 - **権限管理**: 最小限の権限要求（写真アクセスのみ）
 - **暗号化**: Hiveデータベースによるローカル暗号化
 
+## 📚 ドキュメント構成
+
+### メインドキュメント
+- **[CLAUDE.md](CLAUDE.md)** - 包括的な開発ガイド（アーキテクチャ、コーディング規約、実装状況）
+- **[README.md](README.md)** - プロジェクト概要とクイックスタート
+
+### 専門ドキュメント（[docs/](docs/)フォルダ）
+- **[deployment_checklist.md](docs/deployment_checklist.md)** - リリース前チェックリスト
+- **[store_setup_guide.md](docs/store_setup_guide.md)** - App Store/Google Play設定ガイド
+- **[ci_cd_guide.md](docs/ci_cd_guide.md)** - CI/CD詳細運用手順
+- **[monetization_strategy.md](docs/monetization_strategy.md)** - 収益化戦略と進捗管理
+- **[sandbox_testing_guide.md](docs/sandbox_testing_guide.md)** - サンドボックステスト手順
+
 ## 🤝 コントリビューション
 
 ### 開発ガイドライン
 - **新機能はResult<T>パターン必須**
+- **モーダルにはCustomDialogコンポーネント使用**
+- **テキストは左揃い（textAlign: TextAlign.left）採用**
+- **固定高さを避けた自然なレイアウト設計**
 - **全変更にテストコード必要**
 - **静的解析エラー0件維持**
 - **日本語UI、英語変数名規則**
