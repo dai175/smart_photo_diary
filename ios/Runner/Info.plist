@@ -51,5 +51,14 @@
 	<string>写真ライブラリに新しい写真を保存します</string>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>このアプリは位置情報機能を使用しませんが、使用しているライブラリが位置情報APIを参照している可能性があります</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>このアプリは位置情報機能を使用しませんが、使用しているライブラリが位置情報APIを参照している可能性があります</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
 </dict>
 </plist>

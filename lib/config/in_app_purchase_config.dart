@@ -230,13 +230,13 @@ class InAppPurchaseConfig {
   static const Map<String, dynamic> iosConfig = {
     'appStoreConnectKeyId': 'YOUR_APP_STORE_CONNECT_KEY_ID',
     'appStoreConnectIssuerId': 'YOUR_ISSUER_ID',
-    'bundleId': 'com.example.smart_photo_diary',
+    'bundleId': 'com.focuswave.dev.smartPhotoDiary',
     'sandboxEnabled': true,
   };
 
   /// Android Google Play Console設定
   static const Map<String, dynamic> androidConfig = {
-    'packageName': 'com.example.smart_photo_diary',
+    'packageName': 'com.focuswave.dev.smartPhotoDiary',
     'playConsoleProjectId': 'YOUR_PLAY_CONSOLE_PROJECT_ID',
     'serviceAccountEmail': 'YOUR_SERVICE_ACCOUNT@developer.gserviceaccount.com',
     'licenseTestingEnabled': true,
