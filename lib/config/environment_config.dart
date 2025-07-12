@@ -52,7 +52,8 @@ class EnvironmentConfig {
     if (!_isInitialized) {
       debugPrint('警告: EnvironmentConfigが初期化されていません');
       // テスト環境の場合はダミーキーを返す
-      if (kDebugMode && const String.fromEnvironment('FLUTTER_TEST') == 'true') {
+      if (kDebugMode &&
+          const String.fromEnvironment('FLUTTER_TEST') == 'true') {
         return 'AIzaTest_dummy_key_for_testing';
       }
       return '';
@@ -62,7 +63,8 @@ class EnvironmentConfig {
     if (key.isEmpty) {
       debugPrint('警告: GEMINI_API_KEYが設定されていません');
       // テスト環境の場合はダミーキーを返す
-      if (kDebugMode && const String.fromEnvironment('FLUTTER_TEST') == 'true') {
+      if (kDebugMode &&
+          const String.fromEnvironment('FLUTTER_TEST') == 'true') {
         return 'AIzaTest_dummy_key_for_testing';
       }
     }
@@ -79,7 +81,7 @@ class EnvironmentConfig {
     if (kDebugMode && const String.fromEnvironment('FLUTTER_TEST') == 'true') {
       return true;
     }
-    
+
     return _isInitialized &&
         _cachedGeminiApiKey != null &&
         _cachedGeminiApiKey!.isNotEmpty &&

@@ -12,7 +12,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/micro_interactions.dart';
 
 /// アップグレードダイアログのユーティリティクラス
-/// 
+///
 /// ホーム画面と設定画面で共通のアップグレード機能を提供
 class UpgradeDialogUtils {
   UpgradeDialogUtils._(); // プライベートコンストラクタ
@@ -20,8 +20,9 @@ class UpgradeDialogUtils {
   /// プレミアムプラン選択ダイアログを表示
   static Future<void> showUpgradeDialog(BuildContext context) async {
     try {
-      final subscriptionService = await ServiceLocator().getAsync<ISubscriptionService>();
-      
+      final subscriptionService = await ServiceLocator()
+          .getAsync<ISubscriptionService>();
+
       // 利用可能なプランを取得
       final plansResult = subscriptionService.getAvailablePlans();
       if (plansResult is Failure) {
@@ -32,10 +33,12 @@ class UpgradeDialogUtils {
         );
         return;
       }
-      
+
       final plans = (plansResult as Success<List<SubscriptionPlan>>).value;
-      final premiumPlans = plans.where((plan) => plan != SubscriptionPlan.basic).toList();
-      
+      final premiumPlans = plans
+          .where((plan) => plan != SubscriptionPlan.basic)
+          .toList();
+
       if (premiumPlans.isEmpty) {
         if (!context.mounted) return;
         DialogUtils.showSimpleDialog(
@@ -44,24 +47,20 @@ class UpgradeDialogUtils {
         );
         return;
       }
-      
+
       // プレミアムプラン選択ダイアログを表示
       if (!context.mounted) return;
       await _showPremiumPlanDialog(context, premiumPlans);
-      
     } catch (e) {
       if (!context.mounted) return;
-      DialogUtils.showSimpleDialog(
-        context,
-        'エラーが発生しました: ${e.toString()}',
-      );
+      DialogUtils.showSimpleDialog(context, 'エラーが発生しました: ${e.toString()}');
     }
   }
 
   /// プレミアムプラン選択ダイアログ（内部実装）
   static Future<void> _showPremiumPlanDialog(
-    BuildContext context, 
-    List<SubscriptionPlan> plans
+    BuildContext context,
+    List<SubscriptionPlan> plans,
   ) async {
     return showDialog(
       context: context,
@@ -93,7 +92,7 @@ class UpgradeDialogUtils {
   /// プラン選択オプション（内部実装）
   static Widget _buildPlanOption(BuildContext context, SubscriptionPlan plan) {
     String title, price, description;
-    
+
     switch (plan) {
       case SubscriptionPlan.premiumMonthly:
         title = 'プレミアム（月額）';
@@ -108,7 +107,7 @@ class UpgradeDialogUtils {
       default:
         return const SizedBox.shrink();
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: CustomCard(
@@ -165,29 +164,27 @@ class UpgradeDialogUtils {
   }
 
   /// プラン購入処理（内部実装）
-  static Future<void> _purchasePlan(BuildContext context, SubscriptionPlan plan) async {
+  static Future<void> _purchasePlan(
+    BuildContext context,
+    SubscriptionPlan plan,
+  ) async {
     try {
       _showLoadingDialog(context, '購入処理中...');
-      
-      final subscriptionService = await ServiceLocator().getAsync<ISubscriptionService>();
+
+      final subscriptionService = await ServiceLocator()
+          .getAsync<ISubscriptionService>();
       final result = await subscriptionService.purchasePlan(plan);
-      
+
       if (!context.mounted) return;
       Navigator.of(context).pop(); // ローディング画面を閉じる
-      
+
       if (result is Success) {
         if (!context.mounted) return;
-        DialogUtils.showSimpleDialog(
-          context,
-          '購入が完了しました！Premiumプランをお楽しみください。',
-        );
+        DialogUtils.showSimpleDialog(context, '購入が完了しました！Premiumプランをお楽しみください。');
       } else {
         final error = (result as Failure).error;
         if (!context.mounted) return;
-        DialogUtils.showSimpleDialog(
-          context,
-          '購入に失敗しました: ${error.toString()}',
-        );
+        DialogUtils.showSimpleDialog(context, '購入に失敗しました: ${error.toString()}');
       }
     } catch (e) {
       if (!context.mounted) return;

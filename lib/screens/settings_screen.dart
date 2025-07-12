@@ -954,7 +954,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // UI更新
     setState(() {});
   }
-  
 
   Future<void> _exportData() async {
     try {
