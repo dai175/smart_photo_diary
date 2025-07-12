@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
-import '../services/interfaces/subscription_service_interface.dart';
-import '../core/service_locator.dart';
 import '../models/subscription_info.dart';
-import '../models/subscription_plan.dart';
-import '../core/result/result.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/upgrade_dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
-import '../ui/components/custom_dialog.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
@@ -539,7 +535,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _showUpgradeDialog();
       },
       text: 'Premiumにアップグレード',
-      icon: Icons.upgrade_rounded,
+      icon: Icons.auto_awesome_rounded,
       width: double.infinity,
     );
   }
@@ -953,192 +949,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// Phase 1.8.2.2: プラン変更・管理画面への遷移
   void _showUpgradeDialog() async {
-    try {
-      final subscriptionService = await ServiceLocator().getAsync<ISubscriptionService>();
-      
-      // 利用可能なプランを取得
-      final plansResult = subscriptionService.getAvailablePlans();
-      if (plansResult is Failure) {
-        DialogUtils.showSimpleDialog(
-          context,
-          'プラン情報の取得に失敗しました。しばらく時間をおいて再度お試しください。',
-        );
-        return;
-      }
-      
-      final plans = (plansResult as Success<List<SubscriptionPlan>>).value;
-      final premiumPlans = plans.where((plan) => plan != SubscriptionPlan.basic).toList();
-      
-      if (premiumPlans.isEmpty) {
-        DialogUtils.showSimpleDialog(
-          context,
-          'Premiumプランが利用できません。しばらく時間をおいて再度お試しください。',
-        );
-        return;
-      }
-      
-      // プレミアムプラン選択ダイアログを表示
-      _showPremiumPlanDialog(premiumPlans);
-      
-    } catch (e) {
-      DialogUtils.showSimpleDialog(
-        context,
-        'エラーが発生しました: ${e.toString()}',
-      );
-    }
+    // 共通のアップグレードダイアログを表示
+    await UpgradeDialogUtils.showUpgradeDialog(context);
+    // UI更新
+    setState(() {});
   }
   
-  /// プレミアムプラン選択ダイアログ
-  void _showPremiumPlanDialog(List<SubscriptionPlan> plans) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomDialog(
-        title: 'Premiumプラン',
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '月間100回までAI日記生成が可能になり、全20種類のライティングプロンプトをご利用いただけます。',
-              style: AppTypography.bodyMedium,
-              textAlign: TextAlign.left,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ...plans.map((plan) => _buildPlanOption(plan)),
-          ],
-        ),
-        actions: [
-          CustomDialogAction(
-            text: 'キャンセル',
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  /// プラン選択オプション
-  Widget _buildPlanOption(SubscriptionPlan plan) {
-    String title, price, description;
-    IconData icon;
-    
-    switch (plan) {
-      case SubscriptionPlan.premiumMonthly:
-        title = 'プレミアム（月額）';
-        price = '¥300/月';
-        description = '月間100回のAI生成';
-        icon = Icons.calendar_today_rounded;
-        break;
-      case SubscriptionPlan.premiumYearly:
-        title = 'プレミアム（年額）';
-        price = '¥2,800/年';
-        description = '月間100回のAI生成（22%割引）';
-        icon = Icons.event_repeat_rounded;
-        break;
-      default:
-        return const SizedBox.shrink();
-    }
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: CustomCard(
-        child: InkWell(
-          onTap: () {
-            MicroInteractions.hapticTap();
-            Navigator.of(context).pop();
-            _purchasePlan(plan);
-          },
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-          child: Padding(
-            padding: AppSpacing.cardPadding,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSpacing.xs),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: AppColors.primary,
-                    size: AppSpacing.iconSm,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: AppTypography.titleMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        description,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  price,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: AppSpacing.iconXs,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  
-  /// プラン購入処理
-  void _purchasePlan(SubscriptionPlan plan) async {
-    try {
-      _showLoadingDialog('購入処理中...');
-      
-      final subscriptionService = await ServiceLocator().getAsync<ISubscriptionService>();
-      final result = await subscriptionService.purchasePlan(plan);
-      
-      Navigator.of(context).pop(); // ローディング画面を閉じる
-      
-      if (result is Success) {
-        DialogUtils.showSimpleDialog(
-          context,
-          '購入が完了しました！Premiumプランをお楽しみください。',
-        );
-        // UI更新
-        setState(() {});
-      } else {
-        final error = (result as Failure).error;
-        DialogUtils.showSimpleDialog(
-          context,
-          '購入に失敗しました: ${error.toString()}',
-        );
-      }
-    } catch (e) {
-      Navigator.of(context).pop(); // ローディング画面を閉じる
-      DialogUtils.showSimpleDialog(
-        context,
-        '購入処理中にエラーが発生しました: ${e.toString()}',
-      );
-    }
-  }
 
   Future<void> _exportData() async {
     try {

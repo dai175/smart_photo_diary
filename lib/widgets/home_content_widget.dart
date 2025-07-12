@@ -15,6 +15,7 @@ import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
+import '../utils/upgrade_dialog_utils.dart';
 
 class HomeContentWidget extends StatelessWidget {
   final PhotoSelectionController photoController;
@@ -327,15 +328,7 @@ class HomeContentWidget extends StatelessWidget {
 
   /// Phase 1.7.2.4: プラン変更誘導機能
   void _navigateToUpgrade(BuildContext context) {
-    // TODO: Phase 2で設定画面のサブスクリプション管理画面に遷移
-    Navigator.of(context).pushNamed('/settings');
-
-    // 一時的な案内メッセージ
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Premiumプランの設定は次のアップデートで実装予定です'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    // 共通のアップグレードダイアログを表示
+    UpgradeDialogUtils.showUpgradeDialog(context);
   }
 }

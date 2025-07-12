@@ -421,7 +421,7 @@ class PresetDialogs {
         CustomDialogAction(
           text: 'Premiumにアップグレード',
           isPrimary: true,
-          icon: Icons.upgrade_rounded,
+          icon: Icons.auto_awesome_rounded,
           onPressed: onUpgrade,
         ),
       ],
@@ -590,7 +590,7 @@ class PresetDialogs {
           CustomDialogAction(
             text: 'アップグレード',
             isPrimary: true,
-            icon: Icons.upgrade_rounded,
+            icon: Icons.auto_awesome_rounded,
             onPressed: onUpgrade,
           ),
       ],
