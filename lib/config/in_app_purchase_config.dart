@@ -60,9 +60,9 @@ class InAppPurchaseConfig {
   /// 商品IDからプランを取得
   static SubscriptionPlan getSubscriptionPlan(String productId) {
     switch (productId) {
-      case 'smart_photo_diary_monthly':
+      case 'smart_photo_diary_premium_monthly_plan':
         return SubscriptionPlan.premiumMonthly;
-      case 'smart_photo_diary_yearly':
+      case 'smart_photo_diary_premium_yearly_plan':
         return SubscriptionPlan.premiumYearly;
       default:
         throw ArgumentError('Unknown product ID: $productId');

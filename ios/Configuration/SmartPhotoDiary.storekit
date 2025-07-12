@@ -1,0 +1,130 @@
+{
+  "identifier" : "9F4D7E52",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "ja_JP",
+    "_storefront" : "JPN",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21728693",
+      "localizations" : [
+        {
+          "description" : "Smart Photo Diaryのプレミアム機能",
+          "displayName" : "プレミアムプラン",
+          "locale" : "ja"
+        }
+      ],
+      "name" : "Premium Plans",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "300",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "6748548622",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "月100回のAI日記生成と全20種類のライティングプロンプトへのアクセス（月額プラン）",
+              "displayName" : "プレミアムプラン（月額）",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "smart_photo_diary_premium_monthly_plan",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Premium Monthly Plan",
+          "subscriptionGroupID" : "21728693",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "2800",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "6748402889",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "月100回のAI日記生成と全20種類のライティングプロンプトへのアクセス（年額プラン・22%割引）",
+              "displayName" : "プレミアムプラン（年額）",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "smart_photo_diary_premium_yearly_plan",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Premium Yearly Plan",
+          "subscriptionGroupID" : "21728693",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

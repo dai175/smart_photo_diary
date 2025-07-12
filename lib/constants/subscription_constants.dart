@@ -38,11 +38,11 @@ class SubscriptionConstants {
 
   /// Premium プラン年額の商品ID
   static const String premiumYearlyProductId =
-      'smart_photo_diary_yearly';
+      'smart_photo_diary_premium_yearly_plan';
 
   /// Premium プラン月額の商品ID
   static const String premiumMonthlyProductId =
-      'smart_photo_diary_monthly';
+      'smart_photo_diary_premium_monthly_plan';
 
   // ========================================
   // Hive設定
