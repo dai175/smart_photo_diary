@@ -1366,6 +1366,14 @@ class SubscriptionService implements ISubscriptionService {
 
       // テスト環境やbinding未初期化の場合のエラーハンドリング
       try {
+        // シミュレーター環境での特別な処理
+        if (kDebugMode && (defaultTargetPlatform == TargetPlatform.iOS)) {
+          _log(
+            'Running in iOS debug mode - checking simulator environment',
+            level: LogLevel.debug,
+          );
+        }
+
         // In-App Purchase利用可能性チェック
         final bool isAvailable = await InAppPurchase.instance.isAvailable();
         if (!isAvailable) {
@@ -1389,11 +1397,11 @@ class SubscriptionService implements ISubscriptionService {
         _log('In-App Purchase initialization completed', level: LogLevel.info);
       } catch (bindingError) {
         // テスト環境でよくある binding 未初期化エラーをキャッチ
-        if (bindingError.toString().contains(
-          'Binding has not yet been initialized',
-        )) {
+        final errorString = bindingError.toString();
+        if (errorString.contains('Binding has not yet been initialized') ||
+            errorString.contains('ServicesBinding')) {
           _log(
-            'In-App Purchase not available (test environment)',
+            'In-App Purchase not available (test/simulator environment)',
             level: LogLevel.warning,
           );
           return;
@@ -1742,54 +1750,86 @@ class SubscriptionService implements ISubscriptionService {
       // 商品IDを取得
       final productId = InAppPurchaseConfig.getProductId(plan);
 
-      // 商品詳細を取得
-      final productResponse = await _inAppPurchase!.queryProductDetails({
-        productId,
-      });
+      try {
+        // 商品詳細を取得
+        final productResponse = await _inAppPurchase!.queryProductDetails({
+          productId,
+        });
 
-      if (productResponse.error != null) {
-        _isPurchasing = false;
-        return Failure(
-          ServiceException(
-            'Failed to get product details for purchase',
-            details: productResponse.error.toString(),
+        if (productResponse.error != null) {
+          _isPurchasing = false;
+          return Failure(
+            ServiceException(
+              'Failed to get product details for purchase',
+              details: productResponse.error.toString(),
+            ),
+          );
+        }
+
+        if (productResponse.productDetails.isEmpty) {
+          _isPurchasing = false;
+          return Failure(ServiceException('Product not found: $productId'));
+        }
+
+        final productDetails = productResponse.productDetails.first;
+
+        // 購入リクエストを作成
+        final PurchaseParam purchaseParam = PurchaseParam(
+          productDetails: productDetails,
+        );
+
+        // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
+        final bool success = await _inAppPurchase!.buyNonConsumable(
+          purchaseParam: purchaseParam,
+        );
+
+        if (!success) {
+          _isPurchasing = false;
+          return Failure(ServiceException('Failed to initiate purchase'));
+        }
+
+        _log('Purchase initiated successfully', level: LogLevel.info);
+
+        // 購入結果は購入ストリームで非同期に処理される
+        // ここでは購入開始の成功を返す
+        return Success(
+          PurchaseResult(
+            status: ssi.PurchaseStatus.pending,
+            productId: productId,
+            plan: plan,
           ),
         );
-      }
-
-      if (productResponse.productDetails.isEmpty) {
+      } catch (storeError) {
         _isPurchasing = false;
-        return Failure(ServiceException('Product not found: $productId'));
+
+        // シミュレーター環境でのストアエラー処理
+        if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
+          final errorString = storeError.toString();
+          if (errorString.contains('not connected to app store') ||
+              errorString.contains('sandbox') ||
+              errorString.contains('StoreKit')) {
+            _log(
+              'Store connection error in simulator - mocking success',
+              level: LogLevel.warning,
+            );
+
+            await Future.delayed(const Duration(milliseconds: 1000));
+            final result = await createStatus(plan);
+            if (result.isSuccess) {
+              return Success(
+                PurchaseResult(
+                  status: ssi.PurchaseStatus.purchased,
+                  productId: productId,
+                  plan: plan,
+                  purchaseDate: DateTime.now(),
+                ),
+              );
+            }
+          }
+        }
+
+        rethrow;
       }
-
-      final productDetails = productResponse.productDetails.first;
-
-      // 購入リクエストを作成
-      final PurchaseParam purchaseParam = PurchaseParam(
-        productDetails: productDetails,
-      );
-
-      // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
-      final bool success = await _inAppPurchase!.buyNonConsumable(
-        purchaseParam: purchaseParam,
-      );
-
-      if (!success) {
-        _isPurchasing = false;
-        return Failure(ServiceException('Failed to initiate purchase'));
-      }
-
-      _log('Purchase initiated successfully', level: LogLevel.info);
-
-      // 購入結果は購入ストリームで非同期に処理される
-      // ここでは購入開始の成功を返す
-      return Success(
-        PurchaseResult(
-          status: ssi.PurchaseStatus.pending,
-          productId: productId,
-          plan: plan,
-        ),
-      );
     } catch (e) {
       _isPurchasing = false;
       return _handleError(e, 'purchasePlan', details: plan.id);
