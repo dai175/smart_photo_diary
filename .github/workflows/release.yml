@@ -110,6 +110,11 @@ jobs:
       - name: Build Android AAB
         run: flutter build appbundle --release
         
+      - name: Clean up sensitive files
+        run: |
+          rm -f .env
+          echo "✅ Sensitive files removed from build environment"
+        
       - name: Rename artifacts with version
         run: |
           VERSION=${{ github.ref_name }}
@@ -180,6 +185,11 @@ jobs:
           
       - name: Build iOS (release, no codesign)
         run: flutter build ios --release --no-codesign
+        
+      - name: Clean up sensitive files
+        run: |
+          rm -f .env
+          echo "✅ Sensitive files removed from build environment"
         
       - name: Archive iOS build
         run: |
