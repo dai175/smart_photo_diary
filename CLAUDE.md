@@ -93,7 +93,7 @@ fvm flutter build linux
 adb install build/app/outputs/flutter-apk/app-release.apk
 
 # Launch app on device
-adb shell am start -n com.example.smart_photo_diary/.MainActivity
+adb shell am start -n com.focuswave.dev.smartPhotoDiary/.MainActivity
 ```
 
 ### Linting and Code Quality
@@ -900,7 +900,7 @@ The app implements a **two-tier freemium model** with the following structure:
 #### ✅ Fully Implemented (Code)
 - `in_app_purchase` plugin integration with StoreKit 2 compatibility (v3.1.10)
 - Complete `SubscriptionService` with purchase flow handling
-- Product ID configuration: `smart_photo_diary_premium_monthly`, `smart_photo_diary_premium_yearly`
+- Product ID configuration: `smart_photo_diary_premium_monthly_plan`, `smart_photo_diary_premium_yearly_plan`
 - Regional pricing support (JP: ¥300/¥2800, US: $2.99/$28.99, etc.)
 - Usage limit enforcement and plan-based feature access
 - Purchase restoration and error handling
@@ -909,7 +909,7 @@ The app implements a **two-tier freemium model** with the following structure:
 #### ❌ Pending (App Store Connect)
 - **Product registration** in App Store Connect required
 - **App Review approval** needed for subscription functionality
-- **Bundle ID registration** must match `com.focuswave.smartPhotoDiary`
+- **Bundle ID registration** must match `com.focuswave.dev.smartPhotoDiary`
 - **Pricing and availability** configuration in App Store Connect
 
 #### Development Testing

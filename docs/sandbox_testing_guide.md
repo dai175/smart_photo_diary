@@ -68,7 +68,7 @@ App Store 地域: 日本
       "displayPrice" : "300",
       "familyShareable" : false,
       "groupNumber" : 1,
-      "internalID" : "smart_photo_diary_premium_monthly",
+      "internalID" : "smart_photo_diary_premium_monthly_plan",
       "introductoryOffer" : {
         "internalID" : "monthly_trial",
         "paymentMode" : "free",
@@ -81,7 +81,7 @@ App Store 地域: 日本
           "locale" : "ja"
         }
       ],
-      "productID" : "smart_photo_diary_premium_monthly",
+      "productID" : "smart_photo_diary_premium_monthly_plan",
       "recurringSubscriptionPeriod" : "P1M",
       "referenceName" : "Premium Monthly Plan",
       "subscriptionGroupNumber" : 1
@@ -92,7 +92,7 @@ App Store 地域: 日本
       "displayPrice" : "2800", 
       "familyShareable" : false,
       "groupNumber" : 1,
-      "internalID" : "smart_photo_diary_premium_yearly",
+      "internalID" : "smart_photo_diary_premium_yearly_plan",
       "introductoryOffer" : {
         "internalID" : "yearly_trial",
         "paymentMode" : "free", 
@@ -105,7 +105,7 @@ App Store 地域: 日本
           "locale" : "ja"
         }
       ],
-      "productID" : "smart_photo_diary_premium_yearly",
+      "productID" : "smart_photo_diary_premium_yearly_plan",
       "recurringSubscriptionPeriod" : "P1Y",
       "referenceName" : "Premium Yearly Plan",
       "subscriptionGroupNumber" : 1
@@ -193,8 +193,8 @@ class TestEnvironmentConfig {
   static const bool enablePurchaseValidation = false;
   
   static const Map<String, String> testProductIds = {
-    'monthly': 'test_smart_photo_diary_premium_monthly',
-    'yearly': 'test_smart_photo_diary_premium_yearly',
+    'monthly': 'test_smart_photo_diary_premium_monthly_plan',
+    'yearly': 'test_smart_photo_diary_premium_yearly_plan',
   };
 }
 ```

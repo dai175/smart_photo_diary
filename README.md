@@ -206,7 +206,7 @@ fvm flutter build linux
 adb install build/app/outputs/flutter-apk/app-release.apk
 
 # アプリ起動
-adb shell am start -n com.example.smart_photo_diary/.MainActivity
+adb shell am start -n com.focuswave.dev.smartPhotoDiary/.MainActivity
 ```
 
 ## 📊 開発状況

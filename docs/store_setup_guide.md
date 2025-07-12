@@ -9,14 +9,14 @@ This guide provides the In-App Purchase product configuration for Smart Photo Di
 ### 1. Premium Monthly Plan
 
 #### iOS (App Store Connect)
-- **Product ID**: `smart_photo_diary_premium_monthly`
+- **Product ID**: `smart_photo_diary_premium_monthly_plan`
 - **Product Type**: Auto-Renewable Subscription
 - **Price**: ¥300/month
 - **Subscription Group**: Smart Photo Diary Premium
 - **Duration**: 1 month
 
 #### Android (Google Play Console)
-- **Product ID**: `smart_photo_diary_premium_monthly`
+- **Product ID**: `smart_photo_diary_premium_monthly_plan`
 - **Product Type**: Subscription
 - **Price**: ¥300/month
 - **Base Plan**: premium_monthly_base
@@ -67,14 +67,14 @@ Cancel anytime.
 ### 2. Premium Yearly Plan
 
 #### iOS (App Store Connect)
-- **Product ID**: `smart_photo_diary_premium_yearly`
+- **Product ID**: `smart_photo_diary_premium_yearly_plan`
 - **Product Type**: Auto-Renewable Subscription
 - **Price**: ¥2,800/year
 - **Subscription Group**: Smart Photo Diary Premium
 - **Duration**: 1 year
 
 #### Android (Google Play Console)
-- **Product ID**: `smart_photo_diary_premium_yearly`
+- **Product ID**: `smart_photo_diary_premium_yearly_plan`
 - **Product Type**: Subscription
 - **Price**: ¥2,800/year
 - **Base Plan**: premium_yearly_base
@@ -147,12 +147,12 @@ Save ~22% compared to monthly plan. Cancel anytime.
 1. **Navigate to**: App Store Connect > Apps > Smart Photo Diary > Features > In-App Purchases
 2. **Create Subscription Group**: "Smart Photo Diary Premium"
 3. **Add Monthly Subscription**:
-   - Product ID: `smart_photo_diary_premium_monthly`
+   - Product ID: `smart_photo_diary_premium_monthly_plan`
    - Reference Name: Premium Monthly Plan
    - Duration: 1 month
    - Price: ¥300 (Tier 3)
 4. **Add Yearly Subscription**:
-   - Product ID: `smart_photo_diary_premium_yearly`
+   - Product ID: `smart_photo_diary_premium_yearly_plan`
    - Reference Name: Premium Yearly Plan
    - Duration: 1 year
    - Price: ¥2,800 (Tier 23)
@@ -163,12 +163,12 @@ Save ~22% compared to monthly plan. Cancel anytime.
 
 1. **Navigate to**: Google Play Console > Smart Photo Diary > Monetize > Products > Subscriptions
 2. **Create Monthly Subscription**:
-   - Product ID: `smart_photo_diary_premium_monthly`
+   - Product ID: `smart_photo_diary_premium_monthly_plan`
    - Base plan ID: `premium_monthly_base`
    - Billing period: Monthly (P1M)
    - Price: ¥300
 3. **Create Yearly Subscription**:
-   - Product ID: `smart_photo_diary_premium_yearly`
+   - Product ID: `smart_photo_diary_premium_yearly_plan`
    - Base plan ID: `premium_yearly_base`
    - Billing period: Yearly (P1Y)
    - Price: ¥2,800
