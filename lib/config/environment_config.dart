@@ -10,21 +10,37 @@ class EnvironmentConfig {
   /// 環境変数を初期化
   static Future<void> initialize() async {
     try {
-      await dotenv.load();
-      debugPrint('✅ .envファイルから環境変数を読み込み成功');
+      // 1. 本番環境：ビルド時定数（CI/CDシークレット）を優先
+      _cachedGeminiApiKey = const String.fromEnvironment(
+        'GEMINI_API_KEY',
+        defaultValue: '',
+      );
 
-      // 環境変数またはビルド時定数からAPIキーを取得
-      _cachedGeminiApiKey =
-          dotenv.env['GEMINI_API_KEY'] ??
-          const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+      // 2. 開発環境：.envファイルから読み込み（デバッグビルドのみ）
+      if (_cachedGeminiApiKey!.isEmpty && kDebugMode) {
+        try {
+          await dotenv.load(); // assetsから読み込み
+          _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+        } catch (e) {
+          // .envファイル読み込み失敗
+        }
+      }
 
       // プラン強制設定を読み込み（デバッグモードでのみ有効）
       if (kDebugMode) {
-        final forcePlanValue =
-            dotenv.env['FORCE_PLAN'] ??
-            const String.fromEnvironment('FORCE_PLAN', defaultValue: '');
-        _cachedForcePlan = forcePlanValue.isNotEmpty
-            ? forcePlanValue.toLowerCase()
+        _cachedForcePlan = const String.fromEnvironment(
+          'FORCE_PLAN',
+          defaultValue: '',
+        );
+        if (_cachedForcePlan!.isEmpty) {
+          try {
+            _cachedForcePlan = dotenv.env['FORCE_PLAN'] ?? '';
+          } catch (e) {
+            _cachedForcePlan = '';
+          }
+        }
+        _cachedForcePlan = _cachedForcePlan!.isNotEmpty
+            ? _cachedForcePlan!.toLowerCase()
             : null;
       } else {
         _cachedForcePlan = null; // 本番ビルドでは常にnull
@@ -33,14 +49,6 @@ class EnvironmentConfig {
       _isInitialized = true;
 
       debugPrint('🚀 EnvironmentConfig初期化完了');
-      debugPrint(
-        'GEMINI_API_KEY: ${_cachedGeminiApiKey?.isNotEmpty == true ? "設定済み" : "未設定"}',
-      );
-      debugPrint('FORCE_PLAN: $_cachedForcePlan');
-
-      if (_cachedGeminiApiKey?.isNotEmpty == true) {
-        debugPrint('APIキープレビュー: ${_cachedGeminiApiKey!.substring(0, 8)}...');
-      }
     } catch (e) {
       debugPrint('❌ 環境変数初期化エラー: $e');
       _isInitialized = false;

@@ -3,6 +3,7 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_locator.dart';
 import '../models/subscription_plan.dart';
 import '../core/result/result.dart';
+import '../core/errors/app_exceptions.dart';
 import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -173,7 +174,15 @@ class UpgradeDialogUtils {
 
       final subscriptionService = await ServiceLocator()
           .getAsync<ISubscriptionService>();
-      final result = await subscriptionService.purchasePlan(plan);
+
+      // タイムアウト付きで購入処理を実行
+      final result = await subscriptionService
+          .purchasePlan(plan)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () =>
+                Failure(ServiceException('購入処理がタイムアウトしました。再度お試しください。')),
+          );
 
       if (!context.mounted) return;
       Navigator.of(context).pop(); // ローディング画面を閉じる

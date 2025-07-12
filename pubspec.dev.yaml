@@ -1,0 +1,60 @@
+# 開発専用のpubspec設定
+# 使用方法: flutter packages get -C pubspec.dev.yaml
+
+name: smart_photo_diary
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  image_picker: ^1.1.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.5
+  geolocator: ^14.0.0
+  photo_manager: ^3.7.1
+  permission_handler: ^12.0.0+1
+  http: ^1.1.0
+  connectivity_plus: ^5.0.1
+  intl: ^0.20.0
+  flutter_dotenv: ^5.1.0
+  image: ^4.1.7
+  uuid: ^4.5.1
+  table_calendar: ^3.1.2
+  shared_preferences: ^2.3.2
+  package_info_plus: ^8.0.3
+  file_picker: ^8.1.4
+  google_fonts: ^6.2.1
+  in_app_purchase: 3.1.10
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+  build_runner: ^2.4.15
+  hive_generator: ^2.0.1
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/data/
+    - .env  # 開発環境でのみ含める
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/app_icon.png"
