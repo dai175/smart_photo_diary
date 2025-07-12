@@ -225,7 +225,7 @@ The app implements a **Result<T> pattern** for functional error handling, provid
 ### Configuration
 - `pubspec.yaml`: Dependencies and asset configuration
 - `analysis_options.yaml`: Linting rules with Japanese text support and performance optimizations
-- `.env`: Environment variables (API keys) - bundled as asset for release builds
+- `.env`: Environment variables (API keys) - **NEVER bundled in assets** (placed in project root)
 - `android/app/src/main/AndroidManifest.xml`: Includes INTERNET permissions for API calls
 
 ### Generated Code
@@ -245,6 +245,10 @@ The app implements a **Result<T> pattern** for functional error handling, provid
   - Natural layout adjustment functionality
 - `lib/screens/diary_detail_screen.dart`: Enhanced photo dialog functionality
   - Optimized photo display modal
+- `lib/utils/upgrade_dialog_utils.dart`: Unified upgrade dialog functionality
+  - Shared premium plan selection dialog between home and settings screens
+  - Complete purchase flow integration with CustomDialog components
+  - Error handling and loading states for subscription purchases
 
 ## Development Notes
 
@@ -905,6 +909,8 @@ The app implements a **two-tier freemium model** with the following structure:
 - Usage limit enforcement and plan-based feature access
 - Purchase restoration and error handling
 - Subscription state persistence with Hive database
+- StoreKit Configuration file setup for local testing (`ios/SmartPhotoDiary.storekit`)
+- Unified upgrade dialog system with `UpgradeDialogUtils` for consistent UX
 
 #### ❌ Pending (App Store Connect)
 - **Product registration** in App Store Connect required
