@@ -498,15 +498,18 @@ class PresetDialogs {
                       ).colorScheme.outline.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: FractionallySizedBox(
+                    child: Align(
                       alignment: Alignment.centerLeft,
-                      widthFactor: usagePercentage.clamp(0.0, 1.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isNearLimit
-                              ? AppColors.warning
-                              : AppColors.primary,
-                          borderRadius: BorderRadius.circular(4),
+                      child: FractionallySizedBox(
+                        widthFactor: usagePercentage.clamp(0.0, 1.0),
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: isNearLimit
+                                ? AppColors.warning
+                                : AppColors.primary,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
                     ),
