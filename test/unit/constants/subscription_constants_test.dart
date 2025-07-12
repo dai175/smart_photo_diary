@@ -55,11 +55,11 @@ void main() {
       test('Premium商品IDが正しく設定されている', () {
         expect(
           SubscriptionConstants.premiumYearlyProductId,
-          equals('smart_photo_diary_premium_yearly'),
+          equals('smart_photo_diary_premium_yearly_plan'),
         );
         expect(
           SubscriptionConstants.premiumMonthlyProductId,
-          equals('smart_photo_diary_premium_monthly'),
+          equals('smart_photo_diary_premium_monthly_plan'),
         );
       });
     });

@@ -194,8 +194,18 @@ class DiaryService implements DiaryServiceInterface {
         );
 
         if (tagsResult.isSuccess) {
-          await entry.updateTags(tagsResult.value);
-          debugPrint('タグ生成完了: ${entry.id} -> ${tagsResult.value}');
+          // Hiveボックスから最新のエントリーを取得して更新
+          if (_diaryBox != null && _diaryBox!.isOpen) {
+            final latestEntry = _diaryBox!.get(entry.id);
+            if (latestEntry != null) {
+              await latestEntry.updateTags(tagsResult.value);
+              debugPrint('タグ生成完了: ${entry.id} -> ${tagsResult.value}');
+            } else {
+              debugPrint('バックグラウンドタグ生成: エントリーが見つかりません: ${entry.id}');
+            }
+          } else {
+            debugPrint('バックグラウンドタグ生成: Hiveボックスが利用できません');
+          }
         } else {
           debugPrint('バックグラウンドタグ生成エラー: ${tagsResult.error}');
         }
@@ -224,8 +234,13 @@ class DiaryService implements DiaryServiceInterface {
       );
 
       if (tagsResult.isSuccess) {
-        // データベースに保存
-        await entry.updateTags(tagsResult.value);
+        // Hiveボックスから最新のエントリーを取得して更新
+        if (_diaryBox != null && _diaryBox!.isOpen) {
+          final latestEntry = _diaryBox!.get(entry.id);
+          if (latestEntry != null) {
+            await latestEntry.updateTags(tagsResult.value);
+          }
+        }
         return tagsResult.value;
       } else {
         debugPrint('タグ生成エラー: ${tagsResult.error}');

@@ -24,7 +24,7 @@ void main() {
         expect(plan.price, equals(300));
         expect(plan.yearlyPrice, equals(3600)); // 300 * 12
         expect(plan.monthlyAiGenerationLimit, equals(100));
-        expect(plan.productId, equals('smart_photo_diary_premium_monthly'));
+        expect(plan.productId, equals('smart_photo_diary_premium_monthly_plan'));
         expect(plan.isPaid, isTrue);
         expect(plan.isFree, isFalse);
         expect(plan.isMonthly, isTrue);
@@ -40,7 +40,7 @@ void main() {
         expect(plan.price, equals(2800));
         expect(plan.yearlyPrice, equals(2800));
         expect(plan.monthlyAiGenerationLimit, equals(100));
-        expect(plan.productId, equals('smart_photo_diary_premium_yearly'));
+        expect(plan.productId, equals('smart_photo_diary_premium_yearly_plan'));
         expect(plan.isPaid, isTrue);
         expect(plan.isFree, isFalse);
         expect(plan.isMonthly, isFalse);

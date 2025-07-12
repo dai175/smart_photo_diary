@@ -24,8 +24,8 @@ void main() {
         expect(
           InAppPurchaseConfig.allProductIds,
           containsAll([
-            'smart_photo_diary_premium_monthly',
-            'smart_photo_diary_premium_yearly',
+            'smart_photo_diary_premium_monthly_plan',
+            'smart_photo_diary_premium_yearly_plan',
           ]),
         );
       });
@@ -52,23 +52,23 @@ void main() {
         // プランから商品IDを取得
         expect(
           InAppPurchaseConfig.getProductId(SubscriptionPlan.premiumMonthly),
-          equals('smart_photo_diary_premium_monthly'),
+          equals('smart_photo_diary_premium_monthly_plan'),
         );
         expect(
           InAppPurchaseConfig.getProductId(SubscriptionPlan.premiumYearly),
-          equals('smart_photo_diary_premium_yearly'),
+          equals('smart_photo_diary_premium_yearly_plan'),
         );
 
         // 商品IDからプランを取得
         expect(
           InAppPurchaseConfig.getSubscriptionPlan(
-            'smart_photo_diary_premium_monthly',
+            'smart_photo_diary_premium_monthly_plan',
           ),
           equals(SubscriptionPlan.premiumMonthly),
         );
         expect(
           InAppPurchaseConfig.getSubscriptionPlan(
-            'smart_photo_diary_premium_yearly',
+            'smart_photo_diary_premium_yearly_plan',
           ),
           equals(SubscriptionPlan.premiumYearly),
         );
@@ -191,21 +191,21 @@ void main() {
         expect(
           InAppPurchaseConfig.freeTrialEligibleProductIds,
           containsAll([
-            'smart_photo_diary_premium_monthly',
-            'smart_photo_diary_premium_yearly',
+            'smart_photo_diary_premium_monthly_plan',
+            'smart_photo_diary_premium_yearly_plan',
           ]),
         );
 
         // 対象商品チェック
         expect(
           InAppPurchaseConfig.isEligibleForFreeTrial(
-            'smart_photo_diary_premium_monthly',
+            'smart_photo_diary_premium_monthly_plan',
           ),
           isTrue,
         );
         expect(
           InAppPurchaseConfig.isEligibleForFreeTrial(
-            'smart_photo_diary_premium_yearly',
+            'smart_photo_diary_premium_yearly_plan',
           ),
           isTrue,
         );
@@ -291,13 +291,13 @@ void main() {
         // 有効な商品ID
         expect(
           InAppPurchaseConfig.isValidProductId(
-            'smart_photo_diary_premium_monthly',
+            'smart_photo_diary_premium_monthly_plan',
           ),
           isTrue,
         );
         expect(
           InAppPurchaseConfig.isValidProductId(
-            'smart_photo_diary_premium_yearly',
+            'smart_photo_diary_premium_yearly_plan',
           ),
           isTrue,
         );
