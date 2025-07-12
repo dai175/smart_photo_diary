@@ -120,7 +120,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
-          packageName: com.example.smart_photo_diary
+          packageName: com.focuswave.dev.smartPhotoDiary
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: ${{ github.event.inputs.track || 'internal' }}
           status: completed
@@ -138,7 +138,7 @@ jobs:
           echo "## 🚀 Android Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Deployment Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Package**: com.example.smart_photo_diary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: com.focuswave.dev.smartPhotoDiary" >> $GITHUB_STEP_SUMMARY
           echo "- **Track**: ${{ github.event.inputs.track || 'internal' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: Completed" >> $GITHUB_STEP_SUMMARY
           echo "- **Build**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
