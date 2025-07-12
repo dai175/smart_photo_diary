@@ -128,13 +128,13 @@ class UpgradeDialogUtils {
             MicroInteractions.hapticTap();
 
             debugPrint('プランオプションタップ: ${plan.id}');
-            
+
             // シンプルなアプローチ：ダイアログを閉じてから購入処理
             Navigator.of(dialogContext).pop();
-            
+
             // 少し待機してUI安定化
             await Future.delayed(const Duration(milliseconds: 200));
-            
+
             // 購入処理を開始（コンテキスト不要）
             await _startPurchaseWithoutContext(plan);
           },
@@ -187,7 +187,9 @@ class UpgradeDialogUtils {
   }
 
   /// コンテキスト不要のシンプルな購入処理
-  static Future<void> _startPurchaseWithoutContext(SubscriptionPlan plan) async {
+  static Future<void> _startPurchaseWithoutContext(
+    SubscriptionPlan plan,
+  ) async {
     debugPrint('_startPurchaseWithoutContext: 開始 - プラン: ${plan.id}');
 
     // 二重実行防止チェック
@@ -203,19 +205,21 @@ class UpgradeDialogUtils {
           .getAsync<ISubscriptionService>();
 
       debugPrint('_startPurchaseWithoutContext: 購入処理開始');
-      
+
       // SubscriptionService に購入処理を委譲
       final result = await subscriptionService.purchasePlan(plan);
-      
-      debugPrint('_startPurchaseWithoutContext: 購入処理完了 - result: ${result.runtimeType}');
-      
+
+      debugPrint(
+        '_startPurchaseWithoutContext: 購入処理完了 - result: ${result.runtimeType}',
+      );
+
       // 結果に応じた処理
       if (result is Success) {
         debugPrint('_startPurchaseWithoutContext: 購入成功');
       } else if (result is Failure) {
         final error = result.error;
         debugPrint('_startPurchaseWithoutContext: 購入失敗 - エラー: $error');
-        
+
         // シミュレーター環境での特別処理
         if (error.toString().contains('In-App Purchase not available') ||
             error.toString().contains('Product not found')) {
@@ -226,7 +230,7 @@ class UpgradeDialogUtils {
       }
     } catch (e) {
       debugPrint('_startPurchaseWithoutContext: エラー発生: $e');
-      
+
       // 基本的なエラー情報のみログ出力
       // SubscriptionService が適切にエラーハンドリングを行う
     } finally {
@@ -234,5 +238,4 @@ class UpgradeDialogUtils {
       debugPrint('_startPurchaseWithoutContext: 購入処理フラグをリセット');
     }
   }
-
 }
