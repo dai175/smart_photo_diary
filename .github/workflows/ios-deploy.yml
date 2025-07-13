@@ -104,6 +104,12 @@ jobs:
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
           
+      - name: Configure iOS project for manual signing
+        run: |
+          # Configure project.pbxproj for manual signing
+          plutil -replace objects.97C146E61CF9000F007C117D.attributes.TargetAttributes.97C146ED1CF9000F007C117D.DevelopmentTeam -string "${{ secrets.IOS_TEAM_ID }}" ios/Runner.xcodeproj/project.pbxproj || true
+          plutil -replace objects.97C146E61CF9000F007C117D.attributes.TargetAttributes.97C146ED1CF9000F007C117D.ProvisioningStyle -string Manual ios/Runner.xcodeproj/project.pbxproj || true
+          
       - name: Create ExportOptions.plist
         run: |
           cat > ios/Runner/ExportOptions.plist << EOF
@@ -128,6 +134,8 @@ jobs:
                   <key>com.focuswave.dev.smartPhotoDiary</key>
                   <string>Smart Photo Diary App Store</string>
               </dict>
+              <key>signingCertificate</key>
+              <string>iPhone Distribution</string>
           </dict>
           </plist>
           EOF
@@ -135,9 +143,7 @@ jobs:
       - name: Build iOS IPA
         run: |
           flutter build ipa --release \
-            --export-options-plist=ios/Runner/ExportOptions.plist \
-            --codesign-identity="iPhone Distribution: Daisuke Oba" \
-            --provisioning-profile="Smart Photo Diary App Store"
+            --export-options-plist=ios/Runner/ExportOptions.plist
             
       - name: Upload to TestFlight
         if: github.event.inputs.environment == 'testflight' || github.event.inputs.environment == ''
