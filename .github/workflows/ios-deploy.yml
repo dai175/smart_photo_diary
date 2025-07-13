@@ -49,7 +49,7 @@ jobs:
     name: Deploy to App Store
     needs: test
     runs-on: macos-15
-    environment: production  # GitHub Environment for additional security
+    environment: production
     timeout-minutes: 60
     
     steps:
@@ -89,67 +89,44 @@ jobs:
           cd ios
           pod install
           
-      - name: Import Code-Signing Certificates
-        uses: Apple-Actions/import-codesign-certs@v2
-        with:
-          p12-file-base64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
-          p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-          
-      - name: Download Provisioning Profiles
-        uses: Apple-Actions/download-provisioning-profiles@v2
-        with:
-          bundle-id: com.focuswave.dev.smartPhotoDiary
-          profile-type: IOS_APP_STORE
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          
-      - name: Configure Manual Signing
+      - name: Install Apple certificate and provisioning profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
         run: |
-          # Release設定をManual Signingに変更
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-          
-          # プロビジョニングプロファイルを明示的に指定
-          sed -i '' '/CODE_SIGN_STYLE = Manual;/a\'$'\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "Smart Photo Diary App Store";' ios/Runner.xcodeproj/project.pbxproj
-          
-          # Debug現在の設定を確認
-          echo "=== プロジェクト設定確認 ==="
-          grep -n "CODE_SIGN_STYLE\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj || true
-          
-          echo "=== 利用可能なプロビジョニングプロファイル一覧 ==="
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "プロビジョニングプロファイルディレクトリが見つかりません"
-          
-          echo "=== システムキーチェーン確認 ==="
-          security find-identity -v -p codesigning || echo "署名アイデンティティが見つかりません"
-          
-          echo "=== プロビジョニングプロファイル詳細確認 ==="
-          for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-            echo "--- $(basename "$profile") ---"
-            profile_name=$(security cms -D -i "$profile" | plutil -extract Name raw - 2>/dev/null || echo "名前取得失敗")
-            bundle_id=$(security cms -D -i "$profile" | plutil -extract Entitlements.application-identifier raw - 2>/dev/null || echo "Bundle ID取得失敗")
-            echo "プロファイル名: $profile_name"
-            echo "Bundle ID: $bundle_id"
-            
-            # 正しいプロファイル以外を削除
-            if [ "$profile_name" = "Smart Photo Diary App Store" ]; then
-              echo "✅ 保持: $profile_name"
-            elif [[ "$profile_name" == *"iOS Team Store Provisioning Profile"* ]]; then
-              echo "❌ 余計なプロファイルを削除: $profile_name"
-              rm -f "$profile"
-            elif [[ "$bundle_id" == *".com.focuswave.dev.smartPhotoDiary" ]]; then
-              echo "❌ 同じBundle IDのプロファイルを削除: $profile_name"
-              rm -f "$profile"
-            else
-              echo "⚠️ 関係ないプロファイル: $profile_name"
-            fi
-          done
-          
-          echo "=== 削除後のプロファイル一覧 ==="
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "プロファイルなし"
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # Apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+          # Verify installation
+          echo "=== Installed certificates ==="
+          security find-identity -v -p codesigning $KEYCHAIN_PATH
+          echo "=== Installed provisioning profiles ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
           
       - name: Create ExportOptions.plist
         run: |
-          cat > ios/Runner/ExportOptions.plist << EOF
+          cat > ios/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -165,12 +142,7 @@ jobs:
               <key>uploadSymbols</key>
               <true/>
               <key>signingStyle</key>
-              <string>manual</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>com.focuswave.dev.smartPhotoDiary</key>
-                  <string>Smart Photo Diary App Store</string>
-              </dict>
+              <string>automatic</string>
           </dict>
           </plist>
           EOF
@@ -178,32 +150,38 @@ jobs:
       - name: Build iOS IPA
         run: |
           flutter build ipa --release \
-            --export-options-plist=ios/Runner/ExportOptions.plist
+            --export-options-plist=ios/ExportOptions.plist
             
       - name: Upload to TestFlight
         if: github.event.inputs.environment == 'testflight' || github.event.inputs.environment == ''
-        uses: Apple-Actions/upload-testflight-build@v1
-        with:
-          app-path: build/ios/ipa/smart_photo_diary.ipa
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          xcrun altool --upload-app \
+            -f "build/ios/ipa/smart_photo_diary.ipa" \
+            -u "$APPLE_ID" \
+            -p "$APPLE_APP_PASSWORD" \
+            -t ios
           
       - name: Upload to App Store
         if: github.event.inputs.environment == 'appstore'
-        uses: Apple-Actions/upload-testflight-build@v1
-        with:
-          app-path: build/ios/ipa/smart_photo_diary.ipa
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          # Note: App Store submission requires additional review process
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          xcrun altool --upload-app \
+            -f "build/ios/ipa/smart_photo_diary.ipa" \
+            -u "$APPLE_ID" \
+            -p "$APPLE_APP_PASSWORD" \
+            -t ios
           
       - name: Cleanup sensitive files
         if: always()
         run: |
           rm -f .env
-          rm -f ios/Runner/ExportOptions.plist
+          rm -f ios/ExportOptions.plist
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
           
       - name: Create release summary
         run: |
