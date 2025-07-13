@@ -169,9 +169,10 @@ jobs:
           VERSION_NAME=${VERSION_NAME#v}  # Remove 'v' prefix (v1.1.0 -> 1.1.0)
           echo "Deploying version: $VERSION_NAME from tag ${{ github.event.inputs.tag }}"
           
-          # Generate incremental build number (like Xcode automatic increment)
-          BUILD_NUMBER=$((10 + $GITHUB_RUN_NUMBER))
-          echo "Build number: $BUILD_NUMBER (base 10 + run #$GITHUB_RUN_NUMBER)"
+          # Generate incremental build number (Apple/Google recommended approach)
+          # Each version starts from build 1 (industry standard)
+          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
           
           flutter build ipa --release \
             --build-name=$VERSION_NAME \

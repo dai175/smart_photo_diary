@@ -117,9 +117,10 @@ jobs:
             echo "Development build - Version: $VERSION_NAME"
           fi
           
-          # Generate incremental build number
-          BUILD_NUMBER=$((10 + $GITHUB_RUN_NUMBER))
-          echo "Build number: $BUILD_NUMBER (base 10 + run #$GITHUB_RUN_NUMBER)"
+          # Generate incremental build number (Apple/Google recommended approach)
+          # Each version starts from build 1 (industry standard)
+          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
           
           # Build Android artifacts
           flutter build apk --release \
@@ -216,9 +217,10 @@ jobs:
             echo "Development build - Version: $VERSION_NAME"
           fi
           
-          # Generate incremental build number
-          BUILD_NUMBER=$((10 + $GITHUB_RUN_NUMBER))
-          echo "Build number: $BUILD_NUMBER (base 10 + run #$GITHUB_RUN_NUMBER)"
+          # Generate incremental build number (Apple/Google recommended approach)
+          # Each version starts from build 1 (industry standard)
+          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
           
           flutter build ios --release --no-codesign \
             --build-name=$VERSION_NAME \
