@@ -158,7 +158,12 @@ jobs:
           
       - name: Build iOS IPA
         run: |
+          # Generate unique build number using timestamp
+          BUILD_NUMBER=$(date +%Y%m%d%H%M)
+          echo "Generated build number: $BUILD_NUMBER"
+          
           flutter build ipa --release \
+            --build-number=$BUILD_NUMBER \
             --export-options-plist=ios/ExportOptions.plist
           
           # List generated IPA files to find the correct name
