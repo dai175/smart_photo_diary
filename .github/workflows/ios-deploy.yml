@@ -146,7 +146,12 @@ jobs:
               <key>uploadSymbols</key>
               <true/>
               <key>signingStyle</key>
-              <string>automatic</string>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.focuswave.dev.smartPhotoDiary</key>
+                  <string>Smart Photo Diary App Store</string>
+              </dict>
           </dict>
           </plist>
           EOF
