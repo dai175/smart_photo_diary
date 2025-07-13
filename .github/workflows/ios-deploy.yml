@@ -109,9 +109,13 @@ jobs:
           # Release設定をManual Signingに変更
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
           
+          # プロビジョニングプロファイルを明示的に指定
+          sed -i '' '/CODE_SIGN_STYLE = Manual;/a\
+				PROVISIONING_PROFILE_SPECIFIER = "Smart Photo Diary App Store";' ios/Runner.xcodeproj/project.pbxproj
+          
           # Debug現在の設定を確認
           echo "=== プロジェクト設定確認 ==="
-          grep -n "CODE_SIGN_STYLE\|DEVELOPMENT_TEAM" ios/Runner.xcodeproj/project.pbxproj || true
+          grep -n "CODE_SIGN_STYLE\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj || true
           
           echo "=== 利用可能なプロビジョニングプロファイル一覧 ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "プロビジョニングプロファイルディレクトリが見つかりません"
