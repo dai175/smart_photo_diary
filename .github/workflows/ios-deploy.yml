@@ -104,6 +104,13 @@ jobs:
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
           
+      - name: Debug provisioning profiles
+        run: |
+          echo "=== 利用可能なプロビジョニングプロファイル一覧 ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "プロビジョニングプロファイルディレクトリが見つかりません"
+          echo "=== システムキーチェーン確認 ==="
+          security find-identity -v -p codesigning || echo "署名アイデンティティが見つかりません"
+          
       - name: Create ExportOptions.plist
         run: |
           cat > ios/Runner/ExportOptions.plist << EOF
@@ -135,9 +142,7 @@ jobs:
       - name: Build iOS IPA
         run: |
           flutter build ipa --release \
-            --export-options-plist=ios/Runner/ExportOptions.plist \
-            --codesign-identity="iPhone Distribution: Daisuke Oba" \
-            --provisioning-profile="Smart Photo Diary App Store"
+            --export-options-plist=ios/Runner/ExportOptions.plist
             
       - name: Upload to TestFlight
         if: github.event.inputs.environment == 'testflight' || github.event.inputs.environment == ''
