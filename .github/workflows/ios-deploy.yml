@@ -160,15 +160,28 @@ jobs:
         run: |
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions.plist
-            
+          
+          # List generated IPA files to find the correct name
+          echo "=== Generated IPA files ==="
+          ls -la build/ios/ipa/
+          
       - name: Upload to TestFlight
         if: github.event.inputs.environment == 'testflight' || github.event.inputs.environment == ''
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
         run: |
+          # Find the actual IPA file (should be the only .ipa file in the directory)
+          IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
+          echo "Found IPA file: $IPA_FILE"
+          
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ Error: No IPA file found in build/ios/ipa/"
+            exit 1
+          fi
+          
           xcrun altool --upload-app \
-            -f "build/ios/ipa/smart_photo_diary.ipa" \
+            -f "$IPA_FILE" \
             -u "$APPLE_ID" \
             -p "$APPLE_APP_PASSWORD" \
             -t ios
@@ -179,8 +192,17 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
         run: |
+          # Find the actual IPA file (should be the only .ipa file in the directory)
+          IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
+          echo "Found IPA file: $IPA_FILE"
+          
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ Error: No IPA file found in build/ios/ipa/"
+            exit 1
+          fi
+          
           xcrun altool --upload-app \
-            -f "build/ios/ipa/smart_photo_diary.ipa" \
+            -f "$IPA_FILE" \
             -u "$APPLE_ID" \
             -p "$APPLE_APP_PASSWORD" \
             -t ios
