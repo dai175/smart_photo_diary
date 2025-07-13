@@ -128,11 +128,13 @@ jobs:
             echo "Bundle ID: $bundle_id"
             
             # 正しいプロファイル以外を削除
-            if [ "$profile_name" != "Smart Photo Diary App Store" ] && [[ "$bundle_id" == "***.com.focuswave.dev.smartPhotoDiary" ]]; then
+            if [ "$profile_name" = "Smart Photo Diary App Store" ]; then
+              echo "✅ 保持: $profile_name"
+            elif [[ "$bundle_id" == "***.com.focuswave.dev.smartPhotoDiary" ]]; then
               echo "❌ 余計なプロファイルを削除: $profile_name"
               rm -f "$profile"
             else
-              echo "✅ 保持: $profile_name"
+              echo "⚠️ 関係ないプロファイル: $profile_name"
             fi
           done
           
