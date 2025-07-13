@@ -114,7 +114,25 @@ jobs:
           EOF
           
       - name: Build Android App Bundle
-        run: flutter build appbundle --release
+        run: |
+          # Extract version from Git tag (industry standard approach)
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            # Tagged release: extract version from tag (e.g., v1.0.0 -> 1.0.0)
+            VERSION_NAME=${GITHUB_REF#refs/tags/v}
+            echo "Release build - Version: $VERSION_NAME"
+          else
+            # Non-release build: use development version
+            VERSION_NAME="1.0.0-dev"
+            echo "Development build - Version: $VERSION_NAME"
+          fi
+          
+          # Generate incremental build number
+          BUILD_NUMBER=$((10 + $GITHUB_RUN_NUMBER))
+          echo "Build number: $BUILD_NUMBER (base 10 + run #$GITHUB_RUN_NUMBER)"
+          
+          flutter build appbundle --release \
+            --build-name=$VERSION_NAME \
+            --build-number=$BUILD_NUMBER
         
       - name: Upload to Google Play Console
         uses: r0adkll/upload-google-play@v1
