@@ -118,11 +118,15 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+          # Xcode project already configured for manual signing
+          
           # Verify installation
           echo "=== Installed certificates ==="
           security find-identity -v -p codesigning $KEYCHAIN_PATH
           echo "=== Installed provisioning profiles ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "=== Xcode project signing settings ==="
+          grep -n "CODE_SIGN_STYLE\|PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj || true
           
       - name: Create ExportOptions.plist
         run: |
