@@ -122,11 +122,22 @@ jobs:
           echo "=== プロビジョニングプロファイル詳細確認 ==="
           for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
             echo "--- $(basename "$profile") ---"
-            # プロファイル名を確認
-            security cms -D -i "$profile" | plutil -extract Name raw - 2>/dev/null || echo "名前取得失敗"
-            # Bundle IDを確認  
-            security cms -D -i "$profile" | plutil -extract Entitlements.application-identifier raw - 2>/dev/null || echo "Bundle ID取得失敗"
+            profile_name=$(security cms -D -i "$profile" | plutil -extract Name raw - 2>/dev/null || echo "名前取得失敗")
+            bundle_id=$(security cms -D -i "$profile" | plutil -extract Entitlements.application-identifier raw - 2>/dev/null || echo "Bundle ID取得失敗")
+            echo "プロファイル名: $profile_name"
+            echo "Bundle ID: $bundle_id"
+            
+            # 正しいプロファイル以外を削除
+            if [ "$profile_name" != "Smart Photo Diary App Store" ] && [[ "$bundle_id" == "***.com.focuswave.dev.smartPhotoDiary" ]]; then
+              echo "❌ 余計なプロファイルを削除: $profile_name"
+              rm -f "$profile"
+            else
+              echo "✅ 保持: $profile_name"
+            fi
           done
+          
+          echo "=== 削除後のプロファイル一覧 ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "プロファイルなし"
           
       - name: Create ExportOptions.plist
         run: |
