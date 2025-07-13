@@ -104,10 +104,18 @@ jobs:
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
           
-      - name: Debug provisioning profiles
+      - name: Configure Manual Signing
         run: |
+          # Release設定をManual Signingに変更
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
+          
+          # Debug現在の設定を確認
+          echo "=== プロジェクト設定確認 ==="
+          grep -n "CODE_SIGN_STYLE\|DEVELOPMENT_TEAM" ios/Runner.xcodeproj/project.pbxproj || true
+          
           echo "=== 利用可能なプロビジョニングプロファイル一覧 ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "プロビジョニングプロファイルディレクトリが見つかりません"
+          
           echo "=== システムキーチェーン確認 ==="
           security find-identity -v -p codesigning || echo "署名アイデンティティが見つかりません"
           
