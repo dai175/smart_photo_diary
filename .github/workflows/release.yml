@@ -280,62 +280,38 @@ jobs:
       # Release notes will be created manually on GitHub Releases page
           
       - name: Create Release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.version.outputs.version }}
-          release_name: Smart Photo Diary ${{ needs.version.outputs.version }}
-          body: |
-            Build artifacts for Smart Photo Diary ${{ needs.version.outputs.version }}
-            
-            **Build Info:** ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})
-            **Commit:** ${{ github.sha }}
-            
-            Release notes will be updated manually.
-          draft: true
-          prerelease: ${{ github.event.inputs.prerelease || false }}
+        run: |
+          # Create release using GitHub CLI (modern approach)
+          PRERELEASE_FLAG=""
+          if [ "${{ github.event.inputs.prerelease || false }}" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          
+          # Create draft release
+          gh release create ${{ needs.version.outputs.version }} \
+            --title "Smart Photo Diary ${{ needs.version.outputs.version }}" \
+            --notes "Build artifacts for Smart Photo Diary ${{ needs.version.outputs.version }}
+
+          **Build Info:** ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})
+          **Commit:** ${{ github.sha }}
+          
+          Release notes will be updated manually." \
+            --draft \
+            $PRERELEASE_FLAG
         id: create_release
         
-      - name: Upload Android APK
-        uses: actions/upload-release-asset@v1
+      - name: Upload release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/android/smart-photo-diary-${{ needs.version.outputs.version }}.apk
-          asset_name: smart-photo-diary-${{ needs.version.outputs.version }}.apk
-          asset_content_type: application/vnd.android.package-archive
-          
-      - name: Upload Android AAB
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/android/smart-photo-diary-${{ needs.version.outputs.version }}.aab
-          asset_name: smart-photo-diary-${{ needs.version.outputs.version }}.aab
-          asset_content_type: application/octet-stream
-          
-      - name: Upload iOS build archive
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/ios/smart-photo-diary-ios-${{ needs.version.outputs.version }}.zip
-          asset_name: smart-photo-diary-ios-${{ needs.version.outputs.version }}.zip
-          asset_content_type: application/zip
-          
-      - name: Upload checksums
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/android/smart-photo-diary-checksums.txt
-          asset_name: smart-photo-diary-checksums.txt
-          asset_content_type: text/plain
+        run: |
+          # Upload all release assets using GitHub CLI
+          gh release upload ${{ needs.version.outputs.version }} \
+            ./artifacts/android/smart-photo-diary-${{ needs.version.outputs.version }}.apk \
+            ./artifacts/android/smart-photo-diary-${{ needs.version.outputs.version }}.aab \
+            ./artifacts/ios/smart-photo-diary-ios-${{ needs.version.outputs.version }}.zip \
+            ./artifacts/android/smart-photo-diary-checksums.txt
           
       - name: Create release summary
         run: |
