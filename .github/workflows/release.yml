@@ -184,7 +184,7 @@ jobs:
           cd build/app/outputs/flutter-apk
           sha256sum smart-photo-diary-*.apk > smart-photo-diary-checksums.txt
           cd ../bundle/release
-          sha256sum smart-photo-diary-*.aab >> smart-photo-diary-checksums.txt
+          sha256sum smart-photo-diary-*.aab >> ../../flutter-apk/smart-photo-diary-checksums.txt
           
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
@@ -193,7 +193,7 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/smart-photo-diary-*.apk
             build/app/outputs/bundle/release/smart-photo-diary-*.aab
-            build/app/outputs/bundle/release/smart-photo-diary-checksums.txt
+            build/app/outputs/flutter-apk/smart-photo-diary-checksums.txt
           retention-days: 90
 
   build-ios-release:
@@ -294,7 +294,7 @@ jobs:
           fi
           
           # Create draft release
-          gh release create ${{ needs.version.outputs.version }} \
+          RELEASE_URL=$(gh release create ${{ needs.version.outputs.version }} \
             --title "Smart Photo Diary ${{ needs.version.outputs.version }}" \
             --notes "Build artifacts for Smart Photo Diary ${{ needs.version.outputs.version }}
 
@@ -303,18 +303,26 @@ jobs:
           
           Release notes will be updated manually." \
             --draft \
-            $PRERELEASE_FLAG
+            $PRERELEASE_FLAG)
+          
+          echo "RELEASE_URL=$RELEASE_URL" >> $GITHUB_OUTPUT
         id: create_release
         
       - name: Upload release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Upload all release assets using GitHub CLI
+          # List actual files before upload
+          echo "=== Android artifacts ==="
+          ls -la ./artifacts/android/
+          echo "=== iOS artifacts ==="
+          ls -la ./artifacts/ios/
+          
+          # Upload all release assets using GitHub CLI with dynamic file detection
           gh release upload ${{ needs.version.outputs.version }} \
-            ./artifacts/android/smart-photo-diary-${{ needs.version.outputs.version }}.apk \
-            ./artifacts/android/smart-photo-diary-${{ needs.version.outputs.version }}.aab \
-            ./artifacts/ios/smart-photo-diary-ios-${{ needs.version.outputs.version }}.zip \
+            ./artifacts/android/smart-photo-diary-*.apk \
+            ./artifacts/android/smart-photo-diary-*.aab \
+            ./artifacts/ios/smart-photo-diary-ios-*.zip \
             ./artifacts/android/smart-photo-diary-checksums.txt
           
       - name: Create release summary
@@ -323,7 +331,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📋 Release Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: ${{ needs.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Release URL**: ${{ steps.create_release.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release URL**: ${{ steps.create_release.outputs.RELEASE_URL }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Pre-release**: ${{ github.event.inputs.prerelease || false }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Assets" >> $GITHUB_STEP_SUMMARY
@@ -333,5 +341,5 @@ jobs:
           echo "- SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
-          echo "- [View Release](${{ steps.create_release.outputs.html_url }})" >> $GITHUB_STEP_SUMMARY
-          echo "- [Download Assets](${{ steps.create_release.outputs.html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Release](${{ steps.create_release.outputs.RELEASE_URL }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download Assets](${{ steps.create_release.outputs.RELEASE_URL }})" >> $GITHUB_STEP_SUMMARY
