@@ -105,8 +105,8 @@ jobs:
             exit 1
           fi
 
-  build-release:
-    name: Build Release Artifacts
+  build-android-release:
+    name: Build Android Release Artifacts
     needs: [version, test]
     runs-on: ubuntu-latest
     
@@ -147,7 +147,7 @@ jobs:
         
       - name: Build Android artifacts
         run: |
-          echo "Building version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
+          echo "Building Android version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
           
           # Build Android artifacts with version from version job
           flutter build apk --release \
@@ -182,10 +182,10 @@ jobs:
           cd ../bundle/release
           sha256sum smart-photo-diary-*.aab >> smart-photo-diary-checksums.txt
           
-      - name: Upload release artifacts
+      - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts
+          name: android-release-artifacts
           path: |
             build/app/outputs/flutter-apk/smart-photo-diary-*.apk
             build/app/outputs/bundle/release/smart-photo-diary-*.aab
@@ -193,7 +193,7 @@ jobs:
           retention-days: 90
 
   build-ios-release:
-    name: Build iOS Release
+    name: Build iOS Release Artifacts
     needs: [version, test]
     runs-on: macos-latest
     
@@ -258,17 +258,17 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    needs: [version, build-release, build-ios-release]
+    needs: [version, build-android-release, build-ios-release]
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Download release artifacts
+      - name: Download Android artifacts
         uses: actions/download-artifact@v4
         with:
-          name: release-artifacts
+          name: android-release-artifacts
           path: ./artifacts/android
           
       - name: Download iOS artifacts
@@ -317,7 +317,7 @@ jobs:
           asset_name: smart-photo-diary-${{ needs.version.outputs.version }}.aab
           asset_content_type: application/octet-stream
           
-      - name: Upload iOS build
+      - name: Upload iOS build archive
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
