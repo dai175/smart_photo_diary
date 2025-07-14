@@ -1,6 +1,6 @@
-# GitHub Actions Workflows
+# GitHub Actions Workflows Guide
 
-Smart Photo Diaryプロジェクト用のCI/CDワークフロー群です。
+Smart Photo Diaryプロジェクト用のCI/CDワークフロー群の詳細ガイドです。
 
 ## 📋 ワークフロー一覧
 
@@ -53,10 +53,11 @@ GEMINI_API_KEY              # Google Gemini API キー
 ```
 IOS_DISTRIBUTION_CERTIFICATE # 配布証明書（.p12、base64）
 IOS_CERTIFICATE_PASSWORD    # 証明書パスワード
+IOS_PROVISIONING_PROFILE    # プロビジョニングプロファイル（base64）
+IOS_KEYCHAIN_PASSWORD       # 一時的なキーチェーンパスワード
 IOS_TEAM_ID                 # Apple Developer Team ID
-APPSTORE_ISSUER_ID          # App Store Connect Issuer ID
-APPSTORE_KEY_ID             # App Store Connect Key ID
-APPSTORE_PRIVATE_KEY        # App Store Connect Private Key
+APPLE_ID                    # Apple Developer アカウントメール
+APPLE_APP_PASSWORD          # App専用パスワード
 GEMINI_API_KEY              # Google Gemini API キー
 ```
 

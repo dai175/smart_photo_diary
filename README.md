@@ -161,11 +161,24 @@ git push origin v1.0.0-beta           # → release.yml実行（GitHub Releases�
 
 ### 必要なGitHub Secrets（本番用）
 ```
-GEMINI_API_KEY              # Google Gemini API（全ワークフローで必須）
-GOOGLE_PLAY_SERVICE_ACCOUNT # Android デプロイ
-APPSTORE_ISSUER_ID          # iOS デプロイ  
-ANDROID_SIGNING_KEY         # Android 署名
-IOS_DISTRIBUTION_CERTIFICATE # iOS 署名
+# Core API (全ワークフローで必須)
+GEMINI_API_KEY=your_google_gemini_api_key
+
+# Android deployment (android-deploy.yml)
+GOOGLE_PLAY_SERVICE_ACCOUNT=service_account_json
+ANDROID_SIGNING_KEY=base64_encoded_keystore
+ANDROID_KEYSTORE_PASSWORD=keystore_password
+ANDROID_KEY_ALIAS=key_alias
+ANDROID_KEY_PASSWORD=key_password
+
+# iOS deployment (ios-deploy.yml)
+IOS_DISTRIBUTION_CERTIFICATE=p12_certificate_base64
+IOS_CERTIFICATE_PASSWORD=certificate_password
+IOS_PROVISIONING_PROFILE=provisioning_profile_base64
+IOS_KEYCHAIN_PASSWORD=arbitrary_keychain_password
+IOS_TEAM_ID=apple_team_id
+APPLE_ID=apple_developer_account_email
+APPLE_APP_PASSWORD=app_specific_password
 ```
 
 ### リリース運用の特徴

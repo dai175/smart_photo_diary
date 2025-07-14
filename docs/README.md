@@ -34,6 +34,12 @@ Detailed sandbox testing procedures for In-App Purchase validation.
 **Use when**: Testing subscription flows before production
 **Key sections**: Test account setup, purchase scenarios, validation procedures
 
+### ⚙️ [github_actions_workflows.md](github_actions_workflows.md)
+Comprehensive guide to CI/CD workflows and automation setup.
+
+**Use when**: Setting up or troubleshooting GitHub Actions workflows
+**Key sections**: Workflow configuration, secrets management, deployment automation
+
 ## Main Documentation
 
 The primary development documentation is located in the project root:
@@ -59,6 +65,7 @@ The primary development documentation is located in the project root:
 | Setting up CI/CD | ci_cd_guide.md |
 | Business planning | monetization_strategy.md |
 | Testing purchases | sandbox_testing_guide.md |
+| Workflow automation | github_actions_workflows.md |
 
 ## Maintenance
 

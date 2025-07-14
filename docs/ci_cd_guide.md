@@ -118,10 +118,11 @@ GEMINI_API_KEY              # Google Gemini API キー
 # 必要なSecrets（GitHub Repository Settings）
 IOS_DISTRIBUTION_CERTIFICATE # 配布証明書（.p12ファイル、base64エンコード）
 IOS_CERTIFICATE_PASSWORD    # 証明書パスワード
+IOS_PROVISIONING_PROFILE    # プロビジョニングプロファイル（base64エンコード）
+IOS_KEYCHAIN_PASSWORD       # 一時的なキーチェーンパスワード
 IOS_TEAM_ID                 # Apple Developer Team ID
-APPSTORE_ISSUER_ID          # App Store Connect Issuer ID
-APPSTORE_KEY_ID             # App Store Connect Key ID
-APPSTORE_PRIVATE_KEY        # App Store Connect Private Key
+APPLE_ID                    # Apple Developer アカウントメール
+APPLE_APP_PASSWORD          # App専用パスワード
 GEMINI_API_KEY              # Google Gemini API キー
 ```
 
