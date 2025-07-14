@@ -24,34 +24,37 @@ jobs:
     name: Extract Version Info
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ needs.version.outputs.version }}
-      version_name: ${{ needs.version.outputs.version_name }}
-      build_number: ${{ needs.version.outputs.build_number }}
+      version: ${{ steps.version.outputs.version }}
+      version_name: ${{ steps.version.outputs.version_name }}
+      build_number: ${{ steps.version.outputs.build_number }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Extract version info
         id: version
         run: |
           # Extract version from Git tag (industry standard approach)
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             # Tagged release: extract version from tag (e.g., v1.0.0 -> 1.0.0)
-            VERSION_NAME=${GITHUB_REF#refs/tags/v}
-            VERSION=${{ github.ref_name }}
-            echo "Release build - Version: $VERSION_NAME"
+            VERSION="${GITHUB_REF#refs/tags/}"      # v1.0.0 (for tag_name)
+            VERSION_NAME="${VERSION#v}"             # 1.0.0 (for build_name)
+            echo "Release build - Tag: ${VERSION}, Version: ${VERSION_NAME}"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # Manual execution: use input version
-            VERSION=${{ github.event.inputs.version }}
-            VERSION_NAME=${VERSION#v}
-            echo "Manual build - Version: $VERSION_NAME"
+            VERSION="${{ github.event.inputs.version }}"
+            VERSION_NAME="${VERSION#v}"
+            echo "Manual build - Version: ${VERSION_NAME}"
           else
             # Non-release build: use development version
             VERSION="v1.0.0-dev"
             VERSION_NAME="1.0.0-dev"
-            echo "Development build - Version: $VERSION_NAME"
+            echo "Development build - Version: ${VERSION_NAME}"
           fi
           
           # Generate incremental build number (Apple/Google recommended approach)
           BUILD_NUMBER=$GITHUB_RUN_NUMBER
-          echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
+          echo "Build number: ${BUILD_NUMBER} (run #${GITHUB_RUN_NUMBER})"
           
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
