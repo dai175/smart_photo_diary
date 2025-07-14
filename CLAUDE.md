@@ -32,7 +32,10 @@ git push origin v1.0.0
 # Manual deployment workflows require GitHub Secrets:
 # - GEMINI_API_KEY: Google Gemini API key for production builds
 # - GOOGLE_PLAY_SERVICE_ACCOUNT: Android deployment credentials  
-# - APPSTORE_ISSUER_ID, APPSTORE_KEY_ID, APPSTORE_PRIVATE_KEY: iOS deployment
+# - IOS_DISTRIBUTION_CERTIFICATE, IOS_CERTIFICATE_PASSWORD: iOS code signing
+# - IOS_PROVISIONING_PROFILE, IOS_KEYCHAIN_PASSWORD: iOS provisioning
+# - APPLE_ID, APPLE_APP_PASSWORD: App Store/TestFlight upload
+# - IOS_TEAM_ID: Apple Developer Team ID
 # - ANDROID_SIGNING_KEY, ANDROID_KEYSTORE_PASSWORD: Android signing
 ```
 
@@ -595,13 +598,14 @@ ANDROID_KEYSTORE_PASSWORD=keystore_password
 ANDROID_KEY_ALIAS=key_alias
 ANDROID_KEY_PASSWORD=key_password
 
-# iOS deployment (ios-deploy.yml)
-APPSTORE_ISSUER_ID=app_store_connect_issuer_id
-APPSTORE_KEY_ID=app_store_connect_key_id
-APPSTORE_PRIVATE_KEY=app_store_connect_private_key
+# iOS deployment (ios-｀deploy.yml)
 IOS_DISTRIBUTION_CERTIFICATE=p12_certificate_base64
 IOS_CERTIFICATE_PASSWORD=certificate_password
+IOS_PROVISIONING_PROFILE=provisioning_profile_base64
+IOS_KEYCHAIN_PASSWORD=arbitrary_keychain_password
 IOS_TEAM_ID=apple_team_id
+APPLE_ID=apple_developer_account_email
+APPLE_APP_PASSWORD=app_specific_password
 ```
 
 ### Deployment Strategy (Industry Standard)
@@ -609,19 +613,58 @@ IOS_TEAM_ID=apple_team_id
 - **Beta Testing**: Use release.yml for GitHub Releases distribution (tag-triggered)
 - **Store Distribution**: Use android-deploy.yml and ios-deploy.yml (manual execution only)
 
-### Staged Release Flow
+### Modern Release Workflow (Git Tag Based)
+The project uses industry-standard Git tag-based versioning with complete CI/CD automation:
+
+#### Version Management
+- **pubspec.yaml**: Contains template version `0.0.0+0` (overridden by CI/CD)
+- **Git tags**: Source of truth for all version information (`v1.0.0`, `v1.1.0`, etc.)
+- **Build numbers**: Auto-generated using GitHub run number (1, 2, 3...)
+- **Apple/Google compliance**: Each version starts from build 1 (recommended practice)
+
+#### Release Process
+```bash
+# 1. Complete Development & Testing
+git status && git pull origin main
+
+# 2. Create Version Tag
+git tag v1.0.1
+git push origin v1.0.1
+
+# 3. Automatic GitHub Release (release.yml)
+# - Builds Android APK/AAB and iOS archive
+# - Creates draft release with artifacts
+# - Ready for developer/tester distribution
+
+# 4. Store Distribution (Manual)
+# TestFlight: GitHub Actions → iOS Deploy → Run workflow (tag: v1.0.1, env: testflight)
+# App Store: GitHub Actions → iOS Deploy → Run workflow (tag: v1.0.1, env: appstore)  
+# Google Play: GitHub Actions → Android Deploy → Run workflow
+
+# 5. Release Notes
+# Edit draft release on GitHub with actual changelog
+# Publish release for public distribution
+```
+
+#### iOS Deployment Workflow
+- **Input**: Requires Git tag selection (e.g., v1.0.1) and environment (testflight/appstore)
+- **Checkout**: Specific tag version for consistent builds
+- **Signing**: Manual signing with Distribution Certificate and App Store provisioning profile
+- **Upload**: Direct upload to App Store Connect via Apple ID credentials
+
+### Staged Release Flow (Updated)
 ```bash
 # 1. Development Quality Checks (Automatic)
 git push origin main                    # → ci.yml execution
 
-# 2. Beta Distribution (Semi-automatic)
-git tag v1.0.0-beta
-git push origin v1.0.0-beta           # → release.yml execution
+# 2. Production Release (Tag-triggered)
+git tag v1.0.1
+git push origin v1.0.1                # → release.yml execution (GitHub Releases)
 
-# 3. Production Distribution (Manual)
-# Execute manually via GitHub Actions UI:
-# - android-deploy.yml → Google Play Store
-# - ios-deploy.yml → App Store/TestFlight
+# 3. Store Distribution (Manual Workflow Execution)
+# TestFlight: iOS Deploy workflow with tag v1.0.1 and environment testflight
+# App Store: iOS Deploy workflow with tag v1.0.1 and environment appstore
+# Google Play: Android Deploy workflow (uses latest commit)
 ```
 
 ### Important Notes
