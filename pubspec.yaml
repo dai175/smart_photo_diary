@@ -86,7 +86,7 @@ flutter:
   assets:
     - assets/images/
     - assets/data/
-    - .env  # 開発時のみ：本番CI/CDで自動除外
+    # .env は PROJECT ROOT に配置（assetsには含めない）
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -16,13 +16,19 @@ class EnvironmentConfig {
         defaultValue: '',
       );
 
+      debugPrint(
+        '🔑 APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? ".envファイル" : "build-time constants"}',
+      );
+
       // 2. 開発環境：.envファイルから読み込み（デバッグビルドのみ）
       if (_cachedGeminiApiKey!.isEmpty && kDebugMode) {
         try {
-          await dotenv.load(); // assetsから読み込み
+          // プロジェクトルートから読み込み（セキュリティを考慮）
+          await dotenv.load(fileName: '.env');
           _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+          debugPrint('🔧 開発環境: .envファイルから読み込み完了');
         } catch (e) {
-          // .envファイル読み込み失敗
+          debugPrint('⚠️ .envファイル読み込み失敗（開発環境）: $e');
         }
       }
 
@@ -49,6 +55,9 @@ class EnvironmentConfig {
       _isInitialized = true;
 
       debugPrint('🚀 EnvironmentConfig初期化完了');
+      debugPrint(
+        '🔑 APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? "未設定" : (kDebugMode ? "開発環境" : "本番環境")}',
+      );
     } catch (e) {
       debugPrint('❌ 環境変数初期化エラー: $e');
       _isInitialized = false;

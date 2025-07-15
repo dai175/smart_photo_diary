@@ -82,7 +82,7 @@ jobs:
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
         
-      - name: Create production .env file
+      - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -91,8 +91,7 @@ jobs:
             echo "Please add GEMINI_API_KEY to GitHub repository secrets"
             exit 1
           fi
-          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
-          echo "✅ Production .env file created with real API key"
+          echo "✅ Required secrets verified"
           
       - name: Decode Android signing key
         env:
@@ -114,6 +113,8 @@ jobs:
           EOF
           
       - name: Build Android App Bundle
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           # Extract version from Git tag (industry standard approach)
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
@@ -131,9 +132,11 @@ jobs:
           BUILD_NUMBER=$GITHUB_RUN_NUMBER
           echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
           
+          echo "🔑 Using build-time constants for API key injection"
           flutter build appbundle --release \
             --build-name=$VERSION_NAME \
-            --build-number=$BUILD_NUMBER
+            --build-number=$BUILD_NUMBER \
+            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
         
       - name: Upload to Google Play Console
         uses: r0adkll/upload-google-play@v1

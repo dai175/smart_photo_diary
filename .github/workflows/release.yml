@@ -137,7 +137,7 @@ jobs:
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
         
-      - name: Create .env file
+      - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -146,26 +146,29 @@ jobs:
             echo "Please add GEMINI_API_KEY to GitHub repository secrets for release builds"
             exit 1
           fi
-          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
-          echo "✅ Production .env file created with real API key"
+          echo "✅ Required secrets verified"
         
       - name: Build Android artifacts
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           echo "Building Android version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
           
+          echo "🔑 Using build-time constants for API key injection"
           # Build Android artifacts with version from version job
           flutter build apk --release \
             --build-name=${{ needs.version.outputs.version_name }} \
-            --build-number=${{ needs.version.outputs.build_number }}
+            --build-number=${{ needs.version.outputs.build_number }} \
+            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
             
           flutter build appbundle --release \
             --build-name=${{ needs.version.outputs.version_name }} \
-            --build-number=${{ needs.version.outputs.build_number }}
+            --build-number=${{ needs.version.outputs.build_number }} \
+            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
         
-      - name: Clean up sensitive files
+      - name: Build environment cleanup
         run: |
-          rm -f .env
-          echo "✅ Sensitive files removed from build environment"
+          echo "✅ Build environment cleanup completed"
         
       - name: Rename artifacts with version
         run: |
@@ -218,7 +221,7 @@ jobs:
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
         
-      - name: Create .env file
+      - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -227,8 +230,7 @@ jobs:
             echo "Please add GEMINI_API_KEY to GitHub repository secrets for iOS release builds"
             exit 1
           fi
-          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
-          echo "✅ Production .env file created with real API key"
+          echo "✅ Required secrets verified"
         
       - name: Install CocoaPods dependencies
         run: |
@@ -236,17 +238,20 @@ jobs:
           pod install
           
       - name: Build iOS (release, no codesign)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           echo "Building iOS version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
           
+          echo "🔑 Using build-time constants for API key injection"
           flutter build ios --release --no-codesign \
             --build-name=${{ needs.version.outputs.version_name }} \
-            --build-number=${{ needs.version.outputs.build_number }}
+            --build-number=${{ needs.version.outputs.build_number }} \
+            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
         
-      - name: Clean up sensitive files
+      - name: Build environment cleanup
         run: |
-          rm -f .env
-          echo "✅ Sensitive files removed from build environment"
+          echo "✅ Build environment cleanup completed"
         
       - name: Archive iOS build
         run: |

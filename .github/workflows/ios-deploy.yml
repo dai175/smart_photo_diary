@@ -78,7 +78,7 @@ jobs:
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
         
-      - name: Create production .env file
+      - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -87,8 +87,7 @@ jobs:
             echo "Please add GEMINI_API_KEY to GitHub repository secrets"
             exit 1
           fi
-          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
-          echo "✅ Production .env file created with real API key"
+          echo "✅ Required secrets verified"
           
       - name: Install CocoaPods dependencies
         run: |
@@ -163,6 +162,8 @@ jobs:
           EOF
           
       - name: Build iOS IPA
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           # Extract version from user-specified tag (industry standard approach)
           VERSION_NAME=${{ github.event.inputs.tag }}
@@ -174,10 +175,12 @@ jobs:
           BUILD_NUMBER=$GITHUB_RUN_NUMBER
           echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
           
+          echo "🔑 Using build-time constants for API key injection"
           flutter build ipa --release \
             --build-name=$VERSION_NAME \
             --build-number=$BUILD_NUMBER \
-            --export-options-plist=ios/ExportOptions.plist
+            --export-options-plist=ios/ExportOptions.plist \
+            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           
           # List generated IPA files to find the correct name
           echo "=== Generated IPA files ==="
@@ -228,7 +231,6 @@ jobs:
       - name: Cleanup sensitive files
         if: always()
         run: |
-          rm -f .env
           rm -f ios/ExportOptions.plist
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
           
