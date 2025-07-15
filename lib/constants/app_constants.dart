@@ -110,7 +110,7 @@ class ThemeConstants {
 /// AI関連の定数
 class AiConstants {
   // Gemini API設定
-  static const String geminiModelName = 'gemini-2.5-flash-preview-04-17';
+  static const String geminiModelName = 'gemini-2.5-flash';
   static const double defaultTemperature = 0.7;
   static const int defaultMaxOutputTokens = 1000;
   static const double defaultTopP = 0.8;
