@@ -7,14 +7,6 @@ on:
         description: 'Git tag to deploy (e.g., v1.1.0)'
         required: true
         type: string
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'testflight'
-        type: choice
-        options:
-          - testflight
-          - appstore
 
 env:
   FLUTTER_VERSION: '3.32.0'
@@ -187,32 +179,14 @@ jobs:
           ls -la build/ios/ipa/
           
       - name: Upload to TestFlight
-        if: github.event.inputs.environment == 'testflight' || github.event.inputs.environment == ''
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
         run: |
-          # Find the actual IPA file (should be the only .ipa file in the directory)
-          IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
-          echo "Found IPA file: $IPA_FILE"
+          echo "📱 Uploading to TestFlight..."
+          echo "ℹ️  Note: For App Store submission, manually submit from App Store Connect after TestFlight processing"
+          echo ""
           
-          if [ -z "$IPA_FILE" ]; then
-            echo "❌ Error: No IPA file found in build/ios/ipa/"
-            exit 1
-          fi
-          
-          xcrun altool --upload-app \
-            -f "$IPA_FILE" \
-            -u "$APPLE_ID" \
-            -p "$APPLE_APP_PASSWORD" \
-            -t ios
-          
-      - name: Upload to App Store
-        if: github.event.inputs.environment == 'appstore'
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-        run: |
           # Find the actual IPA file (should be the only .ipa file in the directory)
           IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
           echo "Found IPA file: $IPA_FILE"
@@ -240,19 +214,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Deployment Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Bundle ID**: com.focuswave.dev.smartPhotoDiary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: ${{ github.event.inputs.environment || 'testflight' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target**: TestFlight" >> $GITHUB_STEP_SUMMARY
           echo "- **Build**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📱 Next Steps" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ github.event.inputs.environment }}" = "testflight" ] || [ -z "${{ github.event.inputs.environment }}" ]; then
-            echo "1. Check TestFlight for build processing status" >> $GITHUB_STEP_SUMMARY
-            echo "2. Add beta testers for testing" >> $GITHUB_STEP_SUMMARY
-            echo "3. Collect feedback and iterate" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "1. Check App Store Connect for submission status" >> $GITHUB_STEP_SUMMARY
-            echo "2. Wait for Apple review process" >> $GITHUB_STEP_SUMMARY
-            echo "3. Monitor for approval and release" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "1. Check TestFlight for build processing status" >> $GITHUB_STEP_SUMMARY
+          echo "2. For beta testing: Add beta testers and collect feedback" >> $GITHUB_STEP_SUMMARY
+          echo "3. For App Store release: Manually submit from App Store Connect" >> $GITHUB_STEP_SUMMARY
 
   notify:
     name: Notify Deployment
@@ -264,8 +232,8 @@ jobs:
       - name: Notify success
         if: needs.ios-deploy.result == 'success'
         run: |
-          echo "✅ iOS deployment successful!"
-          echo "Environment: ${{ github.event.inputs.environment || 'testflight' }}"
+          echo "✅ iOS deployment to TestFlight successful!"
+          echo "Tag: ${{ github.event.inputs.tag }}"
           
       - name: Notify failure
         if: needs.ios-deploy.result == 'failure'
