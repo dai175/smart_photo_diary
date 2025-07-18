@@ -489,7 +489,13 @@ For testing purposes, you can force a specific subscription plan in debug mode:
   ```
 
 ### Platform Considerations
-The app supports multiple platforms but photo access requires platform-specific permissions handled by `permission_handler`.
+The app is designed as an **iPhone-only application** with iPad support explicitly disabled. Photo access requires platform-specific permissions handled by `permission_handler`.
+
+#### iPhone-Only Design Decision
+- **Target Device Family**: Set to `1` (iPhone only) in Xcode project configuration
+- **Info.plist Configuration**: Removed iPad-specific interface orientations
+- **UI Optimization**: All layouts optimized for iPhone screen sizes and aspect ratios
+- **App Store Strategy**: Simplified submission process by focusing on single platform
 
 ### iOS Photo Permission Implementation
 **CRITICAL**: iOS photo permissions require specific implementation patterns for reliable operation:
@@ -677,6 +683,12 @@ git push origin v1.0.1                # → release.yml execution (GitHub Releas
 
 ## Development Status
 
+### App Store Release Status
+- **✅ App Store Submission Complete**: Smart Photo Diary v1.0 successfully submitted to App Store
+- **🔄 App Review Status**: Currently under App Store review (typically 1-3 days)
+- **⏳ Production Deployment**: Awaiting Apple's review approval
+- **✅ Platform Strategy**: iPhone-only release for focused user experience
+
 ### Recent Achievements
 - **Perfect test coverage**: 683 tests with 100% success rate across unit, widget, and integration tests
 - **PromptService complete implementation**: Phase 2.2.1 fully implemented with JSON asset loading, 3-tier caching, and comprehensive search
@@ -709,7 +721,9 @@ git push origin v1.0.1                # → release.yml execution (GitHub Releas
 - **Diary Editing UX Optimization**: Improved editing experience with natural layouts and long text support
 - **Photo Display Enhancement**: Improved photo dialogs with intuitive interactions
 - **Text Standardization**: Enhanced readability with industry-standard left-aligned text
-- **Responsive Design Implementation**: Natural and efficient layout design avoiding fixed heights
+- **iPhone-Only Design Implementation**: Natural and efficient layout design optimized for iPhone screens
+- **iPad Support Removal**: Disabled iPad support for streamlined development and App Store submission
+- **App Store Submission**: Smart Photo Diary v1.0 successfully submitted to App Store for review
 
 ### Current Architecture State
 - **Production-ready services**: All core services (Diary, Photo, AI, ImageClassifier, Settings, Logging, Subscription, Prompt) are fully implemented and tested
@@ -723,9 +737,9 @@ git push origin v1.0.1                # → release.yml execution (GitHub Releas
 ### Current Implementation State of Result<T>
 - **✅ Core implementation**: Complete Result<T> pattern with comprehensive API and 100% test coverage
 - **✅ Foundation ready**: All utilities (ResultHelper, ErrorHandler, LoggingService) implemented and tested
-- **✅ Partial adoption**: SettingsService demonstrates successful Result<T> usage for write operations
+- **✅ Production adoption**: SettingsService and AiService successfully use Result<T> for robust error handling
 - **✅ Migration experience**: Learned best practices for gradual introduction without breaking existing code
-- **🔄 Legacy compatibility**: Existing service interfaces maintained for backward compatibility during transition
+- **✅ Review ready**: Result<T> pattern stable and ready for App Store release
 - **📋 Future development**: All new features should adopt Result<T> pattern from day one
 
 ### Result<T> Migration Lessons Learned
