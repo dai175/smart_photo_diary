@@ -200,6 +200,5 @@ Save ~22% compared to monthly plan. Cancel anytime.
 - Grace periods and account hold settings can be configured
 
 ### Both Platforms
-- Free trial periods are not currently implemented
 - Auto-renewal is enabled by default
 - Users can cancel subscriptions at any time through platform settings

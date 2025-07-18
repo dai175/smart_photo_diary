@@ -939,7 +939,6 @@ The app implements a **two-tier freemium model** with the following structure:
 - 100 AI diary generations per month  
 - Access to all 20 writing prompts across 8 categories
 - Advanced filtering and analytics features
-- 7-day free trial period
 
 ### Technical Implementation
 - **Subscription Management**: Complete In-App Purchase integration via `SubscriptionService`

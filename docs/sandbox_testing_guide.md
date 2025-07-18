@@ -69,11 +69,6 @@ App Store 地域: 日本
       "familyShareable" : false,
       "groupNumber" : 1,
       "internalID" : "smart_photo_diary_premium_monthly_plan",
-      "introductoryOffer" : {
-        "internalID" : "monthly_trial",
-        "paymentMode" : "free",
-        "subscriptionPeriod" : "P7D"
-      },
       "localizations" : [
         {
           "description" : "月100回のAI日記生成とプレミアム機能",
@@ -93,11 +88,6 @@ App Store 地域: 日本
       "familyShareable" : false,
       "groupNumber" : 1,
       "internalID" : "smart_photo_diary_premium_yearly_plan",
-      "introductoryOffer" : {
-        "internalID" : "yearly_trial",
-        "paymentMode" : "free", 
-        "subscriptionPeriod" : "P7D"
-      },
       "localizations" : [
         {
           "description" : "月100回のAI日記生成とプレミアム機能（年額22%割引）",
@@ -219,22 +209,22 @@ class TestEnvironmentConfig {
 - SubscriptionServiceの状態が正常に更新される
 - UI上でPremiumプランの表示に変更される
 
-### 2. 無料トライアルテスト
+### 2. 月額プラン購入テスト
 
 **テスト手順**:
 ```
 1. 新規テストアカウントでアプリ起動
-2. Premium プラン選択
-3. 「7日間無料トライアル」の表示確認
-4. 無料トライアル開始
+2. Premium 月額プラン選択
+3. 価格表示確認（¥300/月）
+4. 購入処理実行
 5. Premium機能が即座に使用可能になることを確認
-6. 設定画面でトライアル終了日の表示確認
+6. 設定画面でサブスクリプション状態確認
 ```
 
 **期待結果**:
-- 7日間の無料期間が正しく設定される
-- トライアル期間中はPremium機能がフル利用可能
-- トライアル終了日が正確に表示される
+- 購入処理が正常に完了する
+- Premium機能がフル利用可能になる
+- サブスクリプション状態が正確に表示される
 
 ### 3. 購入復元テスト
 
@@ -304,8 +294,8 @@ void main() {
       // 購入復元テストコード
     });
     
-    testWidgets('Free trial activation flow', (tester) async {
-      // 無料トライアルテストコード
+    testWidgets('Premium subscription activation flow', (tester) async {
+      // Premium購入テストコード
     });
   });
 }
@@ -322,7 +312,7 @@ void main() {
 ### iOS テスト
 - [ ] 月額プラン購入テスト完了
 - [ ] 年額プラン購入テスト完了
-- [ ] 無料トライアル開始テスト完了
+- [ ] Premium購入テスト完了
 - [ ] 購入復元テスト完了
 - [ ] 購入キャンセルテスト完了
 - [ ] ネットワークエラーテスト完了
@@ -330,7 +320,7 @@ void main() {
 ### Android テスト  
 - [ ] 月額プラン購入テスト完了
 - [ ] 年額プラン購入テスト完了
-- [ ] 無料トライアル開始テスト完了
+- [ ] Premium購入テスト完了
 - [ ] 購入復元テスト完了
 - [ ] 購入キャンセルテスト完了
 - [ ] Google Play エラーテスト完了
@@ -362,10 +352,10 @@ void main() {
 解決: ローカルストレージのトランザクション情報を確認
 ```
 
-**無料トライアルが開始されない**:
+**Premium購入が完了しない**:
 ```
-原因: 商品設定で無料トライアルが有効になっていない
-解決: App Store Connect/Google Play Consoleの商品設定を確認
+原因: 商品設定やテストアカウント設定に問題がある
+解決: App Store Connect/Google Play Consoleの商品設定とテストアカウントを確認
 ```
 
 ## ログ・デバッグ情報
