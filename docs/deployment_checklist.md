@@ -19,7 +19,7 @@
 - [ ] All modals use CustomDialog components
 - [ ] Text alignment follows left-aligned standards
 - [ ] Photo permission dialogs display correctly
-- [ ] Responsive layouts work on different screen sizes
+- [ ] iPhone-only layouts work correctly (iPad support disabled)
 - [ ] Dark mode support verified
 - [ ] Japanese font rendering correct
 

@@ -27,8 +27,8 @@ Smart Photo DiaryアプリをTestFlightで配布するための詳細な手順�
 - ✅ アプリ登録完了: Smart Photo Diary
 
 #### 3. In-App Purchase設定
-- ✅ Premium Monthly Plan: `smart_photo_diary_monthly`
-- ✅ Premium Yearly Plan: `smart_photo_diary_yearly`
+- ✅ Premium Monthly Plan: `smart_photo_diary_premium_monthly_plan`
+- ✅ Premium Yearly Plan: `smart_photo_diary_premium_yearly_plan`
 
 #### 4. コード設定
 - ✅ Product ID統一済み
@@ -337,6 +337,6 @@ App crashes on launch
 
 ---
 
-**最終更新**: 2025年7月12日  
+**最終更新**: 2025年7月18日  
 **バージョン**: 1.0.0  
 **担当**: Claude Code Assistant
