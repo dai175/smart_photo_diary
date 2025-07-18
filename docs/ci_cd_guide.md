@@ -162,8 +162,8 @@ git push origin main
 ### リリースフロー
 ```bash
 # 1. バージョン準備
-# pubspec.yaml の version を更新
-version: 1.2.0+3
+# Git tagベースの自動バージョン管理（pubspec.yaml更新不要）
+# pubspec.yamlは0.0.0+0を維持、CI/CDが自動設定
 
 # 2. バージョンタグ作成・プッシュ
 git tag v1.2.0
