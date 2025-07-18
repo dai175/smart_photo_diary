@@ -170,33 +170,34 @@ jobs:
         run: |
           echo "✅ Build environment cleanup completed"
         
-      - name: Rename artifacts with version
+      - name: Prepare Android artifacts
         run: |
           VERSION=${{ github.ref_name }}
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION=${{ github.event.inputs.version }}
           fi
           
+          # Create a flat directory for all Android artifacts
+          mkdir -p android-artifacts
+          
+          # Copy and rename artifacts to the flat directory
           cp build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/smart-photo-diary-${VERSION}.apk
+             android-artifacts/smart-photo-diary-${VERSION}.apk
           cp build/app/outputs/bundle/release/app-release.aab \
-             build/app/outputs/bundle/release/smart-photo-diary-${VERSION}.aab
+             android-artifacts/smart-photo-diary-${VERSION}.aab
              
-      - name: Generate checksums
-        run: |
-          cd build/app/outputs/flutter-apk
-          sha256sum smart-photo-diary-*.apk > smart-photo-diary-checksums.txt
-          cd ../bundle/release
-          sha256sum smart-photo-diary-*.aab >> ../../flutter-apk/smart-photo-diary-checksums.txt
+          # Generate checksums in the flat directory (use subshell to avoid cd issues)
+          (
+            cd android-artifacts
+            sha256sum smart-photo-diary-*.apk > smart-photo-diary-checksums.txt
+            sha256sum smart-photo-diary-*.aab >> smart-photo-diary-checksums.txt
+          )
           
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-release-artifacts
-          path: |
-            build/app/outputs/flutter-apk/smart-photo-diary-*.apk
-            build/app/outputs/bundle/release/smart-photo-diary-*.aab
-            build/app/outputs/flutter-apk/smart-photo-diary-checksums.txt
+          path: android-artifacts/*
           retention-days: 90
 
   build-ios-release:
@@ -253,16 +254,27 @@ jobs:
         run: |
           echo "✅ Build environment cleanup completed"
         
-      - name: Archive iOS build
+      - name: Prepare iOS artifacts
         run: |
-          cd build/ios/iphoneos
-          zip -r smart-photo-diary-ios-${{ needs.version.outputs.version }}.zip Runner.app
+          VERSION=${{ github.ref_name }}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          
+          # Create a flat directory for iOS artifacts
+          mkdir -p ios-artifacts
+          
+          # Create zip in the flat directory (use subshell to avoid cd issues)
+          (
+            cd build/ios/iphoneos
+            zip -r ../../../ios-artifacts/smart-photo-diary-ios-${VERSION}.zip Runner.app
+          )
           
       - name: Upload iOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ios-release-artifacts
-          path: build/ios/iphoneos/smart-photo-diary-ios-*.zip
+          path: ios-artifacts/*
           retention-days: 90
 
   create-release:
@@ -317,13 +329,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # List actual files before upload
+          # List all downloaded artifacts
           echo "=== Android artifacts ==="
           ls -la ./artifacts/android/
           echo "=== iOS artifacts ==="
           ls -la ./artifacts/ios/
           
-          # Upload all release assets using GitHub CLI with dynamic file detection
+          # Upload all release assets using GitHub CLI
+          # Now all files are in flat directories, so we can use simple patterns
           gh release upload ${{ needs.version.outputs.version }} \
             ./artifacts/android/smart-photo-diary-*.apk \
             ./artifacts/android/smart-photo-diary-*.aab \
