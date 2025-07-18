@@ -34,11 +34,17 @@ Detailed sandbox testing procedures for In-App Purchase validation.
 **Use when**: Testing subscription flows before production
 **Key sections**: Test account setup, purchase scenarios, validation procedures
 
-### ⚙️ [github_actions_workflows.md](github_actions_workflows.md)
-Comprehensive guide to CI/CD workflows and automation setup.
+### 💳 [in-app-purchase-setup-guide.md](in-app-purchase-setup-guide.md)
+Comprehensive In-App Purchase configuration and setup procedures.
 
-**Use when**: Setting up or troubleshooting GitHub Actions workflows
-**Key sections**: Workflow configuration, secrets management, deployment automation
+**Use when**: Setting up detailed subscription functionality and purchase flows
+**Key sections**: StoreKit configuration, product setup, testing procedures
+
+### ✈️ [testflight-build-guide.md](testflight-build-guide.md)
+Detailed TestFlight build creation and distribution procedures.
+
+**Use when**: Creating and distributing TestFlight builds for testing
+**Key sections**: Xcode build process, App Store Connect upload, tester management
 
 ## Main Documentation
 
@@ -65,7 +71,8 @@ The primary development documentation is located in the project root:
 | Setting up CI/CD | ci_cd_guide.md |
 | Business planning | monetization_strategy.md |
 | Testing purchases | sandbox_testing_guide.md |
-| Workflow automation | github_actions_workflows.md |
+| TestFlight builds | testflight-build-guide.md |
+| In-App Purchase setup | in-app-purchase-setup-guide.md |
 
 ## Maintenance
 
