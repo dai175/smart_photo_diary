@@ -111,12 +111,12 @@ class UpgradeDialogUtils {
       case SubscriptionPlan.premiumMonthly:
         title = 'プレミアム（月額）';
         price = '¥300/月';
-        description = '月間100回のAI生成';
+        description = '';
         break;
       case SubscriptionPlan.premiumYearly:
         title = 'プレミアム（年額）';
         price = '¥2,800/年';
-        description = '月間100回のAI生成（22%割引）';
+        description = '22%割引でお得';
         break;
       default:
         return const SizedBox.shrink();
@@ -144,6 +144,7 @@ class UpgradeDialogUtils {
           child: Padding(
             padding: AppSpacing.cardPadding,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Column(
@@ -155,15 +156,17 @@ class UpgradeDialogUtils {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        description,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: Theme.of(
-                            dialogContext,
-                          ).colorScheme.onSurfaceVariant,
+                      if (description.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          description,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Theme.of(
+                              dialogContext,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
