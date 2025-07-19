@@ -1,403 +1,151 @@
-# サンドボックステスト環境設定ガイド
+# Sandbox Testing Guide
 
 ## 概要
 
-Smart Photo DiaryのIn-App Purchase機能をサンドボックス環境でテストするための設定とテスト手順を説明します。
+Smart Photo DiaryのIn-App Purchase機能をサンドボックス環境でテストするためのガイドです。
 
-## iOS App Store Connect サンドボックス設定
+## 前提条件
 
-### 1. サンドボックステスターアカウント作成
+### 必要なアカウント
+- **Apple ID（サンドボックステスト用）**: App Store Connectで作成したテストアカウント
+- **Google Playテストアカウント**: Google Play Consoleで設定したライセンステスター
 
-**App Store Connectでの設定**:
-1. App Store Connect → ユーザーとアクセス → サンドボックステスター
-2. 「+」ボタンで新規テスターを追加
-3. 以下の情報を入力：
+### テスト環境設定
+- iOS Simulator または実機（TestFlightビルド）
+- Android Emulator または実機（内部テストビルド）
 
-```
-メールアドレス: test.ios@smartphotodiary.app
-パスワード: TestPass123!
-名前: Smart Photo Diary
-姓: iOS Tester
-国または地域: 日本
-App Store 地域: 日本
-```
+## iOSサンドボックステスト
 
-**追加のテストアカウント**:
-```
-# 年額プランテスト用
-メールアドレス: yearly.test@smartphotodiary.app
-地域: 日本
-
-# 月額プランテスト用  
-メールアドレス: monthly.test@smartphotodiary.app
-地域: 日本
-
-# 復元テスト用
-メールアドレス: restore.test@smartphotodiary.app
-地域: 日本
-
-# 地域別テスト用（アメリカ）
-メールアドレス: us.test@smartphotodiary.app
-地域: アメリカ合衆国
-```
-
-### 2. iOS デバイス設定
-
-**テストデバイスの準備**:
-1. **設定 > App Store** を開く
-2. **アカウント情報** でサインアウト
-3. **サンドボックスアカウント** セクションでテストアカウントにサインイン
-
-**重要な注意事項**:
-- 本番のApple IDでサンドボックス購入を試行しない
-- テスト後は必ずサンドボックスアカウントからサインアウト
-- テストアカウントは本番App Storeで使用不可
-
-### 3. Xcodeプロジェクト設定
-
-**StoreKit Configuration File**:
-```xml
-<!-- SmartPhotoDiary.storekit -->
-{
-  "identifier" : "SmartPhotoDiary",
-  "nonRenewingSubscriptions" : [],
-  "subscriptions" : [
-    {
-      "adHocOffers" : [],
-      "codeOffers" : [],
-      "displayPrice" : "300",
-      "familyShareable" : false,
-      "groupNumber" : 1,
-      "internalID" : "smart_photo_diary_premium_monthly_plan",
-      "localizations" : [
-        {
-          "description" : "月100回のAI日記生成とプレミアム機能",
-          "displayName" : "Premium Monthly",
-          "locale" : "ja"
-        }
-      ],
-      "productID" : "smart_photo_diary_premium_monthly_plan",
-      "recurringSubscriptionPeriod" : "P1M",
-      "referenceName" : "Premium Monthly Plan",
-      "subscriptionGroupNumber" : 1
-    },
-    {
-      "adHocOffers" : [],
-      "codeOffers" : [],
-      "displayPrice" : "2800", 
-      "familyShareable" : false,
-      "groupNumber" : 1,
-      "internalID" : "smart_photo_diary_premium_yearly_plan",
-      "localizations" : [
-        {
-          "description" : "月100回のAI日記生成とプレミアム機能（年額22%割引）",
-          "displayName" : "Premium Yearly",
-          "locale" : "ja"
-        }
-      ],
-      "productID" : "smart_photo_diary_premium_yearly_plan",
-      "recurringSubscriptionPeriod" : "P1Y",
-      "referenceName" : "Premium Yearly Plan",
-      "subscriptionGroupNumber" : 1
-    }
-  ],
-  "version" : {
-    "major" : 1,
-    "minor" : 0
-  }
-}
-```
-
-## Android Google Play Console サンドボックス設定
-
-### 1. ライセンステスト設定
-
-**Google Play Consoleでの設定**:
-1. Google Play Console → アプリ → 収益化設定
-2. **ライセンステスト** セクションに移動
-3. テストアカウントを追加：
-
-```
-test.android@smartphotodiary.app
-yearly.test.android@smartphotodiary.app  
-monthly.test.android@smartphotodiary.app
-restore.test.android@smartphotodiary.app
-```
-
-### 2. 内部テスト配布
-
-**内部テスト トラックの設定**:
-1. **リリース > テスト > 内部テスト** を選択
-2. **テスターを管理** でテストアカウント追加
-3. テスト用APKまたはAABをアップロード
-
-**テスト配布手順**:
+### 1. テストアカウント準備
 ```bash
-# デバッグビルド作成
-fvm flutter build apk --debug
-
-# リリースビルド作成（署名必要）
-fvm flutter build apk --release
-
-# 内部テスト用にGoogle Play Consoleへアップロード
-# (手動でコンソールからアップロード)
+# App Store Connect → Users and Access → Sandbox Testers
+- 新規テストアカウント作成
+- テスト用メールアドレス設定
+- 地域設定（日本）
 ```
 
-### 3. Play Billing Library設定
-
-**Android Manifest設定**:
-```xml
-<!-- android/app/src/main/AndroidManifest.xml -->
-<uses-permission android:name="com.android.vending.BILLING" />
+### 2. デバイス設定
+```bash
+# iOS設定 → App Store → サンドボックスアカウント
+- 本番Apple IDをサインアウト
+- サンドボックステストアカウントでサインイン
 ```
 
-**Gradle依存関係**:
-```gradle
-// android/app/build.gradle
-dependencies {
-    implementation 'com.android.billingclient:billing:5.0.0'
-}
+### 3. テストシナリオ
+
+#### 基本購入フロー
+1. **Premium Monthly購入**
+   - アプリ内「Premium」ボタンタップ
+   - 月額プラン（¥300）選択
+   - Face ID/Touch ID認証
+   - 購入完了確認
+
+2. **Premium Yearly購入**
+   - 年額プラン（¥2,800）選択
+   - 購入フロー実行
+   - 割引率表示確認
+
+3. **購入復元**
+   - アプリ削除・再インストール
+   - 「購入を復元」機能テスト
+   - Premium機能アクセス確認
+
+#### エラーケース
+- **決済キャンセル**: 認証画面でキャンセル
+- **ネットワークエラー**: 機内モードでの購入試行
+- **重複購入**: 既存サブスクリプション中の再購入
+
+### 4. 確認項目
+- [ ] Premium機能の解放
+- [ ] 使用量制限の変更（10回→100回）
+- [ ] ライティングプロンプト全アクセス
+- [ ] 設定画面での状態表示
+
+## Androidサンドボックステスト
+
+### 1. ライセンステスター設定
+```bash
+# Google Play Console → Setup → License testing
+- テスト用Googleアカウント追加
+- テストライセンス応答設定
 ```
 
-## テスト環境用設定ファイル
-
-### 環境変数設定
-
-**テスト用 .env ファイル**:
-```env
-# .env.testing
-ENVIRONMENT=testing
-SANDBOX_TESTING=true
-API_ENDPOINT=https://test-api.smartphotodiary.app
-GEMINI_API_KEY=your_test_api_key_here
+### 2. テストトラック配布
+```bash
+# Internal testing track使用
+- テストAPKアップロード
+- ライセンステスターに配布
 ```
 
-### Flutter設定
+### 3. テストシナリオ
+- iOSと同様の購入フロー
+- Google Play Billing統合確認
+- Android特有のバックボタン対応
 
-**テスト用設定クラス**:
-```dart
-// lib/config/environment_config_test.dart
-class TestEnvironmentConfig {
-  static const bool isSandbox = true;
-  static const bool enableLogging = true;
-  static const bool enablePurchaseValidation = false;
-  
-  static const Map<String, String> testProductIds = {
-    'monthly': 'test_smart_photo_diary_premium_monthly_plan',
-    'yearly': 'test_smart_photo_diary_premium_yearly_plan',
-  };
-}
+## デバッグ・トラブルシューティング
+
+### よくある問題
+
+#### iOS
+```bash
+# 問題: "Cannot connect to App Store"
+解決: サンドボックスアカウント設定確認
+
+# 問題: 購入が反映されない
+解決: アプリ再起動、ログ確認
+
+# 問題: テストアカウントでサインインできない
+解決: アカウント作成後24時間待機
 ```
 
-## テストシナリオ
+#### Android
+```bash
+# 問題: ライセンス認証失敗
+解決: テスターアカウント設定確認
 
-### 1. 基本購入フローテスト
-
-**テスト手順**:
-```
-1. アプリ起動
-2. 設定画面 → Premium プラン選択
-3. 月額プラン（¥300）選択
-4. サンドボックス購入画面確認
-5. Touch ID/Face ID で購入完了
-6. Premium機能の有効化確認
-7. AI生成回数が100回に変更されることを確認
+# 問題: 商品が見つからない
+解決: Play Consoleでの商品公開状態確認
 ```
 
-**期待結果**:
-- 購入完了後、即座にPremium機能が使用可能
-- SubscriptionServiceの状態が正常に更新される
-- UI上でPremiumプランの表示に変更される
-
-### 2. 月額プラン購入テスト
-
-**テスト手順**:
-```
-1. 新規テストアカウントでアプリ起動
-2. Premium 月額プラン選択
-3. 価格表示確認（¥300/月）
-4. 購入処理実行
-5. Premium機能が即座に使用可能になることを確認
-6. 設定画面でサブスクリプション状態確認
+### ログ確認方法
+```bash
+# iOS: Xcode Console
+# Android: Android Studio Logcat
+# アプリ内: DebugログでPurchase状態確認
 ```
 
-**期待結果**:
-- 購入処理が正常に完了する
-- Premium機能がフル利用可能になる
-- サブスクリプション状態が正確に表示される
+## 本番移行前チェックリスト
 
-### 3. 購入復元テスト
+### 機能確認
+- [ ] 全購入フローの正常動作
+- [ ] エラーハンドリングの適切性
+- [ ] UI/UXの直感性
+- [ ] パフォーマンスの問題なし
 
-**テスト手順**:
-```
-1. テストアカウントでPremium購入
-2. アプリをアンインストール
-3. 同じアカウントでアプリを再インストール
-4. 設定画面 → 「購入を復元」ボタンタップ
-5. Premium状態の復元確認
-```
+### セキュリティ確認
+- [ ] 領収書検証の実装
+- [ ] 不正購入の防止
+- [ ] サーバーサイド検証（該当する場合）
 
-**期待結果**:
-- 以前の購入が正常に復元される
-- 購入日、有効期限が正しく復元される
-- Premium機能が即座に使用可能になる
+### ストア準備
+- [ ] App Store Connect商品設定完了
+- [ ] Google Play Console設定完了
+- [ ] 価格・地域設定確認
+- [ ] 税務情報・契約完了
 
-### 4. プラン変更テスト
+## 注意事項
 
-**テスト手順**:
-```
-1. 月額プランを購入
-2. 年額プランに変更
-3. プラン変更の処理確認
-4. 新プランの反映確認
-```
+### 重要な制限
+- **サンドボックス購入は実際の課金なし**
+- **テストアカウントは本番環境では無効**
+- **定期的なテストアカウントメンテナンスが必要**
 
-**期待結果**:
-- プラン変更が正常に処理される
-- 新しいプランの有効期限が正しく設定される
-- 旧プランが適切にキャンセルされる
+### 本番デプロイ時の変更点
+- サンドボックスフラグの無効化
+- 本番APIエンドポイントへの切り替え
+- エラーハンドリングの最終確認
 
-### 5. エラーケーステスト
+---
 
-**テストケース**:
-```
-1. ネットワーク切断時の購入
-2. 購入キャンセル
-3. 支払い方法エラー
-4. 不正な商品ID
-5. サーバーエラー（5xx）
-```
-
-**期待結果**:
-- 適切なエラーメッセージが表示される
-- アプリがクラッシュしない
-- 購入状態が不整合にならない
-
-## 自動テストスクリプト
-
-### 購入フローテスト
-
-```dart
-// test/integration/purchase_flow_test.dart
-void main() {
-  group('Purchase Flow Integration Tests', () {
-    testWidgets('Premium monthly purchase flow', (tester) async {
-      // テストコード実装
-      // 1. アプリ起動
-      // 2. Premium プラン画面遷移
-      // 3. 購入ボタンタップ
-      // 4. サンドボックス購入処理
-      // 5. Premium機能の有効化確認
-    });
-    
-    testWidgets('Purchase restoration flow', (tester) async {
-      // 購入復元テストコード
-    });
-    
-    testWidgets('Premium subscription activation flow', (tester) async {
-      // Premium購入テストコード
-    });
-  });
-}
-```
-
-## テスト実行チェックリスト
-
-### 事前準備
-- [ ] サンドボックステスターアカウント作成完了
-- [ ] テストデバイスにサンドボックスアカウント設定完了
-- [ ] App Store Connect / Google Play Console商品設定完了
-- [ ] アプリにテスト用ビルド設定適用完了
-
-### iOS テスト
-- [ ] 月額プラン購入テスト完了
-- [ ] 年額プラン購入テスト完了
-- [ ] Premium購入テスト完了
-- [ ] 購入復元テスト完了
-- [ ] 購入キャンセルテスト完了
-- [ ] ネットワークエラーテスト完了
-
-### Android テスト  
-- [ ] 月額プラン購入テスト完了
-- [ ] 年額プラン購入テスト完了
-- [ ] Premium購入テスト完了
-- [ ] 購入復元テスト完了
-- [ ] 購入キャンセルテスト完了
-- [ ] Google Play エラーテスト完了
-
-### クロスプラットフォームテスト
-- [ ] 同一アカウントでの異なるプラットフォーム間購入状態同期
-- [ ] データ整合性確認
-- [ ] パフォーマンステスト
-
-## トラブルシューティング
-
-### よくある問題と解決策
-
-**商品が表示されない**:
-```
-原因: 商品がApp Store Connect/Google Play Consoleで承認されていない
-解決: コンソールで商品のステータスを確認し、必要に応じて再提出
-```
-
-**サンドボックス購入が失敗する**:
-```
-原因: テストアカウントの設定が正しくない
-解決: デバイスの設定でサンドボックスアカウントが正しく設定されているか確認
-```
-
-**購入復元が機能しない**:
-```
-原因: トランザクションIDの管理に問題がある
-解決: ローカルストレージのトランザクション情報を確認
-```
-
-**Premium購入が完了しない**:
-```
-原因: 商品設定やテストアカウント設定に問題がある
-解決: App Store Connect/Google Play Consoleの商品設定とテストアカウントを確認
-```
-
-## ログ・デバッグ情報
-
-### テスト用ログ設定
-
-```dart
-// デバッグログの有効化
-debugPrint('Purchase flow started');
-debugPrint('Product ID: $productId');
-debugPrint('Purchase result: $result');
-```
-
-### 重要な確認ポイント
-
-1. **購入状態の変更タイミング**
-2. **トランザクションIDの保存**
-3. **有効期限の計算**
-4. **エラーハンドリングの動作**
-5. **UI状態の更新**
-
-## 本番環境への移行
-
-### 移行前チェックリスト
-
-- [ ] 全サンドボックステスト完了
-- [ ] 商品設定の本番環境用更新
-- [ ] テスト用コードの削除
-- [ ] 本番用証明書・署名の設定
-- [ ] レビュー提出用素材準備
-
-### 本番環境設定変更
-
-```dart
-// 本番用設定に変更
-static const bool isSandboxEnvironment = false;
-static const bool enableTestLogging = false;
-```
-
-## 参考資料
-
-- [App Store Connect ヘルプ - サンドボックステスト](https://help.apple.com/app-store-connect/#/dev8b997bee1)
-- [Google Play Console - ライセンステスト](https://developer.android.com/google/play/billing/test)
-- [Flutter in_app_purchase plugin](https://pub.dev/packages/in_app_purchase)
-- [iOS StoreKit Testing](https://developer.apple.com/documentation/storekittesting)
+**更新**: 2024年12月現在  
+**対象バージョン**: Smart Photo Diary v1.0以降
