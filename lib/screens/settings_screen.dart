@@ -632,38 +632,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildStorageItem(String label, String size, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 4,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Text(
-            label,
-            style: AppTypography.bodyMedium.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-        Text(size, style: AppTypography.labelLarge.copyWith(color: color)),
-      ],
-    );
-  }
-
   Widget _buildBackupAction() {
     return MicroInteractions.bounceOnTap(
       onTap: () {
