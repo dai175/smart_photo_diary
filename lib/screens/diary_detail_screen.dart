@@ -407,7 +407,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 3,
+                      flex: 1,
                       child: SecondaryButton(
                         onPressed: () {
                           setState(() {
@@ -417,12 +417,11 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           });
                         },
                         text: 'キャンセル',
-                        icon: Icons.close_rounded,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
-                      flex: 4,
+                      flex: 1,
                       child: PrimaryButton(
                         onPressed: _updateDiary,
                         text: '保存',
