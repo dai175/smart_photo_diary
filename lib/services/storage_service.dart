@@ -229,7 +229,11 @@ class StorageService {
         final entryData = entries[i];
 
         try {
-          final result = await _importSingleEntry(entryData, diaryService, existingEntries);
+          final result = await _importSingleEntry(
+            entryData,
+            diaryService,
+            existingEntries,
+          );
           if (result.isSuccess) {
             final importStatus = result.value;
             if (importStatus == 'imported') {
@@ -318,17 +322,12 @@ class StorageService {
         return const Success('skipped');
       }
 
-      // 日付+タイトル+内容ベースの重複チェック（より厳密に）
-      final contentDuplicate = existingEntries.any(
-        (entry) =>
-            entry.date.year == date.year &&
-            entry.date.month == date.month &&
-            entry.date.day == date.day &&
-            entry.title == entryData['title'] &&
-            entry.content == entryData['content'], // 内容も一致する場合のみ重複とする
+      // 時刻ベースの重複チェック（同じ時刻の場合は重複とする）
+      final timeDuplicate = existingEntries.any(
+        (entry) => entry.date.isAtSameMomentAs(date),
       );
 
-      if (contentDuplicate) {
+      if (timeDuplicate) {
         return const Success('skipped');
       }
 
