@@ -50,7 +50,16 @@ web/build/
 # --- IDE/エディタ関連 ---
 .vscode/
 .idea/
-.claude/
+
+# --- Claude Code設定 ---
+# チーム共通設定は管理対象
+!.claude/
+.claude/*local*
+.claude/memory/
+.claude/cache/
+.claude/logs/
+.claude/settings.json
+.claude/session/
 
 # --- 一時ファイル・その他 ---
 *.iml

@@ -1,0 +1,12 @@
+{
+  "pre-commit": {
+    "command": "fvm dart format --set-exit-if-changed . && fvm flutter analyze --fatal-warnings",
+    "description": "Code format check and Flutter analyze with fatal warnings",
+    "enabled": true
+  },
+  "pre-push": {
+    "command": "fvm flutter test --no-sound-null-safety",
+    "description": "Run tests before push",
+    "enabled": true
+  }
+}
