@@ -38,10 +38,9 @@ class StorageService {
       return StorageInfo(
         totalSize: diaryDataSize,
         diaryDataSize: diaryDataSize,
-        imageDataSize: 0, // 画像データはアプリで管理していない
       );
     } catch (e) {
-      return StorageInfo(totalSize: 0, diaryDataSize: 0, imageDataSize: 0);
+      return StorageInfo(totalSize: 0, diaryDataSize: 0);
     }
   }
 
@@ -384,17 +383,11 @@ class StorageService {
 class StorageInfo {
   final int totalSize;
   final int diaryDataSize;
-  final int imageDataSize;
 
-  StorageInfo({
-    required this.totalSize,
-    required this.diaryDataSize,
-    required this.imageDataSize,
-  });
+  StorageInfo({required this.totalSize, required this.diaryDataSize});
 
   String get formattedTotalSize => _formatBytes(totalSize);
   String get formattedDiaryDataSize => _formatBytes(diaryDataSize);
-  String get formattedImageDataSize => _formatBytes(imageDataSize);
 
   String _formatBytes(int bytes) {
     if (bytes < 1024) return '${bytes}B';
