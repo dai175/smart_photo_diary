@@ -181,7 +181,7 @@ class HomeContentWidget extends StatelessWidget {
               Text(
                 photoController.selectedCount > 0
                     ? '${photoController.selectedCount}枚の写真で日記を作成'
-                    : '写真を選択してください',
+                    : '写真を選んでください',
                 style: AppTypography.labelLarge,
               ),
             ],
