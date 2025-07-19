@@ -23,7 +23,6 @@ class StorageService {
     try {
       final appDir = await getApplicationDocumentsDirectory();
       int diaryDataSize = 0;
-      int imageDataSize = 0;
 
       // Hiveデータベースのサイズを計算
       final hiveDir = Directory(appDir.path);
@@ -36,26 +35,10 @@ class StorageService {
         }
       }
 
-      // 画像データのサイズを推定（実際の画像ファイルは photo_manager で管理）
-      final diaryService = await DiaryService.getInstance();
-      final entries = await diaryService.getSortedDiaryEntries();
-
-      // 写真枚数を計算
-      int totalPhotoCount = 0;
-      for (final entry in entries) {
-        totalPhotoCount += entry.photoIds.length;
-      }
-
-      // 画像データのサイズを推定（写真1枚あたり平均1.5MB）
-      imageDataSize = totalPhotoCount * (1.5 * 1024 * 1024).round();
-
-      // 合計は日記データと画像データの合計
-      final totalSize = diaryDataSize + imageDataSize;
-
       return StorageInfo(
-        totalSize: totalSize,
+        totalSize: diaryDataSize,
         diaryDataSize: diaryDataSize,
-        imageDataSize: imageDataSize,
+        imageDataSize: 0, // 画像データはアプリで管理していない
       );
     } catch (e) {
       return StorageInfo(totalSize: 0, diaryDataSize: 0, imageDataSize: 0);

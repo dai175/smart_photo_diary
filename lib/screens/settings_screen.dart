@@ -32,7 +32,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   SubscriptionInfo? _subscriptionInfo;
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
-  bool _storageExpanded = false;
 
   @override
   void initState() {
@@ -591,93 +590,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
 
-    return Column(
-      children: [
-        MicroInteractions.bounceOnTap(
-          onTap: () {
-            setState(() {
-              _storageExpanded = !_storageExpanded;
-            });
-          },
-          child: Container(
-            padding: AppSpacing.cardPadding,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.info.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                  ),
-                  child: Icon(
-                    AppIcons.settingsStorage,
-                    color: AppColors.info,
-                    size: AppSpacing.iconSm,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '使用容量',
-                        style: AppTypography.titleMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        '合計: ${_storageInfo!.formattedTotalSize}',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                AnimatedRotation(
-                  turns: _storageExpanded ? 0.25 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    AppIcons.actionForward,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    size: AppSpacing.iconSm,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (_storageExpanded) ...[
+    return Container(
+      padding: AppSpacing.cardPadding,
+      child: Row(
+        children: [
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            padding: AppSpacing.cardPadding,
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: AppSpacing.cardRadius,
+              color: AppColors.info.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
+            child: Icon(
+              AppIcons.settingsStorage,
+              color: AppColors.info,
+              size: AppSpacing.iconSm,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildStorageItem(
-                  '日記データ',
-                  _storageInfo!.formattedDiaryDataSize,
-                  AppColors.primary,
+                Text(
+                  'アプリデータ',
+                  style: AppTypography.titleMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                _buildStorageItem(
-                  '画像データ（推定）',
-                  _storageInfo!.formattedImageDataSize,
-                  AppColors.success,
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  '使用容量: ${_storageInfo!.formattedTotalSize}',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
         ],
-      ],
+      ),
     );
   }
 
