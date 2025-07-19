@@ -72,20 +72,22 @@ class UpgradeDialogUtils {
       context: parentContext,
       builder: (dialogContext) => CustomDialog(
         title: 'Premiumプラン',
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '月間100回までAI日記生成が可能になり、全20種類のライティングプロンプトをご利用いただけます。',
-              style: AppTypography.bodyMedium,
-              textAlign: TextAlign.left,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ...plans.map(
-              (plan) => _buildPlanOption(dialogContext, parentContext, plan),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '月間100回のAI生成＋全20種類のライティングプロンプトが利用できます。',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              ...plans.map(
+                (plan) => _buildPlanOption(dialogContext, parentContext, plan),
+              ),
+            ],
+          ),
         ),
         actions: [
           CustomDialogAction(

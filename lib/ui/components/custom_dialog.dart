@@ -336,90 +336,58 @@ class PresetDialogs {
       icon: Icons.block_rounded,
       iconColor: AppColors.warning,
       title: 'AI生成の制限に達しました',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '現在のプラン（$planName）では、月間$limit回までAI日記生成をご利用いただけます。',
-            style: AppTypography.bodyMedium.copyWith(height: 1.5),
-            textAlign: TextAlign.left,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Builder(
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.errorContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-                border: Border.all(
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$planNameプランの月間$limit回制限に達しました。',
+              style: AppTypography.bodyMedium.copyWith(height: 1.4),
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Builder(
+              builder: (context) => Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.error.withValues(alpha: 0.3),
-                  width: 1,
+                  ).colorScheme.errorContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppSpacing.xs),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('リセット日:', style: AppTypography.labelSmall),
+                    Text(
+                      '${nextResetDate.month}月${nextResetDate.day}日',
+                      style: AppTypography.labelSmall.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '今月の残り回数:',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        '$remaining回',
-                        style: AppTypography.labelLarge.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: remaining > 0
-                              ? AppColors.success
-                              : AppColors.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'リセット日:',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        '${nextResetDate.month}月${nextResetDate.day}日',
-                        style: AppTypography.labelMedium.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Premiumプランで月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用可能',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
               ),
+              textAlign: TextAlign.left,
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Premiumプランにアップグレードすると、月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで生成できます。',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.left,
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         CustomDialogAction(text: '後で', onPressed: onDismiss),
         CustomDialogAction(
-          text: 'Premiumにアップグレード',
+          text: 'アップグレード',
           isPrimary: true,
           icon: Icons.auto_awesome_rounded,
           onPressed: onUpgrade,
@@ -445,147 +413,149 @@ class PresetDialogs {
       icon: Icons.analytics_rounded,
       iconColor: isNearLimit ? AppColors.warning : AppColors.info,
       title: 'AI生成の使用状況',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '現在のプラン: $planName',
-            style: AppTypography.titleMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.left,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // 使用量プログレスバー
-          Builder(
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '現在のプラン: $planName',
+              style: AppTypography.titleMedium.copyWith(
+                fontWeight: FontWeight.w600,
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '使用量',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        '$used / $limit回',
-                        style: AppTypography.labelLarge.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: AppSpacing.lg),
 
-                  // プログレスバー
-                  Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
+            // 使用量プログレスバー
+            Builder(
+              builder: (context) => Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppSpacing.sm),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '使用量',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          '$used / $limit回',
+                          style: AppTypography.labelLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FractionallySizedBox(
-                        widthFactor: usagePercentage.clamp(0.0, 1.0),
-                        child: Container(
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: isNearLimit
-                                ? AppColors.warning
-                                : AppColors.primary,
-                            borderRadius: BorderRadius.circular(4),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // プログレスバー
+                    Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: FractionallySizedBox(
+                          widthFactor: usagePercentage.clamp(0.0, 1.0),
+                          child: Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: isNearLimit
+                                  ? AppColors.warning
+                                  : AppColors.primary,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '残り回数:',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '残り回数:',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '$remaining回',
-                        style: AppTypography.labelLarge.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: remaining > 0
-                              ? AppColors.success
-                              : AppColors.error,
+                        Text(
+                          '$remaining回',
+                          style: AppTypography.labelLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: remaining > 0
+                                ? AppColors.success
+                                : AppColors.error,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
 
-          // リセット情報
-          Builder(
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppSpacing.xs),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.refresh_rounded,
-                    size: AppSpacing.iconSm,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    '${nextResetDate.month}月${nextResetDate.day}日にリセット',
-                    style: AppTypography.labelSmall.copyWith(
+            // リセット情報
+            Builder(
+              builder: (context) => Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppSpacing.xs),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.refresh_rounded,
+                      size: AppSpacing.iconSm,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${nextResetDate.month}月${nextResetDate.day}日にリセット',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // アップグレード案内（Basic プランの場合）
-          if (planName == 'Basic') ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Premiumプランなら月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用できます',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
+            // アップグレード案内（Basic プランの場合）
+            if (planName == 'Basic') ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Premiumプランなら月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用できます',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.left,
               ),
-              textAlign: TextAlign.left,
-            ),
+            ],
           ],
-        ],
+        ),
       ),
       actions: [
         CustomDialogAction(text: '閉じる', onPressed: onDismiss),

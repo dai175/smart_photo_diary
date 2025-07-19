@@ -41,16 +41,20 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoGrid(BuildContext context) {
+    final crossAxisCount = _getCrossAxisCount(context);
+    final gridHeight = _getGridHeight(context, crossAxisCount);
+
     if (controller.isLoading) {
       return SizedBox(
-        height: AppConstants.photoGridHeight,
+        height: gridHeight,
         child: GridView.builder(
           shrinkWrap: true,
           physics: const AlwaysScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: AppConstants.photoGridCrossAxisCount,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
             crossAxisSpacing: AppSpacing.sm,
             mainAxisSpacing: AppSpacing.sm,
+            childAspectRatio: 1.0,
           ),
           itemCount: 6,
           itemBuilder: (context, index) => const CardShimmer(),
@@ -59,20 +63,14 @@ class PhotoGridWidget extends StatelessWidget {
     }
 
     if (!controller.hasPermission) {
-      return SizedBox(
-        height: AppConstants.photoGridHeight,
-        child: _buildPermissionRequest(),
-      );
+      return SizedBox(height: gridHeight, child: _buildPermissionRequest());
     }
 
     if (controller.photoAssets.isEmpty) {
-      return SizedBox(
-        height: AppConstants.photoGridHeight,
-        child: _buildEmptyState(context),
-      );
+      return SizedBox(height: gridHeight, child: _buildEmptyState(context));
     }
 
-    return SizedBox(height: AppConstants.photoGridHeight, child: _buildGrid());
+    return SizedBox(height: gridHeight, child: _buildGrid(context));
   }
 
   Widget _buildPermissionRequest() {
@@ -141,18 +139,40 @@ class PhotoGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const AlwaysScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: AppConstants.photoGridCrossAxisCount,
-        crossAxisSpacing: AppSpacing.sm,
-        mainAxisSpacing: AppSpacing.sm,
+  Widget _buildGrid(BuildContext context) {
+    final crossAxisCount = _getCrossAxisCount(context);
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: _getMaxGridWidth(context)),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const AlwaysScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
+            childAspectRatio: 1.0,
+          ),
+          itemCount: controller.photoAssets.length,
+          itemBuilder: (context, index) => _buildPhotoItem(index),
+        ),
       ),
-      itemCount: controller.photoAssets.length,
-      itemBuilder: (context, index) => _buildPhotoItem(index),
     );
+  }
+
+  /// グリッドの最大幅を計算（縦向きと同じ配置を維持）
+  double _getMaxGridWidth(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final orientation = MediaQuery.of(context).orientation;
+
+    // 横向き時は縦向きの幅に相当するサイズに制限
+    if (orientation == Orientation.landscape) {
+      return screenHeight * 0.9; // 少し余裕を持たせる
+    }
+
+    return screenWidth;
   }
 
   Widget _buildPhotoItem(int index) {
@@ -367,5 +387,37 @@ class PhotoGridWidget extends StatelessWidget {
     }
 
     controller.toggleSelect(index);
+  }
+
+  /// 画面の向きに関係なく3カラムで統一
+  int _getCrossAxisCount(BuildContext context) {
+    // 縦向き・横向き問わず3カラムで統一して、写真の位置関係を保持
+    return AppConstants.photoGridCrossAxisCount;
+  }
+
+  /// グリッドの高さを動的に計算（縦横で同じアイテムサイズを維持）
+  double _getGridHeight(BuildContext context, int crossAxisCount) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final orientation = MediaQuery.of(context).orientation;
+
+    final padding =
+        AppSpacing.screenPadding.horizontal + AppSpacing.cardPadding.horizontal;
+
+    // 縦向きと横向きで同じアイテムサイズを維持するために、
+    // より小さい画面幅を基準にアイテムサイズを計算
+    final baseWidth = orientation == Orientation.landscape
+        ? screenHeight // 横向き時は縦向きの幅（screenHeight）を基準に
+        : screenWidth; // 縦向き時はそのまま
+
+    final availableWidth = baseWidth - padding;
+    final spacing = AppSpacing.sm * (crossAxisCount - 1);
+    final itemWidth = (availableWidth - spacing) / crossAxisCount;
+
+    // アイテムのアスペクト比を1:1として、2行分の高さを計算
+    final rowHeight = itemWidth;
+    final totalHeight = rowHeight * 2 + AppSpacing.sm; // 2行 + 間のスペース
+
+    return totalHeight;
   }
 }

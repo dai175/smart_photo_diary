@@ -93,13 +93,22 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(context),
-            if (_isLoading) _buildLoadingContent() else _buildContent(context),
-            _buildFooter(context),
-          ],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(context),
+              Flexible(
+                child: _isLoading
+                    ? _buildLoadingContent()
+                    : _buildContent(context),
+              ),
+              _buildFooter(context),
+            ],
+          ),
         ),
       ),
     );
@@ -143,11 +152,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   }
 
   Widget _buildContent(BuildContext context) {
-    return Expanded(
-      child: _availablePrompts.isEmpty
-          ? _buildEmptyState()
-          : _buildPromptList(),
-    );
+    return _availablePrompts.isEmpty ? _buildEmptyState() : _buildPromptList();
   }
 
   Widget _buildPromptList() {
