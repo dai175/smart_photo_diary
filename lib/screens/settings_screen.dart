@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
 import '../models/subscription_info.dart';
+import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
@@ -10,6 +11,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
@@ -152,7 +154,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         _buildDivider(),
                         SlideInWidget(
-                          delay: const Duration(milliseconds: 150),
+                          delay: const Duration(milliseconds: 140),
+                          child: _buildRestoreAction(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 155),
                           child: _buildOptimizeAction(),
                         ),
                         _buildDivider(),
@@ -760,6 +767,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildRestoreAction() {
+    return MicroInteractions.bounceOnTap(
+      onTap: () {
+        MicroInteractions.hapticTap();
+        _restoreData();
+      },
+      child: Container(
+        padding: AppSpacing.cardPadding,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              child: Icon(
+                AppIcons.settingsImport,
+                color: AppColors.primary,
+                size: AppSpacing.iconSm,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'リストア',
+                    style: AppTypography.titleMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    'ファイルから日記データを復元',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              AppIcons.actionForward,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconSm,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildOptimizeAction() {
     return MicroInteractions.bounceOnTap(
       onTap: () {
@@ -978,6 +1039,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _restoreData() async {
+    try {
+      _showLoadingDialog('インポート中...');
+
+      final result = await StorageService.getInstance().importData();
+
+      if (mounted) {
+        Navigator.pop(context); // ローディングダイアログを閉じる
+
+        result.fold(
+          (importResult) {
+            _showImportResultDialog(importResult);
+          },
+          (error) {
+            _showErrorDialog(error.message);
+          },
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        _showErrorDialog('エラーが発生しました: $e');
+      }
+    }
+  }
+
   Future<void> _optimizeDatabase() async {
     try {
       _showLoadingDialog('最適化中...');
@@ -1012,5 +1099,204 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showErrorDialog(String message) {
     DialogUtils.showErrorDialog(context, message);
+  }
+
+  void _showImportResultDialog(ImportResult result) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        icon: result.isCompletelySuccessful
+            ? Icons.check_circle_rounded
+            : result.hasErrors
+            ? Icons.warning_rounded
+            : Icons.info_rounded,
+        iconColor: result.isCompletelySuccessful
+            ? AppColors.success
+            : result.hasErrors
+            ? AppColors.warning
+            : AppColors.info,
+        title: 'インポート結果',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                result.summaryMessage,
+                style: AppTypography.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // 統計情報
+              if (result.totalEntries > 0) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildResultItem('総エントリー数', '${result.totalEntries}件'),
+                      _buildResultItem('成功', '${result.successfulImports}件'),
+                      if (result.skippedEntries > 0)
+                        _buildResultItem('スキップ', '${result.skippedEntries}件'),
+                      if (result.failedImports > 0)
+                        _buildResultItem('失敗', '${result.failedImports}件'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+
+              // 警告セクション
+              if (result.hasWarnings) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.xs),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: AppSpacing.iconSm,
+                            color: AppColors.warning,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            '警告',
+                            style: AppTypography.labelMedium.copyWith(
+                              color: AppColors.warning,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      ...result.warnings.map(
+                        (warning) => Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xxs),
+                          child: Text(
+                            '• $warning',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+
+              // エラーセクション
+              if (result.hasErrors) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.xs),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.error_rounded,
+                            size: AppSpacing.iconSm,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            'エラー',
+                            style: AppTypography.labelMedium.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      ...result.errors
+                          .take(3)
+                          .map(
+                            (error) => Padding(
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.xxs,
+                              ),
+                              child: Text(
+                                '• $error',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                      if (result.errors.length > 3)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xxs),
+                          child: Text(
+                            '...他${result.errors.length - 3}件のエラー',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          CustomDialogAction(
+            text: 'OK',
+            isPrimary: true,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            value,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

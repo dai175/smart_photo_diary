@@ -59,6 +59,7 @@ class AppIcons {
   static const IconData settingsTheme = Icons.palette_rounded; // テーマをパレットで表現
   static const IconData settingsStorage = Icons.storage_rounded;
   static const IconData settingsExport = Icons.file_download_rounded;
+  static const IconData settingsImport = Icons.file_upload_rounded;
   static const IconData settingsCleanup = Icons.cleaning_services_rounded;
   static const IconData settingsInfo = Icons.info_rounded; // シンプルな情報アイコン
   static const IconData settingsRefresh = Icons.refresh_rounded;
