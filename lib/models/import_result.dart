@@ -22,7 +22,7 @@ class ImportResult {
 
   String get summaryMessage {
     if (isCompletelySuccessful) {
-      return '$successfulImports件の日記を正常にインポートしました';
+      return '$successfulImports件の日記を正常に復元しました';
     }
 
     final parts = <String>[];

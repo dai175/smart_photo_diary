@@ -1018,7 +1018,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _exportData() async {
     try {
-      _showLoadingDialog('エクスポート中...');
+      _showLoadingDialog('バックアップ中...');
 
       final filePath = await StorageService.getInstance().exportData();
 
@@ -1026,9 +1026,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.pop(context); // ローディングダイアログを閉じる
 
         if (filePath != null) {
-          _showSuccessDialog('エクスポート完了', 'バックアップファイルが正常に保存されました');
+          _showSuccessDialog('バックアップ完了', 'バックアップファイルが正常に保存されました');
         } else {
-          _showErrorDialog('エクスポートがキャンセルされたか、失敗しました');
+          _showErrorDialog('バックアップがキャンセルされたか、失敗しました');
         }
       }
     } catch (e) {
@@ -1041,7 +1041,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _restoreData() async {
     try {
-      _showLoadingDialog('インポート中...');
+      _showLoadingDialog('リストア中...');
 
       final result = await StorageService.getInstance().importData();
 
@@ -1115,7 +1115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             : result.hasErrors
             ? AppColors.warning
             : AppColors.info,
-        title: 'インポート結果',
+        title: 'リストア結果',
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

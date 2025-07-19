@@ -33,7 +33,7 @@ void main() {
         expect(result.hasErrors, false);
         expect(result.hasWarnings, false);
         expect(result.isCompletelySuccessful, true);
-        expect(result.summaryMessage, '5件の日記を正常にインポートしました');
+        expect(result.summaryMessage, '5件の日記を正常に復元しました');
       });
     });
 
@@ -50,7 +50,7 @@ void main() {
 
         expect(result.hasErrors, false);
         expect(result.hasWarnings, false);
-        expect(result.summaryMessage, '0件の日記を正常にインポートしました');
+        expect(result.summaryMessage, '0件の日記を正常に復元しました');
       });
 
       test('should handle multiple errors and warnings', () {
