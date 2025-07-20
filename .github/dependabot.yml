@@ -1,0 +1,41 @@
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "dart"
+    ignore:
+      - dependency-name: "in_app_purchase"
+        versions: ["4.x", "5.x"]
+    groups:
+      production:
+        patterns:
+          - "hive*"
+          - "photo_manager"
+          - "permission_handler"
+          - "http"
+          - "connectivity_plus"
+          - "intl"
+          - "flutter_dotenv"
+          - "uuid"
+          - "table_calendar"
+          - "shared_preferences"
+          - "package_info_plus"
+          - "file_picker"
+          - "google_fonts"
+          - "path_provider"
+      development:
+        patterns:
+          - "flutter_test"
+          - "flutter_lints"
+          - "mocktail"
+          - "build_runner"
+          - "hive_generator"
+          - "flutter_launcher_icons"
