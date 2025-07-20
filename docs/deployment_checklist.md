@@ -60,7 +60,7 @@
 - [ ] Large photo processing performance tested
 - [ ] Memory usage within reasonable limits
 - [ ] Battery consumption optimized
-- [ ] Network requests properly handled (offline fallbacks)
+- [ ] Network requests properly handled (error handling and user feedback)
 
 ### Documentation
 - [ ] CLAUDE.md updated with latest implementation

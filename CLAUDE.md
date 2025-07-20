@@ -87,7 +87,7 @@ The app follows a service-oriented architecture with singleton services using la
 
 - **`DiaryService`**: Central data management with Hive database operations, depends on `AiService` for tag generation
 - **`PhotoService`**: Photo access and permissions via `photo_manager` plugin
-- **`AiService`**: AI diary generation with Google Gemini API and comprehensive offline fallbacks
+- **`AiService`**: AI diary generation with Google Gemini API and strict error handling to prevent unauthorized credit consumption
 - **`ImageClassifierService`**: On-device ML inference capabilities
 - **`SettingsService`**: App configuration stored in SharedPreferences with Result<T> pattern for write operations
 - **`StorageService`**: File system operations and data export functionality
@@ -122,7 +122,7 @@ The app implements a **Result<T> pattern** for functional error handling:
 ### AI/ML Architecture
 - **Cloud AI**: Google Gemini 2.5 Flash integration for advanced diary generation
 - **Environment Management**: EnvironmentConfig provides robust API key management with validation
-- **Offline fallbacks**: Complete offline mode diary generation capabilities
+- **Credit Protection**: AI credits are only consumed when generation is successful
 
 ### Monetization Architecture
 - **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts)
@@ -136,7 +136,7 @@ The app implements a **Result<T> pattern** for functional error handling:
 - `hive` + `hive_flutter`: Local NoSQL database for diary storage
 - `photo_manager`: Photo access and management with permission handling
 - `permission_handler`: Platform-specific permissions for photo access
-- `connectivity_plus`: Network status checking for AI service fallbacks
+- `connectivity_plus`: Network status checking for AI service availability
 - `shared_preferences`: Simple key-value storage for app settings
 - `file_picker`: User-selectable file export destinations
 - `http`: Network requests for AI API integration
@@ -177,6 +177,10 @@ The app implements a **Result<T> pattern** for functional error handling:
    - CI/CD: GitHub Secrets with dynamic `.env` creation
    - Production: Environment variables or secure platform storage
    - NEVER bundle API keys in APK/IPA files
+
+3. **AI Generation and Credit Protection**:
+   - AI credits are only consumed on successful generation
+   - Failed generations must throw exceptions, not return fallback content
 
 ### Git Operations and Development Rules (CRITICAL)
 **IMPORTANT**: Always follow these rules when working with Git and making code changes:
@@ -287,6 +291,8 @@ FORCE_PLAN=premium
 - Service architecture with dependency injection
 - Enhanced UI/UX with unified design system
 - Complete CI/CD pipeline implementation
+- **AI Credit Protection**: Fixed unauthorized credit consumption on generation failures
+- **Code Optimization**: Removed unnecessary offline fallback logic
 - Production-ready Smart Photo Diary v1.0 with all core features
 
 ## CI/CD and Deployment
