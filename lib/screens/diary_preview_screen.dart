@@ -246,7 +246,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '日記の生成中にエラーが発生しました。時間を空けてもう一度お試しください。';
+        _errorMessage = '日記の生成中にエラーが発生しました。\n時間を空けてもう一度お試しください。';
       });
     }
   }
@@ -303,7 +303,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = '日記の保存に失敗しました。時間を空けてもう一度お試しください。';
+          _errorMessage = '日記の保存に失敗しました。\n時間を空けてもう一度お試しください。';
         });
 
         scaffoldMessenger.showSnackBar(
@@ -856,7 +856,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             _errorMessage,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                             style: AppTypography.bodyMedium.copyWith(
                               color: Theme.of(context).colorScheme.error,
                             ),
