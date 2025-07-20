@@ -29,7 +29,7 @@ class AiService implements AiServiceInterface {
   @override
   Future<bool> isOnline() async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult != ConnectivityResult.none;
+    return connectivityResult.any((result) => result != ConnectivityResult.none);
   }
 
   @override
