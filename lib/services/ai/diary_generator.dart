@@ -3,18 +3,13 @@ import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'ai_service_interface.dart';
 import 'gemini_api_client.dart';
-import 'offline_fallback_service.dart';
 
 /// 日記生成を担当するサービス
 class DiaryGenerator {
   final GeminiApiClient _apiClient;
-  final OfflineFallbackService _offlineService;
 
-  DiaryGenerator({
-    GeminiApiClient? apiClient,
-    OfflineFallbackService? offlineService,
-  }) : _apiClient = apiClient ?? GeminiApiClient(),
-       _offlineService = offlineService ?? OfflineFallbackService();
+  DiaryGenerator({GeminiApiClient? apiClient})
+    : _apiClient = apiClient ?? GeminiApiClient();
 
   /// プロンプト種別を分析
   String _analyzePromptType(String? prompt) {
@@ -92,7 +87,7 @@ class DiaryGenerator {
     required bool isOnline,
   }) async {
     if (!isOnline) {
-      return _offlineService.generateDiary([], date, location, null);
+      throw Exception('オフライン状態では日記を生成できません');
     }
 
     try {
@@ -189,15 +184,7 @@ $emphasis、個人的で心に響く日記を作成してください。'''
     }
 
     if (!isOnline) {
-      final List<DateTime> offlineTimesList = imagesWithTimes
-          .map<DateTime>((e) => e.time)
-          .toList();
-      return _offlineService.generateDiary(
-        [],
-        imagesWithTimes.first.time,
-        location,
-        offlineTimesList,
-      );
+      throw Exception('オフライン状態では日記を生成できません');
     }
 
     try {
@@ -235,15 +222,8 @@ $emphasis、個人的で心に響く日記を作成してください。'''
       );
     } catch (e) {
       debugPrint('複数画像日記生成エラー: $e');
-      final List<DateTime> fallbackTimesList = imagesWithTimes
-          .map<DateTime>((e) => e.time)
-          .toList();
-      return _offlineService.generateDiary(
-        [],
-        imagesWithTimes.first.time,
-        location,
-        fallbackTimesList,
-      );
+      // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
+      rethrow;
     }
   }
 
@@ -390,12 +370,7 @@ ${location != null ? '場所: $location\n' : ''}
     String? customPrompt,
   ) async {
     if (photoAnalyses.isEmpty) {
-      return _offlineService.generateDiary(
-        [],
-        DateTime.now(),
-        location,
-        photoTimes,
-      );
+      throw Exception('写真の分析結果がありません');
     }
 
     // プロンプト種別分析と最適化パラメータ取得
