@@ -246,7 +246,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '日記の生成中にエラーが発生しました: $e';
+        _errorMessage = '日記の生成中にエラーが発生しました。時間を空けてもう一度お試しください。';
       });
     }
   }
@@ -303,7 +303,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = '日記の保存に失敗しました: $e';
+          _errorMessage = '日記の保存に失敗しました。時間を空けてもう一度お試しください。';
         });
 
         scaffoldMessenger.showSnackBar(

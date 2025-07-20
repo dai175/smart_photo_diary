@@ -167,10 +167,12 @@ $emphasis、個人的で心に響く日記を作成してください。'''
         }
       }
 
-      return _offlineService.generateDiary([], date, location, null);
+      // APIエラーの場合は例外を再スロー
+      throw Exception('AI日記生成に失敗しました: APIレスポンスが不正です');
     } catch (e) {
       debugPrint('画像ベース日記生成エラー: $e');
-      return _offlineService.generateDiary([], date, location, null);
+      // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
+      rethrow;
     }
   }
 
@@ -477,20 +479,12 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
         }
       }
 
-      return _offlineService.generateDiary(
-        [],
-        photoTimes.first,
-        location,
-        photoTimes,
-      );
+      // APIエラーの場合は例外を再スロー
+      throw Exception('AI日記生成に失敗しました: APIレスポンスが不正です');
     } catch (e) {
       debugPrint('統合日記生成エラー: $e');
-      return _offlineService.generateDiary(
-        [],
-        photoTimes.first,
-        location,
-        photoTimes,
-      );
+      // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
+      rethrow;
     }
   }
 }

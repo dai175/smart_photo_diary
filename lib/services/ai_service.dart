@@ -29,7 +29,9 @@ class AiService implements AiServiceInterface {
   @override
   Future<bool> isOnline() async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult.any((result) => result != ConnectivityResult.none);
+    return connectivityResult.any(
+      (result) => result != ConnectivityResult.none,
+    );
   }
 
   @override
@@ -86,6 +88,7 @@ class AiService implements AiServiceInterface {
       );
 
       // Phase 1.7.1.3: 使用量カウント統合
+      // AI生成が成功した場合のみクレジットを消費する
       if (_subscriptionService != null) {
         await _subscriptionService.incrementAiUsage();
       }
@@ -154,6 +157,7 @@ class AiService implements AiServiceInterface {
       );
 
       // Phase 1.7.1.3: 使用量カウント統合
+      // AI生成が成功した場合のみクレジットを消費する
       if (_subscriptionService != null) {
         await _subscriptionService.incrementAiUsage();
       }
