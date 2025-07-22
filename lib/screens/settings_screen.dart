@@ -655,7 +655,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '日記データをファイルに保存',
+                    '日記をファイルに保存',
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -709,7 +709,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'ファイルから日記データを復元',
+                    'ファイルから日記を復元',
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -756,14 +756,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '容量の整理',
+                    'データ削除',
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '不要なデータを削除してアプリを軽くする',
+                    '不要なデータを削除',
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
