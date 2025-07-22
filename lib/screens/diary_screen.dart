@@ -163,7 +163,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ),
               IconButton(
                 icon: Icon(
-                  AppIcons.searchStart,
+                  AppIcons.search,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: _controller.startSearch,
