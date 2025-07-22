@@ -156,13 +156,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
           : [
               IconButton(
                 icon: Icon(
-                  AppIcons.homeRefresh,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                onPressed: _controller.refresh,
-              ),
-              IconButton(
-                icon: Icon(
                   AppIcons.search,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),

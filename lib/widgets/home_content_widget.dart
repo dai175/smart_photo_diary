@@ -77,18 +77,6 @@ class HomeContentWidget extends StatelessWidget {
             tooltip: 'AI生成の使用状況',
           ),
         ),
-        if (onRefresh != null)
-          Container(
-            margin: const EdgeInsets.only(right: AppSpacing.sm),
-            child: IconButton(
-              icon: Icon(
-                Icons.refresh_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: () => onRefresh!(),
-              tooltip: 'ホーム画面を更新',
-            ),
-          ),
       ],
     );
   }

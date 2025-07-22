@@ -382,19 +382,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: AppSpacing.sm),
-            child: IconButton(
-              icon: Icon(
-                AppIcons.homeRefresh,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: _loadStatistics,
-              tooltip: '統計を更新',
-            ),
-          ),
-        ],
       ),
       body: _isLoading
           ? Center(
