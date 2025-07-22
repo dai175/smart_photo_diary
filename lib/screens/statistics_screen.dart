@@ -378,6 +378,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('統計'),
+        centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
