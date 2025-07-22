@@ -61,6 +61,7 @@ class HomeContentWidget extends StatelessWidget {
       title: Text(
         '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
       ),
+      centerTitle: false,
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
