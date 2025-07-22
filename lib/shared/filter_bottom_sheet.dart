@@ -281,7 +281,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               text: _currentFilter.isActive
                   ? 'フィルタを適用 (${_currentFilter.activeFilterCount})'
                   : 'フィルタを適用',
-              icon: Icons.filter_alt,
+              icon: Icons.filter_list,
             ),
           ),
         ],

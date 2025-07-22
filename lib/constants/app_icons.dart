@@ -36,7 +36,7 @@ class AppIcons {
   static const IconData searchStart = Icons.travel_explore_rounded; // 探索のイメージ
   static const IconData searchClear = Icons.clear_rounded;
   static const IconData filter = Icons.filter_list_rounded;
-  static const IconData filterActive = Icons.filter_alt_rounded; // アクティブフィルタ
+  static const IconData filterActive = Icons.filter_list; // アクティブフィルタ（塗りつぶし版）
   static const IconData filterClear = Icons.filter_alt_off_rounded;
 
   /// 写真選択関連アイコン
