@@ -6,6 +6,7 @@ import '../models/subscription_info.dart';
 import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../utils/url_launcher_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -409,6 +410,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   _buildUpgradeButton(),
                 ],
+                // Apple審査要件：サブスクリプション法的情報
+                const SizedBox(height: AppSpacing.lg),
+                _buildSubscriptionLegalInfo(),
               ],
             ),
           ),
@@ -1203,6 +1207,207 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Apple審査要件：サブスクリプション法的情報セクション
+  Widget _buildSubscriptionLegalInfo() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // サブスクリプション詳細情報
+          Text(
+            'サブスクリプション情報',
+            style: AppTypography.titleSmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Premium Monthly詳細
+          _buildSubscriptionPlanDetail(
+            'プレミアム（月額）',
+            '¥300/月',
+            '月100回のAI日記生成、20個のライティングプロンプト',
+          ),
+          const SizedBox(height: AppSpacing.xs),
+
+          // Premium Yearly詳細
+          _buildSubscriptionPlanDetail(
+            'プレミアム（年額）',
+            '¥2,800/年',
+            '月100回のAI日記生成、20個のライティングプロンプト',
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // 自動更新に関する注意事項
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: AppColors.info.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppSpacing.xs),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: AppSpacing.iconXs,
+                      color: AppColors.info,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '自動更新について',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: AppColors.info,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '• サブスクリプションは自動的に更新されます\n'
+                  '• 料金は更新日の24時間前にiTunesアカウントに請求されます\n'
+                  '• 更新の24時間前までにキャンセルしない限り自動更新されます\n'
+                  '• iOS設定 > Apple ID > サブスクリプションで管理できます',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // 法的文書へのリンク
+          Row(
+            children: [
+              Expanded(
+                child: _buildLegalLinkButton(
+                  'プライバシーポリシー',
+                  Icons.privacy_tip_outlined,
+                  () => UrlLauncherUtils.launchPrivacyPolicy(context: context),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _buildLegalLinkButton(
+                  '利用規約',
+                  Icons.article_outlined,
+                  () => UrlLauncherUtils.launchTermsOfUse(context: context),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// サブスクリプションプラン詳細表示
+  Widget _buildSubscriptionPlanDetail(
+    String title,
+    String price,
+    String features,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          margin: const EdgeInsets.only(top: 6),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    price,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                features,
+                style: AppTypography.bodySmall.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 法的文書リンクボタン
+  Widget _buildLegalLinkButton(
+    String text,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: AppSpacing.iconXs, color: AppColors.primary),
+      label: Text(
+        text,
+        style: AppTypography.labelSmall.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        side: BorderSide(
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.xs),
+        ),
       ),
     );
   }
