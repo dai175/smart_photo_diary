@@ -8,7 +8,7 @@ import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
-import '../ui/components/animated_button.dart';
+import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
@@ -154,219 +154,125 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.cardRadiusLarge,
-          ),
-          child: Container(
-            padding: AppSpacing.dialogPadding,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: AppSpacing.cardRadiusLarge,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ヘッダー
-                Container(
-                  padding: AppSpacing.cardPadding,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: AppSpacing.cardRadius,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          AppIcons.calendarToday,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          size: AppSpacing.iconSm,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '日記の日付',
-                              style: AppTypography.withColor(
-                                AppTypography.labelMedium,
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                            Text(
-                              DateFormat('yyyy年MM月dd日').format(selectedDay),
-                              style: AppTypography.withColor(
-                                AppTypography.titleLarge,
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
+        return CustomDialog(
+          icon: AppIcons.calendarToday,
+          iconColor: Theme.of(context).colorScheme.primary,
+          title: DateFormat('yyyy年MM月dd日').format(selectedDay),
+          message: '${diaries.length}件の日記があります',
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 300, maxWidth: 400),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: diaries.length,
+              itemBuilder: (context, index) {
+                final diary = diaries[index];
+                final title = diary.title.isNotEmpty ? diary.title : '無題';
 
-                // 日記件数
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: Text(
-                    '${diaries.length}件の日記があります',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                return SlideInWidget(
+                  delay: Duration(milliseconds: 100 * index),
+                  child: Container(
+                    margin: EdgeInsets.only(
+                      bottom: index < diaries.length - 1 ? AppSpacing.sm : 0,
                     ),
-                  ),
-                ),
-
-                // 日記リスト
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxHeight: 300,
-                    maxWidth: 400,
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: diaries.length,
-                    itemBuilder: (context, index) {
-                      final diary = diaries[index];
-                      final title = diary.title.isNotEmpty ? diary.title : '無題';
-
-                      return SlideInWidget(
-                        delay: Duration(milliseconds: 100 * index),
-                        child: Container(
-                          margin: EdgeInsets.only(
-                            bottom: index < diaries.length - 1
-                                ? AppSpacing.sm
-                                : 0,
+                    child: CustomCard(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          DiaryDetailScreen(diaryId: diary.id).customRoute(),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${index + 1}',
+                                style: AppTypography.labelLarge.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondary,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: CustomCard(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              Navigator.push(
-                                context,
-                                DiaryDetailScreen(
-                                  diaryId: diary.id,
-                                ).customRoute(),
-                              );
-                            },
-                            child: Row(
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text(
+                                  title,
+                                  style: AppTypography.titleMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  diary.content,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
                                 Container(
-                                  width: 40,
-                                  height: 40,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.sm,
+                                    vertical: AppSpacing.xxs,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Theme.of(
                                       context,
-                                    ).colorScheme.secondary,
-                                    shape: BoxShape.circle,
+                                    ).colorScheme.primaryContainer,
+                                    borderRadius: AppSpacing.chipRadius,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      '${index + 1}',
-                                      style: AppTypography.labelLarge.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSecondary,
-                                      ),
+                                  child: Text(
+                                    '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        title,
-                                        style: AppTypography.titleMedium
-                                            .copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                            ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: AppSpacing.xs),
-                                      Text(
-                                        diary.content,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.bodySmall.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppSpacing.xs),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: AppSpacing.sm,
-                                          vertical: AppSpacing.xxs,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primaryContainer,
-                                          borderRadius: AppSpacing.chipRadius,
-                                        ),
-                                        child: Text(
-                                          '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
-                                          style: AppTypography.labelSmall
-                                              .copyWith(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurfaceVariant,
-                                              ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                  size: AppSpacing.iconSm,
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // アクションボタン
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SecondaryButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      text: 'キャンセル',
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            size: AppSpacing.iconSm,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                );
+              },
             ),
           ),
+          actions: [
+            CustomDialogAction(
+              text: '閉じる',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
         );
       },
     );
