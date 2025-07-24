@@ -5,7 +5,7 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/animated_button.dart';
+import '../ui/components/custom_dialog.dart';
 import '../utils/prompt_category_utils.dart';
 
 /// プロンプト選択モーダル
@@ -77,70 +77,50 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-        margin: AppSpacing.screenPadding,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.lg),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(context),
-              Flexible(
-                child: _isLoading
-                    ? _buildLoadingContent()
-                    : _buildContent(context),
-              ),
-              _buildFooter(context),
-            ],
-          ),
-        ),
+    return CustomDialog(
+      title: 'プロンプト選択',
+      icon: Icons.edit_note_rounded,
+      iconColor: Theme.of(context).colorScheme.primary,
+      maxWidth: 420,
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 400),
+        child: _isLoading ? _buildLoadingContent() : _buildContent(context),
       ),
+      actions: _buildActions(),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: AppSpacing.cardPadding,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(AppSpacing.lg),
-          topRight: Radius.circular(AppSpacing.lg),
-        ),
+  List<CustomDialogAction> _buildActions() {
+    return [
+      CustomDialogAction(
+        text: 'キャンセル',
+        onPressed: () => Navigator.of(context).pop(),
       ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.edit_note_rounded,
-            color: Theme.of(context).colorScheme.primary,
-            size: AppSpacing.iconMd,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text('プロンプト選択', style: AppTypography.titleMedium)),
-          CircularIconButton(
-            icon: Icons.close,
-            onPressed: () => Navigator.of(context).pop(),
-            size: 40.0,
-          ),
-        ],
+      CustomDialogAction(
+        text: _isRandomSelected
+            ? 'ランダムで作成'
+            : (_selectedPrompt != null ? 'プロンプトで作成' : 'そのまま作成'),
+        icon: _isRandomSelected
+            ? Icons.shuffle_rounded
+            : (_selectedPrompt != null
+                  ? Icons.auto_awesome_rounded
+                  : Icons.photo_camera_rounded),
+        isPrimary: true,
+        onPressed: () {
+          if (_isRandomSelected) {
+            // ランダム選択の場合は実際のプロンプトを取得して渡す
+            final randomPrompt = _promptService.getRandomPrompt(
+              isPremium: _isPremium,
+            );
+            widget.onPromptSelected(randomPrompt);
+          } else if (_selectedPrompt != null) {
+            widget.onPromptSelected(_selectedPrompt);
+          } else {
+            widget.onSkip();
+          }
+        },
       ),
-    );
+    ];
   }
 
   Widget _buildLoadingContent() {
@@ -458,36 +438,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context) {
-    return Container(
-      padding: AppSpacing.cardPadding,
-      child: PrimaryButton(
-        onPressed: () {
-          if (_isRandomSelected) {
-            // ランダム選択の場合は実際のプロンプトを取得して渡す
-            final randomPrompt = _promptService.getRandomPrompt(
-              isPremium: _isPremium,
-            );
-            widget.onPromptSelected(randomPrompt);
-          } else if (_selectedPrompt != null) {
-            widget.onPromptSelected(_selectedPrompt);
-          } else {
-            widget.onSkip();
-          }
-        },
-        width: double.infinity,
-        text: _isRandomSelected
-            ? 'ランダムプロンプトで作成'
-            : (_selectedPrompt != null ? 'このプロンプトで作成' : 'プロンプトなしで作成'),
-        icon: _isRandomSelected
-            ? Icons.shuffle_rounded
-            : (_selectedPrompt != null
-                  ? Icons.auto_awesome_rounded
-                  : Icons.photo_camera_rounded),
       ),
     );
   }
