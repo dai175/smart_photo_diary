@@ -167,42 +167,4 @@ class DialogUtils {
       },
     );
   }
-
-  /// リスト選択ダイアログを表示
-  ///
-  /// [context]: BuildContext
-  /// [title]: ダイアログのタイトル
-  /// [items]: 表示するアイテムのリスト
-  /// [itemBuilder]: アイテムを構築するビルダー関数
-  static Future<void> showListSelectionDialog<T>(
-    BuildContext context,
-    String title,
-    List<T> items,
-    Widget Function(BuildContext, T, int) itemBuilder,
-  ) {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return CustomDialog(
-          title: title,
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                return itemBuilder(context, items[index], index);
-              },
-            ),
-          ),
-          actions: [
-            CustomDialogAction(
-              text: 'キャンセル',
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
