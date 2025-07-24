@@ -1,5 +1,6 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
+import '../ui/components/custom_dialog.dart';
 
 /// URL起動用のユーティリティクラス
 class UrlLauncherUtils {
@@ -45,18 +46,16 @@ class UrlLauncherUtils {
   }
 
   /// エラーダイアログを表示
-  static void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
+  static Future<void> _showErrorDialog(
+    BuildContext context,
+    String message,
+  ) async {
+    await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('エラー'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
+      builder: (context) => PresetDialogs.error(
+        title: 'リンクエラー',
+        message: message,
+        onConfirm: () => Navigator.of(context).pop(),
       ),
     );
   }
