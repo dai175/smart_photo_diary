@@ -635,7 +635,7 @@ class PlanFactory {
   - [x] 主要ファイルでのenum参照修正 ✅
   - [x] ライブラリファイルでのenum参照修正 ✅
   - [x] テストファイルでのenum参照修正 ✅
-  - [ ] SubscriptionInfoクラス削除
+  - [x] SubscriptionInfoクラス削除
   - [ ] 旧インターフェースメソッド削除
 
 **Phase 7-E-2完了 (2025-07-26)**: ライブラリファイルでのenum参照修正完了
