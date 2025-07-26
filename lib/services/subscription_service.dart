@@ -415,69 +415,6 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  /// 指定されたプランでサブスクリプション状態を作成（enumベース・互換性のため維持）
-  Future<Result<SubscriptionStatus>> createStatus(SubscriptionPlan plan) async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final now = DateTime.now();
-      SubscriptionStatus newStatus;
-
-      // Planクラスを使用して判定
-      final planClass = PlanFactory.createPlan(plan.id);
-
-      if (planClass is BasicPlan) {
-        // Basicプランの場合
-        newStatus = SubscriptionStatus(
-          planId: plan.id,
-          isActive: true,
-          startDate: now,
-          expiryDate: null, // Basicプランは期限なし
-          autoRenewal: false,
-          monthlyUsageCount: 0,
-          lastResetDate: now,
-          transactionId: null,
-          lastPurchaseDate: null,
-        );
-      } else {
-        // Premiumプランの場合
-        final expiryDate = plan.id == SubscriptionConstants.premiumYearlyPlanId
-            ? now.add(
-                Duration(days: SubscriptionConstants.subscriptionYearDays),
-              )
-            : now.add(
-                Duration(days: SubscriptionConstants.subscriptionMonthDays),
-              );
-
-        newStatus = SubscriptionStatus(
-          planId: plan.id,
-          isActive: true,
-          startDate: now,
-          expiryDate: expiryDate,
-          autoRenewal: true,
-          monthlyUsageCount: 0,
-          lastResetDate: now,
-          transactionId: null,
-          lastPurchaseDate: now,
-        );
-      }
-
-      await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
-      debugPrint(
-        'SubscriptionService: Created new status for plan: ${plan.id}',
-      );
-      return Success(newStatus);
-    } catch (e) {
-      debugPrint('SubscriptionService: Error creating status - $e');
-      return Failure(
-        ServiceException('Failed to create status', details: e.toString()),
-      );
-    }
-  }
 
   /// サブスクリプション状態を削除（テスト用）
   @visibleForTesting
@@ -1540,7 +1477,7 @@ class SubscriptionService implements ISubscriptionService {
       );
 
       // 商品IDからプランを特定
-      final plan = InAppPurchaseConfig.getSubscriptionPlan(
+      final plan = InAppPurchaseConfig.getPlanFromProductId(
         purchaseDetails.productID,
       );
 
@@ -1585,7 +1522,7 @@ class SubscriptionService implements ISubscriptionService {
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
         purchaseDate: DateTime.now(),
-        plan: InAppPurchaseConfig.getSubscriptionPlan(
+        plan: InAppPurchaseConfig.getPlanFromProductId(
           purchaseDetails.productID,
         ),
       );
@@ -1649,7 +1586,7 @@ class SubscriptionService implements ISubscriptionService {
   /// 購入からサブスクリプション状態を更新
   Future<void> _updateSubscriptionFromPurchase(
     PurchaseDetails purchaseDetails,
-    SubscriptionPlan plan,
+    Plan plan,
   ) async {
     try {
       final now = DateTime.now();
@@ -1738,7 +1675,7 @@ class SubscriptionService implements ISubscriptionService {
 
       // ProductDetailsをPurchaseProductに変換
       final products = response.productDetails.map((productDetail) {
-        final plan = InAppPurchaseConfig.getSubscriptionPlan(productDetail.id);
+        final plan = InAppPurchaseConfig.getPlanFromProductId(productDetail.id);
 
         return PurchaseProduct(
           id: productDetail.id,

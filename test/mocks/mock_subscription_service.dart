@@ -268,11 +268,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return const Success(null);
   }
 
-  @override
-  Result<List<SubscriptionPlan>> getAvailablePlans() {
-    // @deprecated - enum削除により無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getAvailablePlansClass() instead.');
-  }
 
   @override
   Result<List<Plan>> getAvailablePlansClass() {
@@ -283,17 +278,7 @@ class MockSubscriptionService implements ISubscriptionService {
     ]);
   }
 
-  @override
-  Result<SubscriptionPlan> getPlan(String planId) {
-    // @deprecated - enum削除により無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getPlanClass() instead.');
-  }
 
-  @override
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    // @deprecated - enum削除により無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getCurrentPlanClass() instead.');
-  }
 
   @override
   Result<Plan> getPlanClass(String planId) {
@@ -551,11 +536,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return Success(_availableProducts);
   }
 
-  @override
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    // @deprecated - enum削除により無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use purchasePlanClass() instead.');
-  }
 
   @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
@@ -584,11 +564,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return Success(isValid);
   }
 
-  @override
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    // @deprecated - enum削除により無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use changePlanClass() instead.');
-  }
 
   @override
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {

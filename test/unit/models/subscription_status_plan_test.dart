@@ -86,7 +86,7 @@ void main() {
     });
 
     group('Plan互換性', () {
-      test('SubscriptionPlan enumとPlanクラスの整合性', () {
+      test('Planクラスの整合性', () {
         final statuses = [
           SubscriptionStatus(planId: 'basic', isActive: true),
           SubscriptionStatus(planId: 'premium_monthly', isActive: true),

@@ -64,7 +64,7 @@ void main() {
         final startDate = DateTime.now();
         final status = SubscriptionStatus.createPremium(
           startDate: startDate,
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
           transactionId: 'test_transaction',
         );
 
@@ -90,13 +90,13 @@ void main() {
         final basicStatus = SubscriptionStatus(planId: 'basic');
         final premiumStatus = SubscriptionStatus(planId: 'premium_yearly');
 
-        expect(basicStatus.currentPlan, equals(SubscriptionPlan.basic));
+        expect(basicStatus.planId, equals('basic'));
         // Planクラスを使用して検証
         final premiumPlan = PlanFactory.createPlan(premiumStatus.planId);
         expect(premiumPlan, isA<PremiumYearlyPlan>());
         expect(
           premiumStatus.currentPlan,
-          equals(SubscriptionPlan.premiumYearly),
+          equals('premium_yearly'),
         ); // 互換性のため保持
       });
 
@@ -112,7 +112,7 @@ void main() {
         final status = SubscriptionStatus.createDefault();
         await testBox.add(status);
 
-        status.changePlan(SubscriptionPlan.premiumYearly);
+        status.changePlan('premium_yearly');
 
         expect(status.planId, equals('premium_yearly'));
         // Planクラスを使用して検証
@@ -128,11 +128,11 @@ void main() {
       test('BasicプランへのchangePlanで期限がクリアされる', () async {
         final status = SubscriptionStatus.createPremium(
           startDate: DateTime.now(),
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
         );
         await testBox.add(status);
 
-        status.changePlan(SubscriptionPlan.basic);
+        status.changePlan('basic');
 
         expect(status.planId, equals('basic'));
         // Planクラスを使用して検証
@@ -244,7 +244,7 @@ void main() {
       test('Premiumプランでは制限が異なる', () async {
         final status = SubscriptionStatus.createPremium(
           startDate: DateTime.now(),
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
         );
         await testBox.add(status);
 
@@ -269,7 +269,7 @@ void main() {
       test('有効なPremiumプランではプレミアム機能にアクセスできる', () {
         final status = SubscriptionStatus.createPremium(
           startDate: DateTime.now(),
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
         );
 
         expect(status.canAccessPremiumFeatures, isTrue);
@@ -297,7 +297,7 @@ void main() {
       test('サブスクリプションをキャンセルできる', () async {
         final status = SubscriptionStatus.createPremium(
           startDate: DateTime.now(),
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
         );
         await testBox.add(status);
 
@@ -315,7 +315,7 @@ void main() {
       test('将来の日付でキャンセル予約できる', () async {
         final status = SubscriptionStatus.createPremium(
           startDate: DateTime.now(),
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
         );
         await testBox.add(status);
 
@@ -330,7 +330,7 @@ void main() {
       test('サブスクリプションを復元できる', () async {
         final status = SubscriptionStatus.createPremium(
           startDate: DateTime.now(),
-          plan: SubscriptionPlan.premiumYearly,
+          planId: 'premium_yearly',
         );
         await testBox.add(status);
 
@@ -413,7 +413,7 @@ void main() {
           expect(status.planId, equals('basic'));
           expect(status.expiryDate, isNull);
 
-          status.changePlan(SubscriptionPlan.premiumMonthly);
+          status.changePlan('premium_monthly');
 
           expect(status.planId, equals('premium_monthly'));
           expect(status.isActive, isTrue);
@@ -435,7 +435,7 @@ void main() {
           final status = SubscriptionStatus.createDefault();
           await testBox.add(status);
 
-          status.changePlan(SubscriptionPlan.premiumYearly);
+          status.changePlan('premium_yearly');
 
           expect(status.planId, equals('premium_yearly'));
           expect(status.isActive, isTrue);
@@ -455,12 +455,12 @@ void main() {
         test('Premium月額から年額への変更', () async {
           final status = SubscriptionStatus.createPremium(
             startDate: DateTime.now(),
-            plan: SubscriptionPlan.premiumMonthly,
+            planId: 'premium_monthly',
           );
           await testBox.add(status);
 
           final originalStartDate = status.startDate;
-          status.changePlan(SubscriptionPlan.premiumYearly);
+          status.changePlan('premium_yearly');
 
           expect(status.planId, equals('premium_yearly'));
           expect(status.isActive, isTrue);
@@ -480,11 +480,11 @@ void main() {
         test('PremiumからBasicへのダウングレード', () async {
           final status = SubscriptionStatus.createPremium(
             startDate: DateTime.now(),
-            plan: SubscriptionPlan.premiumYearly,
+            planId: 'premium_yearly',
           );
           await testBox.add(status);
 
-          status.changePlan(SubscriptionPlan.basic);
+          status.changePlan('basic');
 
           expect(status.planId, equals('basic'));
           expect(status.isActive, isTrue);
@@ -498,7 +498,7 @@ void main() {
 
           final futureDate = DateTime.now().add(const Duration(days: 7));
           status.changePlan(
-            SubscriptionPlan.premiumYearly,
+            'premium_yearly',
             effectiveDate: futureDate,
           );
 
@@ -511,7 +511,7 @@ void main() {
         test('有効なPremiumプランの検証', () {
           final status = SubscriptionStatus.createPremium(
             startDate: DateTime.now().subtract(const Duration(days: 30)),
-            plan: SubscriptionPlan.premiumYearly,
+            planId: 'premium_yearly',
           );
 
           expect(status.isValid, isTrue);
@@ -572,7 +572,7 @@ void main() {
         test('Premiumプランで制限に達した場合', () async {
           final status = SubscriptionStatus.createPremium(
             startDate: DateTime.now(),
-            plan: SubscriptionPlan.premiumYearly,
+            planId: 'premium_yearly',
           );
           await testBox.add(status);
 
@@ -611,7 +611,7 @@ void main() {
           expect(status.remainingGenerations, equals(10));
 
           // 2. Premiumに変更
-          status.changePlan(SubscriptionPlan.premiumYearly);
+          status.changePlan('premium_yearly');
           expect(status.planId, equals('premium_yearly'));
           expect(status.remainingGenerations, equals(100));
           expect(status.canAccessPremiumFeatures, isTrue);
@@ -631,7 +631,7 @@ void main() {
 
           // 5. 復元
           status.restore();
-          status.changePlan(SubscriptionPlan.premiumYearly); // プランを戻す
+          status.changePlan('premium_yearly'); // プランを戻す
           expect(status.isActive, isTrue);
           expect(status.canAccessPremiumFeatures, isTrue);
           expect(status.monthlyUsageCount, equals(25)); // 使用量は保持
@@ -665,7 +665,7 @@ void main() {
           // SubscriptionStatusの内部ロジックをテスト（enumベースのフォールバック）
           expect(
             status.currentPlan,
-            equals(SubscriptionPlan.basic),
+            equals('basic'),
           ); // 互換性のため保持
           expect(status.planId, equals('invalid_plan')); // planId自体は保持される
           expect(status.remainingGenerations, equals(10));
@@ -675,7 +675,7 @@ void main() {
           expect(
             () => SubscriptionStatus.createPremium(
               startDate: DateTime.now(),
-              plan: SubscriptionPlan.basic, // Basicプランは不正
+              planId: 'basic', // Basicプランは不正
             ),
             throwsArgumentError,
           );

@@ -114,15 +114,6 @@ class SettingsService {
     }, context: 'SettingsService.getSubscriptionInfoV2');
   }
 
-  /// Phase 1.8.1.1: 包括的なサブスクリプション情報を取得（互換性レイヤー）
-  /// 設定画面表示で使用する統合されたサブスクリプション情報を返します
-  /// 注意: SubscriptionInfoクラス削除により無効化
-  /*
-  @Deprecated('Use getSubscriptionInfoV2() instead')
-  Future<Result<SubscriptionInfo>> getSubscriptionInfo() async {
-    throw UnsupportedError('SubscriptionInfo class has been removed. Use getSubscriptionInfoV2() instead.');
-  }
-  */
 
   /// 現在のプラン情報を取得（メイン実装 - Planクラス版）
   Future<Result<Plan>> getCurrentPlanClass() async {
@@ -140,16 +131,6 @@ class SettingsService {
     }, context: 'SettingsService.getCurrentPlanClass');
   }
 
-  /// Phase 1.8.1.2: 現在のプラン情報を取得（互換性レイヤー）
-  /// 注意: SubscriptionPlan enumが削除されたため、このメソッドは無効化されました
-  /// 代わりにgetCurrentPlanClass()を使用してください
-  /*
-  @Deprecated('Use getCurrentPlanClass() instead')
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    // SubscriptionPlan enumが削除されたため、このメソッドは無効
-    // getCurrentPlanClass()を使用してください
-  }
-  */
 
   /// プラン期限情報を取得（メイン実装 - V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
@@ -292,13 +273,4 @@ class SettingsService {
     }, context: 'SettingsService.getAvailablePlansV2');
   }
 
-  /// Phase 1.8.1.4: プラン比較情報を取得（互換性レイヤー）
-  /// 注意: SubscriptionPlan enumが削除されたため、このメソッドは無効化されました
-  /*
-  @Deprecated('Use getAvailablePlansV2() instead')
-  Future<Result<List<SubscriptionPlan>>> getAvailablePlans() async {
-    // SubscriptionPlan enumが削除されたため、このメソッドは無効
-    // getAvailablePlansV2()を使用してください
-  }
-  */
 }

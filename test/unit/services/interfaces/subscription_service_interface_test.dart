@@ -46,11 +46,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return const Success(null);
   }
 
-  @override
-  Result<List<SubscriptionPlan>> getAvailablePlans() {
-    // SubscriptionPlan enumは削除されたため無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getAvailablePlansClass() instead.');
-  }
 
   @override
   Result<List<Plan>> getAvailablePlansClass() {
@@ -61,17 +56,7 @@ class MockSubscriptionService implements ISubscriptionService {
     ]);
   }
 
-  @override
-  Result<SubscriptionPlan> getPlan(String planId) {
-    // SubscriptionPlan enumは削除されたため無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getPlanClass() instead.');
-  }
 
-  @override
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    // SubscriptionPlan enumは削除されたため無効化
-    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getCurrentPlanClass() instead.');
-  }
 
   @override
   Future<Result<bool>> canUseAiGeneration() async {
@@ -152,18 +137,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return Success(products);
   }
 
-  @override
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    final result = PurchaseResult(
-      status: PurchaseStatus.purchased,
-      productId: plan.productId,
-      transactionId:
-          'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
-      purchaseDate: DateTime.now(),
-      plan: plan,
-    );
-    return Success(result);
-  }
 
   @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
@@ -175,16 +148,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return const Success(true);
   }
 
-  @override
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    _planId = newPlan.planId;
-    if (newPlan.isPremium) {
-      _expiryDate = DateTime.now().add(const Duration(days: 365));
-    } else {
-      _expiryDate = null;
-    }
-    return const Success(null);
-  }
 
   @override
   Future<Result<void>> cancelSubscription() async {
@@ -251,7 +214,7 @@ class MockSubscriptionService implements ISubscriptionService {
       transactionId:
           'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
       purchaseDate: DateTime.now(),
-      plan: SubscriptionPlan.fromId(plan.id),
+      plan: plan,
     );
     return Success(result);
   }
@@ -450,7 +413,7 @@ void main() {
         expect(result.isSuccess, isTrue);
         expect(result.value, isA<List<PurchaseProduct>>());
         expect(result.value.length, equals(1));
-        expect(result.value.first.plan, equals(SubscriptionPlan.premiumYearly));
+        expect(result.value.first.plan.id, equals('premium_yearly'));
       });
 
       test('プランを購入できる', () async {
@@ -557,7 +520,7 @@ void main() {
         expect(product.price, equals('¥100'));
         expect(product.priceAmount, equals(100.0));
         expect(product.currencyCode, equals('JPY'));
-        expect(product.plan, equals(SubscriptionPlan.premiumYearly));
+        expect(product.plan.id, equals('premium_yearly'));
       });
 
       test('PurchaseResultが正しく作成される', () {
@@ -571,7 +534,7 @@ void main() {
         expect(result.status, equals(PurchaseStatus.purchased));
         expect(result.productId, equals('test_product'));
         expect(result.transactionId, equals('test_transaction'));
-        expect(result.plan, equals(SubscriptionPlan.premiumYearly));
+        expect(result.plan.id, equals('premium_yearly'));
         expect(result.isSuccess, isTrue);
         expect(result.isCancelled, isFalse);
         expect(result.isError, isFalse);
