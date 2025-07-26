@@ -1492,7 +1492,6 @@ class SubscriptionService implements ISubscriptionService {
       );
       _purchaseStreamController.add(result);
 
-      _isPurchasing = false;
     } catch (e) {
       _log(
         'Error handling purchase completion',
@@ -1548,7 +1547,6 @@ class SubscriptionService implements ISubscriptionService {
     );
     _purchaseStreamController.add(result);
 
-    _isPurchasing = false;
   }
 
   /// 購入キャンセル処理
@@ -1564,7 +1562,6 @@ class SubscriptionService implements ISubscriptionService {
     );
     _purchaseStreamController.add(result);
 
-    _isPurchasing = false;
   }
 
   /// 購入保留処理
@@ -1717,11 +1714,6 @@ class SubscriptionService implements ISubscriptionService {
         return Failure(ServiceException('In-App Purchase not available'));
       }
 
-      if (_isPurchasing) {
-        return Failure(
-          ServiceException('Another purchase is already in progress'),
-        );
-      }
 
       // Planクラスを使用して判定
       final planClass = PlanFactory.createPlan(plan.id);
@@ -1730,7 +1722,6 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       _log('Starting purchase for plan: ${plan.id}', level: LogLevel.info);
-      _isPurchasing = true;
 
       // 商品IDを取得
       final productId = InAppPurchaseConfig.getProductId(plan);
@@ -1742,8 +1733,7 @@ class SubscriptionService implements ISubscriptionService {
         });
 
         if (productResponse.error != null) {
-          _isPurchasing = false;
-          return Failure(
+              return Failure(
             ServiceException(
               'Failed to get product details for purchase',
               details: productResponse.error.toString(),
@@ -1752,8 +1742,7 @@ class SubscriptionService implements ISubscriptionService {
         }
 
         if (productResponse.productDetails.isEmpty) {
-          _isPurchasing = false;
-          return Failure(ServiceException('Product not found: $productId'));
+              return Failure(ServiceException('Product not found: $productId'));
         }
 
         final productDetails = productResponse.productDetails.first;
@@ -1769,8 +1758,7 @@ class SubscriptionService implements ISubscriptionService {
         );
 
         if (!success) {
-          _isPurchasing = false;
-          return Failure(ServiceException('Failed to initiate purchase'));
+              return Failure(ServiceException('Failed to initiate purchase'));
         }
 
         _log('Purchase initiated successfully', level: LogLevel.info);
@@ -1785,8 +1773,7 @@ class SubscriptionService implements ISubscriptionService {
           ),
         );
       } catch (storeError) {
-        _isPurchasing = false;
-
+  
         // シミュレーター環境でのストアエラー処理
         if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
           final errorString = storeError.toString();
@@ -1816,7 +1803,6 @@ class SubscriptionService implements ISubscriptionService {
         rethrow;
       }
     } catch (e) {
-      _isPurchasing = false;
       return _handleError(e, 'purchasePlan', details: plan.id);
     }
   }
