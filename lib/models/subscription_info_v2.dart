@@ -1,7 +1,7 @@
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
 import 'subscription_status.dart';
-import 'subscription_info.dart';
+// import 'subscription_info.dart'; // 削除されたファイル
 
 /// 使用統計情報（新Planクラス版）
 class UsageStatisticsV2 {
@@ -70,6 +70,46 @@ class UsageStatisticsV2 {
       return DateTime(currentYear, currentMonth + 1, 1);
     }
   }
+}
+
+/// 自動更新情報（V2版）
+class AutoRenewalInfoV2 {
+  /// 自動更新が有効かどうか
+  final bool isAutoRenewalEnabled;
+
+  /// 自動更新の説明テキスト
+  final String autoRenewalDescription;
+
+  /// 自動更新管理のディープリンクURL（プラットフォーム別）
+  final String? managementUrl;
+
+  const AutoRenewalInfoV2({
+    required this.isAutoRenewalEnabled,
+    required this.autoRenewalDescription,
+    required this.managementUrl,
+  });
+
+  /// ファクトリコンストラクタ
+  factory AutoRenewalInfoV2.fromStatus(SubscriptionStatus status) {
+    String description;
+    String? managementUrl;
+
+    if (status.autoRenewal) {
+      description = '自動更新が有効です。期限前に自動的に更新されます。';
+      managementUrl = 'https://apps.apple.com/account/subscriptions';
+    } else {
+      description = '自動更新は無効です。期限切れ前に手動で更新してください。';
+    }
+
+    return AutoRenewalInfoV2(
+      isAutoRenewalEnabled: status.autoRenewal,
+      autoRenewalDescription: description,
+      managementUrl: managementUrl,
+    );
+  }
+
+  /// 自動更新状態の表示テキスト
+  String get statusDisplay => isAutoRenewalEnabled ? '有効' : '無効';
 }
 
 /// プラン期限情報（新Planクラス版）
@@ -148,7 +188,7 @@ class SubscriptionInfoV2 {
   final PlanPeriodInfoV2 periodInfo;
 
   /// 自動更新情報
-  final AutoRenewalInfo autoRenewalInfo;
+  final AutoRenewalInfoV2 autoRenewalInfo;
 
   const SubscriptionInfoV2({
     required this.currentPlan,
@@ -167,7 +207,7 @@ class SubscriptionInfoV2 {
       status: status,
       usageStats: UsageStatisticsV2.fromStatusAndPlan(status, plan),
       periodInfo: PlanPeriodInfoV2.fromStatusAndPlan(status, plan),
-      autoRenewalInfo: AutoRenewalInfo.fromStatus(status),
+      autoRenewalInfo: AutoRenewalInfoV2.fromStatus(status),
     );
   }
 
@@ -181,11 +221,13 @@ class SubscriptionInfoV2 {
       status: status,
       usageStats: UsageStatisticsV2.fromStatusAndPlan(status, plan),
       periodInfo: PlanPeriodInfoV2.fromStatusAndPlan(status, plan),
-      autoRenewalInfo: AutoRenewalInfo.fromStatus(status),
+      autoRenewalInfo: AutoRenewalInfoV2.fromStatus(status),
     );
   }
 
   /// 既存のSubscriptionInfoから変換
+  /// @deprecated SubscriptionInfoクラス削除により無効化
+  /*
   factory SubscriptionInfoV2.fromLegacy(SubscriptionInfo info) {
     final plan = PlanFactory.createPlan(info.currentPlan.id);
 
@@ -197,6 +239,7 @@ class SubscriptionInfoV2 {
       autoRenewalInfo: info.autoRenewalInfo,
     );
   }
+  */
 
   /// 現在のプランがアクティブかどうか
   bool get isActive => status.isActive;
@@ -285,7 +328,7 @@ class SubscriptionInfoV2 {
   }
 
   /// 設定画面表示用の統合データ
-  SubscriptionDisplayData get displayData => SubscriptionDisplayData(
+  SubscriptionDisplayDataV2 get displayData => SubscriptionDisplayDataV2(
     planName: planDisplayName,
     planStatus: planStatusDisplay,
     usageText: usageStats.usageDisplay,
@@ -313,4 +356,37 @@ class SubscriptionInfoV2 {
     // 必要に応じて後で再実装
   }
   */
+}
+
+/// 設定画面表示用のデータクラス（V2版）
+class SubscriptionDisplayDataV2 {
+  final String planName;
+  final String? planStatus;
+  final String usageText;
+  final String remainingText;
+  final String resetDateText;
+  final String? expiryText;
+  final String autoRenewalText;
+  final String? warningMessage;
+  final String? recommendationMessage;
+  final bool showUpgradeButton;
+  final double usageProgressValue;
+  final bool isNearLimit;
+  final bool isExpiryNear;
+
+  const SubscriptionDisplayDataV2({
+    required this.planName,
+    required this.planStatus,
+    required this.usageText,
+    required this.remainingText,
+    required this.resetDateText,
+    required this.expiryText,
+    required this.autoRenewalText,
+    required this.warningMessage,
+    required this.recommendationMessage,
+    required this.showUpgradeButton,
+    required this.usageProgressValue,
+    required this.isNearLimit,
+    required this.isExpiryNear,
+  });
 }

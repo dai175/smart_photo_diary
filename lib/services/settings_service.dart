@@ -177,30 +177,13 @@ class SettingsService {
 
   /// Phase 1.8.1.2: プラン期限情報を取得（互換性レイヤー）
   @Deprecated('Use getPlanPeriodInfoV2() instead')
-  Future<Result<PlanPeriodInfo>> getPlanPeriodInfo() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      if (_subscriptionService == null) {
-        throw StateError('SubscriptionService is not initialized');
-      }
-
-      final statusResult = await _subscriptionService!.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-
-      final planResult = await _subscriptionService!.getCurrentPlanClass();
-      if (planResult.isFailure) {
-        throw planResult.error;
-      }
-
-      // V2版のメソッドを使用することを推奨
-      // このメソッドは非推奨のため、getPlanPeriodInfoV2()を使用
-      throw UnsupportedError('This method is deprecated. Use getPlanPeriodInfoV2() instead.');
-    }, context: 'SettingsService.getPlanPeriodInfo');
+  Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfo() async {
+    // リダイレクトしてV2版を使用
+    return getPlanPeriodInfoV2();
   }
 
   /// Phase 1.8.1.3: 自動更新状態情報を取得
-  Future<Result<AutoRenewalInfo>> getAutoRenewalInfo() async {
+  Future<Result<AutoRenewalInfoV2>> getAutoRenewalInfo() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
         throw StateError('SubscriptionService is not initialized');
@@ -211,7 +194,7 @@ class SettingsService {
         throw statusResult.error;
       }
 
-      return AutoRenewalInfo.fromStatus(statusResult.value);
+      return AutoRenewalInfoV2.fromStatus(statusResult.value);
     }, context: 'SettingsService.getAutoRenewalInfo');
   }
 
@@ -241,30 +224,9 @@ class SettingsService {
 
   /// Phase 1.8.1.4: 使用量統計情報を取得（互換性レイヤー）
   @Deprecated('Use getUsageStatisticsWithPlanClass() instead')
-  Future<Result<UsageStatistics>> getUsageStatistics() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      // 新しいメソッドを呼び出してV2統計を取得
-      final v2Result = await getUsageStatisticsWithPlanClass();
-      if (v2Result.isFailure) {
-        throw v2Result.error;
-      }
-
-      // V2からレガシー形式に変換
-      final v2Stats = v2Result.value;
-      final status = await _subscriptionService!.getCurrentStatus();
-      if (status.isFailure) {
-        throw status.error;
-      }
-
-      final plan = await _subscriptionService!.getCurrentPlanClass();
-      if (plan.isFailure) {
-        throw plan.error;
-      }
-
-      // V2版のメソッドを使用することを推奨
-      // このメソッドは非推奨のため、getUsageStatisticsWithPlanClass()を使用
-      throw UnsupportedError('This method is deprecated. Use getUsageStatisticsWithPlanClass() instead.');
-    }, context: 'SettingsService.getUsageStatistics');
+  Future<Result<UsageStatisticsV2>> getUsageStatistics() async {
+    // リダイレクトしてV2版を使用
+    return getUsageStatisticsWithPlanClass();
   }
 
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）
