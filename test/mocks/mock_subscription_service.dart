@@ -1,8 +1,10 @@
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
@@ -81,7 +83,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥300',
         priceAmount: 300.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumMonthly,
+        plan: null, // V2では使用しない
       ),
       const PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
@@ -90,7 +92,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥2,800',
         priceAmount: 2800.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumYearly,
+        plan: null, // V2では使用しない
       ),
     ];
   }
@@ -119,7 +121,7 @@ class MockSubscriptionService implements ISubscriptionService {
 
   /// テスト用: プランを強制設定
   void setCurrentPlan(
-    SubscriptionPlan plan, {
+    Plan plan, {
     bool? isActive,
     DateTime? expiryDate,
     int? usageCount,
@@ -263,38 +265,20 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Result<List<SubscriptionPlan>> getAvailablePlans() {
-    const availablePlans = [
-      SubscriptionPlan.basic,
-      SubscriptionPlan.premiumMonthly,
-      SubscriptionPlan.premiumYearly,
-    ];
-    return const Success(availablePlans);
+    // @deprecated - 互換性のために保持
+    return const Success([]);
   }
 
   @override
   Result<SubscriptionPlan> getPlan(String planId) {
-    try {
-      final plan = SubscriptionPlan.fromId(planId);
-      return Success(plan);
-    } catch (e) {
-      return Failure(ServiceException('Invalid plan ID: $planId'));
-    }
+    // @deprecated - 互換性のために保持
+    return Failure(ServiceException('Deprecated method: use getPlanClass'));
   }
 
   @override
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    if (!_isInitialized) {
-      return Failure(
-        ServiceException('MockSubscriptionService is not initialized'),
-      );
-    }
-
-    final statusResult = await getCurrentStatus();
-    if (statusResult.isFailure) {
-      return Failure(statusResult.error);
-    }
-
-    return Success(statusResult.value.currentPlan);
+    // @deprecated - 互換性のために保持
+    return Failure(ServiceException('Deprecated method: use getCurrentPlanClass'));
   }
 
   @override
@@ -531,7 +515,11 @@ class MockSubscriptionService implements ISubscriptionService {
     }
 
     final status = statusResult.value;
-    return Success(status.currentPlan.hasPrioritySupport);
+    final planResult = getPlanClass(status.planId);
+    if (planResult.isFailure) {
+      return Failure(planResult.error);
+    }
+    return Success(planResult.value.hasPrioritySupport);
   }
 
   // =================================================================
@@ -551,53 +539,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    if (!_isInitialized) {
-      return Failure(
-        ServiceException('MockSubscriptionService is not initialized'),
-      );
-    }
-
-    if (_shouldFailPurchase) {
-      final result = PurchaseResult(
-        status: PurchaseStatus.error,
-        errorMessage: _forcedErrorMessage ?? 'Mock purchase failure',
-      );
-      _purchaseUpdates.add(result);
-      return Success(result);
-    }
-
-    // 成功した購入をシミュレート
-    final transactionId =
-        'mock_transaction_${DateTime.now().millisecondsSinceEpoch}';
-    final purchaseDate = DateTime.now();
-
-    final result = PurchaseResult(
-      status: PurchaseStatus.purchased,
-      productId: plan.productId,
-      transactionId: transactionId,
-      purchaseDate: purchaseDate,
-      plan: plan,
-    );
-
-    // 状態を更新
-    _planId = plan.id;
-    _isActive = true;
-    _autoRenewal = true;
-    _transactionId = transactionId;
-    _lastPurchaseDate = purchaseDate;
-
-    if (plan.isPremium) {
-      _expiryDate = plan.isYearly
-          ? purchaseDate.add(const Duration(days: 365))
-          : purchaseDate.add(const Duration(days: 30));
-    }
-
-    // 履歴に記録
-    _purchaseHistory.add(result);
-    _purchaseUpdates.add(result);
-    _statusUpdates.add(_currentStatus);
-
-    return Success(result);
+    // @deprecated - 互換性のために保持
+    return Failure(ServiceException('Deprecated method: use purchasePlanClass'));
   }
 
   @override
@@ -629,16 +572,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    if (!_isInitialized) {
-      return Failure(
-        ServiceException('MockSubscriptionService is not initialized'),
-      );
-    }
-
-    // プラン変更をシミュレート
-    setCurrentPlan(newPlan);
-
-    return const Success(null);
+    // @deprecated - 互換性のために保持
+    return Failure(ServiceException('Deprecated method: use changePlanClass'));
   }
 
   @override
@@ -649,9 +584,47 @@ class MockSubscriptionService implements ISubscriptionService {
       );
     }
 
-    // 既存のpurchasePlanメソッドに委譲
-    final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
-    return await purchasePlan(subscriptionPlan);
+    if (_shouldFailPurchase) {
+      final result = PurchaseResult(
+        status: PurchaseStatus.error,
+        errorMessage: _forcedErrorMessage ?? 'Mock purchase failure',
+      );
+      _purchaseUpdates.add(result);
+      return Success(result);
+    }
+
+    // 成功した購入をシミュレート
+    final transactionId =
+        'mock_transaction_${DateTime.now().millisecondsSinceEpoch}';
+    final purchaseDate = DateTime.now();
+
+    final result = PurchaseResult(
+      status: PurchaseStatus.purchased,
+      productId: plan.productId,
+      transactionId: transactionId,
+      purchaseDate: purchaseDate,
+      plan: null, // V2では使用しない
+    );
+
+    // 状態を更新
+    _planId = plan.id;
+    _isActive = true;
+    _autoRenewal = true;
+    _transactionId = transactionId;
+    _lastPurchaseDate = purchaseDate;
+
+    if (plan.isPremium) {
+      _expiryDate = plan.isYearly
+          ? purchaseDate.add(const Duration(days: 365))
+          : purchaseDate.add(const Duration(days: 30));
+    }
+
+    // 履歴に記録
+    _purchaseHistory.add(result);
+    _purchaseUpdates.add(result);
+    _statusUpdates.add(_currentStatus);
+
+    return Success(result);
   }
 
   @override
@@ -662,9 +635,10 @@ class MockSubscriptionService implements ISubscriptionService {
       );
     }
 
-    // 既存のchangePlanメソッドに委譲
-    final subscriptionPlan = SubscriptionPlan.fromId(newPlan.id);
-    return await changePlan(subscriptionPlan);
+    // プラン変更をシミュレート
+    setCurrentPlan(newPlan);
+
+    return const Success(null);
   }
 
   @override

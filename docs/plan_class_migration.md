@@ -527,12 +527,40 @@ class PlanFactory {
   - [x] 旧メソッドの削除
 
 #### フェーズ7-D: テストコードの移行（推定: 5-6時間）
-- [ ] 単体テストの更新
-  - [ ] enum使用箇所をPlanFactoryに置換
-  - [ ] モック実装の更新
-- [ ] 統合テストの更新
-  - [ ] テストヘルパーの移行
-  - [ ] 期待値の更新
+
+##### フェーズ7-D-1: モックとテスト基盤の更新（完了）
+- [x] MockSubscriptionServiceの更新
+  - [x] Plan依存メソッドの実装
+  - [x] 非推奨メソッドのエラー化
+  - [x] テスト用データ設定メソッドの更新
+- [x] 新しいPlanクラステストの作成
+  - [x] `/test/unit/models/plans/plan_test.dart`作成
+  - [x] 既存のsubscription_plan_test.dartと同等のカバレッジ確保
+
+##### フェーズ7-D-2: 単体テストの移行（19ファイル）
+- [ ] モデル層テスト（3ファイル）
+  - [ ] `subscription_status_test.dart`
+  - [ ] `subscription_status_plan_test.dart`
+  - [ ] `purchase_data_v2_test.dart`
+- [ ] サービス層テスト（7ファイル）
+  - [ ] `subscription_service_test.dart`
+  - [ ] `subscription_service_usage_test.dart`
+  - [ ] `subscription_service_access_test.dart`
+  - [ ] `settings_service_subscription_test.dart`
+  - [ ] `interfaces/subscription_service_interface_test.dart`
+  - [ ] `mocks/mock_subscription_service_test.dart`
+  - [ ] `core/service_registration_subscription_test.dart`
+
+##### フェーズ7-D-3: 統合テストの移行（9ファイル）
+- [ ] テストヘルパー（2ファイル）
+  - [ ] `test_helpers/integration_test_helpers.dart`
+  - [ ] `mocks/mock_services.dart`
+- [ ] 機能テスト（7ファイル）
+  - [ ] `subscription_service_integration_test.dart`
+  - [ ] `basic_subscription_test.dart`
+  - [ ] `prompt_features_test.dart`
+  - [ ] `in_app_purchase_sandbox_test.dart`
+  - [ ] `in_app_purchase_integration_test.dart`
 
 #### フェーズ7-E: クリーンアップ（推定: 1-2時間）
 - [ ] 非推奨コードの削除
