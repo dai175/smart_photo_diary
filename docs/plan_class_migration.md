@@ -520,11 +520,11 @@ class PlanFactory {
   - [x] Planクラスベースのマッピングに変更
 
 #### フェーズ7-C: UI層の完全移行（推定: 2-3時間）
-- [ ] `DiaryPreviewScreen`の更新
-  - [ ] SubscriptionPlan参照をPlanクラスに変更
-- [ ] `UpgradeDialogUtils`の統合
-  - [ ] V2メソッドをメインメソッドに昇格
-  - [ ] 旧メソッドの削除
+- [x] `DiaryPreviewScreen`の更新
+  - [x] SubscriptionPlan参照をPlanクラスに変更
+- [x] `UpgradeDialogUtils`の統合
+  - [x] V2メソッドをメインメソッドに昇格
+  - [x] 旧メソッドの削除
 
 #### フェーズ7-D: テストコードの移行（推定: 5-6時間）
 - [ ] 単体テストの更新

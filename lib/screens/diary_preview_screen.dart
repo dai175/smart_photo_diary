@@ -12,12 +12,12 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/custom_card.dart';
-import '../ui/components/custom_dialog.dart';
+import '../ui/components/custom_dialog.dart' show PresetDialogs;
 import '../ui/animations/list_animations.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/prompt_service_interface.dart';
-import '../models/subscription_plan.dart';
+import '../models/plans/basic_plan.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
 
@@ -324,14 +324,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           await ServiceRegistration.getAsync<ISubscriptionService>();
 
       // プラン情報を取得
-      final planResult = await subscriptionService.getCurrentPlan();
+      final planResult = await subscriptionService.getCurrentPlanClass();
       final remainingResult = await subscriptionService
           .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
 
-      final plan = planResult.isSuccess
-          ? planResult.value
-          : SubscriptionPlan.basic;
+      final plan = planResult.isSuccess ? planResult.value : BasicPlan();
       final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final limit = plan.monthlyAiGenerationLimit;
       final nextResetDate = resetDateResult.isSuccess
@@ -343,7 +341,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           context: context,
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
-            planName: plan.name,
+            planName: plan.displayName,
             remaining: remaining,
             limit: limit,
             nextResetDate: nextResetDate,
