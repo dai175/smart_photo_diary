@@ -637,6 +637,35 @@ class PlanFactory {
   - [x] テストファイルでのenum参照修正 ✅
   - [x] SubscriptionInfoクラス削除
   - [ ] 旧インターフェースメソッド削除
+    - [ ] SubscriptionPlan enum参照削除 (28+6件)
+    - [ ] SubscriptionStatus旧メソッド削除 (12+6件)
+    - [ ] ISubscriptionService旧メソッド削除 (3+1件)
+    - [ ] InAppPurchaseConfig旧メソッド削除 (3件)
+    - [ ] テストファイル修正 (7+4件)
+    - [ ] import文修正 (5+1件)
+    - [ ] UsageStatisticsV2プロパティ修正 (1件)
+
+### Phase 7-E-5: 旧インターフェースメソッド削除 (継続中)
+
+**エラー分析結果 (125件):**
+- **SubscriptionPlan enum参照削除** - 最優先 (34件)
+  - `Undefined name 'SubscriptionPlan'` (28件)
+  - `Undefined class 'SubscriptionPlan'` (6件)
+- **SubscriptionStatus旧メソッド削除** - 高優先度 (18件)
+  - `createPremium` メソッド削除 (12件)
+  - `changePlan` メソッド削除 (6件)
+- **ISubscriptionService旧メソッド削除** - 高優先度 (4件)
+  - `getCurrentPlan` メソッド削除 (3+1件)
+- **InAppPurchaseConfig旧メソッド削除** - 中優先度 (3件)
+  - `getSubscriptionPlan` メソッド削除 (3件)
+- **テストファイル修正** - 中優先度 (11件)
+  - const constructor エラー (7件)
+  - 初期化エラー (4件)
+- **import文修正** - 低優先度 (6件)
+  - 削除されたファイルへの参照 (5+1件)
+- **その他修正** - 低優先度 (2件)
+  - UsageStatisticsV2プロパティ修正 (1件)
+  - インターフェース実装不足 (1件)
 
 **Phase 7-E-2完了 (2025-07-26)**: ライブラリファイルでのenum参照修正完了
 
