@@ -153,7 +153,7 @@ class PurchaseResultV2 {
     if (!isError) return '';
 
     final lowerMessage = errorMessage?.toLowerCase() ?? '';
-    
+
     if (lowerMessage.contains('cancelled') || lowerMessage.contains('cancel')) {
       return '購入がキャンセルされました';
     } else if (lowerMessage.contains('network')) {

@@ -425,6 +425,22 @@ class PlanFactory {
 更新ファイル:
 - `lib/models/subscription_status.dart`
 
+### フェーズ7-B一部完了 (2025-07-26)
+- ✅ `SubscriptionService`の内部実装をPlanクラスに統一
+  - enum使用箇所をすべてPlanクラスに置換
+  - `canUseAiGeneration()`: PlanFactory.createPlan()を使用
+  - `incrementAiUsage()`: PlanFactory.createPlan()を使用
+  - `getRemainingAiGenerations()`: PlanFactory.createPlan()を使用
+  - `_isSubscriptionValid()`: BasicPlanのインスタンス判定に変更
+  - `createStatus()`: Planクラスを使用した判定に変更
+  - `purchasePlan()`: BasicPlanのインスタンス判定に変更
+  - アクセス権限チェックメソッド全般: BasicPlanのインスタンス判定に変更
+- ✅ 互換性メソッドを通じて外部インターフェースを維持
+- ✅ テスト実行確認 - SubscriptionServiceの単体テストは全て成功
+
+更新ファイル:
+- `lib/services/subscription_service.dart`
+
 ## フェーズ7: 完全削除への移行計画
 
 ### 7.1 現状分析（2025-07-26時点）
@@ -456,9 +472,9 @@ class PlanFactory {
   - [x] 既存クラスとの互換性維持
 
 #### フェーズ7-B: サービス層の完全移行（推定: 4-5時間）
-- [ ] `SubscriptionService`の内部実装をPlanクラスに統一
-  - [ ] enum使用箇所をすべてPlanクラスに置換
-  - [ ] 互換性メソッドを通じて外部インターフェースを維持
+- [x] `SubscriptionService`の内部実装をPlanクラスに統一
+  - [x] enum使用箇所をすべてPlanクラスに置換
+  - [x] 互換性メソッドを通じて外部インターフェースを維持
 - [ ] `SettingsService`の移行
   - [ ] V2メソッドをメインに切り替え
   - [ ] 旧メソッドを互換性レイヤーとして維持

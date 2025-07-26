@@ -9,6 +9,7 @@ import '../models/subscription_status.dart';
 import '../models/subscription_plan.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
+import '../models/plans/basic_plan.dart';
 import '../constants/subscription_constants.dart';
 import '../config/in_app_purchase_config.dart';
 import '../config/environment_config.dart';
@@ -172,11 +173,11 @@ class SubscriptionService implements ISubscriptionService {
     try {
       _log('Getting available subscription plans', level: LogLevel.debug);
 
-      const availablePlans = [
-        SubscriptionPlan.basic,
-        SubscriptionPlan.premiumMonthly,
-        SubscriptionPlan.premiumYearly,
-      ];
+      // 内部的にはPlanクラスを使用し、返り値をenumに変換
+      final plans = PlanFactory.getAllPlans();
+      final availablePlans = plans
+          .map((plan) => SubscriptionPlan.fromId(plan.id))
+          .toList();
 
       _log(
         'Successfully retrieved ${availablePlans.length} available plans',
@@ -184,7 +185,7 @@ class SubscriptionService implements ISubscriptionService {
         data: {'planCount': availablePlans.length},
       );
 
-      return const Success(availablePlans);
+      return Success(availablePlans);
     } catch (e) {
       return _handleError(e, 'getAvailablePlans');
     }
@@ -353,10 +354,11 @@ class SubscriptionService implements ISubscriptionService {
 
           // 実際のデータはそのままで、プランIDのみを強制設定に変更した状態を返す
           final forcedPlanId = _getForcedPlanId(forcePlan);
-          final forcedPlan = SubscriptionPlan.fromId(forcedPlanId);
+          final forcedPlan = PlanFactory.createPlan(forcedPlanId);
 
           // プランに応じて適切な有効期限を設定
-          final expiryDuration = forcedPlan == SubscriptionPlan.premiumYearly
+          final expiryDuration =
+              forcedPlan.id == SubscriptionConstants.premiumYearlyPlanId
               ? const Duration(days: 365)
               : const Duration(days: 30);
 
@@ -446,7 +448,10 @@ class SubscriptionService implements ISubscriptionService {
       final now = DateTime.now();
       SubscriptionStatus newStatus;
 
-      if (plan == SubscriptionPlan.basic) {
+      // Planクラスを使用して判定
+      final planClass = PlanFactory.createPlan(plan.id);
+
+      if (planClass is BasicPlan) {
         // Basicプランの場合
         newStatus = SubscriptionStatus(
           planId: plan.id,
@@ -461,7 +466,7 @@ class SubscriptionService implements ISubscriptionService {
         );
       } else {
         // Premiumプランの場合
-        final expiryDate = plan == SubscriptionPlan.premiumYearly
+        final expiryDate = plan.id == SubscriptionConstants.premiumYearlyPlanId
             ? now.add(
                 Duration(days: SubscriptionConstants.subscriptionYearDays),
               )
@@ -632,7 +637,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final updatedStatus = updatedStatusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(updatedStatus.planId);
+      final currentPlan = PlanFactory.createPlan(updatedStatus.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
 
       final canUse = updatedStatus.monthlyUsageCount < monthlyLimit;
@@ -689,7 +694,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final latestStatus = latestStatusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(latestStatus.planId);
+      final currentPlan = PlanFactory.createPlan(latestStatus.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
 
       // 制限チェック
@@ -784,7 +789,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final updatedStatus = updatedStatusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(updatedStatus.planId);
+      final currentPlan = PlanFactory.createPlan(updatedStatus.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
       final remaining = monthlyLimit - updatedStatus.monthlyUsageCount;
 
@@ -840,10 +845,10 @@ class SubscriptionService implements ISubscriptionService {
   bool _isSubscriptionValid(SubscriptionStatus status) {
     if (!status.isActive) return false;
 
-    final currentPlan = SubscriptionPlan.fromId(status.planId);
+    final currentPlan = PlanFactory.createPlan(status.planId);
 
     // Basicプランは常に有効
-    if (currentPlan == SubscriptionPlan.basic) return true;
+    if (currentPlan is BasicPlan) return true;
 
     // Premiumプランは有効期限をチェック
     if (status.expiryDate == null) return false;
@@ -956,10 +961,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // Basicプランは基本機能のみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1010,10 +1015,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // ライティングプロンプトは全プランで利用可能（Basicは限定版）
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         debugPrint(
           'SubscriptionService: Writing prompts access - Basic plan (limited prompts)',
         );
@@ -1064,10 +1069,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 高度なフィルタはPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1105,10 +1110,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // データエクスポートは全プランで利用可能（Basicは基本形式のみ）
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         debugPrint(
           'SubscriptionService: Data export access - Basic plan (JSON only)',
         );
@@ -1148,10 +1153,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 統計ダッシュボードはPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1233,10 +1238,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 高度な分析はPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1275,10 +1280,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 優先サポートはPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1672,16 +1677,13 @@ class SubscriptionService implements ISubscriptionService {
 
       // 有効期限を計算
       DateTime expiryDate;
-      switch (plan) {
-        case SubscriptionPlan.premiumMonthly:
-          expiryDate = now.add(const Duration(days: 30));
-          break;
-        case SubscriptionPlan.premiumYearly:
-          expiryDate = now.add(const Duration(days: 365));
-          break;
-        case SubscriptionPlan.basic:
-          // Basicプランは購入対象外
-          throw ArgumentError('Basic plan cannot be purchased');
+      if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
+        expiryDate = now.add(const Duration(days: 30));
+      } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
+        expiryDate = now.add(const Duration(days: 365));
+      } else {
+        // Basicプランは購入対象外
+        throw ArgumentError('Basic plan cannot be purchased');
       }
 
       // 新しいサブスクリプション状態を作成
@@ -1805,7 +1807,9 @@ class SubscriptionService implements ISubscriptionService {
         );
       }
 
-      if (plan == SubscriptionPlan.basic) {
+      // Planクラスを使用して判定
+      final planClass = PlanFactory.createPlan(plan.id);
+      if (planClass is BasicPlan) {
         return Failure(ServiceException('Basic plan cannot be purchased'));
       }
 

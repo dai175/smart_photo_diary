@@ -119,16 +119,16 @@ void main() {
           planId: 'invalid_plan',
           isActive: true,
         );
-        
+
         // planIdはそのまま保持される
         expect(invalidStatus.planId, 'invalid_plan');
-        
+
         // getCurrentPlanClassは例外をスローする
         expect(
           () => invalidStatus.getCurrentPlanClass(),
           throwsA(isA<ArgumentError>()),
         );
-        
+
         // currentPlan（enum）はフォールバックでbasicを返す
         expect(invalidStatus.currentPlan, SubscriptionPlan.basic);
       });
