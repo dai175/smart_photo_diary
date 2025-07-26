@@ -4,6 +4,7 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import '../../mocks/mock_subscription_service.dart';
 
@@ -199,28 +200,16 @@ void main() {
       final v2StatsResult = await settingsService
           .getUsageStatisticsWithPlanClass();
 
-      // レガシーメソッド
-      final legacyPlanResult = await settingsService.getCurrentPlan();
-      final legacyStatsResult = await settingsService.getUsageStatistics();
-
-      // 両方成功すること
+      // V2メソッドが成功すること
       expect(v2PlanResult.isSuccess, true);
       expect(v2StatsResult.isSuccess, true);
-      expect(legacyPlanResult.isSuccess, true);
-      expect(legacyStatsResult.isSuccess, true);
 
-      // プランIDが一致すること
-      expect(v2PlanResult.value.id, legacyPlanResult.value.id);
+      // MockServiceで設定されたプランが取得できること
+      expect(v2PlanResult.value.id, equals('premium_monthly'));
 
-      // 使用量統計が一致すること
-      expect(
-        v2StatsResult.value.monthlyUsageCount,
-        legacyStatsResult.value.currentMonthUsage,
-      );
-      expect(
-        v2StatsResult.value.monthlyLimit,
-        legacyStatsResult.value.monthlyLimit,
-      );
+      // MockServiceで設定された統計データが取得できること
+      expect(v2StatsResult.value.monthlyUsageCount, equals(30));
+      expect(v2StatsResult.value.monthlyLimit, equals(100)); // PremiumMonthlyPlanの制限
     });
   });
 }

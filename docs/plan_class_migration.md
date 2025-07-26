@@ -636,14 +636,14 @@ class PlanFactory {
   - [x] ライブラリファイルでのenum参照修正 ✅
   - [x] テストファイルでのenum参照修正 ✅
   - [x] SubscriptionInfoクラス削除
-  - [ ] 旧インターフェースメソッド削除
+  - [x] 旧インターフェースメソッド削除
     - [x] SubscriptionPlan enum参照削除 (28+6件)
     - [x] SubscriptionStatus旧メソッド削除 (12+6件)
     - [x] ISubscriptionService旧メソッド削除 (3+1件)
     - [x] InAppPurchaseConfig旧メソッド削除 (3件)
     - [x] テストファイル修正 (7+4件)
     - [x] import文修正 (5+1件)
-    - [ ] UsageStatisticsV2プロパティ修正 (1件)
+    - [x] UsageStatisticsV2プロパティ修正 (1件)
 
 ### Phase 7-E-5: 旧インターフェースメソッド削除 (継続中)
 

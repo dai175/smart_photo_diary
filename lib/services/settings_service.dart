@@ -203,12 +203,6 @@ class SettingsService {
     }, context: 'SettingsService.getUsageStatisticsWithPlanClass');
   }
 
-  /// Phase 1.8.1.4: 使用量統計情報を取得（互換性レイヤー）
-  @Deprecated('Use getUsageStatisticsWithPlanClass() instead')
-  Future<Result<UsageStatisticsV2>> getUsageStatistics() async {
-    // リダイレクトしてV2版を使用
-    return getUsageStatisticsWithPlanClass();
-  }
 
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）
   Future<Result<int>> getRemainingGenerations() async {
