@@ -6,7 +6,6 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/subscription_status.dart';
-import '../models/subscription_plan.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
@@ -139,7 +138,7 @@ class SubscriptionService implements ISubscriptionService {
       debugPrint('SubscriptionService: Creating initial Basic plan status');
 
       final initialStatus = SubscriptionStatus(
-        planId: SubscriptionPlan.basic.id,
+        planId: BasicPlan().id,
         isActive: true,
         startDate: DateTime.now(),
         expiryDate: null, // Basicプランは期限なし
@@ -174,10 +173,8 @@ class SubscriptionService implements ISubscriptionService {
       _log('Getting available subscription plans', level: LogLevel.debug);
 
       // 内部的にはPlanクラスを使用し、返り値をenumに変換
-      final plans = PlanFactory.getAllPlans();
-      final availablePlans = plans
-          .map((plan) => SubscriptionPlan.fromId(plan.id))
-          .toList();
+      // 利用可能なプラン一覧を取得は非推奨メソッドを削除
+      // 代わりにPlanFactory.getAllPlans()を直接使用することを推奨
 
       _log(
         'Successfully retrieved ${availablePlans.length} available plans',

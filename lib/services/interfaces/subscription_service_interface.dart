@@ -1,5 +1,4 @@
 import '../../core/result/result.dart';
-import '../../models/subscription_plan.dart';
 import '../../models/plans/plan.dart';
 import '../../models/subscription_status.dart';
 
@@ -29,23 +28,11 @@ abstract class ISubscriptionService {
   // プラン管理メソッド
   // ========================================
 
-  /// 利用可能なプラン一覧を取得
-  /// @deprecated Planクラスベースのメソッドへの移行を推奨
-  @Deprecated('Use PlanFactory.getAllPlans() instead')
-  Result<List<SubscriptionPlan>> getAvailablePlans();
 
-  /// 特定のプラン情報を取得（既存enum互換）
-  /// @deprecated getPlanClass()メソッドの使用を推奨
-  @Deprecated('Use getPlanClass() instead')
-  Result<SubscriptionPlan> getPlan(String planId);
 
   /// 特定のプラン情報を取得（新Planクラス）
   Result<Plan> getPlanClass(String planId);
 
-  /// 現在のプランを取得（既存enum互換）
-  /// @deprecated getCurrentPlanClass()メソッドの使用を推奨
-  @Deprecated('Use getCurrentPlanClass() instead')
-  Future<Result<SubscriptionPlan>> getCurrentPlan();
 
   /// 現在のプランを取得（新Planクラス）
   Future<Result<Plan>> getCurrentPlanClass();
@@ -102,10 +89,6 @@ abstract class ISubscriptionService {
   /// In-App Purchase商品情報を取得
   Future<Result<List<PurchaseProduct>>> getProducts();
 
-  /// プランを購入（既存enum互換）
-  /// @deprecated purchasePlanClass()メソッドの使用を推奨
-  @Deprecated('Use purchasePlanClass() instead')
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan);
 
   /// プランを購入（新Planクラス）
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan);
@@ -116,10 +99,6 @@ abstract class ISubscriptionService {
   /// 購入状態を検証
   Future<Result<bool>> validatePurchase(String transactionId);
 
-  /// プランを変更（既存enum互換）
-  /// @deprecated changePlanClass()メソッドの使用を推奨
-  @Deprecated('Use changePlanClass() instead')
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan);
 
   /// プランを変更（新Planクラス）
   Future<Result<void>> changePlanClass(Plan newPlan);
@@ -165,8 +144,8 @@ class PurchaseProduct {
   /// 通貨コード
   final String currencyCode;
 
-  /// 対応するサブスクリプションプラン
-  final SubscriptionPlan plan;
+  /// 対応するプラン
+  final Plan plan;
 
   const PurchaseProduct({
     required this.id,
@@ -180,7 +159,7 @@ class PurchaseProduct {
 
   @override
   String toString() {
-    return 'PurchaseProduct(id: $id, title: $title, price: $price, plan: $plan)';
+    return 'PurchaseProduct(id: $id, title: $title, price: $price, plan: ${plan.id})';
   }
 }
 
@@ -201,8 +180,8 @@ class PurchaseResult {
   /// エラーメッセージ（失敗時）
   final String? errorMessage;
 
-  /// 対応するサブスクリプションプラン
-  final SubscriptionPlan? plan;
+  /// 対応するプラン
+  final Plan? plan;
 
   const PurchaseResult({
     required this.status,
@@ -225,7 +204,7 @@ class PurchaseResult {
   @override
   String toString() {
     return 'PurchaseResult(status: $status, productId: $productId, '
-        'transactionId: $transactionId, plan: $plan)';
+        'transactionId: $transactionId, plan: ${plan?.id})';
   }
 }
 

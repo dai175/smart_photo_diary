@@ -1,5 +1,4 @@
 import '../constants/subscription_constants.dart';
-import '../models/subscription_plan.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
@@ -56,18 +55,6 @@ class InAppPurchaseConfig {
     return plan.productId;
   }
 
-  /// プランから商品IDを取得（互換性レイヤー）
-  @Deprecated('Use getProductIdFromPlan() instead')
-  static String getProductId(SubscriptionPlan plan) {
-    switch (plan) {
-      case SubscriptionPlan.premiumMonthly:
-        return premiumMonthlyProductId;
-      case SubscriptionPlan.premiumYearly:
-        return premiumYearlyProductId;
-      case SubscriptionPlan.basic:
-        throw ArgumentError('Basic plan does not have a product ID');
-    }
-  }
 
   /// 商品IDからプランを取得（メイン実装 - Planクラス版）
   static Plan getPlanFromProductId(String productId) {
@@ -80,18 +67,6 @@ class InAppPurchaseConfig {
     throw ArgumentError('Unknown product ID: $productId');
   }
 
-  /// 商品IDからプランを取得（互換性レイヤー）
-  @Deprecated('Use getPlanFromProductId() instead')
-  static SubscriptionPlan getSubscriptionPlan(String productId) {
-    switch (productId) {
-      case 'smart_photo_diary_premium_monthly_plan':
-        return SubscriptionPlan.premiumMonthly;
-      case 'smart_photo_diary_premium_yearly_plan':
-        return SubscriptionPlan.premiumYearly;
-      default:
-        throw ArgumentError('Unknown product ID: $productId');
-    }
-  }
 
   // ========================================
   // 価格設定
@@ -187,36 +162,12 @@ class InAppPurchaseConfig {
     return plan.displayName;
   }
 
-  /// プランの表示名を取得（互換性レイヤー）
-  @Deprecated('Use getDisplayNameFromPlan() instead')
-  static String getDisplayName(SubscriptionPlan plan) {
-    switch (plan) {
-      case SubscriptionPlan.premiumMonthly:
-        return premiumMonthlyDisplayName;
-      case SubscriptionPlan.premiumYearly:
-        return premiumYearlyDisplayName;
-      case SubscriptionPlan.basic:
-        return 'Basic Plan';
-    }
-  }
 
   /// プランの説明文を取得（メイン実装 - Planクラス版）
   static String getDescriptionFromPlan(Plan plan) {
     return plan.description;
   }
 
-  /// プランの説明文を取得（互換性レイヤー）
-  @Deprecated('Use getDescriptionFromPlan() instead')
-  static String getDescription(SubscriptionPlan plan) {
-    switch (plan) {
-      case SubscriptionPlan.premiumMonthly:
-        return premiumMonthlyDescription;
-      case SubscriptionPlan.premiumYearly:
-        return premiumYearlyDescription;
-      case SubscriptionPlan.basic:
-        return 'Free plan with basic features and 10 AI generations per month.';
-    }
-  }
 
   // ========================================
   // 無料トライアル設定
@@ -330,11 +281,6 @@ class InAppPurchaseConfig {
     return plan.isPaid;
   }
 
-  /// プランが購入可能かどうかをチェック（互換性レイヤー）
-  @Deprecated('Use isPurchasableFromPlan() instead')
-  static bool isPurchasable(SubscriptionPlan plan) {
-    return plan != SubscriptionPlan.basic;
-  }
 
   /// デバッグ情報を出力
   static Map<String, dynamic> getDebugInfo() {
