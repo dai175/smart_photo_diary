@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/models/purchase_data_v2.dart';
-import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';

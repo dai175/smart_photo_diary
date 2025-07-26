@@ -6,10 +6,8 @@ import 'package:smart_photo_diary/services/interfaces/subscription_service_inter
 import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
-import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
-import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import '../../mocks/mock_subscription_service.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 

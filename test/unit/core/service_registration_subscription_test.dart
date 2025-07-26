@@ -2,12 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
-import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
-import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
-import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'dart:io';
 

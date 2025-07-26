@@ -3,13 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/models/subscription_info.dart';
-import 'package:smart_photo_diary/models/subscription_info_v2.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
-import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
-import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
-import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import '../../mocks/mock_subscription_service.dart';
 

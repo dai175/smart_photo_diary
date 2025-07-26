@@ -642,7 +642,7 @@ class PlanFactory {
     - [x] ISubscriptionService旧メソッド削除 (3+1件)
     - [x] InAppPurchaseConfig旧メソッド削除 (3件)
     - [x] テストファイル修正 (7+4件)
-    - [ ] import文修正 (5+1件)
+    - [x] import文修正 (5+1件)
     - [ ] UsageStatisticsV2プロパティ修正 (1件)
 
 ### Phase 7-E-5: 旧インターフェースメソッド削除 (継続中)
