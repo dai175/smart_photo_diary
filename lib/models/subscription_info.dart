@@ -1,19 +1,21 @@
-import 'subscription_plan.dart';
+// import 'subscription_plan.dart'; // enumクラス削除により無効化
 import 'subscription_status.dart';
 
 /// サブスクリプション情報を統合的に管理するデータモデル
 /// 設定画面や状態表示で使用するための包括的な情報を提供します
 ///
-/// @deprecated 新しいSubscriptionInfoV2クラスの使用を推奨します。
+/// @deprecated このクラスは削除されました。SubscriptionInfoV2クラスを使用してください。
 /// lib/models/subscription_info_v2.dartを参照してください。
+///
+/// 注意: SubscriptionPlan enumの削除により、このクラスは機能しません。
 
-/// 設定画面表示用のサブスクリプション情報
+/// 設定画面表示用のサブスクリプション情報（削除予定）
 @Deprecated(
-  'Use SubscriptionInfoV2 from lib/models/subscription_info_v2.dart instead',
+  'This class has been removed. Use SubscriptionInfoV2 from lib/models/subscription_info_v2.dart instead',
 )
 class SubscriptionInfo {
-  /// 現在のプラン
-  final SubscriptionPlan currentPlan;
+  /// 現在のプラン（注意: enumクラス削除により使用不可）
+  // final SubscriptionPlan currentPlan;
 
   /// サブスクリプション状態
   final SubscriptionStatus status;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
-import '../models/subscription_info.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
@@ -31,9 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsService _settingsService;
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
-  SubscriptionInfo? _subscriptionInfo;
-  // ignore: unused_field
-  SubscriptionInfoV2? _subscriptionInfoV2; // 将来の移行のために保持
+  SubscriptionInfoV2? _subscriptionInfo;
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
 
@@ -53,12 +50,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _packageInfo = await PackageInfo.fromPlatform();
       _storageInfo = await StorageService.getInstance().getStorageInfo();
 
-      // サブスクリプション情報を取得
-      final subscriptionResult = await _settingsService.getSubscriptionInfo();
+      // サブスクリプション情報を取得（V2版）
+      final subscriptionResult = await _settingsService.getSubscriptionInfoV2();
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
-        // V2版も生成（移行期間中は両方保持）
-        _subscriptionInfoV2 = SubscriptionInfoV2.fromLegacy(_subscriptionInfo!);
       } else {
         debugPrint('サブスクリプション情報の取得エラー: ${subscriptionResult.error}');
       }

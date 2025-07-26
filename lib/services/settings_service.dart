@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
-import '../models/subscription_info.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -117,23 +116,13 @@ class SettingsService {
 
   /// Phase 1.8.1.1: 包括的なサブスクリプション情報を取得（互換性レイヤー）
   /// 設定画面表示で使用する統合されたサブスクリプション情報を返します
+  /// 注意: SubscriptionInfoクラス削除により無効化
+  /*
   @Deprecated('Use getSubscriptionInfoV2() instead')
   Future<Result<SubscriptionInfo>> getSubscriptionInfo() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      if (_subscriptionService == null) {
-        throw StateError('SubscriptionService is not initialized');
-      }
-
-      // SubscriptionServiceから現在の状態を取得
-      final statusResult = await _subscriptionService!.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-
-      // SubscriptionInfoに変換して返す
-      return SubscriptionInfo.fromStatus(statusResult.value);
-    }, context: 'SettingsService.getSubscriptionInfo');
+    throw UnsupportedError('SubscriptionInfo class has been removed. Use getSubscriptionInfoV2() instead.');
   }
+  */
 
   /// 現在のプラン情報を取得（メイン実装 - Planクラス版）
   Future<Result<Plan>> getCurrentPlanClass() async {
