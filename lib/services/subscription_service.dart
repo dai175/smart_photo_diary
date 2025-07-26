@@ -7,6 +7,8 @@ import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/subscription_status.dart';
 import '../models/subscription_plan.dart';
+import '../models/plans/plan.dart';
+import '../models/plans/plan_factory.dart';
 import '../constants/subscription_constants.dart';
 import '../config/in_app_purchase_config.dart';
 import '../config/environment_config.dart';
@@ -248,6 +250,69 @@ class SubscriptionService implements ISubscriptionService {
       return Success(plan);
     } catch (e) {
       return _handleError(e, 'getCurrentPlan');
+    }
+  }
+
+  /// 特定のプラン情報を取得（新Planクラス）
+  @override
+  Result<Plan> getPlanClass(String planId) {
+    try {
+      _log(
+        'Getting plan class by ID',
+        level: LogLevel.debug,
+        data: {'planId': planId},
+      );
+
+      final plan = PlanFactory.createPlan(planId);
+
+      _log(
+        'Successfully retrieved plan class',
+        level: LogLevel.debug,
+        data: {'planId': plan.id, 'displayName': plan.displayName},
+      );
+
+      return Success(plan);
+    } catch (e) {
+      return _handleError(e, 'getPlanClass', details: 'planId: $planId');
+    }
+  }
+
+  /// 現在のプランを取得（新Planクラス）
+  @override
+  Future<Result<Plan>> getCurrentPlanClass() async {
+    try {
+      _log('Getting current plan class', level: LogLevel.debug);
+
+      if (!_isInitialized) {
+        return _handleError(
+          StateError('Service not initialized'),
+          'getCurrentPlanClass',
+          details: 'SubscriptionService must be initialized before use',
+        );
+      }
+
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        _log(
+          'Failed to get current status',
+          level: LogLevel.warning,
+          error: statusResult.error,
+        );
+        return Failure(statusResult.error);
+      }
+
+      final status = statusResult.value;
+      final plan = PlanFactory.createPlan(status.planId);
+
+      _log(
+        'Successfully retrieved current plan class',
+        level: LogLevel.debug,
+        data: {'planId': plan.id, 'displayName': plan.displayName},
+      );
+
+      return Success(plan);
+    } catch (e) {
+      return _handleError(e, 'getCurrentPlanClass');
     }
   }
 
@@ -1930,6 +1995,42 @@ class SubscriptionService implements ISubscriptionService {
         details: 'This feature will be available in future versions',
       ),
     );
+  }
+
+  /// プランを購入（新Planクラス）
+  @override
+  Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      // 既存のpurchasePlanメソッドに委譲
+      final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
+      return await purchasePlan(subscriptionPlan);
+    } catch (e) {
+      return _handleError(e, 'purchasePlanClass', details: plan.id);
+    }
+  }
+
+  /// プランを変更（新Planクラス）
+  @override
+  Future<Result<void>> changePlanClass(Plan newPlan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      // 既存のchangePlanメソッドに委譲
+      final subscriptionPlan = SubscriptionPlan.fromId(newPlan.id);
+      return await changePlan(subscriptionPlan);
+    } catch (e) {
+      return _handleError(e, 'changePlanClass', details: newPlan.id);
+    }
   }
 
   @override

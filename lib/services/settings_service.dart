@@ -5,6 +5,7 @@ import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 import '../models/subscription_info.dart';
 import '../models/subscription_plan.dart';
+import '../models/plans/plan.dart';
 import 'interfaces/subscription_service_interface.dart';
 import '../core/service_locator.dart';
 
@@ -122,6 +123,22 @@ class SettingsService {
     }, context: 'SettingsService.getCurrentPlan');
   }
 
+  /// 現在のプラン情報を取得（新Planクラス版）
+  Future<Result<Plan>> getCurrentPlanClass() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
+
+      final planResult = await _subscriptionService!.getCurrentPlanClass();
+      if (planResult.isFailure) {
+        throw planResult.error;
+      }
+
+      return planResult.value;
+    }, context: 'SettingsService.getCurrentPlanClass');
+  }
+
   /// Phase 1.8.1.2: プラン期限情報を取得
   Future<Result<PlanPeriodInfo>> getPlanPeriodInfo() async {
     return ResultHelper.tryExecuteAsync(() async {
@@ -178,6 +195,31 @@ class SettingsService {
 
       return UsageStatistics.fromStatus(statusResult.value, planResult.value);
     }, context: 'SettingsService.getUsageStatistics');
+  }
+
+  /// 使用統計情報を取得（新Planクラス版）
+  Future<Result<UsageStatistics>> getUsageStatisticsWithPlanClass() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
+
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
+
+      final planResult = await _subscriptionService!.getCurrentPlanClass();
+      if (planResult.isFailure) {
+        throw planResult.error;
+      }
+
+      final plan = planResult.value;
+      // 新Planクラスを旧SubscriptionPlanに変換して使用
+      final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
+
+      return UsageStatistics.fromStatus(statusResult.value, subscriptionPlan);
+    }, context: 'SettingsService.getUsageStatisticsWithPlanClass');
   }
 
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）

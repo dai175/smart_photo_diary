@@ -172,15 +172,15 @@ class PlanFactory {
 
 ### フェーズ2: サービス層の移行（推定: 3-4時間）
 
-- [ ] `SubscriptionService`の更新
-  - [ ] `getPlan()`メソッドを新クラスベースに変更
-  - [ ] `getCurrentPlan()`メソッドの更新
-  - [ ] プラン関連のビジネスロジックの移行
-  - [ ] 既存enumとの互換性レイヤー実装
+- [x] `SubscriptionService`の更新
+  - [x] `getPlan()`メソッドを新クラスベースに変更
+  - [x] `getCurrentPlan()`メソッドの更新
+  - [x] プラン関連のビジネスロジックの移行
+  - [x] 既存enumとの互換性レイヤー実装
 
-- [ ] `SettingsService`の更新
-  - [ ] プラン情報取得ロジックの更新
-  - [ ] UI表示用メソッドの調整
+- [x] `SettingsService`の更新
+  - [x] プラン情報取得ロジックの更新
+  - [x] UI表示用メソッドの調整
 
 ### フェーズ3: モデル層の更新（推定: 2時間）
 
@@ -258,7 +258,7 @@ class PlanFactory {
 - [x] **設計レビュー完了**
 - [x] **実装開始**
 - [x] **フェーズ1完了**: 基盤実装
-- [ ] **フェーズ2完了**: サービス層移行
+- [x] **フェーズ2完了**: サービス層移行
 - [ ] **フェーズ3完了**: モデル層更新
 - [ ] **フェーズ4完了**: テスト更新
 - [ ] **フェーズ5完了**: UI層更新
@@ -324,3 +324,20 @@ class PlanFactory {
 - `lib/models/plans/premium_monthly_plan.dart`
 - `lib/models/plans/premium_yearly_plan.dart`
 - `lib/models/plans/plan_factory.dart`
+
+### フェーズ2完了 (2025-07-26)
+- ✅ `SubscriptionService`の更新完了
+  - `getPlanClass()` メソッド追加
+  - `getCurrentPlanClass()` メソッド追加
+  - `purchasePlanClass()` メソッド追加
+  - `changePlanClass()` メソッド追加
+- ✅ `ISubscriptionService`インターフェースの更新
+- ✅ `SettingsService`の更新完了
+  - `getCurrentPlanClass()` メソッド追加
+  - `getUsageStatisticsWithPlanClass()` メソッド追加
+- ✅ コードフォーマットとlintチェック完了
+
+更新ファイル:
+- `lib/services/subscription_service.dart`
+- `lib/services/interfaces/subscription_service_interface.dart`
+- `lib/services/settings_service.dart`
