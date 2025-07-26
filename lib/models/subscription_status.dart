@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 import 'subscription_plan.dart';
+import 'plans/plan.dart';
+import 'plans/plan_factory.dart';
 import '../constants/subscription_constants.dart';
 
 part 'subscription_status.g.dart';
@@ -245,6 +247,29 @@ class SubscriptionStatus extends HiveObject {
     final now = DateTime.now();
     if (expiryDate!.isBefore(now)) return 0;
     return expiryDate!.difference(now).inDays;
+  }
+
+  /// Planクラスベースの新しいステータスを作成
+  /// 将来的にplanIdの代わりにPlanクラスを直接保持する際の移行用
+  SubscriptionStatus copyWithPlan(Plan plan) {
+    return SubscriptionStatus(
+      planId: plan.id,
+      isActive: isActive,
+      startDate: startDate,
+      expiryDate: expiryDate,
+      monthlyUsageCount: monthlyUsageCount,
+      lastResetDate: lastResetDate,
+      autoRenewal: autoRenewal,
+      cancelDate: cancelDate,
+      transactionId: transactionId,
+      lastPurchaseDate: lastPurchaseDate,
+    );
+  }
+
+  /// 現在のプランを新しいPlanクラスとして取得（拡張メソッドの代替）
+  /// @deprecated 拡張メソッド SubscriptionStatusExtensions.plan を使用してください
+  Plan getCurrentPlanClass() {
+    return PlanFactory.createPlan(planId);
   }
 
   /// デバッグ用文字列表現

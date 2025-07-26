@@ -390,17 +390,40 @@ class PlanFactory {
 - `lib/screens/settings_screen.dart`
 - `lib/utils/upgrade_dialog_utils.dart`
 
-### フェーズ6実施中 (2025-07-26)
+### フェーズ6完了 (2025-07-26)
 - ✅ 既存enumの削除準備
   - `SubscriptionPlan` enumに@Deprecatedアノテーション追加
   - `ISubscriptionService`インターフェースの旧メソッドに@Deprecatedアノテーション追加
   - `SubscriptionInfo`クラスに@Deprecatedアノテーション追加
-- ⏳ 完全な削除は将来のリリースで段階的に実施予定
+- ✅ 完全削除計画の策定（フェーズ7として文書化）
 
 更新ファイル:
 - `lib/models/subscription_plan.dart`
 - `lib/services/interfaces/subscription_service_interface.dart`
 - `lib/models/subscription_info.dart`
+- `analysis_options.yaml`（deprecated警告の抑制）
+
+### フェーズ7-A完了 (2025-07-26)
+- ✅ コアモデル層の移行
+  - `PurchaseProductV2`クラスの作成（Planクラスベース）
+  - `PurchaseResultV2`クラスの作成（Planクラスベース）
+  - 相互変換メソッド（fromLegacy/toLegacy）の実装
+- ✅ `SubscriptionStatus`の拡張
+  - `copyWithPlan()`メソッド追加
+  - `getCurrentPlanClass()`メソッド追加
+  - Planクラスとの統合機能実装
+- ✅ 包括的なテストの作成
+  - `purchase_data_v2_test.dart` - 22テスト
+  - `subscription_status_plan_test.dart` - 8テスト
+  - 全713テストが成功
+
+作成ファイル:
+- `lib/models/purchase_data_v2.dart`
+- `test/unit/models/purchase_data_v2_test.dart`
+- `test/unit/models/subscription_status_plan_test.dart`
+
+更新ファイル:
+- `lib/models/subscription_status.dart`
 
 ## フェーズ7: 完全削除への移行計画
 
@@ -425,12 +448,12 @@ class PlanFactory {
 ### 7.2 段階的移行戦略
 
 #### フェーズ7-A: コアモデル層の移行（推定: 3-4時間）
-- [ ] `SubscriptionStatus`の拡張
-  - [ ] Planクラスへの直接参照を追加
-  - [ ] enumとの相互変換メソッド実装
-- [ ] `PurchaseProductV2`/`PurchaseResultV2`の作成
-  - [ ] Planクラスベースの新データクラス
-  - [ ] 既存クラスとの互換性維持
+- [x] `SubscriptionStatus`の拡張
+  - [x] Planクラスへの直接参照を追加
+  - [x] enumとの相互変換メソッド実装
+- [x] `PurchaseProductV2`/`PurchaseResultV2`の作成
+  - [x] Planクラスベースの新データクラス
+  - [x] 既存クラスとの互換性維持
 
 #### フェーズ7-B: サービス層の完全移行（推定: 4-5時間）
 - [ ] `SubscriptionService`の内部実装をPlanクラスに統一
@@ -596,17 +619,13 @@ class SubscriptionService implements ISubscriptionService {
 #### テストコードの移行例
 
 移行前（enum使用）:
-```dart
-final plan = SubscriptionPlan.premiumMonthly;
-expect(plan.price, 300);
-```
+- `SubscriptionPlan.premiumMonthly`を直接使用
+- プロパティアクセスは同じインターフェース
 
 移行後（Planクラス使用）:
-```dart
-final plan = PlanFactory.createPlan('premium_monthly');
-expect(plan.price, 300);
-expect(plan, isA<PremiumMonthlyPlan>());
-```
+- `PlanFactory.createPlan('premium_monthly')`で生成
+- 型チェックで具体的なクラスを確認可能
+- より柔軟な拡張が可能
 
 ### 7.7 移行チェックリスト
 
