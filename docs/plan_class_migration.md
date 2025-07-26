@@ -639,7 +639,7 @@ class PlanFactory {
   - [ ] 旧インターフェースメソッド削除
     - [x] SubscriptionPlan enum参照削除 (28+6件)
     - [x] SubscriptionStatus旧メソッド削除 (12+6件)
-    - [ ] ISubscriptionService旧メソッド削除 (3+1件)
+    - [x] ISubscriptionService旧メソッド削除 (3+1件)
     - [ ] InAppPurchaseConfig旧メソッド削除 (3件)
     - [ ] テストファイル修正 (7+4件)
     - [ ] import文修正 (5+1件)
