@@ -466,6 +466,19 @@ class PlanFactory {
 - `test/mocks/mock_subscription_service.dart`
 - `test/unit/services/settings_service_v2_test.dart`
 
+#### InAppPurchaseConfigの完全移行
+- ✅ `InAppPurchaseConfig`の完全移行
+  - `getProductIdFromPlan()` - Planクラスから商品IDを取得するメソッド追加
+  - `getPlanFromProductId()` - 商品IDからPlanクラスを取得するメソッド追加
+  - `getDisplayNameFromPlan()` - Planクラスから表示名を取得するメソッド追加
+  - `getDescriptionFromPlan()` - Planクラスから説明文を取得するメソッド追加
+  - `isPurchasableFromPlan()` - Planクラスから購入可否を判定するメソッド追加
+  - 既存メソッドは@Deprecatedアノテーション付きで互換性レイヤーとして維持
+- ✅ テスト実行確認 - 全845テストが成功
+
+更新ファイル:
+- `lib/config/in_app_purchase_config.dart`
+
 ## フェーズ7: 完全削除への移行計画
 
 ### 7.1 現状分析（2025-07-26時点）
@@ -503,8 +516,8 @@ class PlanFactory {
 - [x] `SettingsService`の移行
   - [x] V2メソッドをメインに切り替え
   - [x] 旧メソッドを互換性レイヤーとして維持
-- [ ] `InAppPurchaseConfig`の更新
-  - [ ] Planクラスベースのマッピングに変更
+- [x] `InAppPurchaseConfig`の更新
+  - [x] Planクラスベースのマッピングに変更
 
 #### フェーズ7-C: UI層の完全移行（推定: 2-3時間）
 - [ ] `DiaryPreviewScreen`の更新

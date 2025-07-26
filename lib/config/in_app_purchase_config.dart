@@ -1,5 +1,8 @@
 import '../constants/subscription_constants.dart';
 import '../models/subscription_plan.dart';
+import '../models/plans/plan.dart';
+import '../models/plans/plan_factory.dart';
+import '../models/plans/basic_plan.dart';
 
 /// In-App Purchase設定管理クラス
 ///
@@ -45,7 +48,16 @@ class InAppPurchaseConfig {
     premiumYearlyProductId,
   ];
 
-  /// プランから商品IDを取得
+  /// プランから商品IDを取得（メイン実装 - Planクラス版）
+  static String getProductIdFromPlan(Plan plan) {
+    if (plan is BasicPlan) {
+      throw ArgumentError('Basic plan does not have a product ID');
+    }
+    return plan.productId;
+  }
+
+  /// プランから商品IDを取得（互換性レイヤー）
+  @Deprecated('Use getProductIdFromPlan() instead')
   static String getProductId(SubscriptionPlan plan) {
     switch (plan) {
       case SubscriptionPlan.premiumMonthly:
@@ -57,7 +69,19 @@ class InAppPurchaseConfig {
     }
   }
 
-  /// 商品IDからプランを取得
+  /// 商品IDからプランを取得（メイン実装 - Planクラス版）
+  static Plan getPlanFromProductId(String productId) {
+    // 全プランから商品IDが一致するものを検索
+    for (final plan in PlanFactory.getAllPlans()) {
+      if (plan.productId == productId) {
+        return plan;
+      }
+    }
+    throw ArgumentError('Unknown product ID: $productId');
+  }
+
+  /// 商品IDからプランを取得（互換性レイヤー）
+  @Deprecated('Use getPlanFromProductId() instead')
   static SubscriptionPlan getSubscriptionPlan(String productId) {
     switch (productId) {
       case 'smart_photo_diary_premium_monthly_plan':
@@ -158,7 +182,13 @@ class InAppPurchaseConfig {
   static String get premiumYearlyDescription =>
       'Access 100 AI diary generations per month and premium features with yearly billing. Save 22% compared to monthly plan.';
 
-  /// プランの表示名を取得
+  /// プランの表示名を取得（メイン実装 - Planクラス版）
+  static String getDisplayNameFromPlan(Plan plan) {
+    return plan.displayName;
+  }
+
+  /// プランの表示名を取得（互換性レイヤー）
+  @Deprecated('Use getDisplayNameFromPlan() instead')
   static String getDisplayName(SubscriptionPlan plan) {
     switch (plan) {
       case SubscriptionPlan.premiumMonthly:
@@ -170,7 +200,13 @@ class InAppPurchaseConfig {
     }
   }
 
-  /// プランの説明文を取得
+  /// プランの説明文を取得（メイン実装 - Planクラス版）
+  static String getDescriptionFromPlan(Plan plan) {
+    return plan.description;
+  }
+
+  /// プランの説明文を取得（互換性レイヤー）
+  @Deprecated('Use getDescriptionFromPlan() instead')
   static String getDescription(SubscriptionPlan plan) {
     switch (plan) {
       case SubscriptionPlan.premiumMonthly:
@@ -289,7 +325,13 @@ class InAppPurchaseConfig {
     return allProductIds.contains(productId);
   }
 
-  /// プランが購入可能かどうかをチェック
+  /// プランが購入可能かどうかをチェック（メイン実装 - Planクラス版）
+  static bool isPurchasableFromPlan(Plan plan) {
+    return plan.isPaid;
+  }
+
+  /// プランが購入可能かどうかをチェック（互換性レイヤー）
+  @Deprecated('Use isPurchasableFromPlan() instead')
   static bool isPurchasable(SubscriptionPlan plan) {
     return plan != SubscriptionPlan.basic;
   }
