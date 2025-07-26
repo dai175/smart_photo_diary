@@ -184,12 +184,12 @@ class PlanFactory {
 
 ### フェーズ3: モデル層の更新（推定: 2時間）
 
-- [ ] `SubscriptionInfo`クラスの更新
-  - [ ] `Plan`クラスを使用するよう変更
-  - [ ] ファクトリメソッドの更新
+- [x] `SubscriptionInfo`クラスの更新
+  - [x] `Plan`クラスを使用するよう変更
+  - [x] ファクトリメソッドの更新
 
-- [ ] `SubscriptionStatus`との統合
-  - [ ] プランIDからPlanインスタンスへの変換ロジック
+- [x] `SubscriptionStatus`との統合
+  - [x] プランIDからPlanインスタンスへの変換ロジック
 
 ### フェーズ4: テストの更新（推定: 3-4時間）
 
@@ -259,7 +259,7 @@ class PlanFactory {
 - [x] **実装開始**
 - [x] **フェーズ1完了**: 基盤実装
 - [x] **フェーズ2完了**: サービス層移行
-- [ ] **フェーズ3完了**: モデル層更新
+- [x] **フェーズ3完了**: モデル層更新
 - [ ] **フェーズ4完了**: テスト更新
 - [ ] **フェーズ5完了**: UI層更新
 - [ ] **フェーズ6完了**: クリーンアップ
@@ -341,3 +341,20 @@ class PlanFactory {
 - `lib/services/subscription_service.dart`
 - `lib/services/interfaces/subscription_service_interface.dart`
 - `lib/services/settings_service.dart`
+
+### フェーズ3完了 (2025-07-26)
+- ✅ `SubscriptionInfoV2`クラスの作成
+  - 新Planクラスを使用した実装
+  - 既存SubscriptionInfoとの相互変換機能
+- ✅ ヘルパークラスの実装
+  - `UsageStatisticsV2` - Planクラス対応
+  - `PlanPeriodInfoV2` - Planクラス対応
+- ✅ `SubscriptionStatus`拡張メソッドの実装
+  - `plan`プロパティでPlanインスタンス取得
+  - 便利なユーティリティメソッド追加
+- ✅ コードフォーマットとlintエラー解消
+
+作成ファイル:
+- `lib/models/subscription_info_v2.dart`
+- `lib/models/subscription_info_extensions.dart`
+- `lib/models/subscription_status_extensions.dart`
