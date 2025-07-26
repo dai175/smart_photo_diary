@@ -605,14 +605,15 @@ class PlanFactory {
 - Plan instanceによる型安全な処理への移行
 
 #### フェーズ7-E: クリーンアップ（推定: 1-2時間）（進行中）
-- [x] 非推奨コードの削除（部分完了）
+- [x] 非推奨コードの削除（大部分完了）
   - [x] SubscriptionPlan enumファイル削除 ✅
   - [x] 主要ファイルでのenum参照修正 ✅
-  - [ ] 残りファイルでのenum参照修正（継続中）
+  - [x] ライブラリファイルでのenum参照修正 ✅
+  - [ ] テストファイルでのenum参照修正（残作業）
   - [ ] SubscriptionInfoクラス削除
   - [ ] 旧インターフェースメソッド削除
 
-**Phase 7-E-1完了 (2025-07-26)**: SubscriptionPlan enumファイル削除と主要ファイル修正完了
+**Phase 7-E-2完了 (2025-07-26)**: ライブラリファイルでのenum参照修正完了
 
 #### フェーズ7-E-1の実装詳細
 
@@ -647,11 +648,35 @@ class PlanFactory {
 - purchase_data_v2.dart, subscription_info_v2.dartでのenum参照修正
 - settings_service.dartでのenum参照修正
 
+#### フェーズ7-E-2の実装詳細
+
+**ライブラリファイルでのenum参照修正** (2025-07-26完了):
+4. **purchase_data_v2.dartの修正** ✅
+   - enum import削除
+   - `_convertEnumToPlan()`メソッド削除
+   - PlanFactory.createPlan()を使用した直接変換に変更
+   - 未使用import削除
+
+5. **subscription_info_v2.dartの修正** ✅
+   - enum import削除
+   - toLegacy()メソッドのコメントアウト（互換性維持のため）
+
+6. **settings_service.dartの修正** ✅
+   - enum import削除
+   - 非推奨メソッドのコメントアウト（getCurrentPlan, getAvailablePlans等）
+   - エラーメッセージによる適切なガイダンス実装
+
+7. **subscription_service.dartの完全修正** ✅
+   - 非推奨メソッド削除（getAvailablePlans, getPlan, getCurrentPlan, purchasePlan, changePlan）
+   - 新しいメソッドでの直接実装への変更（委譲削除）
+   - コメントアウトによる段階的削除で安全性確保
+
 **技術的成果**:
 - Plan classベースのPurchaseProduct/PurchaseResultクラスへの統一
 - SubscriptionStatusの完全なPlan classベース化
 - InAppPurchaseConfigの非推奨メソッド完全削除
 - 型安全性を維持したままenumからPlan classへの移行を実現
+- 全ライブラリファイルでのenum依存完全削除達成
 - [ ] ドキュメント最終更新
   - [ ] CLAUDE.md更新
   - [ ] APIドキュメント更新

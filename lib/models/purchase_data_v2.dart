@@ -1,14 +1,11 @@
 import '../services/interfaces/subscription_service_interface.dart';
 import 'plans/plan.dart';
-import 'plans/basic_plan.dart';
-import 'plans/premium_monthly_plan.dart';
-import 'plans/premium_yearly_plan.dart';
-import 'subscription_plan.dart';
+import 'plans/plan_factory.dart';
 
 /// 購入商品情報（Planクラスベース版）
 ///
 /// In-App Purchase商品情報を表現するデータクラス。
-/// SubscriptionPlan enumの代わりにPlanクラスを使用します。
+/// Planクラスを使用したモダンなアーキテクチャです。
 class PurchaseProductV2 {
   /// 商品ID
   final String id;
@@ -50,7 +47,7 @@ class PurchaseProductV2 {
       price: legacy.price,
       priceAmount: legacy.priceAmount,
       currencyCode: legacy.currencyCode,
-      plan: _convertEnumToPlan(legacy.plan),
+      plan: PlanFactory.createPlan(legacy.plan.id),
     );
   }
 
@@ -63,7 +60,7 @@ class PurchaseProductV2 {
       price: price,
       priceAmount: priceAmount,
       currencyCode: currencyCode,
-      plan: SubscriptionPlan.fromId(plan.id),
+      plan: plan,
     );
   }
 
@@ -86,7 +83,7 @@ class PurchaseProductV2 {
 /// 購入結果情報（Planクラスベース版）
 ///
 /// In-App Purchaseの結果を表現するデータクラス。
-/// SubscriptionPlan enumの代わりにPlanクラスを使用します。
+/// Planクラスを使用したモダンなアーキテクチャです。
 class PurchaseResultV2 {
   /// 購入状態
   final PurchaseStatus status;
@@ -123,7 +120,7 @@ class PurchaseResultV2 {
       transactionId: legacy.transactionId,
       purchaseDate: legacy.purchaseDate,
       errorMessage: legacy.errorMessage,
-      plan: legacy.plan != null ? _convertEnumToPlan(legacy.plan!) : null,
+      plan: legacy.plan != null ? PlanFactory.createPlan(legacy.plan!.id) : null,
     );
   }
 
@@ -135,7 +132,7 @@ class PurchaseResultV2 {
       transactionId: transactionId,
       purchaseDate: purchaseDate,
       errorMessage: errorMessage,
-      plan: plan != null ? SubscriptionPlan.fromId(plan!.id) : null,
+      plan: plan,
     );
   }
 
@@ -172,16 +169,4 @@ class PurchaseResultV2 {
   }
 }
 
-// ヘルパー関数
-Plan _convertEnumToPlan(SubscriptionPlan enumPlan) {
-  // PlanFactoryを使用して変換
-  // 循環依存を避けるため、ここではdynamic importは使用しない
-  switch (enumPlan) {
-    case SubscriptionPlan.basic:
-      return BasicPlan();
-    case SubscriptionPlan.premiumMonthly:
-      return PremiumMonthlyPlan();
-    case SubscriptionPlan.premiumYearly:
-      return PremiumYearlyPlan();
-  }
-}
+// ヘルパー関数は不要になったため削除

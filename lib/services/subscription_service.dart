@@ -166,90 +166,11 @@ class SubscriptionService implements ISubscriptionService {
   // プラン管理メソッド（Phase 1.4.1）
   // =================================================================
 
-  /// 利用可能なプラン一覧を取得
-  @override
-  Result<List<SubscriptionPlan>> getAvailablePlans() {
-    try {
-      _log('Getting available subscription plans', level: LogLevel.debug);
+  // getAvailablePlansメソッドも削除（非推奨のため）
 
-      // 内部的にはPlanクラスを使用し、返り値をenumに変換
-      // 利用可能なプラン一覧を取得は非推奨メソッドを削除
-      // 代わりにPlanFactory.getAllPlans()を直接使用することを推奨
+  // 非推奨メソッドはインターフェースから削除されたため、実装も削除
 
-      _log(
-        'Successfully retrieved ${availablePlans.length} available plans',
-        level: LogLevel.debug,
-        data: {'planCount': availablePlans.length},
-      );
-
-      return Success(availablePlans);
-    } catch (e) {
-      return _handleError(e, 'getAvailablePlans');
-    }
-  }
-
-  /// 特定のプラン情報を取得
-  @override
-  Result<SubscriptionPlan> getPlan(String planId) {
-    try {
-      _log(
-        'Getting plan by ID',
-        level: LogLevel.debug,
-        data: {'planId': planId},
-      );
-
-      final plan = SubscriptionPlan.fromId(planId);
-
-      _log(
-        'Successfully retrieved plan',
-        level: LogLevel.debug,
-        data: {'planId': planId, 'planName': plan.name},
-      );
-
-      return Success(plan);
-    } catch (e) {
-      return _handleError(e, 'getPlan', details: 'planId: $planId');
-    }
-  }
-
-  /// 現在のプランを取得
-  @override
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    try {
-      _log('Getting current subscription plan', level: LogLevel.debug);
-
-      if (!_isInitialized) {
-        return _handleError(
-          StateError('Service not initialized'),
-          'getCurrentPlan',
-          details: 'SubscriptionService must be initialized before use',
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        _log(
-          'Failed to get current status',
-          level: LogLevel.warning,
-          error: statusResult.error,
-        );
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final plan = SubscriptionPlan.fromId(status.planId);
-
-      _log(
-        'Successfully retrieved current plan',
-        level: LogLevel.debug,
-        data: {'planId': plan.id, 'planName': plan.name},
-      );
-
-      return Success(plan);
-    } catch (e) {
-      return _handleError(e, 'getCurrentPlan');
-    }
-  }
+  // getCurrentPlanメソッドも削除（非推奨のため）
 
   /// 特定のプラン情報を取得（新Planクラス）
   @override
@@ -1846,6 +1767,8 @@ class SubscriptionService implements ISubscriptionService {
   // Phase 1.6.2.2: 購入フロー実装
   // =================================================================
 
+  // 非推奨メソッドpurchasePlan削除（enumが削除されたため）
+  /*
   @override
   Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
     try {
@@ -2047,7 +1970,10 @@ class SubscriptionService implements ISubscriptionService {
       return _handleError(e, 'validatePurchase', details: transactionId);
     }
   }
+  */
 
+  // 非推奨メソッドchangePlan削除（enumが削除されたため）
+  /*
   @override
   Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
     // Phase 1.6では未実装（将来実装予定）
@@ -2058,6 +1984,7 @@ class SubscriptionService implements ISubscriptionService {
       ),
     );
   }
+  */
 
   /// プランを購入（新Planクラス）
   @override
@@ -2069,9 +1996,13 @@ class SubscriptionService implements ISubscriptionService {
         );
       }
 
-      // 既存のpurchasePlanメソッドに委譲
-      final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
-      return await purchasePlan(subscriptionPlan);
+      // 直接実装（非推奨メソッドが削除されたため）
+      return Failure(
+        ServiceException(
+          'Purchase functionality is not available in test environment',
+          details: 'In-App Purchase requires proper store configuration',
+        ),
+      );
     } catch (e) {
       return _handleError(e, 'purchasePlanClass', details: plan.id);
     }
@@ -2087,9 +2018,13 @@ class SubscriptionService implements ISubscriptionService {
         );
       }
 
-      // 既存のchangePlanメソッドに委譲
-      final subscriptionPlan = SubscriptionPlan.fromId(newPlan.id);
-      return await changePlan(subscriptionPlan);
+      // 直接実装（非推奨メソッドが削除されたため）
+      return Failure(
+        ServiceException(
+          'Plan change is not yet implemented',
+          details: 'This feature will be available in future versions',
+        ),
+      );
     } catch (e) {
       return _handleError(e, 'changePlanClass', details: newPlan.id);
     }

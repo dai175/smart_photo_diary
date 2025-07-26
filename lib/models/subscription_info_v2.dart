@@ -1,6 +1,5 @@
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
-import 'subscription_plan.dart';
 import 'subscription_status.dart';
 import 'subscription_info.dart';
 
@@ -303,25 +302,15 @@ class SubscriptionInfoV2 {
   );
 
   /// 既存のSubscriptionInfoに変換（後方互換性用）
+  /// 注意: SubscriptionInfoクラスは非推奨です
+  /// このメソッドは段階的な移行期間中のみ使用し、将来的に削除予定です。
+  /*
+  @Deprecated('SubscriptionInfo class is deprecated, use SubscriptionInfoV2 instead')
   SubscriptionInfo toLegacy() {
-    final subscriptionPlan = SubscriptionPlan.fromId(currentPlan.id);
-
+    // 互換性のためにPlanクラスからの変換を実装
     // V2からレガシー版への変換
-    final legacyUsageStats = UsageStatistics.fromStatus(
-      status,
-      subscriptionPlan,
-    );
-    final legacyPeriodInfo = PlanPeriodInfo.fromStatus(
-      status,
-      subscriptionPlan,
-    );
-
-    return SubscriptionInfo(
-      currentPlan: subscriptionPlan,
-      status: status,
-      usageStats: legacyUsageStats,
-      periodInfo: legacyPeriodInfo,
-      autoRenewalInfo: autoRenewalInfo,
-    );
+    // このメソッドはenumクラス削除により一時的にコメントアウト
+    // 必要に応じて後で再実装
   }
+  */
 }

@@ -5,7 +5,6 @@ import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 import '../models/subscription_info.dart';
 import '../models/subscription_info_v2.dart';
-import '../models/subscription_plan.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
 import 'interfaces/subscription_service_interface.dart';
@@ -153,20 +152,15 @@ class SettingsService {
   }
 
   /// Phase 1.8.1.2: 現在のプラン情報を取得（互換性レイヤー）
+  /// 注意: SubscriptionPlan enumが削除されたため、このメソッドは無効化されました
+  /// 代わりにgetCurrentPlanClass()を使用してください
+  /*
   @Deprecated('Use getCurrentPlanClass() instead')
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      // 新しいメソッドを呼び出してPlanクラスを取得
-      final planClassResult = await getCurrentPlanClass();
-      if (planClassResult.isFailure) {
-        throw planClassResult.error;
-      }
-
-      // PlanクラスからSubscriptionPlan enumに変換
-      final plan = planClassResult.value;
-      return SubscriptionPlan.fromId(plan.id);
-    }, context: 'SettingsService.getCurrentPlan');
+    // SubscriptionPlan enumが削除されたため、このメソッドは無効
+    // getCurrentPlanClass()を使用してください
   }
+  */
 
   /// プラン期限情報を取得（メイン実装 - V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
@@ -210,11 +204,9 @@ class SettingsService {
         throw planResult.error;
       }
 
-      // PlanクラスからSubscriptionPlan enumに変換
-      final plan = planResult.value;
-      final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
-
-      return PlanPeriodInfo.fromStatus(statusResult.value, subscriptionPlan);
+      // V2版のメソッドを使用することを推奨
+      // このメソッドは非推奨のため、getPlanPeriodInfoV2()を使用
+      throw UnsupportedError('This method is deprecated. Use getPlanPeriodInfoV2() instead.');
     }, context: 'SettingsService.getPlanPeriodInfo');
   }
 
@@ -280,8 +272,9 @@ class SettingsService {
         throw plan.error;
       }
 
-      final subscriptionPlan = SubscriptionPlan.fromId(plan.value.id);
-      return UsageStatistics.fromStatus(status.value, subscriptionPlan);
+      // V2版のメソッドを使用することを推奨
+      // このメソッドは非推奨のため、getUsageStatisticsWithPlanClass()を使用
+      throw UnsupportedError('This method is deprecated. Use getUsageStatisticsWithPlanClass() instead.');
     }, context: 'SettingsService.getUsageStatistics');
   }
 
@@ -349,19 +342,12 @@ class SettingsService {
   }
 
   /// Phase 1.8.1.4: プラン比較情報を取得（互換性レイヤー）
+  /// 注意: SubscriptionPlan enumが削除されたため、このメソッドは無効化されました
+  /*
   @Deprecated('Use getAvailablePlansV2() instead')
   Future<Result<List<SubscriptionPlan>>> getAvailablePlans() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      if (_subscriptionService == null) {
-        throw StateError('SubscriptionService is not initialized');
-      }
-
-      final result = _subscriptionService!.getAvailablePlans();
-      if (result.isFailure) {
-        throw result.error;
-      }
-
-      return result.value;
-    }, context: 'SettingsService.getAvailablePlans');
+    // SubscriptionPlan enumが削除されたため、このメソッドは無効
+    // getAvailablePlansV2()を使用してください
   }
+  */
 }
