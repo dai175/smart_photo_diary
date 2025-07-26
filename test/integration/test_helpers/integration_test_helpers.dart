@@ -6,7 +6,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
@@ -400,6 +401,9 @@ class IntegrationTestHelpers {
     when(
       () => mockSubscriptionService.getCurrentPlan(),
     ).thenAnswer((_) async => const Success(SubscriptionPlan.basic));
+    when(
+      () => mockSubscriptionService.getCurrentPlanClass(),
+    ).thenAnswer((_) async => Success(BasicPlan()));
     when(
       () => mockSubscriptionService.canUseAiGeneration(),
     ).thenAnswer((_) async => const Success(true));

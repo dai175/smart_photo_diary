@@ -551,7 +551,14 @@ class PlanFactory {
   - [x] `mocks/mock_subscription_service_test.dart` - 29テスト成功
   - [x] `core/service_registration_subscription_test.dart` - 8テスト成功
 
-**Phase 7-D-2完了**: 合計196テストが全て成功 - enum使用を完全にPlan classに移行完了
+**Phase 7-D-2完了 (2025-07-26)**: 合計196テストが全て成功 - enum使用を完全にPlan classに移行完了
+
+#### 主要な修正内容
+- `SubscriptionService`に`createStatusClass(Plan plan)`メソッド追加
+- `MockSubscriptionService`に`getAvailablePlansClass()`メソッド追加  
+- `plan_test.dart`のプロパティ期待値修正（annualSavings → yearlySavings等）
+- `subscription_status_test.dart`のPlanFactory使用方法修正
+- 全テストでSubscriptionPlan enumからPlan classへの完全移行達成
 
 ##### フェーズ7-D-3: 統合テストの移行（9ファイル）
 - [ ] テストヘルパー（2ファイル）
