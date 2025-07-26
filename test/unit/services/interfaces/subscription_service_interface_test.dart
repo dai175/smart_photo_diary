@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
@@ -195,6 +197,55 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<void> dispose() async {
     // Mock implementation - nothing to dispose
+  }
+
+  // Plan class related methods
+  @override
+  Future<Result<void>> changePlanClass(Plan newPlan) async {
+    _planId = newPlan.id;
+    if (newPlan.isPaid) {
+      _expiryDate = DateTime.now().add(const Duration(days: 365));
+    } else {
+      _expiryDate = null;
+    }
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<Plan>> getCurrentPlanClass() async {
+    try {
+      final plan = PlanFactory.createPlan(_planId);
+      return Success(plan);
+    } catch (e) {
+      return Failure(
+        ServiceException('Failed to get current plan: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Result<Plan> getPlanClass(String planId) {
+    try {
+      final plan = PlanFactory.createPlan(planId);
+      return Success(plan);
+    } catch (e) {
+      return Failure(
+        ServiceException('Invalid plan ID: $planId'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
+    final result = PurchaseResult(
+      status: PurchaseStatus.purchased,
+      productId: plan.productId,
+      transactionId:
+          'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
+      purchaseDate: DateTime.now(),
+      plan: SubscriptionPlan.fromId(plan.id),
+    );
+    return Success(result);
   }
 }
 

@@ -193,15 +193,13 @@ class PlanFactory {
 
 ### フェーズ4: テストの更新（推定: 3-4時間）
 
-- [ ] 単体テストの作成・更新
-  - [ ] `plan_test.dart`の作成
-  - [ ] `plan_factory_test.dart`の作成
-  - [ ] 各プランクラスのテスト作成
+- [x] 単体テストの作成・更新
+  - [x] `plan_test.dart`の作成
+  - [x] `plan_factory_test.dart`の作成
+  - [x] 各プランクラスのテスト作成
 
-- [ ] 既存テストの更新
-  - [ ] `subscription_service_test.dart`の更新
-  - [ ] `subscription_plan_test.dart`の移行
-  - [ ] モックの更新
+- [x] 既存テストの更新
+  - [x] `MockSubscriptionService`の更新（新インターフェースメソッドの実装）
 
 ### フェーズ5: UI層の更新（推定: 2-3時間）
 
@@ -260,7 +258,7 @@ class PlanFactory {
 - [x] **フェーズ1完了**: 基盤実装
 - [x] **フェーズ2完了**: サービス層移行
 - [x] **フェーズ3完了**: モデル層更新
-- [ ] **フェーズ4完了**: テスト更新
+- [x] **フェーズ4完了**: テスト更新
 - [ ] **フェーズ5完了**: UI層更新
 - [ ] **フェーズ6完了**: クリーンアップ
 - [ ] **最終テスト実行**
@@ -358,3 +356,22 @@ class PlanFactory {
 - `lib/models/subscription_info_v2.dart`
 - `lib/models/subscription_info_extensions.dart`
 - `lib/models/subscription_status_extensions.dart`
+
+### フェーズ4完了 (2025-07-26)
+- ✅ 単体テストの作成完了
+  - `plan_test.dart` - Plan抽象クラスの包括的テスト
+  - `plan_factory_test.dart` - PlanFactoryの全機能テスト
+  - `basic_plan_test.dart` - BasicPlanの単体テスト
+  - `premium_monthly_plan_test.dart` - PremiumMonthlyPlanの単体テスト
+  - `premium_yearly_plan_test.dart` - PremiumYearlyPlanの単体テスト
+- ✅ 既存テストの更新
+  - `MockSubscriptionService`に新インターフェースメソッド追加
+- ✅ テスト実行確認 - 115件のテストが成功
+
+作成・更新ファイル:
+- `test/unit/models/plans/plan_test.dart`
+- `test/unit/models/plans/plan_factory_test.dart`
+- `test/unit/models/plans/basic_plan_test.dart`
+- `test/unit/models/plans/premium_monthly_plan_test.dart`
+- `test/unit/models/plans/premium_yearly_plan_test.dart`
+- `test/mocks/mock_subscription_service.dart`

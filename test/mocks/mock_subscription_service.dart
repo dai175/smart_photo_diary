@@ -1,6 +1,8 @@
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
@@ -277,6 +279,41 @@ class MockSubscriptionService implements ISubscriptionService {
     }
 
     return Success(statusResult.value.currentPlan);
+  }
+
+  @override
+  Result<Plan> getPlanClass(String planId) {
+    try {
+      final plan = PlanFactory.createPlan(planId);
+      return Success(plan);
+    } catch (e) {
+      return Failure(
+        ServiceException('Invalid plan ID: $planId'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Plan>> getCurrentPlanClass() async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    try {
+      final plan = PlanFactory.createPlan(statusResult.value.planId);
+      return Success(plan);
+    } catch (e) {
+      return Failure(
+        ServiceException('Invalid plan ID: ${statusResult.value.planId}'),
+      );
+    }
   }
 
   // =================================================================
@@ -588,6 +625,32 @@ class MockSubscriptionService implements ISubscriptionService {
     setCurrentPlan(newPlan);
 
     return const Success(null);
+  }
+
+  @override
+  Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    // 既存のpurchasePlanメソッドに委譲
+    final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
+    return await purchasePlan(subscriptionPlan);
+  }
+
+  @override
+  Future<Result<void>> changePlanClass(Plan newPlan) async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    // 既存のchangePlanメソッドに委譲
+    final subscriptionPlan = SubscriptionPlan.fromId(newPlan.id);
+    return await changePlan(subscriptionPlan);
   }
 
   @override

@@ -122,6 +122,11 @@ class PlanFactory {
 
   /// 商品IDからプランを取得
   static Plan? getPlanByProductId(String productId) {
+    // 空文字列の場合はnullを返す（BasicPlanのproductIdは空文字列）
+    if (productId.isEmpty) {
+      return null;
+    }
+
     try {
       return _planCache.values.firstWhere(
         (plan) => plan.productId == productId,
