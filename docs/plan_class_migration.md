@@ -542,14 +542,16 @@ class PlanFactory {
   - [x] `subscription_status_test.dart`
   - [x] `subscription_status_plan_test.dart`
   - [x] `purchase_data_v2_test.dart`
-- [ ] サービス層テスト（7ファイル）
-  - [ ] `subscription_service_test.dart`
-  - [ ] `subscription_service_usage_test.dart`
-  - [ ] `subscription_service_access_test.dart`
-  - [ ] `settings_service_subscription_test.dart`
-  - [ ] `interfaces/subscription_service_interface_test.dart`
-  - [ ] `mocks/mock_subscription_service_test.dart`
-  - [ ] `core/service_registration_subscription_test.dart`
+- [x] サービス層テスト（7ファイル）
+  - [x] `subscription_service_test.dart` - 33テスト成功
+  - [x] `subscription_service_usage_test.dart` - 33テスト成功
+  - [x] `subscription_service_access_test.dart` - 48テスト成功
+  - [x] `settings_service_subscription_test.dart` - 16テスト成功
+  - [x] `interfaces/subscription_service_interface_test.dart` - 29テスト成功
+  - [x] `mocks/mock_subscription_service_test.dart` - 29テスト成功
+  - [x] `core/service_registration_subscription_test.dart` - 8テスト成功
+
+**Phase 7-D-2完了**: 合計196テストが全て成功 - enum使用を完全にPlan classに移行完了
 
 ##### フェーズ7-D-3: 統合テストの移行（9ファイル）
 - [ ] テストヘルパー（2ファイル）

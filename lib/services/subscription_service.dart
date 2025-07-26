@@ -436,7 +436,68 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  /// 指定されたプランでサブスクリプション状態を作成
+  /// 指定されたプランでサブスクリプション状態を作成（Planクラス版）
+  Future<Result<SubscriptionStatus>> createStatusClass(Plan plan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      final now = DateTime.now();
+      SubscriptionStatus newStatus;
+
+      if (plan is BasicPlan) {
+        // Basicプランの場合
+        newStatus = SubscriptionStatus(
+          planId: plan.id,
+          isActive: true,
+          startDate: now,
+          expiryDate: null, // Basicプランは期限なし
+          autoRenewal: false,
+          monthlyUsageCount: 0,
+          lastResetDate: now,
+          transactionId: null,
+          lastPurchaseDate: null,
+        );
+      } else {
+        // Premiumプランの場合
+        final expiryDate = plan.isYearly
+            ? now.add(
+                Duration(days: SubscriptionConstants.subscriptionYearDays),
+              )
+            : now.add(
+                Duration(days: SubscriptionConstants.subscriptionMonthDays),
+              );
+
+        newStatus = SubscriptionStatus(
+          planId: plan.id,
+          isActive: true,
+          startDate: now,
+          expiryDate: expiryDate,
+          autoRenewal: true,
+          monthlyUsageCount: 0,
+          lastResetDate: now,
+          transactionId: null,
+          lastPurchaseDate: now,
+        );
+      }
+
+      await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
+      debugPrint(
+        'SubscriptionService: Created new status for plan: ${plan.id}',
+      );
+      return Success(newStatus);
+    } catch (e) {
+      debugPrint('SubscriptionService: Error creating status - $e');
+      return Failure(
+        ServiceException('Failed to create status', details: e.toString()),
+      );
+    }
+  }
+
+  /// 指定されたプランでサブスクリプション状態を作成（enumベース・互換性のため維持）
   Future<Result<SubscriptionStatus>> createStatus(SubscriptionPlan plan) async {
     try {
       if (!_isInitialized) {

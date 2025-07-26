@@ -4,6 +4,9 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
@@ -47,6 +50,15 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Result<List<SubscriptionPlan>> getAvailablePlans() {
     return Success(SubscriptionPlan.values);
+  }
+
+  @override
+  Result<List<Plan>> getAvailablePlansClass() {
+    return Success([
+      BasicPlan(),
+      PremiumMonthlyPlan(),
+      PremiumYearlyPlan(),
+    ]);
   }
 
   @override
@@ -286,29 +298,29 @@ void main() {
 
     group('プラン管理メソッドテスト', () {
       test('利用可能なプラン一覧を取得できる', () {
-        final result = service.getAvailablePlans();
+        final result = service.getAvailablePlansClass();
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals(SubscriptionPlan.values));
+        expect(result.value, isA<List<Plan>>());
         expect(result.value.length, equals(3));
+        expect(result.value[0], isA<BasicPlan>());
+        expect(result.value[1], isA<PremiumMonthlyPlan>());
+        expect(result.value[2], isA<PremiumYearlyPlan>());
       });
 
       test('特定のプラン情報を取得できる', () {
-        final basicResult = service.getPlan('basic');
-        final premiumYearlyResult = service.getPlan('premium_yearly');
+        final basicResult = service.getPlanClass('basic');
+        final premiumYearlyResult = service.getPlanClass('premium_yearly');
 
         expect(basicResult.isSuccess, isTrue);
-        expect(basicResult.value, equals(SubscriptionPlan.basic));
+        expect(basicResult.value, isA<BasicPlan>());
 
         expect(premiumYearlyResult.isSuccess, isTrue);
-        expect(
-          premiumYearlyResult.value,
-          equals(SubscriptionPlan.premiumYearly),
-        );
+        expect(premiumYearlyResult.value, isA<PremiumYearlyPlan>());
       });
 
       test('不正なプランIDでエラーが返される', () {
-        final result = service.getPlan('invalid');
+        final result = service.getPlanClass('invalid');
 
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
@@ -317,10 +329,11 @@ void main() {
       test('現在のプランを取得できる', () async {
         await service.initialize();
 
-        final result = await service.getCurrentPlan();
+        final result = await service.getCurrentPlanClass();
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals(SubscriptionPlan.basic));
+        expect(result.value, isA<BasicPlan>());
+        expect(result.value.id, equals('basic'));
       });
     });
 
@@ -445,13 +458,12 @@ void main() {
       test('プランを購入できる', () async {
         await service.initialize();
 
-        final result = await service.purchasePlan(
-          SubscriptionPlan.premiumYearly,
-        );
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        final result = await service.purchasePlanClass(premiumYearlyPlan);
 
         expect(result.isSuccess, isTrue);
         expect(result.value.status, equals(PurchaseStatus.purchased));
-        expect(result.value.plan, equals(SubscriptionPlan.premiumYearly));
+        expect(result.value.productId, equals(premiumYearlyPlan.productId));
         expect(result.value.isSuccess, isTrue);
       });
 
@@ -476,26 +488,28 @@ void main() {
       test('プランを変更できる', () async {
         await service.initialize();
 
-        final changeResult = await service.changePlan(
-          SubscriptionPlan.premiumYearly,
-        );
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        final changeResult = await service.changePlanClass(premiumYearlyPlan);
         expect(changeResult.isSuccess, isTrue);
 
-        final currentPlan = await service.getCurrentPlan();
-        expect(currentPlan.value, equals(SubscriptionPlan.premiumYearly));
+        final currentPlan = await service.getCurrentPlanClass();
+        expect(currentPlan.value, isA<PremiumYearlyPlan>());
+        expect(currentPlan.value.id, equals('premium_yearly'));
       });
 
       test('サブスクリプションをキャンセルできる', () async {
         await service.initialize();
 
         // Premium に変更してからキャンセル
-        await service.changePlan(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await service.changePlanClass(premiumYearlyPlan);
 
         final cancelResult = await service.cancelSubscription();
         expect(cancelResult.isSuccess, isTrue);
 
-        final currentPlan = await service.getCurrentPlan();
-        expect(currentPlan.value, equals(SubscriptionPlan.basic));
+        final currentPlan = await service.getCurrentPlanClass();
+        expect(currentPlan.value, isA<BasicPlan>());
+        expect(currentPlan.value.id, equals('basic'));
       });
     });
 

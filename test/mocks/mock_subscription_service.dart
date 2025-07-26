@@ -1,5 +1,6 @@
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
+import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -83,7 +84,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥300',
         priceAmount: 300.0,
         currencyCode: 'JPY',
-        plan: null, // V2では使用しない
+        plan: SubscriptionPlan.premiumMonthly,
       ),
       const PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
@@ -92,7 +93,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥2,800',
         priceAmount: 2800.0,
         currencyCode: 'JPY',
-        plan: null, // V2では使用しない
+        plan: SubscriptionPlan.premiumYearly,
       ),
     ];
   }
@@ -266,7 +267,20 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Result<List<SubscriptionPlan>> getAvailablePlans() {
     // @deprecated - 互換性のために保持
-    return const Success([]);
+    return const Success([
+      SubscriptionPlan.basic,
+      SubscriptionPlan.premiumMonthly,
+      SubscriptionPlan.premiumYearly,
+    ]);
+  }
+
+  @override
+  Result<List<Plan>> getAvailablePlansClass() {
+    return Success([
+      BasicPlan(),
+      PremiumMonthlyPlan(),
+      PremiumYearlyPlan(),
+    ]);
   }
 
   @override

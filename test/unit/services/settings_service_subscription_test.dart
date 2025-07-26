@@ -3,6 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/models/subscription_info.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import '../../../test/mocks/mock_subscription_service.dart';
@@ -87,7 +92,8 @@ void main() {
 
       test('Premiumプランでも正しく情報を取得できる', () async {
         // Arrange
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        mockSubscriptionService.setCurrentPlan(premiumMonthlyPlan);
 
         // Act
         final result = await settingsService.getSubscriptionInfo();
@@ -123,7 +129,8 @@ void main() {
         final now = DateTime.now();
         final expiryDate = now.add(const Duration(days: 30));
 
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        mockSubscriptionService.setCurrentPlan(premiumMonthlyPlan);
         mockSubscriptionService.setExpiryDate(expiryDate);
 
         // Act
@@ -147,7 +154,8 @@ void main() {
           now.day,
         ).add(const Duration(days: 5)); // 5日後
 
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan2 = PremiumMonthlyPlan();
+        mockSubscriptionService.setCurrentPlan(premiumMonthlyPlan2);
         mockSubscriptionService.setExpiryDate(expiryDate);
 
         // Act
@@ -182,7 +190,8 @@ void main() {
 
       test('自動更新有効時の情報を正しく取得できる', () async {
         // Arrange
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan3 = PremiumMonthlyPlan();
+        mockSubscriptionService.setCurrentPlan(premiumMonthlyPlan3);
         mockSubscriptionService.setAutoRenewal(true);
 
         // Act
@@ -267,11 +276,11 @@ void main() {
 
       test('getAvailablePlans()で利用可能プラン一覧を取得できる', () async {
         // Act
-        final result = await settingsService.getAvailablePlans();
+        final result = await settingsService.getAvailablePlansV2();
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.value, isA<List<SubscriptionPlan>>());
+        expect(result.value, isA<List<Plan>>());
         expect(result.value.length, equals(3)); // Basic, Premium月額, Premium年額
       });
     });
@@ -287,7 +296,8 @@ void main() {
     group('データ変換テスト', () {
       test('SubscriptionInfo.fromStatus()でデータ変換が正しく行われる', () async {
         // Arrange
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan4 = PremiumMonthlyPlan();
+        mockSubscriptionService.setCurrentPlan(premiumMonthlyPlan4);
         mockSubscriptionService.setUsageCount(25);
 
         // Act

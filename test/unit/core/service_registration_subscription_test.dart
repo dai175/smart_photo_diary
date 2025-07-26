@@ -3,6 +3,11 @@ import 'package:hive/hive.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'dart:io';
 
@@ -88,12 +93,11 @@ void main() {
       // Act & Assert - 基本機能の動作確認
 
       // 1. プラン一覧取得
-      final plansResult = subscriptionService.getAvailablePlans();
-      expect(plansResult.isSuccess, isTrue);
-      expect(plansResult.value.length, equals(3));
+      final allPlans = PlanFactory.getAllPlans();
+      expect(allPlans.length, equals(3));
 
       // 2. 現在のプラン取得
-      final currentPlanResult = await subscriptionService.getCurrentPlan();
+      final currentPlanResult = await subscriptionService.getCurrentPlanClass();
       expect(currentPlanResult.isSuccess, isTrue);
       expect(currentPlanResult.value.id, equals('basic'));
 
@@ -164,8 +168,9 @@ void main() {
       );
 
       // 購入機能（テスト環境では失敗）
-      final purchaseResult = await subscriptionService.purchasePlan(
-        SubscriptionPlan.premiumMonthly,
+      final premiumMonthlyPlan = PremiumMonthlyPlan();
+      final purchaseResult = await subscriptionService.purchasePlanClass(
+        premiumMonthlyPlan,
       );
       expect(purchaseResult.isFailure, isTrue);
       expect(
@@ -189,8 +194,10 @@ void main() {
       expect(validateResult.value, isFalse);
 
       // プラン変更（未実装）
-      final changeResult = await subscriptionService.changePlan(
-        subscriptionService.getAvailablePlans().value.last,
+      final allPlans = PlanFactory.getAllPlans();
+      final lastPlan = allPlans.last;
+      final changeResult = await subscriptionService.changePlanClass(
+        lastPlan,
       );
       expect(changeResult.isFailure, isTrue);
 
