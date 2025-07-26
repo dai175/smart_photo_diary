@@ -3,8 +3,14 @@ import 'subscription_status.dart';
 
 /// サブスクリプション情報を統合的に管理するデータモデル
 /// 設定画面や状態表示で使用するための包括的な情報を提供します
+///
+/// @deprecated 新しいSubscriptionInfoV2クラスの使用を推奨します。
+/// lib/models/subscription_info_v2.dartを参照してください。
 
 /// 設定画面表示用のサブスクリプション情報
+@Deprecated(
+  'Use SubscriptionInfoV2 from lib/models/subscription_info_v2.dart instead',
+)
 class SubscriptionInfo {
   /// 現在のプラン
   final SubscriptionPlan currentPlan;

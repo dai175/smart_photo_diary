@@ -32,7 +32,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
   SubscriptionInfo? _subscriptionInfo;
-  SubscriptionInfoV2? _subscriptionInfoV2;
+  // ignore: unused_field
+  SubscriptionInfoV2? _subscriptionInfoV2; // 将来の移行のために保持
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
 

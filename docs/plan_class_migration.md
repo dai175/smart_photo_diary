@@ -210,9 +210,11 @@ class PlanFactory {
 
 ### フェーズ6: クリーンアップ（推定: 1-2時間）
 
-- [ ] 既存enumの削除
-  - [ ] `SubscriptionPlan` enumの削除
-  - [ ] 関連する不要なコードの削除
+- [x] 既存enumの削除準備
+  - [x] `SubscriptionPlan` enumに@Deprecatedアノテーション追加
+  - [x] インターフェースの旧メソッドに@Deprecatedアノテーション追加
+  - [x] `SubscriptionInfo`クラスに@Deprecatedアノテーション追加
+  - [ ] 完全削除は将来のリリースで実施予定
 
 - [ ] ドキュメント更新
   - [ ] CLAUDE.mdの更新
@@ -375,3 +377,245 @@ class PlanFactory {
 - `test/unit/models/plans/premium_monthly_plan_test.dart`
 - `test/unit/models/plans/premium_yearly_plan_test.dart`
 - `test/mocks/mock_subscription_service.dart`
+
+### フェーズ5完了 (2025-07-26)
+- ✅ UI層の更新完了
+  - `SettingsScreen`でSubscriptionInfoV2サポート追加
+  - `UpgradeDialogUtils`にV2メソッド実装
+  - PremiumYearlyPlanの割引表示対応
+- ✅ 116件のテストが成功
+- ✅ コードフォーマットとlintチェック完了
+
+更新ファイル:
+- `lib/screens/settings_screen.dart`
+- `lib/utils/upgrade_dialog_utils.dart`
+
+### フェーズ6実施中 (2025-07-26)
+- ✅ 既存enumの削除準備
+  - `SubscriptionPlan` enumに@Deprecatedアノテーション追加
+  - `ISubscriptionService`インターフェースの旧メソッドに@Deprecatedアノテーション追加
+  - `SubscriptionInfo`クラスに@Deprecatedアノテーション追加
+- ⏳ 完全な削除は将来のリリースで段階的に実施予定
+
+更新ファイル:
+- `lib/models/subscription_plan.dart`
+- `lib/services/interfaces/subscription_service_interface.dart`
+- `lib/models/subscription_info.dart`
+
+## フェーズ7: 完全削除への移行計画
+
+### 7.1 現状分析（2025-07-26時点）
+
+#### enum依存ファイル数
+- **合計26ファイル**がSubscriptionPlan enumをimport
+- **内訳**:
+  - モデル層: 4ファイル
+  - サービス層: 3ファイル
+  - UI層: 2ファイル
+  - テスト: 14ファイル
+  - 設定: 1ファイル
+  - ヘルパー: 2ファイル
+
+#### 主要な依存箇所
+1. **SubscriptionStatus**: enumを直接使用（planId経由で間接参照）
+2. **PurchaseProduct/PurchaseResult**: enumフィールドを持つ
+3. **InAppPurchaseConfig**: enum値でプロダクトIDマッピング
+4. **テストコード**: モック実装で広範囲に使用
+
+### 7.2 段階的移行戦略
+
+#### フェーズ7-A: コアモデル層の移行（推定: 3-4時間）
+- [ ] `SubscriptionStatus`の拡張
+  - [ ] Planクラスへの直接参照を追加
+  - [ ] enumとの相互変換メソッド実装
+- [ ] `PurchaseProductV2`/`PurchaseResultV2`の作成
+  - [ ] Planクラスベースの新データクラス
+  - [ ] 既存クラスとの互換性維持
+
+#### フェーズ7-B: サービス層の完全移行（推定: 4-5時間）
+- [ ] `SubscriptionService`の内部実装をPlanクラスに統一
+  - [ ] enum使用箇所をすべてPlanクラスに置換
+  - [ ] 互換性メソッドを通じて外部インターフェースを維持
+- [ ] `SettingsService`の移行
+  - [ ] V2メソッドをメインに切り替え
+  - [ ] 旧メソッドを互換性レイヤーとして維持
+- [ ] `InAppPurchaseConfig`の更新
+  - [ ] Planクラスベースのマッピングに変更
+
+#### フェーズ7-C: UI層の完全移行（推定: 2-3時間）
+- [ ] `DiaryPreviewScreen`の更新
+  - [ ] SubscriptionPlan参照をPlanクラスに変更
+- [ ] `UpgradeDialogUtils`の統合
+  - [ ] V2メソッドをメインメソッドに昇格
+  - [ ] 旧メソッドの削除
+
+#### フェーズ7-D: テストコードの移行（推定: 5-6時間）
+- [ ] 単体テストの更新
+  - [ ] enum使用箇所をPlanFactoryに置換
+  - [ ] モック実装の更新
+- [ ] 統合テストの更新
+  - [ ] テストヘルパーの移行
+  - [ ] 期待値の更新
+
+#### フェーズ7-E: クリーンアップ（推定: 1-2時間）
+- [ ] 非推奨コードの削除
+  - [ ] SubscriptionPlan enumファイル削除
+  - [ ] SubscriptionInfoクラス削除
+  - [ ] 旧インターフェースメソッド削除
+- [ ] ドキュメント最終更新
+  - [ ] CLAUDE.md更新
+  - [ ] APIドキュメント更新
+
+### 7.3 移行時の考慮事項
+
+#### リスク管理
+1. **後方互換性の維持**
+   - 各フェーズで既存機能の動作を保証
+   - 段階的なリリースで問題を早期発見
+
+2. **データ移行**
+   - 既存のHiveデータベースとの互換性維持
+   - planId文字列ベースの相互運用性確保
+
+3. **外部依存**
+   - In-App Purchaseライブラリとの統合
+   - プロダクトIDマッピングの一貫性
+
+#### テスト戦略
+1. **回帰テスト**
+   - 各フェーズ完了時に全テストスイート実行
+   - 本番環境に近い統合テストの重視
+
+2. **段階的リリース**
+   - feature flagによる新実装の段階的有効化
+   - A/Bテストによる影響測定
+
+### 7.4 スケジュール案
+
+| フェーズ | 作業内容 | 推定工数 | 優先度 |
+|----------|----------|----------|--------|
+| 7-A | コアモデル層移行 | 3-4時間 | 高 |
+| 7-B | サービス層完全移行 | 4-5時間 | 高 |
+| 7-C | UI層完全移行 | 2-3時間 | 中 |
+| 7-D | テストコード移行 | 5-6時間 | 中 |
+| 7-E | クリーンアップ | 1-2時間 | 低 |
+
+**合計推定工数**: 15-20時間
+
+### 7.5 成功基準
+
+1. **機能面**
+   - 全ての既存機能が新アーキテクチャで動作
+   - パフォーマンスの維持または向上
+
+2. **品質面**
+   - テストカバレッジ100%維持
+   - lintエラー0件
+   - 実行時エラー0件
+
+3. **保守性**
+   - コード行数の削減（目標: 20%削減）
+   - 循環的複雑度の改善
+   - 新プラン追加時の変更箇所最小化
+
+### 7.6 具体的な移行例
+
+#### PurchaseProductV2の実装例
+```dart
+// 新しいPlanクラスベースの実装
+class PurchaseProductV2 {
+  final String id;
+  final String title;
+  final String description;
+  final String price;
+  final double priceAmount;
+  final String currencyCode;
+  final Plan plan; // enumではなくPlanクラスを使用
+
+  const PurchaseProductV2({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.price,
+    required this.priceAmount,
+    required this.currencyCode,
+    required this.plan,
+  });
+
+  // 既存PurchaseProductからの変換
+  factory PurchaseProductV2.fromLegacy(PurchaseProduct legacy) {
+    return PurchaseProductV2(
+      id: legacy.id,
+      title: legacy.title,
+      description: legacy.description,
+      price: legacy.price,
+      priceAmount: legacy.priceAmount,
+      currencyCode: legacy.currencyCode,
+      plan: PlanFactory.createPlan(legacy.plan.id),
+    );
+  }
+
+  // 既存PurchaseProductへの変換（互換性のため）
+  PurchaseProduct toLegacy() {
+    return PurchaseProduct(
+      id: id,
+      title: title,
+      description: description,
+      price: price,
+      priceAmount: priceAmount,
+      currencyCode: currencyCode,
+      plan: SubscriptionPlan.fromId(plan.id),
+    );
+  }
+}
+```
+
+#### サービス層の移行例
+```dart
+// SubscriptionServiceの内部実装
+class SubscriptionService implements ISubscriptionService {
+  // 内部ではPlanクラスを使用
+  Plan _currentPlan = BasicPlan();
+
+  // 新しいPlanクラスベースのメソッド（メイン実装）
+  @override
+  Future<Result<Plan>> getCurrentPlanClass() async {
+    return Success(_currentPlan);
+  }
+
+  // 既存enumベースのメソッド（互換性レイヤー）
+  @override
+  @Deprecated('Use getCurrentPlanClass() instead')
+  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
+    final planResult = await getCurrentPlanClass();
+    return planResult.map((plan) => SubscriptionPlan.fromId(plan.id));
+  }
+}
+```
+
+#### テストコードの移行例
+
+移行前（enum使用）:
+```dart
+final plan = SubscriptionPlan.premiumMonthly;
+expect(plan.price, 300);
+```
+
+移行後（Planクラス使用）:
+```dart
+final plan = PlanFactory.createPlan('premium_monthly');
+expect(plan.price, 300);
+expect(plan, isA<PremiumMonthlyPlan>());
+```
+
+### 7.7 移行チェックリスト
+
+完全削除前の最終確認項目：
+
+- [ ] 全てのテストが成功（回帰なし）
+- [ ] パフォーマンステスト合格
+- [ ] メモリ使用量の増加なし
+- [ ] 新旧APIの動作確認
+- [ ] ドキュメント更新完了
+- [ ] チーム内レビュー完了
+- [ ] 段階的リリース計画承認

@@ -30,15 +30,21 @@ abstract class ISubscriptionService {
   // ========================================
 
   /// 利用可能なプラン一覧を取得
+  /// @deprecated Planクラスベースのメソッドへの移行を推奨
+  @Deprecated('Use PlanFactory.getAllPlans() instead')
   Result<List<SubscriptionPlan>> getAvailablePlans();
 
   /// 特定のプラン情報を取得（既存enum互換）
+  /// @deprecated getPlanClass()メソッドの使用を推奨
+  @Deprecated('Use getPlanClass() instead')
   Result<SubscriptionPlan> getPlan(String planId);
 
   /// 特定のプラン情報を取得（新Planクラス）
   Result<Plan> getPlanClass(String planId);
 
   /// 現在のプランを取得（既存enum互換）
+  /// @deprecated getCurrentPlanClass()メソッドの使用を推奨
+  @Deprecated('Use getCurrentPlanClass() instead')
   Future<Result<SubscriptionPlan>> getCurrentPlan();
 
   /// 現在のプランを取得（新Planクラス）
@@ -97,6 +103,8 @@ abstract class ISubscriptionService {
   Future<Result<List<PurchaseProduct>>> getProducts();
 
   /// プランを購入（既存enum互換）
+  /// @deprecated purchasePlanClass()メソッドの使用を推奨
+  @Deprecated('Use purchasePlanClass() instead')
   Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan);
 
   /// プランを購入（新Planクラス）
@@ -109,6 +117,8 @@ abstract class ISubscriptionService {
   Future<Result<bool>> validatePurchase(String transactionId);
 
   /// プランを変更（既存enum互換）
+  /// @deprecated changePlanClass()メソッドの使用を推奨
+  @Deprecated('Use changePlanClass() instead')
   Future<Result<void>> changePlan(SubscriptionPlan newPlan);
 
   /// プランを変更（新Planクラス）

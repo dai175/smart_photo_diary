@@ -2,8 +2,12 @@ import '../constants/subscription_constants.dart';
 
 /// サブスクリプションプラン定義
 ///
+/// @deprecated 新しいPlanクラスベースのアーキテクチャに移行中です。
+/// 新規コードではlib/models/plans/plan.dartとplan_factory.dartを使用してください。
+///
 /// Smart Photo Diaryで利用可能なサブスクリプションプランを定義します。
 /// このenumは価格、機能制限、機能フラグを管理します。
+@Deprecated('Use Plan class from lib/models/plans/ instead')
 enum SubscriptionPlan {
   /// Basic プラン（無料）
   /// - 基本機能のみ
