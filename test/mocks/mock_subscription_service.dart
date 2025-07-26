@@ -138,6 +138,11 @@ class MockSubscriptionService implements ISubscriptionService {
     _statusUpdates.add(_currentStatus);
   }
 
+  /// テスト用: プランクラスを直接設定（Planクラス版）
+  void setCurrentPlanClass(Plan plan) {
+    setCurrentPlan(plan);
+  }
+
   /// テスト用: 使用量を設定
   void setUsageCount(int count) {
     _monthlyUsageCount = count;

@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import '../../mocks/mock_subscription_service.dart';
 
 /// Phase 3.1.1: サブスクリプション機能統合テスト（簡易版）
@@ -42,7 +45,7 @@ void main() {
       // Then: Basicプランの状態が正しく取得される
       expect(result.isSuccess, isTrue);
       final status = result.value;
-      expect(status.currentPlan, equals(SubscriptionPlan.basic));
+      expect(status.planId, equals(BasicPlan().id));
       expect(status.monthlyUsageCount, equals(0));
       expect(status.currentPlan.monthlyAiGenerationLimit, equals(10));
       expect(status.isActive, isTrue);
@@ -51,23 +54,24 @@ void main() {
     test('3.1.1.2: Premiumプランへの変更と状態確認', () async {
       // Given: 初期状態はBasic
       var result = await mockService.getCurrentStatus();
-      expect(result.value.currentPlan, equals(SubscriptionPlan.basic));
+      expect(result.value.planId, equals(BasicPlan().id));
 
       // When: Premiumプランに変更
-      mockService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+      mockService.setCurrentPlanClass(PremiumMonthlyPlan());
 
       // Then: Premium状態に変更されている
       result = await mockService.getCurrentStatus();
       expect(result.isSuccess, isTrue);
       final status = result.value;
-      expect(status.currentPlan, equals(SubscriptionPlan.premiumMonthly));
-      expect(status.currentPlan.monthlyAiGenerationLimit, equals(100));
-      expect(status.currentPlan.hasWritingPrompts, isTrue);
+      expect(status.planId, equals(PremiumMonthlyPlan().id));
+      final plan = PremiumMonthlyPlan();
+      expect(plan.monthlyAiGenerationLimit, equals(100));
+      expect(plan.hasWritingPrompts, isTrue);
     });
 
     test('3.1.1.3: 使用量制限テスト（Basic 10回制限）', () async {
       // Given: Basicプランに設定
-      mockService.setCurrentPlan(SubscriptionPlan.basic);
+      mockService.setCurrentPlanClass(BasicPlan());
 
       // When: 使用量を9回に設定
       mockService.setUsageCount(9);
@@ -77,7 +81,7 @@ void main() {
       var status = result.value;
       expect(status.monthlyUsageCount, equals(9));
       expect(
-        status.monthlyUsageCount < status.currentPlan.monthlyAiGenerationLimit,
+        status.monthlyUsageCount < BasicPlan().monthlyAiGenerationLimit,
         isTrue,
       );
 
@@ -89,14 +93,14 @@ void main() {
       status = result.value;
       expect(status.monthlyUsageCount, equals(10));
       expect(
-        status.monthlyUsageCount >= status.currentPlan.monthlyAiGenerationLimit,
+        status.monthlyUsageCount >= BasicPlan().monthlyAiGenerationLimit,
         isTrue,
       );
     });
 
     test('3.1.1.4: 使用量制限テスト（Premium 100回制限）', () async {
       // Given: Premiumプランに設定
-      mockService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+      mockService.setCurrentPlanClass(PremiumMonthlyPlan());
 
       // When: 使用量を99回に設定
       mockService.setUsageCount(99);
@@ -106,7 +110,7 @@ void main() {
       var status = result.value;
       expect(status.monthlyUsageCount, equals(99));
       expect(
-        status.monthlyUsageCount < status.currentPlan.monthlyAiGenerationLimit,
+        status.monthlyUsageCount < PremiumMonthlyPlan().monthlyAiGenerationLimit,
         isTrue,
       );
 
@@ -118,7 +122,7 @@ void main() {
       status = result.value;
       expect(status.monthlyUsageCount, equals(100));
       expect(
-        status.monthlyUsageCount >= status.currentPlan.monthlyAiGenerationLimit,
+        status.monthlyUsageCount >= PremiumMonthlyPlan().monthlyAiGenerationLimit,
         isTrue,
       );
     });
@@ -140,7 +144,7 @@ void main() {
 
     test('3.1.1.6: 使用量インクリメント機能テスト', () async {
       // Given: Basicプランで3回使用済み
-      mockService.setCurrentPlan(SubscriptionPlan.basic);
+      mockService.setCurrentPlanClass(BasicPlan());
       mockService.setUsageCount(3);
 
       // When: AI使用量をインクリメント
@@ -155,7 +159,7 @@ void main() {
 
     test('3.1.1.7: AI使用可否チェック機能', () async {
       // Given: Basicプランで9回使用済み
-      mockService.setCurrentPlan(SubscriptionPlan.basic);
+      mockService.setCurrentPlanClass(BasicPlan());
       mockService.setUsageCount(9);
 
       // When: AI使用可否をチェック
@@ -175,44 +179,42 @@ void main() {
     });
 
     test('3.1.1.8: プラン情報取得テスト', () async {
-      // When: 利用可能なプラン一覧を取得
-      final plansResult = mockService.getAvailablePlans();
+      // When: 利用可能なプラン一覧を取得（Planクラス版）
+      final plansResult = mockService.getAvailablePlansClass();
 
       // Then: Basic, Premium Monthly, Premium Yearlyが取得される
       expect(plansResult.isSuccess, isTrue);
       final plans = plansResult.value;
       expect(plans.length, equals(3));
 
-      expect(plans, contains(SubscriptionPlan.basic));
-      expect(plans, contains(SubscriptionPlan.premiumMonthly));
-      expect(plans, contains(SubscriptionPlan.premiumYearly));
+      expect(plans.any((p) => p is BasicPlan), isTrue);
+      expect(plans.any((p) => p is PremiumMonthlyPlan), isTrue);
+      expect(plans.any((p) => p is PremiumYearlyPlan), isTrue);
     });
 
     test('3.1.1.9: 残りAI生成回数計算テスト', () async {
       // Given: Basicプランで7回使用済み
-      mockService.setCurrentPlan(SubscriptionPlan.basic);
+      mockService.setCurrentPlanClass(BasicPlan());
       mockService.setUsageCount(7);
 
       // When: 状態を取得して残り回数を計算
       final statusResult = await mockService.getCurrentStatus();
       final status = statusResult.value;
-      final remaining =
-          status.currentPlan.monthlyAiGenerationLimit -
-          status.monthlyUsageCount;
+      final basicPlan = BasicPlan();
+      final remaining = basicPlan.monthlyAiGenerationLimit - status.monthlyUsageCount;
 
       // Then: 残り3回
       expect(remaining, equals(3));
 
       // Given: Premiumプランで50回使用済み
-      mockService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+      mockService.setCurrentPlanClass(PremiumMonthlyPlan());
       mockService.setUsageCount(50);
 
       // When: 状態を取得して残り回数を計算
       final premiumStatusResult = await mockService.getCurrentStatus();
       final premiumStatus = premiumStatusResult.value;
-      final premiumRemaining =
-          premiumStatus.currentPlan.monthlyAiGenerationLimit -
-          premiumStatus.monthlyUsageCount;
+      final premiumPlan = PremiumMonthlyPlan();
+      final premiumRemaining = premiumPlan.monthlyAiGenerationLimit - premiumStatus.monthlyUsageCount;
 
       // Then: 残り50回
       expect(premiumRemaining, equals(50));

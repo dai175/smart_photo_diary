@@ -3,7 +3,8 @@ import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../unit/helpers/hive_test_helpers.dart';
 
@@ -111,7 +112,7 @@ void main() {
         // 初期状態も確認
         final statusResult = await service.getCurrentStatus();
         expect(statusResult.isSuccess, isTrue);
-        expect(statusResult.value.planId, equals(SubscriptionPlan.basic.id));
+        expect(statusResult.value.planId, equals(BasicPlan().id));
       });
 
       test('依存注入を使った他サービスとの連携確認', () async {
@@ -288,9 +289,9 @@ void main() {
         final canUseAfter5 = await subscriptionService.canUseAiGeneration();
         expect(canUseAfter5.value, isTrue); // まだ5回残っているので使用可能
 
-        // 3. changePlanは未実装なので、エラーが返されることを確認
-        final changePlanResult = await subscriptionService.changePlan(
-          SubscriptionPlan.premiumYearly,
+        // 3. changePlanClassを使用してPlanクラス版をテスト
+        final changePlanResult = await subscriptionService.changePlanClass(
+          PremiumYearlyPlan(),
         );
         expect(changePlanResult.isFailure, isTrue);
         expect(
@@ -601,9 +602,9 @@ void main() {
         final basicUsageStatus = await service.getCurrentStatus();
         expect(basicUsageStatus.value.monthlyUsageCount, equals(5));
 
-        // 3. changePlan は未実装なので、エラーを確認
-        final changePlanResult = await service.changePlan(
-          SubscriptionPlan.premiumYearly,
+        // 3. changePlanClassを使用してPlanクラス版をテスト
+        final changePlanResult = await service.changePlanClass(
+          PremiumYearlyPlan(),
         );
         expect(changePlanResult.isFailure, isTrue);
 

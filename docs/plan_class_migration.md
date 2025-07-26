@@ -560,16 +560,49 @@ class PlanFactory {
 - `subscription_status_test.dart`のPlanFactory使用方法修正
 - 全テストでSubscriptionPlan enumからPlan classへの完全移行達成
 
-##### フェーズ7-D-3: 統合テストの移行（9ファイル）
-- [ ] テストヘルパー（2ファイル）
-  - [ ] `test_helpers/integration_test_helpers.dart`
-  - [ ] `mocks/mock_services.dart`
-- [ ] 機能テスト（7ファイル）
-  - [ ] `subscription_service_integration_test.dart`
-  - [ ] `basic_subscription_test.dart`
-  - [ ] `prompt_features_test.dart`
-  - [ ] `in_app_purchase_sandbox_test.dart`
-  - [ ] `in_app_purchase_integration_test.dart`
+##### フェーズ7-D-3: 統合テストの移行（7ファイル）（完了）
+- [x] テストヘルパー（2ファイル）
+  - [x] `test_helpers/integration_test_helpers.dart` ✅
+  - [x] `mocks/mock_services.dart` ✅
+- [x] 機能テスト（5ファイル）
+  - [x] `subscription_service_integration_test.dart` ✅
+  - [x] `basic_subscription_test.dart` ✅ (10テスト成功)
+  - [x] `prompt_features_test.dart` ✅ (12テスト成功)
+  - [x] `in_app_purchase_sandbox_test.dart` ✅ (24テスト成功)
+  - [x] `in_app_purchase_integration_test.dart` ✅ (17テスト成功)
+
+**Phase 7-D-3完了 (2025-07-26)**: 合計66テストが全て成功 - 統合テストの完全なenum → Plan class移行完了
+
+#### 主要な修正内容
+- **MockSubscriptionService拡張**: `setCurrentPlanClass()`メソッド追加
+- **InAppPurchaseConfig V2メソッド使用**: `getProductIdFromPlan()`, `getDisplayNameFromPlan()`, `getDescriptionFromPlan()`, `isPurchasableFromPlan()`
+- **Planクラスメソッド移行**: `purchasePlanClass()`, `changePlanClass()`, `getAvailablePlansClass()`使用
+- **PlanFactory活用**: `PlanFactory.getAllPlans()`を使用した繰り返し処理への統一
+- **enum参照完全削除**: 全7ファイルから`SubscriptionPlan.`参照を削除
+
+#### テスト成功実績
+- `integration_test_helpers.dart`: Plan class helper methods実装 ✅
+- `mock_services.dart`: Plan class対応拡張 ✅
+- `subscription_service_integration_test.dart`: enum → Plan class移行完了 ✅
+- `basic_subscription_test.dart`: 10テスト成功 ✅
+- `prompt_features_test.dart`: 12テスト成功 ✅ 
+- `in_app_purchase_sandbox_test.dart`: 24テスト成功 ✅
+- `in_app_purchase_integration_test.dart`: 17テスト成功（ヘルパーメソッド無効化含む） ✅
+
+#### 実装詳細
+**統合テストヘルパーの完全移行**:
+- `setupMockSubscriptionPlan()`メソッドでPlan classを直接受け取る設計
+- Plan特性に基づく動的mock設定（isPremium, hasWritingPrompts等）
+- `getBasicPlanSubscriptionService()`, `getPremiumMonthlyPlanSubscriptionService()`等のファクトリーメソッド追加
+
+**InAppPurchaseConfig V2統合**:
+- 全ての商品ID取得を`getProductIdFromPlan()`に統一
+- 表示名・説明文取得を`getDisplayNameFromPlan()`, `getDescriptionFromPlan()`に統一
+- 購入可否判定を`isPurchasableFromPlan()`に統一
+
+**PlanFactory活用の徹底**:
+- プラン列挙処理を`PlanFactory.getAllPlans()`ベースに統一
+- Plan instanceによる型安全な処理への移行
 
 #### フェーズ7-E: クリーンアップ（推定: 1-2時間）
 - [ ] 非推奨コードの削除

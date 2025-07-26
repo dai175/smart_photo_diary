@@ -8,6 +8,8 @@ import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
@@ -398,9 +400,7 @@ class IntegrationTestHelpers {
         ),
       ),
     );
-    when(
-      () => mockSubscriptionService.getCurrentPlan(),
-    ).thenAnswer((_) async => const Success(SubscriptionPlan.basic));
+    // Plan class version - primary implementation
     when(
       () => mockSubscriptionService.getCurrentPlanClass(),
     ).thenAnswer((_) async => Success(BasicPlan()));
@@ -429,6 +429,138 @@ class IntegrationTestHelpers {
 
   /// Get mock AI service for additional setup
   static MockAiServiceInterface get mockAiService => _mockAiService;
+
+  // ========================================
+  // Plan Class Integration Test Helpers
+  // ========================================
+
+  /// Setup mock subscription service with specific Plan class
+  static void setupMockSubscriptionPlan(
+    MockSubscriptionServiceInterface mockSubscriptionService,
+    Plan plan, {
+    int usageCount = 0,
+    bool isActive = true,
+  }) {
+    when(
+      () => mockSubscriptionService.getCurrentPlanClass(),
+    ).thenAnswer((_) async => Success(plan));
+
+    when(
+      () => mockSubscriptionService.getCurrentStatus(),
+    ).thenAnswer((_) async => Success(
+      SubscriptionStatus(
+        planId: plan.id,
+        isActive: isActive,
+        startDate: DateTime.now(),
+        expiryDate: plan.isPremium ? DateTime.now().add(const Duration(days: 365)) : null,
+        monthlyUsageCount: usageCount,
+        lastResetDate: DateTime.now(),
+        autoRenewal: plan.isPremium,
+        transactionId: plan.isPremium ? 'test-transaction' : null,
+        lastPurchaseDate: plan.isPremium ? DateTime.now() : null,
+      ),
+    ));
+
+    when(
+      () => mockSubscriptionService.canUseAiGeneration(),
+    ).thenAnswer((_) async => Success(usageCount < plan.monthlyAiGenerationLimit));
+
+    when(
+      () => mockSubscriptionService.getRemainingGenerations(),
+    ).thenAnswer((_) async => Success(plan.monthlyAiGenerationLimit - usageCount));
+
+    when(
+      () => mockSubscriptionService.getMonthlyUsage(),
+    ).thenAnswer((_) async => Success(usageCount));
+  }
+
+  /// Setup mock subscription service for Basic plan scenario
+  static void setupMockBasicPlan(
+    MockSubscriptionServiceInterface mockSubscriptionService, {
+    int usageCount = 0,
+  }) {
+    setupMockSubscriptionPlan(
+      mockSubscriptionService,
+      BasicPlan(),
+      usageCount: usageCount,
+    );
+  }
+
+  /// Setup mock subscription service for Premium plan scenario
+  static void setupMockPremiumPlan(
+    MockSubscriptionServiceInterface mockSubscriptionService, {
+    bool isYearly = true,
+    int usageCount = 0,
+  }) {
+    final plan = isYearly 
+        ? PremiumYearlyPlan() 
+        : PremiumMonthlyPlan();
+    
+    setupMockSubscriptionPlan(
+      mockSubscriptionService,
+      plan,
+      usageCount: usageCount,
+    );
+  }
+
+  /// Setup mock subscription service for usage limit reached scenario
+  static void setupMockUsageLimitReached(
+    MockSubscriptionServiceInterface mockSubscriptionService,
+    Plan plan,
+  ) {
+    setupMockSubscriptionPlan(
+      mockSubscriptionService,
+      plan,
+      usageCount: plan.monthlyAiGenerationLimit,
+    );
+  }
+
+  /// Create test subscription status with Plan class
+  static SubscriptionStatus createTestSubscriptionStatus({
+    Plan? plan,
+    int usageCount = 0,
+    bool isActive = true,
+  }) {
+    final testPlan = plan ?? BasicPlan();
+    
+    return SubscriptionStatus(
+      planId: testPlan.id,
+      isActive: isActive,
+      startDate: DateTime.now(),
+      expiryDate: testPlan.isPremium ? DateTime.now().add(const Duration(days: 365)) : null,
+      monthlyUsageCount: usageCount,
+      lastResetDate: DateTime.now(),
+      autoRenewal: testPlan.isPremium,
+      transactionId: testPlan.isPremium ? 'integration-test-transaction' : null,
+      lastPurchaseDate: testPlan.isPremium ? DateTime.now() : null,
+    );
+  }
+
+  /// Verify plan features are correctly displayed
+  static void verifyPlanFeatures(Plan plan) {
+    // Verify display name
+    expect(find.textContaining(plan.displayName), findsWidgets);
+    
+    // Verify premium features based on plan type
+    if (plan.isPremium) {
+      if (plan.hasWritingPrompts) {
+        expect(find.textContaining('ライティングプロンプト'), findsWidgets);
+      }
+      if (plan.hasAdvancedFilters) {
+        expect(find.textContaining('高度なフィルタ'), findsWidgets);
+      }
+      if (plan.hasAdvancedAnalytics) {
+        expect(find.textContaining('統計・分析'), findsWidgets);
+      }
+    }
+  }
+
+  /// Verify AI generation limits are displayed correctly
+  static void verifyAiGenerationLimits(Plan plan, int currentUsage) {
+    final remaining = plan.monthlyAiGenerationLimit - currentUsage;
+    expect(find.textContaining('$remaining'), findsWidgets);
+    expect(find.textContaining('${plan.monthlyAiGenerationLimit}'), findsWidgets);
+  }
 }
 
 /// Timeout exception for integration tests
