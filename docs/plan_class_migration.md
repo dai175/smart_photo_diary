@@ -638,7 +638,7 @@ class PlanFactory {
   - [x] SubscriptionInfoクラス削除
   - [ ] 旧インターフェースメソッド削除
     - [x] SubscriptionPlan enum参照削除 (28+6件)
-    - [ ] SubscriptionStatus旧メソッド削除 (12+6件)
+    - [x] SubscriptionStatus旧メソッド削除 (12+6件)
     - [ ] ISubscriptionService旧メソッド削除 (3+1件)
     - [ ] InAppPurchaseConfig旧メソッド削除 (3件)
     - [ ] テストファイル修正 (7+4件)

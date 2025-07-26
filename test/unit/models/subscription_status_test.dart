@@ -60,11 +60,11 @@ void main() {
         expect(status.startDate, isNotNull);
       });
 
-      test('createPremiumで正しいPremium状態が作成される', () {
+      test('createPremiumClassで正しいPremium状態が作成される', () {
         final startDate = DateTime.now();
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: startDate,
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           transactionId: 'test_transaction',
         );
 
@@ -95,7 +95,7 @@ void main() {
         final premiumPlan = PlanFactory.createPlan(premiumStatus.planId);
         expect(premiumPlan, isA<PremiumYearlyPlan>());
         expect(
-          premiumStatus.currentPlan,
+          premiumStatus.planId,
           equals('premium_yearly'),
         ); // 互換性のため保持
       });
@@ -112,7 +112,8 @@ void main() {
         final status = SubscriptionStatus.createDefault();
         await testBox.add(status);
 
-        status.changePlan('premium_yearly');
+        final premiumPlan = PlanFactory.createPlan('premium_yearly');
+        status.changePlanClass(premiumPlan);
 
         expect(status.planId, equals('premium_yearly'));
         // Planクラスを使用して検証
@@ -126,13 +127,14 @@ void main() {
       });
 
       test('BasicプランへのchangePlanで期限がクリアされる', () async {
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: DateTime.now(),
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
         );
         await testBox.add(status);
 
-        status.changePlan('basic');
+        final basicPlan = PlanFactory.createPlan('basic');
+        status.changePlanClass(basicPlan);
 
         expect(status.planId, equals('basic'));
         // Planクラスを使用して検証
@@ -155,7 +157,7 @@ void main() {
       test('有効なPremiumプランは有効', () {
         final futureDate = DateTime.now().add(const Duration(days: 30));
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           isActive: true,
           expiryDate: futureDate,
         );
@@ -167,7 +169,7 @@ void main() {
       test('期限切れのPremiumプランは無効', () {
         final pastDate = DateTime.now().subtract(const Duration(days: 1));
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           isActive: true,
           expiryDate: pastDate,
         );
@@ -178,7 +180,7 @@ void main() {
 
       test('非アクティブなプランは無効', () {
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           isActive: false,
           expiryDate: DateTime.now().add(const Duration(days: 30)),
         );
@@ -242,9 +244,9 @@ void main() {
       });
 
       test('Premiumプランでは制限が異なる', () async {
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: DateTime.now(),
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
         );
         await testBox.add(status);
 
@@ -267,9 +269,9 @@ void main() {
       });
 
       test('有効なPremiumプランではプレミアム機能にアクセスできる', () {
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: DateTime.now(),
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
         );
 
         expect(status.canAccessPremiumFeatures, isTrue);
@@ -281,7 +283,7 @@ void main() {
       test('期限切れのPremiumプランではプレミアム機能にアクセスできない', () {
         final pastDate = DateTime.now().subtract(const Duration(days: 1));
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           isActive: true,
           expiryDate: pastDate,
         );
@@ -295,9 +297,9 @@ void main() {
 
     group('キャンセル・復元テスト', () {
       test('サブスクリプションをキャンセルできる', () async {
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: DateTime.now(),
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
         );
         await testBox.add(status);
 
@@ -313,9 +315,9 @@ void main() {
       });
 
       test('将来の日付でキャンセル予約できる', () async {
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: DateTime.now(),
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
         );
         await testBox.add(status);
 
@@ -328,9 +330,9 @@ void main() {
       });
 
       test('サブスクリプションを復元できる', () async {
-        final status = SubscriptionStatus.createPremium(
+        final status = SubscriptionStatus.createPremiumClass(
           startDate: DateTime.now(),
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
         );
         await testBox.add(status);
 
@@ -358,7 +360,7 @@ void main() {
       test('期限までの残り日数が正しく計算される', () {
         final futureDate = DateTime.now().add(const Duration(days: 30));
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           expiryDate: futureDate,
         );
 
@@ -371,7 +373,7 @@ void main() {
       test('期限切れの場合は0日が返される', () {
         final pastDate = DateTime.now().subtract(const Duration(days: 1));
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           expiryDate: pastDate,
         );
 
@@ -388,7 +390,7 @@ void main() {
     group('toStringテスト', () {
       test('toStringが正しい情報を含む', () {
         final status = SubscriptionStatus(
-          planId: 'premium_yearly',
+          plan: PlanFactory.createPlan('premium_yearly'),
           isActive: true,
           monthlyUsageCount: 5,
         );
@@ -413,7 +415,8 @@ void main() {
           expect(status.planId, equals('basic'));
           expect(status.expiryDate, isNull);
 
-          status.changePlan('premium_monthly');
+          final premiumMonthlyPlan = PlanFactory.createPlan('premium_monthly');
+        status.changePlanClass(premiumMonthlyPlan);
 
           expect(status.planId, equals('premium_monthly'));
           expect(status.isActive, isTrue);
@@ -435,7 +438,8 @@ void main() {
           final status = SubscriptionStatus.createDefault();
           await testBox.add(status);
 
-          status.changePlan('premium_yearly');
+          final premiumPlan = PlanFactory.createPlan('premium_yearly');
+        status.changePlanClass(premiumPlan);
 
           expect(status.planId, equals('premium_yearly'));
           expect(status.isActive, isTrue);
@@ -453,14 +457,15 @@ void main() {
         });
 
         test('Premium月額から年額への変更', () async {
-          final status = SubscriptionStatus.createPremium(
+          final status = SubscriptionStatus.createPremiumClass(
             startDate: DateTime.now(),
-            planId: 'premium_monthly',
+            plan: PlanFactory.createPlan('premium_monthly'),
           );
           await testBox.add(status);
 
           final originalStartDate = status.startDate;
-          status.changePlan('premium_yearly');
+          final premiumPlan = PlanFactory.createPlan('premium_yearly');
+        status.changePlanClass(premiumPlan);
 
           expect(status.planId, equals('premium_yearly'));
           expect(status.isActive, isTrue);
@@ -478,13 +483,14 @@ void main() {
         });
 
         test('PremiumからBasicへのダウングレード', () async {
-          final status = SubscriptionStatus.createPremium(
+          final status = SubscriptionStatus.createPremiumClass(
             startDate: DateTime.now(),
-            planId: 'premium_yearly',
+            plan: PlanFactory.createPlan('premium_yearly'),
           );
           await testBox.add(status);
 
-          status.changePlan('basic');
+          final basicPlan = PlanFactory.createPlan('basic');
+        status.changePlanClass(basicPlan);
 
           expect(status.planId, equals('basic'));
           expect(status.isActive, isTrue);
@@ -497,7 +503,7 @@ void main() {
           await testBox.add(status);
 
           final futureDate = DateTime.now().add(const Duration(days: 7));
-          status.changePlan(
+          status.changePlanClass(
             'premium_yearly',
             effectiveDate: futureDate,
           );
@@ -509,9 +515,9 @@ void main() {
 
       group('サブスクリプション状態検証テスト', () {
         test('有効なPremiumプランの検証', () {
-          final status = SubscriptionStatus.createPremium(
+          final status = SubscriptionStatus.createPremiumClass(
             startDate: DateTime.now().subtract(const Duration(days: 30)),
-            planId: 'premium_yearly',
+            plan: PlanFactory.createPlan('premium_yearly'),
           );
 
           expect(status.isValid, isTrue);
@@ -522,7 +528,7 @@ void main() {
         test('期限切れPremiumプランの検証', () {
           final pastDate = DateTime.now().subtract(const Duration(days: 1));
           final status = SubscriptionStatus(
-            planId: 'premium_yearly',
+            plan: PlanFactory.createPlan('premium_yearly'),
             isActive: true,
             startDate: DateTime.now().subtract(const Duration(days: 400)),
             expiryDate: pastDate,
@@ -535,7 +541,7 @@ void main() {
 
         test('非アクティブなプランの検証', () {
           final status = SubscriptionStatus(
-            planId: 'premium_yearly',
+            plan: PlanFactory.createPlan('premium_yearly'),
             isActive: false,
             expiryDate: DateTime.now().add(const Duration(days: 30)),
           );
@@ -570,9 +576,9 @@ void main() {
         });
 
         test('Premiumプランで制限に達した場合', () async {
-          final status = SubscriptionStatus.createPremium(
+          final status = SubscriptionStatus.createPremiumClass(
             startDate: DateTime.now(),
-            planId: 'premium_yearly',
+            plan: PlanFactory.createPlan('premium_yearly'),
           );
           await testBox.add(status);
 
@@ -611,7 +617,8 @@ void main() {
           expect(status.remainingGenerations, equals(10));
 
           // 2. Premiumに変更
-          status.changePlan('premium_yearly');
+          final premiumPlan = PlanFactory.createPlan('premium_yearly');
+        status.changePlanClass(premiumPlan);
           expect(status.planId, equals('premium_yearly'));
           expect(status.remainingGenerations, equals(100));
           expect(status.canAccessPremiumFeatures, isTrue);
@@ -631,7 +638,8 @@ void main() {
 
           // 5. 復元
           status.restore();
-          status.changePlan('premium_yearly'); // プランを戻す
+          final premiumPlan = PlanFactory.createPlan('premium_yearly');
+        status.changePlanClass(premiumPlan); // プランを戻す
           expect(status.isActive, isTrue);
           expect(status.canAccessPremiumFeatures, isTrue);
           expect(status.monthlyUsageCount, equals(25)); // 使用量は保持
@@ -664,7 +672,7 @@ void main() {
           // 不正なプランIDの場合、Basicプランにフォールバック
           // SubscriptionStatusの内部ロジックをテスト（enumベースのフォールバック）
           expect(
-            status.currentPlan,
+            status.currentPlanClass.id,
             equals('basic'),
           ); // 互換性のため保持
           expect(status.planId, equals('invalid_plan')); // planId自体は保持される
@@ -673,9 +681,9 @@ void main() {
 
         test('開始日なしでPremiumプラン作成時のエラー', () {
           expect(
-            () => SubscriptionStatus.createPremium(
+            () => SubscriptionStatus.createPremiumClass(
               startDate: DateTime.now(),
-              planId: 'basic', // Basicプランは不正
+              plan: PlanFactory.createPlan('basic'), // Basicプランは不正
             ),
             throwsArgumentError,
           );
@@ -684,7 +692,7 @@ void main() {
         test('期限日が過去の場合の処理', () {
           final pastDate = DateTime.now().subtract(const Duration(days: 100));
           final status = SubscriptionStatus(
-            planId: 'premium_yearly',
+            plan: PlanFactory.createPlan('premium_yearly'),
             isActive: true,
             startDate: DateTime.now().subtract(const Duration(days: 200)),
             expiryDate: pastDate,

@@ -47,7 +47,7 @@ void main() {
       final status = result.value;
       expect(status.planId, equals(BasicPlan().id));
       expect(status.monthlyUsageCount, equals(0));
-      expect(status.currentPlan.monthlyAiGenerationLimit, equals(10));
+      expect(status.currentPlanClass.monthlyAiGenerationLimit, equals(10));
       expect(status.isActive, isTrue);
     });
 
