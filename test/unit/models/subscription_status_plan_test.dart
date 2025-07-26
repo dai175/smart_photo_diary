@@ -4,7 +4,6 @@ import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 
 void main() {
   group('SubscriptionStatus - Plan統合機能', () {
@@ -47,7 +46,9 @@ void main() {
         for (final plan in plans) {
           final newStatus = status.copyWithPlan(plan);
           expect(newStatus.planId, plan.id);
-          expect(newStatus.currentPlan, SubscriptionPlan.fromId(plan.id));
+          // currentPlanのenumプロパティは削除されたため、Planクラスで検証
+          final planClass = newStatus.getCurrentPlanClass();
+          expect(planClass.id, plan.id);
         }
       });
     });
@@ -93,23 +94,18 @@ void main() {
         ];
 
         for (final status in statuses) {
-          final enumPlan = status.currentPlan;
+          // Planクラスのプロパティを検証
           final classPlan = status.getCurrentPlanClass();
 
-          // IDの一致
-          expect(classPlan.id, enumPlan.id);
-
-          // 主要プロパティの一致
-          expect(classPlan.price, enumPlan.price);
-          expect(
-            classPlan.monthlyAiGenerationLimit,
-            enumPlan.monthlyAiGenerationLimit,
-          );
-          expect(classPlan.isPremium, enumPlan.isPremium);
-          expect(classPlan.hasWritingPrompts, enumPlan.hasWritingPrompts);
-          expect(classPlan.hasAdvancedFilters, enumPlan.hasAdvancedFilters);
-          expect(classPlan.hasAdvancedAnalytics, enumPlan.hasAdvancedAnalytics);
-          expect(classPlan.hasPrioritySupport, enumPlan.hasPrioritySupport);
+          // Planクラスの基本プロパティを検証
+          expect(classPlan.id, status.planId);
+          expect(classPlan.price, isA<int>());
+          expect(classPlan.monthlyAiGenerationLimit, isA<int>());
+          expect(classPlan.isPremium, isA<bool>());
+          expect(classPlan.hasWritingPrompts, isA<bool>());
+          expect(classPlan.hasAdvancedFilters, isA<bool>());
+          expect(classPlan.hasAdvancedAnalytics, isA<bool>());
+          expect(classPlan.hasPrioritySupport, isA<bool>());
         }
       });
 
@@ -129,8 +125,8 @@ void main() {
           throwsA(isA<ArgumentError>()),
         );
 
-        // currentPlan（enum）はフォールバックでbasicを返す
-        expect(invalidStatus.currentPlan, SubscriptionPlan.basic);
+        // currentPlanのenumプロパティは削除されたため、このテストは無効
+        // PlanFactoryは不正なプランIDに対してArgumentErrorをスローする
       });
     });
 

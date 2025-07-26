@@ -1,6 +1,5 @@
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -84,7 +83,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥300',
         priceAmount: 300.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumMonthly,
+        plan: PremiumMonthlyPlan(),
       ),
       const PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
@@ -93,7 +92,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥2,800',
         priceAmount: 2800.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumYearly,
+        plan: PremiumYearlyPlan(),
       ),
     ];
   }
@@ -271,12 +270,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Result<List<SubscriptionPlan>> getAvailablePlans() {
-    // @deprecated - 互換性のために保持
-    return const Success([
-      SubscriptionPlan.basic,
-      SubscriptionPlan.premiumMonthly,
-      SubscriptionPlan.premiumYearly,
-    ]);
+    // @deprecated - enum削除により無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getAvailablePlansClass() instead.');
   }
 
   @override
@@ -290,16 +285,14 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Result<SubscriptionPlan> getPlan(String planId) {
-    // @deprecated - 互換性のために保持
-    return Failure(ServiceException('Deprecated method: use getPlanClass'));
+    // @deprecated - enum削除により無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getPlanClass() instead.');
   }
 
   @override
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    // @deprecated - 互換性のために保持
-    return Failure(
-      ServiceException('Deprecated method: use getCurrentPlanClass'),
-    );
+    // @deprecated - enum削除により無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getCurrentPlanClass() instead.');
   }
 
   @override
@@ -560,10 +553,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    // @deprecated - 互換性のために保持
-    return Failure(
-      ServiceException('Deprecated method: use purchasePlanClass'),
-    );
+    // @deprecated - enum削除により無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use purchasePlanClass() instead.');
   }
 
   @override
@@ -595,8 +586,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    // @deprecated - 互換性のために保持
-    return Failure(ServiceException('Deprecated method: use changePlanClass'));
+    // @deprecated - enum削除により無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use changePlanClass() instead.');
   }
 
   @override

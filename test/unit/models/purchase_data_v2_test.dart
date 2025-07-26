@@ -4,7 +4,6 @@ import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
 void main() {
@@ -71,7 +70,7 @@ void main() {
           price: '¥300',
           priceAmount: 300.0,
           currencyCode: 'JPY',
-          plan: SubscriptionPlan.premiumMonthly,
+          plan: PremiumMonthlyPlan(),
         );
 
         final v2 = PurchaseProductV2.fromLegacy(legacy);
@@ -106,7 +105,7 @@ void main() {
         expect(legacy.price, v2.price);
         expect(legacy.priceAmount, v2.priceAmount);
         expect(legacy.currencyCode, v2.currencyCode);
-        expect(legacy.plan, SubscriptionPlan.premiumYearly);
+        expect(legacy.plan, isA<PremiumYearlyPlan>());
       });
 
       test('全プランタイプで相互変換が機能する', () {
@@ -265,7 +264,7 @@ void main() {
           productId: 'legacy_product',
           transactionId: 'legacy_transaction',
           purchaseDate: null,
-          plan: SubscriptionPlan.premiumYearly,
+          plan: PremiumYearlyPlan(),
         );
 
         final v2 = PurchaseResultV2.fromLegacy(legacy);
@@ -307,7 +306,7 @@ void main() {
         expect(legacy.productId, v2.productId);
         expect(legacy.transactionId, v2.transactionId);
         expect(legacy.purchaseDate, v2.purchaseDate);
-        expect(legacy.plan, SubscriptionPlan.premiumMonthly);
+        expect(legacy.plan, isA<PremiumMonthlyPlan>());
       });
 
       test('planがnullの場合の変換', () {

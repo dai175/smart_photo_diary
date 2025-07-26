@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -44,7 +43,7 @@ void main() {
         // Planクラスを使用して検証
         final plan = PlanFactory.createPlan(status.planId);
         expect(plan, isA<BasicPlan>());
-        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
       });
 
       test('createDefaultで正しいデフォルト状態が作成される', () {
@@ -55,7 +54,7 @@ void main() {
         // Planクラスを使用して検証
         final plan = PlanFactory.createPlan(status.planId);
         expect(plan, isA<BasicPlan>());
-        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
         expect(status.monthlyUsageCount, equals(0));
         expect(status.autoRenewal, isFalse);
         expect(status.startDate, isNotNull);
@@ -74,10 +73,7 @@ void main() {
         // Planクラスを使用して検証
         final plan = PlanFactory.createPlan(status.planId);
         expect(plan, isA<PremiumYearlyPlan>());
-        expect(
-          status.currentPlan,
-          equals(SubscriptionPlan.premiumYearly),
-        ); // 互換性のため保持
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
         expect(status.startDate, equals(startDate));
         expect(
           status.expiryDate,
@@ -108,7 +104,7 @@ void main() {
         final status = SubscriptionStatus(planId: 'invalid_plan');
 
         // SubscriptionStatusの内部ロジックをテスト（enumベースのフォールバック）
-        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
         expect(status.planId, equals('invalid_plan')); // planId自体は保持される
       });
 
@@ -122,10 +118,7 @@ void main() {
         // Planクラスを使用して検証
         final plan = PlanFactory.createPlan(status.planId);
         expect(plan, isA<PremiumYearlyPlan>());
-        expect(
-          status.currentPlan,
-          equals(SubscriptionPlan.premiumYearly),
-        ); // 互換性のため保持
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
         expect(status.isActive, isTrue);
         expect(status.autoRenewal, isTrue);
         expect(status.startDate, isNotNull);
@@ -145,7 +138,7 @@ void main() {
         // Planクラスを使用して検証
         final plan = PlanFactory.createPlan(status.planId);
         expect(plan, isA<BasicPlan>());
-        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
         expect(status.expiryDate, isNull);
         expect(status.autoRenewal, isFalse);
       });

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -267,11 +266,11 @@ void main() {
 
         final products = productsResult.value;
         expect(
-          products.any((p) => p.plan == SubscriptionPlan.premiumMonthly),
+          products.any((p) => p.plan is PremiumMonthlyPlan),
           isTrue,
         );
         expect(
-          products.any((p) => p.plan == SubscriptionPlan.premiumYearly),
+          products.any((p) => p.plan is PremiumYearlyPlan),
           isTrue,
         );
       });

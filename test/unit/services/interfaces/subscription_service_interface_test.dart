@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -49,7 +48,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Result<List<SubscriptionPlan>> getAvailablePlans() {
-    return Success(SubscriptionPlan.values);
+    // SubscriptionPlan enumは削除されたため無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getAvailablePlansClass() instead.');
   }
 
   @override
@@ -63,17 +63,14 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Result<SubscriptionPlan> getPlan(String planId) {
-    try {
-      final plan = SubscriptionPlan.fromId(planId);
-      return Success(plan);
-    } catch (e) {
-      return Failure(ServiceException('Invalid plan ID: $planId'));
-    }
+    // SubscriptionPlan enumは削除されたため無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getPlanClass() instead.');
   }
 
   @override
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    return Success(_currentStatus.currentPlan);
+    // SubscriptionPlan enumは削除されたため無効化
+    throw UnsupportedError('SubscriptionPlan enum has been removed. Use getCurrentPlanClass() instead.');
   }
 
   @override
@@ -135,7 +132,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Future<Result<bool>> canAccessPrioritySupport() async {
-    return Success(_currentStatus.currentPlan.hasPrioritySupport);
+    final plan = PlanFactory.createPlan(_planId);
+    return Success(plan.hasPrioritySupport);
   }
 
   @override
@@ -148,7 +146,7 @@ class MockSubscriptionService implements ISubscriptionService {
         price: '¥2,800',
         priceAmount: 2800.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumYearly,
+        plan: PremiumYearlyPlan(),
       ),
     ];
     return Success(products);
@@ -550,7 +548,7 @@ void main() {
           price: '¥100',
           priceAmount: 100.0,
           currencyCode: 'JPY',
-          plan: SubscriptionPlan.premiumYearly,
+          plan: PremiumYearlyPlan(),
         );
 
         expect(product.id, equals('test_id'));
@@ -567,7 +565,7 @@ void main() {
           status: PurchaseStatus.purchased,
           productId: 'test_product',
           transactionId: 'test_transaction',
-          plan: SubscriptionPlan.premiumYearly,
+          plan: PremiumYearlyPlan(),
         );
 
         expect(result.status, equals(PurchaseStatus.purchased));

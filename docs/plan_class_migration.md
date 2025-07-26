@@ -609,11 +609,17 @@ class PlanFactory {
   - [x] SubscriptionPlan enumファイル削除 ✅
   - [x] 主要ファイルでのenum参照修正 ✅
   - [x] ライブラリファイルでのenum参照修正 ✅
-  - [ ] テストファイルでのenum参照修正（残作業）
+  - [x] テストファイルでのenum参照修正 ✅
   - [ ] SubscriptionInfoクラス削除
   - [ ] 旧インターフェースメソッド削除
 
 **Phase 7-E-2完了 (2025-07-26)**: ライブラリファイルでのenum参照修正完了
+
+**Phase 7-E-3完了 (2025-07-26)**: テストファイルでのenum参照修正完了
+- 8つのテストファイルでenum参照を完全削除
+- Plan classベースのテスト実装に統一
+- enum dependent assertionsをPlan class assertionsに変更
+- 非推奨enumメソッドをUnsupportedErrorで無効化
 
 #### フェーズ7-E-1の実装詳細
 

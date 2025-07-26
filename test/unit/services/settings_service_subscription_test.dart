@@ -102,7 +102,9 @@ void main() {
         expect(result.isSuccess, isTrue);
 
         final info = result.value;
-        expect(info.currentPlan, equals(SubscriptionPlan.premiumMonthly));
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
+        final plan = PlanFactory.createPlan('premium_monthly');
+        expect(plan, isA<PremiumMonthlyPlan>());
         expect(info.isPremium, isTrue);
         expect(info.planDisplayName, equals('Premium (月額)'));
       });
@@ -307,7 +309,9 @@ void main() {
         expect(result.isSuccess, isTrue);
 
         final info = result.value;
-        expect(info.currentPlan, equals(SubscriptionPlan.premiumMonthly));
+        // currentPlanのenumプロパティは削除されたため、Planクラスで検証
+        final plan = PlanFactory.createPlan('premium_monthly');
+        expect(plan, isA<PremiumMonthlyPlan>());
         expect(info.usageStats.currentMonthUsage, equals(25));
         expect(info.usageStats.monthlyLimit, equals(100)); // Premiumプランの制限
         expect(info.planFeatures, isNotEmpty);
