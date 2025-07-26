@@ -2,6 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/models/subscription_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 
 void main() {
   group('SubscriptionStatus', () {
@@ -37,7 +41,10 @@ void main() {
         expect(status.isActive, isTrue);
         expect(status.monthlyUsageCount, equals(0));
         expect(status.autoRenewal, isFalse);
-        expect(status.currentPlan, equals(SubscriptionPlan.basic));
+        // Planクラスを使用して検証
+        final plan = PlanFactory.createPlan(status.planId);
+        expect(plan, isA<BasicPlan>());
+        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
       });
 
       test('createDefaultで正しいデフォルト状態が作成される', () {
@@ -45,7 +52,10 @@ void main() {
 
         expect(status.planId, equals('basic'));
         expect(status.isActive, isTrue);
-        expect(status.currentPlan, equals(SubscriptionPlan.basic));
+        // Planクラスを使用して検証
+        final plan = PlanFactory.createPlan(status.planId);
+        expect(plan, isA<BasicPlan>());
+        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
         expect(status.monthlyUsageCount, equals(0));
         expect(status.autoRenewal, isFalse);
         expect(status.startDate, isNotNull);
@@ -61,7 +71,13 @@ void main() {
 
         expect(status.planId, equals('premium_yearly'));
         expect(status.isActive, isTrue);
-        expect(status.currentPlan, equals(SubscriptionPlan.premiumYearly));
+        // Planクラスを使用して検証
+        final plan = PlanFactory.createPlan(status.planId);
+        expect(plan, isA<PremiumYearlyPlan>());
+        expect(
+          status.currentPlan,
+          equals(SubscriptionPlan.premiumYearly),
+        ); // 互換性のため保持
         expect(status.startDate, equals(startDate));
         expect(
           status.expiryDate,
@@ -79,16 +95,22 @@ void main() {
         final premiumStatus = SubscriptionStatus(planId: 'premium_yearly');
 
         expect(basicStatus.currentPlan, equals(SubscriptionPlan.basic));
+        // Planクラスを使用して検証
+        final premiumPlan = PlanFactory.createPlan(premiumStatus.planId);
+        expect(premiumPlan, isA<PremiumYearlyPlan>());
         expect(
           premiumStatus.currentPlan,
           equals(SubscriptionPlan.premiumYearly),
-        );
+        ); // 互換性のため保持
       });
 
       test('不正なプランIDでもBasicにフォールバックする', () {
         final status = SubscriptionStatus(planId: 'invalid_plan');
 
-        expect(status.currentPlan, equals(SubscriptionPlan.basic));
+        // Planクラスを使用して検証
+        final plan = PlanFactory.createPlan(status.planId);
+        expect(plan, isA<BasicPlan>());
+        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
       });
 
       test('changePlanでプランが正しく変更される', () async {
@@ -98,7 +120,13 @@ void main() {
         status.changePlan(SubscriptionPlan.premiumYearly);
 
         expect(status.planId, equals('premium_yearly'));
-        expect(status.currentPlan, equals(SubscriptionPlan.premiumYearly));
+        // Planクラスを使用して検証
+        final plan = PlanFactory.createPlan(status.planId);
+        expect(plan, isA<PremiumYearlyPlan>());
+        expect(
+          status.currentPlan,
+          equals(SubscriptionPlan.premiumYearly),
+        ); // 互換性のため保持
         expect(status.isActive, isTrue);
         expect(status.autoRenewal, isTrue);
         expect(status.startDate, isNotNull);
@@ -115,7 +143,10 @@ void main() {
         status.changePlan(SubscriptionPlan.basic);
 
         expect(status.planId, equals('basic'));
-        expect(status.currentPlan, equals(SubscriptionPlan.basic));
+        // Planクラスを使用して検証
+        final plan = PlanFactory.createPlan(status.planId);
+        expect(plan, isA<BasicPlan>());
+        expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
         expect(status.expiryDate, isNull);
         expect(status.autoRenewal, isFalse);
       });
@@ -639,7 +670,13 @@ void main() {
           final status = SubscriptionStatus(planId: 'invalid_plan');
 
           // 不正なプランIDの場合、Basicプランにフォールバック
-          expect(status.currentPlan, equals(SubscriptionPlan.basic));
+          // Planクラスを使用して検証
+          final plan = PlanFactory.createPlan(status.planId);
+          expect(plan, isA<BasicPlan>());
+          expect(
+            status.currentPlan,
+            equals(SubscriptionPlan.basic),
+          ); // 互換性のため保持
           expect(status.remainingGenerations, equals(10));
         });
 

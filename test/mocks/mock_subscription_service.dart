@@ -278,7 +278,9 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<SubscriptionPlan>> getCurrentPlan() async {
     // @deprecated - 互換性のために保持
-    return Failure(ServiceException('Deprecated method: use getCurrentPlanClass'));
+    return Failure(
+      ServiceException('Deprecated method: use getCurrentPlanClass'),
+    );
   }
 
   @override
@@ -540,7 +542,9 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
     // @deprecated - 互換性のために保持
-    return Failure(ServiceException('Deprecated method: use purchasePlanClass'));
+    return Failure(
+      ServiceException('Deprecated method: use purchasePlanClass'),
+    );
   }
 
   @override

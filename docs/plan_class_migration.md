@@ -538,10 +538,10 @@ class PlanFactory {
   - [x] 既存のsubscription_plan_test.dartと同等のカバレッジ確保
 
 ##### フェーズ7-D-2: 単体テストの移行（19ファイル）
-- [ ] モデル層テスト（3ファイル）
-  - [ ] `subscription_status_test.dart`
-  - [ ] `subscription_status_plan_test.dart`
-  - [ ] `purchase_data_v2_test.dart`
+- [x] モデル層テスト（3ファイル）
+  - [x] `subscription_status_test.dart`
+  - [x] `subscription_status_plan_test.dart`
+  - [x] `purchase_data_v2_test.dart`
 - [ ] サービス層テスト（7ファイル）
   - [ ] `subscription_service_test.dart`
   - [ ] `subscription_service_usage_test.dart`

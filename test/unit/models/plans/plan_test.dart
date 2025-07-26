@@ -29,10 +29,7 @@ void main() {
         expect(plan.price, equals(300));
         expect(plan.yearlyPrice, equals(3600)); // 300 * 12
         expect(plan.monthlyAiGenerationLimit, equals(100));
-        expect(
-          plan.productId,
-          equals('smart_photo_diary_premium_monthly'),
-        );
+        expect(plan.productId, equals('smart_photo_diary_premium_monthly'));
         expect(plan.isPaid, isTrue);
         expect(plan.isFree, isFalse);
         expect(plan.isMonthly, isTrue);
@@ -143,10 +140,7 @@ void main() {
       });
 
       test('プラン説明文が正しく取得できる', () {
-        expect(
-          BasicPlan().description,
-          equals('日記を試してみたい新規ユーザー、軽いユーザー向け'),
-        );
+        expect(BasicPlan().description, equals('日記を試してみたい新規ユーザー、軽いユーザー向け'));
         expect(
           PremiumMonthlyPlan().description,
           equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'),
@@ -160,10 +154,7 @@ void main() {
 
     group('PlanFactoryテスト', () {
       test('正しいプランIDから対応するプランを取得できる', () {
-        expect(
-          PlanFactory.createPlan('basic'),
-          isA<BasicPlan>(),
-        );
+        expect(PlanFactory.createPlan('basic'), isA<BasicPlan>());
         expect(
           PlanFactory.createPlan('premium_monthly'),
           isA<PremiumMonthlyPlan>(),
@@ -175,10 +166,7 @@ void main() {
       });
 
       test('大文字小文字を区別しない', () {
-        expect(
-          PlanFactory.createPlan('BASIC'),
-          isA<BasicPlan>(),
-        );
+        expect(PlanFactory.createPlan('BASIC'), isA<BasicPlan>());
         expect(
           PlanFactory.createPlan('Premium_Monthly'),
           isA<PremiumMonthlyPlan>(),
@@ -194,10 +182,7 @@ void main() {
           () => PlanFactory.createPlan('invalid'),
           throwsA(isA<ArgumentError>()),
         );
-        expect(
-          () => PlanFactory.createPlan(''),
-          throwsA(isA<ArgumentError>()),
-        );
+        expect(() => PlanFactory.createPlan(''), throwsA(isA<ArgumentError>()));
         expect(
           () => PlanFactory.createPlan('pro'),
           throwsA(isA<ArgumentError>()),
@@ -263,7 +248,7 @@ void main() {
       test('同じIDのプランは等しいと判定される', () {
         final plan1 = BasicPlan();
         final plan2 = BasicPlan();
-        
+
         expect(plan1, equals(plan2));
         expect(plan1.hashCode, equals(plan2.hashCode));
       });
@@ -271,7 +256,7 @@ void main() {
       test('異なるIDのプランは等しくないと判定される', () {
         final basic = BasicPlan();
         final premium = PremiumMonthlyPlan();
-        
+
         expect(basic, isNot(equals(premium)));
       });
     });
