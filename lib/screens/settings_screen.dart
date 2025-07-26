@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
 import '../models/subscription_info.dart';
+import '../models/subscription_info_v2.dart';
 import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
@@ -31,6 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
   SubscriptionInfo? _subscriptionInfo;
+  SubscriptionInfoV2? _subscriptionInfoV2;
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
 
@@ -54,6 +56,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final subscriptionResult = await _settingsService.getSubscriptionInfo();
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
+        // V2版も生成（移行期間中は両方保持）
+        _subscriptionInfoV2 = SubscriptionInfoV2.fromLegacy(_subscriptionInfo!);
       } else {
         debugPrint('サブスクリプション情報の取得エラー: ${subscriptionResult.error}');
       }

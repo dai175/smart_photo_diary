@@ -287,9 +287,7 @@ class MockSubscriptionService implements ISubscriptionService {
       final plan = PlanFactory.createPlan(planId);
       return Success(plan);
     } catch (e) {
-      return Failure(
-        ServiceException('Invalid plan ID: $planId'),
-      );
+      return Failure(ServiceException('Invalid plan ID: $planId'));
     }
   }
 
