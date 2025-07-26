@@ -4,8 +4,10 @@ import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 import '../models/subscription_info.dart';
+import '../models/subscription_info_v2.dart';
 import '../models/subscription_plan.dart';
 import '../models/plans/plan.dart';
+import '../models/plans/plan_factory.dart';
 import 'interfaces/subscription_service_interface.dart';
 import '../core/service_locator.dart';
 
@@ -55,6 +57,13 @@ class SettingsService {
     return _instance!;
   }
 
+  /// テスト用: インスタンスをリセット
+  @visibleForTesting
+  static void resetInstance() {
+    _instance = null;
+    _preferences = null;
+  }
+
   // テーマ設定のキー
   static const String _themeKey = 'theme_mode';
 
@@ -88,8 +97,28 @@ class SettingsService {
   // Phase 1.8.1: サブスクリプション状態管理API
   // ========================================
 
-  /// Phase 1.8.1.1: 包括的なサブスクリプション情報を取得
+  /// 包括的なサブスクリプション情報を取得（メイン実装 - V2版）
   /// 設定画面表示で使用する統合されたサブスクリプション情報を返します
+  Future<Result<SubscriptionInfoV2>> getSubscriptionInfoV2() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
+
+      // SubscriptionServiceから現在の状態を取得
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
+
+      // SubscriptionInfoV2に変換して返す
+      return SubscriptionInfoV2.fromStatus(statusResult.value);
+    }, context: 'SettingsService.getSubscriptionInfoV2');
+  }
+
+  /// Phase 1.8.1.1: 包括的なサブスクリプション情報を取得（互換性レイヤー）
+  /// 設定画面表示で使用する統合されたサブスクリプション情報を返します
+  @Deprecated('Use getSubscriptionInfoV2() instead')
   Future<Result<SubscriptionInfo>> getSubscriptionInfo() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -107,23 +136,7 @@ class SettingsService {
     }, context: 'SettingsService.getSubscriptionInfo');
   }
 
-  /// Phase 1.8.1.2: 現在のプラン情報を取得
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      if (_subscriptionService == null) {
-        throw StateError('SubscriptionService is not initialized');
-      }
-
-      final planResult = await _subscriptionService!.getCurrentPlan();
-      if (planResult.isFailure) {
-        throw planResult.error;
-      }
-
-      return planResult.value;
-    }, context: 'SettingsService.getCurrentPlan');
-  }
-
-  /// 現在のプラン情報を取得（新Planクラス版）
+  /// 現在のプラン情報を取得（メイン実装 - Planクラス版）
   Future<Result<Plan>> getCurrentPlanClass() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -139,7 +152,48 @@ class SettingsService {
     }, context: 'SettingsService.getCurrentPlanClass');
   }
 
-  /// Phase 1.8.1.2: プラン期限情報を取得
+  /// Phase 1.8.1.2: 現在のプラン情報を取得（互換性レイヤー）
+  @Deprecated('Use getCurrentPlanClass() instead')
+  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      // 新しいメソッドを呼び出してPlanクラスを取得
+      final planClassResult = await getCurrentPlanClass();
+      if (planClassResult.isFailure) {
+        throw planClassResult.error;
+      }
+
+      // PlanクラスからSubscriptionPlan enumに変換
+      final plan = planClassResult.value;
+      return SubscriptionPlan.fromId(plan.id);
+    }, context: 'SettingsService.getCurrentPlan');
+  }
+
+  /// プラン期限情報を取得（メイン実装 - V2版）
+  Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
+
+      final statusResult = await _subscriptionService!.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
+
+      final planResult = await _subscriptionService!.getCurrentPlanClass();
+      if (planResult.isFailure) {
+        throw planResult.error;
+      }
+
+      return PlanPeriodInfoV2.fromStatusAndPlan(
+        statusResult.value,
+        planResult.value,
+      );
+    }, context: 'SettingsService.getPlanPeriodInfoV2');
+  }
+
+  /// Phase 1.8.1.2: プラン期限情報を取得（互換性レイヤー）
+  @Deprecated('Use getPlanPeriodInfoV2() instead')
   Future<Result<PlanPeriodInfo>> getPlanPeriodInfo() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -151,12 +205,16 @@ class SettingsService {
         throw statusResult.error;
       }
 
-      final planResult = await _subscriptionService!.getCurrentPlan();
+      final planResult = await _subscriptionService!.getCurrentPlanClass();
       if (planResult.isFailure) {
         throw planResult.error;
       }
 
-      return PlanPeriodInfo.fromStatus(statusResult.value, planResult.value);
+      // PlanクラスからSubscriptionPlan enumに変換
+      final plan = planResult.value;
+      final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
+
+      return PlanPeriodInfo.fromStatus(statusResult.value, subscriptionPlan);
     }, context: 'SettingsService.getPlanPeriodInfo');
   }
 
@@ -176,29 +234,8 @@ class SettingsService {
     }, context: 'SettingsService.getAutoRenewalInfo');
   }
 
-  /// Phase 1.8.1.4: 使用量統計情報を取得
-  Future<Result<UsageStatistics>> getUsageStatistics() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      if (_subscriptionService == null) {
-        throw StateError('SubscriptionService is not initialized');
-      }
-
-      final statusResult = await _subscriptionService!.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-
-      final planResult = await _subscriptionService!.getCurrentPlan();
-      if (planResult.isFailure) {
-        throw planResult.error;
-      }
-
-      return UsageStatistics.fromStatus(statusResult.value, planResult.value);
-    }, context: 'SettingsService.getUsageStatistics');
-  }
-
-  /// 使用統計情報を取得（新Planクラス版）
-  Future<Result<UsageStatistics>> getUsageStatisticsWithPlanClass() async {
+  /// 使用統計情報を取得（メイン実装 - Planクラス版）
+  Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
         throw StateError('SubscriptionService is not initialized');
@@ -214,12 +251,38 @@ class SettingsService {
         throw planResult.error;
       }
 
-      final plan = planResult.value;
-      // 新Planクラスを旧SubscriptionPlanに変換して使用
-      final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
-
-      return UsageStatistics.fromStatus(statusResult.value, subscriptionPlan);
+      return UsageStatisticsV2.fromStatusAndPlan(
+        statusResult.value,
+        planResult.value,
+      );
     }, context: 'SettingsService.getUsageStatisticsWithPlanClass');
+  }
+
+  /// Phase 1.8.1.4: 使用量統計情報を取得（互換性レイヤー）
+  @Deprecated('Use getUsageStatisticsWithPlanClass() instead')
+  Future<Result<UsageStatistics>> getUsageStatistics() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      // 新しいメソッドを呼び出してV2統計を取得
+      final v2Result = await getUsageStatisticsWithPlanClass();
+      if (v2Result.isFailure) {
+        throw v2Result.error;
+      }
+
+      // V2からレガシー形式に変換
+      final v2Stats = v2Result.value;
+      final status = await _subscriptionService!.getCurrentStatus();
+      if (status.isFailure) {
+        throw status.error;
+      }
+
+      final plan = await _subscriptionService!.getCurrentPlanClass();
+      if (plan.isFailure) {
+        throw plan.error;
+      }
+
+      final subscriptionPlan = SubscriptionPlan.fromId(plan.value.id);
+      return UsageStatistics.fromStatus(status.value, subscriptionPlan);
+    }, context: 'SettingsService.getUsageStatistics');
   }
 
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）
@@ -272,7 +335,21 @@ class SettingsService {
     }, context: 'SettingsService.canChangePlan');
   }
 
-  /// Phase 1.8.1.4: プラン比較情報を取得
+  /// プラン比較情報を取得（メイン実装 - V2版）
+  Future<Result<List<Plan>>> getAvailablePlansV2() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      if (_subscriptionService == null) {
+        throw StateError('SubscriptionService is not initialized');
+      }
+
+      // 新しいPlanFactoryを使用
+      final plans = PlanFactory.getAllPlans();
+      return plans;
+    }, context: 'SettingsService.getAvailablePlansV2');
+  }
+
+  /// Phase 1.8.1.4: プラン比較情報を取得（互換性レイヤー）
+  @Deprecated('Use getAvailablePlansV2() instead')
   Future<Result<List<SubscriptionPlan>>> getAvailablePlans() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {

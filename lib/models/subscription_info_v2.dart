@@ -4,6 +4,132 @@ import 'subscription_plan.dart';
 import 'subscription_status.dart';
 import 'subscription_info.dart';
 
+/// 使用統計情報（新Planクラス版）
+class UsageStatisticsV2 {
+  /// 今月の使用回数
+  final int monthlyUsageCount;
+
+  /// 月間制限回数
+  final int monthlyLimit;
+
+  /// 残り使用可能回数
+  final int remainingCount;
+
+  /// 次回リセット日
+  final DateTime nextResetDate;
+
+  /// 日平均制限
+  final double dailyAverageLimit;
+
+  const UsageStatisticsV2({
+    required this.monthlyUsageCount,
+    required this.monthlyLimit,
+    required this.remainingCount,
+    required this.nextResetDate,
+    required this.dailyAverageLimit,
+  });
+
+  /// 使用率（0.0〜1.0）
+  double get usageRate {
+    if (monthlyLimit == 0) return 0.0;
+    return monthlyUsageCount / monthlyLimit;
+  }
+
+  /// 制限に近づいているか（80%以上）
+  bool get isNearLimit => usageRate >= 0.8 && remainingCount > 0;
+
+  /// 使用状況の表示文字列
+  String get usageDisplay => '$monthlyUsageCount / $monthlyLimit回';
+
+  /// SubscriptionStatusとPlanから構築
+  factory UsageStatisticsV2.fromStatusAndPlan(
+    SubscriptionStatus status,
+    Plan plan,
+  ) {
+    final monthlyLimit = plan.monthlyAiGenerationLimit;
+    final remaining = monthlyLimit - status.monthlyUsageCount;
+    final nextReset = _calculateNextResetDate(status.lastResetDate);
+
+    return UsageStatisticsV2(
+      monthlyUsageCount: status.monthlyUsageCount,
+      monthlyLimit: monthlyLimit,
+      remainingCount: remaining > 0 ? remaining : 0,
+      nextResetDate: nextReset,
+      dailyAverageLimit: plan.dailyAverageGenerations,
+    );
+  }
+
+  /// 次のリセット日を計算
+  static DateTime _calculateNextResetDate(DateTime? lastResetDate) {
+    final baseDate = lastResetDate ?? DateTime.now();
+    final currentYear = baseDate.year;
+    final currentMonth = baseDate.month;
+
+    if (currentMonth == 12) {
+      return DateTime(currentYear + 1, 1, 1);
+    } else {
+      return DateTime(currentYear, currentMonth + 1, 1);
+    }
+  }
+}
+
+/// プラン期限情報（新Planクラス版）
+class PlanPeriodInfoV2 {
+  /// 開始日
+  final DateTime? startDate;
+
+  /// 有効期限
+  final DateTime? expiryDate;
+
+  /// 自動更新有無
+  final bool autoRenewal;
+
+  /// 期限切れまでの日数
+  final int? daysUntilExpiry;
+
+  /// 期限が近いかどうか（7日以内）
+  final bool isExpiryNear;
+
+  /// 期限切れかどうか
+  final bool isExpired;
+
+  const PlanPeriodInfoV2({
+    required this.startDate,
+    required this.expiryDate,
+    required this.autoRenewal,
+    required this.daysUntilExpiry,
+    required this.isExpiryNear,
+    required this.isExpired,
+  });
+
+  /// SubscriptionStatusとPlanから構築
+  factory PlanPeriodInfoV2.fromStatusAndPlan(
+    SubscriptionStatus status,
+    Plan plan,
+  ) {
+    final now = DateTime.now();
+    int? daysUntilExpiry;
+    bool isExpiryNear = false;
+    bool isExpired = false;
+
+    if (status.expiryDate != null) {
+      final difference = status.expiryDate!.difference(now);
+      daysUntilExpiry = difference.inDays;
+      isExpiryNear = daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+      isExpired = daysUntilExpiry < 0;
+    }
+
+    return PlanPeriodInfoV2(
+      startDate: status.startDate,
+      expiryDate: status.expiryDate,
+      autoRenewal: status.autoRenewal == true,
+      daysUntilExpiry: daysUntilExpiry,
+      isExpiryNear: isExpiryNear,
+      isExpired: isExpired,
+    );
+  }
+}
+
 /// サブスクリプション情報を統合的に管理するデータモデル（新Planクラス版）
 /// 設定画面や状態表示で使用するための包括的な情報を提供します
 ///
@@ -17,10 +143,10 @@ class SubscriptionInfoV2 {
   final SubscriptionStatus status;
 
   /// 使用量統計
-  final UsageStatistics usageStats;
+  final UsageStatisticsV2 usageStats;
 
   /// プラン期限情報
-  final PlanPeriodInfo periodInfo;
+  final PlanPeriodInfoV2 periodInfo;
 
   /// 自動更新情報
   final AutoRenewalInfo autoRenewalInfo;
@@ -36,14 +162,12 @@ class SubscriptionInfoV2 {
   /// ファクトリコンストラクタ - SubscriptionStatusから構築
   factory SubscriptionInfoV2.fromStatus(SubscriptionStatus status) {
     final plan = PlanFactory.createPlan(status.planId);
-    // 互換性のため、一時的にSubscriptionPlanに変換
-    final subscriptionPlan = SubscriptionPlan.fromId(status.planId);
 
     return SubscriptionInfoV2(
       currentPlan: plan,
       status: status,
-      usageStats: UsageStatistics.fromStatus(status, subscriptionPlan),
-      periodInfo: PlanPeriodInfo.fromStatus(status, subscriptionPlan),
+      usageStats: UsageStatisticsV2.fromStatusAndPlan(status, plan),
+      periodInfo: PlanPeriodInfoV2.fromStatusAndPlan(status, plan),
       autoRenewalInfo: AutoRenewalInfo.fromStatus(status),
     );
   }
@@ -53,14 +177,11 @@ class SubscriptionInfoV2 {
     SubscriptionStatus status,
     Plan plan,
   ) {
-    // 互換性のため、一時的にSubscriptionPlanに変換
-    final subscriptionPlan = SubscriptionPlan.fromId(plan.id);
-
     return SubscriptionInfoV2(
       currentPlan: plan,
       status: status,
-      usageStats: UsageStatistics.fromStatus(status, subscriptionPlan),
-      periodInfo: PlanPeriodInfo.fromStatus(status, subscriptionPlan),
+      usageStats: UsageStatisticsV2.fromStatusAndPlan(status, plan),
+      periodInfo: PlanPeriodInfoV2.fromStatusAndPlan(status, plan),
       autoRenewalInfo: AutoRenewalInfo.fromStatus(status),
     );
   }
@@ -72,8 +193,8 @@ class SubscriptionInfoV2 {
     return SubscriptionInfoV2(
       currentPlan: plan,
       status: info.status,
-      usageStats: info.usageStats,
-      periodInfo: info.periodInfo,
+      usageStats: UsageStatisticsV2.fromStatusAndPlan(info.status, plan),
+      periodInfo: PlanPeriodInfoV2.fromStatusAndPlan(info.status, plan),
       autoRenewalInfo: info.autoRenewalInfo,
     );
   }
@@ -152,7 +273,7 @@ class SubscriptionInfoV2 {
 
   /// 設定画面用のリセット日表示
   String get resetDateDisplayText {
-    final resetDate = status.nextResetDate;
+    final resetDate = usageStats.nextResetDate;
     final today = DateTime.now();
     final daysUntilReset = resetDate.difference(today).inDays;
 
@@ -185,11 +306,21 @@ class SubscriptionInfoV2 {
   SubscriptionInfo toLegacy() {
     final subscriptionPlan = SubscriptionPlan.fromId(currentPlan.id);
 
+    // V2からレガシー版への変換
+    final legacyUsageStats = UsageStatistics.fromStatus(
+      status,
+      subscriptionPlan,
+    );
+    final legacyPeriodInfo = PlanPeriodInfo.fromStatus(
+      status,
+      subscriptionPlan,
+    );
+
     return SubscriptionInfo(
       currentPlan: subscriptionPlan,
       status: status,
-      usageStats: usageStats,
-      periodInfo: periodInfo,
+      usageStats: legacyUsageStats,
+      periodInfo: legacyPeriodInfo,
       autoRenewalInfo: autoRenewalInfo,
     );
   }

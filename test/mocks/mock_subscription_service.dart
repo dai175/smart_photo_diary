@@ -147,6 +147,22 @@ class MockSubscriptionService implements ISubscriptionService {
     _statusUpdates.add(_currentStatus);
   }
 
+  /// テスト用: サブスクリプション状態を直接設定
+  void setCurrentStatus(SubscriptionStatus status) {
+    _planId = status.planId;
+    _isActive = status.isActive;
+    _monthlyUsageCount = status.monthlyUsageCount;
+    _expiryDate = status.expiryDate;
+    _startDate = status.startDate;
+    _lastResetDate = status.lastResetDate;
+    _autoRenewal = status.autoRenewal ?? false;
+    _transactionId = status.transactionId;
+    _lastPurchaseDate = status.lastPurchaseDate;
+
+    // 状態更新をストリームに通知
+    _statusUpdates.add(_currentStatus);
+  }
+
   /// テスト用: 自動更新設定
   void setAutoRenewal(bool autoRenewal) {
     _autoRenewal = autoRenewal;

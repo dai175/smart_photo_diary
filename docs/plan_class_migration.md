@@ -425,7 +425,8 @@ class PlanFactory {
 更新ファイル:
 - `lib/models/subscription_status.dart`
 
-### フェーズ7-B一部完了 (2025-07-26)
+### フェーズ7-B完了 (2025-07-26)
+#### SubscriptionServiceの内部実装をPlanクラスに統一
 - ✅ `SubscriptionService`の内部実装をPlanクラスに統一
   - enum使用箇所をすべてPlanクラスに置換
   - `canUseAiGeneration()`: PlanFactory.createPlan()を使用
@@ -440,6 +441,30 @@ class PlanFactory {
 
 更新ファイル:
 - `lib/services/subscription_service.dart`
+
+#### SettingsServiceの完全移行
+- ✅ `SettingsService`の完全移行
+  - `getSubscriptionInfoV2()` - V2版のSubscriptionInfo取得メソッド追加
+  - `getCurrentPlanClass()` - Planクラスを返すメソッド追加
+  - `getUsageStatisticsWithPlanClass()` - UsageStatisticsV2を返すメソッド追加
+  - `getPlanPeriodInfoV2()` - PlanPeriodInfoV2を返すメソッド追加
+  - `getAvailablePlansV2()` - Planクラスのリストを返すメソッド追加
+  - 既存メソッドは@Deprecatedアノテーション付きで互換性レイヤーとして維持
+  - テスト用リセットメソッド`resetInstance()`を追加
+- ✅ 新しいV2データモデルの実装
+  - `UsageStatisticsV2` - Planクラス対応の使用統計
+  - `PlanPeriodInfoV2` - Planクラス対応の期限情報
+- ✅ MockSubscriptionServiceの拡張
+  - `setCurrentStatus()` - SubscriptionStatusを直接設定するメソッド追加
+- ✅ 包括的なテストの作成
+  - `settings_service_v2_test.dart` - V2メソッドの単体テスト
+  - 全6テストが成功
+
+作成・更新ファイル:
+- `lib/services/settings_service.dart`
+- `lib/models/subscription_info_v2.dart`
+- `test/mocks/mock_subscription_service.dart`
+- `test/unit/services/settings_service_v2_test.dart`
 
 ## フェーズ7: 完全削除への移行計画
 
@@ -475,9 +500,9 @@ class PlanFactory {
 - [x] `SubscriptionService`の内部実装をPlanクラスに統一
   - [x] enum使用箇所をすべてPlanクラスに置換
   - [x] 互換性メソッドを通じて外部インターフェースを維持
-- [ ] `SettingsService`の移行
-  - [ ] V2メソッドをメインに切り替え
-  - [ ] 旧メソッドを互換性レイヤーとして維持
+- [x] `SettingsService`の移行
+  - [x] V2メソッドをメインに切り替え
+  - [x] 旧メソッドを互換性レイヤーとして維持
 - [ ] `InAppPurchaseConfig`の更新
   - [ ] Planクラスベースのマッピングに変更
 
