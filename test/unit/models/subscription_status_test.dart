@@ -107,10 +107,9 @@ void main() {
       test('不正なプランIDでもBasicにフォールバックする', () {
         final status = SubscriptionStatus(planId: 'invalid_plan');
 
-        // Planクラスを使用して検証
-        final plan = PlanFactory.createPlan(status.planId);
-        expect(plan, isA<BasicPlan>());
+        // SubscriptionStatusの内部ロジックをテスト（enumベースのフォールバック）
         expect(status.currentPlan, equals(SubscriptionPlan.basic)); // 互換性のため保持
+        expect(status.planId, equals('invalid_plan')); // planId自体は保持される
       });
 
       test('changePlanでプランが正しく変更される', () async {
@@ -670,13 +669,12 @@ void main() {
           final status = SubscriptionStatus(planId: 'invalid_plan');
 
           // 不正なプランIDの場合、Basicプランにフォールバック
-          // Planクラスを使用して検証
-          final plan = PlanFactory.createPlan(status.planId);
-          expect(plan, isA<BasicPlan>());
+          // SubscriptionStatusの内部ロジックをテスト（enumベースのフォールバック）
           expect(
             status.currentPlan,
             equals(SubscriptionPlan.basic),
           ); // 互換性のため保持
+          expect(status.planId, equals('invalid_plan')); // planId自体は保持される
           expect(status.remainingGenerations, equals(10));
         });
 
