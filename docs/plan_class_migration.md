@@ -641,7 +641,7 @@ class PlanFactory {
     - [x] SubscriptionStatus旧メソッド削除 (12+6件)
     - [x] ISubscriptionService旧メソッド削除 (3+1件)
     - [x] InAppPurchaseConfig旧メソッド削除 (3件)
-    - [ ] テストファイル修正 (7+4件)
+    - [x] テストファイル修正 (7+4件)
     - [ ] import文修正 (5+1件)
     - [ ] UsageStatisticsV2プロパティ修正 (1件)
 

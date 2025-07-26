@@ -63,7 +63,7 @@ void main() {
 
     group('相互変換', () {
       test('既存PurchaseProductから正しく変換される', () {
-        const legacy = PurchaseProduct(
+        final legacy = PurchaseProduct(
           id: 'legacy_id',
           title: 'Legacy Product',
           description: 'Legacy Description',
@@ -259,7 +259,7 @@ void main() {
 
     group('相互変換', () {
       test('既存PurchaseResultから正しく変換される（成功時）', () {
-        const legacy = PurchaseResult(
+        final legacy = PurchaseResult(
           status: PurchaseStatus.purchased,
           productId: 'legacy_product',
           transactionId: 'legacy_transaction',
@@ -278,7 +278,7 @@ void main() {
       });
 
       test('既存PurchaseResultから正しく変換される（エラー時）', () {
-        const legacy = PurchaseResult(
+        final legacy = PurchaseResult(
           status: PurchaseStatus.error,
           errorMessage: 'Legacy error',
         );

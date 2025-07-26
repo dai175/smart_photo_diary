@@ -124,7 +124,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     final products = [
-      const PurchaseProduct(
+      PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
         title: 'Premium Plan',
         description: 'Smart Photo Diary Premium',
@@ -504,7 +504,7 @@ void main() {
 
     group('データクラステスト', () {
       test('PurchaseProductが正しく作成される', () {
-        const product = PurchaseProduct(
+        final product = PurchaseProduct(
           id: 'test_id',
           title: 'Test Title',
           description: 'Test Description',
@@ -524,10 +524,11 @@ void main() {
       });
 
       test('PurchaseResultが正しく作成される', () {
-        const result = PurchaseResult(
+        final result = PurchaseResult(
           status: PurchaseStatus.purchased,
           productId: 'test_product',
           transactionId: 'test_transaction',
+          purchaseDate: DateTime.now(),
           plan: PremiumYearlyPlan(),
         );
 

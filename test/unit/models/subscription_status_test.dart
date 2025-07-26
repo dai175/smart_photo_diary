@@ -3,7 +3,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
-import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 
 void main() {
@@ -157,7 +156,7 @@ void main() {
       test('有効なPremiumプランは有効', () {
         final futureDate = DateTime.now().add(const Duration(days: 30));
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           isActive: true,
           expiryDate: futureDate,
         );
@@ -169,7 +168,7 @@ void main() {
       test('期限切れのPremiumプランは無効', () {
         final pastDate = DateTime.now().subtract(const Duration(days: 1));
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           isActive: true,
           expiryDate: pastDate,
         );
@@ -180,7 +179,7 @@ void main() {
 
       test('非アクティブなプランは無効', () {
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           isActive: false,
           expiryDate: DateTime.now().add(const Duration(days: 30)),
         );
@@ -283,7 +282,7 @@ void main() {
       test('期限切れのPremiumプランではプレミアム機能にアクセスできない', () {
         final pastDate = DateTime.now().subtract(const Duration(days: 1));
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           isActive: true,
           expiryDate: pastDate,
         );
@@ -360,7 +359,7 @@ void main() {
       test('期限までの残り日数が正しく計算される', () {
         final futureDate = DateTime.now().add(const Duration(days: 30));
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           expiryDate: futureDate,
         );
 
@@ -373,7 +372,7 @@ void main() {
       test('期限切れの場合は0日が返される', () {
         final pastDate = DateTime.now().subtract(const Duration(days: 1));
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           expiryDate: pastDate,
         );
 
@@ -390,7 +389,7 @@ void main() {
     group('toStringテスト', () {
       test('toStringが正しい情報を含む', () {
         final status = SubscriptionStatus(
-          plan: PlanFactory.createPlan('premium_yearly'),
+          planId: 'premium_yearly',
           isActive: true,
           monthlyUsageCount: 5,
         );
@@ -504,7 +503,7 @@ void main() {
 
           final futureDate = DateTime.now().add(const Duration(days: 7));
           status.changePlanClass(
-            'premium_yearly',
+            PlanFactory.createPlan('premium_yearly'),
             effectiveDate: futureDate,
           );
 
@@ -528,7 +527,7 @@ void main() {
         test('期限切れPremiumプランの検証', () {
           final pastDate = DateTime.now().subtract(const Duration(days: 1));
           final status = SubscriptionStatus(
-            plan: PlanFactory.createPlan('premium_yearly'),
+            planId: 'premium_yearly',
             isActive: true,
             startDate: DateTime.now().subtract(const Duration(days: 400)),
             expiryDate: pastDate,
@@ -541,7 +540,7 @@ void main() {
 
         test('非アクティブなプランの検証', () {
           final status = SubscriptionStatus(
-            plan: PlanFactory.createPlan('premium_yearly'),
+            planId: 'premium_yearly',
             isActive: false,
             expiryDate: DateTime.now().add(const Duration(days: 30)),
           );
@@ -638,8 +637,7 @@ void main() {
 
           // 5. 復元
           status.restore();
-          final premiumPlan = PlanFactory.createPlan('premium_yearly');
-        status.changePlanClass(premiumPlan); // プランを戻す
+        status.changePlanClass(PlanFactory.createPlan('premium_yearly')); // プランを戻す
           expect(status.isActive, isTrue);
           expect(status.canAccessPremiumFeatures, isTrue);
           expect(status.monthlyUsageCount, equals(25)); // 使用量は保持
@@ -692,7 +690,7 @@ void main() {
         test('期限日が過去の場合の処理', () {
           final pastDate = DateTime.now().subtract(const Duration(days: 100));
           final status = SubscriptionStatus(
-            plan: PlanFactory.createPlan('premium_yearly'),
+            planId: 'premium_yearly',
             isActive: true,
             startDate: DateTime.now().subtract(const Duration(days: 200)),
             expiryDate: pastDate,

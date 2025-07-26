@@ -76,7 +76,7 @@ class MockSubscriptionService implements ISubscriptionService {
   void _initializeTestData() {
     // 利用可能な商品を設定
     _availableProducts = [
-      const PurchaseProduct(
+      PurchaseProduct(
         id: 'smart_photo_diary_premium_monthly',
         title: 'Premium Monthly',
         description: 'Smart Photo Diary Premium Monthly Plan',
@@ -85,7 +85,7 @@ class MockSubscriptionService implements ISubscriptionService {
         currencyCode: 'JPY',
         plan: PremiumMonthlyPlan(),
       ),
-      const PurchaseProduct(
+      PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
         title: 'Premium Yearly',
         description: 'Smart Photo Diary Premium Yearly Plan',
