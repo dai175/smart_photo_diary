@@ -187,7 +187,7 @@ void main() {
         'test_transaction',
       );
       expect(validateResult.isSuccess, isTrue);
-      expect(validateResult.value, isFalse);
+      expect(validateResult.value, isFalse); // 一致しないTransactionIDはfalseを返す
 
       // プラン変更（未実装）
       final allPlans = PlanFactory.getAllPlans();

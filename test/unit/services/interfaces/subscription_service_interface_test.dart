@@ -535,7 +535,8 @@ void main() {
         expect(result.status, equals(PurchaseStatus.purchased));
         expect(result.productId, equals('test_product'));
         expect(result.transactionId, equals('test_transaction'));
-        expect(result.plan.id, equals('premium_yearly'));
+        expect(result.plan, isNotNull);
+        expect(result.plan!.id, equals('premium_yearly'));
         expect(result.isSuccess, isTrue);
         expect(result.isCancelled, isFalse);
         expect(result.isError, isFalse);

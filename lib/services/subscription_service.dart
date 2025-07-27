@@ -1919,10 +1919,7 @@ class SubscriptionService implements ISubscriptionService {
 
       // 直接実装（非推奨メソッドが削除されたため）
       return Failure(
-        ServiceException(
-          'Purchase functionality is not available in test environment',
-          details: 'In-App Purchase requires proper store configuration',
-        ),
+        ServiceException('In-App Purchase not available'),
       );
     } catch (e) {
       return _handleError(e, 'purchasePlanClass', details: plan.id);
@@ -2048,10 +2045,26 @@ class SubscriptionService implements ISubscriptionService {
         );
       }
 
-      // テスト環境では常にtrueを返す
-      return const Success(true);
+      _log('Validating purchase: $transactionId', level: LogLevel.info);
+
+      // 現在の実装では基本的なローカル検証のみ
+      // 将来的にサーバーサイド検証を追加予定
+
+      // トランザクションIDの存在確認
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+
+      final status = statusResult.value;
+      final isValid =
+          status.transactionId == transactionId && _isSubscriptionValid(status);
+
+      _log('Purchase validation result: $isValid', level: LogLevel.info);
+
+      return Success(isValid);
     } catch (e) {
-      return _handleError(e, 'validatePurchase');
+      return _handleError(e, 'validatePurchase', details: transactionId);
     }
   }
 
