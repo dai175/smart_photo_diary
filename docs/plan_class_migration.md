@@ -232,7 +232,7 @@ class PlanFactory {
 
 2. **モデル層**
    - `lib/models/subscription_plan.dart` (削除予定)
-   - `lib/models/subscription_info.dart`
+   - `lib/models/subscription_info_v2.dart`（新実装）
    - `lib/models/subscription_status.dart`
 
 3. **UI層**
@@ -414,7 +414,7 @@ Plan Class Migration プロジェクトが正常に完了しました：
 更新ファイル:
 - `lib/models/subscription_plan.dart`
 - `lib/services/interfaces/subscription_service_interface.dart`
-- `lib/models/subscription_info.dart`
+- `lib/models/subscription_info_v2.dart`
 - `analysis_options.yaml`（deprecated警告の抑制）
 
 ### フェーズ7-A完了 (2025-07-26)

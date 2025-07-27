@@ -1,7 +1,6 @@
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
 import 'subscription_status.dart';
-// import 'subscription_info.dart'; // 削除されたファイル
 
 /// 使用統計情報（新Planクラス版）
 class UsageStatisticsV2 {
@@ -225,21 +224,6 @@ class SubscriptionInfoV2 {
     );
   }
 
-  /// 既存のSubscriptionInfoから変換
-  /// @deprecated SubscriptionInfoクラス削除により無効化
-  /*
-  factory SubscriptionInfoV2.fromLegacy(SubscriptionInfo info) {
-    final plan = PlanFactory.createPlan(info.currentPlan.id);
-
-    return SubscriptionInfoV2(
-      currentPlan: plan,
-      status: info.status,
-      usageStats: UsageStatisticsV2.fromStatusAndPlan(info.status, plan),
-      periodInfo: PlanPeriodInfoV2.fromStatusAndPlan(info.status, plan),
-      autoRenewalInfo: info.autoRenewalInfo,
-    );
-  }
-  */
 
   /// 現在のプランがアクティブかどうか
   bool get isActive => status.isActive;
@@ -344,18 +328,6 @@ class SubscriptionInfoV2 {
     isExpiryNear: periodInfo.isExpiryNear,
   );
 
-  /// 既存のSubscriptionInfoに変換（後方互換性用）
-  /// 注意: SubscriptionInfoクラスは非推奨です
-  /// このメソッドは段階的な移行期間中のみ使用し、将来的に削除予定です。
-  /*
-  @Deprecated('SubscriptionInfo class is deprecated, use SubscriptionInfoV2 instead')
-  SubscriptionInfo toLegacy() {
-    // 互換性のためにPlanクラスからの変換を実装
-    // V2からレガシー版への変換
-    // このメソッドはenumクラス削除により一時的にコメントアウト
-    // 必要に応じて後で再実装
-  }
-  */
 }
 
 /// 設定画面表示用のデータクラス（V2版）

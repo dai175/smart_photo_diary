@@ -164,11 +164,6 @@ class SubscriptionService implements ISubscriptionService {
   // プラン管理メソッド（Phase 1.4.1）
   // =================================================================
 
-  // getAvailablePlansメソッドも削除（非推奨のため）
-
-  // 非推奨メソッドはインターフェースから削除されたため、実装も削除
-
-  // getCurrentPlanメソッドも削除（非推奨のため）
 
   /// 特定のプラン情報を取得（新Planクラス）
   @override
@@ -1699,113 +1694,6 @@ class SubscriptionService implements ISubscriptionService {
   // Phase 1.6.2.2: 購入フロー実装
   // =================================================================
 
-  // 非推奨メソッドpurchasePlan削除（enumが削除されたため）
-  /*
-  @override
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
-      }
-
-
-      // Planクラスを使用して判定
-      final planClass = PlanFactory.createPlan(plan.id);
-      if (planClass is BasicPlan) {
-        return Failure(ServiceException('Basic plan cannot be purchased'));
-      }
-
-      _log('Starting purchase for plan: ${plan.id}', level: LogLevel.info);
-
-      // 商品IDを取得
-      final productId = InAppPurchaseConfig.getProductId(plan);
-
-      try {
-        // 商品詳細を取得
-        final productResponse = await _inAppPurchase!.queryProductDetails({
-          productId,
-        });
-
-        if (productResponse.error != null) {
-              return Failure(
-            ServiceException(
-              'Failed to get product details for purchase',
-              details: productResponse.error.toString(),
-            ),
-          );
-        }
-
-        if (productResponse.productDetails.isEmpty) {
-              return Failure(ServiceException('Product not found: $productId'));
-        }
-
-        final productDetails = productResponse.productDetails.first;
-
-        // 購入リクエストを作成
-        final PurchaseParam purchaseParam = PurchaseParam(
-          productDetails: productDetails,
-        );
-
-        // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
-        final bool success = await _inAppPurchase!.buyNonConsumable(
-          purchaseParam: purchaseParam,
-        );
-
-        if (!success) {
-              return Failure(ServiceException('Failed to initiate purchase'));
-        }
-
-        _log('Purchase initiated successfully', level: LogLevel.info);
-
-        // 購入結果は購入ストリームで非同期に処理される
-        // ここでは購入開始の成功を返す
-        return Success(
-          PurchaseResult(
-            status: ssi.PurchaseStatus.pending,
-            productId: productId,
-            plan: plan,
-          ),
-        );
-      } catch (storeError) {
-  
-        // シミュレーター環境でのストアエラー処理
-        if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
-          final errorString = storeError.toString();
-          if (errorString.contains('not connected to app store') ||
-              errorString.contains('sandbox') ||
-              errorString.contains('StoreKit')) {
-            _log(
-              'Store connection error in simulator - mocking success',
-              level: LogLevel.warning,
-            );
-
-            await Future.delayed(const Duration(milliseconds: 1000));
-            final result = await createStatus(plan);
-            if (result.isSuccess) {
-              return Success(
-                PurchaseResult(
-                  status: ssi.PurchaseStatus.purchased,
-                  productId: productId,
-                  plan: plan,
-                  purchaseDate: DateTime.now(),
-                ),
-              );
-            }
-          }
-        }
-
-        rethrow;
-      }
-    } catch (e) {
-      return _handleError(e, 'purchasePlan', details: plan.id);
-    }
-  }
 
   // =================================================================
   // Phase 1.6.2.3: 購入状態監視実装
@@ -1891,21 +1779,6 @@ class SubscriptionService implements ISubscriptionService {
       return _handleError(e, 'validatePurchase', details: transactionId);
     }
   }
-  */
-
-  // 非推奨メソッドchangePlan削除（enumが削除されたため）
-  /*
-  @override
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    // Phase 1.6では未実装（将来実装予定）
-    return Failure(
-      ServiceException(
-        'Plan change is not yet implemented',
-        details: 'This feature will be available in future versions',
-      ),
-    );
-  }
-  */
 
   /// プランを購入（新Planクラス）
   @override
@@ -2011,76 +1884,6 @@ class SubscriptionService implements ISubscriptionService {
     _log('SubscriptionService disposed', level: LogLevel.info);
   }
 
-  /// 購入の復元
-  @override
-  Future<Result<List<PurchaseResult>>> restorePurchases() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
-      }
-
-      _log('Restoring purchases...', level: LogLevel.info);
-      await _inAppPurchase!.restorePurchases();
-      
-      // 復元は購入ストリームを通じて処理される
-      return const Success([]);
-    } catch (e) {
-      return _handleError(e, 'restorePurchases');
-    }
-  }
-
-  /// 購入の検証
-  @override
-  Future<Result<bool>> validatePurchase(String transactionId) async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      _log('Validating purchase: $transactionId', level: LogLevel.info);
-
-      // 現在の実装では基本的なローカル検証のみ
-      // 将来的にサーバーサイド検証を追加予定
-
-      // トランザクションIDの存在確認
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final isValid =
-          status.transactionId == transactionId && _isSubscriptionValid(status);
-
-      _log('Purchase validation result: $isValid', level: LogLevel.info);
-
-      return Success(isValid);
-    } catch (e) {
-      return _handleError(e, 'validatePurchase', details: transactionId);
-    }
-  }
-
-  /// サブスクリプション状態ストリーム
-  @override
-  Stream<SubscriptionStatus> get statusStream {
-    // 簡単な実装：現在の状態を定期的に返す
-    return Stream.periodic(const Duration(seconds: 30), (_) async {
-      final result = await getCurrentStatus();
-      return result.isSuccess ? result.value : SubscriptionStatus.createDefault();
-    }).asyncMap((future) => future);
-  }
-
-  /// 購入結果ストリーム
-  @override
-  Stream<PurchaseResult> get purchaseStream => _purchaseStreamController.stream;
 
   /// テスト用リセットメソッド
   static void resetForTesting() {
