@@ -325,10 +325,7 @@ void main() {
         );
 
         // 購入不可プラン
-        expect(
-          InAppPurchaseConfig.isPurchasableFromPlan(BasicPlan()),
-          isFalse,
-        );
+        expect(InAppPurchaseConfig.isPurchasableFromPlan(BasicPlan()), isFalse);
       });
     });
 

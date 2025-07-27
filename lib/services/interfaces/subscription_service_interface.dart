@@ -28,11 +28,8 @@ abstract class ISubscriptionService {
   // プラン管理メソッド
   // ========================================
 
-
-
   /// 特定のプラン情報を取得（新Planクラス）
   Result<Plan> getPlanClass(String planId);
-
 
   /// 現在のプランを取得（新Planクラス）
   Future<Result<Plan>> getCurrentPlanClass();
@@ -89,7 +86,6 @@ abstract class ISubscriptionService {
   /// In-App Purchase商品情報を取得
   Future<Result<List<PurchaseProduct>>> getProducts();
 
-
   /// プランを購入（新Planクラス）
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan);
 
@@ -98,7 +94,6 @@ abstract class ISubscriptionService {
 
   /// 購入状態を検証
   Future<Result<bool>> validatePurchase(String transactionId);
-
 
   /// プランを変更（新Planクラス）
   Future<Result<void>> changePlanClass(Plan newPlan);

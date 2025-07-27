@@ -135,9 +135,7 @@ void main() {
 
       test('purchasePlan()でBasicプラン購入時にエラーが返される', () async {
         // Basicプランは購入対象外
-        final result = await subscriptionService.purchasePlanClass(
-          BasicPlan(),
-        );
+        final result = await subscriptionService.purchasePlanClass(BasicPlan());
 
         expect(result.isFailure, isTrue);
         // テスト環境では In-App Purchase 未対応のため、このエラーが先に発生する
@@ -191,9 +189,7 @@ void main() {
 
       test('無効なプランでの購入処理エラーハンドリング', () async {
         // Basicプランでの購入はエラーになるべき
-        final result = await subscriptionService.purchasePlanClass(
-          BasicPlan(),
-        );
+        final result = await subscriptionService.purchasePlanClass(BasicPlan());
 
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
@@ -487,7 +483,7 @@ void main() {
 class InAppPurchaseTestHelpers {
   // 注意: PurchaseResultとPurchaseProductは旧バージョンでenumに依存しているため、
   // ヘルパーメソッドは一旦コメントアウト。V2バージョンが利用可能になったら再実装。
-  
+
   /*
   /// テスト用購入結果を作成
   static PurchaseResult createTestPurchaseResult({

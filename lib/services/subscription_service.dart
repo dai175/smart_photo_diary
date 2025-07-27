@@ -63,7 +63,6 @@ class SubscriptionService implements ISubscriptionService {
   final StreamController<PurchaseResult> _purchaseStreamController =
       StreamController<PurchaseResult>.broadcast();
 
-
   // プライベートコンストラクタ
   SubscriptionService._();
 
@@ -163,7 +162,6 @@ class SubscriptionService implements ISubscriptionService {
   // =================================================================
   // プラン管理メソッド（Phase 1.4.1）
   // =================================================================
-
 
   /// 特定のプラン情報を取得（新Planクラス）
   @override
@@ -407,7 +405,6 @@ class SubscriptionService implements ISubscriptionService {
       );
     }
   }
-
 
   /// サブスクリプション状態を削除（テスト用）
   @visibleForTesting
@@ -1486,7 +1483,6 @@ class SubscriptionService implements ISubscriptionService {
         plan: plan,
       );
       _purchaseStreamController.add(result);
-
     } catch (e) {
       _log(
         'Error handling purchase completion',
@@ -1541,7 +1537,6 @@ class SubscriptionService implements ISubscriptionService {
       errorMessage: purchaseDetails.error?.message ?? 'Unknown purchase error',
     );
     _purchaseStreamController.add(result);
-
   }
 
   /// 購入キャンセル処理
@@ -1556,7 +1551,6 @@ class SubscriptionService implements ISubscriptionService {
       productId: purchaseDetails.productID,
     );
     _purchaseStreamController.add(result);
-
   }
 
   /// 購入保留処理
@@ -1694,7 +1688,6 @@ class SubscriptionService implements ISubscriptionService {
   // Phase 1.6.2.2: 購入フロー実装
   // =================================================================
 
-
   // =================================================================
   // Phase 1.6.2.3: 購入状態監視実装
   // =================================================================
@@ -1791,9 +1784,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       // 直接実装（非推奨メソッドが削除されたため）
-      return Failure(
-        ServiceException('In-App Purchase not available'),
-      );
+      return Failure(ServiceException('In-App Purchase not available'));
     } catch (e) {
       return _handleError(e, 'purchasePlanClass', details: plan.id);
     }
@@ -1883,7 +1874,6 @@ class SubscriptionService implements ISubscriptionService {
 
     _log('SubscriptionService disposed', level: LogLevel.info);
   }
-
 
   /// テスト用リセットメソッド
   static void resetForTesting() {

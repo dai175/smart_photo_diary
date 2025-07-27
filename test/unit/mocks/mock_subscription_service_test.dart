@@ -232,10 +232,7 @@ void main() {
 
       test('Premiumプランでのアクセス権限が正しい', () async {
         final premiumYearlyPlan = PremiumYearlyPlan();
-        mockService.setCurrentPlan(
-          premiumYearlyPlan,
-          isActive: true,
-        );
+        mockService.setCurrentPlan(premiumYearlyPlan, isActive: true);
 
         final premiumResult = await mockService.canAccessPremiumFeatures();
         final promptsResult = await mockService.canAccessWritingPrompts();
@@ -263,14 +260,8 @@ void main() {
         expect(productsResult.value.length, equals(2));
 
         final products = productsResult.value;
-        expect(
-          products.any((p) => p.plan is PremiumMonthlyPlan),
-          isTrue,
-        );
-        expect(
-          products.any((p) => p.plan is PremiumYearlyPlan),
-          isTrue,
-        );
+        expect(products.any((p) => p.plan is PremiumMonthlyPlan), isTrue);
+        expect(products.any((p) => p.plan is PremiumYearlyPlan), isTrue);
       });
 
       test('プラン購入をシミュレートできる', () async {
@@ -358,9 +349,7 @@ void main() {
         mockService.setPurchaseFailure(true, 'Test purchase error');
 
         final premiumYearlyPlan = PremiumYearlyPlan();
-        final result = await mockService.purchasePlanClass(
-          premiumYearlyPlan,
-        );
+        final result = await mockService.purchasePlanClass(premiumYearlyPlan);
 
         expect(result.isSuccess, isTrue); // Success with error status
         expect(result.value.status, equals(PurchaseStatus.error));

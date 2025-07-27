@@ -163,7 +163,8 @@ class SubscriptionStatus extends HiveObject {
   /// 残りAI生成回数を取得
   int get remainingGenerations {
     _resetMonthlyUsageIfNeeded();
-    final remaining = currentPlanClass.monthlyAiGenerationLimit - monthlyUsageCount;
+    final remaining =
+        currentPlanClass.monthlyAiGenerationLimit - monthlyUsageCount;
     return remaining > 0 ? remaining : 0;
   }
 

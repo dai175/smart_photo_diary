@@ -268,16 +268,9 @@ class MockSubscriptionService implements ISubscriptionService {
     return const Success(null);
   }
 
-
   Result<List<Plan>> getAvailablePlansClass() {
-    return Success([
-      BasicPlan(),
-      PremiumMonthlyPlan(),
-      PremiumYearlyPlan(),
-    ]);
+    return Success([BasicPlan(), PremiumMonthlyPlan(), PremiumYearlyPlan()]);
   }
-
-
 
   @override
   Result<Plan> getPlanClass(String planId) {
@@ -535,7 +528,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return Success(_availableProducts);
   }
 
-
   @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     if (!_isInitialized) {
@@ -562,7 +554,6 @@ class MockSubscriptionService implements ISubscriptionService {
 
     return Success(isValid);
   }
-
 
   @override
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {

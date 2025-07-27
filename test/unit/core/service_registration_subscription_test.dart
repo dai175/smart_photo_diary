@@ -192,9 +192,7 @@ void main() {
       // プラン変更（未実装）
       final allPlans = PlanFactory.getAllPlans();
       final lastPlan = allPlans.last;
-      final changeResult = await subscriptionService.changePlanClass(
-        lastPlan,
-      );
+      final changeResult = await subscriptionService.changePlanClass(lastPlan);
       expect(changeResult.isFailure, isTrue);
 
       // キャンセル（実装済み）

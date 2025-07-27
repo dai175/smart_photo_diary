@@ -243,8 +243,10 @@ class TestServiceSetup {
 
     // Basic Plan default setup
     final basicPlan = BasicPlan();
-    when(() => mock.getCurrentPlanClass()).thenAnswer((_) async => Success(basicPlan));
-    
+    when(
+      () => mock.getCurrentPlanClass(),
+    ).thenAnswer((_) async => Success(basicPlan));
+
     when(() => mock.getCurrentStatus()).thenAnswer(
       (_) async => Success(
         SubscriptionStatus(
@@ -262,19 +264,35 @@ class TestServiceSetup {
     );
 
     // AI usage defaults
-    when(() => mock.canUseAiGeneration()).thenAnswer((_) async => const Success(true));
-    when(() => mock.getRemainingGenerations()).thenAnswer(
-      (_) async => Success(basicPlan.monthlyAiGenerationLimit),
-    );
-    when(() => mock.getMonthlyUsage()).thenAnswer((_) async => const Success(0));
-    when(() => mock.incrementAiUsage()).thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.canUseAiGeneration(),
+    ).thenAnswer((_) async => const Success(true));
+    when(
+      () => mock.getRemainingGenerations(),
+    ).thenAnswer((_) async => Success(basicPlan.monthlyAiGenerationLimit));
+    when(
+      () => mock.getMonthlyUsage(),
+    ).thenAnswer((_) async => const Success(0));
+    when(
+      () => mock.incrementAiUsage(),
+    ).thenAnswer((_) async => const Success(null));
 
     // Access permissions defaults (Basic plan)
-    when(() => mock.canAccessPremiumFeatures()).thenAnswer((_) async => const Success(false));
-    when(() => mock.canAccessWritingPrompts()).thenAnswer((_) async => const Success(false));
-    when(() => mock.canAccessAdvancedFilters()).thenAnswer((_) async => const Success(false));
-    when(() => mock.canAccessAdvancedAnalytics()).thenAnswer((_) async => const Success(false));
-    when(() => mock.canAccessPrioritySupport()).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessPremiumFeatures(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessWritingPrompts(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessAdvancedFilters(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessAdvancedAnalytics(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessPrioritySupport(),
+    ).thenAnswer((_) async => const Success(false));
 
     // Date-related defaults
     when(() => mock.getNextResetDate()).thenAnswer(
@@ -319,15 +337,19 @@ class TestServiceSetup {
     int usageCount = 0,
     bool isActive = true,
   }) {
-    when(() => mock.getCurrentPlanClass()).thenAnswer((_) async => Success(plan));
-    
+    when(
+      () => mock.getCurrentPlanClass(),
+    ).thenAnswer((_) async => Success(plan));
+
     when(() => mock.getCurrentStatus()).thenAnswer(
       (_) async => Success(
         SubscriptionStatus(
           planId: plan.id,
           isActive: isActive,
           startDate: DateTime.now(),
-          expiryDate: plan.isPremium ? DateTime.now().add(const Duration(days: 365)) : null,
+          expiryDate: plan.isPremium
+              ? DateTime.now().add(const Duration(days: 365))
+              : null,
           monthlyUsageCount: usageCount,
           lastResetDate: DateTime.now(),
           autoRenewal: plan.isPremium,
@@ -340,26 +362,48 @@ class TestServiceSetup {
     // AI usage based on plan limits and current usage
     final canUseAi = usageCount < plan.monthlyAiGenerationLimit;
     final remaining = plan.monthlyAiGenerationLimit - usageCount;
-    
-    when(() => mock.canUseAiGeneration()).thenAnswer((_) async => Success(canUseAi));
-    when(() => mock.getRemainingGenerations()).thenAnswer((_) async => Success(remaining));
-    when(() => mock.getMonthlyUsage()).thenAnswer((_) async => Success(usageCount));
+
+    when(
+      () => mock.canUseAiGeneration(),
+    ).thenAnswer((_) async => Success(canUseAi));
+    when(
+      () => mock.getRemainingGenerations(),
+    ).thenAnswer((_) async => Success(remaining));
+    when(
+      () => mock.getMonthlyUsage(),
+    ).thenAnswer((_) async => Success(usageCount));
 
     // Access permissions based on plan features
-    when(() => mock.canAccessPremiumFeatures()).thenAnswer((_) async => Success(plan.isPremium));
-    when(() => mock.canAccessWritingPrompts()).thenAnswer((_) async => Success(plan.hasWritingPrompts));
-    when(() => mock.canAccessAdvancedFilters()).thenAnswer((_) async => Success(plan.hasAdvancedFilters));
-    when(() => mock.canAccessAdvancedAnalytics()).thenAnswer((_) async => Success(plan.hasAdvancedAnalytics));
-    when(() => mock.canAccessPrioritySupport()).thenAnswer((_) async => Success(plan.hasPrioritySupport));
+    when(
+      () => mock.canAccessPremiumFeatures(),
+    ).thenAnswer((_) async => Success(plan.isPremium));
+    when(
+      () => mock.canAccessWritingPrompts(),
+    ).thenAnswer((_) async => Success(plan.hasWritingPrompts));
+    when(
+      () => mock.canAccessAdvancedFilters(),
+    ).thenAnswer((_) async => Success(plan.hasAdvancedFilters));
+    when(
+      () => mock.canAccessAdvancedAnalytics(),
+    ).thenAnswer((_) async => Success(plan.hasAdvancedAnalytics));
+    when(
+      () => mock.canAccessPrioritySupport(),
+    ).thenAnswer((_) async => Success(plan.hasPrioritySupport));
   }
 
   /// Get SubscriptionService mock configured for Basic plan
-  static MockSubscriptionServiceInterface getBasicPlanSubscriptionService({int usageCount = 0}) {
+  static MockSubscriptionServiceInterface getBasicPlanSubscriptionService({
+    int usageCount = 0,
+  }) {
     final mock = MockSubscriptionServiceInterface();
     when(() => mock.isInitialized).thenReturn(true);
     when(() => mock.initialize()).thenAnswer((_) async => const Success(null));
-    
-    configureSubscriptionServiceForPlan(mock, BasicPlan(), usageCount: usageCount);
+
+    configureSubscriptionServiceForPlan(
+      mock,
+      BasicPlan(),
+      usageCount: usageCount,
+    );
     return mock;
   }
 
@@ -371,7 +415,7 @@ class TestServiceSetup {
     final mock = MockSubscriptionServiceInterface();
     when(() => mock.isInitialized).thenReturn(true);
     when(() => mock.initialize()).thenAnswer((_) async => const Success(null));
-    
+
     final plan = isYearly ? PremiumYearlyPlan() : PremiumMonthlyPlan();
     configureSubscriptionServiceForPlan(mock, plan, usageCount: usageCount);
     return mock;

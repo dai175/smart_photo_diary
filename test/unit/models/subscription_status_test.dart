@@ -93,10 +93,7 @@ void main() {
         // Planクラスを使用して検証
         final premiumPlan = PlanFactory.createPlan(premiumStatus.planId);
         expect(premiumPlan, isA<PremiumYearlyPlan>());
-        expect(
-          premiumStatus.planId,
-          equals('premium_yearly'),
-        ); // 互換性のため保持
+        expect(premiumStatus.planId, equals('premium_yearly')); // 互換性のため保持
       });
 
       test('不正なプランIDでもBasicにフォールバックする', () {
@@ -415,7 +412,7 @@ void main() {
           expect(status.expiryDate, isNull);
 
           final premiumMonthlyPlan = PlanFactory.createPlan('premium_monthly');
-        status.changePlanClass(premiumMonthlyPlan);
+          status.changePlanClass(premiumMonthlyPlan);
 
           expect(status.planId, equals('premium_monthly'));
           expect(status.isActive, isTrue);
@@ -438,7 +435,7 @@ void main() {
           await testBox.add(status);
 
           final premiumPlan = PlanFactory.createPlan('premium_yearly');
-        status.changePlanClass(premiumPlan);
+          status.changePlanClass(premiumPlan);
 
           expect(status.planId, equals('premium_yearly'));
           expect(status.isActive, isTrue);
@@ -464,7 +461,7 @@ void main() {
 
           final originalStartDate = status.startDate;
           final premiumPlan = PlanFactory.createPlan('premium_yearly');
-        status.changePlanClass(premiumPlan);
+          status.changePlanClass(premiumPlan);
 
           expect(status.planId, equals('premium_yearly'));
           expect(status.isActive, isTrue);
@@ -489,7 +486,7 @@ void main() {
           await testBox.add(status);
 
           final basicPlan = PlanFactory.createPlan('basic');
-        status.changePlanClass(basicPlan);
+          status.changePlanClass(basicPlan);
 
           expect(status.planId, equals('basic'));
           expect(status.isActive, isTrue);
@@ -617,7 +614,7 @@ void main() {
 
           // 2. Premiumに変更
           final premiumPlan = PlanFactory.createPlan('premium_yearly');
-        status.changePlanClass(premiumPlan);
+          status.changePlanClass(premiumPlan);
           expect(status.planId, equals('premium_yearly'));
           expect(status.remainingGenerations, equals(100));
           expect(status.canAccessPremiumFeatures, isTrue);
@@ -637,7 +634,9 @@ void main() {
 
           // 5. 復元
           status.restore();
-        status.changePlanClass(PlanFactory.createPlan('premium_yearly')); // プランを戻す
+          status.changePlanClass(
+            PlanFactory.createPlan('premium_yearly'),
+          ); // プランを戻す
           expect(status.isActive, isTrue);
           expect(status.canAccessPremiumFeatures, isTrue);
           expect(status.monthlyUsageCount, equals(25)); // 使用量は保持
@@ -669,10 +668,7 @@ void main() {
 
           // 不正なプランIDの場合、Basicプランにフォールバック
           // SubscriptionStatusの内部ロジックをテスト（enumベースのフォールバック）
-          expect(
-            status.currentPlanClass.id,
-            equals('basic'),
-          ); // 互換性のため保持
+          expect(status.currentPlanClass.id, equals('basic')); // 互換性のため保持
           expect(status.planId, equals('invalid_plan')); // planId自体は保持される
           expect(status.remainingGenerations, equals(10));
         });

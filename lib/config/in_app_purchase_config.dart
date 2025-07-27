@@ -55,7 +55,6 @@ class InAppPurchaseConfig {
     return plan.productId;
   }
 
-
   /// 商品IDからプランを取得（メイン実装 - Planクラス版）
   static Plan getPlanFromProductId(String productId) {
     // 全プランから商品IDが一致するものを検索
@@ -66,7 +65,6 @@ class InAppPurchaseConfig {
     }
     throw ArgumentError('Unknown product ID: $productId');
   }
-
 
   // ========================================
   // 価格設定
@@ -162,12 +160,10 @@ class InAppPurchaseConfig {
     return plan.displayName;
   }
 
-
   /// プランの説明文を取得（メイン実装 - Planクラス版）
   static String getDescriptionFromPlan(Plan plan) {
     return plan.description;
   }
-
 
   // ========================================
   // 無料トライアル設定
@@ -280,7 +276,6 @@ class InAppPurchaseConfig {
   static bool isPurchasableFromPlan(Plan plan) {
     return plan.isPaid;
   }
-
 
   /// デバッグ情報を出力
   static Map<String, dynamic> getDebugInfo() {

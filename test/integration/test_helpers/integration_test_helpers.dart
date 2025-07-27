@@ -445,29 +445,31 @@ class IntegrationTestHelpers {
       () => mockSubscriptionService.getCurrentPlanClass(),
     ).thenAnswer((_) async => Success(plan));
 
-    when(
-      () => mockSubscriptionService.getCurrentStatus(),
-    ).thenAnswer((_) async => Success(
-      SubscriptionStatus(
-        planId: plan.id,
-        isActive: isActive,
-        startDate: DateTime.now(),
-        expiryDate: plan.isPremium ? DateTime.now().add(const Duration(days: 365)) : null,
-        monthlyUsageCount: usageCount,
-        lastResetDate: DateTime.now(),
-        autoRenewal: plan.isPremium,
-        transactionId: plan.isPremium ? 'test-transaction' : null,
-        lastPurchaseDate: plan.isPremium ? DateTime.now() : null,
+    when(() => mockSubscriptionService.getCurrentStatus()).thenAnswer(
+      (_) async => Success(
+        SubscriptionStatus(
+          planId: plan.id,
+          isActive: isActive,
+          startDate: DateTime.now(),
+          expiryDate: plan.isPremium
+              ? DateTime.now().add(const Duration(days: 365))
+              : null,
+          monthlyUsageCount: usageCount,
+          lastResetDate: DateTime.now(),
+          autoRenewal: plan.isPremium,
+          transactionId: plan.isPremium ? 'test-transaction' : null,
+          lastPurchaseDate: plan.isPremium ? DateTime.now() : null,
+        ),
       ),
-    ));
+    );
 
-    when(
-      () => mockSubscriptionService.canUseAiGeneration(),
-    ).thenAnswer((_) async => Success(usageCount < plan.monthlyAiGenerationLimit));
+    when(() => mockSubscriptionService.canUseAiGeneration()).thenAnswer(
+      (_) async => Success(usageCount < plan.monthlyAiGenerationLimit),
+    );
 
-    when(
-      () => mockSubscriptionService.getRemainingGenerations(),
-    ).thenAnswer((_) async => Success(plan.monthlyAiGenerationLimit - usageCount));
+    when(() => mockSubscriptionService.getRemainingGenerations()).thenAnswer(
+      (_) async => Success(plan.monthlyAiGenerationLimit - usageCount),
+    );
 
     when(
       () => mockSubscriptionService.getMonthlyUsage(),
@@ -492,10 +494,8 @@ class IntegrationTestHelpers {
     bool isYearly = true,
     int usageCount = 0,
   }) {
-    final plan = isYearly 
-        ? PremiumYearlyPlan() 
-        : PremiumMonthlyPlan();
-    
+    final plan = isYearly ? PremiumYearlyPlan() : PremiumMonthlyPlan();
+
     setupMockSubscriptionPlan(
       mockSubscriptionService,
       plan,
@@ -522,12 +522,14 @@ class IntegrationTestHelpers {
     bool isActive = true,
   }) {
     final testPlan = plan ?? BasicPlan();
-    
+
     return SubscriptionStatus(
       planId: testPlan.id,
       isActive: isActive,
       startDate: DateTime.now(),
-      expiryDate: testPlan.isPremium ? DateTime.now().add(const Duration(days: 365)) : null,
+      expiryDate: testPlan.isPremium
+          ? DateTime.now().add(const Duration(days: 365))
+          : null,
       monthlyUsageCount: usageCount,
       lastResetDate: DateTime.now(),
       autoRenewal: testPlan.isPremium,
@@ -540,7 +542,7 @@ class IntegrationTestHelpers {
   static void verifyPlanFeatures(Plan plan) {
     // Verify display name
     expect(find.textContaining(plan.displayName), findsWidgets);
-    
+
     // Verify premium features based on plan type
     if (plan.isPremium) {
       if (plan.hasWritingPrompts) {
@@ -559,7 +561,10 @@ class IntegrationTestHelpers {
   static void verifyAiGenerationLimits(Plan plan, int currentUsage) {
     final remaining = plan.monthlyAiGenerationLimit - currentUsage;
     expect(find.textContaining('$remaining'), findsWidgets);
-    expect(find.textContaining('${plan.monthlyAiGenerationLimit}'), findsWidgets);
+    expect(
+      find.textContaining('${plan.monthlyAiGenerationLimit}'),
+      findsWidgets,
+    );
   }
 }
 

@@ -109,7 +109,8 @@ void main() {
       var status = result.value;
       expect(status.monthlyUsageCount, equals(99));
       expect(
-        status.monthlyUsageCount < PremiumMonthlyPlan().monthlyAiGenerationLimit,
+        status.monthlyUsageCount <
+            PremiumMonthlyPlan().monthlyAiGenerationLimit,
         isTrue,
       );
 
@@ -121,7 +122,8 @@ void main() {
       status = result.value;
       expect(status.monthlyUsageCount, equals(100));
       expect(
-        status.monthlyUsageCount >= PremiumMonthlyPlan().monthlyAiGenerationLimit,
+        status.monthlyUsageCount >=
+            PremiumMonthlyPlan().monthlyAiGenerationLimit,
         isTrue,
       );
     });
@@ -200,7 +202,8 @@ void main() {
       final statusResult = await mockService.getCurrentStatus();
       final status = statusResult.value;
       final basicPlan = BasicPlan();
-      final remaining = basicPlan.monthlyAiGenerationLimit - status.monthlyUsageCount;
+      final remaining =
+          basicPlan.monthlyAiGenerationLimit - status.monthlyUsageCount;
 
       // Then: 残り3回
       expect(remaining, equals(3));
@@ -213,7 +216,9 @@ void main() {
       final premiumStatusResult = await mockService.getCurrentStatus();
       final premiumStatus = premiumStatusResult.value;
       final premiumPlan = PremiumMonthlyPlan();
-      final premiumRemaining = premiumPlan.monthlyAiGenerationLimit - premiumStatus.monthlyUsageCount;
+      final premiumRemaining =
+          premiumPlan.monthlyAiGenerationLimit -
+          premiumStatus.monthlyUsageCount;
 
       // Then: 残り50回
       expect(premiumRemaining, equals(50));

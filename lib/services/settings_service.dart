@@ -114,7 +114,6 @@ class SettingsService {
     }, context: 'SettingsService.getSubscriptionInfoV2');
   }
 
-
   /// 現在のプラン情報を取得（メイン実装 - Planクラス版）
   Future<Result<Plan>> getCurrentPlanClass() async {
     return ResultHelper.tryExecuteAsync(() async {
@@ -130,7 +129,6 @@ class SettingsService {
       return planResult.value;
     }, context: 'SettingsService.getCurrentPlanClass');
   }
-
 
   /// プラン期限情報を取得（メイン実装 - V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
@@ -203,7 +201,6 @@ class SettingsService {
     }, context: 'SettingsService.getUsageStatisticsWithPlanClass');
   }
 
-
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）
   Future<Result<int>> getRemainingGenerations() async {
     return ResultHelper.tryExecuteAsync(() async {
@@ -266,5 +263,4 @@ class SettingsService {
       return plans;
     }, context: 'SettingsService.getAvailablePlansV2');
   }
-
 }

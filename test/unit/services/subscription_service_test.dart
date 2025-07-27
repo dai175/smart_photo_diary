@@ -202,9 +202,7 @@ void main() {
 
         // Act
         final basicPlan = BasicPlan();
-        final result = await subscriptionService.createStatusClass(
-          basicPlan,
-        );
+        final result = await subscriptionService.createStatusClass(basicPlan);
 
         // Assert
         expect(result.isSuccess, isTrue);

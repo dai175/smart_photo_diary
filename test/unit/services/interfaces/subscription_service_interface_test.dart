@@ -46,16 +46,9 @@ class MockSubscriptionService implements ISubscriptionService {
     return const Success(null);
   }
 
-
   Result<List<Plan>> getAvailablePlansClass() {
-    return Success([
-      BasicPlan(),
-      PremiumMonthlyPlan(),
-      PremiumYearlyPlan(),
-    ]);
+    return Success([BasicPlan(), PremiumMonthlyPlan(), PremiumYearlyPlan()]);
   }
-
-
 
   @override
   Future<Result<bool>> canUseAiGeneration() async {
@@ -136,7 +129,6 @@ class MockSubscriptionService implements ISubscriptionService {
     return Success(products);
   }
 
-
   @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     return const Success([]);
@@ -146,7 +138,6 @@ class MockSubscriptionService implements ISubscriptionService {
   Future<Result<bool>> validatePurchase(String transactionId) async {
     return const Success(true);
   }
-
 
   @override
   Future<Result<void>> cancelSubscription() async {

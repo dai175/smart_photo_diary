@@ -209,7 +209,10 @@ void main() {
 
       // MockServiceで設定された統計データが取得できること
       expect(v2StatsResult.value.monthlyUsageCount, equals(30));
-      expect(v2StatsResult.value.monthlyLimit, equals(100)); // PremiumMonthlyPlanの制限
+      expect(
+        v2StatsResult.value.monthlyLimit,
+        equals(100),
+      ); // PremiumMonthlyPlanの制限
     });
   });
 }

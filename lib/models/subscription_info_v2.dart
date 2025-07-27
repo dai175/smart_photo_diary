@@ -224,7 +224,6 @@ class SubscriptionInfoV2 {
     );
   }
 
-
   /// 現在のプランがアクティブかどうか
   bool get isActive => status.isActive;
 
@@ -327,7 +326,6 @@ class SubscriptionInfoV2 {
     isNearLimit: usageStats.isNearLimit,
     isExpiryNear: periodInfo.isExpiryNear,
   );
-
 }
 
 /// 設定画面表示用のデータクラス（V2版）

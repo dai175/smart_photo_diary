@@ -120,7 +120,9 @@ class PurchaseResultV2 {
       transactionId: legacy.transactionId,
       purchaseDate: legacy.purchaseDate,
       errorMessage: legacy.errorMessage,
-      plan: legacy.plan != null ? PlanFactory.createPlan(legacy.plan!.id) : null,
+      plan: legacy.plan != null
+          ? PlanFactory.createPlan(legacy.plan!.id)
+          : null,
     );
   }
 

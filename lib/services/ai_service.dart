@@ -56,7 +56,8 @@ class AiService implements AiServiceInterface {
 
         if (!canUseResult.value) {
           // Phase 1.7.2.2: 制限超過時の適切なエラーメッセージ
-          final currentPlanResult = await _subscriptionService.getCurrentPlanClass();
+          final currentPlanResult = await _subscriptionService
+              .getCurrentPlanClass();
           final planName = currentPlanResult.isSuccess
               ? currentPlanResult.value.displayName
               : 'Basic';
@@ -126,7 +127,8 @@ class AiService implements AiServiceInterface {
 
         if (!canUseResult.value) {
           // Phase 1.7.2.2: 制限超過時の適切なエラーメッセージ
-          final currentPlanResult = await _subscriptionService.getCurrentPlanClass();
+          final currentPlanResult = await _subscriptionService
+              .getCurrentPlanClass();
           final planName = currentPlanResult.isSuccess
               ? currentPlanResult.value.displayName
               : 'Basic';
