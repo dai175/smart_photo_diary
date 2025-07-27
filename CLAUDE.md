@@ -30,7 +30,7 @@ fvm flutter run
 
 ### Testing
 ```bash
-# Run all tests (using FVM) - Currently 683 tests with 100% success rate
+# Run all tests (using FVM) - Currently 808+ tests with 100% success rate
 fvm flutter test
 
 # Run specific test types
@@ -116,7 +116,8 @@ The app implements a **Result<T> pattern** for functional error handling:
 ### Data Models
 - **`DiaryEntry`**: Primary data model with Hive annotations for local storage
 - **`WritingPrompt`**: Writing prompt model with categories, tags, and Premium/Basic classification
-- **`SubscriptionPlan`**: Subscription plan definitions (Basic, Premium Monthly/Yearly)
+- **Plan Classes**: Type-safe subscription plan system (BasicPlan, PremiumMonthlyPlan, PremiumYearlyPlan)
+- **`PlanFactory`**: Factory pattern for plan instantiation and management
 - Uses `build_runner` for generating Hive adapters
 
 ### AI/ML Architecture
@@ -126,6 +127,7 @@ The app implements a **Result<T> pattern** for functional error handling:
 
 ### Monetization Architecture
 - **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts)
+- **Plan Class Architecture**: Type-safe, extensible plan management with factory pattern
 - **In-App Purchase Integration**: Uses `in_app_purchase` plugin for subscription management
 - **Usage Tracking**: AI generation counts with monthly reset functionality
 - **Writing Prompts System**: 20 curated prompts (5 Basic + 15 Premium) across 8 categories
@@ -245,7 +247,7 @@ The app is designed as an **iPhone-only application** with iPad support explicit
 - **Photo Selection**: Use `PhotoManager.presentLimited()` to show selection UI
 
 ### Testing Architecture
-The project follows a comprehensive 3-tier testing strategy with **100% success rate** (683 passing tests):
+The project follows a comprehensive 3-tier testing strategy with **100% success rate** (808+ passing tests):
 
 #### Unit Tests (`test/unit/`)
 - Pure logic testing with mocked dependencies using `mocktail`
@@ -278,22 +280,23 @@ FORCE_PLAN=premium
 
 ### Current Implementation State
 - **Production-ready services**: All core services are fully implemented and tested
+- **Plan Class Architecture**: Complete migration from enum to class-based plan management
 - **Functional error handling**: Result<T> pattern implemented with complete utilities
 - **Performance optimized**: Lazy initialization, efficient caching, optimized database operations
 - **High code quality**: Clean, well-documented codebase with 100% test success rate
-- **Monetization ready**: Complete subscription system with usage tracking and premium features
+- **Type-safe monetization**: Extensible plan system with factory pattern
 
 ### Recent Achievements
-- Perfect test coverage: 683 tests with 100% success rate
+- **Plan Class Migration**: Successfully migrated from SubscriptionPlan enum to Plan class architecture
+- Perfect test coverage: 808+ tests with 100% success rate
 - Complete freemium model with In-App Purchase integration
 - Writing prompts system with 20 curated prompts
 - Result<T> pattern implementation for robust error handling
 - Service architecture with dependency injection
 - Enhanced UI/UX with unified design system
 - Complete CI/CD pipeline implementation
-- **AI Credit Protection**: Fixed unauthorized credit consumption on generation failures
-- **Code Optimization**: Removed unnecessary offline fallback logic
-- Production-ready Smart Photo Diary v1.0 with all core features
+- **Type Safety Enhancement**: Improved extensibility and maintainability through Plan class system
+- Production-ready Smart Photo Diary v1.0 with modern architecture
 
 ## CI/CD and Deployment
 
