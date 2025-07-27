@@ -251,7 +251,7 @@ class HomeContentWidget extends StatelessWidget {
 
       // 使用量情報を取得
       final statusResult = await subscriptionService.getCurrentStatus();
-      final planResult = await subscriptionService.getCurrentPlan();
+      final planResult = await subscriptionService.getCurrentPlanClass();
       final remainingResult = await subscriptionService
           .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
-import '../models/subscription_info.dart';
+import '../models/subscription_info_v2.dart';
 import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
@@ -30,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsService _settingsService;
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
-  SubscriptionInfo? _subscriptionInfo;
+  SubscriptionInfoV2? _subscriptionInfo;
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
 
@@ -50,8 +50,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _packageInfo = await PackageInfo.fromPlatform();
       _storageInfo = await StorageService.getInstance().getStorageInfo();
 
-      // サブスクリプション情報を取得
-      final subscriptionResult = await _settingsService.getSubscriptionInfo();
+      // サブスクリプション情報を取得（V2版）
+      final subscriptionResult = await _settingsService.getSubscriptionInfoV2();
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
       } else {

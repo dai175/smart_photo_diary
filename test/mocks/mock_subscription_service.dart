@@ -1,6 +1,10 @@
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
@@ -72,23 +76,23 @@ class MockSubscriptionService implements ISubscriptionService {
   void _initializeTestData() {
     // 利用可能な商品を設定
     _availableProducts = [
-      const PurchaseProduct(
+      PurchaseProduct(
         id: 'smart_photo_diary_premium_monthly',
         title: 'Premium Monthly',
         description: 'Smart Photo Diary Premium Monthly Plan',
         price: '¥300',
         priceAmount: 300.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumMonthly,
+        plan: PremiumMonthlyPlan(),
       ),
-      const PurchaseProduct(
+      PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
         title: 'Premium Yearly',
         description: 'Smart Photo Diary Premium Yearly Plan',
         price: '¥2,800',
         priceAmount: 2800.0,
         currencyCode: 'JPY',
-        plan: SubscriptionPlan.premiumYearly,
+        plan: PremiumYearlyPlan(),
       ),
     ];
   }
@@ -117,7 +121,7 @@ class MockSubscriptionService implements ISubscriptionService {
 
   /// テスト用: プランを強制設定
   void setCurrentPlan(
-    SubscriptionPlan plan, {
+    Plan plan, {
     bool? isActive,
     DateTime? expiryDate,
     int? usageCount,
@@ -133,6 +137,11 @@ class MockSubscriptionService implements ISubscriptionService {
     _statusUpdates.add(_currentStatus);
   }
 
+  /// テスト用: プランクラスを直接設定（Planクラス版）
+  void setCurrentPlanClass(Plan plan) {
+    setCurrentPlan(plan);
+  }
+
   /// テスト用: 使用量を設定
   void setUsageCount(int count) {
     _monthlyUsageCount = count;
@@ -142,6 +151,22 @@ class MockSubscriptionService implements ISubscriptionService {
   /// テスト用: 有効期限を設定
   void setExpiryDate(DateTime? date) {
     _expiryDate = date;
+    _statusUpdates.add(_currentStatus);
+  }
+
+  /// テスト用: サブスクリプション状態を直接設定
+  void setCurrentStatus(SubscriptionStatus status) {
+    _planId = status.planId;
+    _isActive = status.isActive;
+    _monthlyUsageCount = status.monthlyUsageCount;
+    _expiryDate = status.expiryDate;
+    _startDate = status.startDate;
+    _lastResetDate = status.lastResetDate;
+    _autoRenewal = status.autoRenewal;
+    _transactionId = status.transactionId;
+    _lastPurchaseDate = status.lastPurchaseDate;
+
+    // 状態更新をストリームに通知
     _statusUpdates.add(_currentStatus);
   }
 
@@ -243,20 +268,14 @@ class MockSubscriptionService implements ISubscriptionService {
     return const Success(null);
   }
 
-  @override
-  Result<List<SubscriptionPlan>> getAvailablePlans() {
-    const availablePlans = [
-      SubscriptionPlan.basic,
-      SubscriptionPlan.premiumMonthly,
-      SubscriptionPlan.premiumYearly,
-    ];
-    return const Success(availablePlans);
+  Result<List<Plan>> getAvailablePlansClass() {
+    return Success([BasicPlan(), PremiumMonthlyPlan(), PremiumYearlyPlan()]);
   }
 
   @override
-  Result<SubscriptionPlan> getPlan(String planId) {
+  Result<Plan> getPlanClass(String planId) {
     try {
-      final plan = SubscriptionPlan.fromId(planId);
+      final plan = PlanFactory.createPlan(planId);
       return Success(plan);
     } catch (e) {
       return Failure(ServiceException('Invalid plan ID: $planId'));
@@ -264,7 +283,7 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
+  Future<Result<Plan>> getCurrentPlanClass() async {
     if (!_isInitialized) {
       return Failure(
         ServiceException('MockSubscriptionService is not initialized'),
@@ -276,7 +295,14 @@ class MockSubscriptionService implements ISubscriptionService {
       return Failure(statusResult.error);
     }
 
-    return Success(statusResult.value.currentPlan);
+    try {
+      final plan = PlanFactory.createPlan(statusResult.value.planId);
+      return Success(plan);
+    } catch (e) {
+      return Failure(
+        ServiceException('Invalid plan ID: ${statusResult.value.planId}'),
+      );
+    }
   }
 
   // =================================================================
@@ -480,7 +506,11 @@ class MockSubscriptionService implements ISubscriptionService {
     }
 
     final status = statusResult.value;
-    return Success(status.currentPlan.hasPrioritySupport);
+    final planResult = getPlanClass(status.planId);
+    if (planResult.isFailure) {
+      return Failure(planResult.error);
+    }
+    return Success(planResult.value.hasPrioritySupport);
   }
 
   // =================================================================
@@ -496,57 +526,6 @@ class MockSubscriptionService implements ISubscriptionService {
     }
 
     return Success(_availableProducts);
-  }
-
-  @override
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    if (!_isInitialized) {
-      return Failure(
-        ServiceException('MockSubscriptionService is not initialized'),
-      );
-    }
-
-    if (_shouldFailPurchase) {
-      final result = PurchaseResult(
-        status: PurchaseStatus.error,
-        errorMessage: _forcedErrorMessage ?? 'Mock purchase failure',
-      );
-      _purchaseUpdates.add(result);
-      return Success(result);
-    }
-
-    // 成功した購入をシミュレート
-    final transactionId =
-        'mock_transaction_${DateTime.now().millisecondsSinceEpoch}';
-    final purchaseDate = DateTime.now();
-
-    final result = PurchaseResult(
-      status: PurchaseStatus.purchased,
-      productId: plan.productId,
-      transactionId: transactionId,
-      purchaseDate: purchaseDate,
-      plan: plan,
-    );
-
-    // 状態を更新
-    _planId = plan.id;
-    _isActive = true;
-    _autoRenewal = true;
-    _transactionId = transactionId;
-    _lastPurchaseDate = purchaseDate;
-
-    if (plan.isPremium) {
-      _expiryDate = plan.isYearly
-          ? purchaseDate.add(const Duration(days: 365))
-          : purchaseDate.add(const Duration(days: 30));
-    }
-
-    // 履歴に記録
-    _purchaseHistory.add(result);
-    _purchaseUpdates.add(result);
-    _statusUpdates.add(_currentStatus);
-
-    return Success(result);
   }
 
   @override
@@ -577,7 +556,58 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
+  Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    if (_shouldFailPurchase) {
+      final result = PurchaseResult(
+        status: PurchaseStatus.error,
+        errorMessage: _forcedErrorMessage ?? 'Mock purchase failure',
+      );
+      _purchaseUpdates.add(result);
+      return Success(result);
+    }
+
+    // 成功した購入をシミュレート
+    final transactionId =
+        'mock_transaction_${DateTime.now().millisecondsSinceEpoch}';
+    final purchaseDate = DateTime.now();
+
+    final result = PurchaseResult(
+      status: PurchaseStatus.purchased,
+      productId: plan.productId,
+      transactionId: transactionId,
+      purchaseDate: purchaseDate,
+      plan: null, // V2では使用しない
+    );
+
+    // 状態を更新
+    _planId = plan.id;
+    _isActive = true;
+    _autoRenewal = true;
+    _transactionId = transactionId;
+    _lastPurchaseDate = purchaseDate;
+
+    if (plan.isPremium) {
+      _expiryDate = plan.isYearly
+          ? purchaseDate.add(const Duration(days: 365))
+          : purchaseDate.add(const Duration(days: 30));
+    }
+
+    // 履歴に記録
+    _purchaseHistory.add(result);
+    _purchaseUpdates.add(result);
+    _statusUpdates.add(_currentStatus);
+
+    return Success(result);
+  }
+
+  @override
+  Future<Result<void>> changePlanClass(Plan newPlan) async {
     if (!_isInitialized) {
       return Failure(
         ServiceException('MockSubscriptionService is not initialized'),

@@ -10,7 +10,10 @@ import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 
 /// Mock PhotoService for integration testing
@@ -48,6 +51,7 @@ class TestServiceSetup {
   static MockPhotoServiceInterface? _mockPhotoService;
   static MockAiServiceInterface? _mockAiService;
   static MockDiaryServiceInterface? _mockDiaryService;
+  static MockSubscriptionServiceInterface? _mockSubscriptionService;
   static MockSettingsService? _mockSettingsService;
   static MockStorageService? _mockStorageService;
 
@@ -66,6 +70,11 @@ class TestServiceSetup {
     return _mockDiaryService ??= _createDiaryServiceMock();
   }
 
+  /// Get or create mock SubscriptionService with default behavior
+  static MockSubscriptionServiceInterface getSubscriptionService() {
+    return _mockSubscriptionService ??= _createSubscriptionServiceMock();
+  }
+
   /// Get or create mock SettingsService with default behavior
   static MockSettingsService getSettingsService() {
     return _mockSettingsService ??= _createSettingsServiceMock();
@@ -81,6 +90,7 @@ class TestServiceSetup {
     _mockPhotoService = null;
     _mockAiService = null;
     _mockDiaryService = null;
+    _mockSubscriptionService = null;
     _mockSettingsService = null;
     _mockStorageService = null;
   }
@@ -91,6 +101,7 @@ class TestServiceSetup {
     getPhotoService();
     getAiService();
     getDiaryService();
+    getSubscriptionService();
     getSettingsService();
     getStorageService();
   }
@@ -223,6 +234,77 @@ class TestServiceSetup {
     return mock;
   }
 
+  static MockSubscriptionServiceInterface _createSubscriptionServiceMock() {
+    final mock = MockSubscriptionServiceInterface();
+
+    // Default mock behavior for SubscriptionService
+    when(() => mock.isInitialized).thenReturn(true);
+    when(() => mock.initialize()).thenAnswer((_) async => const Success(null));
+
+    // Basic Plan default setup
+    final basicPlan = BasicPlan();
+    when(
+      () => mock.getCurrentPlanClass(),
+    ).thenAnswer((_) async => Success(basicPlan));
+
+    when(() => mock.getCurrentStatus()).thenAnswer(
+      (_) async => Success(
+        SubscriptionStatus(
+          planId: basicPlan.id,
+          isActive: true,
+          startDate: DateTime.now(),
+          expiryDate: null,
+          monthlyUsageCount: 0,
+          lastResetDate: DateTime.now(),
+          autoRenewal: false,
+          transactionId: null,
+          lastPurchaseDate: null,
+        ),
+      ),
+    );
+
+    // AI usage defaults
+    when(
+      () => mock.canUseAiGeneration(),
+    ).thenAnswer((_) async => const Success(true));
+    when(
+      () => mock.getRemainingGenerations(),
+    ).thenAnswer((_) async => Success(basicPlan.monthlyAiGenerationLimit));
+    when(
+      () => mock.getMonthlyUsage(),
+    ).thenAnswer((_) async => const Success(0));
+    when(
+      () => mock.incrementAiUsage(),
+    ).thenAnswer((_) async => const Success(null));
+
+    // Access permissions defaults (Basic plan)
+    when(
+      () => mock.canAccessPremiumFeatures(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessWritingPrompts(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessAdvancedFilters(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessAdvancedAnalytics(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.canAccessPrioritySupport(),
+    ).thenAnswer((_) async => const Success(false));
+
+    // Date-related defaults
+    when(() => mock.getNextResetDate()).thenAnswer(
+      (_) async => Success(DateTime.now().add(const Duration(days: 30))),
+    );
+
+    // Purchase-related defaults
+    // when(() => mock.restorePurchases()).thenAnswer((_) async => const Success(<PurchaseResult>[])); // コメントアウト - 必要に応じて有効化
+
+    return mock;
+  }
+
   static MockSettingsService _createSettingsServiceMock() {
     final mock = MockSettingsService();
 
@@ -241,6 +323,101 @@ class TestServiceSetup {
     // Note: Basic setup, tests should specify their own behavior
     // We'll set up basic fallbacks here
 
+    return mock;
+  }
+
+  // ========================================
+  // Plan Class Helper Methods
+  // ========================================
+
+  /// Configure SubscriptionService mock for specific Plan
+  static void configureSubscriptionServiceForPlan(
+    MockSubscriptionServiceInterface mock,
+    Plan plan, {
+    int usageCount = 0,
+    bool isActive = true,
+  }) {
+    when(
+      () => mock.getCurrentPlanClass(),
+    ).thenAnswer((_) async => Success(plan));
+
+    when(() => mock.getCurrentStatus()).thenAnswer(
+      (_) async => Success(
+        SubscriptionStatus(
+          planId: plan.id,
+          isActive: isActive,
+          startDate: DateTime.now(),
+          expiryDate: plan.isPremium
+              ? DateTime.now().add(const Duration(days: 365))
+              : null,
+          monthlyUsageCount: usageCount,
+          lastResetDate: DateTime.now(),
+          autoRenewal: plan.isPremium,
+          transactionId: plan.isPremium ? 'integration-test-transaction' : null,
+          lastPurchaseDate: plan.isPremium ? DateTime.now() : null,
+        ),
+      ),
+    );
+
+    // AI usage based on plan limits and current usage
+    final canUseAi = usageCount < plan.monthlyAiGenerationLimit;
+    final remaining = plan.monthlyAiGenerationLimit - usageCount;
+
+    when(
+      () => mock.canUseAiGeneration(),
+    ).thenAnswer((_) async => Success(canUseAi));
+    when(
+      () => mock.getRemainingGenerations(),
+    ).thenAnswer((_) async => Success(remaining));
+    when(
+      () => mock.getMonthlyUsage(),
+    ).thenAnswer((_) async => Success(usageCount));
+
+    // Access permissions based on plan features
+    when(
+      () => mock.canAccessPremiumFeatures(),
+    ).thenAnswer((_) async => Success(plan.isPremium));
+    when(
+      () => mock.canAccessWritingPrompts(),
+    ).thenAnswer((_) async => Success(plan.hasWritingPrompts));
+    when(
+      () => mock.canAccessAdvancedFilters(),
+    ).thenAnswer((_) async => Success(plan.hasAdvancedFilters));
+    when(
+      () => mock.canAccessAdvancedAnalytics(),
+    ).thenAnswer((_) async => Success(plan.hasAdvancedAnalytics));
+    when(
+      () => mock.canAccessPrioritySupport(),
+    ).thenAnswer((_) async => Success(plan.hasPrioritySupport));
+  }
+
+  /// Get SubscriptionService mock configured for Basic plan
+  static MockSubscriptionServiceInterface getBasicPlanSubscriptionService({
+    int usageCount = 0,
+  }) {
+    final mock = MockSubscriptionServiceInterface();
+    when(() => mock.isInitialized).thenReturn(true);
+    when(() => mock.initialize()).thenAnswer((_) async => const Success(null));
+
+    configureSubscriptionServiceForPlan(
+      mock,
+      BasicPlan(),
+      usageCount: usageCount,
+    );
+    return mock;
+  }
+
+  /// Get SubscriptionService mock configured for Premium plan
+  static MockSubscriptionServiceInterface getPremiumPlanSubscriptionService({
+    bool isYearly = true,
+    int usageCount = 0,
+  }) {
+    final mock = MockSubscriptionServiceInterface();
+    when(() => mock.isInitialized).thenReturn(true);
+    when(() => mock.initialize()).thenAnswer((_) async => const Success(null));
+
+    final plan = isYearly ? PremiumYearlyPlan() : PremiumMonthlyPlan();
+    configureSubscriptionServiceForPlan(mock, plan, usageCount: usageCount);
     return mock;
   }
 }
@@ -267,7 +444,7 @@ void registerMockFallbacks() {
       updatedAt: DateTime.now(),
     ),
   );
-  registerFallbackValue(SubscriptionPlan.basic);
+  registerFallbackValue(BasicPlan());
   registerFallbackValue(
     SubscriptionStatus(
       planId: 'basic',

@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
-import 'subscription_plan.dart';
+import 'plans/plan.dart';
+import 'plans/plan_factory.dart';
+import 'plans/basic_plan.dart';
 import '../constants/subscription_constants.dart';
 
 part 'subscription_status.g.dart';
@@ -84,19 +86,19 @@ class SubscriptionStatus extends HiveObject {
     return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
   }
 
-  /// 現在のプランを取得
-  SubscriptionPlan get currentPlan {
+  /// 現在のプランを取得（Plan classベース）
+  Plan get currentPlanClass {
     try {
-      return SubscriptionPlan.fromId(planId);
+      return PlanFactory.createPlan(planId);
     } catch (e) {
       // 不正なプランIDの場合はBasicにフォールバック
-      return SubscriptionPlan.basic;
+      return BasicPlan();
     }
   }
 
-  /// プランを変更
-  void changePlan(SubscriptionPlan newPlan, {DateTime? effectiveDate}) {
-    planId = newPlan.planId;
+  /// プランを変更（Plan classベース）
+  void changePlanClass(Plan newPlan, {DateTime? effectiveDate}) {
+    planId = newPlan.id;
     if (effectiveDate != null) {
       planChangeDate = effectiveDate;
     }
@@ -106,7 +108,7 @@ class SubscriptionStatus extends HiveObject {
       startDate ??= DateTime.now();
 
       // 年額プランと月額プランで有効期限を設定
-      if (newPlan.isYearly) {
+      if (newPlan.id.contains('yearly')) {
         expiryDate = startDate!.add(
           Duration(days: SubscriptionConstants.subscriptionYearDays),
         );
@@ -133,7 +135,7 @@ class SubscriptionStatus extends HiveObject {
     if (!isActive) return false;
 
     // Basic プランは常に有効
-    if (currentPlan == SubscriptionPlan.basic) return true;
+    if (currentPlanClass is BasicPlan) return true;
 
     // Premium プランは有効期限をチェック
     if (expiryDate == null) return false;
@@ -142,7 +144,7 @@ class SubscriptionStatus extends HiveObject {
 
   /// サブスクリプションが期限切れかどうか
   bool get isExpired {
-    if (currentPlan == SubscriptionPlan.basic) return false;
+    if (currentPlanClass is BasicPlan) return false;
     if (expiryDate == null) return true;
     return DateTime.now().isAfter(expiryDate!);
   }
@@ -150,7 +152,7 @@ class SubscriptionStatus extends HiveObject {
   /// 今月のAI生成回数制限に達しているかどうか
   bool get hasReachedMonthlyLimit {
     _resetMonthlyUsageIfNeeded();
-    return monthlyUsageCount >= currentPlan.monthlyAiGenerationLimit;
+    return monthlyUsageCount >= currentPlanClass.monthlyAiGenerationLimit;
   }
 
   /// AI生成を使用できるかどうか
@@ -161,7 +163,8 @@ class SubscriptionStatus extends HiveObject {
   /// 残りAI生成回数を取得
   int get remainingGenerations {
     _resetMonthlyUsageIfNeeded();
-    final remaining = currentPlan.monthlyAiGenerationLimit - monthlyUsageCount;
+    final remaining =
+        currentPlanClass.monthlyAiGenerationLimit - monthlyUsageCount;
     return remaining > 0 ? remaining : 0;
   }
 
@@ -214,22 +217,22 @@ class SubscriptionStatus extends HiveObject {
 
   /// プレミアム機能にアクセスできるかどうか
   bool get canAccessPremiumFeatures {
-    return isValid && currentPlan.isPremium;
+    return isValid && currentPlanClass.isPremium;
   }
 
   /// ライティングプロンプトにアクセスできるかどうか
   bool get canAccessWritingPrompts {
-    return canAccessPremiumFeatures && currentPlan.hasWritingPrompts;
+    return canAccessPremiumFeatures && currentPlanClass.hasWritingPrompts;
   }
 
   /// 高度なフィルタにアクセスできるかどうか
   bool get canAccessAdvancedFilters {
-    return canAccessPremiumFeatures && currentPlan.hasAdvancedFilters;
+    return canAccessPremiumFeatures && currentPlanClass.hasAdvancedFilters;
   }
 
   /// 高度な分析にアクセスできるかどうか
   bool get canAccessAdvancedAnalytics {
-    return canAccessPremiumFeatures && currentPlan.hasAdvancedAnalytics;
+    return canAccessPremiumFeatures && currentPlanClass.hasAdvancedAnalytics;
   }
 
   /// 次の使用量リセット日を取得
@@ -247,6 +250,29 @@ class SubscriptionStatus extends HiveObject {
     return expiryDate!.difference(now).inDays;
   }
 
+  /// Planクラスベースの新しいステータスを作成
+  /// 将来的にplanIdの代わりにPlanクラスを直接保持する際の移行用
+  SubscriptionStatus copyWithPlan(Plan plan) {
+    return SubscriptionStatus(
+      planId: plan.id,
+      isActive: isActive,
+      startDate: startDate,
+      expiryDate: expiryDate,
+      monthlyUsageCount: monthlyUsageCount,
+      lastResetDate: lastResetDate,
+      autoRenewal: autoRenewal,
+      cancelDate: cancelDate,
+      transactionId: transactionId,
+      lastPurchaseDate: lastPurchaseDate,
+    );
+  }
+
+  /// 現在のプランを新しいPlanクラスとして取得（拡張メソッドの代替）
+  /// @deprecated 拡張メソッド SubscriptionStatusExtensions.plan を使用してください
+  Plan getCurrentPlanClass() {
+    return PlanFactory.createPlan(planId);
+  }
+
   /// デバッグ用文字列表現
   @override
   String toString() {
@@ -255,7 +281,7 @@ class SubscriptionStatus extends HiveObject {
         'isActive: $isActive, '
         'isValid: $isValid, '
         'monthlyUsageCount: $monthlyUsageCount/'
-        '${currentPlan.monthlyAiGenerationLimit}, '
+        '${currentPlanClass.monthlyAiGenerationLimit}, '
         'usageMonth: $usageMonth, '
         'expiryDate: $expiryDate'
         ')';
@@ -272,17 +298,17 @@ class SubscriptionStatus extends HiveObject {
     );
   }
 
-  /// Premium プランの状態を作成
-  static SubscriptionStatus createPremium({
+  /// Premium プランの状態を作成（Plan classベース）
+  static SubscriptionStatus createPremiumClass({
     required DateTime startDate,
-    required SubscriptionPlan plan,
+    required Plan plan,
     String? transactionId,
   }) {
     if (!plan.isPremium) {
-      throw ArgumentError('Premium plan required, got: $plan');
+      throw ArgumentError('Premium plan required, got: ${plan.id}');
     }
 
-    final expiryDate = plan.isYearly
+    final expiryDate = plan.id.contains('yearly')
         ? startDate.add(
             Duration(days: SubscriptionConstants.subscriptionYearDays),
           )
@@ -291,7 +317,7 @@ class SubscriptionStatus extends HiveObject {
           );
 
     return SubscriptionStatus(
-      planId: plan.planId,
+      planId: plan.id,
       isActive: true,
       startDate: startDate,
       expiryDate: expiryDate,

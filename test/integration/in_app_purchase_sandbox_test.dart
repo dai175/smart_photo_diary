@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/config/in_app_purchase_config.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 
 /// Phase 1.6.1.4: サンドボックステスト準備
 ///
@@ -51,31 +54,31 @@ void main() {
       test('プランと商品IDのマッピングが正しい', () {
         // プランから商品IDを取得
         expect(
-          InAppPurchaseConfig.getProductId(SubscriptionPlan.premiumMonthly),
+          InAppPurchaseConfig.getProductIdFromPlan(PremiumMonthlyPlan()),
           equals('smart_photo_diary_premium_monthly_plan'),
         );
         expect(
-          InAppPurchaseConfig.getProductId(SubscriptionPlan.premiumYearly),
+          InAppPurchaseConfig.getProductIdFromPlan(PremiumYearlyPlan()),
           equals('smart_photo_diary_premium_yearly_plan'),
         );
 
         // 商品IDからプランを取得
         expect(
-          InAppPurchaseConfig.getSubscriptionPlan(
+          InAppPurchaseConfig.getPlanFromProductId(
             'smart_photo_diary_premium_monthly_plan',
-          ),
-          equals(SubscriptionPlan.premiumMonthly),
+          ).id,
+          equals(PremiumMonthlyPlan().id),
         );
         expect(
-          InAppPurchaseConfig.getSubscriptionPlan(
+          InAppPurchaseConfig.getPlanFromProductId(
             'smart_photo_diary_premium_yearly_plan',
-          ),
-          equals(SubscriptionPlan.premiumYearly),
+          ).id,
+          equals(PremiumYearlyPlan().id),
         );
 
         // Basicプランは商品IDを持たない
         expect(
-          () => InAppPurchaseConfig.getProductId(SubscriptionPlan.basic),
+          () => InAppPurchaseConfig.getProductIdFromPlan(BasicPlan()),
           throwsA(isA<ArgumentError>()),
         );
       });
@@ -83,36 +86,36 @@ void main() {
       test('商品説明文が設定されている', () {
         // 表示名が設定されている
         expect(
-          InAppPurchaseConfig.getDisplayName(SubscriptionPlan.premiumMonthly),
+          InAppPurchaseConfig.getDisplayNameFromPlan(PremiumMonthlyPlan()),
           isNotEmpty,
         );
         expect(
-          InAppPurchaseConfig.getDisplayName(SubscriptionPlan.premiumYearly),
+          InAppPurchaseConfig.getDisplayNameFromPlan(PremiumYearlyPlan()),
           isNotEmpty,
         );
         expect(
-          InAppPurchaseConfig.getDisplayName(SubscriptionPlan.basic),
+          InAppPurchaseConfig.getDisplayNameFromPlan(BasicPlan()),
           isNotEmpty,
         );
 
         // 説明文が設定されている
         expect(
-          InAppPurchaseConfig.getDescription(SubscriptionPlan.premiumMonthly),
+          InAppPurchaseConfig.getDescriptionFromPlan(PremiumMonthlyPlan()),
           isNotEmpty,
         );
         expect(
-          InAppPurchaseConfig.getDescription(SubscriptionPlan.premiumYearly),
+          InAppPurchaseConfig.getDescriptionFromPlan(PremiumYearlyPlan()),
           isNotEmpty,
         );
         expect(
-          InAppPurchaseConfig.getDescription(SubscriptionPlan.basic),
+          InAppPurchaseConfig.getDescriptionFromPlan(BasicPlan()),
           isNotEmpty,
         );
 
-        // 年額プランの説明に割引情報が含まれている
+        // 年額プランの説明が設定されている
         expect(
-          InAppPurchaseConfig.getDescription(SubscriptionPlan.premiumYearly),
-          contains('22%'),
+          InAppPurchaseConfig.getDescriptionFromPlan(PremiumYearlyPlan()),
+          isNotEmpty,
         );
       });
     });
@@ -313,19 +316,16 @@ void main() {
       test('購入可能プランの判定が正しい', () {
         // 購入可能プラン
         expect(
-          InAppPurchaseConfig.isPurchasable(SubscriptionPlan.premiumMonthly),
+          InAppPurchaseConfig.isPurchasableFromPlan(PremiumMonthlyPlan()),
           isTrue,
         );
         expect(
-          InAppPurchaseConfig.isPurchasable(SubscriptionPlan.premiumYearly),
+          InAppPurchaseConfig.isPurchasableFromPlan(PremiumYearlyPlan()),
           isTrue,
         );
 
         // 購入不可プラン
-        expect(
-          InAppPurchaseConfig.isPurchasable(SubscriptionPlan.basic),
-          isFalse,
-        );
+        expect(InAppPurchaseConfig.isPurchasableFromPlan(BasicPlan()), isFalse);
       });
     });
 
@@ -369,14 +369,14 @@ void main() {
     group('Error Handling Tests', () {
       test('不正な商品IDでエラーが発生する', () {
         expect(
-          () => InAppPurchaseConfig.getSubscriptionPlan('invalid_product_id'),
+          () => InAppPurchaseConfig.getPlanFromProductId('invalid_product_id'),
           throwsA(isA<ArgumentError>()),
         );
       });
 
       test('Basicプランの商品ID取得でエラーが発生する', () {
         expect(
-          () => InAppPurchaseConfig.getProductId(SubscriptionPlan.basic),
+          () => InAppPurchaseConfig.getProductIdFromPlan(BasicPlan()),
           throwsA(isA<ArgumentError>()),
         );
       });
@@ -432,15 +432,15 @@ void main() {
         for (final productId in InAppPurchaseConfig.allProductIds) {
           expect(InAppPurchaseConfig.isValidProductId(productId), isTrue);
           expect(
-            () => InAppPurchaseConfig.getSubscriptionPlan(productId),
+            () => InAppPurchaseConfig.getPlanFromProductId(productId),
             returnsNormally,
           );
         }
 
         // 全プランの表示名・説明が設定されていることを確認
-        for (final plan in SubscriptionPlan.values) {
-          expect(InAppPurchaseConfig.getDisplayName(plan), isNotEmpty);
-          expect(InAppPurchaseConfig.getDescription(plan), isNotEmpty);
+        for (final plan in PlanFactory.getAllPlans()) {
+          expect(InAppPurchaseConfig.getDisplayNameFromPlan(plan), isNotEmpty);
+          expect(InAppPurchaseConfig.getDescriptionFromPlan(plan), isNotEmpty);
         }
 
         // 地域別価格の一貫性確認

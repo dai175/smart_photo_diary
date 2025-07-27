@@ -6,7 +6,9 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/subscription_status.dart';
-import '../models/subscription_plan.dart';
+import '../models/plans/plan.dart';
+import '../models/plans/plan_factory.dart';
+import '../models/plans/basic_plan.dart';
 import '../constants/subscription_constants.dart';
 import '../config/in_app_purchase_config.dart';
 import '../config/environment_config.dart';
@@ -136,7 +138,7 @@ class SubscriptionService implements ISubscriptionService {
       debugPrint('SubscriptionService: Creating initial Basic plan status');
 
       final initialStatus = SubscriptionStatus(
-        planId: SubscriptionPlan.basic.id,
+        planId: BasicPlan().id,
         isActive: true,
         startDate: DateTime.now(),
         expiryDate: null, // Basicプランは期限なし
@@ -164,64 +166,40 @@ class SubscriptionService implements ISubscriptionService {
   // プラン管理メソッド（Phase 1.4.1）
   // =================================================================
 
-  /// 利用可能なプラン一覧を取得
+  /// 特定のプラン情報を取得（新Planクラス）
   @override
-  Result<List<SubscriptionPlan>> getAvailablePlans() {
-    try {
-      _log('Getting available subscription plans', level: LogLevel.debug);
-
-      const availablePlans = [
-        SubscriptionPlan.basic,
-        SubscriptionPlan.premiumMonthly,
-        SubscriptionPlan.premiumYearly,
-      ];
-
-      _log(
-        'Successfully retrieved ${availablePlans.length} available plans',
-        level: LogLevel.debug,
-        data: {'planCount': availablePlans.length},
-      );
-
-      return const Success(availablePlans);
-    } catch (e) {
-      return _handleError(e, 'getAvailablePlans');
-    }
-  }
-
-  /// 特定のプラン情報を取得
-  @override
-  Result<SubscriptionPlan> getPlan(String planId) {
+  Result<Plan> getPlanClass(String planId) {
     try {
       _log(
-        'Getting plan by ID',
+        'Getting plan class by ID',
         level: LogLevel.debug,
         data: {'planId': planId},
       );
 
-      final plan = SubscriptionPlan.fromId(planId);
+      final plan = PlanFactory.createPlan(planId);
 
       _log(
-        'Successfully retrieved plan',
+        'Successfully retrieved plan class',
         level: LogLevel.debug,
-        data: {'planId': planId, 'planName': plan.name},
+        data: {'planId': plan.id, 'displayName': plan.displayName},
       );
 
       return Success(plan);
     } catch (e) {
-      return _handleError(e, 'getPlan', details: 'planId: $planId');
+      return _handleError(e, 'getPlanClass', details: 'planId: $planId');
     }
   }
 
-  /// 現在のプランを取得
+  /// 現在のプランを取得（新Planクラス）
   @override
-  Future<Result<SubscriptionPlan>> getCurrentPlan() async {
+  Future<Result<Plan>> getCurrentPlanClass() async {
     try {
-      _log('Getting current subscription plan', level: LogLevel.debug);
+      _log('Getting current plan class', level: LogLevel.debug);
 
       if (!_isInitialized) {
         return _handleError(
           StateError('Service not initialized'),
-          'getCurrentPlan',
+          'getCurrentPlanClass',
           details: 'SubscriptionService must be initialized before use',
         );
       }
@@ -237,17 +215,17 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final plan = SubscriptionPlan.fromId(status.planId);
+      final plan = PlanFactory.createPlan(status.planId);
 
       _log(
-        'Successfully retrieved current plan',
+        'Successfully retrieved current plan class',
         level: LogLevel.debug,
-        data: {'planId': plan.id, 'planName': plan.name},
+        data: {'planId': plan.id, 'displayName': plan.displayName},
       );
 
       return Success(plan);
     } catch (e) {
-      return _handleError(e, 'getCurrentPlan');
+      return _handleError(e, 'getCurrentPlanClass');
     }
   }
 
@@ -288,10 +266,11 @@ class SubscriptionService implements ISubscriptionService {
 
           // 実際のデータはそのままで、プランIDのみを強制設定に変更した状態を返す
           final forcedPlanId = _getForcedPlanId(forcePlan);
-          final forcedPlan = SubscriptionPlan.fromId(forcedPlanId);
+          final forcedPlan = PlanFactory.createPlan(forcedPlanId);
 
           // プランに応じて適切な有効期限を設定
-          final expiryDuration = forcedPlan == SubscriptionPlan.premiumYearly
+          final expiryDuration =
+              forcedPlan.id == SubscriptionConstants.premiumYearlyPlanId
               ? const Duration(days: 365)
               : const Duration(days: 30);
 
@@ -369,8 +348,8 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  /// 指定されたプランでサブスクリプション状態を作成
-  Future<Result<SubscriptionStatus>> createStatus(SubscriptionPlan plan) async {
+  /// 指定されたプランでサブスクリプション状態を作成（Planクラス版）
+  Future<Result<SubscriptionStatus>> createStatusClass(Plan plan) async {
     try {
       if (!_isInitialized) {
         return Failure(
@@ -381,7 +360,7 @@ class SubscriptionService implements ISubscriptionService {
       final now = DateTime.now();
       SubscriptionStatus newStatus;
 
-      if (plan == SubscriptionPlan.basic) {
+      if (plan is BasicPlan) {
         // Basicプランの場合
         newStatus = SubscriptionStatus(
           planId: plan.id,
@@ -396,7 +375,7 @@ class SubscriptionService implements ISubscriptionService {
         );
       } else {
         // Premiumプランの場合
-        final expiryDate = plan == SubscriptionPlan.premiumYearly
+        final expiryDate = plan.isYearly
             ? now.add(
                 Duration(days: SubscriptionConstants.subscriptionYearDays),
               )
@@ -567,7 +546,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final updatedStatus = updatedStatusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(updatedStatus.planId);
+      final currentPlan = PlanFactory.createPlan(updatedStatus.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
 
       final canUse = updatedStatus.monthlyUsageCount < monthlyLimit;
@@ -624,7 +603,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final latestStatus = latestStatusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(latestStatus.planId);
+      final currentPlan = PlanFactory.createPlan(latestStatus.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
 
       // 制限チェック
@@ -719,7 +698,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final updatedStatus = updatedStatusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(updatedStatus.planId);
+      final currentPlan = PlanFactory.createPlan(updatedStatus.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
       final remaining = monthlyLimit - updatedStatus.monthlyUsageCount;
 
@@ -775,10 +754,10 @@ class SubscriptionService implements ISubscriptionService {
   bool _isSubscriptionValid(SubscriptionStatus status) {
     if (!status.isActive) return false;
 
-    final currentPlan = SubscriptionPlan.fromId(status.planId);
+    final currentPlan = PlanFactory.createPlan(status.planId);
 
     // Basicプランは常に有効
-    if (currentPlan == SubscriptionPlan.basic) return true;
+    if (currentPlan is BasicPlan) return true;
 
     // Premiumプランは有効期限をチェック
     if (status.expiryDate == null) return false;
@@ -891,10 +870,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // Basicプランは基本機能のみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -945,10 +924,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // ライティングプロンプトは全プランで利用可能（Basicは限定版）
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         debugPrint(
           'SubscriptionService: Writing prompts access - Basic plan (limited prompts)',
         );
@@ -999,10 +978,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 高度なフィルタはPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1040,10 +1019,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // データエクスポートは全プランで利用可能（Basicは基本形式のみ）
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         debugPrint(
           'SubscriptionService: Data export access - Basic plan (JSON only)',
         );
@@ -1083,10 +1062,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 統計ダッシュボードはPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1168,10 +1147,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 高度な分析はPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1210,10 +1189,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final currentPlan = SubscriptionPlan.fromId(status.planId);
+      final currentPlan = PlanFactory.createPlan(status.planId);
 
       // 優先サポートはPremiumプランのみ
-      if (currentPlan == SubscriptionPlan.basic) {
+      if (currentPlan is BasicPlan) {
         return const Success(false);
       }
 
@@ -1491,7 +1470,7 @@ class SubscriptionService implements ISubscriptionService {
       );
 
       // 商品IDからプランを特定
-      final plan = InAppPurchaseConfig.getSubscriptionPlan(
+      final plan = InAppPurchaseConfig.getPlanFromProductId(
         purchaseDetails.productID,
       );
 
@@ -1508,7 +1487,9 @@ class SubscriptionService implements ISubscriptionService {
       );
       _purchaseStreamController.add(result);
 
+      // 購入完了後にフラグをリセット
       _isPurchasing = false;
+      _log('[_handlePurchaseCompleted] 購入フラグをリセットしました', level: LogLevel.debug);
     } catch (e) {
       _log(
         'Error handling purchase completion',
@@ -1536,7 +1517,7 @@ class SubscriptionService implements ISubscriptionService {
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
         purchaseDate: DateTime.now(),
-        plan: InAppPurchaseConfig.getSubscriptionPlan(
+        plan: InAppPurchaseConfig.getPlanFromProductId(
           purchaseDetails.productID,
         ),
       );
@@ -1564,7 +1545,9 @@ class SubscriptionService implements ISubscriptionService {
     );
     _purchaseStreamController.add(result);
 
+    // エラー時にフラグをリセット
     _isPurchasing = false;
+    _log('[_handlePurchaseError] 購入フラグをリセットしました', level: LogLevel.debug);
   }
 
   /// 購入キャンセル処理
@@ -1580,7 +1563,9 @@ class SubscriptionService implements ISubscriptionService {
     );
     _purchaseStreamController.add(result);
 
+    // キャンセル時にフラグをリセット
     _isPurchasing = false;
+    _log('[_handlePurchaseCanceled] 購入フラグをリセットしました', level: LogLevel.debug);
   }
 
   /// 購入保留処理
@@ -1600,23 +1585,20 @@ class SubscriptionService implements ISubscriptionService {
   /// 購入からサブスクリプション状態を更新
   Future<void> _updateSubscriptionFromPurchase(
     PurchaseDetails purchaseDetails,
-    SubscriptionPlan plan,
+    Plan plan,
   ) async {
     try {
       final now = DateTime.now();
 
       // 有効期限を計算
       DateTime expiryDate;
-      switch (plan) {
-        case SubscriptionPlan.premiumMonthly:
-          expiryDate = now.add(const Duration(days: 30));
-          break;
-        case SubscriptionPlan.premiumYearly:
-          expiryDate = now.add(const Duration(days: 365));
-          break;
-        case SubscriptionPlan.basic:
-          // Basicプランは購入対象外
-          throw ArgumentError('Basic plan cannot be purchased');
+      if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
+        expiryDate = now.add(const Duration(days: 30));
+      } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
+        expiryDate = now.add(const Duration(days: 365));
+      } else {
+        // Basicプランは購入対象外
+        throw ArgumentError('Basic plan cannot be purchased');
       }
 
       // 新しいサブスクリプション状態を作成
@@ -1692,7 +1674,7 @@ class SubscriptionService implements ISubscriptionService {
 
       // ProductDetailsをPurchaseProductに変換
       final products = response.productDetails.map((productDetail) {
-        final plan = InAppPurchaseConfig.getSubscriptionPlan(productDetail.id);
+        final plan = InAppPurchaseConfig.getPlanFromProductId(productDetail.id);
 
         return PurchaseProduct(
           id: productDetail.id,
@@ -1720,121 +1702,6 @@ class SubscriptionService implements ISubscriptionService {
   // =================================================================
   // Phase 1.6.2.2: 購入フロー実装
   // =================================================================
-
-  @override
-  Future<Result<PurchaseResult>> purchasePlan(SubscriptionPlan plan) async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
-      }
-
-      if (_isPurchasing) {
-        return Failure(
-          ServiceException('Another purchase is already in progress'),
-        );
-      }
-
-      if (plan == SubscriptionPlan.basic) {
-        return Failure(ServiceException('Basic plan cannot be purchased'));
-      }
-
-      _log('Starting purchase for plan: ${plan.id}', level: LogLevel.info);
-      _isPurchasing = true;
-
-      // 商品IDを取得
-      final productId = InAppPurchaseConfig.getProductId(plan);
-
-      try {
-        // 商品詳細を取得
-        final productResponse = await _inAppPurchase!.queryProductDetails({
-          productId,
-        });
-
-        if (productResponse.error != null) {
-          _isPurchasing = false;
-          return Failure(
-            ServiceException(
-              'Failed to get product details for purchase',
-              details: productResponse.error.toString(),
-            ),
-          );
-        }
-
-        if (productResponse.productDetails.isEmpty) {
-          _isPurchasing = false;
-          return Failure(ServiceException('Product not found: $productId'));
-        }
-
-        final productDetails = productResponse.productDetails.first;
-
-        // 購入リクエストを作成
-        final PurchaseParam purchaseParam = PurchaseParam(
-          productDetails: productDetails,
-        );
-
-        // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
-        final bool success = await _inAppPurchase!.buyNonConsumable(
-          purchaseParam: purchaseParam,
-        );
-
-        if (!success) {
-          _isPurchasing = false;
-          return Failure(ServiceException('Failed to initiate purchase'));
-        }
-
-        _log('Purchase initiated successfully', level: LogLevel.info);
-
-        // 購入結果は購入ストリームで非同期に処理される
-        // ここでは購入開始の成功を返す
-        return Success(
-          PurchaseResult(
-            status: ssi.PurchaseStatus.pending,
-            productId: productId,
-            plan: plan,
-          ),
-        );
-      } catch (storeError) {
-        _isPurchasing = false;
-
-        // シミュレーター環境でのストアエラー処理
-        if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
-          final errorString = storeError.toString();
-          if (errorString.contains('not connected to app store') ||
-              errorString.contains('sandbox') ||
-              errorString.contains('StoreKit')) {
-            _log(
-              'Store connection error in simulator - mocking success',
-              level: LogLevel.warning,
-            );
-
-            await Future.delayed(const Duration(milliseconds: 1000));
-            final result = await createStatus(plan);
-            if (result.isSuccess) {
-              return Success(
-                PurchaseResult(
-                  status: ssi.PurchaseStatus.purchased,
-                  productId: productId,
-                  plan: plan,
-                  purchaseDate: DateTime.now(),
-                ),
-              );
-            }
-          }
-        }
-
-        rethrow;
-      }
-    } catch (e) {
-      _isPurchasing = false;
-      return _handleError(e, 'purchasePlan', details: plan.id);
-    }
-  }
 
   // =================================================================
   // Phase 1.6.2.3: 購入状態監視実装
@@ -1921,15 +1788,176 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
+  /// プランを購入（新Planクラス）
   @override
-  Future<Result<void>> changePlan(SubscriptionPlan newPlan) async {
-    // Phase 1.6では未実装（将来実装予定）
-    return Failure(
-      ServiceException(
-        'Plan change is not yet implemented',
-        details: 'This feature will be available in future versions',
-      ),
-    );
+  Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      if (_inAppPurchase == null) {
+        return Failure(ServiceException('In-App Purchase not available'));
+      }
+
+      if (_isPurchasing) {
+        return Failure(
+          ServiceException('Another purchase is already in progress'),
+        );
+      }
+
+      if (plan.id == BasicPlan().id) {
+        return Failure(ServiceException('Basic plan cannot be purchased'));
+      }
+
+      _log(
+        '[purchasePlanClass] 購入処理開始 - plan: ${plan.id}, productId: ${plan.productId}',
+        level: LogLevel.info,
+      );
+      _isPurchasing = true;
+
+      // 商品IDを取得
+      final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
+      _log('[purchasePlanClass] 商品ID取得完了: $productId', level: LogLevel.debug);
+
+      try {
+        // 商品詳細を取得
+        _log(
+          '[purchasePlanClass] 商品詳細をクエリ中: $productId',
+          level: LogLevel.debug,
+        );
+        final productResponse = await _inAppPurchase!.queryProductDetails({
+          productId,
+        });
+        _log(
+          '[purchasePlanClass] 商品クエリ完了 - error: ${productResponse.error}, 商品数: ${productResponse.productDetails.length}',
+          level: LogLevel.debug,
+        );
+
+        if (productResponse.error != null) {
+          _isPurchasing = false;
+          return Failure(
+            ServiceException(
+              'Failed to get product details for purchase',
+              details: productResponse.error.toString(),
+            ),
+          );
+        }
+
+        if (productResponse.productDetails.isEmpty) {
+          _isPurchasing = false;
+          return Failure(ServiceException('Product not found: $productId'));
+        }
+
+        final productDetails = productResponse.productDetails.first;
+        _log(
+          '[purchasePlanClass] 商品詳細取得: id=${productDetails.id}, title=${productDetails.title}, price=${productDetails.price}',
+          level: LogLevel.info,
+        );
+
+        // 購入リクエストを作成
+        final PurchaseParam purchaseParam = PurchaseParam(
+          productDetails: productDetails,
+        );
+
+        // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
+        _log(
+          '[purchasePlanClass] buyNonConsumable呼び出し中...',
+          level: LogLevel.info,
+        );
+        final bool success = await _inAppPurchase!.buyNonConsumable(
+          purchaseParam: purchaseParam,
+        );
+        _log(
+          '[purchasePlanClass] buyNonConsumable結果: $success',
+          level: LogLevel.info,
+        );
+
+        if (!success) {
+          _isPurchasing = false;
+          return Failure(ServiceException('Failed to initiate purchase'));
+        }
+
+        _log('[purchasePlanClass] 購入処理が正常に開始されました', level: LogLevel.info);
+
+        // 購入結果は購入ストリームで非同期に処理される
+        // ここでは購入開始の成功を返す
+        return Success(
+          PurchaseResult(
+            status: ssi.PurchaseStatus.pending,
+            productId: productId,
+            plan: plan,
+          ),
+        );
+      } catch (storeError) {
+        _isPurchasing = false;
+        _log(
+          '[purchasePlanClass] ストアエラー発生: $storeError',
+          level: LogLevel.error,
+        );
+
+        // シミュレーター環境でのストアエラー処理
+        if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
+          final errorString = storeError.toString();
+          if (errorString.contains('not connected to app store') ||
+              errorString.contains('sandbox') ||
+              errorString.contains('StoreKit')) {
+            _log(
+              '[purchasePlanClass] シミュレーター環境のストア接続エラー - 成功をモック',
+              level: LogLevel.warning,
+            );
+
+            await Future.delayed(const Duration(milliseconds: 1000));
+            final result = await createStatusClass(plan);
+            if (result.isSuccess) {
+              return Success(
+                PurchaseResult(
+                  status: ssi.PurchaseStatus.purchased,
+                  productId: productId,
+                  plan: plan,
+                  purchaseDate: DateTime.now(),
+                ),
+              );
+            }
+          }
+        }
+
+        // その他のエラーは再スロー
+        rethrow;
+      }
+    } catch (e) {
+      _isPurchasing = false;
+      _log('[purchasePlanClass] 予期しないエラー: $e', level: LogLevel.error);
+      return _handleError(
+        e,
+        'purchasePlanClass',
+        details: 'planId: ${plan.id}, productId: ${plan.productId}',
+      );
+    }
+  }
+
+  /// プランを変更（新Planクラス）
+  @override
+  Future<Result<void>> changePlanClass(Plan newPlan) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      // 直接実装（非推奨メソッドが削除されたため）
+      return Failure(
+        ServiceException(
+          'Plan change is not yet implemented',
+          details: 'This feature will be available in future versions',
+        ),
+      );
+    } catch (e) {
+      return _handleError(e, 'changePlanClass', details: newPlan.id);
+    }
   }
 
   @override

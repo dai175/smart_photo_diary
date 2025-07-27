@@ -6,7 +6,8 @@ import 'package:smart_photo_diary/services/interfaces/subscription_service_inter
 import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import '../../mocks/mock_subscription_service.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -144,7 +145,7 @@ void main() {
     group('3.1.2.1: プラン別表示テスト', () {
       test('Basicプランで基本プロンプト（5個）のみ表示確認', () async {
         // Given: Basicプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.basic);
+        mockSubscriptionService.setCurrentPlanClass(BasicPlan());
 
         // When: Basic用プロンプトを取得
         final prompts = promptService.getPromptsForPlan(isPremium: false);
@@ -170,7 +171,7 @@ void main() {
 
       test('Premiumプランで全プロンプト（20個）表示確認', () async {
         // Given: Premiumプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // When: Premium用プロンプトを取得
         final prompts = promptService.getPromptsForPlan(isPremium: true);
@@ -202,14 +203,14 @@ void main() {
 
       test('プラン変更時の表示切り替え確認', () async {
         // Given: 最初にBasicプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.basic);
+        mockSubscriptionService.setCurrentPlanClass(BasicPlan());
 
         // When: Basicプランでプロンプトを取得
         final basicPrompts = promptService.getPromptsForPlan(isPremium: false);
         expect(basicPrompts.length, equals(5));
 
         // Then: Premiumプランに変更
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // When: Premiumプランでプロンプトを取得
         final premiumPrompts = promptService.getPromptsForPlan(isPremium: true);
@@ -232,7 +233,7 @@ void main() {
     group('3.1.2.2: Basic/Premium分離テスト', () {
       test('Basic/Premium用プロンプトの正確な分離', () async {
         // Given: Premiumプランに設定（全プロンプトを確認するため）
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // When: 全プロンプトを取得
         final allPrompts = promptService.getAllPrompts();
@@ -289,7 +290,7 @@ void main() {
 
       test('プラン権限による適切なフィルタリング', () async {
         // Test Case 1: Basicプランでのフィルタリング
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.basic);
+        mockSubscriptionService.setCurrentPlanClass(BasicPlan());
 
         final dailyBasicPrompts = promptService.getPromptsByCategory(
           PromptCategory.emotion,
@@ -312,7 +313,7 @@ void main() {
         expect(emotionDepthPrompts.isEmpty, isTrue);
 
         // Test Case 3: Premiumプランでのフィルタリング
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         final premiumEmotionDepthPrompts = promptService.getPromptsByCategory(
           PromptCategory.emotionDepth,
@@ -343,7 +344,7 @@ void main() {
 
         // 期限切れのPremiumプランをシミュレート
         mockSubscriptionService.setCurrentPlan(
-          SubscriptionPlan.premiumMonthly,
+          PremiumMonthlyPlan(),
           expiryDate: DateTime.now().subtract(const Duration(days: 1)),
           isActive: false,
         );
@@ -369,7 +370,7 @@ void main() {
     group('3.1.2.3: プロンプト検索テスト', () {
       test('キーワード検索の基本動作', () async {
         // Given: Premiumプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // When: 検索クエリを実行（実際のプロンプトデータに基づくキーワード）
         final searchResults = promptService.searchPrompts(
@@ -410,7 +411,7 @@ void main() {
 
       test('プラン制限下での検索結果フィルタリング', () async {
         // Test Case 1: Basicプランでの検索
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.basic);
+        mockSubscriptionService.setCurrentPlanClass(BasicPlan());
 
         // Basicプランでの検索（Basic用キーワード）
         final basicResults = promptService.searchPrompts(
@@ -442,7 +443,7 @@ void main() {
         );
 
         // Test Case 2: Premiumプランでの検索
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         final premiumResults = promptService.searchPrompts(
           '深掘り',
@@ -461,7 +462,7 @@ void main() {
 
       test('空検索結果の適切な処理', () async {
         // Given: Premiumプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // When: 存在しないキーワードで検索
         final searchResults = promptService.searchPrompts(
@@ -494,7 +495,7 @@ void main() {
     group('3.1.2.4: カテゴリフィルタテスト', () {
       test('カテゴリ別フィルタリング機能', () async {
         // Given: Premiumプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // Test Case 1: 各感情深掘り型カテゴリでのフィルタリング
         final categories = [
@@ -535,7 +536,7 @@ void main() {
 
       test('プラン制限を考慮したカテゴリフィルタ', () async {
         // Test Case 1: Basicプランでのカテゴリフィルタ
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.basic);
+        mockSubscriptionService.setCurrentPlanClass(BasicPlan());
 
         // Basic用カテゴリ（基本感情のみ）
         final emotionPrompts = promptService.getPromptsByCategory(
@@ -576,7 +577,7 @@ void main() {
         }
 
         // Test Case 2: Premiumプランでのカテゴリフィルタ
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         for (final category in premiumCategories) {
           final prompts = promptService.getPromptsByCategory(
@@ -601,7 +602,7 @@ void main() {
 
       test('複数カテゴリでの組み合わせテスト', () async {
         // Given: Premiumプランに設定
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         // Test Case 1: 感情深掘り型カテゴリ統計の確認
         final allPrompts = promptService.getAllPrompts();
@@ -673,7 +674,7 @@ void main() {
 
         // Test Case 3: プラン別アクセス制御の確認
         // Basicプランに変更
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.basic);
+        mockSubscriptionService.setCurrentPlanClass(BasicPlan());
 
         final basicPlanPrompts = promptService.getPromptsForPlan(
           isPremium: false,
@@ -689,7 +690,7 @@ void main() {
         );
 
         // Premiumプランでのアクセス可能カテゴリ確認
-        mockSubscriptionService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        mockSubscriptionService.setCurrentPlanClass(PremiumMonthlyPlan());
 
         final premiumPlanPrompts = promptService.getPromptsForPlan(
           isPremium: true,

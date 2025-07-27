@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import '../../mocks/mock_subscription_service.dart';
@@ -82,8 +84,9 @@ void main() {
       test('setCurrentPlan()でプランを動的に変更できる', () async {
         await mockService.initialize();
 
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
         mockService.setCurrentPlan(
-          SubscriptionPlan.premiumMonthly,
+          premiumMonthlyPlan,
           isActive: true,
           usageCount: 25,
         );
@@ -108,7 +111,8 @@ void main() {
 
       test('resetToDefaults()で初期状態に戻る', () async {
         await mockService.initialize();
-        mockService.setCurrentPlan(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        mockService.setCurrentPlan(premiumYearlyPlan);
         mockService.setUsageCount(50);
 
         mockService.resetToDefaults();
@@ -132,25 +136,25 @@ void main() {
       });
 
       test('利用可能なプラン一覧を取得できる', () {
-        final result = mockService.getAvailablePlans();
+        final result = mockService.getAvailablePlansClass();
 
         expect(result.isSuccess, isTrue);
         expect(result.value.length, equals(3));
-        expect(result.value, contains(SubscriptionPlan.basic));
-        expect(result.value, contains(SubscriptionPlan.premiumMonthly));
-        expect(result.value, contains(SubscriptionPlan.premiumYearly));
+        expect(result.value[0], isA<BasicPlan>());
+        expect(result.value[1], isA<PremiumMonthlyPlan>());
+        expect(result.value[2], isA<PremiumYearlyPlan>());
       });
 
       test('特定プランの情報を取得できる', () {
-        final basicResult = mockService.getPlan('basic');
-        final premiumResult = mockService.getPlan('premium_yearly');
-        final invalidResult = mockService.getPlan('invalid');
+        final basicResult = mockService.getPlanClass('basic');
+        final premiumResult = mockService.getPlanClass('premium_yearly');
+        final invalidResult = mockService.getPlanClass('invalid');
 
         expect(basicResult.isSuccess, isTrue);
-        expect(basicResult.value, equals(SubscriptionPlan.basic));
+        expect(basicResult.value, isA<BasicPlan>());
 
         expect(premiumResult.isSuccess, isTrue);
-        expect(premiumResult.value, equals(SubscriptionPlan.premiumYearly));
+        expect(premiumResult.value, isA<PremiumYearlyPlan>());
 
         expect(invalidResult.isFailure, isTrue);
       });
@@ -210,7 +214,8 @@ void main() {
       });
 
       test('Basicプランでのアクセス権限が正しい', () async {
-        mockService.setCurrentPlan(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        mockService.setCurrentPlan(basicPlan);
 
         final premiumResult = await mockService.canAccessPremiumFeatures();
         final promptsResult = await mockService.canAccessWritingPrompts();
@@ -226,10 +231,8 @@ void main() {
       });
 
       test('Premiumプランでのアクセス権限が正しい', () async {
-        mockService.setCurrentPlan(
-          SubscriptionPlan.premiumYearly,
-          isActive: true,
-        );
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        mockService.setCurrentPlan(premiumYearlyPlan, isActive: true);
 
         final premiumResult = await mockService.canAccessPremiumFeatures();
         final promptsResult = await mockService.canAccessWritingPrompts();
@@ -257,26 +260,21 @@ void main() {
         expect(productsResult.value.length, equals(2));
 
         final products = productsResult.value;
-        expect(
-          products.any((p) => p.plan == SubscriptionPlan.premiumMonthly),
-          isTrue,
-        );
-        expect(
-          products.any((p) => p.plan == SubscriptionPlan.premiumYearly),
-          isTrue,
-        );
+        expect(products.any((p) => p.plan is PremiumMonthlyPlan), isTrue);
+        expect(products.any((p) => p.plan is PremiumYearlyPlan), isTrue);
       });
 
       test('プラン購入をシミュレートできる', () async {
-        final purchaseResult = await mockService.purchasePlan(
-          SubscriptionPlan.premiumYearly,
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        final purchaseResult = await mockService.purchasePlanClass(
+          premiumYearlyPlan,
         );
 
         expect(purchaseResult.isSuccess, isTrue);
         expect(purchaseResult.value.status, equals(PurchaseStatus.purchased));
         expect(
-          purchaseResult.value.plan,
-          equals(SubscriptionPlan.premiumYearly),
+          purchaseResult.value.productId,
+          equals(premiumYearlyPlan.productId),
         );
         expect(purchaseResult.value.transactionId, isNotNull);
 
@@ -287,8 +285,10 @@ void main() {
 
       test('購入履歴を復元できる', () async {
         // 複数回購入
-        await mockService.purchasePlan(SubscriptionPlan.premiumMonthly);
-        await mockService.purchasePlan(SubscriptionPlan.premiumYearly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await mockService.purchasePlanClass(premiumMonthlyPlan);
+        await mockService.purchasePlanClass(premiumYearlyPlan);
 
         final restoreResult = await mockService.restorePurchases();
 
@@ -297,8 +297,9 @@ void main() {
       });
 
       test('購入の検証ができる', () async {
-        final purchaseResult = await mockService.purchasePlan(
-          SubscriptionPlan.premiumYearly,
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        final purchaseResult = await mockService.purchasePlanClass(
+          premiumYearlyPlan,
         );
         final transactionId = purchaseResult.value.transactionId!;
 
@@ -310,7 +311,8 @@ void main() {
       });
 
       test('サブスクリプションをキャンセルできる', () async {
-        mockService.setCurrentPlan(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        mockService.setCurrentPlan(premiumYearlyPlan);
 
         final cancelResult = await mockService.cancelSubscription();
         expect(cancelResult.isSuccess, isTrue);
@@ -346,9 +348,8 @@ void main() {
         await mockService.initialize();
         mockService.setPurchaseFailure(true, 'Test purchase error');
 
-        final result = await mockService.purchasePlan(
-          SubscriptionPlan.premiumYearly,
-        );
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        final result = await mockService.purchasePlanClass(premiumYearlyPlan);
 
         expect(result.isSuccess, isTrue); // Success with error status
         expect(result.value.status, equals(PurchaseStatus.error));
@@ -363,7 +364,8 @@ void main() {
 
       test('statusStreamが状態変更を通知する', () async {
         // 状態変更
-        mockService.setCurrentPlan(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        mockService.setCurrentPlan(premiumMonthlyPlan);
         mockService.setUsageCount(5);
 
         final stream = mockService.statusStream;
@@ -378,7 +380,8 @@ void main() {
         final stream = mockService.purchaseStream;
 
         // 購入実行
-        await mockService.purchasePlan(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await mockService.purchasePlanClass(premiumYearlyPlan);
 
         expect(stream, isA<Stream<PurchaseResult>>());
       });

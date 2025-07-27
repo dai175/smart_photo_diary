@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import '../helpers/hive_test_helpers.dart';
 
@@ -69,7 +71,7 @@ void main() {
         // 初期状態が作成されている
         final status = box.get(SubscriptionConstants.statusKey);
         expect(status, isNotNull);
-        expect(status!.planId, equals(SubscriptionPlan.basic.id));
+        expect(status!.planId, equals('basic'));
         expect(status.isActive, isTrue);
         expect(status.monthlyUsageCount, equals(0));
         expect(status.expiryDate, isNull); // Basicプランは期限なし
@@ -82,7 +84,7 @@ void main() {
         );
 
         final existingStatus = SubscriptionStatus(
-          planId: SubscriptionPlan.premiumMonthly.id,
+          planId: 'premium_monthly',
           isActive: true,
           startDate: DateTime.now(),
           expiryDate: DateTime.now().add(const Duration(days: 30)),
@@ -104,7 +106,7 @@ void main() {
           SubscriptionConstants.statusKey,
         );
         expect(status, isNotNull);
-        expect(status!.planId, equals(SubscriptionPlan.premiumMonthly.id));
+        expect(status!.planId, equals('premium_monthly'));
         expect(status.monthlyUsageCount, equals(5));
         expect(status.transactionId, equals('test_transaction'));
       });
@@ -131,7 +133,7 @@ void main() {
         // Assert
         expect(result.isSuccess, isTrue);
         final status = result.value;
-        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.planId, equals('basic'));
         expect(status.isActive, isTrue);
         expect(status.monthlyUsageCount, equals(0));
       });
@@ -139,7 +141,7 @@ void main() {
       test('updateStatus()でサブスクリプション状態を更新できる', () async {
         // Arrange
         final newStatus = SubscriptionStatus(
-          planId: SubscriptionPlan.premiumMonthly.id,
+          planId: 'premium_monthly',
           isActive: true,
           startDate: DateTime.now(),
           expiryDate: DateTime.now().add(const Duration(days: 30)),
@@ -158,7 +160,7 @@ void main() {
         expect(updateResult.isSuccess, isTrue);
         expect(getResult.isSuccess, isTrue);
         final status = getResult.value;
-        expect(status.planId, equals(SubscriptionPlan.premiumMonthly.id));
+        expect(status.planId, equals('premium_monthly'));
         expect(status.monthlyUsageCount, equals(5));
         expect(status.transactionId, equals('test_transaction_update'));
       });
@@ -166,7 +168,7 @@ void main() {
       test('refreshStatus()でHiveボックスを再読み込みできる', () async {
         // Arrange
         final newStatus = SubscriptionStatus(
-          planId: SubscriptionPlan.premiumYearly.id,
+          planId: 'premium_yearly',
           isActive: true,
           startDate: DateTime.now(),
           expiryDate: DateTime.now().add(const Duration(days: 365)),
@@ -189,7 +191,7 @@ void main() {
         final statusResult = await subscriptionService.getCurrentStatus();
         expect(statusResult.isSuccess, isTrue);
         final status = statusResult.value;
-        expect(status.planId, equals(SubscriptionPlan.premiumYearly.id));
+        expect(status.planId, equals('premium_yearly'));
         expect(status.monthlyUsageCount, equals(15));
         expect(status.transactionId, equals('test_refresh'));
       });
@@ -199,14 +201,13 @@ void main() {
         await subscriptionService.clearStatus();
 
         // Act
-        final result = await subscriptionService.createStatus(
-          SubscriptionPlan.basic,
-        );
+        final basicPlan = BasicPlan();
+        final result = await subscriptionService.createStatusClass(basicPlan);
 
         // Assert
         expect(result.isSuccess, isTrue);
         final status = result.value;
-        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.planId, equals('basic'));
         expect(status.isActive, isTrue);
         expect(status.expiryDate, isNull); // Basicプランは期限なし
         expect(status.autoRenewal, isFalse);
@@ -218,14 +219,15 @@ void main() {
         await subscriptionService.clearStatus();
 
         // Act
-        final result = await subscriptionService.createStatus(
-          SubscriptionPlan.premiumMonthly,
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        final result = await subscriptionService.createStatusClass(
+          premiumMonthlyPlan,
         );
 
         // Assert
         expect(result.isSuccess, isTrue);
         final status = result.value;
-        expect(status.planId, equals(SubscriptionPlan.premiumMonthly.id));
+        expect(status.planId, equals('premium_monthly'));
         expect(status.isActive, isTrue);
         expect(status.expiryDate, isNotNull);
         expect(status.autoRenewal, isTrue);
@@ -246,14 +248,15 @@ void main() {
         await subscriptionService.clearStatus();
 
         // Act
-        final result = await subscriptionService.createStatus(
-          SubscriptionPlan.premiumYearly,
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        final result = await subscriptionService.createStatusClass(
+          premiumYearlyPlan,
         );
 
         // Assert
         expect(result.isSuccess, isTrue);
         final status = result.value;
-        expect(status.planId, equals(SubscriptionPlan.premiumYearly.id));
+        expect(status.planId, equals('premium_yearly'));
         expect(status.isActive, isTrue);
         expect(status.expiryDate, isNotNull);
         expect(status.autoRenewal, isTrue);
@@ -279,7 +282,7 @@ void main() {
         expect(getResult.isSuccess, isTrue);
         // getCurrentStatus()は状態がない場合に初期状態を作成するため、Basicプランが返される
         final status = getResult.value;
-        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.planId, equals('basic'));
       });
     });
 
@@ -290,7 +293,8 @@ void main() {
 
       test('canUseAiGeneration()はBasicプランで制限内なら使用可能', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // Act
         final result = await subscriptionService.canUseAiGeneration();
@@ -302,7 +306,8 @@ void main() {
 
       test('incrementAiUsage()で使用量を正しくインクリメントできる', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // Act
         final incrementResult = await subscriptionService.incrementAiUsage();
@@ -316,7 +321,8 @@ void main() {
 
       test('incrementAiUsage()を複数回実行して制限に達する', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // Act - Basic制限の10回まで使用
         for (int i = 0; i < 10; i++) {
@@ -337,7 +343,8 @@ void main() {
 
       test('canUseAiGeneration()は制限に達すると使用不可を返す', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // 制限まで使用
         for (int i = 0; i < 10; i++) {
@@ -354,7 +361,8 @@ void main() {
 
       test('getRemainingAiGenerations()で残り回数を取得できる', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        await subscriptionService.createStatusClass(premiumMonthlyPlan);
 
         // 5回使用
         for (int i = 0; i < 5; i++) {
@@ -371,7 +379,8 @@ void main() {
 
       test('getNextResetDate()で翌月1日を取得できる', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // Act
         final result = await subscriptionService.getNextResetDate();
@@ -394,7 +403,8 @@ void main() {
 
       test('月次使用量リセットが正しく動作する', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // 使用量を増やす
         await subscriptionService.incrementAiUsage();
@@ -435,7 +445,8 @@ void main() {
 
       test('Premiumプランは制限が100回に設定される', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await subscriptionService.createStatusClass(premiumYearlyPlan);
 
         // Act
         final remainingResult = await subscriptionService
@@ -449,7 +460,7 @@ void main() {
       test('期限切れのPremiumプランでは使用不可', () async {
         // Arrange - 期限切れのPremiumプランを作成
         final expiredStatus = SubscriptionStatus(
-          planId: SubscriptionPlan.premiumMonthly.id,
+          planId: 'premium_monthly',
           isActive: true,
           startDate: DateTime.now().subtract(const Duration(days: 60)),
           expiryDate: DateTime.now().subtract(
@@ -489,7 +500,7 @@ void main() {
         // Assert
         expect(result.isSuccess, isTrue);
         final status = result.value;
-        expect(status.planId, equals(SubscriptionPlan.basic.id));
+        expect(status.planId, equals('basic'));
         expect(status.isActive, isTrue);
       });
 
@@ -507,7 +518,8 @@ void main() {
 
       test('canAccessPremiumFeatures()はBasicプランでfalseを返す', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // Act
         final result = await subscriptionService.canAccessPremiumFeatures();
@@ -519,7 +531,8 @@ void main() {
 
       test('canAccessPremiumFeatures()は有効なPremiumプランでtrueを返す', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        await subscriptionService.createStatusClass(premiumMonthlyPlan);
 
         // Act
         final result = await subscriptionService.canAccessPremiumFeatures();
@@ -532,7 +545,7 @@ void main() {
       test('canAccessPremiumFeatures()は期限切れPremiumプランでfalseを返す', () async {
         // Arrange - 期限切れのPremiumプランを作成
         final expiredStatus = SubscriptionStatus(
-          planId: SubscriptionPlan.premiumMonthly.id,
+          planId: 'premium_monthly',
           isActive: true,
           startDate: DateTime.now().subtract(const Duration(days: 60)),
           expiryDate: DateTime.now().subtract(
@@ -563,13 +576,15 @@ void main() {
 
       test('canAccessWritingPrompts()は全プランでtrueを返す', () async {
         // Basic プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
         var result = await subscriptionService.canAccessWritingPrompts();
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue); // Basicプランでも基本プロンプトは利用可能
 
         // Premium プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        await subscriptionService.createStatusClass(premiumMonthlyPlan);
         result = await subscriptionService.canAccessWritingPrompts();
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue); // Premiumプランでは全プロンプト利用可能
@@ -577,13 +592,15 @@ void main() {
 
       test('canAccessAdvancedFilters()はPremiumプランのみtrueを返す', () async {
         // Basic プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
         var result = await subscriptionService.canAccessAdvancedFilters();
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basicプランは高度なフィルタ利用不可
 
         // Premium プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await subscriptionService.createStatusClass(premiumYearlyPlan);
         result = await subscriptionService.canAccessAdvancedFilters();
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue); // Premiumプランは高度なフィルタ利用可能
@@ -591,13 +608,15 @@ void main() {
 
       test('canAccessDataExport()は全プランでtrueを返す', () async {
         // Basic プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
         var result = await subscriptionService.canAccessDataExport();
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue); // BasicプランでもJSON形式は利用可能
 
         // Premium プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.premiumMonthly);
+        final premiumMonthlyPlan = PremiumMonthlyPlan();
+        await subscriptionService.createStatusClass(premiumMonthlyPlan);
         result = await subscriptionService.canAccessDataExport();
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue); // Premiumプランでは複数形式利用可能
@@ -605,13 +624,15 @@ void main() {
 
       test('canAccessStatsDashboard()はPremiumプランのみtrueを返す', () async {
         // Basic プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
         var result = await subscriptionService.canAccessStatsDashboard();
         expect(result.isSuccess, isTrue);
         expect(result.value, isFalse); // Basicプランは統計ダッシュボード利用不可
 
         // Premium プランのテスト
-        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await subscriptionService.createStatusClass(premiumYearlyPlan);
         result = await subscriptionService.canAccessStatsDashboard();
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue); // Premiumプランは統計ダッシュボード利用可能
@@ -619,7 +640,8 @@ void main() {
 
       test('getFeatureAccess()でBasicプランの機能アクセス情報を取得できる', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.basic);
+        final basicPlan = BasicPlan();
+        await subscriptionService.createStatusClass(basicPlan);
 
         // Act
         final result = await subscriptionService.getFeatureAccess();
@@ -636,7 +658,8 @@ void main() {
 
       test('getFeatureAccess()でPremiumプランの機能アクセス情報を取得できる', () async {
         // Arrange
-        await subscriptionService.createStatus(SubscriptionPlan.premiumYearly);
+        final premiumYearlyPlan = PremiumYearlyPlan();
+        await subscriptionService.createStatusClass(premiumYearlyPlan);
 
         // Act
         final result = await subscriptionService.getFeatureAccess();
@@ -654,7 +677,7 @@ void main() {
       test('期限切れPremiumプランでは機能制限が適用される', () async {
         // Arrange - 期限切れのPremiumプランを作成
         final expiredStatus = SubscriptionStatus(
-          planId: SubscriptionPlan.premiumMonthly.id,
+          planId: 'premium_monthly',
           isActive: true,
           startDate: DateTime.now().subtract(const Duration(days: 60)),
           expiryDate: DateTime.now().subtract(

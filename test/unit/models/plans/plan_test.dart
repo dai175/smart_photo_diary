@@ -1,26 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 
 void main() {
-  group('SubscriptionPlan', () {
+  group('Plan', () {
     group('基本プロパティテスト', () {
       test('Basic プランの基本プロパティが正しく設定されている', () {
-        const plan = SubscriptionPlan.basic;
+        final plan = BasicPlan();
 
         expect(plan.displayName, equals('Basic'));
-        expect(plan.planId, equals('basic'));
-        expect(plan.yearlyPrice, equals(0));
+        expect(plan.id, equals('basic'));
+        expect(plan.price, equals(0));
         expect(plan.monthlyAiGenerationLimit, equals(10));
         expect(plan.productId, equals(''));
         expect(plan.isPaid, isFalse);
         expect(plan.isFree, isTrue);
+        expect(plan.isPremium, isFalse);
       });
 
       test('Premium Monthly プランの基本プロパティが正しく設定されている', () {
-        const plan = SubscriptionPlan.premiumMonthly;
+        final plan = PremiumMonthlyPlan();
 
         expect(plan.displayName, equals('Premium (月額)'));
-        expect(plan.planId, equals('premium_monthly'));
+        expect(plan.id, equals('premium_monthly'));
         expect(plan.price, equals(300));
         expect(plan.yearlyPrice, equals(3600)); // 300 * 12
         expect(plan.monthlyAiGenerationLimit, equals(100));
@@ -36,10 +40,10 @@ void main() {
       });
 
       test('Premium Yearly プランの基本プロパティが正しく設定されている', () {
-        const plan = SubscriptionPlan.premiumYearly;
+        final plan = PremiumYearlyPlan();
 
         expect(plan.displayName, equals('Premium (年額)'));
-        expect(plan.planId, equals('premium_yearly'));
+        expect(plan.id, equals('premium_yearly'));
         expect(plan.price, equals(2800));
         expect(plan.yearlyPrice, equals(2800));
         expect(plan.monthlyAiGenerationLimit, equals(100));
@@ -54,7 +58,7 @@ void main() {
 
     group('機能フラグテスト', () {
       test('Basic プランの機能フラグが正しく設定されている', () {
-        const plan = SubscriptionPlan.basic;
+        final plan = BasicPlan();
 
         expect(plan.hasWritingPrompts, isFalse);
         expect(plan.hasAdvancedFilters, isFalse);
@@ -63,7 +67,7 @@ void main() {
       });
 
       test('Premium Monthly プランの機能フラグが正しく設定されている', () {
-        const plan = SubscriptionPlan.premiumMonthly;
+        final plan = PremiumMonthlyPlan();
 
         expect(plan.hasWritingPrompts, isTrue);
         expect(plan.hasAdvancedFilters, isTrue);
@@ -72,7 +76,7 @@ void main() {
       });
 
       test('Premium Yearly プランの機能フラグが正しく設定されている', () {
-        const plan = SubscriptionPlan.premiumYearly;
+        final plan = PremiumYearlyPlan();
 
         expect(plan.hasWritingPrompts, isTrue);
         expect(plan.hasAdvancedFilters, isTrue);
@@ -83,7 +87,7 @@ void main() {
 
     group('機能リストテスト', () {
       test('Basic プランの機能リストが正しく取得できる', () {
-        const plan = SubscriptionPlan.basic;
+        final plan = BasicPlan();
         final features = plan.features;
 
         expect(features, isA<List<String>>());
@@ -97,8 +101,8 @@ void main() {
       });
 
       test('Premium プランの機能リストが正しく取得できる', () {
-        const monthlyPlan = SubscriptionPlan.premiumMonthly;
-        const yearlyPlan = SubscriptionPlan.premiumYearly;
+        final monthlyPlan = PremiumMonthlyPlan();
+        final yearlyPlan = PremiumYearlyPlan();
 
         // 両プランとも同じ機能リストを持つ
         for (final plan in [monthlyPlan, yearlyPlan]) {
@@ -121,15 +125,15 @@ void main() {
 
     group('計算プロパティテスト', () {
       test('Basic プランの日平均生成回数が正しく計算される', () {
-        const plan = SubscriptionPlan.basic;
+        final plan = BasicPlan();
         final dailyAverage = plan.dailyAverageGenerations;
 
         expect(dailyAverage, closeTo(0.33, 0.01)); // 10/30 ≈ 0.33
       });
 
       test('Premium プランの日平均生成回数が正しく計算される', () {
-        const monthlyPlan = SubscriptionPlan.premiumMonthly;
-        const yearlyPlan = SubscriptionPlan.premiumYearly;
+        final monthlyPlan = PremiumMonthlyPlan();
+        final yearlyPlan = PremiumYearlyPlan();
 
         for (final plan in [monthlyPlan, yearlyPlan]) {
           final dailyAverage = plan.dailyAverageGenerations;
@@ -138,93 +142,124 @@ void main() {
       });
 
       test('プラン説明文が正しく取得できる', () {
+        expect(BasicPlan().description, equals('日記を試してみたい新規ユーザー、軽いユーザー向け'));
         expect(
-          SubscriptionPlan.basic.description,
-          equals('日記を試してみたい新規ユーザー、軽いユーザー向け'),
-        );
-        expect(
-          SubscriptionPlan.premiumMonthly.description,
+          PremiumMonthlyPlan().description,
           equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'),
         );
         expect(
-          SubscriptionPlan.premiumYearly.description,
+          PremiumYearlyPlan().description,
           equals('日常的に日記を書くユーザー、デジタル手帳として活用したいユーザー向け'),
         );
       });
     });
 
-    group('fromIdメソッドテスト', () {
+    group('PlanFactoryテスト', () {
       test('正しいプランIDから対応するプランを取得できる', () {
+        expect(PlanFactory.createPlan('basic'), isA<BasicPlan>());
         expect(
-          SubscriptionPlan.fromId('basic'),
-          equals(SubscriptionPlan.basic),
+          PlanFactory.createPlan('premium_monthly'),
+          isA<PremiumMonthlyPlan>(),
         );
         expect(
-          SubscriptionPlan.fromId('premium_monthly'),
-          equals(SubscriptionPlan.premiumMonthly),
-        );
-        expect(
-          SubscriptionPlan.fromId('premium_yearly'),
-          equals(SubscriptionPlan.premiumYearly),
+          PlanFactory.createPlan('premium_yearly'),
+          isA<PremiumYearlyPlan>(),
         );
       });
 
       test('大文字小文字を区別しない', () {
+        expect(PlanFactory.createPlan('BASIC'), isA<BasicPlan>());
         expect(
-          SubscriptionPlan.fromId('BASIC'),
-          equals(SubscriptionPlan.basic),
+          PlanFactory.createPlan('Premium_Monthly'),
+          isA<PremiumMonthlyPlan>(),
         );
         expect(
-          SubscriptionPlan.fromId('Premium_Monthly'),
-          equals(SubscriptionPlan.premiumMonthly),
-        );
-        expect(
-          SubscriptionPlan.fromId('PREMIUM_YEARLY'),
-          equals(SubscriptionPlan.premiumYearly),
+          PlanFactory.createPlan('PREMIUM_YEARLY'),
+          isA<PremiumYearlyPlan>(),
         );
       });
 
       test('不正なプランIDでArgumentErrorが発生する', () {
         expect(
-          () => SubscriptionPlan.fromId('invalid'),
+          () => PlanFactory.createPlan('invalid'),
           throwsA(isA<ArgumentError>()),
         );
+        expect(() => PlanFactory.createPlan(''), throwsA(isA<ArgumentError>()));
         expect(
-          () => SubscriptionPlan.fromId(''),
-          throwsA(isA<ArgumentError>()),
-        );
-        expect(
-          () => SubscriptionPlan.fromId('pro'),
+          () => PlanFactory.createPlan('pro'),
           throwsA(isA<ArgumentError>()),
         );
       });
-    });
 
-    group('enum値テスト', () {
-      test('すべてのプランが存在する', () {
-        final allPlans = SubscriptionPlan.values;
+      test('すべてのプランが取得できる', () {
+        final allPlans = PlanFactory.getAllPlans();
 
         expect(allPlans.length, equals(3));
-        expect(allPlans, contains(SubscriptionPlan.basic));
-        expect(allPlans, contains(SubscriptionPlan.premiumMonthly));
-        expect(allPlans, contains(SubscriptionPlan.premiumYearly));
+        expect(allPlans.any((p) => p is BasicPlan), isTrue);
+        expect(allPlans.any((p) => p is PremiumMonthlyPlan), isTrue);
+        expect(allPlans.any((p) => p is PremiumYearlyPlan), isTrue);
       });
 
-      test('各プランのplanIdが一意である', () {
-        final planIds = SubscriptionPlan.values.map((p) => p.planId).toList();
+      test('有料プランだけが取得できる', () {
+        final premiumPlans = PlanFactory.getPremiumPlans();
+
+        expect(premiumPlans.length, equals(2));
+        expect(premiumPlans.any((p) => p is PremiumMonthlyPlan), isTrue);
+        expect(premiumPlans.any((p) => p is PremiumYearlyPlan), isTrue);
+        expect(premiumPlans.any((p) => p is BasicPlan), isFalse);
+      });
+
+      test('各プランのIDが一意である', () {
+        final allPlans = PlanFactory.getAllPlans();
+        final planIds = allPlans.map((p) => p.id).toList();
         final uniqueIds = planIds.toSet();
 
         expect(planIds.length, equals(uniqueIds.length));
       });
 
       test('各プランのproductIdが一意である（空文字除く）', () {
-        final productIds = SubscriptionPlan.values
+        final allPlans = PlanFactory.getAllPlans();
+        final productIds = allPlans
             .map((p) => p.productId)
             .where((id) => id.isNotEmpty)
             .toList();
         final uniqueIds = productIds.toSet();
 
         expect(productIds.length, equals(uniqueIds.length));
+      });
+    });
+
+    group('Premium Yearly特有の機能テスト', () {
+      test('年額プランの割引率が正しく計算される', () {
+        final plan = PremiumYearlyPlan();
+        expect(plan.discountPercentage, equals(22));
+      });
+
+      test('年額プランの月額換算価格が正しく計算される', () {
+        final plan = PremiumYearlyPlan();
+        expect(plan.monthlyEquivalentPrice, closeTo(233.33, 0.01));
+      });
+
+      test('年額プランの節約額が正しく計算される', () {
+        final plan = PremiumYearlyPlan();
+        expect(plan.yearlySavings, equals(800));
+      });
+    });
+
+    group('等価性テスト', () {
+      test('同じIDのプランは等しいと判定される', () {
+        final plan1 = BasicPlan();
+        final plan2 = BasicPlan();
+
+        expect(plan1, equals(plan2));
+        expect(plan1.hashCode, equals(plan2.hashCode));
+      });
+
+      test('異なるIDのプランは等しくないと判定される', () {
+        final basic = BasicPlan();
+        final premium = PremiumMonthlyPlan();
+
+        expect(basic, isNot(equals(premium)));
       });
     });
   });

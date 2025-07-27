@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
-import 'package:smart_photo_diary/models/subscription_plan.dart';
+import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
@@ -133,9 +135,7 @@ void main() {
 
       test('purchasePlan()でBasicプラン購入時にエラーが返される', () async {
         // Basicプランは購入対象外
-        final result = await subscriptionService.purchasePlan(
-          SubscriptionPlan.basic,
-        );
+        final result = await subscriptionService.purchasePlanClass(BasicPlan());
 
         expect(result.isFailure, isTrue);
         // テスト環境では In-App Purchase 未対応のため、このエラーが先に発生する
@@ -147,8 +147,8 @@ void main() {
 
       test('purchasePlan()でPremiumプラン指定時の動作確認', () async {
         // Premium月額プランの購入試行
-        final result = await subscriptionService.purchasePlan(
-          SubscriptionPlan.premiumMonthly,
+        final result = await subscriptionService.purchasePlanClass(
+          PremiumMonthlyPlan(),
         );
 
         // テスト環境では In-App Purchase 未対応のためエラーが期待される
@@ -175,11 +175,11 @@ void main() {
         // この機能はテスト環境での検証が困難
         // インターフェースレベルでの基本確認のみ実施
 
-        final monthlyResult = await subscriptionService.purchasePlan(
-          SubscriptionPlan.premiumMonthly,
+        final monthlyResult = await subscriptionService.purchasePlanClass(
+          PremiumMonthlyPlan(),
         );
-        final yearlyResult = await subscriptionService.purchasePlan(
-          SubscriptionPlan.premiumYearly,
+        final yearlyResult = await subscriptionService.purchasePlanClass(
+          PremiumYearlyPlan(),
         );
 
         // 両方とも何らかの結果が返されることを確認
@@ -189,9 +189,7 @@ void main() {
 
       test('無効なプランでの購入処理エラーハンドリング', () async {
         // Basicプランでの購入はエラーになるべき
-        final result = await subscriptionService.purchasePlan(
-          SubscriptionPlan.basic,
-        );
+        final result = await subscriptionService.purchasePlanClass(BasicPlan());
 
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
@@ -364,8 +362,8 @@ void main() {
       });
 
       test('changePlan()が未実装エラーを返すことを確認', () async {
-        final result = await subscriptionService.changePlan(
-          SubscriptionPlan.premiumYearly,
+        final result = await subscriptionService.changePlanClass(
+          PremiumYearlyPlan(),
         );
 
         expect(result.isFailure, isTrue);
@@ -393,8 +391,8 @@ void main() {
         final getProductsResult = await subscriptionService.getProducts();
         expect(getProductsResult, isA<Result<List<PurchaseProduct>>>());
 
-        final purchaseResult = await subscriptionService.purchasePlan(
-          SubscriptionPlan.premiumMonthly,
+        final purchaseResult = await subscriptionService.purchasePlanClass(
+          PremiumMonthlyPlan(),
         );
         expect(purchaseResult, isA<Result<PurchaseResult>>());
 
@@ -406,8 +404,8 @@ void main() {
         );
         expect(validateResult, isA<Result<bool>>());
 
-        final changePlanResult = await subscriptionService.changePlan(
-          SubscriptionPlan.premiumYearly,
+        final changePlanResult = await subscriptionService.changePlanClass(
+          PremiumYearlyPlan(),
         );
         expect(changePlanResult, isA<Result<void>>());
 
@@ -421,7 +419,7 @@ void main() {
 
         final results = await Future.wait([
           subscriptionService.getProducts(),
-          subscriptionService.purchasePlan(SubscriptionPlan.premiumMonthly),
+          subscriptionService.purchasePlanClass(PremiumMonthlyPlan()),
           subscriptionService.restorePurchases(),
         ]);
 
@@ -457,15 +455,15 @@ void main() {
         // 各メソッドのエラー処理が一貫していることを確認
 
         // 無効な入力でのエラー
-        final basicPurchaseResult = await subscriptionService.purchasePlan(
-          SubscriptionPlan.basic,
+        final basicPurchaseResult = await subscriptionService.purchasePlanClass(
+          BasicPlan(),
         );
         expect(basicPurchaseResult.isFailure, isTrue);
         expect(basicPurchaseResult.error, isA<ServiceException>());
 
         // 未実装機能のエラー
-        final changePlanResult = await subscriptionService.changePlan(
-          SubscriptionPlan.premiumYearly,
+        final changePlanResult = await subscriptionService.changePlanClass(
+          PremiumYearlyPlan(),
         );
         expect(changePlanResult.isFailure, isTrue);
         expect(changePlanResult.error, isA<ServiceException>());
@@ -483,42 +481,32 @@ void main() {
 
 /// In-App Purchase統合テスト用ヘルパークラス
 class InAppPurchaseTestHelpers {
+  // 注意: PurchaseResultとPurchaseProductは旧バージョンでenumに依存しているため、
+  // ヘルパーメソッドは一旦コメントアウト。V2バージョンが利用可能になったら再実装。
+
+  /*
   /// テスト用購入結果を作成
   static PurchaseResult createTestPurchaseResult({
     PurchaseStatus status = PurchaseStatus.pending,
     String? productId,
     String? transactionId,
-    SubscriptionPlan? plan,
+    Plan? plan,
     String? errorMessage,
   }) {
-    return PurchaseResult(
-      status: status,
-      productId: productId,
-      transactionId: transactionId,
-      purchaseDate: DateTime.now(),
-      plan: plan,
-      errorMessage: errorMessage,
-    );
+    // 旧バージョンはenum依存のため、V2バージョンでの実装を待つ
   }
 
   /// テスト用商品情報を作成
   static PurchaseProduct createTestPurchaseProduct({
     required String id,
     required String title,
-    required SubscriptionPlan plan,
+    required Plan plan,
     String price = '¥300',
     double priceAmount = 300.0,
   }) {
-    return PurchaseProduct(
-      id: id,
-      title: title,
-      description: 'Test product for $title',
-      price: price,
-      priceAmount: priceAmount,
-      currencyCode: 'JPY',
-      plan: plan,
-    );
+    // 旧バージョンはenum依存のため、V2バージョンでの実装を待つ
   }
+  */
 
   /// 購入ストリームのテスト用監視
   static Future<List<PurchaseResult>> listenToPurchaseStream(
