@@ -162,7 +162,7 @@ class MockSubscriptionService implements ISubscriptionService {
     _expiryDate = status.expiryDate;
     _startDate = status.startDate;
     _lastResetDate = status.lastResetDate;
-    _autoRenewal = status.autoRenewal ?? false;
+    _autoRenewal = status.autoRenewal;
     _transactionId = status.transactionId;
     _lastPurchaseDate = status.lastPurchaseDate;
 
@@ -269,7 +269,6 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
 
-  @override
   Result<List<Plan>> getAvailablePlansClass() {
     return Success([
       BasicPlan(),

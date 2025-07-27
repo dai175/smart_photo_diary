@@ -47,7 +47,6 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
 
-  @override
   Result<List<Plan>> getAvailablePlansClass() {
     return Success([
       BasicPlan(),
