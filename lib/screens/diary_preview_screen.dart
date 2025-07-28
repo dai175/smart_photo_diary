@@ -20,6 +20,7 @@ import '../services/interfaces/prompt_service_interface.dart';
 import '../models/plans/basic_plan.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
+import '../utils/upgrade_dialog_utils.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -376,18 +377,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   }
 
   /// Phase 1.7.2.4: プラン変更誘導機能
-  void _navigateToUpgrade() {
-    // TODO: Phase 2で設定画面のサブスクリプション管理画面に遷移
-    // 現在は設定画面に遷移してプレースホルダーを表示
-    Navigator.of(context).pushNamed('/settings');
+  void _navigateToUpgrade() async {
+    // アップグレードダイアログを表示
+    await UpgradeDialogUtils.showUpgradeDialog(context);
 
-    // 一時的な案内メッセージ
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Premiumプランの設定は次のアップデートで実装予定です'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    // ダイアログを閉じた後、日記生成画面も閉じてホーム画面に戻る
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   /// プロンプトをクリア（再生成時に使用）
