@@ -470,6 +470,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('日記プレビュー'),
+        centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
