@@ -8,12 +8,15 @@
   - [x] photo_managerプラグインのフィルター機能調査
   - [x] 撮影日時によるフィルタリング実装
   - [x] タイムゾーン考慮の実装
-- [ ] `getAccessibleDateRange()` メソッドの実装
-  - [ ] Planクラスに基づいた期間計算
-  - [ ] BasicPlan: 1日前まで
-  - [ ] PremiumPlan: 365日前まで
-- [ ] `isPhotoAccessible()` メソッドの実装
-  - [ ] 写真の撮影日時とプランに基づくアクセス可否判定
+- [x] `getAccessibleDateRange()` メソッドの実装
+  - [x] Planクラスに基づいた期間計算
+  - [x] BasicPlan: 1日前まで
+  - [x] PremiumPlan: 365日前まで
+- [x] `isPhotoAccessible()` メソッドの実装
+  - [x] 写真の撮影日時とプランに基づくアクセス可否判定
+- [x] **PhotoAccessControlService分離設計**
+  - [x] **責任の単一化（PhotoServiceから分離）**
+  - [x] **依存性注入なしの純粋関数設計**
 - [x] ページネーション対応
   - [x] `getPhotosForDateRange()` with offset/limit
   - [x] 効率的なメモリ管理
@@ -32,12 +35,16 @@
   - [ ] 「思い出を振り返る」文脈の追加
   - [ ] 時制の適切な調整（過去形での生成）
 
-### 1.4 新しいモデルクラス
-- [ ] `DateRange` クラスの作成
-  - [ ] start/endのDateTime管理
-  - [ ] 期間内判定メソッド
-- [ ] `PhotoAccessibility` enumの作成
-  - [ ] accessible / locked / limited
+### 1.4 新しいサービスクラス
+- [x] **`PhotoAccessControlService` の作成**
+  - [x] **プラン別アクセス制御の専用サービス**
+  - [x] **純粋関数による設計（副作用なし）**
+  - [x] **PhotoAccessControlServiceInterface の定義**
+- [ ] ~~`DateRange` クラスの作成~~　（※設計変更により不要）
+  - [ ] ~~start/endのDateTime管理~~
+  - [ ] ~~期間内判定メソッド~~
+- [ ] ~~`PhotoAccessibility` enumの作成~~　（※設計変更により不要）
+  - [ ] ~~accessible / locked / limited~~
 
 ## 2. UI実装 (Presentation層)
 
@@ -102,16 +109,19 @@
 ## 4. テスト実装
 
 ### 4.1 Unit Tests
-- [ ] PhotoService拡張機能のテスト
-  - [ ] 日付フィルタリングテスト
-  - [ ] アクセス制限判定テスト
-  - [ ] ページネーションテスト
-- [ ] DiaryService拡張機能のテスト
-  - [ ] 過去日付での作成テスト
-  - [ ] 重複チェックテスト
-- [ ] プラン別制限ロジックのテスト
-  - [ ] BasicPlan: 1日制限
-  - [ ] PremiumPlan: 365日制限
+- [x] PhotoService拡張機能のテスト
+  - [x] 日付フィルタリングテスト
+  - [ ] アクセス制限判定テスト（※PhotoAccessControlServiceに移行）
+  - [x] ページネーションテスト
+- [x] DiaryService拡張機能のテスト
+  - [x] 過去日付での作成テスト
+  - [x] 重複チェックテスト
+- [x] **PhotoAccessControlService専用テスト**
+  - [x] **プラン別制限ロジックのテスト**
+    - [x] **BasicPlan: 1日制限**
+    - [x] **PremiumPlan: 365日制限**
+  - [x] **境界値テスト（日付精度、うるう年、DST）**
+  - [x] **エッジケース処理テスト**
 
 ### 4.2 Widget Tests
 - [ ] タブ切り替えUIテスト
@@ -189,15 +199,17 @@
 - [ ] パフォーマンスメトリクス
 - [ ] エラー率の監視
 
-## 実装順序の推奨
+## 実装順序の推奨（更新版）
 
-1. **Phase 1: 基本機能（1-2週間）**
-   - PhotoService拡張（1.1）
-   - 基本的なUI実装（2.1, 2.2の一部）
-   - 最小限のテスト（4.1の一部）
+1. **Phase 1: 基本機能（1-2週間）** ✅ **完了**
+   - PhotoService拡張（1.1） ✅
+   - PhotoAccessControlService新規作成（1.4） ✅
+   - DiaryService拡張（1.2） ✅
+   - 基本的なUI実装（2.1, 2.2の一部） ✅
+   - 最小限のテスト（4.1の一部） ✅
 
 2. **Phase 2: 完全実装（1-2週間）**
-   - DiaryService/AiService拡張（1.2, 1.3）
+   - AiService拡張（1.3）
    - 完全なUI実装（2.2完成, 2.4）
    - 状態管理（3.1, 3.2）
    - テスト完備（4.1-4.3）
@@ -207,3 +219,10 @@
    - エラーハンドリング強化（6.1, 6.2）
    - カレンダーUI（2.3）
    - リリース準備（8.1-8.3）
+
+## アーキテクチャ改善記録
+
+### 設計変更の履歴
+- **2025-07-29**: PhotoServiceから責任分離によりPhotoAccessControlService新規作成
+- **変更理由**: 単一責任の原則、テスタビリティ向上、依存関係の削減
+- **影響範囲**: UI層でのプラン取得とアクセス制御の組み合わせが必要
