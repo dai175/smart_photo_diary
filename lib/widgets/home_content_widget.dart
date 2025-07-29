@@ -7,6 +7,7 @@ import '../widgets/photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
 import '../widgets/prompt_selection_modal.dart';
 import '../models/writing_prompt.dart';
+import '../screens/past_photos_selection_screen.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
@@ -129,7 +130,88 @@ class HomeContentWidget extends StatelessWidget {
             onUsedPhotoSelected: onUsedPhotoSelected,
             onRequestPermission: onRequestPermission,
           ),
+          const SizedBox(height: AppSpacing.md),
+          _buildPastPhotosButton(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPastPhotosButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppSpacing.md),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
+            ),
+            child: Icon(
+              Icons.history_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: AppSpacing.iconSm,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '過去の写真から日記を作成',
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '思い出の写真を振り返って日記を作成',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          AnimatedButton(
+            onPressed: () => _navigateToPastPhotosSelection(context),
+            width: 80,
+            height: 36,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            borderRadius: BorderRadius.circular(AppSpacing.sm),
+            child: Text(
+              '開く',
+              style: AppTypography.labelMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToPastPhotosSelection(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PastPhotosSelectionScreen(),
       ),
     );
   }
