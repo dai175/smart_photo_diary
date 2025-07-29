@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
+import '../models/plans/plan.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../widgets/photo_grid_widget.dart';
 import '../widgets/past_photo_grid_widget.dart';
@@ -34,6 +37,10 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
   late final PhotoSelectionController _todayPhotoController;
   late final PhotoSelectionController _pastPhotoController;
 
+  // アクセス制御関連
+  Plan? _currentPlan;
+  DateTime? _accessibleDate;
+
   PhotoSelectionController get activeController =>
       _tabController.index == 0 ? _todayPhotoController : _pastPhotoController;
 
@@ -50,6 +57,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
     _loadTodayPhotos();
     _loadUsedPhotoIds();
+    _loadCurrentPlan();
   }
 
   @override
@@ -114,15 +122,28 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         return;
       }
 
-      // 昨日の写真を取得（テスト用）
-      final yesterday = DateTime.now().subtract(const Duration(days: 1));
-      final photos = await photoService.getPhotosForDate(
-        yesterday,
-        offset: 0,
-        limit: 20,
+      // プランに基づいて過去の写真を取得（今日は除外）
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      
+      DateTime startDate;
+      if (_currentPlan != null && _accessibleDate != null) {
+        startDate = _accessibleDate!;
+      } else {
+        // フォールバック: 昨日の00:00:00から取得
+        startDate = today.subtract(const Duration(days: 1));
+      }
+      
+      // 今日の00:00:00を終了日として設定（今日は除外）
+      final endDate = today;
+      
+      final photos = await photoService.getPhotosInDateRange(
+        startDate: startDate,
+        endDate: endDate,
+        limit: 50,
       );
 
-      debugPrint('昨日の写真を取得: ${photos.length}枚');
+      debugPrint('過去の写真を取得: ${photos.length}枚 (${startDate.toString().split(' ')[0]} - ${endDate.toString().split(' ')[0]})');
 
       if (!mounted) return;
 
@@ -158,6 +179,45 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
     } catch (e) {
       debugPrint('使用済み写真ID読み込みエラー: $e');
     }
+  }
+
+  /// 現在のプランとアクセス可能日付を読み込み
+  Future<void> _loadCurrentPlan() async {
+    debugPrint('=== _loadCurrentPlan 開始 ===');
+    try {
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+      final accessControlService =
+          ServiceRegistration.get<PhotoAccessControlServiceInterface>();
+
+      debugPrint('サービス取得完了');
+
+      final planResult = await subscriptionService.getCurrentPlanClass();
+      debugPrint('プラン取得結果: ${planResult.isSuccess ? "成功" : "失敗"}');
+      
+      if (planResult.isFailure) {
+        debugPrint('プラン取得エラー: ${planResult.error}');
+        return;
+      }
+
+      final plan = planResult.value;
+      final accessibleDate = accessControlService.getAccessibleDateForPlan(plan);
+
+      debugPrint('プラン: ${plan.displayName}, タイプ: ${plan.runtimeType}');
+      debugPrint('アクセス可能日付: $accessibleDate');
+
+      if (mounted) {
+        setState(() {
+          _currentPlan = plan;
+          _accessibleDate = accessibleDate;
+        });
+        debugPrint('setState完了: _currentPlan = $_currentPlan');
+      }
+    } catch (e) {
+      debugPrint('プラン情報読み込みエラー: $e');
+      debugPrint('エラースタックトレース: ${StackTrace.current}');
+    }
+    debugPrint('=== _loadCurrentPlan 終了 ===');
   }
 
   @override
@@ -302,6 +362,10 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(icon: Icons.history_rounded, title: '過去の写真'),
+          const SizedBox(height: AppSpacing.md),
+
+          // プランに基づくアクセス範囲の説明
+          _buildAccessRangeInfo(),
           const SizedBox(height: AppSpacing.lg),
 
           // 過去の写真グリッド（暫定的に既存のPhotoGridWidgetを使用）
@@ -325,6 +389,112 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         const SizedBox(width: AppSpacing.sm),
         Text(title, style: AppTypography.titleLarge),
       ],
+    );
+  }
+
+  Widget _buildAccessRangeInfo() {
+    debugPrint('_buildAccessRangeInfo: _currentPlan = $_currentPlan');
+    
+    if (_currentPlan == null) {
+      // プラン情報がない場合もデバッグメッセージを表示
+      return Container(
+        padding: AppSpacing.cardPadding,
+        decoration: BoxDecoration(
+          color: AppColors.error.withValues(alpha: 0.1),
+          borderRadius: AppSpacing.cardRadius,
+          border: Border.all(
+            color: AppColors.error.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: AppColors.error,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                'プラン情報を読み込み中...',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.error,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final accessControlService =
+        ServiceRegistration.get<PhotoAccessControlServiceInterface>();
+    final rangeDescription = accessControlService.getAccessRangeDescription(_currentPlan!);
+    
+    final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
+    
+    return Container(
+      padding: AppSpacing.cardPadding,
+      decoration: BoxDecoration(
+        color: isBasic 
+            ? AppColors.warning.withValues(alpha: 0.1)
+            : AppColors.success.withValues(alpha: 0.1),
+        borderRadius: AppSpacing.cardRadius,
+        border: Border.all(
+          color: isBasic 
+              ? AppColors.warning.withValues(alpha: 0.3)
+              : AppColors.success.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isBasic ? Icons.schedule_rounded : Icons.history_rounded,
+            color: isBasic ? AppColors.warning : AppColors.success,
+            size: 20,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${_currentPlan!.displayName} - $rangeDescription',
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isBasic ? AppColors.warning : AppColors.success,
+                  ),
+                ),
+                if (isBasic) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'プレミアムプランなら1年前までの写真にアクセス可能',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (isBasic)
+            TextButton(
+              onPressed: _showAccessDeniedModal,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.warning,
+                minimumSize: Size.zero,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+              ),
+              child: const Text(
+                'アップグレード',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -419,8 +589,9 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       ).customRoute(),
     ).then((_) {
       if (mounted) {
-        // 日記作成後、使用済み写真IDを再読み込みして両方のコントローラーを更新
+        // 日記作成後、使用済み写真IDとプラン情報を再読み込みして両方のコントローラーを更新
         _loadUsedPhotoIds();
+        _loadCurrentPlan();
         Navigator.pop(context);
       }
     });

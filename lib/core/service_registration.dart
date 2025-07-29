@@ -5,6 +5,8 @@ import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/photo_access_control_service.dart';
+import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -78,6 +80,11 @@ class ServiceRegistration {
     // PhotoService (singleton pattern)
     serviceLocator.registerFactory<PhotoServiceInterface>(
       () => PhotoService.getInstance(),
+    );
+
+    // PhotoAccessControlService (singleton pattern)
+    serviceLocator.registerFactory<PhotoAccessControlServiceInterface>(
+      () => PhotoAccessControlService.getInstance(),
     );
 
     // SettingsService (async initialization)
