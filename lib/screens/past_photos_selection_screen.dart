@@ -6,6 +6,7 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../widgets/photo_grid_widget.dart';
 import '../widgets/past_photo_grid_widget.dart';
+import '../widgets/prompt_selection_modal.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -324,7 +325,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
             final selectedCount = activeController.selectedCount;
 
             return AnimatedButton(
-              onPressed: selectedCount > 0 ? _navigateToDiaryPreview : null,
+              onPressed: selectedCount > 0 ? _showPromptSelectionModal : null,
               width: double.infinity,
               height: AppSpacing.buttonHeightLg,
               backgroundColor: selectedCount > 0
@@ -366,12 +367,29 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
     );
   }
 
-  void _navigateToDiaryPreview() {
+  void _showPromptSelectionModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PromptSelectionModal(
+        onPromptSelected: (prompt) {
+          Navigator.of(context).pop();
+          _navigateToDiaryPreview(prompt);
+        },
+        onSkip: () {
+          Navigator.of(context).pop();
+          _navigateToDiaryPreview(null);
+        },
+      ),
+    );
+  }
+
+  void _navigateToDiaryPreview(WritingPrompt? selectedPrompt) {
     Navigator.push(
       context,
       DiaryPreviewScreen(
         selectedAssets: activeController.selectedPhotos,
-        selectedPrompt: widget.selectedPrompt,
+        selectedPrompt: selectedPrompt,
       ).customRoute(),
     ).then((_) {
       if (mounted) {
