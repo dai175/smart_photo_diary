@@ -96,7 +96,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
     try {
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
-      
+
       // 権限チェック
       final hasPermission = await photoService.requestPermission();
       debugPrint('過去の写真 - 権限ステータス: $hasPermission');

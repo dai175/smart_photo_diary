@@ -355,4 +355,152 @@ class DiaryService implements DiaryServiceInterface {
       await _diaryBox!.compact();
     }
   }
+
+  /// 過去の写真から日記エントリーを作成
+  ///
+  /// [photoDate]: 写真の撮影日時
+  /// [title]: 日記のタイトル
+  /// [content]: 日記の内容
+  /// [photoIds]: 写真のIDリスト
+  /// [location]: 場所（オプション）
+  /// [tags]: タグリスト（オプション）
+  /// 戻り値: 作成された日記エントリー
+  @override
+  Future<DiaryEntry> createDiaryForPastPhoto({
+    required DateTime photoDate,
+    required String title,
+    required String content,
+    required List<String> photoIds,
+    String? location,
+    List<String>? tags,
+  }) async {
+    try {
+      if (_diaryBox == null) {
+        debugPrint('_diaryBoxが未初期化です。再初期化します...');
+        await _init();
+      }
+
+      // 既存の日記との重複チェック
+      final existingDiaries = await getDiaryByPhotoDate(photoDate);
+      if (existingDiaries.isNotEmpty) {
+        debugPrint('警告: ${photoDate.toString().split(' ')[0]}の日記が既に存在します');
+        // 重複がある場合でも作成を続行（ユーザーが複数の日記を作成したい場合もある）
+      }
+
+      final now = DateTime.now();
+      final id = _uuid.v4();
+
+      debugPrint('過去の写真から日記エントリー作成中...');
+      debugPrint('ID: $id');
+      debugPrint('写真撮影日: $photoDate');
+      debugPrint('日記作成日時: $now');
+      debugPrint('タイトル: $title');
+      debugPrint('本文長: ${content.length}文字');
+      debugPrint('写真ID数: ${photoIds.length}');
+
+      final entry = DiaryEntry(
+        id: id,
+        date: photoDate, // 写真の撮影日を日記の日付として使用
+        title: title,
+        content: content,
+        photoIds: photoIds,
+        location: location,
+        tags: tags,
+        createdAt: now, // 実際の作成日時
+        updatedAt: now,
+      );
+
+      debugPrint('Hiveに保存中...');
+      await _diaryBox!.put(entry.id, entry);
+      debugPrint('過去写真日記の保存完了');
+
+      // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
+      _generateTagsInBackgroundForPastPhoto(entry);
+
+      return entry;
+    } catch (e, stackTrace) {
+      debugPrint('過去写真日記作成エラー: $e');
+      debugPrint('スタックトレース: $stackTrace');
+      rethrow;
+    }
+  }
+
+  /// 写真の撮影日付で日記を検索
+  ///
+  /// [photoDate]: 写真の撮影日時
+  /// 戻り値: 該当する日記エントリーのリスト
+  @override
+  Future<List<DiaryEntry>> getDiaryByPhotoDate(DateTime photoDate) async {
+    if (_diaryBox == null) await _init();
+
+    final targetDate = DateTime(photoDate.year, photoDate.month, photoDate.day);
+
+    return _diaryBox!.values.where((entry) {
+      final entryDate = DateTime(
+        entry.date.year,
+        entry.date.month,
+        entry.date.day,
+      );
+      return entryDate.isAtSameMomentAs(targetDate);
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 作成日時の降順
+  }
+
+  /// 過去の写真用のバックグラウンドタグ生成
+  ///
+  /// 通常のタグ生成と異なり、過去の日付であることを考慮してタグを生成
+  void _generateTagsInBackgroundForPastPhoto(DiaryEntry entry) {
+    Future.delayed(Duration.zero, () async {
+      try {
+        debugPrint('過去写真日記のバックグラウンドタグ生成開始: ${entry.id}');
+
+        // 過去の日付であることを示すメタデータを追加
+        final daysDifference = DateTime.now().difference(entry.date).inDays;
+        String pastContext = '';
+
+        if (daysDifference == 1) {
+          pastContext = '昨日の思い出';
+        } else if (daysDifference <= 7) {
+          pastContext = '$daysDifference日前の思い出';
+        } else if (daysDifference <= 30) {
+          pastContext = '約${(daysDifference / 7).round()}週間前の思い出';
+        } else if (daysDifference <= 365) {
+          pastContext = '約${(daysDifference / 30).round()}ヶ月前の思い出';
+        } else {
+          pastContext = '約${(daysDifference / 365).round()}年前の思い出';
+        }
+
+        final tagsResult = await _aiService.generateTagsFromContent(
+          title: entry.title,
+          content: '$pastContext: ${entry.content}', // 過去のコンテキストを含める
+          date: entry.date,
+          photoCount: entry.photoIds.length,
+        );
+
+        if (tagsResult.isSuccess) {
+          if (_diaryBox != null && _diaryBox!.isOpen) {
+            final latestEntry = _diaryBox!.get(entry.id);
+            if (latestEntry != null) {
+              final updatedEntry = DiaryEntry(
+                id: latestEntry.id,
+                date: latestEntry.date,
+                title: latestEntry.title,
+                content: latestEntry.content,
+                photoIds: latestEntry.photoIds,
+                location: latestEntry.location,
+                tags: tagsResult.value,
+                createdAt: latestEntry.createdAt,
+                updatedAt: DateTime.now(),
+              );
+              await _diaryBox!.put(entry.id, updatedEntry);
+              debugPrint('過去写真日記のタグ生成完了: ${tagsResult.value}');
+            }
+          }
+        } else {
+          debugPrint('過去写真日記のタグ生成失敗: ${tagsResult.error}');
+        }
+      } catch (e) {
+        debugPrint('過去写真日記のタグ生成エラー: $e');
+      }
+    });
+  }
 }

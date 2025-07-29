@@ -48,4 +48,17 @@ abstract class DiaryServiceInterface {
     required String content,
     required List<AssetEntity> photos,
   });
+
+  /// 過去の写真から日記エントリーを作成
+  Future<DiaryEntry> createDiaryForPastPhoto({
+    required DateTime photoDate,
+    required String title,
+    required String content,
+    required List<String> photoIds,
+    String? location,
+    List<String>? tags,
+  });
+
+  /// 写真の撮影日付で日記を検索
+  Future<List<DiaryEntry>> getDiaryByPhotoDate(DateTime photoDate);
 }
