@@ -18,6 +18,13 @@ abstract class PhotoServiceInterface {
     int limit = 100,
   });
 
+  /// 指定された日付の写真を取得する
+  Future<List<AssetEntity>> getPhotosForDate(
+    DateTime date, {
+    required int offset,
+    required int limit,
+  });
+
   /// 写真のバイナリデータを取得する
   Future<List<int>?> getPhotoData(AssetEntity asset);
 

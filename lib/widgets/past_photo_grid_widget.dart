@@ -501,7 +501,7 @@ class PastPhotoGridWidget extends StatelessWidget {
     if (difference == 1) {
       return '昨日';
     } else if (difference < 7) {
-      return '${difference}日前';
+      return '$difference日前';
     } else if (difference < 30) {
       return '${(difference / 7).floor()}週間前';
     } else {

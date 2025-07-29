@@ -95,13 +95,34 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
     _pastPhotoController.setLoading(true);
 
     try {
-      // TODO: 過去の写真を読み込む処理を実装
-      // PhotoServiceの拡張メソッドを使用
-      await Future.delayed(const Duration(milliseconds: 500)); // 仮の処理
+      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+      
+      // 権限チェック
+      final hasPermission = await photoService.requestPermission();
+      debugPrint('過去の写真 - 権限ステータス: $hasPermission');
 
       if (!mounted) return;
 
-      _pastPhotoController.setPhotoAssets([]); // 暫定的に空リスト
+      _pastPhotoController.setPermission(hasPermission);
+
+      if (!hasPermission) {
+        _pastPhotoController.setLoading(false);
+        return;
+      }
+
+      // 昨日の写真を取得（テスト用）
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      final photos = await photoService.getPhotosForDate(
+        yesterday,
+        offset: 0,
+        limit: 20,
+      );
+
+      debugPrint('昨日の写真を取得: ${photos.length}枚');
+
+      if (!mounted) return;
+
+      _pastPhotoController.setPhotoAssets(photos);
       _pastPhotoController.setLoading(false);
     } catch (e) {
       debugPrint('過去の写真読み込みエラー: $e');
@@ -256,14 +277,12 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
           _buildSectionHeader(icon: Icons.history_rounded, title: '過去の写真'),
           const SizedBox(height: AppSpacing.lg),
 
-          // 過去の写真グリッド
-          PastPhotoGridWidget(
+          // 過去の写真グリッド（暫定的に既存のPhotoGridWidgetを使用）
+          PhotoGridWidget(
             controller: _pastPhotoController,
             onSelectionLimitReached: _showSelectionLimitModal,
             onUsedPhotoSelected: _showUsedPhotoModal,
-            onAccessDenied: _showAccessDeniedModal,
             onRequestPermission: _loadPastPhotos,
-            photoGroups: const [], // TODO: 実際の写真グループデータを渡す
           ),
 
           const SizedBox(height: AppSpacing.xl),
@@ -334,7 +353,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     selectedCount > 0
-                        ? '${selectedCount}枚の写真で日記を作成'
+                        ? '$selectedCount枚の写真で日記を作成'
                         : '写真を選んでください',
                     style: AppTypography.labelLarge,
                   ),

@@ -3,20 +3,20 @@
 ## 1. バックエンド実装 (Model & Service層)
 
 ### 1.1 PhotoService拡張
-- [ ] `getPhotosForDate()` メソッドの実装
-  - [ ] 指定日付の写真を取得するロジック
-  - [ ] photo_managerプラグインのフィルター機能調査
-  - [ ] 撮影日時によるフィルタリング実装
-  - [ ] タイムゾーン考慮の実装
+- [x] `getPhotosForDate()` メソッドの実装
+  - [x] 指定日付の写真を取得するロジック
+  - [x] photo_managerプラグインのフィルター機能調査
+  - [x] 撮影日時によるフィルタリング実装
+  - [x] タイムゾーン考慮の実装
 - [ ] `getAccessibleDateRange()` メソッドの実装
   - [ ] Planクラスに基づいた期間計算
   - [ ] BasicPlan: 1日前まで
   - [ ] PremiumPlan: 365日前まで
 - [ ] `isPhotoAccessible()` メソッドの実装
   - [ ] 写真の撮影日時とプランに基づくアクセス可否判定
-- [ ] ページネーション対応
-  - [ ] `getPhotosForDateRange()` with offset/limit
-  - [ ] 効率的なメモリ管理
+- [x] ページネーション対応
+  - [x] `getPhotosForDateRange()` with offset/limit
+  - [x] 効率的なメモリ管理
 
 ### 1.2 DiaryService拡張
 - [ ] `createDiaryForPastPhoto()` メソッドの追加

@@ -235,6 +235,90 @@ class PhotoService implements PhotoServiceInterface {
     }
   }
 
+  /// 指定された日付の写真を取得する
+  ///
+  /// [date]: 取得したい日付
+  /// [offset]: 取得開始位置（ページネーション用）
+  /// [limit]: 取得する写真の最大数
+  /// 戻り値: 写真アセットのリスト
+  @override
+  Future<List<AssetEntity>> getPhotosForDate(
+    DateTime date, {
+    required int offset,
+    required int limit,
+  }) async {
+    // 権限チェック
+    final bool hasPermission = await requestPermission();
+    if (!hasPermission) {
+      return [];
+    }
+
+    try {
+      // 指定日の日付範囲を計算（その日の00:00:00から23:59:59まで）
+      final DateTime startOfDay = DateTime(date.year, date.month, date.day);
+      final DateTime endOfDay = startOfDay.add(const Duration(days: 1));
+
+      debugPrint('getPhotosForDate - 日付: $date, オフセット: $offset, 制限: $limit');
+      debugPrint('検索範囲: $startOfDay - $endOfDay');
+
+      // 写真を取得
+      final FilterOptionGroup filterOption = FilterOptionGroup(
+        orders: [const OrderOption()], // 作成日時の降順（新しい順）
+        createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
+      );
+
+      // アルバムを取得
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        filterOption: filterOption,
+      );
+
+      debugPrint('取得したアルバム数: ${albums.length}');
+
+      if (albums.isEmpty) {
+        debugPrint('指定日のアルバムが見つかりません');
+        return [];
+      }
+
+      // 最近の写真アルバムから写真を取得（ページネーション対応）
+      final AssetPathEntity album = albums.first;
+      debugPrint('アルバム名: ${album.name}');
+
+      // アルバム内の総写真数を確認
+      final int totalCount = await album.assetCountAsync;
+      debugPrint('アルバム内の総写真数: $totalCount');
+
+      // オフセットが総数を超えている場合は空のリストを返す
+      if (offset >= totalCount) {
+        debugPrint('オフセット($offset)が総数($totalCount)を超えています');
+        return [];
+      }
+
+      // 実際に取得可能な数を計算
+      final int actualLimit = (offset + limit > totalCount)
+          ? totalCount - offset
+          : limit;
+
+      debugPrint('実際の取得範囲: $offset - ${offset + actualLimit}');
+
+      final List<AssetEntity> assets = await album.getAssetListRange(
+        start: offset,
+        end: offset + actualLimit,
+      );
+
+      debugPrint('取得した写真数: ${assets.length}');
+
+      // デバッグ用：取得した写真の作成日時を表示
+      for (int i = 0; i < assets.length && i < 3; i++) {
+        debugPrint('写真${i + 1}: ${assets[i].createDateTime}');
+      }
+
+      return assets;
+    } catch (e) {
+      debugPrint('getPhotosForDate エラー: $e');
+      return [];
+    }
+  }
+
   /// 特定の日付の写真を取得する（後方互換性のため保持）
   ///
   /// [date]: 取得したい日付
@@ -244,14 +328,7 @@ class PhotoService implements PhotoServiceInterface {
     DateTime date, {
     int limit = AppConstants.defaultPhotoLimit,
   }) async {
-    final DateTime startOfDay = DateTime(date.year, date.month, date.day);
-    final DateTime endOfDay = startOfDay.add(const Duration(days: 1));
-
-    return await getPhotosInDateRange(
-      startDate: startOfDay,
-      endDate: endOfDay,
-      limit: limit,
-    );
+    return await getPhotosForDate(date, offset: 0, limit: limit);
   }
 
   /// Limited Photo Access時に写真選択画面を表示
