@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../models/diary_entry.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
+import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../widgets/photo_grid_widget.dart';
@@ -47,6 +49,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
     });
 
     _loadTodayPhotos();
+    _loadUsedPhotoIds();
   }
 
   @override
@@ -131,6 +134,29 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         _pastPhotoController.setPhotoAssets([]);
         _pastPhotoController.setLoading(false);
       }
+    }
+  }
+
+  /// 使用済み写真IDを収集して両方のコントローラーに設定
+  Future<void> _loadUsedPhotoIds() async {
+    try {
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final allEntries = await diaryService.getSortedDiaryEntries();
+
+      // 使用済み写真IDを収集
+      final usedIds = <String>{};
+      for (final entry in allEntries) {
+        usedIds.addAll(entry.photoIds);
+      }
+
+      // 両方のコントローラーに設定
+      _todayPhotoController.setUsedPhotoIds(usedIds);
+      _pastPhotoController.setUsedPhotoIds(usedIds);
+
+      debugPrint('使用済み写真ID数: ${usedIds.length}');
+    } catch (e) {
+      debugPrint('使用済み写真ID読み込みエラー: $e');
     }
   }
 
@@ -393,6 +419,8 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       ).customRoute(),
     ).then((_) {
       if (mounted) {
+        // 日記作成後、使用済み写真IDを再読み込みして両方のコントローラーを更新
+        _loadUsedPhotoIds();
         Navigator.pop(context);
       }
     });
