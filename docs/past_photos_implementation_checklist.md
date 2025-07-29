@@ -19,12 +19,12 @@
   - [x] 効率的なメモリ管理
 
 ### 1.2 DiaryService拡張
-- [ ] `createDiaryForPastPhoto()` メソッドの追加
-  - [ ] 過去の日付での日記作成ロジック
-  - [ ] 既存の日記との重複チェック
-  - [ ] 作成日時と写真撮影日時の管理
-- [ ] `getDiaryByPhotoDate()` メソッドの追加
-  - [ ] 写真の撮影日付で日記を検索
+- [x] `createDiaryForPastPhoto()` メソッドの追加
+  - [x] 過去の日付での日記作成ロジック
+  - [x] 既存の日記との重複チェック
+  - [x] 作成日時と写真撮影日時の管理
+- [x] `getDiaryByPhotoDate()` メソッドの追加
+  - [x] 写真の撮影日付で日記を検索
 
 ### 1.3 AiService拡張
 - [ ] プロンプト生成の調整
