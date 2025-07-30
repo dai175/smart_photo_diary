@@ -222,7 +222,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   Widget _buildTodayPhotosTab() {
-    return Padding(
+    return SingleChildScrollView(
       padding: AppSpacing.cardPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
