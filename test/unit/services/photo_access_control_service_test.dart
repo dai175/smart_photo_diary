@@ -22,7 +22,9 @@ void main() {
         final expectedDate = today.subtract(const Duration(days: 1));
 
         // Act
-        final accessibleDate = accessControlService.getAccessibleDateForPlan(plan);
+        final accessibleDate = accessControlService.getAccessibleDateForPlan(
+          plan,
+        );
 
         // Assert
         expect(accessibleDate.year, equals(expectedDate.year));
@@ -41,7 +43,9 @@ void main() {
         final expectedDate = today.subtract(const Duration(days: 365));
 
         // Act
-        final accessibleDate = accessControlService.getAccessibleDateForPlan(plan);
+        final accessibleDate = accessControlService.getAccessibleDateForPlan(
+          plan,
+        );
 
         // Assert
         expect(accessibleDate.year, equals(expectedDate.year));
@@ -57,7 +61,9 @@ void main() {
         final expectedDate = today.subtract(const Duration(days: 365));
 
         // Act
-        final accessibleDate = accessControlService.getAccessibleDateForPlan(plan);
+        final accessibleDate = accessControlService.getAccessibleDateForPlan(
+          plan,
+        );
 
         // Assert
         expect(accessibleDate.year, equals(expectedDate.year));
@@ -74,7 +80,10 @@ void main() {
         final photoDate = DateTime.now();
 
         // Act
-        final isAccessible = accessControlService.isPhotoAccessible(photoDate, basicPlan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          photoDate,
+          basicPlan,
+        );
 
         // Assert
         expect(isAccessible, isTrue);
@@ -85,7 +94,10 @@ void main() {
         final photoDate = DateTime.now().subtract(const Duration(days: 1));
 
         // Act
-        final isAccessible = accessControlService.isPhotoAccessible(photoDate, basicPlan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          photoDate,
+          basicPlan,
+        );
 
         // Assert
         expect(isAccessible, isTrue);
@@ -96,7 +108,10 @@ void main() {
         final photoDate = DateTime.now().subtract(const Duration(days: 2));
 
         // Act
-        final isAccessible = accessControlService.isPhotoAccessible(photoDate, basicPlan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          photoDate,
+          basicPlan,
+        );
 
         // Assert
         expect(isAccessible, isFalse);
@@ -109,7 +124,10 @@ void main() {
         final boundaryDate = today.subtract(const Duration(days: 1));
 
         // Act
-        final isAccessible = accessControlService.isPhotoAccessible(boundaryDate, basicPlan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          boundaryDate,
+          basicPlan,
+        );
 
         // Assert
         expect(isAccessible, isTrue);
@@ -119,11 +137,15 @@ void main() {
         // Arrange
         final now = DateTime.now();
         // 1日前の23:59:59
-        final photoDate = now.subtract(const Duration(days: 1))
+        final photoDate = now
+            .subtract(const Duration(days: 1))
             .add(const Duration(hours: 23, minutes: 59, seconds: 59));
 
         // Act
-        final isAccessible = accessControlService.isPhotoAccessible(photoDate, basicPlan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          photoDate,
+          basicPlan,
+        );
 
         // Assert
         expect(isAccessible, isTrue);
@@ -139,8 +161,14 @@ void main() {
         final photoDate = DateTime.now().subtract(const Duration(days: 364));
 
         // Act
-        final isAccessibleMonthly = accessControlService.isPhotoAccessible(photoDate, premiumMonthlyPlan);
-        final isAccessibleYearly = accessControlService.isPhotoAccessible(photoDate, premiumYearlyPlan);
+        final isAccessibleMonthly = accessControlService.isPhotoAccessible(
+          photoDate,
+          premiumMonthlyPlan,
+        );
+        final isAccessibleYearly = accessControlService.isPhotoAccessible(
+          photoDate,
+          premiumYearlyPlan,
+        );
 
         // Assert
         expect(isAccessibleMonthly, isTrue);
@@ -152,8 +180,14 @@ void main() {
         final photoDate = DateTime.now().subtract(const Duration(days: 365));
 
         // Act
-        final isAccessibleMonthly = accessControlService.isPhotoAccessible(photoDate, premiumMonthlyPlan);
-        final isAccessibleYearly = accessControlService.isPhotoAccessible(photoDate, premiumYearlyPlan);
+        final isAccessibleMonthly = accessControlService.isPhotoAccessible(
+          photoDate,
+          premiumMonthlyPlan,
+        );
+        final isAccessibleYearly = accessControlService.isPhotoAccessible(
+          photoDate,
+          premiumYearlyPlan,
+        );
 
         // Assert
         expect(isAccessibleMonthly, isTrue);
@@ -165,8 +199,14 @@ void main() {
         final photoDate = DateTime.now().subtract(const Duration(days: 366));
 
         // Act
-        final isAccessibleMonthly = accessControlService.isPhotoAccessible(photoDate, premiumMonthlyPlan);
-        final isAccessibleYearly = accessControlService.isPhotoAccessible(photoDate, premiumYearlyPlan);
+        final isAccessibleMonthly = accessControlService.isPhotoAccessible(
+          photoDate,
+          premiumMonthlyPlan,
+        );
+        final isAccessibleYearly = accessControlService.isPhotoAccessible(
+          photoDate,
+          premiumYearlyPlan,
+        );
 
         // Assert
         expect(isAccessibleMonthly, isFalse);
@@ -178,7 +218,10 @@ void main() {
         final futureDate = DateTime.now().add(const Duration(days: 1));
 
         // Act
-        final isAccessibleMonthly = accessControlService.isPhotoAccessible(futureDate, premiumMonthlyPlan);
+        final isAccessibleMonthly = accessControlService.isPhotoAccessible(
+          futureDate,
+          premiumMonthlyPlan,
+        );
 
         // Assert
         expect(isAccessibleMonthly, isTrue);
@@ -191,7 +234,9 @@ void main() {
         final plan = BasicPlan();
 
         // Act
-        final description = accessControlService.getAccessRangeDescription(plan);
+        final description = accessControlService.getAccessRangeDescription(
+          plan,
+        );
 
         // Assert
         expect(description, equals('昨日まで'));
@@ -203,8 +248,10 @@ void main() {
         final yearlyPlan = PremiumYearlyPlan();
 
         // Act
-        final monthlyDescription = accessControlService.getAccessRangeDescription(monthlyPlan);
-        final yearlyDescription = accessControlService.getAccessRangeDescription(yearlyPlan);
+        final monthlyDescription = accessControlService
+            .getAccessRangeDescription(monthlyPlan);
+        final yearlyDescription = accessControlService
+            .getAccessRangeDescription(yearlyPlan);
 
         // Assert
         expect(monthlyDescription, equals('1年前まで'));
@@ -232,7 +279,10 @@ void main() {
         final now = DateTime.now();
         final daysDifference = now.difference(photoDate).inDays;
         final shouldBeAccessible = daysDifference <= plan.pastPhotoAccessDays;
-        final isAccessible = accessControlService.isPhotoAccessible(photoDate, plan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          photoDate,
+          plan,
+        );
 
         // Assert
         expect(isAccessible, equals(shouldBeAccessible));
@@ -244,7 +294,10 @@ void main() {
         final photoDate = DateTime.now().subtract(const Duration(hours: 25));
 
         // Act
-        final isAccessible = accessControlService.isPhotoAccessible(photoDate, plan);
+        final isAccessible = accessControlService.isPhotoAccessible(
+          photoDate,
+          plan,
+        );
 
         // Assert
         // Should be accessible as it's within 2 days
@@ -255,11 +308,17 @@ void main() {
         // Arrange
         final now = DateTime.now();
         final midnight = DateTime(now.year, now.month, now.day);
-        final justBeforeMidnight = midnight.subtract(const Duration(seconds: 1));
+        final justBeforeMidnight = midnight.subtract(
+          const Duration(seconds: 1),
+        );
 
         // Act
-        final isAccessibleMidnight = accessControlService.isPhotoAccessible(midnight, plan);
-        final isAccessibleBeforeMidnight = accessControlService.isPhotoAccessible(justBeforeMidnight, plan);
+        final isAccessibleMidnight = accessControlService.isPhotoAccessible(
+          midnight,
+          plan,
+        );
+        final isAccessibleBeforeMidnight = accessControlService
+            .isPhotoAccessible(justBeforeMidnight, plan);
 
         // Assert
         expect(isAccessibleMidnight, isTrue);

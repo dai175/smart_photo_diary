@@ -3,7 +3,7 @@ import '../models/plans/plan.dart';
 import 'interfaces/photo_access_control_service_interface.dart';
 
 /// 写真アクセス制御サービスの実装
-/// 
+///
 /// プランに基づいた写真へのアクセス可否を判定する
 class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
   // シングルトンパターン
@@ -22,14 +22,18 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
     final now = DateTime.now();
     // 今日の0時0分0秒を基準にする
     final today = DateTime(now.year, now.month, now.day);
-    
+
     // プランのアクセス可能日数分だけ過去に遡る
-    final accessibleDate = today.subtract(Duration(days: plan.pastPhotoAccessDays));
-    
-    debugPrint('アクセス可能範囲計算: プラン=${plan.displayName}, '
-        '過去${plan.pastPhotoAccessDays}日前まで, '
-        '最古アクセス可能日=$accessibleDate');
-    
+    final accessibleDate = today.subtract(
+      Duration(days: plan.pastPhotoAccessDays),
+    );
+
+    debugPrint(
+      'アクセス可能範囲計算: プラン=${plan.displayName}, '
+      '過去${plan.pastPhotoAccessDays}日前まで, '
+      '最古アクセス可能日=$accessibleDate',
+    );
+
     return accessibleDate;
   }
 
@@ -37,19 +41,26 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
   @override
   bool isPhotoAccessible(DateTime photoDate, Plan plan) {
     // 日付のみで比較（時刻は考慮しない）
-    final photoDateOnly = DateTime(photoDate.year, photoDate.month, photoDate.day);
+    final photoDateOnly = DateTime(
+      photoDate.year,
+      photoDate.month,
+      photoDate.day,
+    );
     final accessibleDate = getAccessibleDateForPlan(plan);
-    
+
     // 写真の日付がアクセス可能日以降であればアクセス可能
-    final isAccessible = photoDateOnly.isAfter(accessibleDate) || 
-                        photoDateOnly.isAtSameMomentAs(accessibleDate);
-    
-    debugPrint('写真アクセス判定: '
-        'プラン=${plan.displayName}, '
-        '撮影日=$photoDateOnly, '
-        '最古アクセス可能日=$accessibleDate, '
-        '結果=$isAccessible');
-    
+    final isAccessible =
+        photoDateOnly.isAfter(accessibleDate) ||
+        photoDateOnly.isAtSameMomentAs(accessibleDate);
+
+    debugPrint(
+      '写真アクセス判定: '
+      'プラン=${plan.displayName}, '
+      '撮影日=$photoDateOnly, '
+      '最古アクセス可能日=$accessibleDate, '
+      '結果=$isAccessible',
+    );
+
     return isAccessible;
   }
 
@@ -57,7 +68,7 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
   @override
   String getAccessRangeDescription(Plan plan) {
     final days = plan.pastPhotoAccessDays;
-    
+
     if (days == 1) {
       return '昨日まで';
     } else if (days == 7) {

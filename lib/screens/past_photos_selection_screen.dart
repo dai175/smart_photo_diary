@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../controllers/photo_selection_controller.dart';
-import '../models/diary_entry.dart';
 import '../models/plans/plan.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
@@ -10,8 +9,8 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../widgets/photo_grid_widget.dart';
-import '../widgets/past_photo_grid_widget.dart';
 import '../widgets/prompt_selection_modal.dart';
+import '../widgets/past_photo_calendar_widget.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -40,6 +39,9 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
   // アクセス制御関連
   Plan? _currentPlan;
   DateTime? _accessibleDate;
+
+  // ビューモード（グリッド or カレンダー）
+  bool _isCalendarView = false;
 
   PhotoSelectionController get activeController =>
       _tabController.index == 0 ? _todayPhotoController : _pastPhotoController;
@@ -125,7 +127,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       // プランに基づいて過去の写真を取得（今日は除外）
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      
+
       DateTime startDate;
       if (_currentPlan != null && _accessibleDate != null) {
         startDate = _accessibleDate!;
@@ -133,17 +135,19 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         // フォールバック: 昨日の00:00:00から取得
         startDate = today.subtract(const Duration(days: 1));
       }
-      
+
       // 今日の00:00:00を終了日として設定（今日は除外）
       final endDate = today;
-      
+
       final photos = await photoService.getPhotosInDateRange(
         startDate: startDate,
         endDate: endDate,
         limit: 50,
       );
 
-      debugPrint('過去の写真を取得: ${photos.length}枚 (${startDate.toString().split(' ')[0]} - ${endDate.toString().split(' ')[0]})');
+      debugPrint(
+        '過去の写真を取得: ${photos.length}枚 (${startDate.toString().split(' ')[0]} - ${endDate.toString().split(' ')[0]})',
+      );
 
       if (!mounted) return;
 
@@ -194,14 +198,16 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
       final planResult = await subscriptionService.getCurrentPlanClass();
       debugPrint('プラン取得結果: ${planResult.isSuccess ? "成功" : "失敗"}');
-      
+
       if (planResult.isFailure) {
         debugPrint('プラン取得エラー: ${planResult.error}');
         return;
       }
 
       final plan = planResult.value;
-      final accessibleDate = accessControlService.getAccessibleDateForPlan(plan);
+      final accessibleDate = accessControlService.getAccessibleDateForPlan(
+        plan,
+      );
 
       debugPrint('プラン: ${plan.displayName}, タイプ: ${plan.runtimeType}');
       debugPrint('アクセス可能日付: $accessibleDate');
@@ -243,6 +249,12 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
           onTap: (index) {
             if (index == 1 && _pastPhotoController.photoAssets.isEmpty) {
               _loadPastPhotos();
+            }
+            // タブを切り替えたらカレンダービューをリセット
+            if (index == 0) {
+              setState(() {
+                _isCalendarView = false;
+              });
             }
           },
         ),
@@ -361,20 +373,57 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader(icon: Icons.history_rounded, title: '過去の写真'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSectionHeader(icon: Icons.history_rounded, title: '過去の写真'),
+              // ビュー切り替えボタン
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isCalendarView = !_isCalendarView;
+                  });
+                },
+                icon: Icon(
+                  _isCalendarView
+                      ? Icons.grid_view_rounded
+                      : Icons.calendar_month_rounded,
+                  color: AppColors.primary,
+                ),
+                tooltip: _isCalendarView ? 'グリッド表示' : 'カレンダー表示',
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.md),
 
           // プランに基づくアクセス範囲の説明
           _buildAccessRangeInfo(),
           const SizedBox(height: AppSpacing.lg),
 
-          // 過去の写真グリッド（暫定的に既存のPhotoGridWidgetを使用）
-          PhotoGridWidget(
-            controller: _pastPhotoController,
-            onSelectionLimitReached: _showSelectionLimitModal,
-            onUsedPhotoSelected: _showUsedPhotoModal,
-            onRequestPermission: _loadPastPhotos,
-          ),
+          // ビューモードに応じて表示を切り替え
+          if (_isCalendarView)
+            PastPhotoCalendarWidget(
+              currentPlan: _currentPlan,
+              accessibleDate: _accessibleDate,
+              usedPhotoIds: _pastPhotoController.usedPhotoIds,
+              onPhotosSelected: (photos) {
+                // カレンダーで選択された日付の写真を設定
+                _pastPhotoController.setPhotoAssets(photos);
+
+                // 自動的にグリッドビューに切り替え
+                setState(() {
+                  _isCalendarView = false;
+                });
+              },
+            )
+          else
+            // 過去の写真グリッド
+            PhotoGridWidget(
+              controller: _pastPhotoController,
+              onSelectionLimitReached: _showSelectionLimitModal,
+              onUsedPhotoSelected: _showUsedPhotoModal,
+              onRequestPermission: _loadPastPhotos,
+            ),
 
           const SizedBox(height: AppSpacing.xl),
         ],
@@ -394,7 +443,7 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
   Widget _buildAccessRangeInfo() {
     debugPrint('_buildAccessRangeInfo: _currentPlan = $_currentPlan');
-    
+
     if (_currentPlan == null) {
       // プラン情報がない場合もデバッグメッセージを表示
       return Container(
@@ -402,17 +451,11 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         decoration: BoxDecoration(
           color: AppColors.error.withValues(alpha: 0.1),
           borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: AppColors.error.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: AppColors.error,
-              size: 20,
-            ),
+            Icon(Icons.error_outline, color: AppColors.error, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
@@ -429,19 +472,21 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
     final accessControlService =
         ServiceRegistration.get<PhotoAccessControlServiceInterface>();
-    final rangeDescription = accessControlService.getAccessRangeDescription(_currentPlan!);
-    
+    final rangeDescription = accessControlService.getAccessRangeDescription(
+      _currentPlan!,
+    );
+
     final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
-    
+
     return Container(
       padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: isBasic 
+        color: isBasic
             ? AppColors.warning.withValues(alpha: 0.1)
             : AppColors.success.withValues(alpha: 0.1),
         borderRadius: AppSpacing.cardRadius,
         border: Border.all(
-          color: isBasic 
+          color: isBasic
               ? AppColors.warning.withValues(alpha: 0.3)
               : AppColors.success.withValues(alpha: 0.3),
         ),
