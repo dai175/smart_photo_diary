@@ -34,7 +34,7 @@ class PhotoGridWidget extends StatelessWidget {
         return Column(
           children: [
             _buildPhotoGrid(context),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.sm),
             _buildSelectionCounter(context),
           ],
         );
