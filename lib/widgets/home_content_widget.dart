@@ -119,25 +119,32 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   Widget _buildMainContent(BuildContext context) {
-    return ListView(
-      padding: AppSpacing.screenPadding,
-      children: [
-        FadeInWidget(
-          delay: const Duration(milliseconds: 100),
-          child: _buildPhotoSection(context),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        FadeInWidget(
-          delay: const Duration(milliseconds: 200),
-          child: _buildCreateDiaryButton(context),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        FadeInWidget(
-          delay: const Duration(milliseconds: 300),
-          child: _buildRecentDiariesSection(context),
-        ),
-        const SizedBox(height: AppConstants.bottomNavPadding),
-      ],
+    return AnimatedBuilder(
+      animation: widget.tabController,
+      builder: (context, child) {
+        return ListView(
+          padding: AppSpacing.screenPadding,
+          children: [
+            FadeInWidget(
+              delay: const Duration(milliseconds: 100),
+              child: _buildPhotoSection(context),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // カレンダー表示時は日記作成ボタンを非表示
+            if (!(widget.tabController.index == 1 && _isCalendarView))
+              FadeInWidget(
+                delay: const Duration(milliseconds: 200),
+                child: _buildCreateDiaryButton(context),
+              ),
+            const SizedBox(height: AppSpacing.xl),
+            FadeInWidget(
+              delay: const Duration(milliseconds: 300),
+              child: _buildRecentDiariesSection(context),
+            ),
+            const SizedBox(height: AppConstants.bottomNavPadding),
+          ],
+        );
+      },
     );
   }
 
@@ -197,9 +204,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           ),
           // タブビュー
           SizedBox(
-            height: widget.tabController.index == 1 && _isCalendarView
-                ? 600
-                : 480,
+            height: 480,
             child: TabBarView(
               controller: widget.tabController,
               children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],

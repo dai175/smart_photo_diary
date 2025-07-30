@@ -442,7 +442,10 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                 holidayTextStyle: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                 ),
+                cellMargin: const EdgeInsets.all(2),
+                cellPadding: const EdgeInsets.all(0),
               ),
+              rowHeight: 48,
               headerStyle: HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
@@ -481,7 +484,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
 
         // 凡例
         Container(
-          margin: const EdgeInsets.only(top: AppSpacing.md),
+          margin: const EdgeInsets.only(top: AppSpacing.sm),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
