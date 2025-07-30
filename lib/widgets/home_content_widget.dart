@@ -199,7 +199,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           SizedBox(
             height: widget.tabController.index == 1 && _isCalendarView
                 ? 600
-                : 400,
+                : 480,
             child: TabBarView(
               controller: widget.tabController,
               children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],
@@ -276,6 +276,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onSelectionLimitReached: widget.onSelectionLimitReached,
               onUsedPhotoSelected: widget.onUsedPhotoSelected,
               onRequestPermission: _loadPastPhotos,
+              onDifferentDateSelected: _showDifferentDateDialog,
             ),
         ],
       ),
@@ -653,6 +654,26 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
             ),
+        ],
+      ),
+    );
+  }
+  
+  /// 異なる日付の写真選択時のダイアログ
+  void _showDifferentDateDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        icon: Icons.info_outline_rounded,
+        iconColor: AppColors.info,
+        title: '同じ日の写真を選んでください',
+        message: '過去の写真から日記を作成する場合は、同じ日付の写真のみを選択できます。',
+        actions: [
+          CustomDialogAction(
+            text: 'OK',
+            isPrimary: true,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ],
       ),
     );

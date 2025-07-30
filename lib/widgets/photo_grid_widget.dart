@@ -15,6 +15,7 @@ class PhotoGridWidget extends StatelessWidget {
   final VoidCallback? onSelectionLimitReached;
   final VoidCallback? onUsedPhotoSelected;
   final VoidCallback? onRequestPermission;
+  final VoidCallback? onDifferentDateSelected;
 
   const PhotoGridWidget({
     super.key,
@@ -22,6 +23,7 @@ class PhotoGridWidget extends StatelessWidget {
     this.onSelectionLimitReached,
     this.onUsedPhotoSelected,
     this.onRequestPermission,
+    this.onDifferentDateSelected,
   });
 
   @override
@@ -32,7 +34,7 @@ class PhotoGridWidget extends StatelessWidget {
         return Column(
           children: [
             _buildPhotoGrid(context),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             _buildSelectionCounter(context),
           ],
         );
@@ -56,7 +58,7 @@ class PhotoGridWidget extends StatelessWidget {
             mainAxisSpacing: AppSpacing.sm,
             childAspectRatio: 1.0,
           ),
-          itemCount: 6,
+          itemCount: 9,
           itemBuilder: (context, index) => const CardShimmer(),
         ),
       );
@@ -74,10 +76,9 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildPermissionRequest() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
           Container(
             padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
@@ -102,47 +103,45 @@ class PhotoGridWidget extends StatelessWidget {
             text: AppConstants.requestPermissionButton,
             icon: Icons.camera_alt,
           ),
-        ],
-      ),
+      ],
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: AppSpacing.cardPadding,
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-              borderRadius: AppSpacing.cardRadius,
-            ),
-            child: Icon(
-              Icons.photo_library_outlined,
-              size: AppSpacing.iconLg,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          padding: AppSpacing.cardPadding,
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+            borderRadius: AppSpacing.cardRadius,
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            AppConstants.noPhotosMessage,
-            style: AppTypography.bodyMedium.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
+          child: Icon(
+            Icons.photo_library_outlined,
+            size: AppSpacing.iconLg,
+            color: Theme.of(context).colorScheme.primary,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          AppConstants.noPhotosMessage,
+          style: AppTypography.bodyMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
   Widget _buildGrid(BuildContext context) {
     final crossAxisCount = _getCrossAxisCount(context);
 
-    return Center(
+    return Align(
+      alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: _getMaxGridWidth(context)),
         child: GridView.builder(
@@ -381,8 +380,25 @@ class PhotoGridWidget extends StatelessWidget {
       return;
     }
 
+    // 現在の選択状態を保存
+    final wasSelected = controller.selected[index];
+    
+    // 選択解除の場合は制限チェック不要
+    if (wasSelected) {
+      controller.toggleSelect(index);
+      return;
+    }
+
+    // 選択可能かチェック
     if (!controller.canSelectPhoto(index)) {
-      onSelectionLimitReached?.call();
+      // 選択上限に達している場合
+      if (controller.selectedCount >= 5) {
+        onSelectionLimitReached?.call();
+      } 
+      // 日付が異なる場合（日付制限が有効かつ選択済み写真がある場合）
+      else if (onDifferentDateSelected != null) {
+        onDifferentDateSelected!();
+      }
       return;
     }
 
@@ -414,9 +430,9 @@ class PhotoGridWidget extends StatelessWidget {
     final spacing = AppSpacing.sm * (crossAxisCount - 1);
     final itemWidth = (availableWidth - spacing) / crossAxisCount;
 
-    // アイテムのアスペクト比を1:1として、2行分の高さを計算
+    // アイテムのアスペクト比を1:1として、3行分の高さを計算
     final rowHeight = itemWidth;
-    final totalHeight = rowHeight * 2 + AppSpacing.sm; // 2行 + 間のスペース
+    final totalHeight = rowHeight * 3 + AppSpacing.sm * 2; // 3行 + 間のスペース
 
     return totalHeight;
   }
