@@ -18,6 +18,7 @@ import '../ui/components/animated_button.dart';
 import '../ui/components/custom_dialog.dart';
 import '../ui/animations/page_transitions.dart';
 import '../utils/prompt_category_utils.dart';
+import '../utils/upgrade_dialog_utils.dart';
 
 /// 過去の写真選択画面（タブ付き）
 class PastPhotosSelectionScreen extends StatefulWidget {
@@ -113,7 +114,6 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
       // 権限チェック
       final hasPermission = await photoService.requestPermission();
-      debugPrint('過去の写真 - 権限ステータス: $hasPermission');
 
       if (!mounted) return;
 
@@ -145,16 +145,11 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         limit: 50,
       );
 
-      debugPrint(
-        '過去の写真を取得: ${photos.length}枚 (${startDate.toString().split(' ')[0]} - ${endDate.toString().split(' ')[0]})',
-      );
-
       if (!mounted) return;
 
       _pastPhotoController.setPhotoAssets(photos);
       _pastPhotoController.setLoading(false);
     } catch (e) {
-      debugPrint('過去の写真読み込みエラー: $e');
       if (mounted) {
         _pastPhotoController.setPhotoAssets([]);
         _pastPhotoController.setLoading(false);
@@ -178,29 +173,22 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       // 両方のコントローラーに設定
       _todayPhotoController.setUsedPhotoIds(usedIds);
       _pastPhotoController.setUsedPhotoIds(usedIds);
-
-      debugPrint('使用済み写真ID数: ${usedIds.length}');
-    } catch (e) {
-      debugPrint('使用済み写真ID読み込みエラー: $e');
+    } catch (_) {
+      // エラーは無視してデフォルト値を使用
     }
   }
 
   /// 現在のプランとアクセス可能日付を読み込み
   Future<void> _loadCurrentPlan() async {
-    debugPrint('=== _loadCurrentPlan 開始 ===');
     try {
       final subscriptionService =
           await ServiceRegistration.getAsync<ISubscriptionService>();
       final accessControlService =
           ServiceRegistration.get<PhotoAccessControlServiceInterface>();
 
-      debugPrint('サービス取得完了');
-
       final planResult = await subscriptionService.getCurrentPlanClass();
-      debugPrint('プラン取得結果: ${planResult.isSuccess ? "成功" : "失敗"}');
 
       if (planResult.isFailure) {
-        debugPrint('プラン取得エラー: ${planResult.error}');
         return;
       }
 
@@ -209,21 +197,15 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
         plan,
       );
 
-      debugPrint('プラン: ${plan.displayName}, タイプ: ${plan.runtimeType}');
-      debugPrint('アクセス可能日付: $accessibleDate');
-
       if (mounted) {
         setState(() {
           _currentPlan = plan;
           _accessibleDate = accessibleDate;
         });
-        debugPrint('setState完了: _currentPlan = $_currentPlan');
       }
-    } catch (e) {
-      debugPrint('プラン情報読み込みエラー: $e');
-      debugPrint('エラースタックトレース: ${StackTrace.current}');
+    } catch (_) {
+      // エラーは無視してデフォルト値を使用
     }
-    debugPrint('=== _loadCurrentPlan 終了 ===');
   }
 
   @override
@@ -442,8 +424,6 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
   }
 
   Widget _buildAccessRangeInfo() {
-    debugPrint('_buildAccessRangeInfo: _currentPlan = $_currentPlan');
-
     if (_currentPlan == null) {
       // プラン情報がない場合もデバッグメッセージを表示
       return Container(
@@ -676,9 +656,9 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
             'この写真にアクセスするには\nプレミアムプランが必要です。\n\nプレミアムプランなら1年前までの\n写真から日記を作成できます。',
         confirmText: 'プレミアムを見る',
         cancelText: '閉じる',
-        onConfirm: () {
+        onConfirm: () async {
           Navigator.of(context).pop();
-          // TODO: プレミアムプラン購入画面に遷移
+          await UpgradeDialogUtils.showUpgradeDialog(context);
         },
         onCancel: () => Navigator.of(context).pop(),
       ),

@@ -488,8 +488,7 @@ class PastPhotoGridWidget extends StatelessWidget {
       return;
     }
 
-    // TODO: 写真選択ロジックをPhotoSelectionControllerに実装
-    // controller.toggleSelectPhoto(photo);
+    // 写真選択ロジックは呼び出し元で実装
   }
 
   String _formatDateHeader(DateTime date) {

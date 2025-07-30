@@ -9,6 +9,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
+import '../utils/upgrade_dialog_utils.dart';
 
 /// 過去の写真カレンダーウィジェット
 class PastPhotoCalendarWidget extends StatefulWidget {
@@ -104,7 +105,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('写真数読み込みエラー: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -136,7 +136,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         widget.onPhotosSelected(photos);
       }
     } catch (e) {
-      debugPrint('写真読み込みエラー: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -192,8 +191,8 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       setState(() {
         _diaryDates = dates;
       });
-    } catch (e) {
-      debugPrint('日記日付読み込みエラー: $e');
+    } catch (_) {
+      // エラーは無視してデフォルト値を使用
     }
   }
 
@@ -563,9 +562,11 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
             child: const Text('閉じる'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // TODO: プレミアムプラン購入画面へ遷移
+              if (context.mounted) {
+                await UpgradeDialogUtils.showUpgradeDialog(context);
+              }
             },
             child: const Text('プレミアムを見る'),
           ),

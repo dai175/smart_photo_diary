@@ -179,10 +179,10 @@
 - [ ] APIドキュメントの更新
 
 ### 7.2 コード品質
-- [ ] `fvm flutter analyze` でのエラーゼロ確認
-- [ ] `fvm dart format .` でのフォーマット
-- [ ] 不要なprint文の削除
-- [ ] TODOコメントの解決
+- [x] `fvm flutter analyze` でのエラーゼロ確認
+- [x] `fvm dart format .` でのフォーマット
+- [x] 不要なprint文の削除
+- [x] TODOコメントの解決
 
 ## 8. リリース準備
 
