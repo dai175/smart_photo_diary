@@ -19,6 +19,8 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../models/plans/basic_plan.dart';
 import '../models/writing_prompt.dart';
+import '../services/logging_service.dart';
+import '../core/errors/error_handler.dart';
 import '../utils/prompt_category_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
 
@@ -297,8 +299,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         navigator.pop();
       }
     } catch (e, stackTrace) {
-      debugPrint('日記保存失敗: $e');
-      debugPrint('スタックトレース: $stackTrace');
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '日記保存');
+      loggingService.error(
+        '日記の保存に失敗しました',
+        context: 'DiaryPreviewScreen._saveDiaryEntry',
+        error: appError,
+        stackTrace: stackTrace,
+      );
 
       if (mounted) {
         setState(() {
@@ -358,7 +366,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
       }
     } catch (e) {
-      debugPrint('使用量制限ダイアログ表示エラー: $e');
+      final loggingService = await LoggingService.getInstance();
+      loggingService.warning(
+        '使用量制限ダイアログ表示エラー',
+        context: 'DiaryPreviewScreen._showUsageLimitDialog',
+        data: e.toString(),
+      );
       // フォールバック: 基本的なエラーダイアログ
       if (mounted) {
         await showDialog<void>(

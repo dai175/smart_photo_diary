@@ -19,6 +19,9 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/page_transitions.dart';
 import '../utils/prompt_category_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../services/logging_service.dart';
+import '../core/errors/error_handler.dart';
+import '../ui/error_display/error_display_service.dart';
 
 /// 過去の写真選択画面（タブ付き）
 class PastPhotosSelectionScreen extends StatefulWidget {
@@ -86,6 +89,12 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
 
       if (!hasPermission) {
         _todayPhotoController.setLoading(false);
+        // 権限がない場合はユーザーに通知
+        final loggingService = await LoggingService.getInstance();
+        loggingService.info(
+          '写真アクセス権限が拒否されました',
+          context: 'PastPhotosSelectionScreen',
+        );
         return;
       }
 
@@ -96,10 +105,23 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       _todayPhotoController.setPhotoAssets(photos);
       _todayPhotoController.setLoading(false);
     } catch (e) {
-      debugPrint('写真読み込みエラー: $e');
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '今日の写真読み込み');
+      loggingService.error(
+        '今日の写真読み込みエラー',
+        context: 'PastPhotosSelectionScreen._loadTodayPhotos',
+        error: appError,
+      );
+
       if (mounted) {
         _todayPhotoController.setPhotoAssets([]);
         _todayPhotoController.setLoading(false);
+
+        // ユーザーにエラーを通知
+        ErrorDisplayService().showError(
+          context,
+          appError,
+        );
       }
     }
   }
@@ -150,9 +172,23 @@ class _PastPhotosSelectionScreenState extends State<PastPhotosSelectionScreen>
       _pastPhotoController.setPhotoAssets(photos);
       _pastPhotoController.setLoading(false);
     } catch (e) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '過去の写真読み込み');
+      loggingService.error(
+        '過去の写真読み込みエラー',
+        context: 'PastPhotosSelectionScreen._loadPastPhotos',
+        error: appError,
+      );
+
       if (mounted) {
         _pastPhotoController.setPhotoAssets([]);
         _pastPhotoController.setLoading(false);
+
+        // ユーザーにエラーを通知
+        ErrorDisplayService().showError(
+          context,
+          appError,
+        );
       }
     }
   }

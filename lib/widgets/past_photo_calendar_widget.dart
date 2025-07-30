@@ -10,6 +10,8 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../services/logging_service.dart';
+import '../core/errors/error_handler.dart';
 
 /// 過去の写真カレンダーウィジェット
 class PastPhotoCalendarWidget extends StatefulWidget {
@@ -105,6 +107,13 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         _isLoading = false;
       });
     } catch (e) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '写真数読み込み');
+      loggingService.error(
+        '月単位の写真数読み込みエラー',
+        context: 'PastPhotoCalendarWidget._loadPhotoCountsForMonth',
+        error: appError,
+      );
       setState(() => _isLoading = false);
     }
   }
@@ -136,6 +145,13 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         widget.onPhotosSelected(photos);
       }
     } catch (e) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '日付別写真読み込み');
+      loggingService.error(
+        '選択日付の写真読み込みエラー',
+        context: 'PastPhotoCalendarWidget._loadPhotosForDate',
+        error: appError,
+      );
       setState(() => _isLoading = false);
     }
   }
@@ -191,8 +207,15 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       setState(() {
         _diaryDates = dates;
       });
-    } catch (_) {
-      // エラーは無視してデフォルト値を使用
+    } catch (e) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '日記日付読み込み');
+      loggingService.warning(
+        '日記日付の読み込みに失敗しましたが、機能は継続します',
+        context: 'PastPhotoCalendarWidget._loadDiaryDates',
+        data: appError.toString(),
+      );
+      // エラーでも機能を継続
     }
   }
 
