@@ -176,9 +176,12 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.today_rounded, size: 18),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text('今日'),
+                      Icon(Icons.today_rounded),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        '今日',
+                        style: AppTypography.titleMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -186,9 +189,12 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.history_rounded, size: 18),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text('過去の写真'),
+                      Icon(Icons.history_rounded),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        '過去',
+                        style: AppTypography.titleMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -239,7 +245,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: AppSpacing.md),
           if (_currentPlan != null) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
