@@ -20,7 +20,7 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
   @override
   DateTime getAccessibleDateForPlan(Plan plan) {
     final now = DateTime.now();
-    // 今日の0時0分0秒を基準にする
+    // タイムゾーン対応: 今日の0時0分0秒を基準にする（ローカルタイムゾーン）
     final today = DateTime(now.year, now.month, now.day);
 
     // プランのアクセス可能日数分だけ過去に遡る
@@ -31,7 +31,7 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
     debugPrint(
       'アクセス可能範囲計算: プラン=${plan.displayName}, '
       '過去${plan.pastPhotoAccessDays}日前まで, '
-      '最古アクセス可能日=$accessibleDate',
+      '最古アクセス可能日=$accessibleDate (ローカルタイムゾーン)',
     );
 
     return accessibleDate;
@@ -40,7 +40,7 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
   /// 指定された写真の撮影日時がプランでアクセス可能かどうかを判定
   @override
   bool isPhotoAccessible(DateTime photoDate, Plan plan) {
-    // 日付のみで比較（時刻は考慮しない）
+    // タイムゾーン対応: 日付のみで比較（時刻は考慮しない）、ローカルタイムゾーンで正規化
     final photoDateOnly = DateTime(
       photoDate.year,
       photoDate.month,
@@ -56,8 +56,8 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
     debugPrint(
       '写真アクセス判定: '
       'プラン=${plan.displayName}, '
-      '撮影日=$photoDateOnly, '
-      '最古アクセス可能日=$accessibleDate, '
+      '撮影日=$photoDateOnly (ローカル), '
+      '最古アクセス可能日=$accessibleDate (ローカル), '
       '結果=$isAccessible',
     );
 

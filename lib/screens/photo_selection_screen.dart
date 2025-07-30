@@ -3,6 +3,7 @@ import '../controllers/photo_selection_controller.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/logging_service.dart';
 import '../core/service_registration.dart';
 import '../widgets/photo_grid_widget.dart';
 import '../ui/design_system/app_colors.dart';
@@ -43,12 +44,16 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
     if (!mounted) return;
 
     _photoController.setLoading(true);
+    final loggingService = await LoggingService.getInstance();
 
     try {
       // 権限リクエスト
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
       final hasPermission = await photoService.requestPermission();
-      debugPrint('権限ステータス: $hasPermission');
+      loggingService.debug(
+        '権限ステータス: $hasPermission',
+        context: 'PhotoSelectionScreen._loadTodayPhotos',
+      );
 
       if (!mounted) return;
 
@@ -61,14 +66,22 @@ class _PhotoSelectionScreenState extends State<PhotoSelectionScreen> {
 
       // 今日撮影された写真だけを取得
       final photos = await photoService.getTodayPhotos();
-      debugPrint('取得した写真数: ${photos.length}');
+      loggingService.info(
+        '今日の写真を取得しました',
+        context: 'PhotoSelectionScreen._loadTodayPhotos',
+        data: '取得数: ${photos.length}枚',
+      );
 
       if (!mounted) return;
 
       _photoController.setPhotoAssets(photos);
       _photoController.setLoading(false);
     } catch (e) {
-      debugPrint('写真読み込みエラー: $e');
+      loggingService.error(
+        '写真読み込みエラー',
+        context: 'PhotoSelectionScreen._loadTodayPhotos',
+        error: e,
+      );
       if (mounted) {
         _photoController.setPhotoAssets([]);
         _photoController.setLoading(false);

@@ -95,9 +95,11 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       );
 
       // 日付ごとにグループ化して件数を計算
+      // タイムゾーン対応: ローカルタイムゾーンで日付を正規化
       final counts = <DateTime, int>{};
       for (final photo in photos) {
         final photoDate = photo.createDateTime;
+        // ローカルタイムゾーンで日付を正規化（時刻情報を削除）
         final date = DateTime(photoDate.year, photoDate.month, photoDate.day);
         counts[date] = (counts[date] ?? 0) + 1;
       }
@@ -125,9 +127,17 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
     try {
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
 
-      // 選択日の開始と終了時刻
+      // タイムゾーン対応: 選択日の開始と終了時刻（ローカルタイムゾーン）
       final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+      final endOfDay = DateTime(
+        date.year, 
+        date.month, 
+        date.day, 
+        23, 
+        59, 
+        59,
+        999,
+      );
 
       final photos = await photoService.getPhotosInDateRange(
         startDate: startOfDay,
@@ -177,12 +187,14 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
 
   /// 日付に写真があるかチェック
   int _getPhotoCount(DateTime date) {
+    // タイムゾーン対応: ローカルタイムゾーンで日付を正規化
     final normalizedDate = DateTime(date.year, date.month, date.day);
     return _photoCounts[normalizedDate] ?? 0;
   }
 
   /// 日付に日記が存在するかチェック
   bool _hasDiary(DateTime date) {
+    // タイムゾーン対応: ローカルタイムゾーンで日付を正規化
     final normalizedDate = DateTime(date.year, date.month, date.day);
     return _diaryDates.contains(normalizedDate);
   }
