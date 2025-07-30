@@ -7,7 +7,12 @@ import '../widgets/photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
 import '../widgets/prompt_selection_modal.dart';
 import '../models/writing_prompt.dart';
-import '../screens/past_photos_selection_screen.dart';
+import '../models/plans/plan.dart';
+import '../services/interfaces/photo_access_control_service_interface.dart';
+import '../widgets/past_photo_calendar_widget.dart';
+import '../core/errors/error_handler.dart';
+import '../services/logging_service.dart';
+import '../ui/error_display/error_display_service.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
@@ -18,8 +23,10 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 
-class HomeContentWidget extends StatelessWidget {
+class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
+  final PhotoSelectionController pastPhotoController;
+  final TabController tabController;
   final List<DiaryEntry> recentDiaries;
   final bool isLoadingDiaries;
   final VoidCallback onRequestPermission;
@@ -32,6 +39,8 @@ class HomeContentWidget extends StatelessWidget {
   const HomeContentWidget({
     super.key,
     required this.photoController,
+    required this.pastPhotoController,
+    required this.tabController,
     required this.recentDiaries,
     required this.isLoadingDiaries,
     required this.onRequestPermission,
@@ -43,12 +52,35 @@ class HomeContentWidget extends StatelessWidget {
   });
 
   @override
+  State<HomeContentWidget> createState() => _HomeContentWidgetState();
+}
+
+class _HomeContentWidgetState extends State<HomeContentWidget> {
+  // アクセス制御関連
+  Plan? _currentPlan;
+  DateTime? _accessibleDate;
+  bool _isCalendarView = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentPlan();
+    _loadUsedPhotoIds();
+    widget.tabController.addListener(() {
+      if (widget.tabController.index == 1 &&
+          widget.pastPhotoController.photoAssets.isEmpty) {
+        _loadPastPhotos();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildHeader(context),
-      body: onRefresh != null
+      body: widget.onRefresh != null
           ? MicroInteractions.pullToRefresh(
-              onRefresh: onRefresh!,
+              onRefresh: widget.onRefresh!,
               color: Theme.of(context).colorScheme.primary,
               child: _buildMainContent(context),
             )
@@ -107,151 +139,189 @@ class HomeContentWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoSection(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // タブバー
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.2),
+                ),
+              ),
+            ),
+            child: TabBar(
+              controller: widget.tabController,
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.today_rounded, size: 18),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text('今日'),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.history_rounded, size: 18),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text('過去の写真'),
+                    ],
+                  ),
+                ),
+              ],
+              indicatorColor: Theme.of(context).colorScheme.primary,
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorWeight: 3,
+            ),
+          ),
+          // タブビュー
+          SizedBox(
+            height: widget.tabController.index == 1 && _isCalendarView
+                ? 600
+                : 400,
+            child: TabBarView(
+              controller: widget.tabController,
+              children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTodayPhotosTab() {
     return Padding(
       padding: AppSpacing.cardPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.photo_camera_rounded,
-                color: Theme.of(context).colorScheme.primary,
-                size: AppSpacing.iconMd,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text('今日の写真', style: AppTypography.titleLarge),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          PhotoGridWidget(
-            controller: photoController,
-            onSelectionLimitReached: onSelectionLimitReached,
-            onUsedPhotoSelected: onUsedPhotoSelected,
-            onRequestPermission: onRequestPermission,
-          ),
           const SizedBox(height: AppSpacing.md),
-          _buildPastPhotosButton(context),
+          PhotoGridWidget(
+            controller: widget.photoController,
+            onSelectionLimitReached: widget.onSelectionLimitReached,
+            onUsedPhotoSelected: widget.onUsedPhotoSelected,
+            onRequestPermission: widget.onRequestPermission,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPastPhotosButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainer.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
+  Widget _buildPastPhotosTab() {
+    return SingleChildScrollView(
+      padding: AppSpacing.cardPadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
-            child: Icon(
-              Icons.history_rounded,
-              color: Theme.of(context).colorScheme.primary,
-              size: AppSpacing.iconSm,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: AppSpacing.md),
+          if (_currentPlan != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '過去の写真から日記を作成',
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+                Expanded(child: _buildAccessRangeInfo()),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isCalendarView = !_isCalendarView;
+                    });
+                  },
+                  icon: Icon(
+                    _isCalendarView
+                        ? Icons.grid_view_rounded
+                        : Icons.calendar_month_rounded,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '思い出の写真を振り返って日記を作成',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  tooltip: _isCalendarView ? 'グリッド表示' : 'カレンダー表示',
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          AnimatedButton(
-            onPressed: () => _navigateToPastPhotosSelection(context),
-            width: 80,
-            height: 36,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-            child: Text(
-              '開く',
-              style: AppTypography.labelMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (_isCalendarView)
+            PastPhotoCalendarWidget(
+              currentPlan: _currentPlan,
+              accessibleDate: _accessibleDate,
+              usedPhotoIds: widget.pastPhotoController.usedPhotoIds,
+              onPhotosSelected: (photos) {
+                widget.pastPhotoController.setPhotoAssets(photos);
+                setState(() {
+                  _isCalendarView = false;
+                });
+              },
+            )
+          else
+            PhotoGridWidget(
+              controller: widget.pastPhotoController,
+              onSelectionLimitReached: widget.onSelectionLimitReached,
+              onUsedPhotoSelected: widget.onUsedPhotoSelected,
+              onRequestPermission: _loadPastPhotos,
             ),
-          ),
         ],
-      ),
-    );
-  }
-
-  void _navigateToPastPhotosSelection(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PastPhotosSelectionScreen(),
       ),
     );
   }
 
   Widget _buildCreateDiaryButton(BuildContext context) {
-    return ListenableBuilder(
-      listenable: photoController,
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        widget.photoController,
+        widget.pastPhotoController,
+        widget.tabController,
+      ]),
       builder: (context, child) {
+        final activeController = widget.tabController.index == 0
+            ? widget.photoController
+            : widget.pastPhotoController;
         final theme = Theme.of(context);
         return AnimatedButton(
-          onPressed: photoController.selectedCount > 0
+          onPressed: activeController.selectedCount > 0
               ? () => _showPromptSelectionModal(context)
               : null,
           width: double.infinity,
           height: AppSpacing.buttonHeightLg,
-          backgroundColor: photoController.selectedCount > 0
+          backgroundColor: activeController.selectedCount > 0
               ? theme.colorScheme.primary
               : theme.colorScheme.surfaceContainerHighest,
-          foregroundColor: photoController.selectedCount > 0
+          foregroundColor: activeController.selectedCount > 0
               ? theme.colorScheme.onPrimary
               : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          shadowColor: photoController.selectedCount > 0
+          shadowColor: activeController.selectedCount > 0
               ? theme.colorScheme.primary.withValues(alpha: 0.3)
               : null,
-          elevation: photoController.selectedCount > 0
+          elevation: activeController.selectedCount > 0
               ? AppSpacing.elevationSm
               : 0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                photoController.selectedCount > 0
+                activeController.selectedCount > 0
                     ? Icons.auto_awesome_rounded
                     : Icons.photo_camera_outlined,
                 size: AppSpacing.iconSm,
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                photoController.selectedCount > 0
-                    ? '${photoController.selectedCount}枚の写真で日記を作成'
+                activeController.selectedCount > 0
+                    ? '${activeController.selectedCount}枚の写真で日記を作成'
                     : '写真を選んでください',
                 style: AppTypography.labelLarge,
               ),
@@ -281,9 +351,9 @@ class HomeContentWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           RecentDiariesWidget(
-            recentDiaries: recentDiaries,
-            isLoading: isLoadingDiaries,
-            onDiaryTap: onDiaryTap,
+            recentDiaries: widget.recentDiaries,
+            isLoading: widget.isLoadingDiaries,
+            onDiaryTap: widget.onDiaryTap,
           ),
         ],
       ),
@@ -311,17 +381,22 @@ class HomeContentWidget extends StatelessWidget {
     BuildContext context,
     WritingPrompt? selectedPrompt,
   ) {
+    final activeController = widget.tabController.index == 0
+        ? widget.photoController
+        : widget.pastPhotoController;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => DiaryPreviewScreen(
-          selectedAssets: photoController.selectedPhotos,
+          selectedAssets: activeController.selectedPhotos,
           selectedPrompt: selectedPrompt,
         ),
       ),
     ).then((_) {
-      onLoadRecentDiaries();
-      photoController.clearSelection();
+      widget.onLoadRecentDiaries();
+      widget.photoController.clearSelection();
+      widget.pastPhotoController.clearSelection();
     });
   }
 
@@ -401,5 +476,182 @@ class HomeContentWidget extends StatelessWidget {
   void _navigateToUpgrade(BuildContext context) {
     // 共通のアップグレードダイアログを表示
     UpgradeDialogUtils.showUpgradeDialog(context);
+  }
+
+  /// 現在のプランとアクセス可能日付を読み込み
+  Future<void> _loadCurrentPlan() async {
+    try {
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+      final accessControlService =
+          ServiceRegistration.get<PhotoAccessControlServiceInterface>();
+
+      final planResult = await subscriptionService.getCurrentPlanClass();
+
+      if (planResult.isFailure) {
+        return;
+      }
+
+      final plan = planResult.value;
+      final accessibleDate = accessControlService.getAccessibleDateForPlan(
+        plan,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentPlan = plan;
+          _accessibleDate = accessibleDate;
+        });
+      }
+    } catch (_) {
+      // エラーは無視してデフォルト値を使用
+    }
+  }
+
+  /// 使用済み写真IDを収集して両方のコントローラーに設定
+  Future<void> _loadUsedPhotoIds() async {
+    try {
+      final diaryService =
+          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final allEntries = await diaryService.getSortedDiaryEntries();
+
+      // 使用済み写真IDを収集
+      final usedIds = <String>{};
+      for (final entry in allEntries) {
+        usedIds.addAll(entry.photoIds);
+      }
+
+      // 両方のコントローラーに設定
+      widget.photoController.setUsedPhotoIds(usedIds);
+      widget.pastPhotoController.setUsedPhotoIds(usedIds);
+    } catch (_) {
+      // エラーは無視してデフォルト値を使用
+    }
+  }
+
+  Future<void> _loadPastPhotos() async {
+    if (!mounted) return;
+
+    widget.pastPhotoController.setLoading(true);
+
+    try {
+      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+
+      // 権限チェック
+      final hasPermission = await photoService.requestPermission();
+
+      if (!mounted) return;
+
+      widget.pastPhotoController.setPermission(hasPermission);
+
+      if (!hasPermission) {
+        widget.pastPhotoController.setLoading(false);
+        return;
+      }
+
+      // プランに基づいて過去の写真を取得（今日は除外）
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      DateTime startDate;
+      if (_currentPlan != null && _accessibleDate != null) {
+        startDate = _accessibleDate!;
+      } else {
+        // フォールバック: 昨日の00:00:00から取得
+        startDate = today.subtract(const Duration(days: 1));
+      }
+
+      // 今日の00:00:00を終了日として設定（今日は除外）
+      final endDate = today;
+
+      final photos = await photoService.getPhotosInDateRange(
+        startDate: startDate,
+        endDate: endDate,
+        limit: 50,
+      );
+
+      if (!mounted) return;
+
+      widget.pastPhotoController.setPhotoAssets(photos);
+      widget.pastPhotoController.setLoading(false);
+    } catch (e) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '過去の写真読み込み');
+      loggingService.error(
+        '過去の写真読み込みエラー',
+        context: 'HomeContentWidget._loadPastPhotos',
+        error: appError,
+      );
+
+      if (mounted) {
+        widget.pastPhotoController.setPhotoAssets([]);
+        widget.pastPhotoController.setLoading(false);
+
+        // ユーザーにエラーを通知
+        ErrorDisplayService().showError(context, appError);
+      }
+    }
+  }
+
+  Widget _buildAccessRangeInfo() {
+    if (_currentPlan == null) {
+      return const SizedBox.shrink();
+    }
+
+    final accessControlService =
+        ServiceRegistration.get<PhotoAccessControlServiceInterface>();
+    final rangeDescription = accessControlService.getAccessRangeDescription(
+      _currentPlan!,
+    );
+
+    final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: isBasic
+            ? AppColors.warning.withValues(alpha: 0.1)
+            : AppColors.success.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isBasic ? Icons.schedule_rounded : Icons.history_rounded,
+            color: isBasic ? AppColors.warning : AppColors.success,
+            size: 16,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              '${_currentPlan!.displayName}: $rangeDescription',
+              style: AppTypography.bodySmall.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isBasic ? AppColors.warning : AppColors.success,
+              ),
+            ),
+          ),
+          if (isBasic)
+            TextButton(
+              onPressed: () => _navigateToUpgrade(context),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.warning,
+                minimumSize: Size.zero,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+              ),
+              child: const Text(
+                'アップグレード',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

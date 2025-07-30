@@ -24,11 +24,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+class _HomeScreenState extends State<HomeScreen>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   int _currentIndex = 0;
 
   // コントローラー
   late final PhotoSelectionController _photoController;
+  late final PhotoSelectionController _pastPhotoController;
+  late final TabController _tabController;
 
   // 最近の日記リスト
   List<DiaryEntry> _recentDiaries = [];
@@ -42,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _photoController = PhotoSelectionController();
+    _pastPhotoController = PhotoSelectionController();
+    _tabController = TabController(length: 2, vsync: this);
     _loadTodayPhotos();
     _loadRecentDiaries();
   }
@@ -50,6 +55,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _photoController.dispose();
+    _pastPhotoController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -195,6 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       usedIds.addAll(entry.photoIds);
     }
     _photoController.setUsedPhotoIds(usedIds);
+    _pastPhotoController.setUsedPhotoIds(usedIds);
   }
 
   // 権限リクエストと写真の読み込み
@@ -256,6 +264,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // ホーム画面（現在の画面）
       HomeContentWidget(
         photoController: _photoController,
+        pastPhotoController: _pastPhotoController,
+        tabController: _tabController,
         recentDiaries: _recentDiaries,
         isLoadingDiaries: _loadingDiaries,
         onRequestPermission: _loadTodayPhotos,
@@ -273,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             _loadRecentDiaries();
             if (result == true) {
               _photoController.clearSelection();
+              _pastPhotoController.clearSelection();
             }
           });
         },
