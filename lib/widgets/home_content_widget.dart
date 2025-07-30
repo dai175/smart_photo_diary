@@ -8,7 +8,9 @@ import '../widgets/recent_diaries_widget.dart';
 import '../widgets/prompt_selection_modal.dart';
 import '../models/writing_prompt.dart';
 import '../models/plans/plan.dart';
+import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/photo_access_control_service_interface.dart';
+import '../services/interfaces/diary_service_interface.dart';
 import '../widgets/past_photo_calendar_widget.dart';
 import '../core/errors/error_handler.dart';
 import '../services/logging_service.dart';
@@ -22,6 +24,7 @@ import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../ui/design_system/app_colors.dart';
 
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
