@@ -621,9 +621,11 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.xs,
       ),
       decoration: BoxDecoration(
         color: isBasic
@@ -632,38 +634,40 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         borderRadius: BorderRadius.circular(AppSpacing.sm),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            isBasic ? Icons.schedule_rounded : Icons.history_rounded,
-            color: isBasic ? AppColors.warning : AppColors.success,
-            size: 16,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: Text(
-              '${_currentPlan!.displayName}: $rangeDescription',
-              style: AppTypography.bodySmall.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isBasic ? AppColors.warning : AppColors.success,
-              ),
+            Icon(
+              isBasic ? Icons.schedule_rounded : Icons.history_rounded,
+              color: isBasic ? AppColors.warning : AppColors.success,
+              size: 16,
             ),
-          ),
-          if (isBasic)
-            TextButton(
-              onPressed: () => _navigateToUpgrade(context),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.warning,
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: Text(
+                '${_currentPlan!.displayName}: $rangeDescription',
+                style: AppTypography.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isBasic ? AppColors.warning : AppColors.success,
                 ),
               ),
-              child: const Text(
-                'アップグレード',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              ),
             ),
+            if (isBasic)
+              TextButton(
+                onPressed: () => _navigateToUpgrade(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.warning,
+                  minimumSize: Size.zero,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: 0,
+                  ),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'アップグレード',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
         ],
       ),
     );

@@ -32,10 +32,11 @@ class PhotoGridWidget extends StatelessWidget {
       listenable: controller,
       builder: (context, child) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildPhotoGrid(context),
             const SizedBox(height: AppSpacing.sm),
-            _buildSelectionCounter(context),
+            Center(child: _buildSelectionCounter(context)),
           ],
         );
       },
@@ -108,32 +109,35 @@ class PhotoGridWidget extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          padding: AppSpacing.cardPadding,
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-            borderRadius: AppSpacing.cardRadius,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: AppSpacing.cardPadding,
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+              borderRadius: AppSpacing.cardRadius,
+            ),
+            child: Icon(
+              Icons.photo_library_outlined,
+              size: AppSpacing.iconLg,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
-          child: Icon(
-            Icons.photo_library_outlined,
-            size: AppSpacing.iconLg,
-            color: Theme.of(context).colorScheme.primary,
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            AppConstants.noPhotosMessage,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          AppConstants.noPhotosMessage,
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
