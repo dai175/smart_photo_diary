@@ -136,7 +136,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                 delay: const Duration(milliseconds: 200),
                 child: _buildCreateDiaryButton(context),
               ),
-            const SizedBox(height: AppSpacing.xl),
             FadeInWidget(
               delay: const Duration(milliseconds: 300),
               child: _buildRecentDiariesSection(context),
@@ -210,7 +209,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           ),
           // タブビュー
           SizedBox(
-            height: 480,
+            height: 520,
             child: TabBarView(
               controller: widget.tabController,
               children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],

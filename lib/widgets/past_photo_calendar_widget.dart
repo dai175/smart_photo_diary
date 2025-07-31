@@ -291,18 +291,17 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: !isAccessible
-                          ? Colors.grey.withValues(alpha: 0.1)
+                          ? Colors.grey.withValues(alpha: 0.15)
                           : hasDiary
-                          ? Theme.of(context).colorScheme.primaryContainer
-                                .withValues(alpha: 0.3)
+                          ? Theme.of(context).colorScheme.primary
+                                .withValues(alpha: 0.2)
                           : null,
                       borderRadius: BorderRadius.circular(8),
-                      border: hasDiary
+                      border: hasDiary && isAccessible
                           ? Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.3),
-                              width: 1,
+                              color: Theme.of(context).colorScheme.primary
+                                  .withValues(alpha: 0.4),
+                              width: 2,
                             )
                           : null,
                     ),
@@ -326,27 +325,16 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                         if (photoCount > 0)
                           Positioned(
                             bottom: 2,
-                            left: day.day < 10 ? 18 : 12,
+                            left: day.day < 10 ? 16 : 10,
                             child: Container(
-                              width: 6,
-                              height: 6,
+                              width: 8,
+                              height: 8,
                               decoration: BoxDecoration(
                                 color: isAccessible
                                     ? Theme.of(context).colorScheme.primary
-                                    : Colors.grey,
+                                    : Colors.grey.withValues(alpha: 0.8),
                                 shape: BoxShape.circle,
                               ),
-                            ),
-                          ),
-                        // 日記インジケーター
-                        if (hasDiary)
-                          Positioned(
-                            bottom: 2,
-                            right: day.day < 10 ? 18 : 12,
-                            child: Icon(
-                              Icons.edit_note_rounded,
-                              size: 10,
-                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         // ロックアイコン
@@ -356,8 +344,8 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                             right: 2,
                             child: Icon(
                               Icons.lock_rounded,
-                              size: 12,
-                              color: Colors.grey.withValues(alpha: 0.7),
+                              size: 14,
+                              color: Colors.grey.withValues(alpha: 0.9),
                             ),
                           ),
                       ],
@@ -366,7 +354,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                 },
                 selectedBuilder: (context, day, focusedDay) {
                   final photoCount = _getPhotoCount(day);
-                  final hasDiary = _hasDiary(day);
 
                   return Container(
                     margin: const EdgeInsets.all(4),
@@ -389,25 +376,14 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                         if (photoCount > 0)
                           Positioned(
                             bottom: 2,
-                            left: day.day < 10 ? 18 : 12,
+                            left: day.day < 10 ? 16 : 10,
                             child: Container(
-                              width: 6,
-                              height: 6,
+                              width: 8,
+                              height: 8,
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 shape: BoxShape.circle,
                               ),
-                            ),
-                          ),
-                        // 日記インジケーター
-                        if (hasDiary)
-                          Positioned(
-                            bottom: 2,
-                            right: day.day < 10 ? 18 : 12,
-                            child: Icon(
-                              Icons.edit_note_rounded,
-                              size: 10,
-                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                       ],
@@ -490,12 +466,12 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
             vertical: AppSpacing.sm,
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildLegendItem(
                 icon: Container(
-                  width: 6,
-                  height: 6,
+                  width: 10,
+                  height: 10,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
@@ -503,21 +479,23 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                 ),
                 label: '写真あり',
               ),
+              const SizedBox(width: AppSpacing.xl),
               _buildLegendItem(
-                icon: Icon(
-                  Icons.edit_note_rounded,
-                  size: 12,
-                  color: Theme.of(context).colorScheme.primary,
+                icon: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary
+                        .withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary
+                          .withValues(alpha: 0.4),
+                      width: 2,
+                    ),
+                  ),
                 ),
                 label: '日記あり',
-              ),
-              _buildLegendItem(
-                icon: Icon(
-                  Icons.lock_rounded,
-                  size: 12,
-                  color: Colors.grey.withValues(alpha: 0.7),
-                ),
-                label: '制限',
               ),
             ],
           ),
@@ -573,18 +551,29 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   }
 
   Widget _buildLegendItem({required Widget icon, required String label}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        icon,
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            label,
+            style: AppTypography.labelLarge.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
