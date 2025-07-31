@@ -9,7 +9,6 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
-import '../utils/upgrade_dialog_utils.dart';
 import '../services/logging_service.dart';
 import '../core/errors/error_handler.dart';
 
@@ -130,11 +129,11 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       // タイムゾーン対応: 選択日の開始と終了時刻（ローカルタイムゾーン）
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(
-        date.year, 
-        date.month, 
-        date.day, 
-        23, 
-        59, 
+        date.year,
+        date.month,
+        date.day,
+        23,
+        59,
         59,
         999,
       );
@@ -247,15 +246,12 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
               calendarFormat: CalendarFormat.month,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               onDaySelected: (selectedDay, focusedDay) {
-                // アクセス可能かチェック
-                if (!_isDateAccessible(selectedDay)) {
-                  _showAccessDeniedDialog();
-                  return;
-                }
+                final isAccessible = _isDateAccessible(selectedDay);
+                final photoCount = _getPhotoCount(selectedDay);
 
-                // 写真があるかチェック
-                if (_getPhotoCount(selectedDay) == 0) {
-                  _showNoPhotosDialog(selectedDay);
+                // アクセス可能で写真がある場合のみ選択可能
+                if (!isAccessible || photoCount == 0) {
+                  // 何もしない（選択不可）
                   return;
                 }
 
@@ -285,76 +281,41 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                   final isAccessible = _isDateAccessible(day);
                   final photoCount = _getPhotoCount(day);
                   final hasDiary = _hasDiary(day);
+                  final hasPhotoAndAccessible = photoCount > 0 && isAccessible;
 
                   return Container(
                     margin: const EdgeInsets.all(4),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: !isAccessible
-                          ? Colors.grey.withValues(alpha: 0.15)
-                          : hasDiary
-                          ? Theme.of(context).colorScheme.primary
-                                .withValues(alpha: 0.2)
-                          : null,
+                      color: hasPhotoAndAccessible
+                          ? null
+                          : Colors.grey.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                       border: hasDiary && isAccessible
                           ? Border.all(
-                              color: Theme.of(context).colorScheme.primary
-                                  .withValues(alpha: 0.4),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.4),
                               width: 2,
                             )
                           : null,
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Text(
-                          '${day.day}',
-                          style: TextStyle(
-                            color: !isAccessible
-                                ? Colors.grey
-                                : hasDiary
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurface,
-                            fontWeight: hasDiary
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
-                        ),
-                        // 写真インジケーター
-                        if (photoCount > 0)
-                          Positioned(
-                            bottom: 2,
-                            left: day.day < 10 ? 16 : 10,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: isAccessible
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.grey.withValues(alpha: 0.8),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        // ロックアイコン
-                        if (!isAccessible && photoCount > 0)
-                          Positioned(
-                            top: 2,
-                            right: 2,
-                            child: Icon(
-                              Icons.lock_rounded,
-                              size: 14,
-                              color: Colors.grey.withValues(alpha: 0.9),
-                            ),
-                          ),
-                      ],
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        color: hasPhotoAndAccessible
+                            ? hasDiary
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface
+                            : Colors.grey.withValues(alpha: 0.4),
+                        fontWeight: hasDiary && hasPhotoAndAccessible
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
                     ),
                   );
                 },
                 selectedBuilder: (context, day, focusedDay) {
-                  final photoCount = _getPhotoCount(day);
-
                   return Container(
                     margin: const EdgeInsets.all(4),
                     alignment: Alignment.center,
@@ -362,49 +323,39 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                       color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Text(
-                          '${day.day}',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        // 写真インジケーター
-                        if (photoCount > 0)
-                          Positioned(
-                            bottom: 2,
-                            left: day.day < 10 ? 16 : 10,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                      ],
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   );
                 },
                 todayBuilder: (context, day, focusedDay) {
+                  final photoCount = _getPhotoCount(day);
+                  final hasPhoto = photoCount > 0;
+
                   return Container(
                     margin: const EdgeInsets.all(4),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.secondary.withValues(alpha: 0.3),
+                      color: hasPhoto
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.secondary.withValues(alpha: 0.3)
+                          : Colors.grey.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '${day.day}',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                        color: hasPhoto
+                            ? Theme.of(context).colorScheme.secondary
+                            : Colors.grey.withValues(alpha: 0.4),
+                        fontWeight: hasPhoto
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                   );
@@ -458,49 +409,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
             child: const CircularProgressIndicator(strokeWidth: 2),
           ),
 
-        // 凡例
-        Container(
-          margin: const EdgeInsets.only(top: AppSpacing.sm),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildLegendItem(
-                icon: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                label: '写真あり',
-              ),
-              const SizedBox(width: AppSpacing.xl),
-              _buildLegendItem(
-                icon: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary
-                        .withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary
-                          .withValues(alpha: 0.4),
-                      width: 2,
-                    ),
-                  ),
-                ),
-                label: '日記あり',
-              ),
-            ],
-          ),
-        ),
-
         // 選択された日付の情報
         if (_selectedDay != null && !_isLoading)
           SlideInWidget(
@@ -547,74 +455,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildLegendItem({required Widget icon, required String label}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          icon,
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            label,
-            style: AppTypography.labelLarge.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAccessDeniedDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('アクセス制限'),
-        content: const Text('この日付の写真にアクセスするには、プレミアムプランが必要です。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('閉じる'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              if (context.mounted) {
-                await UpgradeDialogUtils.showUpgradeDialog(context);
-              }
-            },
-            child: const Text('プレミアムを見る'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNoPhotosDialog(DateTime date) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('写真がありません'),
-        content: Text('${date.year}年${date.month}月${date.day}日には写真がありません。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
     );
   }
 }

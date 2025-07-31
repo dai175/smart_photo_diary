@@ -341,12 +341,13 @@ class PhotoService implements PhotoServiceInterface {
             createDate.second,
           );
 
-          if (localCreateDate.isBefore(localStartDate) || 
+          if (localCreateDate.isBefore(localStartDate) ||
               localCreateDate.isAfter(localEndDate)) {
             loggingService.debug(
               'タイムゾーン調整後、日付範囲外の写真をスキップ',
               context: 'PhotoService.getPhotosInDateRange',
-              data: 'createDate: $localCreateDate, range: $localStartDate - $localEndDate',
+              data:
+                  'createDate: $localCreateDate, range: $localStartDate - $localEndDate',
             );
             continue;
           }
@@ -481,12 +482,12 @@ class PhotoService implements PhotoServiceInterface {
       // ローカルタイムゾーンで正規化
       final DateTime startOfDay = DateTime(date.year, date.month, date.day);
       final DateTime endOfDay = DateTime(
-        date.year, 
-        date.month, 
-        date.day, 
-        23, 
-        59, 
-        59, 
+        date.year,
+        date.month,
+        date.day,
+        23,
+        59,
+        59,
         999,
       );
 
@@ -562,7 +563,7 @@ class PhotoService implements PhotoServiceInterface {
             createDate.month,
             createDate.day,
           );
-          
+
           // 指定日と同じ日付の写真のみを含める
           if (localCreateDate.year == date.year &&
               localCreateDate.month == date.month &&
@@ -572,7 +573,8 @@ class PhotoService implements PhotoServiceInterface {
             loggingService.debug(
               'タイムゾーン調整後、異なる日付の写真をスキップ',
               context: 'PhotoService.getPhotosForDate',
-              data: 'expected: ${date.toIso8601String()}, actual: ${localCreateDate.toIso8601String()}',
+              data:
+                  'expected: ${date.toIso8601String()}, actual: ${localCreateDate.toIso8601String()}',
             );
           }
         } catch (e) {
@@ -589,7 +591,8 @@ class PhotoService implements PhotoServiceInterface {
       loggingService.info(
         '指定日の写真を取得しました',
         context: 'PhotoService.getPhotosForDate',
-        data: '取得数: ${validAssets.length}枚（元: ${assets.length}枚）, 取得範囲: $offset - ${offset + actualLimit}',
+        data:
+            '取得数: ${validAssets.length}枚（元: ${assets.length}枚）, 取得範囲: $offset - ${offset + actualLimit}',
       );
 
       return validAssets;

@@ -177,10 +177,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                     children: [
                       Icon(Icons.today_rounded),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        '今日',
-                        style: AppTypography.titleMedium,
-                      ),
+                      Text('今日', style: AppTypography.titleMedium),
                     ],
                   ),
                 ),
@@ -190,10 +187,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                     children: [
                       Icon(Icons.history_rounded),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        '過去',
-                        style: AppTypography.titleMedium,
-                      ),
+                      Text('過去', style: AppTypography.titleMedium),
                     ],
                   ),
                 ),
@@ -654,7 +648,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             ],
           ),
         ),
-        if (isBasic) ...[  
+        if (isBasic) ...[
           const SizedBox(width: AppSpacing.sm),
           // アップグレードボタン
           GestureDetector(
@@ -669,7 +663,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -700,7 +696,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       ],
     );
   }
-  
+
   /// 異なる日付の写真選択時のダイアログ
   void _showDifferentDateDialog() {
     showDialog(

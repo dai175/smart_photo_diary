@@ -1,11 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
-import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/photo_access_control_service.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import 'mocks/mock_services.dart';
@@ -57,7 +55,9 @@ void main() {
 
       test('制限写真タップ→アップグレード必要の確認', () async {
         // 1. 30日前の写真を準備
-        final restrictedDate = DateTime.now().subtract(const Duration(days: 30));
+        final restrictedDate = DateTime.now().subtract(
+          const Duration(days: 30),
+        );
         when(() => mockAsset.id).thenReturn('restricted_photo_1');
         when(() => mockAsset.createDateTime).thenReturn(restrictedDate);
         when(() => mockAsset.title).thenReturn('30日前の写真');
@@ -71,7 +71,9 @@ void main() {
         expect(isAccessibleBasic, false, reason: 'ベーシックプランでは30日前の写真にアクセス不可');
 
         // 3. アクセス制限の理由を確認
-        final accessRange = photoAccessControlService.getAccessRangeDescription(basicPlan);
+        final accessRange = photoAccessControlService.getAccessRangeDescription(
+          basicPlan,
+        );
         expect(accessRange, contains('昨日まで'));
 
         // 4. プレミアムプランでのアクセス確認
@@ -119,7 +121,10 @@ void main() {
           monthlyUsageCount: 5,
           lastResetDate: DateTime.now(),
         );
-        expect(beforeUpgrade.currentPlanClass.id, SubscriptionConstants.basicPlanId);
+        expect(
+          beforeUpgrade.currentPlanClass.id,
+          SubscriptionConstants.basicPlanId,
+        );
 
         final afterUpgrade = SubscriptionStatus(
           planId: SubscriptionConstants.premiumMonthlyPlanId,
@@ -129,7 +134,10 @@ void main() {
           monthlyUsageCount: 5,
           lastResetDate: DateTime.now(),
         );
-        expect(afterUpgrade.currentPlanClass.id, SubscriptionConstants.premiumMonthlyPlanId);
+        expect(
+          afterUpgrade.currentPlanClass.id,
+          SubscriptionConstants.premiumMonthlyPlanId,
+        );
         expect(afterUpgrade.currentPlanClass.isPremium, true);
       });
 
@@ -137,9 +145,12 @@ void main() {
         // 1. 過去の写真から日記作成のフローをシミュレート
         final photoDate = DateTime.now().subtract(const Duration(days: 14));
         final premiumPlan = PremiumMonthlyPlan();
-        
+
         // 2. アクセス可能性を確認
-        final canAccess = photoAccessControlService.isPhotoAccessible(photoDate, premiumPlan);
+        final canAccess = photoAccessControlService.isPhotoAccessible(
+          photoDate,
+          premiumPlan,
+        );
         expect(canAccess, true);
 
         // 3. 日記作成の条件を確認
@@ -148,16 +159,17 @@ void main() {
           monthlyUsageCount: 10,
           lastResetDate: DateTime.now(),
         );
-        
+
         // 4. 月間制限内であることを確認
-        final remainingGenerations = subscriptionStatus.currentPlanClass.monthlyAiGenerationLimit - 
-                                   subscriptionStatus.monthlyUsageCount;
+        final remainingGenerations =
+            subscriptionStatus.currentPlanClass.monthlyAiGenerationLimit -
+            subscriptionStatus.monthlyUsageCount;
         expect(remainingGenerations > 0, true, reason: 'AI生成の残り回数がある');
 
         // 5. 日記作成後の状態を確認
         subscriptionStatus.monthlyUsageCount++;
         expect(subscriptionStatus.monthlyUsageCount, 11);
-        
+
         // 6. 使用済み写真の管理
         final usedPhotoIds = <String>{'past_photo_1', 'past_photo_2'};
         usedPhotoIds.add('past_photo_3');

@@ -80,30 +80,30 @@ class PhotoGridWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-          Container(
-            padding: AppSpacing.cardPadding,
-            decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha: 0.1),
-              borderRadius: AppSpacing.cardRadius,
-            ),
-            child: Icon(
-              Icons.photo_camera_outlined,
-              size: AppSpacing.iconLg,
-              color: AppColors.warning,
-            ),
+        Container(
+          padding: AppSpacing.cardPadding,
+          decoration: BoxDecoration(
+            color: AppColors.warning.withValues(alpha: 0.1),
+            borderRadius: AppSpacing.cardRadius,
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            AppConstants.permissionMessage,
-            style: AppTypography.bodyMedium,
-            textAlign: TextAlign.center,
+          child: Icon(
+            Icons.photo_camera_outlined,
+            size: AppSpacing.iconLg,
+            color: AppColors.warning,
           ),
-          const SizedBox(height: AppSpacing.lg),
-          PrimaryButton(
-            onPressed: onRequestPermission,
-            text: AppConstants.requestPermissionButton,
-            icon: Icons.camera_alt,
-          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          AppConstants.permissionMessage,
+          style: AppTypography.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        PrimaryButton(
+          onPressed: onRequestPermission,
+          text: AppConstants.requestPermissionButton,
+          icon: Icons.camera_alt,
+        ),
       ],
     );
   }
@@ -386,7 +386,7 @@ class PhotoGridWidget extends StatelessWidget {
 
     // 現在の選択状態を保存
     final wasSelected = controller.selected[index];
-    
+
     // 選択解除の場合は制限チェック不要
     if (wasSelected) {
       controller.toggleSelect(index);
@@ -398,7 +398,7 @@ class PhotoGridWidget extends StatelessWidget {
       // 選択上限に達している場合
       if (controller.selectedCount >= 5) {
         onSelectionLimitReached?.call();
-      } 
+      }
       // 日付が異なる場合（日付制限が有効かつ選択済み写真がある場合）
       else if (onDifferentDateSelected != null) {
         onDifferentDateSelected!();

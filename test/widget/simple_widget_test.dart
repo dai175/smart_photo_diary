@@ -6,7 +6,9 @@ import 'package:smart_photo_diary/ui/components/custom_card.dart';
 
 void main() {
   group('UI Components Widget Tests', () {
-    testWidgets('CustomDialog displays title and content', (WidgetTester tester) async {
+    testWidgets('CustomDialog displays title and content', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -14,12 +16,7 @@ void main() {
               child: CustomDialog(
                 title: 'Test Dialog',
                 content: Text('This is test content'),
-                actions: [
-                  CustomDialogAction(
-                    text: 'OK',
-                    onPressed: () {},
-                  ),
-                ],
+                actions: [CustomDialogAction(text: 'OK', onPressed: () {})],
               ),
             ),
           ),
@@ -61,7 +58,9 @@ void main() {
       expect(tapped, true);
     });
 
-    testWidgets('CustomCard displays child content', (WidgetTester tester) async {
+    testWidgets('CustomCard displays child content', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -120,7 +119,9 @@ void main() {
       expect(find.text('過去のコンテンツ'), findsOneWidget);
     });
 
-    testWidgets('Lock icon overlay displays correctly', (WidgetTester tester) async {
+    testWidgets('Lock icon overlay displays correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -154,7 +155,9 @@ void main() {
       expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
     });
 
-    testWidgets('Upgrade promotion banner displays correctly', (WidgetTester tester) async {
+    testWidgets('Upgrade promotion banner displays correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -188,7 +191,9 @@ void main() {
       expect(find.text('Premiumプランで過去365日の写真にアクセス'), findsOneWidget);
     });
 
-    testWidgets('Photo selection counter updates correctly', (WidgetTester tester) async {
+    testWidgets('Photo selection counter updates correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -196,7 +201,9 @@ void main() {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Theme.of(tester.element(find.byType(Container).first)).primaryColor.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    tester.element(find.byType(Container).first),
+                  ).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
