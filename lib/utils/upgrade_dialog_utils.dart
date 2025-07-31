@@ -63,7 +63,7 @@ class UpgradeDialogUtils {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '月間100回のAI生成＋全20種類のライティングプロンプトが利用できます。',
+                '月間100回のAI生成、過去1年の写真、全20種類のライティングプロンプトが利用できます。',
                 style: AppTypography.bodyMedium,
                 textAlign: TextAlign.left,
               ),
