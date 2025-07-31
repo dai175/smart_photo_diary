@@ -70,15 +70,15 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
     final days = plan.pastPhotoAccessDays;
 
     if (days == 1) {
-      return '昨日まで';
+      return '昨日の写真まで';
     } else if (days == 7) {
-      return '1週間前まで';
+      return '1週間前の写真まで';
     } else if (days == 30) {
-      return '1ヶ月前まで';
+      return '1ヶ月前の写真まで';
     } else if (days == 365) {
-      return '1年前まで';
+      return '1年前の写真まで';
     } else {
-      return '$days日前まで';
+      return '$days日前の写真まで';
     }
   }
 }
