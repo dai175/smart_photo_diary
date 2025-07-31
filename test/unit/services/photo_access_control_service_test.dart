@@ -239,7 +239,7 @@ void main() {
         );
 
         // Assert
-        expect(description, equals('昨日の写真まで'));
+        expect(description, equals('昨日までの写真'));
       });
 
       test('should return correct description for PremiumPlans', () {
@@ -254,8 +254,8 @@ void main() {
             .getAccessRangeDescription(yearlyPlan);
 
         // Assert
-        expect(monthlyDescription, equals('1年前の写真まで'));
-        expect(yearlyDescription, equals('1年前の写真まで'));
+        expect(monthlyDescription, equals('1年前までの写真'));
+        expect(yearlyDescription, equals('1年前までの写真'));
       });
 
       test('should return correct description for various day counts', () {
