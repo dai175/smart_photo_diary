@@ -38,7 +38,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
 
   // 遅延読み込み用の変数
   static const int _itemsPerPage = 30;
-  int _visibleItemCount = _itemsPerPage;
+  int _visibleItemCount = 0; // 初期値を0に変更
   bool _isLoadingMore = false;
 
   @override
@@ -122,12 +122,23 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (context, child) {
-        // 写真アセットが変更されたらリセット
-        if (widget.controller.photoAssets.length < _visibleItemCount) {
-          _visibleItemCount = widget.controller.photoAssets.length.clamp(
-            0,
-            _itemsPerPage,
-          );
+        // 写真アセットが変更されたら適切に更新
+        if (widget.controller.photoAssets.isNotEmpty) {
+          // 写真がある場合、表示数を更新
+          if (_visibleItemCount == 0 ||
+              widget.controller.photoAssets.length < _visibleItemCount) {
+            _visibleItemCount = widget.controller.photoAssets.length.clamp(
+              0,
+              _itemsPerPage,
+            );
+            // 初期プリロードを実行
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _preloadInitialThumbnails();
+            });
+          }
+        } else {
+          // 写真がない場合は0にリセット
+          _visibleItemCount = 0;
         }
 
         return Column(
