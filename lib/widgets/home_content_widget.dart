@@ -3,7 +3,7 @@ import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
 import '../screens/diary_preview_screen.dart';
-import '../widgets/photo_grid_widget.dart';
+import '../widgets/optimized_photo_grid_widget.dart';
 import '../widgets/recent_diaries_widget.dart';
 import '../widgets/prompt_selection_modal.dart';
 import '../models/writing_prompt.dart';
@@ -221,7 +221,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.md),
-          PhotoGridWidget(
+          OptimizedPhotoGridWidget(
             controller: widget.photoController,
             onSelectionLimitReached: widget.onSelectionLimitReached,
             onUsedPhotoSelected: widget.onUsedPhotoSelected,
@@ -274,7 +274,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               },
             )
           else
-            PhotoGridWidget(
+            OptimizedPhotoGridWidget(
               controller: widget.pastPhotoController,
               onSelectionLimitReached: widget.onSelectionLimitReached,
               onUsedPhotoSelected: widget.onUsedPhotoSelected,

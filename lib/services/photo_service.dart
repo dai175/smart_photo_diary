@@ -3,6 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
 import 'interfaces/photo_service_interface.dart';
+import 'photo_cache_service.dart';
 import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
 
@@ -676,21 +677,14 @@ class PhotoService implements PhotoServiceInterface {
     int width = AppConstants.defaultThumbnailWidth,
     int height = AppConstants.defaultThumbnailHeight,
   }) async {
-    try {
-      return await asset.thumbnailDataWithSize(ThumbnailSize(width, height));
-    } catch (e) {
-      final loggingService = await LoggingService.getInstance();
-      final appError = ErrorHandler.handleError(
-        e,
-        context: 'PhotoService.getThumbnail',
-      );
-      loggingService.error(
-        'サムネイル取得エラー',
-        context: 'PhotoService.getThumbnail',
-        error: appError,
-      );
-      return null;
-    }
+    // PhotoCacheServiceを使用してキャッシュ付きでサムネイルを取得
+    final cacheService = PhotoCacheService.getInstance();
+    return await cacheService.getThumbnail(
+      asset,
+      width: width,
+      height: height,
+      quality: 80,
+    );
   }
 
   /// 写真の元画像を取得する（後方互換性のため保持）
@@ -781,6 +775,100 @@ class PhotoService implements PhotoServiceInterface {
       loggingService.error(
         '写真取得エラー',
         context: 'PhotoService.getAllPhotos',
+        error: appError,
+      );
+      return [];
+    }
+  }
+
+  /// 効率的な写真取得（ページネーション対応）
+  ///
+  /// [startDate]: 開始日時（指定しない場合は全期間）
+  /// [endDate]: 終了日時（指定しない場合は現在まで）
+  /// [offset]: 取得開始位置
+  /// [limit]: 取得する写真の最大数
+  /// 戻り値: 写真アセットのリスト
+  @override
+  Future<List<AssetEntity>> getPhotosEfficient({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    // 権限チェック
+    final bool hasPermission = await requestPermission();
+    if (!hasPermission) {
+      loggingService.info(
+        '写真アクセス権限がありません',
+        context: 'PhotoService.getPhotosEfficient',
+      );
+      return [];
+    }
+
+    try {
+      // フィルターオプションの作成
+      final FilterOptionGroup filterOption;
+      if (startDate != null || endDate != null) {
+        filterOption = FilterOptionGroup(
+          orders: [const OrderOption()],
+          createTimeCond: DateTimeCond(
+            min: startDate ?? DateTime(1970),
+            max: endDate ?? DateTime.now(),
+          ),
+        );
+      } else {
+        filterOption = FilterOptionGroup(orders: [const OrderOption()]);
+      }
+
+      // アルバムを取得
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        filterOption: filterOption,
+      );
+
+      if (albums.isEmpty) {
+        loggingService.debug(
+          'アルバムが見つかりません',
+          context: 'PhotoService.getPhotosEfficient',
+        );
+        return [];
+      }
+
+      // メインアルバムから写真を取得
+      final AssetPathEntity album = albums.first;
+      final int totalCount = await album.assetCountAsync;
+
+      // オフセットが総数を超えている場合は空のリストを返す
+      if (offset >= totalCount) {
+        return [];
+      }
+
+      // 実際に取得可能な数を計算
+      final int actualLimit = (offset + limit > totalCount)
+          ? totalCount - offset
+          : limit;
+
+      final List<AssetEntity> assets = await album.getAssetListRange(
+        start: offset,
+        end: offset + actualLimit,
+      );
+
+      loggingService.debug(
+        '写真を効率的に取得しました',
+        context: 'PhotoService.getPhotosEfficient',
+        data: '取得数: ${assets.length}, オフセット: $offset, 制限: $limit',
+      );
+
+      return assets;
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.getPhotosEfficient',
+      );
+      loggingService.error(
+        '写真取得エラー',
+        context: 'PhotoService.getPhotosEfficient',
         error: appError,
       );
       return [];

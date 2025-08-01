@@ -46,4 +46,12 @@ abstract class PhotoServiceInterface {
 
   /// 現在の権限状態が Limited Access かチェック
   Future<bool> isLimitedAccess();
+
+  /// 効率的な写真取得（ページネーション対応）
+  Future<List<AssetEntity>> getPhotosEfficient({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  });
 }
