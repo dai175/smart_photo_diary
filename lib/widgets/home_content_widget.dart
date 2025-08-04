@@ -249,7 +249,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           if (_currentPlan != null) ...[
             // Basicプランの場合のみアクセス範囲情報を表示
             if (isBasicPlan) ...[
-              _buildAccessRangeInfo(),
+              Row(children: [_buildAccessRangeInfo()]),
               const SizedBox(height: AppSpacing.md),
             ] else ...[
               // プレミアムプランの場合は表示切り替えのみ
@@ -665,37 +665,78 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       _currentPlan!,
     );
 
-    return Flexible(
-      child: Row(
-        children: [
-          // プラン情報バッジ
-          Flexible(
+    return Row(
+      children: [
+        // プラン情報バッジ
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: isBasic
+                ? AppColors.warning.withValues(alpha: 0.08)
+                : AppColors.success.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isBasic
+                  ? AppColors.warning.withValues(alpha: 0.2)
+                  : AppColors.success.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                rangeDescription,
+                style: AppTypography.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: isBasic ? AppColors.warning : AppColors.success,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isBasic) ...[
+          const SizedBox(width: AppSpacing.sm),
+          // アップグレードボタン
+          GestureDetector(
+            onTap: () => _navigateToUpgrade(context),
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: isBasic
-                    ? AppColors.warning.withValues(alpha: 0.08)
-                    : AppColors.success.withValues(alpha: 0.08),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isBasic
-                      ? AppColors.warning.withValues(alpha: 0.2)
-                      : AppColors.success.withValues(alpha: 0.2),
-                  width: 1,
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(width: AppSpacing.xs),
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
                   Text(
-                    rangeDescription,
+                    'アップグレード',
                     style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: isBasic ? AppColors.warning : AppColors.success,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
                       fontSize: 13,
                     ),
                   ),
@@ -703,53 +744,8 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               ),
             ),
           ),
-          if (isBasic) ...[
-            const SizedBox(width: AppSpacing.sm),
-            // アップグレードボタン
-            GestureDetector(
-              onTap: () => _navigateToUpgrade(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'アップグレード',
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
-      ),
+      ],
     );
   }
 
