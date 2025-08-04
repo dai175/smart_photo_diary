@@ -18,6 +18,7 @@ class PastPhotoCalendarWidget extends StatefulWidget {
   final DateTime? accessibleDate;
   final Function(List<AssetEntity>) onPhotosSelected;
   final Set<String> usedPhotoIds;
+  final Function()? onSelectionCleared;
 
   const PastPhotoCalendarWidget({
     super.key,
@@ -25,6 +26,7 @@ class PastPhotoCalendarWidget extends StatefulWidget {
     required this.accessibleDate,
     required this.onPhotosSelected,
     required this.usedPhotoIds,
+    this.onSelectionCleared,
   });
 
   @override
@@ -43,6 +45,15 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
 
   // 日記が存在する日付
   Set<DateTime> _diaryDates = {};
+
+  /// 選択状態をクリアする
+  void clearSelection() {
+    setState(() {
+      _selectedDay = null;
+    });
+    // クリアコールバックを呼び出し
+    widget.onSelectionCleared?.call();
+  }
 
   @override
   void initState() {

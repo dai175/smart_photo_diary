@@ -40,6 +40,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   static const int _itemsPerPage = 30;
   int _visibleItemCount = 0; // 初期値を0に変更
   bool _isLoadingMore = false;
+  int _lastPhotoCount = 0; // 写真リストの長さを追跡
 
   @override
   void initState() {
@@ -58,6 +59,26 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant OptimizedPhotoGridWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 写真リストが変更された場合、表示数をリセット
+    if (oldWidget.controller.photoAssets.length !=
+        widget.controller.photoAssets.length) {
+      setState(() {
+        _visibleItemCount = widget.controller.photoAssets.length.clamp(
+          0,
+          _itemsPerPage,
+        );
+      });
+
+      // 新しい写真リストの初期バッチをプリロード
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _preloadInitialThumbnails();
+      });
+    }
   }
 
   /// スクロール時の処理
@@ -122,23 +143,22 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (context, child) {
-        // 写真アセットが変更されたら適切に更新
-        if (widget.controller.photoAssets.isNotEmpty) {
-          // 写真がある場合、表示数を更新
-          if (_visibleItemCount == 0 ||
-              widget.controller.photoAssets.length < _visibleItemCount) {
-            _visibleItemCount = widget.controller.photoAssets.length.clamp(
-              0,
-              _itemsPerPage,
-            );
-            // 初期プリロードを実行
+        // 写真リストが変更された場合の処理
+        if (_lastPhotoCount != widget.controller.photoAssets.length) {
+          _lastPhotoCount = widget.controller.photoAssets.length;
+
+          // 表示数をリセット
+          _visibleItemCount = widget.controller.photoAssets.length.clamp(
+            0,
+            _itemsPerPage,
+          );
+
+          // 初期プリロードを実行
+          if (widget.controller.photoAssets.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _preloadInitialThumbnails();
             });
           }
-        } else {
-          // 写真がない場合は0にリセット
-          _visibleItemCount = 0;
         }
 
         return Column(

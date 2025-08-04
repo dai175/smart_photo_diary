@@ -63,6 +63,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   Plan? _currentPlan;
   DateTime? _accessibleDate;
   bool _isCalendarView = false;
+  // 過去タブの表示モード管理
+  DateTime? _selectedPastDate; // 選択された日付
+  bool _showAllPastPhotos = true; // すべての写真を表示するかどうか
 
   @override
   void initState() {
@@ -243,20 +246,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(child: _buildAccessRangeInfo()),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isCalendarView = !_isCalendarView;
-                    });
-                  },
-                  icon: Icon(
-                    _isCalendarView
-                        ? Icons.grid_view_rounded
-                        : Icons.calendar_month_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  tooltip: _isCalendarView ? 'グリッド表示' : 'カレンダー表示',
-                ),
+                _buildViewToggle(),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -269,8 +259,23 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onPhotosSelected: (photos) {
                 widget.pastPhotoController.setPhotoAssets(photos);
                 setState(() {
+                  _selectedPastDate = photos.isNotEmpty
+                      ? DateTime(
+                          photos.first.createDateTime.year,
+                          photos.first.createDateTime.month,
+                          photos.first.createDateTime.day,
+                        )
+                      : null;
+                  _showAllPastPhotos = false;
                   _isCalendarView = false;
                 });
+              },
+              onSelectionCleared: () {
+                setState(() {
+                  _selectedPastDate = null;
+                  _showAllPastPhotos = true;
+                });
+                _loadPastPhotos();
               },
             )
           else
@@ -465,7 +470,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         );
       }
     } catch (e) {
-      debugPrint('使用量状況取得エラー: $e');
       if (context.mounted) {
         await showDialog<void>(
           context: context,
@@ -536,7 +540,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
   }
 
-  Future<void> _loadPastPhotos() async {
+  Future<void> _loadPastPhotos({DateTime? specificDate}) async {
     if (!mounted) return;
 
     widget.pastPhotoController.setLoading(true);
@@ -556,13 +560,46 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         return;
       }
 
-      // プランに基づいて過去の写真を取得（今日は除外）
+      // 特定日付が指定されている場合はその日付の写真のみを取得
+      if (specificDate != null) {
+        final startOfDay = DateTime(
+          specificDate.year,
+          specificDate.month,
+          specificDate.day,
+        );
+        final endOfDay = DateTime(
+          specificDate.year,
+          specificDate.month,
+          specificDate.day,
+          23,
+          59,
+          59,
+          999,
+        );
+
+        final photos = await photoService.getPhotosInDateRange(
+          startDate: startOfDay,
+          endDate: endOfDay,
+          limit: 200,
+        );
+
+        if (!mounted) return;
+
+        widget.pastPhotoController.setPhotoAssets(photos);
+        widget.pastPhotoController.setLoading(false);
+        return;
+      }
+
+      // カレンダー表示時と同じ範囲の写真を取得（今日は除外）
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
+      // カレンダーウィジェットと同じ範囲を使用
       DateTime startDate;
-      if (_currentPlan != null && _accessibleDate != null) {
-        startDate = _accessibleDate!;
+      if (_currentPlan != null) {
+        // プランの過去写真アクセス日数に基づいて開始日を計算
+        final daysBack = _currentPlan!.pastPhotoAccessDays;
+        startDate = today.subtract(Duration(days: daysBack));
       } else {
         // フォールバック: 昨日の00:00:00から取得
         startDate = today.subtract(const Duration(days: 1));
@@ -574,7 +611,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       final photos = await photoService.getPhotosInDateRange(
         startDate: startDate,
         endDate: endDate,
-        limit: 50,
+        limit: 200,
       );
 
       if (!mounted) return;
@@ -613,78 +650,37 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
     final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
 
-    return Row(
-      children: [
-        // プラン情報バッジ
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: isBasic
-                ? AppColors.warning.withValues(alpha: 0.08)
-                : AppColors.success.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isBasic
-                  ? AppColors.warning.withValues(alpha: 0.2)
-                  : AppColors.success.withValues(alpha: 0.2),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                rangeDescription,
-                style: AppTypography.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: isBasic ? AppColors.warning : AppColors.success,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (isBasic) ...[
-          const SizedBox(width: AppSpacing.sm),
-          // アップグレードボタン
-          GestureDetector(
-            onTap: () => _navigateToUpgrade(context),
+    return Flexible(
+      child: Row(
+        children: [
+          // プラン情報バッジ
+          Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+                color: isBasic
+                    ? AppColors.warning.withValues(alpha: 0.08)
+                    : AppColors.success.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(
+                  color: isBasic
+                      ? AppColors.warning.withValues(alpha: 0.2)
+                      : AppColors.success.withValues(alpha: 0.2),
+                  width: 1,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.auto_awesome_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'アップグレード',
+                    rangeDescription,
                     style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      color: isBasic ? AppColors.warning : AppColors.success,
                       fontSize: 13,
                     ),
                   ),
@@ -692,12 +688,179 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               ),
             ),
           ),
+          if (isBasic) ...[
+            const SizedBox(width: AppSpacing.sm),
+            // アップグレードボタン
+            GestureDetector(
+              onTap: () => _navigateToUpgrade(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'アップグレード',
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
   /// 異なる日付の写真選択時のダイアログ
+  /// 表示切り替えウィジェットを構築
+  Widget _buildViewToggle() {
+    return Row(
+      children: [
+        // 日付表示（タップ可能）
+        if (!_showAllPastPhotos && _selectedPastDate != null)
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _showAllPastPhotos = true;
+                  _selectedPastDate = null;
+                });
+                _loadPastPhotos();
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${_selectedPastDate!.year}年${_selectedPastDate!.month}月${_selectedPastDate!.day}日',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Icon(
+                      Icons.close_rounded,
+                      size: 16,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.6),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        else if (_showAllPastPhotos)
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _isCalendarView = true;
+                });
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.photo_library_rounded,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'すべての写真',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        const SizedBox(width: AppSpacing.sm),
+        // カレンダー表示切り替えボタン
+        IconButton(
+          onPressed: () {
+            setState(() {
+              _isCalendarView = !_isCalendarView;
+            });
+          },
+          icon: Icon(
+            _isCalendarView
+                ? Icons.grid_view_rounded
+                : Icons.calendar_month_rounded,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          tooltip: _isCalendarView ? 'グリッド表示' : 'カレンダー表示',
+        ),
+      ],
+    );
+  }
+
   void _showDifferentDateDialog() {
     showDialog(
       context: context,
