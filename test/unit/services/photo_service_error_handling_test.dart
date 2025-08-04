@@ -7,7 +7,9 @@ import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
 class MockAssetPathEntity extends Mock implements AssetPathEntity {}
+
 class MockAssetEntity extends Mock implements AssetEntity {}
+
 class MockFilterOptionGroup extends Mock implements FilterOptionGroup {}
 
 void main() {
@@ -35,7 +37,7 @@ void main() {
       test('should return empty list when permission is denied', () async {
         // Arrange
         final testDate = DateTime(2024, 7, 25);
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           testDate,
@@ -52,7 +54,7 @@ void main() {
         // Arrange
         final testDate = DateTime.now();
         const negativeOffset = -10;
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           testDate,
@@ -68,7 +70,7 @@ void main() {
       test('should handle zero limit gracefully', () async {
         // Arrange
         final testDate = DateTime.now();
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           testDate,
@@ -85,7 +87,7 @@ void main() {
         // Arrange
         final testDate = DateTime.now();
         const hugeLimit = 1000000;
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           testDate,
@@ -103,7 +105,7 @@ void main() {
       test('should handle far past dates', () async {
         // Arrange
         final ancientDate = DateTime(1900, 1, 1);
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           ancientDate,
@@ -119,7 +121,7 @@ void main() {
       test('should handle far future dates', () async {
         // Arrange
         final futureDate = DateTime(2100, 12, 31);
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           futureDate,
@@ -136,7 +138,7 @@ void main() {
         // Arrange
         // Dartは無効な日付を自動調整するため、2月30日は3月2日になる
         final invalidDate = DateTime(2024, 2, 30);
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           invalidDate,
@@ -153,19 +155,19 @@ void main() {
     group('Concurrent Access', () {
       test('should handle multiple simultaneous requests', () async {
         // Arrange
-        final dates = List.generate(10, (i) => 
-          DateTime.now().subtract(Duration(days: i))
+        final dates = List.generate(
+          10,
+          (i) => DateTime.now().subtract(Duration(days: i)),
         );
-        
+
         // Act
-        final futures = dates.map((date) => 
-          photoService.getPhotosForDate(
-            date,
-            offset: 0,
-            limit: 5,
-          )
-        ).toList();
-        
+        final futures = dates
+            .map(
+              (date) =>
+                  photoService.getPhotosForDate(date, offset: 0, limit: 5),
+            )
+            .toList();
+
         final results = await Future.wait(futures);
 
         // Assert
@@ -178,7 +180,7 @@ void main() {
       test('should handle rapid sequential requests', () async {
         // Arrange
         final testDate = DateTime.now();
-        
+
         // Act
         final results = <List<AssetEntity>>[];
         for (int i = 0; i < 20; i++) {
@@ -202,14 +204,14 @@ void main() {
       test('should handle overlapping offset and limit', () async {
         // Arrange
         final testDate = DateTime.now();
-        
+
         // Act
         final batch1 = await photoService.getPhotosForDate(
           testDate,
           offset: 0,
           limit: 20,
         );
-        
+
         final batch2 = await photoService.getPhotosForDate(
           testDate,
           offset: 10,
@@ -219,21 +221,21 @@ void main() {
         // Assert
         expect(batch1, isA<List<AssetEntity>>());
         expect(batch2, isA<List<AssetEntity>>());
-        
+
         // オーバーラップしても正常に動作
       });
 
       test('should handle gaps in pagination', () async {
         // Arrange
         final testDate = DateTime.now();
-        
+
         // Act
         final batch1 = await photoService.getPhotosForDate(
           testDate,
           offset: 0,
           limit: 10,
         );
-        
+
         final batch2 = await photoService.getPhotosForDate(
           testDate,
           offset: 50, // ギャップあり
@@ -251,7 +253,7 @@ void main() {
         // Arrange
         final testDate = DateTime.now();
         var attemptCount = 0;
-        
+
         // Act & Assert
         // 3回試行して、毎回結果を確認
         for (int i = 0; i < 3; i++) {
@@ -261,10 +263,10 @@ void main() {
             offset: 0,
             limit: 10,
           );
-          
+
           expect(result, isA<List<AssetEntity>>());
         }
-        
+
         expect(attemptCount, equals(3));
       });
 
@@ -272,7 +274,7 @@ void main() {
         // Arrange
         final validDate = DateTime.now();
         final invalidOffset = -1000;
-        
+
         // Act
         // 不正なパラメータでの呼び出し
         final errorResult = await photoService.getPhotosForDate(
@@ -280,7 +282,7 @@ void main() {
           offset: invalidOffset,
           limit: 10,
         );
-        
+
         // 正常なパラメータでの呼び出し
         final normalResult = await photoService.getPhotosForDate(
           validDate,
@@ -299,7 +301,7 @@ void main() {
       test('should handle minimum date values', () async {
         // Arrange
         final minDate = DateTime(1, 1, 1);
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           minDate,
@@ -314,7 +316,7 @@ void main() {
       test('should handle maximum date values', () async {
         // Arrange
         final maxDate = DateTime(9999, 12, 31);
-        
+
         // Act
         final result = await photoService.getPhotosForDate(
           maxDate,
@@ -330,14 +332,14 @@ void main() {
         // Arrange
         final startOfDay = DateTime(2024, 7, 25, 0, 0, 0);
         final endOfDay = DateTime(2024, 7, 25, 23, 59, 59);
-        
+
         // Act
         final morningPhotos = await photoService.getPhotosForDate(
           startOfDay,
           offset: 0,
           limit: 100,
         );
-        
+
         final nightPhotos = await photoService.getPhotosForDate(
           endOfDay,
           offset: 0,
@@ -347,7 +349,7 @@ void main() {
         // Assert
         expect(morningPhotos, isA<List<AssetEntity>>());
         expect(nightPhotos, isA<List<AssetEntity>>());
-        
+
         // 同じ日付として扱われるべき
         expect(morningPhotos.length, equals(nightPhotos.length));
       });
