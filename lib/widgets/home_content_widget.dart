@@ -236,6 +236,11 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   Widget _buildPastPhotosTab() {
+    // Basicプランかどうかチェック
+    final isBasicPlan =
+        _currentPlan != null &&
+        _currentPlan!.runtimeType.toString().contains('Basic');
+
     return SingleChildScrollView(
       padding: AppSpacing.cardPadding,
       child: Column(
@@ -246,12 +251,14 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(child: _buildAccessRangeInfo()),
-                _buildViewToggle(),
+                // Basicプランではカレンダー切り替えを非表示
+                if (!isBasicPlan) _buildViewToggle(),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
           ],
-          if (_isCalendarView)
+          // Basicプランではカレンダー表示を無効化
+          if (_isCalendarView && !isBasicPlan)
             PastPhotoCalendarWidget(
               currentPlan: _currentPlan,
               accessibleDate: _accessibleDate,
@@ -741,6 +748,15 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   /// 異なる日付の写真選択時のダイアログ
   /// 表示切り替えウィジェットを構築
   Widget _buildViewToggle() {
+    // Basicプランではこの機能を無効化
+    final isBasicPlan =
+        _currentPlan != null &&
+        _currentPlan!.runtimeType.toString().contains('Basic');
+
+    if (isBasicPlan) {
+      return const SizedBox.shrink();
+    }
+
     return Row(
       children: [
         // 日付表示（タップ可能）
