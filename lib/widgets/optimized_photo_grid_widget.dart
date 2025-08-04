@@ -9,6 +9,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
+import '../utils/performance_monitor.dart';
 
 /// 最適化された写真グリッド表示ウィジェット
 class OptimizedPhotoGridWidget extends StatefulWidget {
@@ -41,6 +42,11 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   int _visibleItemCount = 0; // 初期値を0に変更
   bool _isLoadingMore = false;
   int _lastPhotoCount = 0; // 写真リストの長さを追跡
+
+  // パフォーマンス最適化用の変数
+  bool _isScrolling = false;
+  DateTime? _lastScrollTime;
+  static const Duration _scrollDebounce = Duration(milliseconds: 100);
 
   @override
   void initState() {
@@ -83,6 +89,28 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
 
   /// スクロール時の処理
   void _onScroll() {
+    // スクロール状態を追跡
+    if (!_isScrolling) {
+      setState(() {
+        _isScrolling = true;
+      });
+    }
+
+    _lastScrollTime = DateTime.now();
+
+    // デバウンス処理でスクロール停止を検出
+    Future.delayed(_scrollDebounce, () {
+      if (_lastScrollTime != null &&
+          DateTime.now().difference(_lastScrollTime!) >= _scrollDebounce) {
+        if (mounted && _isScrolling) {
+          setState(() {
+            _isScrolling = false;
+          });
+        }
+      }
+    });
+
+    // 追加読み込みの判定
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreItems();
@@ -128,6 +156,8 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   Future<void> _preloadInitialThumbnails() async {
     if (widget.controller.photoAssets.isEmpty) return;
 
+    PerformanceMonitor.startMeasurement('initial_thumbnail_preload');
+
     final initialBatch = widget.controller.photoAssets
         .take(_itemsPerPage)
         .toList();
@@ -135,6 +165,11 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
       initialBatch,
       width: AppConstants.photoThumbnailSize.toInt(),
       height: AppConstants.photoThumbnailSize.toInt(),
+    );
+
+    await PerformanceMonitor.endMeasurement(
+      'initial_thumbnail_preload',
+      context: 'OptimizedPhotoGridWidget',
     );
   }
 
@@ -287,6 +322,12 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   Widget _buildPhotoThumbnail(int index) {
     final asset = widget.controller.photoAssets[index];
 
+    // スクロール中は低品質、停止後は高品質
+    final quality = _isScrolling ? 50 : 80;
+    final filterQuality = _isScrolling
+        ? FilterQuality.low
+        : FilterQuality.medium;
+
     return ClipRRect(
       borderRadius: AppSpacing.photoRadius,
       child: FutureBuilder<Uint8List?>(
@@ -294,6 +335,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
           asset,
           width: AppConstants.photoThumbnailSize.toInt(),
           height: AppConstants.photoThumbnailSize.toInt(),
+          quality: quality,
         ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
@@ -313,7 +355,21 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
                             MediaQuery.of(context).devicePixelRatio)
                         .round(),
                 gaplessPlayback: true,
-                filterQuality: FilterQuality.medium,
+                filterQuality: filterQuality,
+                // スクロール中はフレーム優先
+                frameBuilder: _isScrolling
+                    ? null
+                    : (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded) {
+                          return child;
+                        }
+                        return AnimatedOpacity(
+                          opacity: frame == null ? 0 : 1,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          child: child,
+                        );
+                      },
               ),
             );
           } else {

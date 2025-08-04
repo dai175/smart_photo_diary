@@ -37,8 +37,16 @@ class PhotoCacheService implements PhotoCacheServiceInterface {
   static const int _maxCacheEntries = 500; // 最大500エントリー
   static const Duration _cacheExpiration = Duration(hours: 1); // 1時間でキャッシュ期限切れ
 
+  // メモリ警告閾値
+  static const int _memoryWarningThreshold = 80 * 1024 * 1024; // 80MB
+  static const int _memoryCriticalThreshold = 90 * 1024 * 1024; // 90MB
+
   // 現在のキャッシュサイズ（バイト）
   int _currentCacheSizeInBytes = 0;
+
+  // メモリ監視用
+  DateTime? _lastMemoryCheck;
+  static const Duration _memoryCheckInterval = Duration(seconds: 30);
 
   /// サムネイルを取得（キャッシュがあればキャッシュから、なければ生成してキャッシュ）
   @override
@@ -189,6 +197,9 @@ class PhotoCacheService implements PhotoCacheServiceInterface {
 
   /// キャッシュに追加
   void _addToCache(String key, Uint8List data) {
+    // メモリ監視
+    _checkMemoryUsage();
+
     // キャッシュサイズの制限チェック
     if (_currentCacheSizeInBytes + data.length > _maxMemoryCacheSizeInBytes ||
         _memoryCache.length >= _maxCacheEntries) {
@@ -204,6 +215,11 @@ class PhotoCacheService implements PhotoCacheServiceInterface {
 
     _memoryCache[key] = entry;
     _currentCacheSizeInBytes += data.length;
+
+    // メモリ警告チェック
+    if (_currentCacheSizeInBytes > _memoryCriticalThreshold) {
+      _performAggressiveCleanup();
+    }
   }
 
   /// キャッシュから削除
@@ -229,5 +245,93 @@ class PhotoCacheService implements PhotoCacheServiceInterface {
     }
 
     debugPrint('PhotoCacheService: キャッシュエビクション実行 - $entriesToRemove エントリーを削除');
+  }
+
+  /// メモリ使用状況をチェック
+  void _checkMemoryUsage() async {
+    final now = DateTime.now();
+    if (_lastMemoryCheck != null &&
+        now.difference(_lastMemoryCheck!) < _memoryCheckInterval) {
+      return;
+    }
+
+    _lastMemoryCheck = now;
+
+    // メモリ使用量を記録
+    final loggingService = await LoggingService.getInstance();
+    loggingService.debug(
+      'キャッシュメモリ使用状況',
+      context: 'PhotoCacheService._checkMemoryUsage',
+      data: {
+        'currentSize':
+            '${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
+        'entries': _memoryCache.length,
+        'threshold': _currentCacheSizeInBytes > _memoryWarningThreshold
+            ? 'WARNING'
+            : 'OK',
+      }.toString(),
+    );
+
+    // 警告閾値を超えている場合
+    if (_currentCacheSizeInBytes > _memoryWarningThreshold) {
+      loggingService.warning(
+        'キャッシュメモリ使用量が警告閾値を超えました',
+        context: 'PhotoCacheService._checkMemoryUsage',
+        data:
+            '${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB / ${(_memoryWarningThreshold / 1024 / 1024)}MB',
+      );
+    }
+  }
+
+  /// アグレッシブなクリーンアップ
+  void _performAggressiveCleanup() async {
+    final loggingService = await LoggingService.getInstance();
+    loggingService.warning(
+      'アグレッシブクリーンアップを実行',
+      context: 'PhotoCacheService._performAggressiveCleanup',
+      data:
+          '現在のサイズ: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
+    );
+
+    // タイムスタンプでソート
+    final sortedEntries = _memoryCache.entries.toList()
+      ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
+
+    // 50%のエントリーを削除
+    final entriesToRemove = (_memoryCache.length * 0.5).ceil();
+
+    for (var i = 0; i < entriesToRemove && i < sortedEntries.length; i++) {
+      _removeFromCache(sortedEntries[i].key);
+    }
+
+    loggingService.info(
+      'アグレッシブクリーンアップ完了',
+      context: 'PhotoCacheService._performAggressiveCleanup',
+      data:
+          'クリーンアップ後: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
+    );
+  }
+
+  /// 期限切れエントリーのクリーンアップ
+  @override
+  void cleanupExpiredEntries() {
+    final now = DateTime.now();
+    final keysToRemove = <String>[];
+
+    _memoryCache.forEach((key, entry) {
+      if (now.difference(entry.timestamp) > _cacheExpiration) {
+        keysToRemove.add(key);
+      }
+    });
+
+    for (final key in keysToRemove) {
+      _removeFromCache(key);
+    }
+
+    if (keysToRemove.isNotEmpty) {
+      debugPrint(
+        'PhotoCacheService: ${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
+      );
+    }
   }
 }

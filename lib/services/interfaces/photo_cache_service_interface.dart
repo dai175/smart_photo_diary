@@ -27,4 +27,7 @@ abstract class PhotoCacheServiceInterface {
     int height = 200,
     int quality = 80,
   });
+
+  /// 期限切れエントリーのクリーンアップ
+  void cleanupExpiredEntries();
 }

@@ -69,6 +69,15 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
     _loadDiaryDates();
   }
 
+  @override
+  void dispose() {
+    // ウィジェット破棄時にメモリクリーンアップ
+    _photosByDate.clear();
+    _photoCounts.clear();
+    _diaryDates.clear();
+    super.dispose();
+  }
+
   /// 指定月の写真数を取得
   Future<void> _loadPhotoCountsForMonth(DateTime month) async {
     setState(() => _isLoading = true);

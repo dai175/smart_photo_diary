@@ -25,6 +25,7 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
+import '../services/photo_cache_service.dart';
 
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
@@ -72,12 +73,26 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     super.initState();
     _loadCurrentPlan();
     _loadUsedPhotoIds();
-    widget.tabController.addListener(() {
-      if (widget.tabController.index == 1 &&
-          widget.pastPhotoController.photoAssets.isEmpty) {
-        _loadPastPhotos();
-      }
-    });
+    widget.tabController.addListener(_handleTabChange);
+  }
+
+  @override
+  void dispose() {
+    widget.tabController.removeListener(_handleTabChange);
+    super.dispose();
+  }
+
+  void _handleTabChange() {
+    if (widget.tabController.index == 1 &&
+        widget.pastPhotoController.photoAssets.isEmpty) {
+      _loadPastPhotos();
+    }
+
+    // タブ切り替え時にキャッシュクリーンアップ
+    if (widget.tabController.index == 0) {
+      // 過去タブから今日タブに戻った時
+      _cleanupPastPhotosCache();
+    }
   }
 
   @override
@@ -898,5 +913,24 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         ],
       ),
     );
+  }
+
+  /// 過去の写真キャッシュをクリーンアップ
+  void _cleanupPastPhotosCache() async {
+    try {
+      final cacheService = PhotoCacheService.getInstance();
+      // 期限切れエントリーのクリーンアップ
+      cacheService.cleanupExpiredEntries();
+
+      final loggingService = await LoggingService.getInstance();
+      loggingService.debug(
+        '過去タブのキャッシュクリーンアップ実行',
+        context: 'HomeContentWidget._cleanupPastPhotosCache',
+        data:
+            '現在のキャッシュサイズ: ${(cacheService.getCacheSize() / 1024 / 1024).toStringAsFixed(2)}MB',
+      );
+    } catch (e) {
+      // エラーは無視（クリーンアップは必須ではない）
+    }
   }
 }
