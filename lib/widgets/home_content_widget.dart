@@ -247,15 +247,18 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_currentPlan != null) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(child: _buildAccessRangeInfo()),
-                // Basicプランではカレンダー切り替えを非表示
-                if (!isBasicPlan) _buildViewToggle(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
+            // Basicプランの場合のみアクセス範囲情報を表示
+            if (isBasicPlan) ...[
+              _buildAccessRangeInfo(),
+              const SizedBox(height: AppSpacing.md),
+            ] else ...[
+              // プレミアムプランの場合は表示切り替えのみ
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [_buildViewToggle()],
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
           ],
           // Basicプランではカレンダー表示を無効化
           if (_isCalendarView && !isBasicPlan)
@@ -649,13 +652,18 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       return const SizedBox.shrink();
     }
 
+    final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
+
+    // プレミアムプランの場合は何も表示しない
+    if (!isBasic) {
+      return const SizedBox.shrink();
+    }
+
     final accessControlService =
         ServiceRegistration.get<PhotoAccessControlServiceInterface>();
     final rangeDescription = accessControlService.getAccessRangeDescription(
       _currentPlan!,
     );
-
-    final isBasic = _currentPlan!.runtimeType.toString().contains('Basic');
 
     return Flexible(
       child: Row(
