@@ -955,7 +955,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   double _getTabViewHeight() {
     // 過去タブでカレンダー表示の場合 - 固定高さで上部位置を一定に保つ
     if (widget.tabController.index == 1 && _isCalendarView) {
-      return 540.0; // カレンダー表示用の固定高さ（6週間分）
+      return 460.0; // カレンダー表示用の固定高さ（6週間分）
     }
     // 過去タブで写真表示の場合
     else if (widget.tabController.index == 1) {
