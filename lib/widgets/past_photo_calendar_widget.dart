@@ -310,11 +310,8 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                       margin: const EdgeInsets.all(4),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: hasPhotoAndAccessible
-                            ? null
-                            : Colors.grey.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
-                        border: hasDiary && isAccessible
+                        border: hasDiary && hasPhotoAndAccessible
                             ? Border.all(
                                 color: Theme.of(
                                   context,
@@ -328,8 +325,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                         style: TextStyle(
                           color: hasPhotoAndAccessible
                               ? Theme.of(context).colorScheme.primary
-                              : isAccessible
-                              ? Theme.of(context).colorScheme.onSurface
                               : Colors.grey.withValues(alpha: 0.4),
                           fontWeight: hasDiary && hasPhotoAndAccessible
                               ? FontWeight.w600
@@ -366,7 +361,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                             ? Theme.of(
                                 context,
                               ).colorScheme.secondary.withValues(alpha: 0.3)
-                            : Colors.grey.withValues(alpha: 0.08),
+                            : null,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
