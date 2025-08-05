@@ -98,28 +98,21 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
           ? today.subtract(const Duration(days: 1))
           : endOfMonth;
 
-      if (adjustedEnd.isBefore(startOfMonth)) {
-        setState(() {
-          _photoCounts.clear();
-          _isLoading = false;
-        });
-        return;
-      }
-
-      // 写真を取得
+      // 月単位で写真を取得
       final photos = await photoService.getPhotosInDateRange(
         startDate: startOfMonth,
         endDate: adjustedEnd.add(const Duration(days: 1)),
         limit: 1000, // 月単位の写真数上限
       );
 
-      // 日付ごとにグループ化して件数を計算
-      // タイムゾーン対応: ローカルタイムゾーンで日付を正規化
+      // 日付別に写真数をカウント
       final counts = <DateTime, int>{};
       for (final photo in photos) {
-        final photoDate = photo.createDateTime;
-        // ローカルタイムゾーンで日付を正規化（時刻情報を削除）
-        final date = DateTime(photoDate.year, photoDate.month, photoDate.day);
+        final date = DateTime(
+          photo.createDateTime.year,
+          photo.createDateTime.month,
+          photo.createDateTime.day,
+        );
         counts[date] = (counts[date] ?? 0) + 1;
       }
 
@@ -129,24 +122,25 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       });
     } catch (e) {
       final loggingService = await LoggingService.getInstance();
-      final appError = ErrorHandler.handleError(e, context: '写真数読み込み');
-      loggingService.error(
-        '月単位の写真数読み込みエラー',
+      final appError = ErrorHandler.handleError(e, context: '写真カウント読み込み');
+      loggingService.warning(
+        '写真数の読み込みに失敗しましたが、機能は継続します',
         context: 'PastPhotoCalendarWidget._loadPhotoCountsForMonth',
-        error: appError,
+        data: appError.toString(),
       );
-      setState(() => _isLoading = false);
+
+      setState(() {
+        _photoCounts = {};
+        _isLoading = false;
+      });
     }
   }
 
-  /// 選択された日付の写真を取得
+  /// 特定日の写真を読み込み
   Future<void> _loadPhotosForDate(DateTime date) async {
-    setState(() => _isLoading = true);
-
     try {
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
 
-      // タイムゾーン対応: 選択日の開始と終了時刻（ローカルタイムゾーン）
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(
         date.year,
@@ -161,42 +155,46 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       final photos = await photoService.getPhotosInDateRange(
         startDate: startOfDay,
         endDate: endOfDay,
-        limit: 100,
+        limit: 200, // 1日あたりの写真数上限
       );
 
-      setState(() {
-        _photosByDate[date] = photos;
-        _isLoading = false;
-      });
+      // 写真をキャッシュ
+      _photosByDate[startOfDay] = photos;
 
-      // 写真選択コールバックを呼び出し
-      if (photos.isNotEmpty) {
-        widget.onPhotosSelected(photos);
-      }
+      // 選択された写真を親に通知
+      widget.onPhotosSelected(photos);
     } catch (e) {
       final loggingService = await LoggingService.getInstance();
       final appError = ErrorHandler.handleError(e, context: '日付別写真読み込み');
       loggingService.error(
-        '選択日付の写真読み込みエラー',
+        '選択日の写真読み込みエラー',
         context: 'PastPhotoCalendarWidget._loadPhotosForDate',
         error: appError,
       );
-      setState(() => _isLoading = false);
+
+      // エラー時は空のリストを通知
+      widget.onPhotosSelected([]);
     }
   }
 
   /// 日付がアクセス可能かチェック
   bool _isDateAccessible(DateTime date) {
-    if (widget.currentPlan == null || widget.accessibleDate == null) {
+    // 今日以降はアクセス不可
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (!date.isBefore(today)) {
       return false;
     }
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final checkDate = DateTime(date.year, date.month, date.day);
+    // アクセス可能日が設定されていない場合は全てアクセス可能
+    if (widget.accessibleDate == null) {
+      return true;
+    }
 
-    // 今日以降はアクセス不可
-    if (!checkDate.isBefore(today)) {
+    // 正規化された日付で比較
+    final checkDate = DateTime(date.year, date.month, date.day);
+    if (checkDate.isBefore(widget.accessibleDate!)) {
       return false;
     }
 
@@ -254,168 +252,173 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // カレンダー
-        SlideInWidget(
-          child: CustomCard(
-            child: TableCalendar(
-              firstDay:
-                  widget.accessibleDate ??
-                  DateTime.now().subtract(const Duration(days: 365)),
-              lastDay: DateTime.now().subtract(const Duration(days: 1)),
-              focusedDay: _focusedDay,
-              calendarFormat: CalendarFormat.month,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (selectedDay, focusedDay) {
-                final isAccessible = _isDateAccessible(selectedDay);
-                final photoCount = _getPhotoCount(selectedDay);
+        // カレンダー（固定高さで上部位置を完全固定）
+        SizedBox(
+          height: 380, // 6週間分の適切な高さに調整
+          child: SlideInWidget(
+            child: CustomCard(
+              child: TableCalendar(
+                firstDay:
+                    widget.accessibleDate ??
+                    DateTime.now().subtract(const Duration(days: 365)),
+                lastDay: DateTime.now().subtract(const Duration(days: 1)),
+                focusedDay: _focusedDay,
+                calendarFormat: CalendarFormat.month,
+                sixWeekMonthsEnforced: true, // 常に6週間表示で高さを統一
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onDaySelected: (selectedDay, focusedDay) {
+                  final isAccessible = _isDateAccessible(selectedDay);
+                  final photoCount = _getPhotoCount(selectedDay);
 
-                // アクセス可能で写真がある場合のみ選択可能
-                if (!isAccessible || photoCount == 0) {
-                  // 何もしない（選択不可）
-                  return;
-                }
+                  // アクセス可能で写真がある場合のみ選択可能
+                  if (!isAccessible || photoCount == 0) {
+                    // 何もしない（選択不可）
+                    return;
+                  }
 
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
 
-                // 選択日の写真を読み込み
-                _loadPhotosForDate(selectedDay);
-              },
-              onPageChanged: (focusedDay) {
-                // focusedDayが今日以降の場合は昨日に調整
-                final now = DateTime.now();
-                final today = DateTime(now.year, now.month, now.day);
-                final yesterday = today.subtract(const Duration(days: 1));
+                  // 選択日の写真を読み込み
+                  _loadPhotosForDate(selectedDay);
+                },
+                onPageChanged: (focusedDay) {
+                  // focusedDayが今日以降の場合は昨日に調整
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final yesterday = today.subtract(const Duration(days: 1));
 
-                if (focusedDay.isAfter(yesterday)) {
-                  _focusedDay = yesterday;
-                } else {
-                  _focusedDay = focusedDay;
-                }
-                _loadPhotoCountsForMonth(_focusedDay);
-              },
-              calendarBuilders: CalendarBuilders(
-                defaultBuilder: (context, day, focusedDay) {
-                  final isAccessible = _isDateAccessible(day);
-                  final photoCount = _getPhotoCount(day);
-                  final hasDiary = _hasDiary(day);
-                  final hasPhotoAndAccessible = photoCount > 0 && isAccessible;
+                  if (focusedDay.isAfter(yesterday)) {
+                    _focusedDay = yesterday;
+                  } else {
+                    _focusedDay = focusedDay;
+                  }
+                  _loadPhotoCountsForMonth(_focusedDay);
+                },
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) {
+                    final isAccessible = _isDateAccessible(day);
+                    final photoCount = _getPhotoCount(day);
+                    final hasDiary = _hasDiary(day);
 
-                  return Container(
-                    margin: const EdgeInsets.all(4),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: hasPhotoAndAccessible
-                          ? null
-                          : Colors.grey.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
-                      border: hasDiary && isAccessible
-                          ? Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.4),
-                              width: 2,
-                            )
-                          : null,
-                    ),
-                    child: Text(
-                      '${day.day}',
-                      style: TextStyle(
+                    final hasPhoto = photoCount > 0;
+                    final hasPhotoAndAccessible = hasPhoto && isAccessible;
+
+                    return Container(
+                      margin: const EdgeInsets.all(4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
                         color: hasPhotoAndAccessible
-                            ? hasDiary
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurface
-                            : Colors.grey.withValues(alpha: 0.4),
-                        fontWeight: hasDiary && hasPhotoAndAccessible
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                            ? null
+                            : Colors.grey.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: hasDiary && isAccessible
+                            ? Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.4),
+                                width: 2,
+                              )
+                            : null,
                       ),
-                    ),
-                  );
-                },
-                selectedBuilder: (context, day, focusedDay) {
-                  return Container(
-                    margin: const EdgeInsets.all(4),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${day.day}',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          color: hasPhotoAndAccessible
+                              ? Theme.of(context).colorScheme.primary
+                              : isAccessible
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Colors.grey.withValues(alpha: 0.4),
+                          fontWeight: hasDiary && hasPhotoAndAccessible
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                todayBuilder: (context, day, focusedDay) {
-                  final photoCount = _getPhotoCount(day);
-                  final hasPhoto = photoCount > 0;
+                    );
+                  },
+                  selectedBuilder: (context, day, focusedDay) {
+                    return Container(
+                      margin: const EdgeInsets.all(4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
+                  outsideBuilder: (context, day, focusedDay) {
+                    final hasPhoto = _getPhotoCount(day) > 0;
 
-                  return Container(
-                    margin: const EdgeInsets.all(4),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: hasPhoto
-                          ? Theme.of(
-                              context,
-                            ).colorScheme.secondary.withValues(alpha: 0.3)
-                          : Colors.grey.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${day.day}',
-                      style: TextStyle(
+                    return Container(
+                      margin: const EdgeInsets.all(4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
                         color: hasPhoto
-                            ? Theme.of(context).colorScheme.secondary
-                            : Colors.grey.withValues(alpha: 0.4),
-                        fontWeight: hasPhoto
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.secondary.withValues(alpha: 0.3)
+                            : Colors.grey.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  );
-                },
-              ),
-              calendarStyle: CalendarStyle(
-                outsideDaysVisible: false,
-                weekendTextStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          color: hasPhoto
+                              ? Theme.of(context).colorScheme.secondary
+                              : Colors.grey.withValues(alpha: 0.4),
+                          fontWeight: hasPhoto
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                holidayTextStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                calendarStyle: CalendarStyle(
+                  outsideDaysVisible: false,
+                  weekendTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  holidayTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  cellMargin: const EdgeInsets.all(2),
+                  cellPadding: const EdgeInsets.all(0),
                 ),
-                cellMargin: const EdgeInsets.all(2),
-                cellPadding: const EdgeInsets.all(0),
-              ),
-              rowHeight: 48,
-              headerStyle: HeaderStyle(
-                titleCentered: true,
-                formatButtonVisible: false,
-                titleTextStyle: AppTypography.titleLarge.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
+                rowHeight: 42,
+                headerStyle: HeaderStyle(
+                  titleCentered: true,
+                  formatButtonVisible: false,
+                  titleTextStyle: AppTypography.titleLarge.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  leftChevronIcon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  rightChevronIcon: Icon(
+                    Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
-                leftChevronIcon: Icon(
-                  Icons.chevron_left_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                rightChevronIcon: Icon(
-                  Icons.chevron_right_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-                weekendStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  weekendStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -450,15 +453,15 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
               child: Row(
                 children: [
                   Icon(
-                    Icons.check_circle_rounded,
+                    Icons.calendar_today_rounded,
                     color: Theme.of(context).colorScheme.primary,
                     size: 20,
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      '${_selectedDay!.year}年${_selectedDay!.month}月${_selectedDay!.day}日の写真を選択中',
-                      style: AppTypography.bodyMedium.copyWith(
+                      '${_selectedDay!.year}年${_selectedDay!.month}月${_selectedDay!.day}日の写真',
+                      style: AppTypography.labelLarge.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),

@@ -855,6 +855,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 日付表示（タップ可能・アニメーション付き）
         if (!_showAllPastPhotos && _selectedPastDate != null)
@@ -997,9 +998,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
   /// タブビューの高さを取得（表示モードに応じて調整）
   double _getTabViewHeight() {
-    // 過去タブでカレンダー表示の場合
+    // 過去タブでカレンダー表示の場合 - 固定高さで上部位置を一定に保つ
     if (widget.tabController.index == 1 && _isCalendarView) {
-      return 480.0; // カレンダー表示用の高さ
+      return 540.0; // カレンダー表示用の固定高さ（6週間分）
     }
     // 過去タブで写真表示の場合
     else if (widget.tabController.index == 1) {
