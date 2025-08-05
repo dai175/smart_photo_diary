@@ -227,52 +227,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             child: TabBarView(
               controller: widget.tabController,
               physics: const BouncingScrollPhysics(),
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.02, 0),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutQuad,
-                              ),
-                            ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _buildTodayPhotosTab(),
-                ),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(-0.02, 0),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutQuad,
-                              ),
-                            ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _buildPastPhotosTab(),
-                ),
-              ],
+              children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],
             ),
           ),
         ],
@@ -323,66 +278,66 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               const SizedBox(height: AppSpacing.md),
             ],
           ],
-          // カレンダー表示とグリッド表示のアニメーション切り替え
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(
-                        begin: const Offset(0, 0.05),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOutCubic,
-                        ),
+          // カレンダー表示とグリッド表示の切り替え
+          _isCalendarView && !isBasicPlan
+              ? PastPhotoCalendarWidget(
+                  key: const ValueKey('calendar'),
+                  currentPlan: _currentPlan,
+                  accessibleDate: _accessibleDate,
+                  usedPhotoIds: widget.pastPhotoController.usedPhotoIds,
+                  onPhotosSelected: (photos) {
+                    // 新しい日付の写真を設定する前に選択をクリア
+                    widget.pastPhotoController.clearSelection();
+                    widget.pastPhotoController.setPhotoAssets(photos);
+                    setState(() {
+                      _selectedPastDate = photos.isNotEmpty
+                          ? DateTime(
+                              photos.first.createDateTime.year,
+                              photos.first.createDateTime.month,
+                              photos.first.createDateTime.day,
+                            )
+                          : null;
+                      _showAllPastPhotos = false;
+                      _isCalendarView = false;
+                    });
+                  },
+                  onSelectionCleared: () {
+                    setState(() {
+                      _selectedPastDate = null;
+                      _showAllPastPhotos = true;
+                    });
+                    _loadPastPhotos();
+                  },
+                )
+              : AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0, 0.05),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                        child: child,
                       ),
-                  child: child,
-                ),
-              );
-            },
-            child: _isCalendarView && !isBasicPlan
-                ? PastPhotoCalendarWidget(
-                    key: const ValueKey('calendar'),
-                    currentPlan: _currentPlan,
-                    accessibleDate: _accessibleDate,
-                    usedPhotoIds: widget.pastPhotoController.usedPhotoIds,
-                    onPhotosSelected: (photos) {
-                      // 新しい日付の写真を設定する前に選択をクリア
-                      widget.pastPhotoController.clearSelection();
-                      widget.pastPhotoController.setPhotoAssets(photos);
-                      setState(() {
-                        _selectedPastDate = photos.isNotEmpty
-                            ? DateTime(
-                                photos.first.createDateTime.year,
-                                photos.first.createDateTime.month,
-                                photos.first.createDateTime.day,
-                              )
-                            : null;
-                        _showAllPastPhotos = false;
-                        _isCalendarView = false;
-                      });
-                    },
-                    onSelectionCleared: () {
-                      setState(() {
-                        _selectedPastDate = null;
-                        _showAllPastPhotos = true;
-                      });
-                      _loadPastPhotos();
-                    },
-                  )
-                : OptimizedPhotoGridWidget(
-                    key: const ValueKey('grid'),
+                    );
+                  },
+                  child: OptimizedPhotoGridWidget(
+                    key: ValueKey('grid-$_showAllPastPhotos'),
                     controller: widget.pastPhotoController,
                     onSelectionLimitReached: widget.onSelectionLimitReached,
                     onUsedPhotoSelected: widget.onUsedPhotoSelected,
                     onRequestPermission: _loadPastPhotos,
                     onDifferentDateSelected: _showDifferentDateDialog,
                   ),
-          ),
+                ),
         ],
       ),
     );
