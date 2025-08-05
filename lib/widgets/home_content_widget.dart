@@ -282,6 +282,8 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               accessibleDate: _accessibleDate,
               usedPhotoIds: widget.pastPhotoController.usedPhotoIds,
               onPhotosSelected: (photos) {
+                // 新しい日付の写真を設定する前に選択をクリア
+                widget.pastPhotoController.clearSelection();
                 widget.pastPhotoController.setPhotoAssets(photos);
                 setState(() {
                   _selectedPastDate = photos.isNotEmpty
@@ -610,6 +612,8 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
         if (!mounted) return;
 
+        // 新しい日付の写真を設定する前に選択をクリア
+        widget.pastPhotoController.clearSelection();
         widget.pastPhotoController.setPhotoAssets(photos);
         widget.pastPhotoController.setLoading(false);
         return;
@@ -641,6 +645,8 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
       if (!mounted) return;
 
+      // 新しい写真を設定する前に選択をクリア
+      widget.pastPhotoController.clearSelection();
       widget.pastPhotoController.setPhotoAssets(photos);
       widget.pastPhotoController.setLoading(false);
     } catch (e) {
@@ -653,6 +659,8 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       );
 
       if (mounted) {
+        // エラー時も選択をクリア
+        widget.pastPhotoController.clearSelection();
         widget.pastPhotoController.setPhotoAssets([]);
         widget.pastPhotoController.setLoading(false);
 

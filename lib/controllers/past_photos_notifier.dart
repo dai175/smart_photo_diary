@@ -184,6 +184,9 @@ class PastPhotosNotifier extends ChangeNotifier {
   Future<void> loadPhotosForDate(DateTime date) async {
     if (_state.isLoading) return;
 
+    // 日付移動時に選択をクリア
+    clearSelection();
+
     _updateState(
       _state.copyWith(isLoading: true, selectedDate: date, clearError: true),
     );
@@ -237,6 +240,9 @@ class PastPhotosNotifier extends ChangeNotifier {
 
   /// 日付選択をクリア
   void clearDateSelection(Plan currentPlan) {
+    // 日付選択クリア時に選択もクリア
+    clearSelection();
+
     _updateState(
       _state.copyWith(clearSelectedDate: true, isCalendarView: false),
     );

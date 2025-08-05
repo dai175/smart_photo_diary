@@ -84,6 +84,9 @@ class UnifiedPhotoController extends ChangeNotifier {
 
   /// 特定の日付の写真を読み込み
   Future<void> loadPhotosForDate(DateTime date) async {
+    // 日付移動時に選択をクリア
+    pastController.clearSelection();
+
     await pastPhotosNotifier.loadPhotosForDate(date);
 
     // 読み込んだ写真をコントローラーに設定
@@ -94,6 +97,9 @@ class UnifiedPhotoController extends ChangeNotifier {
 
   /// 日付選択をクリア
   void clearDateSelection(Plan currentPlan) {
+    // 日付選択クリア時に選択もクリア
+    pastController.clearSelection();
+
     pastPhotosNotifier.clearDateSelection(currentPlan);
   }
 
