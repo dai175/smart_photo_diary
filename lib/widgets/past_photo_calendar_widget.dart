@@ -325,10 +325,30 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                         style: TextStyle(
                           color: hasPhotoAndAccessible
                               ? Theme.of(context).colorScheme.primary
-                              : Colors.grey.withValues(alpha: 0.4),
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.4),
                           fontWeight: hasDiary && hasPhotoAndAccessible
                               ? FontWeight.w600
                               : FontWeight.normal,
+                        ),
+                      ),
+                    );
+                  },
+                  disabledBuilder: (context, day, focusedDay) {
+                    return Container(
+                      margin: const EdgeInsets.all(4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.3),
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     );
@@ -369,7 +389,9 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                         style: TextStyle(
                           color: hasPhoto
                               ? Theme.of(context).colorScheme.secondary
-                              : Colors.grey.withValues(alpha: 0.4),
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.4),
                           fontWeight: hasPhoto
                               ? FontWeight.bold
                               : FontWeight.normal,
