@@ -810,7 +810,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 日付表示（タップ可能・アニメーション付き）
         if (!_showAllPastPhotos && _selectedPastDate != null)
