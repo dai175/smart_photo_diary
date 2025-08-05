@@ -644,7 +644,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
 
     // アイテムのアスペクト比を1:1として、3行分の高さを計算
     final rowHeight = itemWidth;
-    final totalHeight = rowHeight * 3 + AppSpacing.sm * 2; // 3行 + 間のスペース
+    final totalHeight = rowHeight * 2 + AppSpacing.sm * 2; // 2行 + 間のスペース
 
     return totalHeight;
   }

@@ -220,11 +220,59 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             ),
           ),
           // タブビュー
-          SizedBox(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
             height: _getTabViewHeight(),
             child: TabBarView(
               controller: widget.tabController,
-              children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],
+              physics: const BouncingScrollPhysics(),
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0.02, 0),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutQuad,
+                              ),
+                            ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _buildTodayPhotosTab(),
+                ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(-0.02, 0),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutQuad,
+                              ),
+                            ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _buildPastPhotosTab(),
+                ),
+              ],
             ),
           ),
         ],
@@ -275,44 +323,66 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               const SizedBox(height: AppSpacing.md),
             ],
           ],
-          // Basicプランではカレンダー表示を無効化
-          if (_isCalendarView && !isBasicPlan)
-            PastPhotoCalendarWidget(
-              currentPlan: _currentPlan,
-              accessibleDate: _accessibleDate,
-              usedPhotoIds: widget.pastPhotoController.usedPhotoIds,
-              onPhotosSelected: (photos) {
-                // 新しい日付の写真を設定する前に選択をクリア
-                widget.pastPhotoController.clearSelection();
-                widget.pastPhotoController.setPhotoAssets(photos);
-                setState(() {
-                  _selectedPastDate = photos.isNotEmpty
-                      ? DateTime(
-                          photos.first.createDateTime.year,
-                          photos.first.createDateTime.month,
-                          photos.first.createDateTime.day,
-                        )
-                      : null;
-                  _showAllPastPhotos = false;
-                  _isCalendarView = false;
-                });
-              },
-              onSelectionCleared: () {
-                setState(() {
-                  _selectedPastDate = null;
-                  _showAllPastPhotos = true;
-                });
-                _loadPastPhotos();
-              },
-            )
-          else
-            OptimizedPhotoGridWidget(
-              controller: widget.pastPhotoController,
-              onSelectionLimitReached: widget.onSelectionLimitReached,
-              onUsedPhotoSelected: widget.onUsedPhotoSelected,
-              onRequestPermission: _loadPastPhotos,
-              onDifferentDateSelected: _showDifferentDateDialog,
-            ),
+          // カレンダー表示とグリッド表示のアニメーション切り替え
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position:
+                      Tween<Offset>(
+                        begin: const Offset(0, 0.05),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      ),
+                  child: child,
+                ),
+              );
+            },
+            child: _isCalendarView && !isBasicPlan
+                ? PastPhotoCalendarWidget(
+                    key: const ValueKey('calendar'),
+                    currentPlan: _currentPlan,
+                    accessibleDate: _accessibleDate,
+                    usedPhotoIds: widget.pastPhotoController.usedPhotoIds,
+                    onPhotosSelected: (photos) {
+                      // 新しい日付の写真を設定する前に選択をクリア
+                      widget.pastPhotoController.clearSelection();
+                      widget.pastPhotoController.setPhotoAssets(photos);
+                      setState(() {
+                        _selectedPastDate = photos.isNotEmpty
+                            ? DateTime(
+                                photos.first.createDateTime.year,
+                                photos.first.createDateTime.month,
+                                photos.first.createDateTime.day,
+                              )
+                            : null;
+                        _showAllPastPhotos = false;
+                        _isCalendarView = false;
+                      });
+                    },
+                    onSelectionCleared: () {
+                      setState(() {
+                        _selectedPastDate = null;
+                        _showAllPastPhotos = true;
+                      });
+                      _loadPastPhotos();
+                    },
+                  )
+                : OptimizedPhotoGridWidget(
+                    key: const ValueKey('grid'),
+                    controller: widget.pastPhotoController,
+                    onSelectionLimitReached: widget.onSelectionLimitReached,
+                    onUsedPhotoSelected: widget.onUsedPhotoSelected,
+                    onRequestPermission: _loadPastPhotos,
+                    onDifferentDateSelected: _showDifferentDateDialog,
+                  ),
+          ),
         ],
       ),
     );
@@ -725,8 +795,8 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         ),
         if (isBasic) ...[
           const SizedBox(width: AppSpacing.sm),
-          // アップグレードボタン
-          GestureDetector(
+          // アップグレードボタン（タップアニメーション付き）
+          MicroInteractions.bounceOnTap(
             onTap: () => _navigateToUpgrade(context),
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -786,119 +856,121 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
     return Row(
       children: [
-        // 日付表示（タップ可能）
+        // 日付表示（タップ可能・アニメーション付き）
         if (!_showAllPastPhotos && _selectedPastDate != null)
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _showAllPastPhotos = true;
-                  _selectedPastDate = null;
-                });
-                _loadPastPhotos();
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
+          MicroInteractions.bounceOnTap(
+            onTap: () {
+              setState(() {
+                _showAllPastPhotos = true;
+                _selectedPastDate = null;
+              });
+              _loadPastPhotos();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
                   color: Theme.of(
                     context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    '${_selectedPastDate!.year}年${_selectedPastDate!.month}月${_selectedPastDate!.day}日',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Icon(
+                    Icons.close_rounded,
+                    size: 16,
                     color: Theme.of(
                       context,
-                    ).colorScheme.primary.withValues(alpha: 0.3),
+                    ).colorScheme.primary.withValues(alpha: 0.6),
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      '${_selectedPastDate!.year}年${_selectedPastDate!.month}月${_selectedPastDate!.day}日',
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Icon(
-                      Icons.close_rounded,
-                      size: 16,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.6),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           )
         else if (_showAllPastPhotos)
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _isCalendarView = true;
-                });
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.photo_library_rounded,
-                      size: 16,
+          MicroInteractions.bounceOnTap(
+            onTap: () {
+              setState(() {
+                _isCalendarView = true;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.photo_library_rounded,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'すべての写真',
+                    style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'すべての写真',
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         const SizedBox(width: AppSpacing.sm),
-        // カレンダー表示切り替えボタン
-        IconButton(
-          onPressed: () {
-            setState(() {
-              _isCalendarView = !_isCalendarView;
-            });
+        // カレンダー表示切り替えボタン（アニメーション付き）
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(scale: animation, child: child),
+            );
           },
-          icon: Icon(
-            _isCalendarView
-                ? Icons.grid_view_rounded
-                : Icons.calendar_month_rounded,
-            color: Theme.of(context).colorScheme.primary,
+          child: IconButton(
+            key: ValueKey(_isCalendarView),
+            onPressed: () {
+              setState(() {
+                _isCalendarView = !_isCalendarView;
+              });
+            },
+            icon: Icon(
+              _isCalendarView
+                  ? Icons.grid_view_rounded
+                  : Icons.calendar_month_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            tooltip: _isCalendarView ? 'グリッド表示' : 'カレンダー表示',
           ),
-          tooltip: _isCalendarView ? 'グリッド表示' : 'カレンダー表示',
         ),
       ],
     );
