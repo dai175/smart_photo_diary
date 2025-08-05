@@ -582,11 +582,19 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     // 選択可能かチェック
     if (!widget.controller.canSelectPhoto(index)) {
       // 選択上限に達している場合
-      if (widget.controller.selectedCount >= 5) {
+      if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection) {
         widget.onSelectionLimitReached?.call();
+        return;
       }
-      // 日付が異なる場合（日付制限が有効かつ選択済み写真がある場合）
-      else if (widget.onDifferentDateSelected != null) {
+
+      // 使用済み写真の場合（念のため再度チェック）
+      if (widget.controller.isPhotoUsed(index)) {
+        widget.onUsedPhotoSelected?.call();
+        return;
+      }
+
+      // 日付が異なる場合のチェック（上限に達しておらず、使用済みでもない場合）
+      if (widget.onDifferentDateSelected != null) {
         widget.onDifferentDateSelected!();
       }
       return;

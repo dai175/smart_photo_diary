@@ -54,7 +54,7 @@ class AppConstants {
   static const String noDiariesMessage = '保存された日記がありません';
   static const String permissionMessage = '写真へのアクセス権限が必要です';
   static const String requestPermissionButton = '権限をリクエスト';
-  static const String selectionLimitMessage = '写真は3枚までにしてください';
+  static const String selectionLimitMessage = '一度に選択できる写真は3枚までです';
   static const String usedPhotoMessage = 'この写真はすでに日記で使用されています';
   static const String usedPhotoLabel = '使用済み';
   static const String okButton = 'OK';
