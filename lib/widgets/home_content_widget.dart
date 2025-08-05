@@ -221,7 +221,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           ),
           // タブビュー
           SizedBox(
-            height: 520,
+            height: _getTabViewHeight(),
             child: TabBarView(
               controller: widget.tabController,
               children: [_buildTodayPhotosTab(), _buildPastPhotosTab()],
@@ -921,6 +921,22 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         ],
       ),
     );
+  }
+
+  /// タブビューの高さを取得（表示モードに応じて調整）
+  double _getTabViewHeight() {
+    // 過去タブでカレンダー表示の場合
+    if (widget.tabController.index == 1 && _isCalendarView) {
+      return 480.0; // カレンダー表示用の高さ
+    }
+    // 過去タブで写真表示の場合
+    else if (widget.tabController.index == 1) {
+      return 390.0; // 過去の写真グリッド表示用の高さ
+    }
+    // 今日タブの場合
+    else {
+      return 340.0; // 今日の写真グリッド表示用の高さ
+    }
   }
 
   /// 過去の写真キャッシュをクリーンアップ
