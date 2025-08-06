@@ -70,8 +70,7 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
     final days = plan.pastPhotoAccessDays;
 
     if (days == 1) {
-      // Basicプランの場合、アップグレードを促す文言に変更
-      return 'Premiumで過去1年間の写真';
+      return 'Premiumで過去1年の写真';
     } else if (days == 7) {
       return '1週間前までの写真';
     } else if (days == 30) {

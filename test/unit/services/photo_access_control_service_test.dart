@@ -239,7 +239,7 @@ void main() {
         );
 
         // Assert
-        expect(description, equals('Premiumで過去1年間の写真'));
+        expect(description, equals('Premiumで過去1年の写真'));
       });
 
       test('should return correct description for PremiumPlans', () {
