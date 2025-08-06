@@ -267,7 +267,10 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           if (_currentPlan != null) ...[
             // Basicプランの場合のみアクセス範囲情報を表示
             if (isBasicPlan) ...[
-              Row(children: [_buildAccessRangeInfo()]),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [_buildAccessRangeInfo()],
+              ),
               const SizedBox(height: AppSpacing.md),
             ] else ...[
               // プレミアムプランの場合は表示切り替えのみ
@@ -774,9 +777,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.auto_awesome_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     size: 16,
                   ),
                   const SizedBox(width: 6),
@@ -784,7 +787,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                     'アップグレード',
                     style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 13,
                     ),
                   ),
