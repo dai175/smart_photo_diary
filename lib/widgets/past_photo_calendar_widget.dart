@@ -266,6 +266,21 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                 calendarFormat: CalendarFormat.month,
                 sixWeekMonthsEnforced: true, // 常に6週間表示で高さを統一
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onHeaderTapped: (focusedDay) {
+                  // ヘッダータップで当月（昨日）に遷移
+                  final now = DateTime.now();
+                  final yesterday = DateTime(now.year, now.month, now.day - 1);
+
+                  // 現在表示中の月と異なる場合のみ遷移
+                  if (focusedDay.year != yesterday.year ||
+                      focusedDay.month != yesterday.month) {
+                    setState(() {
+                      _focusedDay = yesterday;
+                      _selectedDay = null; // 選択をクリア
+                    });
+                    _loadPhotoCountsForMonth(yesterday);
+                  }
+                },
                 onDaySelected: (selectedDay, focusedDay) {
                   final isAccessible = _isDateAccessible(selectedDay);
                   final photoCount = _getPhotoCount(selectedDay);

@@ -532,6 +532,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
             },
+            onHeaderTapped: (focusedDay) {
+              // ヘッダータップで当月に遷移
+              final now = DateTime.now();
+              final currentMonth = DateTime(now.year, now.month, now.day);
+
+              // 現在表示中の月と異なる場合のみ遷移
+              if (focusedDay.year != currentMonth.year ||
+                  focusedDay.month != currentMonth.month) {
+                setState(() {
+                  _focusedDay = currentMonth;
+                  _selectedDay = null; // 選択をクリア
+                });
+              }
+            },
             calendarStyle: CalendarStyle(
               defaultTextStyle: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
