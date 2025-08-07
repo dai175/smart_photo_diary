@@ -43,6 +43,9 @@ class BasicPlan extends Plan {
   @override
   bool get hasPrioritySupport => false;
 
+  @override
+  int get pastPhotoAccessDays => 1; // Basicプランは1日前まで
+
   // ========================================
   // Basicプラン固有のメソッド
   // ========================================

@@ -64,6 +64,9 @@ abstract class Plan {
   /// 優先カスタマーサポートアクセス権
   bool get hasPrioritySupport;
 
+  /// 過去の写真アクセス可能日数
+  int get pastPhotoAccessDays;
+
   // ========================================
   // 共通プロパティ・メソッド
   // ========================================

@@ -30,6 +30,102 @@ void main() {
       mockAssetEntity = MockAssetEntity();
     });
 
+    group('getPhotosForDate', () {
+      test(
+        'should get photos for specific date with offset and limit',
+        () async {
+          // Arrange
+          final testDate = DateTime(2024, 7, 29);
+          const offset = 0;
+          const limit = 10;
+          final mockAssets = [mockAssetEntity];
+
+          when(
+            () => mockPhotoService.getPhotosForDate(
+              testDate,
+              offset: offset,
+              limit: limit,
+            ),
+          ).thenAnswer((_) async => mockAssets);
+
+          // Act
+          final result = await mockPhotoService.getPhotosForDate(
+            testDate,
+            offset: offset,
+            limit: limit,
+          );
+
+          // Assert
+          expect(result, equals(mockAssets));
+          verify(
+            () => mockPhotoService.getPhotosForDate(
+              testDate,
+              offset: offset,
+              limit: limit,
+            ),
+          ).called(1);
+        },
+      );
+
+      test('should return empty list when no photos found for date', () async {
+        // Arrange
+        final testDate = DateTime(2024, 1, 1);
+        const offset = 0;
+        const limit = 10;
+
+        when(
+          () => mockPhotoService.getPhotosForDate(
+            testDate,
+            offset: offset,
+            limit: limit,
+          ),
+        ).thenAnswer((_) async => []);
+
+        // Act
+        final result = await mockPhotoService.getPhotosForDate(
+          testDate,
+          offset: offset,
+          limit: limit,
+        );
+
+        // Assert
+        expect(result, isEmpty);
+      });
+
+      test('should handle pagination with offset', () async {
+        // Arrange
+        final testDate = DateTime(2024, 7, 29);
+        const offset = 10;
+        const limit = 5;
+        final mockAssets = List.generate(5, (index) => MockAssetEntity());
+
+        when(
+          () => mockPhotoService.getPhotosForDate(
+            testDate,
+            offset: offset,
+            limit: limit,
+          ),
+        ).thenAnswer((_) async => mockAssets);
+
+        // Act
+        final result = await mockPhotoService.getPhotosForDate(
+          testDate,
+          offset: offset,
+          limit: limit,
+        );
+
+        // Assert
+        expect(result.length, equals(5));
+        verify(
+          () => mockPhotoService.getPhotosForDate(
+            testDate,
+            offset: offset,
+            limit: limit,
+          ),
+        ).called(1);
+      });
+    });
+
     group('Permission Management', () {
       test('should request permission successfully', () async {
         // Arrange

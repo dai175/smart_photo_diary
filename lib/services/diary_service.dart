@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -9,6 +8,7 @@ import 'interfaces/diary_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
+import 'logging_service.dart';
 
 class DiaryService implements DiaryServiceInterface {
   static const String _boxName = 'diary_entries';
@@ -16,6 +16,7 @@ class DiaryService implements DiaryServiceInterface {
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
   final AiServiceInterface _aiService;
+  late final LoggingService _loggingService;
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService);
@@ -45,19 +46,22 @@ class DiaryService implements DiaryServiceInterface {
 
   // 初期化処理
   Future<void> _init() async {
+    // LoggingServiceの初期化を最初に行う
+    _loggingService = await LoggingService.getInstance();
+
     try {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
-      debugPrint('Hiveボックス初期化完了: ${_diaryBox?.length ?? 0}件のエントリー');
+      _loggingService.info('Hiveボックス初期化完了: ${_diaryBox?.length ?? 0}件のエントリー');
     } catch (e) {
-      debugPrint('Hiveボックス初期化エラー: $e');
+      _loggingService.error('Hiveボックス初期化エラー', error: e);
       // スキーマ変更により既存データが読めない場合はボックスを削除して再作成
       try {
         await Hive.deleteBoxFromDisk(_boxName);
-        debugPrint('古いボックスを削除しました');
+        _loggingService.warning('古いボックスを削除しました');
         _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
-        debugPrint('新しいボックスを作成しました');
+        _loggingService.info('新しいボックスを作成しました');
       } catch (deleteError) {
-        debugPrint('ボックス削除エラー: $deleteError');
+        _loggingService.error('ボックス削除エラー', error: deleteError);
         rethrow;
       }
     }
@@ -76,7 +80,7 @@ class DiaryService implements DiaryServiceInterface {
     try {
       // _diaryBoxが初期化されているかチェック
       if (_diaryBox == null) {
-        debugPrint('_diaryBoxが未初期化です。再初期化します...');
+        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
         await _init();
       }
 
@@ -84,12 +88,9 @@ class DiaryService implements DiaryServiceInterface {
       final now = DateTime.now();
       final id = _uuid.v4();
 
-      debugPrint('DiaryEntry作成中...');
-      debugPrint('ID: $id');
-      debugPrint('日付: $date');
-      debugPrint('タイトル: $title');
-      debugPrint('本文長: ${content.length}文字');
-      debugPrint('写真ID数: ${photoIds.length}');
+      _loggingService.debug(
+        'DiaryEntry作成中 - ID: $id, 日付: $date, 写真数: ${photoIds.length}',
+      );
 
       final entry = DiaryEntry(
         id: id,
@@ -103,18 +104,17 @@ class DiaryService implements DiaryServiceInterface {
         updatedAt: now,
       );
 
-      debugPrint('Hiveに保存中...');
+      _loggingService.debug('Hiveに保存中...');
       // Hiveに保存
       await _diaryBox!.put(entry.id, entry);
-      debugPrint('Hive保存完了');
+      _loggingService.info('日記エントリー保存完了: ${entry.id}');
 
       // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
       _generateTagsInBackground(entry);
 
       return entry;
     } catch (e, stackTrace) {
-      debugPrint('日記保存エラー: $e');
-      debugPrint('スタックトレース: $stackTrace');
+      _loggingService.error('日記保存エラー', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -185,7 +185,7 @@ class DiaryService implements DiaryServiceInterface {
     // 非同期でタグ生成を実行（UI をブロックしない）
     Future.delayed(Duration.zero, () async {
       try {
-        debugPrint('バックグラウンドでタグ生成開始: ${entry.id}');
+        _loggingService.debug('バックグラウンドでタグ生成開始: ${entry.id}');
         final tagsResult = await _aiService.generateTagsFromContent(
           title: entry.title,
           content: entry.content,
@@ -199,18 +199,22 @@ class DiaryService implements DiaryServiceInterface {
             final latestEntry = _diaryBox!.get(entry.id);
             if (latestEntry != null) {
               await latestEntry.updateTags(tagsResult.value);
-              debugPrint('タグ生成完了: ${entry.id} -> ${tagsResult.value}');
+              _loggingService.debug(
+                'タグ生成完了: ${entry.id} -> ${tagsResult.value}',
+              );
             } else {
-              debugPrint('バックグラウンドタグ生成: エントリーが見つかりません: ${entry.id}');
+              _loggingService.warning(
+                'バックグラウンドタグ生成: エントリーが見つかりません: ${entry.id}',
+              );
             }
           } else {
-            debugPrint('バックグラウンドタグ生成: Hiveボックスが利用できません');
+            _loggingService.warning('バックグラウンドタグ生成: Hiveボックスが利用できません');
           }
         } else {
-          debugPrint('バックグラウンドタグ生成エラー: ${tagsResult.error}');
+          _loggingService.error('バックグラウンドタグ生成エラー', error: tagsResult.error);
         }
       } catch (e) {
-        debugPrint('バックグラウンドタグ生成エラー: $e');
+        _loggingService.error('バックグラウンドタグ生成エラー', error: e);
       }
     });
   }
@@ -225,7 +229,7 @@ class DiaryService implements DiaryServiceInterface {
 
     try {
       // キャッシュが無効または存在しない場合は新しく生成
-      debugPrint('新しいタグを生成中: ${entry.id}');
+      _loggingService.debug('新しいタグを生成中: ${entry.id}');
       final tagsResult = await _aiService.generateTagsFromContent(
         title: entry.title,
         content: entry.content,
@@ -243,12 +247,12 @@ class DiaryService implements DiaryServiceInterface {
         }
         return tagsResult.value;
       } else {
-        debugPrint('タグ生成エラー: ${tagsResult.error}');
+        _loggingService.error('タグ生成エラー', error: tagsResult.error);
         // エラー時はフォールバックタグを返す
         return _generateFallbackTags(entry);
       }
     } catch (e) {
-      debugPrint('タグ生成エラー: $e');
+      _loggingService.error('タグ生成エラー', error: e);
       // エラー時はフォールバックタグを返す
       return _generateFallbackTags(entry);
     }
@@ -354,5 +358,150 @@ class DiaryService implements DiaryServiceInterface {
     if (_diaryBox != null) {
       await _diaryBox!.compact();
     }
+  }
+
+  /// 過去の写真から日記エントリーを作成
+  ///
+  /// [photoDate]: 写真の撮影日時
+  /// [title]: 日記のタイトル
+  /// [content]: 日記の内容
+  /// [photoIds]: 写真のIDリスト
+  /// [location]: 場所（オプション）
+  /// [tags]: タグリスト（オプション）
+  /// 戻り値: 作成された日記エントリー
+  @override
+  Future<DiaryEntry> createDiaryForPastPhoto({
+    required DateTime photoDate,
+    required String title,
+    required String content,
+    required List<String> photoIds,
+    String? location,
+    List<String>? tags,
+  }) async {
+    try {
+      if (_diaryBox == null) {
+        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
+        await _init();
+      }
+
+      // 既存の日記との重複チェック
+      final existingDiaries = await getDiaryByPhotoDate(photoDate);
+      if (existingDiaries.isNotEmpty) {
+        _loggingService.warning(
+          '${photoDate.toString().split(' ')[0]}の日記が既に存在します',
+        );
+        // 重複がある場合でも作成を続行（ユーザーが複数の日記を作成したい場合もある）
+      }
+
+      final now = DateTime.now();
+      final id = _uuid.v4();
+
+      _loggingService.debug(
+        '過去の写真から日記エントリー作成中 - ID: $id, 撮影日: $photoDate, 写真数: ${photoIds.length}',
+      );
+
+      final entry = DiaryEntry(
+        id: id,
+        date: photoDate, // 写真の撮影日を日記の日付として使用
+        title: title,
+        content: content,
+        photoIds: photoIds,
+        location: location,
+        tags: tags,
+        createdAt: now, // 実際の作成日時
+        updatedAt: now,
+      );
+
+      _loggingService.debug('Hiveに保存中...');
+      await _diaryBox!.put(entry.id, entry);
+      _loggingService.info('過去写真日記の保存完了: ${entry.id}');
+
+      // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
+      _generateTagsInBackgroundForPastPhoto(entry);
+
+      return entry;
+    } catch (e, stackTrace) {
+      _loggingService.error('過去写真日記作成エラー', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 写真の撮影日付で日記を検索
+  ///
+  /// [photoDate]: 写真の撮影日時
+  /// 戻り値: 該当する日記エントリーのリスト
+  @override
+  Future<List<DiaryEntry>> getDiaryByPhotoDate(DateTime photoDate) async {
+    if (_diaryBox == null) await _init();
+
+    final targetDate = DateTime(photoDate.year, photoDate.month, photoDate.day);
+
+    return _diaryBox!.values.where((entry) {
+      final entryDate = DateTime(
+        entry.date.year,
+        entry.date.month,
+        entry.date.day,
+      );
+      return entryDate.isAtSameMomentAs(targetDate);
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 作成日時の降順
+  }
+
+  /// 過去の写真用のバックグラウンドタグ生成
+  ///
+  /// 通常のタグ生成と異なり、過去の日付であることを考慮してタグを生成
+  void _generateTagsInBackgroundForPastPhoto(DiaryEntry entry) {
+    Future.delayed(Duration.zero, () async {
+      try {
+        _loggingService.debug('過去写真日記のバックグラウンドタグ生成開始: ${entry.id}');
+
+        // 過去の日付であることを示すメタデータを追加
+        final daysDifference = DateTime.now().difference(entry.date).inDays;
+        String pastContext = '';
+
+        if (daysDifference == 1) {
+          pastContext = '昨日の思い出';
+        } else if (daysDifference <= 7) {
+          pastContext = '$daysDifference日前の思い出';
+        } else if (daysDifference <= 30) {
+          pastContext = '約${(daysDifference / 7).round()}週間前の思い出';
+        } else if (daysDifference <= 365) {
+          pastContext = '約${(daysDifference / 30).round()}ヶ月前の思い出';
+        } else {
+          pastContext = '約${(daysDifference / 365).round()}年前の思い出';
+        }
+
+        final tagsResult = await _aiService.generateTagsFromContent(
+          title: entry.title,
+          content: '$pastContext: ${entry.content}', // 過去のコンテキストを含める
+          date: entry.date,
+          photoCount: entry.photoIds.length,
+        );
+
+        if (tagsResult.isSuccess) {
+          if (_diaryBox != null && _diaryBox!.isOpen) {
+            final latestEntry = _diaryBox!.get(entry.id);
+            if (latestEntry != null) {
+              final updatedEntry = DiaryEntry(
+                id: latestEntry.id,
+                date: latestEntry.date,
+                title: latestEntry.title,
+                content: latestEntry.content,
+                photoIds: latestEntry.photoIds,
+                location: latestEntry.location,
+                tags: tagsResult.value,
+                createdAt: latestEntry.createdAt,
+                updatedAt: DateTime.now(),
+              );
+              await _diaryBox!.put(entry.id, updatedEntry);
+              _loggingService.debug('過去写真日記のタグ生成完了: ${tagsResult.value}');
+            }
+          }
+        } else {
+          _loggingService.error('過去写真日記のタグ生成失敗', error: tagsResult.error);
+        }
+      } catch (e) {
+        _loggingService.error('過去写真日記のタグ生成エラー', error: e);
+      }
+    });
   }
 }

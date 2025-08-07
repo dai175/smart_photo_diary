@@ -9,6 +9,7 @@ class PhotoSelectionController extends ChangeNotifier {
   Set<String> _usedPhotoIds = {};
   bool _isLoading = true;
   bool _hasPermission = false;
+  DateTime? _selectedDate; // 選択された写真の日付を保持
 
   // ゲッター
   List<AssetEntity> get photoAssets => _photoAssets;
@@ -50,10 +51,29 @@ class PhotoSelectionController extends ChangeNotifier {
     if (_selected[index]) {
       // 選択解除の場合はそのまま実行
       _selected[index] = false;
+
+      // 選択された写真がなくなった場合は日付制限をクリア
+      if (selectedCount == 0) {
+        _selectedDate = null;
+      }
     } else {
       // 選択の場合は上限チェック
       if (selectedCount < AppConstants.maxPhotosSelection) {
+        // 日付制限のチェック（日付制限が有効な場合のみ）
+        if (_enableDateRestriction && _selectedDate != null) {
+          final photoDate = _photoAssets[index].createDateTime;
+          if (!_isSameDate(_selectedDate!, photoDate)) {
+            // 異なる日付の写真は選択できない
+            return;
+          }
+        }
+
         _selected[index] = true;
+
+        // 初めての選択の場合は、その写真の日付を記録
+        if (_enableDateRestriction && _selectedDate == null) {
+          _selectedDate = _photoAssets[index].createDateTime;
+        }
       } else {
         // 上限に達している場合の処理は呼び出し側で実装
         return;
@@ -66,6 +86,7 @@ class PhotoSelectionController extends ChangeNotifier {
   /// 写真選択をクリア
   void clearSelection() {
     _selected = List.generate(_photoAssets.length, (index) => false);
+    _selectedDate = null;
     notifyListeners();
   }
 
@@ -107,7 +128,53 @@ class PhotoSelectionController extends ChangeNotifier {
         index >= _selected.length) {
       return false;
     }
-    return !isPhotoUsed(index) &&
-        (selectedCount < AppConstants.maxPhotosSelection || _selected[index]);
+
+    // 使用済み写真はNG
+    if (isPhotoUsed(index)) return false;
+
+    // 既に選択されている場合はOK（選択解除のため）
+    if (_selected[index]) return true;
+
+    // 選択上限チェック
+    if (selectedCount >= AppConstants.maxPhotosSelection) return false;
+
+    // 日付制限チェック（日付制限が有効な場合のみ）
+    if (_enableDateRestriction && _selectedDate != null) {
+      final photoDate = _photoAssets[index].createDateTime;
+      if (!_isSameDate(_selectedDate!, photoDate)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /// 同じ日付かどうかをチェック
+  bool _isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  /// 日付制限を有効にするかどうか
+  bool _enableDateRestriction = false;
+
+  /// 日付制限を設定
+  void setDateRestrictionEnabled(bool enabled) {
+    _enableDateRestriction = enabled;
+    if (!enabled) {
+      _selectedDate = null;
+    }
+    notifyListeners();
+  }
+
+  /// リソースのクリーンアップ
+  @override
+  void dispose() {
+    // 大量の写真リストをクリア
+    _photoAssets.clear();
+    _selected.clear();
+    _usedPhotoIds.clear();
+    super.dispose();
   }
 }

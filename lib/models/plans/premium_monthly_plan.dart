@@ -43,6 +43,9 @@ class PremiumMonthlyPlan extends Plan {
   @override
   bool get hasPrioritySupport => true;
 
+  @override
+  int get pastPhotoAccessDays => 365; // Premiumプランは365日前まで
+
   // ========================================
   // Premium月額プラン固有のメソッド
   // ========================================

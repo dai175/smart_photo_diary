@@ -35,6 +35,119 @@ void main() {
       mockPhotoService = MockPhotoServiceInterface();
     });
 
+    group('Past Photo Diary Creation', () {
+      test(
+        'should create diary entry for past photo with correct date mapping',
+        () {
+          // Arrange
+          final photoDate = DateTime(2024, 7, 25, 10, 30); // 写真撮影日
+          final now = DateTime.now();
+          const title = '昨日の思い出';
+          const content = '昨日撮った写真から日記を作成しました';
+          const photoIds = ['past_photo1', 'past_photo2'];
+
+          // Act - Test creation logic
+          final entry = DiaryEntry(
+            id: 'test-past-id',
+            date: photoDate, // 写真撮影日を日記の日付として使用
+            title: title,
+            content: content,
+            photoIds: photoIds,
+            createdAt: now, // 実際の作成日時
+            updatedAt: now,
+          );
+
+          // Assert
+          expect(entry.date, equals(photoDate));
+          expect(entry.createdAt.isAfter(photoDate), isTrue);
+          expect(entry.title, equals(title));
+          expect(entry.content, equals(content));
+          expect(entry.photoIds, equals(photoIds));
+        },
+      );
+
+      test('should handle multiple diary entries for same photo date', () {
+        // Arrange
+        final photoDate = DateTime(2024, 7, 25);
+        final entries = [
+          DiaryEntry(
+            id: 'entry1',
+            date: photoDate,
+            title: '朝の思い出',
+            content: '朝の写真から',
+            photoIds: ['photo1'],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          DiaryEntry(
+            id: 'entry2',
+            date: photoDate,
+            title: '夕方の思い出',
+            content: '夕方の写真から',
+            photoIds: ['photo2'],
+            createdAt: DateTime.now().add(const Duration(hours: 1)),
+            updatedAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
+        ];
+
+        // Act & Assert
+        for (final entry in entries) {
+          expect(entry.date.year, equals(photoDate.year));
+          expect(entry.date.month, equals(photoDate.month));
+          expect(entry.date.day, equals(photoDate.day));
+        }
+
+        // 作成時刻で並び替えのテスト
+        entries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        expect(entries.first.title, equals('夕方の思い出'));
+      });
+
+      test('should calculate correct past context for tag generation', () {
+        // Arrange
+        final now = DateTime.now();
+        final testCases = [
+          {'date': now.subtract(const Duration(days: 1)), 'expected': '昨日の思い出'},
+          {
+            'date': now.subtract(const Duration(days: 3)),
+            'expected': '3日前の思い出',
+          },
+          {
+            'date': now.subtract(const Duration(days: 14)),
+            'expected': '約2週間前の思い出',
+          },
+          {
+            'date': now.subtract(const Duration(days: 60)),
+            'expected': '約2ヶ月前の思い出',
+          },
+          {
+            'date': now.subtract(const Duration(days: 400)),
+            'expected': '約1年前の思い出',
+          },
+        ];
+
+        // Act & Assert
+        for (final testCase in testCases) {
+          final date = testCase['date'] as DateTime;
+          final daysDifference = now.difference(date).inDays;
+
+          String pastContext = '';
+          if (daysDifference == 1) {
+            pastContext = '昨日の思い出';
+          } else if (daysDifference <= 7) {
+            pastContext = '$daysDifference日前の思い出';
+          } else if (daysDifference <= 30) {
+            pastContext = '約${(daysDifference / 7).round()}週間前の思い出';
+          } else if (daysDifference <= 365) {
+            pastContext = '約${(daysDifference / 30).round()}ヶ月前の思い出';
+          } else {
+            pastContext = '約${(daysDifference / 365).round()}年前の思い出';
+          }
+
+          expect(pastContext, equals(testCase['expected']));
+        }
+      });
+    });
+
     group('DiaryEntry Creation Logic', () {
       test('should create diary entry with required fields', () {
         // Arrange

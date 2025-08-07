@@ -61,6 +61,9 @@ web/build/
 .claude/settings.json
 .claude/session/
 
+# --- Serena MCP Server ---
+.serena/
+
 # --- 一時ファイル・その他 ---
 *.iml
 *.log

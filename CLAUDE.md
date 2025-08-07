@@ -30,7 +30,7 @@ fvm flutter run
 
 ### Testing
 ```bash
-# Run all tests (using FVM) - Currently 808+ tests with 100% success rate
+# Run all tests (using FVM) - Currently 800+ tests with 100% success rate
 fvm flutter test
 
 # Run specific test types
@@ -86,13 +86,13 @@ git push origin v1.0.0
 The app follows a service-oriented architecture with singleton services using lazy initialization via `ServiceLocator`:
 
 - **`DiaryService`**: Central data management with Hive database operations, depends on `AiService` for tag generation
-- **`PhotoService`**: Photo access and permissions via `photo_manager` plugin
+- **`PhotoService`**: Photo access with permission handling, performance-optimized photo grid, and past photos functionality
 - **`AiService`**: AI diary generation with Google Gemini API and strict error handling to prevent unauthorized credit consumption
 - **`ImageClassifierService`**: On-device ML inference capabilities
 - **`SettingsService`**: App configuration stored in SharedPreferences with Result<T> pattern for write operations
 - **`StorageService`**: File system operations and data export functionality
 - **`LoggingService`**: Structured logging with levels and performance monitoring
-- **`SubscriptionService`**: In-App Purchase integration for Premium subscriptions
+- **`SubscriptionService`**: In-App Purchase integration for Premium subscriptions with plan-based access control
 - **`PromptService`**: Writing prompt management with JSON asset loading and 3-tier caching system
 
 ### Error Handling Architecture
@@ -126,11 +126,12 @@ The app implements a **Result<T> pattern** for functional error handling:
 - **Credit Protection**: AI credits are only consumed when generation is successful
 
 ### Monetization Architecture
-- **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts)
+- **Freemium Model**: Basic (free, 10 AI generations/month) vs Premium (¥300/month, 100 generations + prompts + past photos)
 - **Plan Class Architecture**: Type-safe, extensible plan management with factory pattern
 - **In-App Purchase Integration**: Uses `in_app_purchase` plugin for subscription management
 - **Usage Tracking**: AI generation counts with monthly reset functionality
 - **Writing Prompts System**: 20 curated prompts (5 Basic + 15 Premium) across 8 categories
+- **Feature Access Control**: Plan-based restrictions for past photos and premium features
 
 ## Key Dependencies
 
@@ -247,7 +248,7 @@ The app is designed as an **iPhone-only application** with iPad support explicit
 - **Photo Selection**: Use `PhotoManager.presentLimited()` to show selection UI
 
 ### Testing Architecture
-The project follows a comprehensive 3-tier testing strategy with **100% success rate** (808+ passing tests):
+The project follows a comprehensive 3-tier testing strategy with **100% success rate** (800+ passing tests):
 
 #### Unit Tests (`test/unit/`)
 - Pure logic testing with mocked dependencies using `mocktail`
@@ -287,15 +288,16 @@ FORCE_PLAN=premium
 - **Type-safe monetization**: Extensible plan system with factory pattern
 
 ### Recent Achievements
+- **Past Photos Feature**: Implemented state management and plan-based access control for historical photo viewing
+- **Performance Optimization**: Enhanced photo grid scroll performance and memory management
 - **Plan Class Migration**: Successfully migrated from SubscriptionPlan enum to Plan class architecture
-- Perfect test coverage: 808+ tests with 100% success rate
-- Complete freemium model with In-App Purchase integration
+- Perfect test coverage: 800+ tests with 100% success rate
+- Complete freemium model with In-App Purchase integration and feature restrictions
 - Writing prompts system with 20 curated prompts
 - Result<T> pattern implementation for robust error handling
 - Service architecture with dependency injection
 - Enhanced UI/UX with unified design system
 - Complete CI/CD pipeline implementation
-- **Type Safety Enhancement**: Improved extensibility and maintainability through Plan class system
 - Production-ready Smart Photo Diary v1.0 with modern architecture
 
 ## CI/CD and Deployment
