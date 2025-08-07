@@ -131,6 +131,7 @@ The app implements a **Result<T> pattern** for functional error handling:
 - **In-App Purchase Integration**: Uses `in_app_purchase` plugin for subscription management
 - **Usage Tracking**: AI generation counts with monthly reset functionality
 - **Writing Prompts System**: 20 curated prompts (5 Basic + 15 Premium) across 8 categories
+- **Past Photos Access**: Premium members can access photos from the past 365 days, Basic members limited to 1 day
 - **Feature Access Control**: Plan-based restrictions for past photos and premium features
 
 ## Key Dependencies
