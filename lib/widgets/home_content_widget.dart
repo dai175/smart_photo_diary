@@ -725,14 +725,14 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
-            color: isBasic
-                ? AppColors.warning.withValues(alpha: 0.08)
-                : AppColors.success.withValues(alpha: 0.08),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceVariant.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isBasic
-                  ? AppColors.warning.withValues(alpha: 0.2)
-                  : AppColors.success.withValues(alpha: 0.2),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -744,7 +744,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                 rangeDescription,
                 style: AppTypography.bodyMedium.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: isBasic ? AppColors.warning : AppColors.success,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 13,
                 ),
               ),

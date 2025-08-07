@@ -535,8 +535,8 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
       ),
       decoration: BoxDecoration(
         color: widget.controller.selectedCount > 0
-            ? AppColors.primaryContainer
-            : AppColors.surfaceVariant,
+            ? Theme.of(context).colorScheme.primaryContainer
+            : Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: AppSpacing.chipRadius,
       ),
       child: Row(
@@ -546,8 +546,8 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
             Icons.photo_library_rounded,
             size: AppSpacing.iconSm,
             color: widget.controller.selectedCount > 0
-                ? AppColors.primary
-                : AppColors.onSurfaceVariant,
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: AppSpacing.xs),
           Text(
@@ -555,8 +555,8 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
             style: AppTypography.withColor(
               AppTypography.labelMedium,
               widget.controller.selectedCount > 0
-                  ? AppColors.onPrimaryContainer
-                  : AppColors.onSurfaceVariant,
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
