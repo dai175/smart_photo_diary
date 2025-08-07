@@ -74,7 +74,7 @@ void main() {
         final accessRange = photoAccessControlService.getAccessRangeDescription(
           basicPlan,
         );
-        expect(accessRange, contains('Premiumで過去1年の写真'));
+        expect(accessRange, contains('Premiumで過去1年分'));
 
         // 4. プレミアムプランでのアクセス確認
         final premiumPlan = PremiumMonthlyPlan();
