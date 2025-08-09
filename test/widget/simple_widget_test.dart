@@ -3,9 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/ui/components/custom_dialog.dart';
 import 'package:smart_photo_diary/ui/components/animated_button.dart';
 import 'package:smart_photo_diary/ui/components/custom_card.dart';
+import 'package:smart_photo_diary/services/logging_service.dart';
 
 void main() {
   group('UI Components Widget Tests', () {
+    setUpAll(() async {
+      // AnimatedButtonがLoggingServiceを使用するため初期化
+      await LoggingService.getInstance();
+    });
     testWidgets('CustomDialog displays title and content', (
       WidgetTester tester,
     ) async {
@@ -50,8 +55,8 @@ void main() {
       // ボタンが表示されることを確認
       expect(find.text('Tap me'), findsOneWidget);
 
-      // ボタンをタップ
-      await tester.tap(find.byType(AnimatedButton));
+      // ボタンをタップ（警告を抑制）
+      await tester.tap(find.byType(AnimatedButton), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // タップが検出されたことを確認

@@ -357,28 +357,28 @@ class IntegrationTestHelpers {
     MockSettingsService mockSettingsService,
     MockStorageService mockStorageService,
   ) {
-    // Diary service defaults - using correct interface methods
+    // Diary service defaults - using Result<T> pattern
     when(
       () => mockDiaryService.getSortedDiaryEntries(),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success(<DiaryEntry>[]));
     when(
       () => mockDiaryService.getFilteredDiaryEntries(any()),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success(<DiaryEntry>[]));
     when(
       () => mockDiaryService.getAllTags(),
-    ).thenAnswer((_) async => <String>{});
+    ).thenAnswer((_) async => const Success(<String>{}));
     when(
       () => mockDiaryService.getTotalDiaryCount(),
-    ).thenAnswer((_) async => 0);
+    ).thenAnswer((_) async => const Success(0));
     when(
       () => mockDiaryService.getDiaryCountInPeriod(any(), any()),
-    ).thenAnswer((_) async => 0);
+    ).thenAnswer((_) async => const Success(0));
     when(
       () => mockDiaryService.getDiaryEntry(any()),
-    ).thenAnswer((_) async => null);
+    ).thenAnswer((_) async => const Success<DiaryEntry?>(null));
     when(
       () => mockDiaryService.getTagsForEntry(any()),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success(<String>[]));
 
     // Subscription service defaults - basic mock setup
     when(() => mockSubscriptionService.isInitialized).thenReturn(true);
