@@ -10,6 +10,7 @@ import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/import_result.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -199,20 +200,20 @@ class TestServiceSetup {
   static MockDiaryServiceInterface _createDiaryServiceMock() {
     final mock = MockDiaryServiceInterface();
 
-    // Default mock behavior for DiaryService
-    when(() => mock.getSortedDiaryEntries()).thenAnswer((_) async => []);
-    when(() => mock.getDiaryEntry(any())).thenAnswer((_) async => null);
-    when(() => mock.getTotalDiaryCount()).thenAnswer((_) async => 0);
+    // Default mock behavior for DiaryService (Result<T> pattern)
+    when(() => mock.getSortedDiaryEntries()).thenAnswer((_) async => const Success(<DiaryEntry>[]));
+    when(() => mock.getDiaryEntry(any())).thenAnswer((_) async => const Success<DiaryEntry?>(null));
+    when(() => mock.getTotalDiaryCount()).thenAnswer((_) async => const Success(0));
     when(
       () => mock.getAllTags(),
-    ).thenAnswer((_) async => {'mock', 'test', 'tags'});
+    ).thenAnswer((_) async => const Success({'mock', 'test', 'tags'}));
     when(
       () => mock.getDiaryCountInPeriod(any(), any()),
-    ).thenAnswer((_) async => 0);
-    when(() => mock.getFilteredDiaryEntries(any())).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success(0));
+    when(() => mock.getFilteredDiaryEntries(any())).thenAnswer((_) async => const Success(<DiaryEntry>[]));
     when(
       () => mock.getTagsForEntry(any()),
-    ).thenAnswer((_) async => ['mock', 'test']);
+    ).thenAnswer((_) async => const Success(['mock', 'test']));
     when(
       () => mock.saveDiaryEntry(
         date: any(named: 'date'),
@@ -223,18 +224,110 @@ class TestServiceSetup {
         tags: any(named: 'tags'),
       ),
     ).thenAnswer(
-      (_) async => DiaryEntry(
-        id: 'mock-id',
+      (_) async => Success(
+        DiaryEntry(
+          id: 'mock-id',
+          date: DateTime.now(),
+          title: 'Mock Title',
+          content: 'Mock Content',
+          photoIds: [],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ),
+    );
+    when(() => mock.updateDiaryEntry(any())).thenAnswer((_) async => Success(
+      DiaryEntry(
+        id: 'mock-updated-id',
         date: DateTime.now(),
-        title: 'Mock Title',
-        content: 'Mock Content',
+        title: 'Updated Mock Title',
+        content: 'Updated Mock Content',
         photoIds: [],
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
+    ));
+    when(() => mock.deleteDiaryEntry(any())).thenAnswer((_) async => const Success(null));
+
+    // Additional DiaryServiceInterface methods
+    when(
+      () => mock.saveDiaryEntryWithPhotos(
+        date: any(named: 'date'),
+        title: any(named: 'title'),
+        content: any(named: 'content'),
+        photos: any(named: 'photos'),
+      ),
+    ).thenAnswer(
+      (_) async => Success(
+        DiaryEntry(
+          id: 'mock-photo-entry-id',
+          date: DateTime.now(),
+          title: 'Mock Photo Entry',
+          content: 'Mock Photo Content',
+          photoIds: ['photo1'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ),
     );
-    when(() => mock.updateDiaryEntry(any())).thenAnswer((_) async {});
-    when(() => mock.deleteDiaryEntry(any())).thenAnswer((_) async {});
+
+    when(
+      () => mock.createDiaryForPastPhoto(
+        photoDate: any(named: 'photoDate'),
+        title: any(named: 'title'),
+        content: any(named: 'content'),
+        photoIds: any(named: 'photoIds'),
+        location: any(named: 'location'),
+        tags: any(named: 'tags'),
+      ),
+    ).thenAnswer(
+      (_) async => Success(
+        DiaryEntry(
+          id: 'mock-past-photo-id',
+          date: DateTime.now(),
+          title: 'Past Photo Mock Title',
+          content: 'Past Photo Mock Content',
+          photoIds: [],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ),
+    );
+
+    when(
+      () => mock.getDiaryByPhotoDate(any()),
+    ).thenAnswer((_) async => const Success(<DiaryEntry>[]));
+
+    when(
+      () => mock.searchDiaries(
+        query: any(named: 'query'),
+        tags: any(named: 'tags'),
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+      ),
+    ).thenAnswer((_) async => const Success(<DiaryEntry>[]));
+
+    when(
+      () => mock.exportDiaries(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+      ),
+    ).thenAnswer((_) async => const Success('Mock export data'));
+
+    when(
+      () => mock.importDiaries(),
+    ).thenAnswer(
+      (_) async => Success(
+        ImportResult(
+          totalEntries: 0,
+          successfulImports: 0,
+          skippedEntries: 0,
+          failedImports: 0,
+          errors: [],
+          warnings: [],
+        ),
+      ),
+    );
 
     return mock;
   }

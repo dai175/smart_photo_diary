@@ -72,9 +72,9 @@
 - [x] `home_content_widget.dart` - forループのResult<T>対応
 - [x] `past_photo_calendar_widget.dart` - Result<T>対応
 - [ ] テストファイルの移行（96個のエラー修正）
-  - [ ] `test/integration/diary_service_integration_test.dart`
-  - [ ] `test/integration/diary_service_past_photo_integration_test.dart`
-  - [ ] `test/integration/mocks/mock_services.dart`
+  - [x] `test/integration/diary_service_integration_test.dart`
+  - [x] `test/integration/diary_service_past_photo_integration_test.dart`
+  - [x] `test/integration/mocks/mock_services.dart`
   - [ ] `test/integration/test_helpers/integration_test_helpers.dart`
 - [ ] `flutter analyze`の完全クリア（テストファイル修正後）
 
