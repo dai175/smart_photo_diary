@@ -1687,6 +1687,110 @@ class PhotoService implements PhotoServiceInterface {
     }
   }
 
+  /// Limited Photo Access時の統合的なハンドリング
+  ///
+  /// このメソッドは以下の処理を統合します:
+  /// 1. Limited Access状態の検出
+  /// 2. 条件に基づく写真選択UIの表示
+  /// 3. ユーザーの選択結果の処理
+  ///
+  /// [checkPhotoCount]: 写真数をチェックするかどうか（デフォルト: true）
+  /// [minimumPhotoThreshold]: 写真選択UIを表示する写真数の閾値（デフォルト: 1）
+  ///
+  /// 戻り値:
+  /// - Success(true): Limited Access処理を実行し、ユーザーが写真を選択/変更
+  /// - Success(false): Limited Accessではない、または条件に合致しない
+  /// - Failure: システムエラーまたはプラットフォーム固有エラー
+  Future<Result<bool>> handleLimitedPhotoAccess({
+    bool checkPhotoCount = true,
+    int minimumPhotoThreshold = 1,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug(
+        'Limited Photo Access統合処理開始',
+        context: 'PhotoService.handleLimitedPhotoAccess',
+        data:
+            'checkPhotoCount: $checkPhotoCount, threshold: $minimumPhotoThreshold',
+      );
+
+      // Phase 1: Limited Access状態の検出
+      final isLimitedResult = await isLimitedAccessResult();
+      if (isLimitedResult.isFailure) {
+        loggingService.error(
+          'Limited Access状態チェックに失敗',
+          context: 'PhotoService.handleLimitedPhotoAccess',
+          error: isLimitedResult.error,
+        );
+        return Failure(isLimitedResult.error);
+      }
+
+      final isLimited = isLimitedResult.value;
+      if (!isLimited) {
+        loggingService.debug(
+          'Limited Accessではないため処理をスキップ',
+          context: 'PhotoService.handleLimitedPhotoAccess',
+        );
+        return const Success(false);
+      }
+
+      // Phase 2: 写真数チェック（オプション）
+      if (checkPhotoCount) {
+        try {
+          final photos = await getTodayPhotos();
+          if (photos.length >= minimumPhotoThreshold) {
+            loggingService.debug(
+              '写真数が閾値以上のためUI表示をスキップ',
+              context: 'PhotoService.handleLimitedPhotoAccess',
+              data: '写真数: ${photos.length}, 閾値: $minimumPhotoThreshold',
+            );
+            return const Success(false);
+          }
+
+          loggingService.info(
+            'Limited Access + 写真不足のため選択UI表示',
+            context: 'PhotoService.handleLimitedPhotoAccess',
+            data: '写真数: ${photos.length}, 閾値: $minimumPhotoThreshold',
+          );
+        } catch (e) {
+          loggingService.warning(
+            '写真数チェック中にエラーが発生（処理継続）',
+            context: 'PhotoService.handleLimitedPhotoAccess',
+            data: 'エラー: $e',
+          );
+          // 写真数チェックエラーは致命的ではないので処理継続
+        }
+      }
+
+      // Phase 3: 写真選択UIの表示
+      final pickerResult = await presentLimitedLibraryPickerResult();
+      if (pickerResult.isFailure) {
+        loggingService.error(
+          '写真選択UI表示に失敗',
+          context: 'PhotoService.handleLimitedPhotoAccess',
+          error: pickerResult.error,
+        );
+        return Failure(pickerResult.error);
+      }
+
+      final userSelected = pickerResult.value;
+      loggingService.info(
+        'Limited Photo Access統合処理完了',
+        context: 'PhotoService.handleLimitedPhotoAccess',
+        data: 'ユーザー選択結果: $userSelected',
+      );
+
+      return Success(userSelected);
+    } catch (e) {
+      return PhotoResultHelper.fromError<bool>(
+        e,
+        context: 'PhotoService.handleLimitedPhotoAccess',
+        customMessage: 'Limited Photo Access処理中にエラーが発生しました',
+      );
+    }
+  }
+
   /// 写真のサムネイルを取得する（後方互換性のため保持）
   ///
   /// [asset]: 写真アセット

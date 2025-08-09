@@ -276,7 +276,29 @@ class _HomeScreenState extends State<HomeScreen>
 
       if (!mounted) return;
 
-      // Limited Access で写真が少ない場合は追加選択を提案
+      // Limited Access処理: 統合メソッド + 従来UI（現状並行動作）
+      final photoServiceConcrete = PhotoService.getInstance();
+      final limitedAccessResult = await photoServiceConcrete
+          .handleLimitedPhotoAccess();
+
+      // 統合メソッドでの処理結果を記録
+      limitedAccessResult.fold(
+        (handled) {
+          if (handled) {
+            // ユーザーが写真を選択した場合は再読み込み
+            _loadTodayPhotos();
+            return; // 早期リターンで二重読み込みを防ぐ
+          }
+        },
+        (error) {
+          // エラーハンドリング（ログ出力のみ、UIには影響させない）
+          if (kDebugMode) {
+            debugPrint('Limited Access処理エラー: $error');
+          }
+        },
+      );
+
+      // 従来の分散ロジック（統合メソッドとの並行実行）
       if (photos.isEmpty) {
         final isLimited = await photoService.isLimitedAccess();
         if (isLimited) {

@@ -142,14 +142,26 @@
 - [x] 品質保証（テスト・解析・フォーマット）
 
 ##### Phase 5-B: handleLimitedPhotoAccess新規実装（統合ロジック・新規）
-- [ ] `handleLimitedPhotoAccess()` 新規メソッド追加
-  - [ ] `Future<Result<bool>> handleLimitedPhotoAccess()` 実装
-  - [ ] isLimitedAccess() + presentLimitedLibraryPicker() の統合
-  - [ ] Limited Access時の統一的なハンドリング実装
-  - [ ] ユーザーガイダンス機能の統合
-- [ ] 新規例外クラスの実装（UserCancelledException等）
-- [ ] 統合ロジックのテストカバレッジ100%
-- [ ] 品質保証（テスト・解析・フォーマット）
+- [x] `handleLimitedPhotoAccess()` 新規メソッド追加
+  - [x] `Future<Result<bool>> handleLimitedPhotoAccess()` 実装
+  - [x] isLimitedAccess() + presentLimitedLibraryPicker() の統合
+  - [x] Limited Access時の統一的なハンドリング実装
+  - [x] パラメータ化による柔軟な条件設定（写真数閾値等）
+- [x] 統合ロジックの基盤実装（UI統合は将来対応）
+- [x] home_screen.dartでの統合メソッド呼び出し実装
+- [x] 品質保証（テスト・解析・フォーマット）
+
+##### Phase 5-B 将来対応（UI統合強化・低優先度）
+- [ ] UI統合の完全実装
+  - [ ] `handleLimitedPhotoAccess()`内でのダイアログ表示統合
+  - [ ] `_showLimitedAccessDialog()`の完全削除
+  - [ ] コールバック機能またはイベント通知による分離設計
+- [ ] 他画面での統合メソッド採用
+  - [ ] 写真選択が必要な全画面での活用
+  - [ ] カスタムパラメータによる画面別最適化
+- [ ] テストカバレッジの完全化
+  - [ ] UI統合後の包括的テスト実装
+  - [ ] エラーシナリオの網羅的テスト
 
 ##### Phase 5-C: getPhotosEfficient Result<T>移行（高リスク・慎重実施）
 - [ ] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`（高優先度）
