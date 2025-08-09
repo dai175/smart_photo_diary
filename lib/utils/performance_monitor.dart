@@ -44,11 +44,6 @@ class PerformanceMonitor {
       'パフォーマンス: $label: ${milliseconds}ms (平均: ${average.toStringAsFixed(1)}ms)',
       context: context ?? 'PerformanceMonitor',
     );
-
-    // デバッグビルドの場合はTimelineに記録
-    if (kDebugMode) {
-      developer.Timeline.finishSync();
-    }
   }
 
   /// メモリ使用状況を記録
