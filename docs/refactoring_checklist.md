@@ -81,14 +81,14 @@
 #### PhotoService（細分化版）
 
 ##### Phase 1: 基盤整備
-- [ ] Result用ヘルパーユーティリティ作成
-  - [ ] `lib/core/result/photo_result_helper.dart` 作成
-  - [ ] `photoPermissionResult()`, `photoAccessResult()` 実装
-- [ ] PhotoAccessException詳細化
-  - [ ] `PhotoPermissionDeniedException` 追加
-  - [ ] `PhotoPermissionPermanentlyDeniedException` 追加
-  - [ ] `PhotoLimitedAccessException` 追加
-  - [ ] `PhotoDataCorruptedException` 追加
+- [x] Result用ヘルパーユーティリティ作成
+  - [x] `lib/core/result/photo_result_helper.dart` 作成
+  - [x] `photoPermissionResult()`, `photoAccessResult()` 実装
+- [x] PhotoAccessException詳細化
+  - [x] `PhotoPermissionDeniedException` 追加
+  - [x] `PhotoPermissionPermanentlyDeniedException` 追加
+  - [x] `PhotoLimitedAccessException` 追加
+  - [x] `PhotoDataCorruptedException` 追加
 
 ##### Phase 2: Core Permission Methods（基本権限系）
 - [ ] `requestPermission()` → `Future<Result<bool>>`（高優先度）
