@@ -64,7 +64,9 @@ class DiaryEntry extends HiveObject {
           assets.add(asset);
         }
       } catch (e) {
-        debugPrint('写真の取得エラー: $e');
+        if (kDebugMode) {
+          debugPrint('写真の取得エラー: $e');
+        }
       }
     }
 

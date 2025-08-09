@@ -16,7 +16,9 @@ class PerformanceMonitor {
   static Future<void> endMeasurement(String label, {String? context}) async {
     final startTime = _startTimes[label];
     if (startTime == null) {
-      debugPrint('PerformanceMonitor: 計測開始されていません - $label');
+      if (kDebugMode) {
+        debugPrint('PerformanceMonitor: 計測開始されていません - $label');
+      }
       return;
     }
 

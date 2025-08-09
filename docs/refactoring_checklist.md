@@ -38,21 +38,21 @@
 - [x] `shared/filter_bottom_sheet.dart` - print文を削除
 
 #### その他
-- [ ] `main.dart` - 初期化ログの条件付き出力
-- [ ] `config/environment_config.dart` - API keyログの削除
-- [ ] `core/service_registration.dart` - 登録ログの条件付き
-- [ ] `core/service_locator.dart` - デバッグログの条件付き
-- [ ] `core/errors/error_handler.dart` - エラーログの適切な処理
-- [ ] `models/diary_entry.dart` - デバッグ出力の削除
-- [ ] `debug/font_debug_screen.dart` - デバッグ画面なので保持
-- [ ] `utils/performance_monitor.dart` - パフォーマンスログの条件付き
-- [ ] `utils/dialog_utils.dart` - ダイアログログの削除
-- [ ] `utils/url_launcher_utils.dart` - URLログの削除
+- [x] `main.dart` - 初期化ログの条件付き出力
+- [x] `config/environment_config.dart` - API keyログの削除
+- [x] `core/service_registration.dart` - 登録ログの条件付き
+- [x] `core/service_locator.dart` - デバッグログの条件付き
+- [x] `core/errors/error_handler.dart` - エラーログの適切な処理
+- [x] `models/diary_entry.dart` - デバッグ出力の削除
+- [x] `debug/font_debug_screen.dart` - デバッグ画面なので保持
+- [x] `utils/performance_monitor.dart` - パフォーマンスログの条件付き
+- [x] `utils/dialog_utils.dart` - ダイアログログの削除
+- [x] `utils/url_launcher_utils.dart` - URLログの削除
 - [ ] `utils/upgrade_dialog_utils.dart` - アップグレードログの削除
 - [ ] `ui/components/animated_button.dart` - アニメーションログの削除
-- [ ] `ui/components/custom_dialog.dart` - ダイアログログの削除
+- [x] `ui/components/custom_dialog.dart` - ダイアログログの削除
 - [ ] `ui/error_display/error_display_service.dart` - エラー表示ログの適切化
-- [ ] `ui/error_display/error_display_widgets.dart` - ウィジェットログの削除
+- [x] `ui/error_display/error_display_widgets.dart` - ウィジェットログの削除
 
 ### 3. Result<T>パターンへの移行強化
 

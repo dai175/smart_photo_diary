@@ -16,9 +16,7 @@ class EnvironmentConfig {
         defaultValue: '',
       );
 
-      debugPrint(
-        '🔑 APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? ".envファイル" : "build-time constants"}',
-      );
+      // APIキー情報をログ出力しない（セキュリティ対応）
 
       // 2. 開発環境：.envファイルから読み込み（デバッグビルドのみ）
       if (_cachedGeminiApiKey!.isEmpty && kDebugMode) {
@@ -26,9 +24,13 @@ class EnvironmentConfig {
           // プロジェクトルートから読み込み（セキュリティを考慮）
           await dotenv.load(fileName: '.env');
           _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-          debugPrint('🔧 開発環境: .envファイルから読み込み完了');
+          if (kDebugMode) {
+            debugPrint('🔧 開発環境: .envファイルから読み込み完了');
+          }
         } catch (e) {
-          debugPrint('⚠️ .envファイル読み込み失敗（開発環境）: $e');
+          if (kDebugMode) {
+            debugPrint('⚠️ .envファイル読み込み失敗（開発環境）: $e');
+          }
         }
       }
 
@@ -54,12 +56,14 @@ class EnvironmentConfig {
 
       _isInitialized = true;
 
-      debugPrint('🚀 EnvironmentConfig初期化完了');
-      debugPrint(
-        '🔑 APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? "未設定" : (kDebugMode ? "開発環境" : "本番環境")}',
-      );
+      if (kDebugMode) {
+        debugPrint('🚀 EnvironmentConfig初期化完了');
+        // APIキー情報をログ出力しない（セキュリティ対応）
+      }
     } catch (e) {
-      debugPrint('❌ 環境変数初期化エラー: $e');
+      if (kDebugMode) {
+        debugPrint('❌ 環境変数初期化エラー: $e');
+      }
       _isInitialized = false;
     }
   }
@@ -67,7 +71,9 @@ class EnvironmentConfig {
   /// Gemini APIキーを取得
   static String get geminiApiKey {
     if (!_isInitialized) {
-      debugPrint('警告: EnvironmentConfigが初期化されていません');
+      if (kDebugMode) {
+        debugPrint('警告: EnvironmentConfigが初期化されていません');
+      }
       // テスト環境の場合はダミーキーを返す
       if (kDebugMode &&
           const String.fromEnvironment('FLUTTER_TEST') == 'true') {
@@ -78,7 +84,7 @@ class EnvironmentConfig {
 
     final key = _cachedGeminiApiKey ?? '';
     if (key.isEmpty) {
-      debugPrint('警告: GEMINI_API_KEYが設定されていません');
+      // APIキー警告をログ出力しない（セキュリティ対応）
       // テスト環境の場合はダミーキーを返す
       if (kDebugMode &&
           const String.fromEnvironment('FLUTTER_TEST') == 'true') {
@@ -125,8 +131,10 @@ class EnvironmentConfig {
       return plan;
     }
 
-    debugPrint('警告: 無効なFORCE_PLANが指定されました: $plan');
-    debugPrint('有効な値: ${validPlans.join(', ')}');
+    if (kDebugMode) {
+      debugPrint('警告: 無効なFORCE_PLANが指定されました: $plan');
+      debugPrint('有効な値: ${validPlans.join(', ')}');
+    }
     return null;
   }
 
@@ -146,18 +154,15 @@ class EnvironmentConfig {
 
   /// デバッグ情報を出力
   static void printDebugInfo() {
-    debugPrint('=== Environment Config Debug ===');
-    debugPrint('初期化状態: $_isInitialized');
-    debugPrint('デバッグモード: $kDebugMode');
-    debugPrint(
-      'APIキー設定: ${_cachedGeminiApiKey?.isNotEmpty == true ? "有効" : "無効"}',
-    );
-    debugPrint(
-      'APIキー形式: ${_cachedGeminiApiKey?.startsWith('AIza') == true ? "正常" : "異常"}',
-    );
-    debugPrint('プラン強制: $_cachedForcePlan');
-    debugPrint('dotenv環境: ${dotenv.env.keys.length}個のキー');
-    debugPrint('================================');
+    if (kDebugMode) {
+      debugPrint('=== Environment Config Debug ===');
+      debugPrint('初期化状態: $_isInitialized');
+      debugPrint('デバッグモード: $kDebugMode');
+      // APIキー情報はセキュリティ上の理由でログ出力しない
+      debugPrint('プラン強制: $_cachedForcePlan');
+      debugPrint('dotenv環境: ${dotenv.env.keys.length}個のキー');
+      debugPrint('================================');
+    }
   }
 
   /// 環境変数を再読み込み

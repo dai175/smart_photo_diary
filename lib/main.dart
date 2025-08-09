@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -28,14 +29,22 @@ Future<void> main() async {
   Hive.registerAdapter(PromptUsageHistoryAdapter());
 
   // 環境変数の初期化
-  debugPrint('🔧 EnvironmentConfig初期化開始...');
+  if (kDebugMode) {
+    debugPrint('🔧 EnvironmentConfig初期化開始...');
+  }
   await EnvironmentConfig.initialize();
-  debugPrint('🔧 EnvironmentConfig初期化完了: ${EnvironmentConfig.isInitialized}');
+  if (kDebugMode) {
+    debugPrint('🔧 EnvironmentConfig初期化完了: ${EnvironmentConfig.isInitialized}');
+  }
 
   // サービスロケータの初期化
-  debugPrint('🔧 ServiceRegistration初期化開始...');
+  if (kDebugMode) {
+    debugPrint('🔧 ServiceRegistration初期化開始...');
+  }
   await ServiceRegistration.initialize();
-  debugPrint('🔧 ServiceRegistration初期化完了');
+  if (kDebugMode) {
+    debugPrint('🔧 ServiceRegistration初期化完了');
+  }
 
   runApp(const MyApp());
 }
@@ -69,7 +78,11 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _isLoading = false;
       });
-      debugPrint('設定の読み込みエラー: $e');
+      if (kDebugMode) {
+        // LoggingServiceを使用すると初期化ループが発生する可能性があるため、
+        // ここではdebugPrintを使用
+        debugPrint('設定の読み込みエラー: $e');
+      }
     }
   }
 

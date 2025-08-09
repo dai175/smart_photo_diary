@@ -19,19 +19,25 @@ class ServiceLocator {
 
   /// Register a singleton instance
   void registerSingleton<T>(T instance) {
-    debugPrint('ServiceLocator: Registering singleton ${T.toString()}');
+    if (kDebugMode) {
+      debugPrint('ServiceLocator: Registering singleton ${T.toString()}');
+    }
     _services[T] = instance;
   }
 
   /// Register a factory function for lazy initialization
   void registerFactory<T>(T Function() factory) {
-    debugPrint('ServiceLocator: Registering factory ${T.toString()}');
+    if (kDebugMode) {
+      debugPrint('ServiceLocator: Registering factory ${T.toString()}');
+    }
     _factories[T] = factory;
   }
 
   /// Register an async factory function for services that require async initialization
   void registerAsyncFactory<T>(Future<T> Function() factory) {
-    debugPrint('ServiceLocator: Registering async factory ${T.toString()}');
+    if (kDebugMode) {
+      debugPrint('ServiceLocator: Registering async factory ${T.toString()}');
+    }
     _factories[T] = factory;
   }
 
@@ -41,18 +47,22 @@ class ServiceLocator {
 
     // Check if singleton instance exists
     if (_services.containsKey(type)) {
-      debugPrint(
-        'ServiceLocator: Returning singleton instance of ${type.toString()}',
-      );
+      if (kDebugMode) {
+        debugPrint(
+          'ServiceLocator: Returning singleton instance of ${type.toString()}',
+        );
+      }
       return _services[type] as T;
     }
 
     // Check if factory exists
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
-      debugPrint(
-        'ServiceLocator: Creating instance from factory ${type.toString()}',
-      );
+      if (kDebugMode) {
+        debugPrint(
+          'ServiceLocator: Creating instance from factory ${type.toString()}',
+        );
+      }
 
       final instance = factory();
 
@@ -79,18 +89,22 @@ class ServiceLocator {
 
     // Check if singleton instance exists
     if (_services.containsKey(type)) {
-      debugPrint(
-        'ServiceLocator: Returning singleton instance of ${type.toString()}',
-      );
+      if (kDebugMode) {
+        debugPrint(
+          'ServiceLocator: Returning singleton instance of ${type.toString()}',
+        );
+      }
       return _services[type] as T;
     }
 
     // Check if factory exists
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
-      debugPrint(
-        'ServiceLocator: Creating instance from async factory ${type.toString()}',
-      );
+      if (kDebugMode) {
+        debugPrint(
+          'ServiceLocator: Creating instance from async factory ${type.toString()}',
+        );
+      }
 
       final instance = await factory();
 
@@ -113,14 +127,18 @@ class ServiceLocator {
   /// Unregister a service (useful for testing)
   void unregister<T>() {
     final type = T;
-    debugPrint('ServiceLocator: Unregistering ${type.toString()}');
+    if (kDebugMode) {
+      debugPrint('ServiceLocator: Unregistering ${type.toString()}');
+    }
     _services.remove(type);
     _factories.remove(type);
   }
 
   /// Clear all services (useful for testing)
   void clear() {
-    debugPrint('ServiceLocator: Clearing all services');
+    if (kDebugMode) {
+      debugPrint('ServiceLocator: Clearing all services');
+    }
     _services.clear();
     _factories.clear();
   }
@@ -135,9 +153,11 @@ class ServiceLocator {
 
   /// Print debug information about registered services
   void debugPrintServices() {
-    debugPrint('ServiceLocator registered services:');
-    debugPrint('Singletons: ${_services.keys.toList()}');
-    debugPrint('Factories: ${_factories.keys.toList()}');
+    if (kDebugMode) {
+      debugPrint('ServiceLocator registered services:');
+      debugPrint('Singletons: ${_services.keys.toList()}');
+      debugPrint('Factories: ${_factories.keys.toList()}');
+    }
   }
 }
 

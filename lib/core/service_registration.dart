@@ -46,11 +46,15 @@ class ServiceRegistration {
   /// Initialize and register all services
   static Future<void> initialize() async {
     if (_isInitialized) {
-      debugPrint('ServiceRegistration: Already initialized');
+      if (kDebugMode) {
+        debugPrint('ServiceRegistration: Already initialized');
+      }
       return;
     }
 
-    debugPrint('ServiceRegistration: Initializing services...');
+    if (kDebugMode) {
+      debugPrint('ServiceRegistration: Initializing services...');
+    }
 
     try {
       // Register core services that don't have dependencies
@@ -60,19 +64,25 @@ class ServiceRegistration {
       await _registerDependentServices();
 
       _isInitialized = true;
-      debugPrint('ServiceRegistration: All services initialized successfully');
+      if (kDebugMode) {
+        debugPrint('ServiceRegistration: All services initialized successfully');
+      }
 
       // Debug print all registered services
       serviceLocator.debugPrintServices();
     } catch (e) {
-      debugPrint('ServiceRegistration: Error during initialization: $e');
+      if (kDebugMode) {
+        debugPrint('ServiceRegistration: Error during initialization: $e');
+      }
       rethrow;
     }
   }
 
   /// Register services that don't have dependencies
   static Future<void> _registerCoreServices() async {
-    debugPrint('ServiceRegistration: Registering core services...');
+    if (kDebugMode) {
+      debugPrint('ServiceRegistration: Registering core services...');
+    }
 
     // LoggingService (基盤サービス - 他のサービスの依存関係として使用)
     serviceLocator.registerAsyncFactory<LoggingService>(
@@ -119,7 +129,9 @@ class ServiceRegistration {
 
   /// Register services that have dependencies on other services
   static Future<void> _registerDependentServices() async {
-    debugPrint('ServiceRegistration: Registering dependent services...');
+    if (kDebugMode) {
+      debugPrint('ServiceRegistration: Registering dependent services...');
+    }
 
     // Phase 1.7.1.1: AiService with SubscriptionService dependency injection
     serviceLocator.registerAsyncFactory<AiServiceInterface>(() async {
@@ -152,7 +164,9 @@ class ServiceRegistration {
 
   /// Reset service registration (useful for testing)
   static void reset() {
-    debugPrint('ServiceRegistration: Resetting...');
+    if (kDebugMode) {
+      debugPrint('ServiceRegistration: Resetting...');
+    }
     serviceLocator.clear();
     _isInitialized = false;
   }
