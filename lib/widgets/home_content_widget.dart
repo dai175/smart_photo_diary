@@ -579,17 +579,24 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     try {
       final diaryService =
           await ServiceRegistration.getAsync<DiaryServiceInterface>();
-      final allEntries = await diaryService.getSortedDiaryEntries();
+      final allEntriesResult = await diaryService.getSortedDiaryEntries();
 
-      // 使用済み写真IDを収集
-      final usedIds = <String>{};
-      for (final entry in allEntries) {
-        usedIds.addAll(entry.photoIds);
-      }
+      allEntriesResult.fold(
+        (allEntries) {
+          // 使用済み写真IDを収集
+          final usedIds = <String>{};
+          for (final entry in allEntries) {
+            usedIds.addAll(entry.photoIds);
+          }
 
-      // 両方のコントローラーに設定
-      widget.photoController.setUsedPhotoIds(usedIds);
-      widget.pastPhotoController.setUsedPhotoIds(usedIds);
+          // 両方のコントローラーに設定
+          widget.photoController.setUsedPhotoIds(usedIds);
+          widget.pastPhotoController.setUsedPhotoIds(usedIds);
+        },
+        (error) {
+          // エラーは無視してデフォルト値を使用
+        },
+      );
     } catch (_) {
       // エラーは無視してデフォルト値を使用
     }

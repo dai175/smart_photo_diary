@@ -36,7 +36,10 @@ class DiaryScreenController extends BaseErrorController {
   Future<void> loadDiaryEntries() async {
     final result = await safeExecute(() async {
       final diaryService = await DiaryService.getInstance();
-      return await diaryService.getFilteredDiaryEntries(_currentFilter);
+      final entriesResult = await diaryService.getFilteredDiaryEntries(
+        _currentFilter,
+      );
+      return entriesResult.fold((entries) => entries, (error) => throw error);
     }, context: 'DiaryScreenController.loadDiaryEntries');
 
     if (result != null) {
@@ -112,11 +115,17 @@ class DiaryScreenController extends BaseErrorController {
 
       if (query.isEmpty) {
         // 検索クエリが空の場合は通常のフィルタを適用
-        return await diaryService.getFilteredDiaryEntries(_currentFilter);
+        final entriesResult = await diaryService.getFilteredDiaryEntries(
+          _currentFilter,
+        );
+        return entriesResult.fold((entries) => entries, (error) => throw error);
       } else {
         // 検索クエリがある場合は検索フィルタを作成
         final searchFilter = _currentFilter.copyWith(searchText: query);
-        return await diaryService.getFilteredDiaryEntries(searchFilter);
+        final entriesResult = await diaryService.getFilteredDiaryEntries(
+          searchFilter,
+        );
+        return entriesResult.fold((entries) => entries, (error) => throw error);
       }
     }, context: 'DiaryScreenController.searchDiaryEntries');
 

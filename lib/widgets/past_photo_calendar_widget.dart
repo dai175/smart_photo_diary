@@ -221,21 +221,34 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
     try {
       final diaryService =
           await ServiceRegistration.getAsync<DiaryServiceInterface>();
-      final diaries = await diaryService.getSortedDiaryEntries();
+      final diariesResult = await diaryService.getSortedDiaryEntries();
 
-      final dates = <DateTime>{};
-      for (final diary in diaries) {
-        final date = DateTime(
-          diary.date.year,
-          diary.date.month,
-          diary.date.day,
-        );
-        dates.add(date);
-      }
+      diariesResult.fold(
+        (diaries) {
+          final dates = <DateTime>{};
+          for (final diary in diaries) {
+            final date = DateTime(
+              diary.date.year,
+              diary.date.month,
+              diary.date.day,
+            );
+            dates.add(date);
+          }
 
-      setState(() {
-        _diaryDates = dates;
-      });
+          setState(() {
+            _diaryDates = dates;
+          });
+        },
+        (error) {
+          final loggingService = LoggingService.instance;
+          loggingService.warning(
+            '日記日付の読み込みに失敗しましたが、機能は継続します',
+            context: 'PastPhotoCalendarWidget._loadDiaryDates',
+            data: error.toString(),
+          );
+          // エラーでも機能を継続
+        },
+      );
     } catch (e) {
       final loggingService = await LoggingService.getInstance();
       final appError = ErrorHandler.handleError(e, context: '日記日付読み込み');
