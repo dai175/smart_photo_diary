@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
@@ -1533,6 +1534,84 @@ class PhotoService implements PhotoServiceInterface {
         error: appError,
       );
       return false;
+    }
+  }
+
+  /// Limited Photo Access時に写真選択画面を表示（Result版）
+  ///
+  /// 戻り値: 写真選択ダイアログの表示結果
+  /// - Success(true): ユーザーが写真を選択/変更した
+  /// - Success(false): ユーザーがキャンセルした
+  /// - Failure: システムエラーが発生した
+  Future<Result<bool>> presentLimitedLibraryPickerResult() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug(
+        'Limited Library Picker表示開始',
+        context: 'PhotoService.presentLimitedLibraryPickerResult',
+      );
+
+      // プラットフォーム固有チェック（iOS専用機能）
+      if (defaultTargetPlatform != TargetPlatform.iOS) {
+        return PhotoResultHelper.fromError<bool>(
+          PlatformException(
+            code: 'PLATFORM_NOT_SUPPORTED',
+            message: 'Limited Library Pickerはios専用の機能です',
+          ),
+          context: 'PhotoService.presentLimitedLibraryPickerResult',
+          customMessage: 'この機能はiOSでのみ利用できます',
+        );
+      }
+
+      // Limited Access状態の事前チェック
+      final pmState = await PhotoManager.requestPermissionExtend();
+      if (pmState != PermissionState.limited) {
+        loggingService.warning(
+          'Limited Access状態ではありません',
+          context: 'PhotoService.presentLimitedLibraryPickerResult',
+          data: '現在の権限状態: $pmState',
+        );
+
+        return PhotoResultHelper.fromError<bool>(
+          StateError('Limited Access状態ではないため、写真選択ダイアログを表示できません'),
+          context: 'PhotoService.presentLimitedLibraryPickerResult',
+          customMessage: '写真の追加選択は制限付きアクセス時のみ利用できます',
+        );
+      }
+
+      // システムダイアログ表示
+      await PhotoManager.presentLimited();
+
+      loggingService.info(
+        'Limited Library Picker表示完了',
+        context: 'PhotoService.presentLimitedLibraryPickerResult',
+      );
+
+      // 表示成功時はtrueを返す（PhotoManagerの仕様上、ユーザーの操作結果は区別できない）
+      return const Success(true);
+    } on PlatformException catch (e) {
+      // システムUI表示失敗の詳細化
+      if (e.code == 'PlatformException') {
+        return PhotoResultHelper.fromError<bool>(
+          e,
+          context: 'PhotoService.presentLimitedLibraryPickerResult',
+          customMessage: 'システムの写真選択ダイアログの表示に失敗しました',
+        );
+      }
+
+      // その他のプラットフォーム例外
+      return PhotoResultHelper.fromError<bool>(
+        e,
+        context: 'PhotoService.presentLimitedLibraryPickerResult',
+        customMessage: 'プラットフォーム固有のエラーが発生しました',
+      );
+    } catch (e) {
+      return PhotoResultHelper.fromError<bool>(
+        e,
+        context: 'PhotoService.presentLimitedLibraryPickerResult',
+        customMessage: 'Limited Library Pickerの表示中にエラーが発生しました',
+      );
     }
   }
 

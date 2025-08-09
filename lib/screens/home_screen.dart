@@ -10,6 +10,7 @@ import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/photo_service.dart';
 import '../services/logging_service.dart';
 import '../core/service_registration.dart';
 import '../utils/dialog_utils.dart';
@@ -143,11 +144,24 @@ class _HomeScreenState extends State<HomeScreen>
               icon: Icons.add_photo_alternate_rounded,
               onPressed: () async {
                 Navigator.of(context).pop();
-                final photoService =
-                    ServiceRegistration.get<PhotoServiceInterface>();
-                await photoService.presentLimitedLibraryPicker();
-                // 選択後に写真を再読み込み
-                _loadTodayPhotos();
+                final photoService = PhotoService.getInstance();
+                final result = await photoService
+                    .presentLimitedLibraryPickerResult();
+
+                result.fold(
+                  (success) {
+                    if (success) {
+                      // 写真選択が成功した場合のみ再読み込み
+                      _loadTodayPhotos();
+                    }
+                  },
+                  (error) {
+                    // エラーハンドリング（ログ出力のみ、UIには影響させない）
+                    if (kDebugMode) {
+                      debugPrint('Limited Library Picker表示エラー: $error');
+                    }
+                  },
+                );
               },
             ),
           ],

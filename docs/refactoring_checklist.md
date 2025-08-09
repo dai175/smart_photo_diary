@@ -133,13 +133,13 @@
   - [x] `getOriginalFileResult()`メソッド実装完了
 
 ##### Phase 5-A: presentLimitedLibraryPicker Result<T>移行（iOS固有・低リスク）
-- [ ] `presentLimitedLibraryPicker()` → `Future<Result<bool>>`（iOS固有）
-  - [ ] プラットフォーム固有エラーの詳細化（iOS専用チェック）
-  - [ ] システムダイアログ表示失敗の詳細エラー情報
-  - [ ] ユーザーキャンセル vs システムエラーの区別
-  - [ ] `presentLimitedLibraryPickerResult()`メソッド実装完了
-- [ ] home_screen.dartでの呼び出し動作確認
-- [ ] 品質保証（テスト・解析・フォーマット）
+- [x] `presentLimitedLibraryPicker()` → `Future<Result<bool>>`（iOS固有）
+  - [x] プラットフォーム固有エラーの詳細化（iOS専用チェック）
+  - [x] システムダイアログ表示失敗の詳細エラー情報
+  - [x] ユーザーキャンセル vs システムエラーの区別
+  - [x] `presentLimitedLibraryPickerResult()`メソッド実装完了
+- [x] home_screen.dartでの呼び出し動作確認
+- [x] 品質保証（テスト・解析・フォーマット）
 
 ##### Phase 5-B: handleLimitedPhotoAccess新規実装（統合ロジック・新規）
 - [ ] `handleLimitedPhotoAccess()` 新規メソッド追加
