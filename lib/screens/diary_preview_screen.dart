@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -170,7 +170,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         result = resultFromAi.value;
       } else {
         // 複数写真の場合：新しい順次処理方式を使用
-        debugPrint('複数写真の順次分析を開始...');
+        if (kDebugMode) {
+          LoggingService.instance.debug(
+            '複数写真の順次分析を開始',
+            context: 'DiaryPreviewScreen._generateDiary',
+          );
+        }
 
         // 全ての写真データを収集
         final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
@@ -200,7 +205,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           imagesWithTimes: imagesWithTimes,
           prompt: _selectedPrompt?.text,
           onProgress: (current, total) {
-            debugPrint('画像分析進捗: $current/$total');
+            if (kDebugMode) {
+              LoggingService.instance.debug(
+                '画像分析進捗: $current/$total',
+                context: 'DiaryPreviewScreen._generateDiary',
+              );
+            }
             setState(() {
               _currentPhotoIndex = current;
               _totalPhotos = total;
@@ -254,10 +264,17 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _isLoading = true;
       });
 
-      debugPrint('日記保存開始...');
-      debugPrint('タイトル: ${_titleController.text}');
-      debugPrint('本文: ${_contentController.text}');
-      debugPrint('写真数: ${widget.selectedAssets.length}');
+      if (kDebugMode) {
+        LoggingService.instance.info(
+          '日記保存開始',
+          context: 'DiaryPreviewScreen._saveDiaryEntry',
+          data: {
+            'title': _titleController.text,
+            'contentLength': _contentController.text.length,
+            'photoCount': widget.selectedAssets.length,
+          },
+        );
+      }
 
       // DiaryServiceのインスタンスを取得
       final diaryService =
@@ -271,7 +288,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         photos: widget.selectedAssets,
       );
 
-      debugPrint('日記保存成功');
+      if (kDebugMode) {
+        LoggingService.instance.info(
+          '日記保存成功',
+          context: 'DiaryPreviewScreen._saveDiaryEntry',
+        );
+      }
 
       // ウィジェットがまだマウントされている場合のみ状態を更新
       if (mounted) {

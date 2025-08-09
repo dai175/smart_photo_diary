@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
@@ -16,6 +17,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../services/logging_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -55,10 +57,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
       } else {
-        debugPrint('サブスクリプション情報の取得エラー: ${subscriptionResult.error}');
+        if (kDebugMode) {
+          LoggingService.instance.error(
+            'サブスクリプション情報の取得エラー',
+            context: 'SettingsScreen._loadData',
+            error: subscriptionResult.error,
+          );
+        }
       }
     } catch (e) {
-      debugPrint('設定の読み込みエラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          '設定の読み込みエラー',
+          context: 'SettingsScreen._loadData',
+          error: e,
+        );
+      }
     }
 
     setState(() {

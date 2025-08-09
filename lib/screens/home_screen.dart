@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
@@ -9,6 +10,7 @@ import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/logging_service.dart';
 import '../core/service_registration.dart';
 import '../utils/dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
@@ -187,7 +189,13 @@ class _HomeScreenState extends State<HomeScreen>
         _loadingDiaries = false;
       });
     } catch (e) {
-      debugPrint('日記の読み込みエラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          '日記の読み込みエラー',
+          context: 'HomeScreen._loadRecentDiaries',
+          error: e,
+        );
+      }
       if (mounted) {
         setState(() {
           _recentDiaries = [];

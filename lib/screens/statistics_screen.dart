@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../services/logging_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -54,7 +56,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('統計データの読み込みエラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          '統計データの読み込みエラー',
+          context: 'StatisticsScreen._loadDiaryData',
+          error: e,
+        );
+      }
       setState(() {
         _isLoading = false;
       });

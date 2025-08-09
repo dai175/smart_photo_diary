@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../controllers/diary_screen_controller.dart';
 import '../widgets/diary_card_widget.dart';
@@ -12,6 +13,7 @@ import '../ui/components/loading_shimmer.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../services/logging_service.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -46,7 +48,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
       // 削除された場合の追加処理（必要に応じて）
       if (result == true) {
-        debugPrint('日記が削除されました');
+        if (kDebugMode) {
+          LoggingService.instance.debug(
+            '日記が削除されました',
+            context: 'DiaryScreen._navigateToDetail',
+          );
+        }
       }
     });
   }

@@ -25,12 +25,12 @@
 - [x] `services/ai/gemini_api_client.dart` - LoggingServiceへ移行
 
 #### スクリーン
-- [ ] `screens/home_screen.dart` - print文を削除またはkDebugMode条件付き
-- [ ] `screens/diary_screen.dart` - print文を削除またはkDebugMode条件付き
-- [ ] `screens/diary_detail_screen.dart` - print文を削除またはkDebugMode条件付き
-- [ ] `screens/diary_preview_screen.dart` - print文を削除またはkDebugMode条件付き
-- [ ] `screens/settings_screen.dart` - print文を削除またはkDebugMode条件付き
-- [ ] `screens/statistics_screen.dart` - print文を削除またはkDebugMode条件付き
+- [x] `screens/home_screen.dart` - print文を削除またはkDebugMode条件付き
+- [x] `screens/diary_screen.dart` - print文を削除またはkDebugMode条件付き
+- [x] `screens/diary_detail_screen.dart` - print文を削除またはkDebugMode条件付き
+- [x] `screens/diary_preview_screen.dart` - print文を削除またはkDebugMode条件付き
+- [x] `screens/settings_screen.dart` - print文を削除またはkDebugMode条件付き
+- [x] `screens/statistics_screen.dart` - print文を削除またはkDebugMode条件付き
 
 #### ウィジェット
 - [ ] `widgets/home_content_widget.dart` - print文を削除
