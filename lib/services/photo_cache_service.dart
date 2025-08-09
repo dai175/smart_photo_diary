@@ -3,6 +3,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
+import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 
 /// メモリキャッシュのエントリー
 class _CacheEntry {
@@ -332,6 +334,87 @@ class PhotoCacheService implements PhotoCacheServiceInterface {
       debugPrint(
         'PhotoCacheService: ${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
       );
+    }
+  }
+
+  // ===== Result<T>版メソッド（推奨） =====
+
+  /// サムネイルを取得（Result<T>版）
+  @override
+  Future<Result<Uint8List>> getThumbnailResult(
+    AssetEntity asset, {
+    int width = 200,
+    int height = 200,
+    int quality = 80,
+  }) async {
+    try {
+      final loggingService = await LoggingService.getInstance();
+      final cacheKey = _generateCacheKey(asset.id, width, height, quality);
+
+      // パラメータ検証
+      if (width <= 0 || height <= 0) {
+        return Failure(
+          ValidationException('サムネイルサイズは正の値である必要があります: ${width}x$height'),
+        );
+      }
+
+      if (quality < 1 || quality > 100) {
+        return Failure(ValidationException('品質は1-100の範囲で指定してください: $quality'));
+      }
+
+      // キャッシュから取得を試みる
+      final cachedEntry = _memoryCache[cacheKey];
+      if (cachedEntry != null) {
+        // キャッシュの有効期限チェック
+        if (DateTime.now().difference(cachedEntry.timestamp) <
+            _cacheExpiration) {
+          loggingService.debug(
+            'サムネイルをキャッシュから取得',
+            context: 'PhotoCacheService.getThumbnailResult',
+            data: 'assetId: ${asset.id}, size: ${width}x$height',
+          );
+          return Success(cachedEntry.data);
+        } else {
+          // 期限切れのキャッシュを削除
+          _removeFromCache(cacheKey);
+        }
+      }
+
+      // キャッシュにない場合は生成
+      final thumbnail = await asset.thumbnailDataWithSize(
+        ThumbnailSize(width, height),
+        quality: quality,
+      );
+
+      if (thumbnail == null) {
+        return Failure(
+          PhotoAccessException('サムネイル生成に失敗しました: アセットID ${asset.id}'),
+        );
+      }
+
+      // キャッシュに追加
+      _addToCache(cacheKey, thumbnail);
+
+      loggingService.debug(
+        'サムネイルを生成してキャッシュに追加',
+        context: 'PhotoCacheService.getThumbnailResult',
+        data:
+            'assetId: ${asset.id}, size: ${width}x$height, bytes: ${thumbnail.length}',
+      );
+
+      return Success(thumbnail);
+    } catch (e) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoCacheService.getThumbnailResult',
+      );
+      loggingService.error(
+        'サムネイル取得エラー',
+        context: 'PhotoCacheService.getThumbnailResult',
+        error: appError,
+      );
+      return Failure(appError);
     }
   }
 }

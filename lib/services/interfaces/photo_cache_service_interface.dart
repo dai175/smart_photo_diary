@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
+import '../../core/result/result.dart';
 
 /// 写真キャッシュサービスのインターフェース
 abstract class PhotoCacheServiceInterface {
@@ -30,4 +31,19 @@ abstract class PhotoCacheServiceInterface {
 
   /// 期限切れエントリーのクリーンアップ
   void cleanupExpiredEntries();
+
+  // ===== Result<T>版メソッド（推奨） =====
+
+  /// サムネイルを取得（Result<T>版）
+  ///
+  /// キャッシュがあればキャッシュから、なければ生成してキャッシュする。
+  /// エラー時は構造化されたAppExceptionを返す。
+  ///
+  /// **推奨**: 新しいコードではこちらを使用してください。
+  Future<Result<Uint8List>> getThumbnailResult(
+    AssetEntity asset, {
+    int width = 200,
+    int height = 200,
+    int quality = 80,
+  });
 }

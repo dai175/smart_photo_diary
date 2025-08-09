@@ -266,13 +266,20 @@
 - [x] UI層メイン画面動作確認（subagentによる品質保証完了）
 
 ##### Phase 6-4B: UI層残り更新（段階完了）
-- [ ] 残りUI層ファイルの段階的Result<T>移行
-  - [ ] `diary_preview_screen.dart` 更新
-  - [ ] `photo_grid_widget.dart` 更新
-  - [ ] その他必要ファイルの更新
-- [ ] 全UI層エラーハンドリング統一
-- [ ] UI層完全テスト更新
-- [ ] 全画面動作確認
+- [x] PhotoCacheServiceInterface Result<T>メソッド追加
+  - [x] `getThumbnailResult()` シグネチャ追加とJSDoc記載
+- [x] PhotoCacheService実装 Result<T>メソッド追加  
+  - [x] `getThumbnailResult()` 完全実装（パラメータ検証・エラーハンドリング）
+  - [x] ValidationException、PhotoAccessExceptionの適切な使用
+- [x] OptimizedPhotoGridWidget Result<T>移行
+  - [x] `_loadThumbnailResult()` ヘルパーメソッド実装
+  - [x] `_handleThumbnailError()` 統一エラーハンドリング実装  
+  - [x] FutureBuilderでのResult<T>パターン活用
+- [x] diary_preview_screen.dart確認完了（既にCustomDialog使用済み）
+- [x] 品質保証完了（subagent実施）
+  - [x] `flutter analyze` 0 issues達成
+  - [x] `flutter test` 全テスト成功
+  - [x] `dart format` コード品質確保
 
 ##### Phase 6-5: 統合テスト・最終検証（品質保証）
 - [ ] 全PhotoServiceメソッドのResult<T>対応完了確認

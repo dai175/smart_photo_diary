@@ -14,10 +14,10 @@ void main() {
       // ServiceRegistrationを初期化してLoggingServiceを使えるようにする
       ServiceRegistration.reset();
       await ServiceRegistration.initialize();
-      
+
       // LoggingServiceインスタンスを事前に作成して初期化
       await LoggingService.getInstance();
-      
+
       service = ErrorDisplayService();
     });
 
