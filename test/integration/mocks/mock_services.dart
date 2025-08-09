@@ -144,6 +144,9 @@ class TestServiceSetup {
     when(
       () => mock.getOriginalFile(any()),
     ).thenAnswer((_) async => 'mock_file_path');
+    when(
+      () => mock.getOriginalFileResult(any()),
+    ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3, 4, 5])));
 
     return mock;
   }

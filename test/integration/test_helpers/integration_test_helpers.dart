@@ -127,6 +127,9 @@ class IntegrationTestHelpers {
       () => _mockPhotoService.getOriginalFile(any()),
     ).thenAnswer((_) async => null);
     when(
+      () => _mockPhotoService.getOriginalFileResult(any()),
+    ).thenAnswer((_) async => Success(_createMockImageData()));
+    when(
       () => _mockPhotoService.getThumbnail(
         any(),
         width: any(named: 'width'),

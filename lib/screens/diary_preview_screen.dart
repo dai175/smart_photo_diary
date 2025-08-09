@@ -143,13 +143,16 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       // Vision API方式：画像を直接Geminiに送信
       if (widget.selectedAssets.length == 1) {
-        // 単一写真の場合：従来通り
+        // 単一写真の場合：Result<T>版を使用
         final firstAsset = widget.selectedAssets.first;
-        final imageData = await _photoService.getOriginalFile(firstAsset);
+        final imageDataResult = await _photoService.getOriginalFileResult(
+          firstAsset,
+        );
 
-        if (imageData == null) {
-          throw Exception('写真データの取得に失敗しました');
-        }
+        final imageData = imageDataResult.fold(
+          (data) => data,
+          (error) => throw Exception('写真データの取得に失敗しました: ${error.message}'),
+        );
 
         final resultFromAi = await _aiService.generateDiaryFromImage(
           imageData: imageData,
@@ -177,17 +180,27 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           );
         }
 
-        // 全ての写真データを収集
+        // 全ての写真データを収集（Result<T>版）
         final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
 
         for (final asset in widget.selectedAssets) {
-          final imageData = await _photoService.getOriginalFile(asset);
-          if (imageData != null) {
-            imagesWithTimes.add((
-              imageData: imageData,
-              time: asset.createDateTime,
-            ));
-          }
+          final imageDataResult = await _photoService.getOriginalFileResult(
+            asset,
+          );
+          imageDataResult.fold(
+            (imageData) {
+              imagesWithTimes.add((
+                imageData: imageData,
+                time: asset.createDateTime,
+              ));
+            },
+            (error) {
+              // エラーログを出力して続行（一部写真の失敗で全体を止めない）
+              if (kDebugMode) {
+                print('写真データ取得エラー (${asset.id}): ${error.message}');
+              }
+            },
+          );
         }
 
         if (imagesWithTimes.isEmpty) {

@@ -1,6 +1,9 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -294,6 +297,46 @@ void main() {
         expect(result, equals(mockFile));
         verify(
           () => mockPhotoService.getOriginalFile(mockAssetEntity),
+        ).called(1);
+      });
+
+      test('should get original file result successfully', () async {
+        // Arrange
+        final mockData = Uint8List.fromList([1, 2, 3, 4]);
+        when(
+          () => mockPhotoService.getOriginalFileResult(any()),
+        ).thenAnswer((_) async => Success(mockData));
+
+        // Act
+        final result = await mockPhotoService.getOriginalFileResult(
+          mockAssetEntity,
+        );
+
+        // Assert
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockData));
+        verify(
+          () => mockPhotoService.getOriginalFileResult(mockAssetEntity),
+        ).called(1);
+      });
+
+      test('should handle original file result error', () async {
+        // Arrange
+        final mockError = PhotoAccessException('画像データの取得に失敗しました');
+        when(
+          () => mockPhotoService.getOriginalFileResult(any()),
+        ).thenAnswer((_) async => Failure(mockError));
+
+        // Act
+        final result = await mockPhotoService.getOriginalFileResult(
+          mockAssetEntity,
+        );
+
+        // Assert
+        expect(result.isFailure, isTrue);
+        expect(result.error, equals(mockError));
+        verify(
+          () => mockPhotoService.getOriginalFileResult(mockAssetEntity),
         ).called(1);
       });
 

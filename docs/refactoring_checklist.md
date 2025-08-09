@@ -194,16 +194,16 @@
 - [x] 後方互換性維持（既存メソッド併存）
 - [x] ビルド確認（インターフェース変更のコンパイル確認）
 
-##### Phase 6-2A: DiaryService高優先メソッド移行（最重要1個）
-- [ ] `getOriginalFileResult()` 実装完了確認（Phase 5で実装済み）
-- [ ] DiaryServiceでの`getOriginalFile()`呼び出しを`getOriginalFileResult()`に移行
-  - [ ] `saveDiaryEntryWithPhotos()`内の呼び出し更新
-  - [ ] `createDiaryForPastPhoto()`内の呼び出し更新
-- [ ] Result<T>パターンの`.fold()`活用実装
-- [ ] エラーハンドリングの構造化
-- [ ] 単体テスト更新（DiaryService関連のみ）
-- [ ] 動作確認（日記作成機能の基本テスト）
-- [ ] `flutter analyze` 確認
+##### Phase 6-2A: 主要UI層のgetOriginalFile移行（最重要1個）
+- [x] `getOriginalFileResult()` 実装完了確認（Phase 5で実装済み）
+- [x] `diary_preview_screen.dart`でのResult<T>移行（AI画像解析で使用）
+  - [x] 148行目: 単一写真の`getOriginalFile()`→`getOriginalFileResult()`移行
+  - [x] 184行目: 複数写真ループの`getOriginalFile()`→`getOriginalFileResult()`移行
+- [x] Result<T>パターンの`.fold()`活用実装
+- [x] エラーハンドリングの構造化（null例外排除）
+- [x] 単体テスト更新（PhotoService関連のみ）
+- [x] 動作確認（AI日記生成機能の基本テスト）
+- [x] `flutter analyze` 確認
 
 ##### Phase 6-2B: DiaryService残りメソッド移行（段階完了）
 - [ ] 残りのPhotoServiceメソッド実装

@@ -8,7 +8,7 @@ abstract class PhotoServiceInterface {
   Future<bool> requestPermission();
 
   /// 写真アクセス権限をリクエストする（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[requestPermission]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<bool>> requestPermissionResult();
@@ -17,7 +17,7 @@ abstract class PhotoServiceInterface {
   Future<bool> isPermissionPermanentlyDenied();
 
   /// 権限が永続的に拒否されているかチェック（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[isPermissionPermanentlyDenied]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<bool>> isPermissionPermanentlyDeniedResult();
@@ -26,7 +26,7 @@ abstract class PhotoServiceInterface {
   Future<List<AssetEntity>> getTodayPhotos({int limit = 20});
 
   /// 今日撮影された写真を取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getTodayPhotos]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<List<AssetEntity>>> getTodayPhotosResult({int limit = 20});
@@ -39,7 +39,7 @@ abstract class PhotoServiceInterface {
   });
 
   /// 指定された日付範囲の写真を取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getPhotosInDateRange]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<List<AssetEntity>>> getPhotosInDateRangeResult({
@@ -56,7 +56,7 @@ abstract class PhotoServiceInterface {
   });
 
   /// 指定された日付の写真を取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getPhotosForDate]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<List<AssetEntity>>> getPhotosForDateResult(
@@ -69,7 +69,7 @@ abstract class PhotoServiceInterface {
   Future<List<int>?> getPhotoData(AssetEntity asset);
 
   /// 写真のバイナリデータを取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getPhotoData]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<List<int>>> getPhotoDataResult(AssetEntity asset);
@@ -78,7 +78,7 @@ abstract class PhotoServiceInterface {
   Future<List<int>?> getThumbnailData(AssetEntity asset);
 
   /// 写真のサムネイルデータを取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getThumbnailData]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<List<int>>> getThumbnailDataResult(AssetEntity asset);
@@ -87,7 +87,7 @@ abstract class PhotoServiceInterface {
   Future<dynamic> getOriginalFile(AssetEntity asset);
 
   /// 写真の元画像を取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getOriginalFile]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<Uint8List>> getOriginalFileResult(AssetEntity asset);
@@ -100,7 +100,7 @@ abstract class PhotoServiceInterface {
   });
 
   /// 写真のサムネイルを取得する（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[getThumbnail]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<Uint8List>> getThumbnailResult(
@@ -113,7 +113,7 @@ abstract class PhotoServiceInterface {
   Future<bool> presentLimitedLibraryPicker();
 
   /// Limited Photo Access時に写真選択画面を表示（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[presentLimitedLibraryPicker]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<bool>> presentLimitedLibraryPickerResult();
@@ -122,7 +122,7 @@ abstract class PhotoServiceInterface {
   Future<bool> isLimitedAccess();
 
   /// 現在の権限状態が Limited Access かチェック（Result<T>版・推奨）
-  /// 
+  ///
   /// 従来の[isLimitedAccess]より型安全で詳細なエラー情報を提供します。
   /// 新規実装では必ずこちらを使用してください。
   Future<Result<bool>> isLimitedAccessResult();
@@ -136,7 +136,7 @@ abstract class PhotoServiceInterface {
   });
 
   /// 効率的な写真取得（ページネーション対応）
-  /// 
+  ///
   /// Result<T>版は既に追加済み。従来の[getPhotosEfficient]と併用可能です。
 
   /// 効率的な写真取得（Result<T>版・ページネーション対応）
