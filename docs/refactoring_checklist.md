@@ -175,17 +175,97 @@
 - [x] 統合テストの全面的な更新と検証
 - [x] 品質保証（テスト・解析・フォーマット）
 
-##### Phase 6: Interface & Caller Updates（インターフェース更新）
-- [ ] PhotoServiceInterface更新
-  - [ ] 全メソッドのシグネチャをResult型に更新
-- [ ] 呼び出し元の段階的更新
-  - [ ] `DiaryService` 更新（高優先度 - メイン機能）
-  - [ ] `PastPhotosNotifier` 更新（中優先度 - Premium機能）
-  - [ ] その他のUI層更新（低優先度）
-- [ ] エラー処理の統一
-  - [ ] `result.fold()`パターンの活用
-  - [ ] 統一的なエラーダイアログ表示
-  - [ ] Result型エラーの構造化ログ出力
+##### Phase 6: Interface & Caller Updates（インターフェース更新・Option A: 最小リスク分割）
+
+##### Phase 6-1: Interface基盤整備（インターフェース更新のみ）
+- [ ] PhotoServiceInterfaceに10個のResult<T>メソッド追加
+  - [ ] `requestPermissionResult()` シグネチャ追加
+  - [ ] `isPermissionPermanentlyDeniedResult()` シグネチャ追加  
+  - [ ] `isLimitedAccessResult()` シグネチャ追加
+  - [ ] `getTodayPhotosResult()` シグネチャ追加
+  - [ ] `getPhotosInDateRangeResult()` シグネチャ追加
+  - [ ] `getPhotosForDateResult()` シグネチャ追加
+  - [ ] `getPhotoDataResult()` シグネチャ追加
+  - [ ] `getThumbnailDataResult()` シグネチャ追加
+  - [ ] `getOriginalFileResult()` シグネチャ追加
+  - [ ] `getThumbnailResult()` シグネチャ追加
+  - [ ] `presentLimitedLibraryPickerResult()` シグネチャ追加
+- [ ] JSDocコメントでResult<T>版推奨を明記
+- [ ] 後方互換性維持（既存メソッド併存）
+- [ ] ビルド確認（インターフェース変更のコンパイル確認）
+
+##### Phase 6-2A: DiaryService高優先メソッド移行（最重要1個）
+- [ ] `getOriginalFileResult()` 実装完了確認（Phase 5で実装済み）
+- [ ] DiaryServiceでの`getOriginalFile()`呼び出しを`getOriginalFileResult()`に移行
+  - [ ] `saveDiaryEntryWithPhotos()`内の呼び出し更新
+  - [ ] `createDiaryForPastPhoto()`内の呼び出し更新
+- [ ] Result<T>パターンの`.fold()`活用実装
+- [ ] エラーハンドリングの構造化
+- [ ] 単体テスト更新（DiaryService関連のみ）
+- [ ] 動作確認（日記作成機能の基本テスト）
+- [ ] `flutter analyze` 確認
+
+##### Phase 6-2B: DiaryService残りメソッド移行（段階完了）
+- [ ] 残りのPhotoServiceメソッド実装
+  - [ ] `getTodayPhotosResult()` 実装
+  - [ ] `getPhotosInDateRangeResult()` 実装  
+  - [ ] 他必要メソッドの実装
+- [ ] DiaryServiceでの全PhotoService呼び出しのResult<T>移行
+- [ ] 統一的なエラーハンドリング実装
+- [ ] DiaryService完全テスト更新
+- [ ] 統合テスト実行（DiaryService関連）
+- [ ] 動作確認（全日記機能の包括テスト）
+
+##### Phase 6-3: PastPhotosNotifier移行（Premium機能）  
+- [ ] 権限系メソッドのResult<T>実装
+  - [ ] `requestPermissionResult()` 実装
+  - [ ] `isPermissionPermanentlyDeniedResult()` 実装
+  - [ ] `isLimitedAccessResult()` 実装
+  - [ ] `presentLimitedLibraryPickerResult()` 実装
+- [ ] PastPhotosNotifierでの権限処理Result<T>移行
+- [ ] Limited Access対応の改善
+- [ ] 統一的なエラー表示処理実装
+- [ ] PastPhotosNotifierテスト更新
+- [ ] Premium機能動作確認（過去写真アクセス）
+
+##### Phase 6-4A: UI層高優先更新（メイン画面）
+- [ ] `home_screen.dart` 権限リクエスト処理のResult<T>移行
+- [ ] `home_content_widget.dart` 写真権限チェックのResult<T>移行
+- [ ] エラーダイアログの統一実装
+- [ ] UI層テスト更新（高優先画面のみ）
+- [ ] ユーザー体験確認（メイン画面動作）
+
+##### Phase 6-4B: UI層残り更新（段階完了）
+- [ ] 残りUI層ファイルの段階的Result<T>移行
+  - [ ] `diary_preview_screen.dart` 更新
+  - [ ] `photo_grid_widget.dart` 更新
+  - [ ] その他必要ファイルの更新
+- [ ] 全UI層エラーハンドリング統一
+- [ ] UI層完全テスト更新
+- [ ] 全画面動作確認
+
+##### Phase 6-5: 統合テスト・最終検証（品質保証）
+- [ ] 全PhotoServiceメソッドのResult<T>対応完了確認
+- [ ] Unit/Widget/Integration 全テスト更新・実行
+- [ ] 手動テスト実行（権限・エラーシナリオ網羅）
+- [ ] `flutter analyze` 完全クリア（警告・エラー0件）
+- [ ] パフォーマンス確認・ベンチマーク
+- [ ] 既存機能の完全な動作保証
+- [ ] ドキュメント更新（Result<T>移行完了記録）
+
+**🎯 各フェーズの成功基準**
+- **Phase 6-1**: コンパイル成功、インターフェース整合性確認
+- **Phase 6-2A**: 日記作成機能の基本動作確認
+- **Phase 6-2B**: DiaryService全機能の動作確認  
+- **Phase 6-3**: Premium過去写真機能の動作確認
+- **Phase 6-4A/B**: UI層エラー表示の改善確認
+- **Phase 6-5**: 全機能統合動作・品質基準達成
+
+**⚠️ 各フェーズ完了時の必須確認項目**
+1. `fvm flutter test` 成功
+2. `fvm flutter analyze` クリア
+3. 該当機能の手動動作確認
+4. 次フェーズ着手前の品質確認
 
 ##### Phase 7: Testing & Validation（テスト・検証）
 - [ ] Unit Tests更新
