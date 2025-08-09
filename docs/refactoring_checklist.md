@@ -114,14 +114,23 @@
   - [x] `getPhotosForDateResult()`メソッド実装完了
 
 ##### Phase 4: Data Access Methods（データアクセス系）
-- [ ] `getPhotoData()` → `Future<Result<Uint8List?>>`
-  - [ ] nullチェックとエラー情報の充実
-  - [ ] `PhotoDataCorruptedException`の活用
-- [ ] `getThumbnailData()` → `Future<Result<Uint8List?>>`
-  - [ ] キャッシュ系エラーとの連携
-  - [ ] サムネイル生成失敗の詳細化
-- [ ] `getThumbnail()` → `Future<Result<Uint8List?>>`（後方互換性維持）
-- [ ] `getOriginalFile()` → `Future<Result<Uint8List?>>`（低優先度）
+- [x] `getPhotoData()` → `Future<Result<List<int>>>`（高優先度）
+  - [x] データサイズ監視（50MB/100MB閾値）の実装
+  - [x] 画像フォーマット検証（JPEG/PNG/GIF/WebP/BMP/HEIC対応）
+  - [x] `getPhotoDataResult()`メソッド実装完了
+- [x] `getThumbnailData()` → `Future<Result<List<int>>>`（高優先度）
+  - [x] サイズパラメータ妥当性チェック（幅・高さ・1000px警告）
+  - [x] サムネイル生成失敗の詳細エラー情報
+  - [x] `getThumbnailDataResult()`メソッド実装完了
+- [x] `getThumbnail()` → `Future<Result<Uint8List>>`（後方互換性維持）
+  - [x] PhotoCacheService連携エラー処理の詳細化
+  - [x] 品質パラメータ妥当性チェック（1-100範囲）
+  - [x] `getThumbnailResult()`メソッド実装完了
+- [x] `getOriginalFile()` → `Future<Result<Uint8List>>`（最優先度）
+  - [x] AI生成で使用される重要メソッドのResult<T>対応
+  - [x] 大容量画像対策（50MB閾値警告）
+  - [x] 画像データ整合性チェックの実装
+  - [x] `getOriginalFileResult()`メソッド実装完了
 
 ##### Phase 5: Advanced Methods（高度な機能系）
 - [ ] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`

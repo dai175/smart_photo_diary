@@ -906,6 +906,99 @@ class PhotoService implements PhotoServiceInterface {
     }
   }
 
+  /// 写真のバイナリデータを取得する（Result<T>版）
+  ///
+  /// [asset]: 写真アセット
+  /// 戻り値: 写真データのList<int>のResult型
+  Future<Result<List<int>>> getPhotoDataResult(AssetEntity asset) async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      // アセットの妥当性チェック
+      if (asset.id.isEmpty) {
+        return PhotoResultHelper.fromError<List<int>>(
+          ArgumentError('無効なアセットIDです'),
+          context: 'PhotoService.getPhotoDataResult',
+          customMessage: '写真アセットが不正です',
+        );
+      }
+
+      loggingService.debug(
+        '写真データを取得開始',
+        context: 'PhotoService.getPhotoDataResult',
+        data: 'assetId: ${asset.id}, type: ${asset.type}',
+      );
+
+      // メモリ使用量の事前確認（後でデータサイズで判定）
+      // asset.sizeはファイルサイズではなくFlutterのSize型のため使用不可
+
+      // 元画像データを取得
+      final Uint8List? data = await asset.originBytes;
+
+      // データ存在チェック
+      if (data == null) {
+        return PhotoResultHelper.fromError<List<int>>(
+          StateError('写真データがnullです'),
+          context: 'PhotoService.getPhotoDataResult',
+          customMessage: '写真データの取得に失敗しました',
+        );
+      }
+
+      // データサイズチェック
+      if (data.isEmpty) {
+        return PhotoResultHelper.fromError<List<int>>(
+          StateError('写真データが空です'),
+          context: 'PhotoService.getPhotoDataResult',
+          customMessage: '写真データが破損している可能性があります',
+        );
+      }
+
+      // 取得後のデータサイズ監視
+      final sizeInMB = data.length / 1024 / 1024;
+      if (sizeInMB > 100) {
+        loggingService.warning(
+          '非常に大容量の画像データ',
+          context: 'PhotoService.getPhotoDataResult',
+          data: 'データサイズ: ${sizeInMB.toStringAsFixed(2)}MB',
+        );
+      } else if (sizeInMB > 50) {
+        loggingService.info(
+          '大容量画像データを処理',
+          context: 'PhotoService.getPhotoDataResult',
+          data: 'データサイズ: ${sizeInMB.toStringAsFixed(2)}MB',
+        );
+      }
+
+      // 基本的なデータ整合性チェック
+      bool isValidImageData = _validateImageData(data);
+      if (!isValidImageData) {
+        loggingService.warning(
+          '写真データ形式の検証で問題を検出',
+          context: 'PhotoService.getPhotoDataResult',
+          data: 'dataSize: ${data.length}バイト',
+        );
+        // 警告はするが処理は継続（未対応フォーマットの可能性もあるため）
+      }
+
+      // List<int>に変換
+      final List<int> resultData = data.toList();
+
+      loggingService.debug(
+        '写真データ取得成功',
+        context: 'PhotoService.getPhotoDataResult',
+        data: 'dataSize: ${resultData.length}バイト, valid: $isValidImageData',
+      );
+
+      return Success(resultData);
+    } catch (e) {
+      return PhotoResultHelper.fromError<List<int>>(
+        e,
+        context: 'PhotoService.getPhotoDataResult',
+        customMessage: '写真データの取得中にエラーが発生しました',
+      );
+    }
+  }
+
   /// 写真のサムネイルデータを取得する
   ///
   /// [asset]: 写真アセット
@@ -932,6 +1025,121 @@ class PhotoService implements PhotoServiceInterface {
         error: appError,
       );
       return null;
+    }
+  }
+
+  /// 写真のサムネイルデータを取得する（Result<T>版）
+  ///
+  /// [asset]: 写真アセット
+  /// [width]: サムネイル幅（デフォルト: AppConstants.defaultThumbnailWidth）
+  /// [height]: サムネイル高さ（デフォルト: AppConstants.defaultThumbnailHeight）
+  /// 戻り値: サムネイルデータのList<int>のResult型
+  Future<Result<List<int>>> getThumbnailDataResult(
+    AssetEntity asset, {
+    int width = AppConstants.defaultThumbnailWidth,
+    int height = AppConstants.defaultThumbnailHeight,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      // アセットの妥当性チェック
+      if (asset.id.isEmpty) {
+        return PhotoResultHelper.fromError<List<int>>(
+          ArgumentError('無効なアセットIDです'),
+          context: 'PhotoService.getThumbnailDataResult',
+          customMessage: '写真アセットが不正です',
+        );
+      }
+
+      // サイズパラメータの妥当性チェック
+      if (width <= 0 || height <= 0) {
+        return PhotoResultHelper.fromError<List<int>>(
+          ArgumentError('サムネイルサイズが不正です: ${width}x$height'),
+          context: 'PhotoService.getThumbnailDataResult',
+          customMessage: 'サムネイルサイズの設定が無効です',
+        );
+      }
+
+      // 大きすぎるサムネイルサイズの警告
+      if (width > 1000 || height > 1000) {
+        loggingService.warning(
+          '大きなサムネイルサイズが指定されました',
+          context: 'PhotoService.getThumbnailDataResult',
+          data: 'サイズ: ${width}x$height',
+        );
+      }
+
+      loggingService.debug(
+        'サムネイルデータを取得開始',
+        context: 'PhotoService.getThumbnailDataResult',
+        data: 'assetId: ${asset.id}, サイズ: ${width}x$height',
+      );
+
+      // サムネイルデータを取得
+      final Uint8List? data = await asset.thumbnailDataWithSize(
+        ThumbnailSize(width, height),
+      );
+
+      // データ存在チェック
+      if (data == null) {
+        return PhotoResultHelper.fromError<List<int>>(
+          StateError('サムネイルデータがnullです'),
+          context: 'PhotoService.getThumbnailDataResult',
+          customMessage: 'サムネイルの生成に失敗しました',
+        );
+      }
+
+      // データサイズチェック
+      if (data.isEmpty) {
+        return PhotoResultHelper.fromError<List<int>>(
+          StateError('サムネイルデータが空です'),
+          context: 'PhotoService.getThumbnailDataResult',
+          customMessage: 'サムネイルデータが破損している可能性があります',
+        );
+      }
+
+      // サムネイルサイズの妥当性チェック（最小サイズ）
+      if (data.length < 100) {
+        loggingService.warning(
+          'サムネイルデータが異常に小さい',
+          context: 'PhotoService.getThumbnailDataResult',
+          data: 'dataSize: ${data.length}バイト',
+        );
+        return PhotoResultHelper.fromError<List<int>>(
+          StateError('サムネイルデータが小さすぎます'),
+          context: 'PhotoService.getThumbnailDataResult',
+          customMessage: 'サムネイル生成が不完全です',
+        );
+      }
+
+      // 基本的な画像データ整合性チェック
+      bool isValidImageData = _validateImageData(data);
+      if (!isValidImageData) {
+        loggingService.warning(
+          'サムネイル画像形式の検証で問題を検出',
+          context: 'PhotoService.getThumbnailDataResult',
+          data: 'dataSize: ${data.length}バイト, サイズ: ${width}x$height',
+        );
+        // サムネイルの場合は形式チェック失敗でも継続
+      }
+
+      // List<int>に変換
+      final List<int> resultData = data.toList();
+
+      loggingService.debug(
+        'サムネイルデータ取得成功',
+        context: 'PhotoService.getThumbnailDataResult',
+        data:
+            'dataSize: ${resultData.length}バイト, サイズ: ${width}x$height, valid: $isValidImageData',
+      );
+
+      return Success(resultData);
+    } catch (e) {
+      return PhotoResultHelper.fromError<List<int>>(
+        e,
+        context: 'PhotoService.getThumbnailDataResult',
+        customMessage: 'サムネイルデータの取得中にエラーが発生しました',
+      );
     }
   }
 
@@ -1422,6 +1630,119 @@ class PhotoService implements PhotoServiceInterface {
     );
   }
 
+  /// 写真のサムネイルを取得する（Result<T>版）
+  ///
+  /// [asset]: 写真アセット
+  /// [width]: サムネイル幅（デフォルト: AppConstants.defaultThumbnailWidth）
+  /// [height]: サムネイル高さ（デフォルト: AppConstants.defaultThumbnailHeight）
+  /// [quality]: 品質（デフォルト: 80）
+  /// 戻り値: サムネイル画像のUint8ListのResult型
+  Future<Result<Uint8List>> getThumbnailResult(
+    AssetEntity asset, {
+    int width = AppConstants.defaultThumbnailWidth,
+    int height = AppConstants.defaultThumbnailHeight,
+    int quality = 80,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      // アセットの妥当性チェック
+      if (asset.id.isEmpty) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          ArgumentError('無効なアセットIDです'),
+          context: 'PhotoService.getThumbnailResult',
+          customMessage: '写真アセットが不正です',
+        );
+      }
+
+      // パラメータの妥当性チェック
+      if (width <= 0 || height <= 0) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          ArgumentError('サムネイルサイズが不正です: ${width}x$height'),
+          context: 'PhotoService.getThumbnailResult',
+          customMessage: 'サムネイルサイズの設定が無効です',
+        );
+      }
+
+      if (quality < 1 || quality > 100) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          ArgumentError('品質設定が不正です: $quality'),
+          context: 'PhotoService.getThumbnailResult',
+          customMessage: '品質設定は1-100の範囲で指定してください',
+        );
+      }
+
+      loggingService.debug(
+        'キャッシュ付きサムネイルを取得開始',
+        context: 'PhotoService.getThumbnailResult',
+        data: 'assetId: ${asset.id}, サイズ: ${width}x$height, 品質: $quality',
+      );
+
+      // PhotoCacheServiceを使用してキャッシュ付きでサムネイルを取得
+      final cacheService = PhotoCacheService.getInstance();
+      final Uint8List? data = await cacheService.getThumbnail(
+        asset,
+        width: width,
+        height: height,
+        quality: quality,
+      );
+
+      // データ存在チェック
+      if (data == null) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          StateError('キャッシュサービスからのサムネイルがnullです'),
+          context: 'PhotoService.getThumbnailResult',
+          customMessage: 'サムネイルの取得に失敗しました',
+        );
+      }
+
+      // データサイズチェック
+      if (data.isEmpty) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          StateError('サムネイルデータが空です'),
+          context: 'PhotoService.getThumbnailResult',
+          customMessage: 'サムネイルデータが破損している可能性があります',
+        );
+      }
+
+      // 最小サイズチェック（キャッシュサービス経由なので厳しくチェック）
+      if (data.length < 50) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          StateError('サムネイルデータが異常に小さい: ${data.length}バイト'),
+          context: 'PhotoService.getThumbnailResult',
+          customMessage: 'キャッシュからのサムネイル取得が不完全です',
+        );
+      }
+
+      // 基本的な画像データ整合性チェック
+      bool isValidImageData = _validateImageData(data);
+      if (!isValidImageData) {
+        loggingService.warning(
+          'キャッシュサムネイルの画像形式検証で問題を検出',
+          context: 'PhotoService.getThumbnailResult',
+          data:
+              'dataSize: ${data.length}バイト, サイズ: ${width}x$height, 品質: $quality',
+        );
+        // キャッシュサービス経由の場合も継続（形式チェックはベストエフォート）
+      }
+
+      loggingService.debug(
+        'キャッシュ付きサムネイル取得成功',
+        context: 'PhotoService.getThumbnailResult',
+        data:
+            'dataSize: ${data.length}バイト, サイズ: ${width}x$height, 品質: $quality, valid: $isValidImageData',
+      );
+
+      return Success(data);
+    } catch (e) {
+      return PhotoResultHelper.fromError<Uint8List>(
+        e,
+        context: 'PhotoService.getThumbnailResult',
+        customMessage: 'キャッシュ付きサムネイル取得中にエラーが発生しました',
+      );
+    }
+  }
+
   /// 写真の元画像を取得する（後方互換性のため保持）
   ///
   /// [asset]: 写真アセット
@@ -1442,6 +1763,91 @@ class PhotoService implements PhotoServiceInterface {
         error: appError,
       );
       return null;
+    }
+  }
+
+  /// 写真の元画像を取得する（Result<T>版）
+  ///
+  /// [asset]: 写真アセット
+  /// 戻り値: 元画像データのResult型
+  Future<Result<Uint8List>> getOriginalFileResult(AssetEntity asset) async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      // アセットの妥当性チェック
+      if (asset.id.isEmpty) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          ArgumentError('無効なアセットIDです'),
+          context: 'PhotoService.getOriginalFileResult',
+          customMessage: '写真アセットが不正です',
+        );
+      }
+
+      loggingService.debug(
+        '元画像データを取得開始',
+        context: 'PhotoService.getOriginalFileResult',
+        data:
+            'assetId: ${asset.id}, type: ${asset.type}, duration: ${asset.duration}',
+      );
+
+      // ファイルサイズの事前チェック（後でデータサイズで判定）
+      // asset.sizeはファイルサイズではなくFlutterのSize型のため使用不可
+
+      // 元画像データを取得
+      final Uint8List? data = await asset.originBytes;
+
+      // データ存在チェック
+      if (data == null) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          StateError('元画像データがnullです'),
+          context: 'PhotoService.getOriginalFileResult',
+          customMessage: '元画像データの取得に失敗しました',
+        );
+      }
+
+      // データサイズチェック
+      if (data.isEmpty) {
+        return PhotoResultHelper.fromError<Uint8List>(
+          StateError('元画像データが空です'),
+          context: 'PhotoService.getOriginalFileResult',
+          customMessage: '元画像データが破損している可能性があります',
+        );
+      }
+
+      // 取得後のデータサイズ監視
+      final sizeInMB = data.length / 1024 / 1024;
+      if (sizeInMB > 50) {
+        // 50MB超過時は警告ログを出力
+        loggingService.warning(
+          '大容量画像ファイルを検出',
+          context: 'PhotoService.getOriginalFileResult',
+          data: 'データサイズ: ${sizeInMB.toStringAsFixed(2)}MB',
+        );
+      }
+
+      // 基本的なデータ整合性チェック
+      bool isValidImageData = _validateImageData(data);
+      if (!isValidImageData) {
+        loggingService.warning(
+          '画像データの整合性に問題がある可能性があります',
+          context: 'PhotoService.getOriginalFileResult',
+          data: 'dataSize: ${data.length}バイト',
+        );
+      }
+
+      loggingService.debug(
+        '元画像データ取得成功',
+        context: 'PhotoService.getOriginalFileResult',
+        data: 'dataSize: ${data.length}バイト, valid: $isValidImageData',
+      );
+
+      return Success(data);
+    } catch (e) {
+      return PhotoResultHelper.fromError<Uint8List>(
+        e,
+        context: 'PhotoService.getOriginalFileResult',
+        customMessage: '元画像データの取得中にエラーが発生しました',
+      );
     }
   }
 
@@ -1608,5 +2014,68 @@ class PhotoService implements PhotoServiceInterface {
       );
       return [];
     }
+  }
+
+  /// 画像データの基本的な整合性をチェック
+  ///
+  /// [data]: 画像データ
+  /// 戻り値: データが有効かどうか
+  bool _validateImageData(Uint8List data) {
+    if (data.length < 10) {
+      return false; // あまりにも小さなデータは無効
+    }
+
+    // 一般的な画像フォーマットのマジックナンバーをチェック
+    // JPEG: FF D8 FF
+    if (data.length >= 3 &&
+        data[0] == 0xFF &&
+        data[1] == 0xD8 &&
+        data[2] == 0xFF) {
+      return true;
+    }
+
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    if (data.length >= 8 &&
+        data[0] == 0x89 &&
+        data[1] == 0x50 &&
+        data[2] == 0x4E &&
+        data[3] == 0x47 &&
+        data[4] == 0x0D &&
+        data[5] == 0x0A &&
+        data[6] == 0x1A &&
+        data[7] == 0x0A) {
+      return true;
+    }
+
+    // GIF: 47 49 46 38 (GIF8)
+    if (data.length >= 4 &&
+        data[0] == 0x47 &&
+        data[1] == 0x49 &&
+        data[2] == 0x46 &&
+        data[3] == 0x38) {
+      return true;
+    }
+
+    // WebP: 57 45 42 50 (WEBP)（RIFF形式の場合は8バイト目から）
+    if (data.length >= 12 &&
+        data[8] == 0x57 &&
+        data[9] == 0x45 &&
+        data[10] == 0x42 &&
+        data[11] == 0x50) {
+      return true;
+    }
+
+    // BMP: 42 4D (BM)
+    if (data.length >= 2 && data[0] == 0x42 && data[1] == 0x4D) {
+      return true;
+    }
+
+    // HEIC: 通常はftypボックスで識別されるが簡易チェック
+    // (複雑なため、ここでは基本的なサイズチェックのみ)
+    if (data.length >= 100) {
+      return true; // 十分なサイズがあれば有効と仮定
+    }
+
+    return false; // 認識できない形式
   }
 }
