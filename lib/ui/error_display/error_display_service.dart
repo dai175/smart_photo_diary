@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
@@ -48,7 +49,9 @@ class ErrorDisplayService {
         }
       } catch (e) {
         // LoggingService初期化エラーの場合はログ出力をスキップ
-        debugPrint('ErrorDisplayService: Failed to log error - $e');
+        if (kDebugMode) {
+          debugPrint('ErrorDisplayService: Failed to log error - $e');
+        }
       }
     }
 
