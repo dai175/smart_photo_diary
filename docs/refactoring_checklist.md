@@ -78,15 +78,78 @@
   - [x] `test/integration/test_helpers/integration_test_helpers.dart`
 - [x] `flutter analyze`の完全クリア（テストファイル修正後）
 
-#### PhotoService
-- [ ] `requestPermission()` → `Future<Result<bool>>`
-- [ ] `getTodayPhotos()` → `Future<Result<List<AssetEntity>>>`
-- [ ] `getPastPhotos()` → `Future<Result<List<AssetEntity>>>`
-- [ ] `getPhotoThumbnail()` → `Future<Result<Uint8List?>>`
+#### PhotoService（細分化版）
+
+##### Phase 1: 基盤整備
+- [ ] Result用ヘルパーユーティリティ作成
+  - [ ] `lib/core/result/photo_result_helper.dart` 作成
+  - [ ] `photoPermissionResult()`, `photoAccessResult()` 実装
+- [ ] PhotoAccessException詳細化
+  - [ ] `PhotoPermissionDeniedException` 追加
+  - [ ] `PhotoPermissionPermanentlyDeniedException` 追加
+  - [ ] `PhotoLimitedAccessException` 追加
+  - [ ] `PhotoDataCorruptedException` 追加
+
+##### Phase 2: Core Permission Methods（基本権限系）
+- [ ] `requestPermission()` → `Future<Result<bool>>`（高優先度）
+  - [ ] 権限拒否時の`PhotoPermissionDeniedException`
+  - [ ] 永続拒否時の`PhotoPermissionPermanentlyDeniedException`
+- [ ] `isPermissionPermanentlyDenied()` → `Future<Result<bool>>`
+- [ ] `isLimitedAccess()` → `Future<Result<bool>>`
+
+##### Phase 3: Core Photo Retrieval Methods（写真取得系）
+- [ ] `getTodayPhotos()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [ ] 権限エラー処理をResult型に統一
+  - [ ] 写真取得失敗時の詳細エラー情報
+- [ ] `getPhotosInDateRange()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [ ] 複雑な日付範囲チェックのエラー処理改善
+  - [ ] 破損写真検出時の詳細エラー情報
+- [ ] `getPhotosForDate()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [ ] タイムゾーン関連エラーの詳細化
+
+##### Phase 4: Data Access Methods（データアクセス系）
 - [ ] `getPhotoData()` → `Future<Result<Uint8List?>>`
-- [ ] `handleLimitedPhotoAccess()` → `Future<Result<void>>`
-- [ ] PhotoAccessException使用の統一
-- [ ] 呼び出し元でのエラー処理改善
+  - [ ] nullチェックとエラー情報の充実
+  - [ ] `PhotoDataCorruptedException`の活用
+- [ ] `getThumbnailData()` → `Future<Result<Uint8List?>>`
+  - [ ] キャッシュ系エラーとの連携
+  - [ ] サムネイル生成失敗の詳細化
+- [ ] `getThumbnail()` → `Future<Result<Uint8List?>>`（後方互換性維持）
+- [ ] `getOriginalFile()` → `Future<Result<Uint8List?>>`（低優先度）
+
+##### Phase 5: Advanced Methods（高度な機能系）
+- [ ] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`
+  - [ ] ページネーション関連エラーの詳細化
+- [ ] `handleLimitedPhotoAccess()` 新規メソッド追加
+  - [ ] `Future<Result<void>> handleLimitedPhotoAccess()` 実装
+  - [ ] Limited Access時の統一的なハンドリング
+- [ ] `presentLimitedLibraryPicker()` → `Future<Result<bool>>`
+  - [ ] プラットフォーム固有エラーの詳細化
+
+##### Phase 6: Interface & Caller Updates（インターフェース更新）
+- [ ] PhotoServiceInterface更新
+  - [ ] 全メソッドのシグネチャをResult型に更新
+- [ ] 呼び出し元の段階的更新
+  - [ ] `DiaryService` 更新（高優先度 - メイン機能）
+  - [ ] `PastPhotosNotifier` 更新（中優先度 - Premium機能）
+  - [ ] その他のUI層更新（低優先度）
+- [ ] エラー処理の統一
+  - [ ] `result.fold()`パターンの活用
+  - [ ] 統一的なエラーダイアログ表示
+  - [ ] Result型エラーの構造化ログ出力
+
+##### Phase 7: Testing & Validation（テスト・検証）
+- [ ] Unit Tests更新
+  - [ ] `test/unit/services/photo_service_error_handling_test.dart` 更新
+  - [ ] `test/unit/services/photo_service_mock_test.dart` 更新
+  - [ ] Result型のテストケース追加
+- [ ] Integration Tests更新
+  - [ ] `test/integration/photo_service_integration_test.dart` 更新
+  - [ ] Result型を考慮したエンドツーエンドテスト
+- [ ] 手動テスト項目
+  - [ ] 権限拒否シナリオのテスト
+  - [ ] Limited Access対応の確認
+  - [ ] エラーダイアログ表示の確認
 
 #### AiService
 - [ ] 既存のResult<DiaryGenerationResult>の活用確認
