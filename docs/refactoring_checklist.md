@@ -15,14 +15,14 @@
 
 ### 2. デバッグプリントの本番環境での除去（34ファイル）
 #### コアサービス
-- [ ] `services/logging_service.dart` - kDebugMode条件追加
-- [ ] `services/subscription_service.dart` - LoggingServiceへ移行
-- [ ] `services/photo_service.dart` - LoggingServiceへ移行
-- [ ] `services/photo_cache_service.dart` - LoggingServiceへ移行
-- [ ] `services/photo_access_control_service.dart` - LoggingServiceへ移行
-- [ ] `services/ai/diary_generator.dart` - LoggingServiceへ移行
-- [ ] `services/ai/tag_generator.dart` - LoggingServiceへ移行
-- [ ] `services/ai/gemini_api_client.dart` - LoggingServiceへ移行
+- [x] `services/logging_service.dart` - kDebugMode条件追加
+- [x] `services/subscription_service.dart` - LoggingServiceへ移行
+- [x] `services/photo_service.dart` - LoggingServiceへ移行
+- [x] `services/photo_cache_service.dart` - LoggingServiceへ移行
+- [x] `services/photo_access_control_service.dart` - LoggingServiceへ移行
+- [x] `services/ai/diary_generator.dart` - LoggingServiceへ移行
+- [x] `services/ai/tag_generator.dart` - LoggingServiceへ移行
+- [x] `services/ai/gemini_api_client.dart` - LoggingServiceへ移行
 
 #### スクリーン
 - [ ] `screens/home_screen.dart` - print文を削除またはkDebugMode条件付き

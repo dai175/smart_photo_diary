@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/plans/plan.dart';
 import 'interfaces/photo_access_control_service_interface.dart';
+import 'logging_service.dart';
 
 /// 写真アクセス制御サービスの実装
 ///
@@ -28,11 +29,17 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
       Duration(days: plan.pastPhotoAccessDays),
     );
 
-    debugPrint(
-      'アクセス可能範囲計算: プラン=${plan.displayName}, '
-      '過去${plan.pastPhotoAccessDays}日前まで, '
-      '最古アクセス可能日=$accessibleDate (ローカルタイムゾーン)',
-    );
+    if (kDebugMode) {
+      _logAsync(
+        'アクセス可能範囲計算',
+        context: 'PhotoAccessControlService.getAccessibleDateForPlan',
+        data: {
+          'planName': plan.displayName,
+          'pastDays': plan.pastPhotoAccessDays,
+          'accessibleDate': accessibleDate.toIso8601String(),
+        },
+      );
+    }
 
     return accessibleDate;
   }
@@ -53,13 +60,18 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
         photoDateOnly.isAfter(accessibleDate) ||
         photoDateOnly.isAtSameMomentAs(accessibleDate);
 
-    debugPrint(
-      '写真アクセス判定: '
-      'プラン=${plan.displayName}, '
-      '撮影日=$photoDateOnly (ローカル), '
-      '最古アクセス可能日=$accessibleDate (ローカル), '
-      '結果=$isAccessible',
-    );
+    if (kDebugMode) {
+      _logAsync(
+        '写真アクセス判定',
+        context: 'PhotoAccessControlService.isPhotoAccessible',
+        data: {
+          'planName': plan.displayName,
+          'photoDate': photoDateOnly.toIso8601String(),
+          'accessibleDate': accessibleDate.toIso8601String(),
+          'result': isAccessible,
+        },
+      );
+    }
 
     return isAccessible;
   }
@@ -80,5 +92,23 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
     } else {
       return '$days日前までの写真';
     }
+  }
+
+  /// 非同期でログ出力を行う（テスト環境での初期化問題を回避）
+  void _logAsync(
+    String message, {
+    required String context,
+    Map<String, dynamic>? data,
+  }) {
+    // 非同期でログを出力し、エラーが発生してもメイン処理に影響させない
+    Future.microtask(() async {
+      try {
+        final loggingService = await LoggingService.getInstance();
+        loggingService.debug(message, context: context, data: data);
+      } catch (e) {
+        // ログ出力に失敗した場合は debugPrint にフォールバック
+        debugPrint('[$context] $message - $data');
+      }
+    });
   }
 }

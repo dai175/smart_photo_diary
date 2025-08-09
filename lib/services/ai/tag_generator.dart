@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'gemini_api_client.dart';
+import '../logging_service.dart';
 
 /// タグ生成を担当するサービス
 class TagGenerator {
@@ -79,10 +80,21 @@ class TagGenerator {
         }
       }
 
-      debugPrint('タグ生成 API エラーまたはレスポンスなし');
+      if (kDebugMode) {
+        LoggingService.instance.warning(
+          'タグ生成 API エラーまたはレスポンスなし',
+          context: 'TagGenerator.generateTags',
+        );
+      }
       return _generateOfflineTags(title, content, date, photoCount);
     } catch (e) {
-      debugPrint('タグ生成エラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'タグ生成エラー',
+          context: 'TagGenerator.generateTags',
+          error: e,
+        );
+      }
       return _generateOfflineTags(title, content, date, photoCount);
     }
   }

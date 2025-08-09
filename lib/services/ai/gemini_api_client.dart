@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
+import '../logging_service.dart';
 
 /// Gemini APIクライアント - API通信を担当
 class GeminiApiClient {
@@ -13,8 +14,11 @@ class GeminiApiClient {
   // APIキーをEnvironmentConfigから取得
   static String get _apiKey {
     final key = EnvironmentConfig.geminiApiKey;
-    if (key.isEmpty) {
-      debugPrint('警告: GEMINI_API_KEYが設定されていません');
+    if (key.isEmpty && kDebugMode) {
+      LoggingService.instance.warning(
+        'GEMINI_API_KEYが設定されていません',
+        context: 'GeminiApiClient._apiKey',
+      );
       EnvironmentConfig.printDebugInfo();
     }
     return key;
@@ -28,8 +32,13 @@ class GeminiApiClient {
   }) async {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
-      debugPrint('Gemini API エラー: 有効なAPIキーが設定されていません');
-      EnvironmentConfig.printDebugInfo();
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'Gemini API エラー: 有効なAPIキーが設定されていません',
+          context: 'GeminiApiClient.sendTextRequest',
+        );
+        EnvironmentConfig.printDebugInfo();
+      }
       return null;
     }
 
@@ -59,20 +68,31 @@ class GeminiApiClient {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        debugPrint('Gemini API レスポンス: $data');
+        if (kDebugMode) {
+          LoggingService.instance.debug(
+            'Gemini API レスポンス受信',
+            context: 'GeminiApiClient.sendTextRequest',
+            data: {'responseSize': response.body.length},
+          );
+        }
         return data;
       } else {
-        debugPrint('Gemini API エラー: ${response.statusCode} - ${response.body}');
-        debugPrint(
-          '使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}',
-        );
+        if (kDebugMode) {
+          LoggingService.instance.error(
+            'Gemini API エラー: ${response.statusCode} - ${response.body}',
+            context: 'GeminiApiClient.sendTextRequest',
+          );
+        }
         return null;
       }
     } catch (e) {
-      debugPrint('Gemini API リクエストエラー: $e');
-      debugPrint(
-        '使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}',
-      );
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'Gemini API リクエストエラー',
+          context: 'GeminiApiClient.sendTextRequest',
+          error: e,
+        );
+      }
       return null;
     }
   }
@@ -86,8 +106,13 @@ class GeminiApiClient {
   }) async {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
-      debugPrint('Gemini Vision API エラー: 有効なAPIキーが設定されていません');
-      EnvironmentConfig.printDebugInfo();
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'Gemini Vision API エラー: 有効なAPIキーが設定されていません',
+          context: 'GeminiApiClient.sendVisionRequest',
+        );
+        EnvironmentConfig.printDebugInfo();
+      }
       return null;
     }
 
@@ -123,22 +148,31 @@ class GeminiApiClient {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        debugPrint('Gemini Vision API レスポンス: $data');
+        if (kDebugMode) {
+          LoggingService.instance.debug(
+            'Gemini Vision API レスポンス受信',
+            context: 'GeminiApiClient.sendVisionRequest',
+            data: {'responseSize': response.body.length},
+          );
+        }
         return data;
       } else {
-        debugPrint(
-          'Gemini Vision API エラー: ${response.statusCode} - ${response.body}',
-        );
-        debugPrint(
-          '使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}',
-        );
+        if (kDebugMode) {
+          LoggingService.instance.error(
+            'Gemini Vision API エラー: ${response.statusCode} - ${response.body}',
+            context: 'GeminiApiClient.sendVisionRequest',
+          );
+        }
         return null;
       }
     } catch (e) {
-      debugPrint('Gemini Vision API リクエストエラー: $e');
-      debugPrint(
-        '使用されたAPIキー: ${_apiKey.isNotEmpty ? "${_apiKey.substring(0, 8)}..." : "空"}',
-      );
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'Gemini Vision API リクエストエラー',
+          context: 'GeminiApiClient.sendVisionRequest',
+          error: e,
+        );
+      }
       return null;
     }
   }
@@ -146,18 +180,35 @@ class GeminiApiClient {
   /// APIキーの有効性をテスト
   Future<bool> testApiKey() async {
     if (!EnvironmentConfig.hasValidApiKey) {
-      debugPrint('APIキーテスト: 有効なAPIキーが設定されていません');
-      EnvironmentConfig.printDebugInfo();
+      if (kDebugMode) {
+        LoggingService.instance.warning(
+          'APIキーテスト: 有効なAPIキーが設定されていません',
+          context: 'GeminiApiClient.testApiKey',
+        );
+        EnvironmentConfig.printDebugInfo();
+      }
       return false;
     }
 
     try {
       final response = await sendTextRequest(prompt: 'Hello, this is a test.');
       final isValid = response != null;
-      debugPrint('APIキーテスト: ${isValid ? "有効" : "無効"}');
+      if (kDebugMode) {
+        LoggingService.instance.info(
+          'APIキーテスト結果',
+          context: 'GeminiApiClient.testApiKey',
+          data: {'valid': isValid},
+        );
+      }
       return isValid;
     } catch (e) {
-      debugPrint('APIキーテストエラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'APIキーテストエラー',
+          context: 'GeminiApiClient.testApiKey',
+          error: e,
+        );
+      }
       return false;
     }
   }
@@ -191,17 +242,33 @@ class GeminiApiClient {
         if (content != null && content.isNotEmpty) {
           return content.trim();
         } else {
-          debugPrint(
-            'テキストコンテンツが見つかりません。finishReason: ${candidate['finishReason']}',
-          );
+          if (kDebugMode) {
+            LoggingService.instance.warning(
+              'テキストコンテンツが見つかりません',
+              context: 'GeminiApiClient.extractTextFromResponse',
+              data: {'finishReason': candidate['finishReason']},
+            );
+          }
           return null;
         }
       } else {
-        debugPrint('レスポンス構造が予期されたものと異なります: $data');
+        if (kDebugMode) {
+          LoggingService.instance.warning(
+            'レスポンス構造が予期されたものと異なります',
+            context: 'GeminiApiClient.extractTextFromResponse',
+            data: {'unexpectedData': data.toString()},
+          );
+        }
         return null;
       }
     } catch (e) {
-      debugPrint('レスポンス解析エラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'レスポンス解析エラー',
+          context: 'GeminiApiClient.extractTextFromResponse',
+          error: e,
+        );
+      }
       return null;
     }
   }
