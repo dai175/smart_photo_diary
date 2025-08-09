@@ -477,43 +477,6 @@ void main() {
       });
     });
 
-    group('使用履歴管理', () {
-      setUp(() async {
-        await promptService.initialize();
-      });
-
-      test('使用履歴関連メソッドは実装されている', () async {
-        // 使用履歴機能が無効でも、メソッドはエラーを投げない
-        final allPrompts = promptService.getAllPrompts();
-        final testPrompt = allPrompts.first;
-
-        // 使用履歴記録（失敗してもエラーにならない）
-        final result = await promptService.recordPromptUsage(
-          promptId: testPrompt.id,
-          diaryEntryId: 'test_diary_001',
-          wasHelpful: true,
-        );
-
-        // 結果はboolean（成功/失敗）
-        expect(result, isA<bool>());
-
-        // 履歴取得（空リストでもエラーにならない）
-        final history = promptService.getUsageHistory();
-        expect(history, isA<List<PromptUsageHistory>>());
-
-        // 最近使用ID取得（空リストでもエラーにならない）
-        final recentIds = promptService.getRecentlyUsedPromptIds();
-        expect(recentIds, isA<List<String>>());
-
-        // 履歴クリア（結果はboolean）
-        final clearResult = await promptService.clearUsageHistory();
-        expect(clearResult, isA<bool>());
-
-        // 統計取得（空マップでもエラーにならない）
-        final stats = promptService.getUsageFrequencyStats();
-        expect(stats, isA<Map<String, int>>());
-      });
-    });
 
     group('エラーハンドリング', () {
       test('初期化前のメソッド呼び出しでエラーが発生', () {

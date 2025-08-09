@@ -16,7 +16,6 @@ import '../ui/components/custom_dialog.dart' show PresetDialogs;
 import '../ui/animations/list_animations.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
-import '../services/interfaces/prompt_service_interface.dart';
 import '../models/plans/basic_plan.dart';
 import '../models/writing_prompt.dart';
 import '../services/logging_service.dart';
@@ -235,16 +234,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _photoDateTime = photoDateTime;
       });
 
-      // プロンプトが使用された場合のみ使用履歴を記録
-      if (_selectedPrompt != null) {
-        try {
-          final promptService =
-              await ServiceRegistration.getAsync<IPromptService>();
-          await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
-        } catch (e) {
-          debugPrint('プロンプト使用履歴記録エラー: $e');
-        }
-      }
     } catch (e) {
       setState(() {
         _isLoading = false;
