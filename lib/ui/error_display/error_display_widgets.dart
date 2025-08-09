@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
+import '../../ui/components/custom_dialog.dart';
 import 'error_severity.dart';
 
 /// SnackBar用エラーコンテンツ
@@ -61,22 +62,19 @@ class ErrorDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      icon: Icon(
-        _getIconForSeverity(config.severity),
-        color: _getColorForSeverity(context, config.severity),
-        size: 32,
-      ),
-      title: Text(_getTitleForSeverity(config.severity)),
+    return CustomDialog(
+      icon: _getIconForSeverity(config.severity),
+      iconColor: _getColorForSeverity(context, config.severity),
+      title: _getTitleForSeverity(config.severity),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(error.userMessage),
+          Text(error.userMessage, style: const TextStyle(fontSize: 16)),
           if (_shouldShowDetails(config.severity)) ..._buildErrorDetails(),
         ],
       ),
-      actions: _buildActions(context),
+      actions: _buildCustomDialogActions(context),
     );
   }
 
@@ -104,26 +102,27 @@ class ErrorDialogWidget extends StatelessWidget {
     ];
   }
 
-  List<Widget> _buildActions(BuildContext context) {
-    final actions = <Widget>[];
+  List<CustomDialogAction> _buildCustomDialogActions(BuildContext context) {
+    final actions = <CustomDialogAction>[];
 
     if (config.showRetryButton && onRetry != null) {
       actions.add(
-        TextButton(
+        CustomDialogAction(
+          text: retryButtonText ?? '再試行',
           onPressed: () {
             Navigator.of(context).pop();
             onRetry!();
           },
-          child: Text(retryButtonText ?? '再試行'),
         ),
       );
     }
 
     if (config.dismissible) {
       actions.add(
-        TextButton(
+        CustomDialogAction(
+          text: AppConstants.okButton,
+          isPrimary: true,
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(AppConstants.okButton),
         ),
       );
     }
@@ -208,7 +207,7 @@ class ErrorInlineWidget extends StatelessWidget {
         border: Border.all(
           color: _getColorForSeverity(context, config.severity),
         ),
-        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
+        borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,7 +381,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         decoration: BoxDecoration(
           color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
+          borderRadius: BorderRadius.circular(8.0),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

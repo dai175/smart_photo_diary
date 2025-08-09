@@ -8,6 +8,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
+import '../services/logging_service.dart';
 
 /// 写真グリッド表示ウィジェット
 class PhotoGridWidget extends StatelessWidget {
@@ -227,9 +228,7 @@ class PhotoGridWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: AppSpacing.photoRadius,
       child: FutureBuilder<dynamic>(
-        future: ServiceRegistration.get<PhotoServiceInterface>().getThumbnail(
-          controller.photoAssets[index],
-        ),
+        future: _loadThumbnail(controller.photoAssets[index]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
@@ -439,5 +438,30 @@ class PhotoGridWidget extends StatelessWidget {
     final totalHeight = rowHeight * 3 + AppSpacing.sm * 2; // 3行 + 間のスペース
 
     return totalHeight;
+  }
+
+  /// サムネイル読み込み（Result<T>版）
+  Future<dynamic> _loadThumbnail(dynamic asset) async {
+    final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+    final thumbnailResult = await photoService.getThumbnailResult(asset);
+
+    if (thumbnailResult.isSuccess) {
+      return thumbnailResult.value;
+    } else {
+      // エラーハンドリング
+      await _handleThumbnailError(thumbnailResult.error, 'サムネイル読み込み');
+      return null; // エラー時はnullを返してプレースホルダーを表示
+    }
+  }
+
+  /// サムネイルエラーの統一ハンドリング
+  Future<void> _handleThumbnailError(Exception error, String context) async {
+    final loggingService = await LoggingService.getInstance();
+    loggingService.error(
+      'サムネイル読み込みエラー',
+      context: 'PhotoGridWidget.$context',
+      error: error,
+    );
+    // UI処理は継続（プレースホルダー表示）
   }
 }

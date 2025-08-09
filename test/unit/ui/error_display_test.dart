@@ -2,13 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/ui/error_display/error_display.dart';
+import 'package:smart_photo_diary/ui/components/custom_dialog.dart';
+import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/core/service_registration.dart';
 
 void main() {
   group('ErrorDisplayService', () {
     late ErrorDisplayService service;
 
-    setUp(() {
+    setUp(() async {
+      // ServiceRegistrationを初期化してLoggingServiceを使えるようにする
+      ServiceRegistration.reset();
+      await ServiceRegistration.initialize();
+      
+      // LoggingServiceインスタンスを事前に作成して初期化
+      await LoggingService.getInstance();
+      
       service = ErrorDisplayService();
+    });
+
+    tearDown(() {
+      ServiceRegistration.reset();
     });
 
     testWidgets('should show snackbar for warning error', (tester) async {
@@ -67,7 +81,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(CustomDialog), findsOneWidget);
       expect(find.text('テストエラーメッセージ'), findsOneWidget);
     });
 
