@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
+import '../../services/logging_service.dart';
 
 /// Smart Photo Diary 統一ボタンシステム
 ///
@@ -172,7 +173,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
 
   void _handleTapDown(TapDownDetails details) {
     if (kDebugMode) {
-      debugPrint('AnimatedButton: _handleTapDown が呼び出されました');
+      LoggingService.instance.debug(
+        '_handleTapDown が呼び出されました',
+        context: 'AnimatedButton',
+      );
     }
     if (widget.enableScaleAnimation) {
       // setState(() => _isPressed = true);
@@ -247,7 +251,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTap: widget.onPressed != null
                     ? () {
                         if (kDebugMode) {
-                          debugPrint('AnimatedButton: onTap が呼び出されました');
+                          LoggingService.instance.debug(
+                            'onTap が呼び出されました',
+                            context: 'AnimatedButton',
+                          );
                         }
                         widget.onPressed!();
                       }
@@ -310,7 +317,10 @@ class PrimaryButton extends StatelessWidget {
           : (onPressed != null
                 ? () {
                     if (kDebugMode) {
-                      debugPrint('PrimaryButton: onPressed が呼び出されました');
+                      LoggingService.instance.debug(
+                        'onPressed が呼び出されました',
+                        context: 'PrimaryButton',
+                      );
                     }
                     onPressed!();
                   }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/logging_service.dart';
 
 /// 環境変数を安全に管理するクラス
 class EnvironmentConfig {
@@ -155,13 +156,41 @@ class EnvironmentConfig {
   /// デバッグ情報を出力
   static void printDebugInfo() {
     if (kDebugMode) {
-      debugPrint('=== Environment Config Debug ===');
-      debugPrint('初期化状態: $_isInitialized');
-      debugPrint('デバッグモード: $kDebugMode');
-      // APIキー情報はセキュリティ上の理由でログ出力しない
-      debugPrint('プラン強制: $_cachedForcePlan');
-      debugPrint('dotenv環境: ${dotenv.env.keys.length}個のキー');
-      debugPrint('================================');
+      try {
+        LoggingService.instance.debug(
+          '=== Environment Config Debug ===',
+          context: 'EnvironmentConfig',
+        );
+        LoggingService.instance.debug(
+          '初期化状態: $_isInitialized',
+          context: 'EnvironmentConfig',
+        );
+        LoggingService.instance.debug(
+          'デバッグモード: $kDebugMode',
+          context: 'EnvironmentConfig',
+        );
+        // APIキー情報はセキュリティ上の理由でログ出力しない
+        LoggingService.instance.debug(
+          'プラン強制: $_cachedForcePlan',
+          context: 'EnvironmentConfig',
+        );
+        LoggingService.instance.debug(
+          'dotenv環境: ${dotenv.env.keys.length}個のキー',
+          context: 'EnvironmentConfig',
+        );
+        LoggingService.instance.debug(
+          '================================',
+          context: 'EnvironmentConfig',
+        );
+      } catch (e) {
+        debugPrint('=== Environment Config Debug ===');
+        debugPrint('初期化状態: $_isInitialized');
+        debugPrint('デバッグモード: $kDebugMode');
+        // APIキー情報はセキュリティ上の理由でログ出力しない
+        debugPrint('プラン強制: $_cachedForcePlan');
+        debugPrint('dotenv環境: ${dotenv.env.keys.length}個のキー');
+        debugPrint('================================');
+      }
     }
   }
 

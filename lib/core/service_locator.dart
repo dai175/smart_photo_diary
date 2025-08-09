@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../services/logging_service.dart';
 
 /// Service Locator pattern implementation for dependency injection
 ///
@@ -20,7 +21,15 @@ class ServiceLocator {
   /// Register a singleton instance
   void registerSingleton<T>(T instance) {
     if (kDebugMode) {
-      debugPrint('ServiceLocator: Registering singleton ${T.toString()}');
+      try {
+        LoggingService.instance.debug(
+          'Registering singleton ${T.toString()}',
+          context: 'ServiceLocator',
+        );
+      } catch (e) {
+        // LoggingServiceがまだ初期化されていない場合は直接debugPrintを使用
+        debugPrint('ServiceLocator: Registering singleton ${T.toString()}');
+      }
     }
     _services[T] = instance;
   }
@@ -28,7 +37,15 @@ class ServiceLocator {
   /// Register a factory function for lazy initialization
   void registerFactory<T>(T Function() factory) {
     if (kDebugMode) {
-      debugPrint('ServiceLocator: Registering factory ${T.toString()}');
+      try {
+        LoggingService.instance.debug(
+          'Registering factory ${T.toString()}',
+          context: 'ServiceLocator',
+        );
+      } catch (e) {
+        // LoggingServiceがまだ初期化されていない場合は直接debugPrintを使用
+        debugPrint('ServiceLocator: Registering factory ${T.toString()}');
+      }
     }
     _factories[T] = factory;
   }
@@ -36,7 +53,15 @@ class ServiceLocator {
   /// Register an async factory function for services that require async initialization
   void registerAsyncFactory<T>(Future<T> Function() factory) {
     if (kDebugMode) {
-      debugPrint('ServiceLocator: Registering async factory ${T.toString()}');
+      try {
+        LoggingService.instance.debug(
+          'Registering async factory ${T.toString()}',
+          context: 'ServiceLocator',
+        );
+      } catch (e) {
+        // LoggingServiceがまだ初期化されていない場合は直接debugPrintを使用
+        debugPrint('ServiceLocator: Registering async factory ${T.toString()}');
+      }
     }
     _factories[T] = factory;
   }
@@ -48,9 +73,16 @@ class ServiceLocator {
     // Check if singleton instance exists
     if (_services.containsKey(type)) {
       if (kDebugMode) {
-        debugPrint(
-          'ServiceLocator: Returning singleton instance of ${type.toString()}',
-        );
+        try {
+          LoggingService.instance.debug(
+            'Returning singleton instance of ${type.toString()}',
+            context: 'ServiceLocator',
+          );
+        } catch (e) {
+          debugPrint(
+            'ServiceLocator: Returning singleton instance of ${type.toString()}',
+          );
+        }
       }
       return _services[type] as T;
     }
@@ -59,9 +91,16 @@ class ServiceLocator {
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
       if (kDebugMode) {
-        debugPrint(
-          'ServiceLocator: Creating instance from factory ${type.toString()}',
-        );
+        try {
+          LoggingService.instance.debug(
+            'Creating instance from factory ${type.toString()}',
+            context: 'ServiceLocator',
+          );
+        } catch (e) {
+          debugPrint(
+            'ServiceLocator: Creating instance from factory ${type.toString()}',
+          );
+        }
       }
 
       final instance = factory();
@@ -90,9 +129,16 @@ class ServiceLocator {
     // Check if singleton instance exists
     if (_services.containsKey(type)) {
       if (kDebugMode) {
-        debugPrint(
-          'ServiceLocator: Returning singleton instance of ${type.toString()}',
-        );
+        try {
+          LoggingService.instance.debug(
+            'Returning singleton instance of ${type.toString()}',
+            context: 'ServiceLocator',
+          );
+        } catch (e) {
+          debugPrint(
+            'ServiceLocator: Returning singleton instance of ${type.toString()}',
+          );
+        }
       }
       return _services[type] as T;
     }
@@ -101,9 +147,16 @@ class ServiceLocator {
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
       if (kDebugMode) {
-        debugPrint(
-          'ServiceLocator: Creating instance from async factory ${type.toString()}',
-        );
+        try {
+          LoggingService.instance.debug(
+            'Creating instance from async factory ${type.toString()}',
+            context: 'ServiceLocator',
+          );
+        } catch (e) {
+          debugPrint(
+            'ServiceLocator: Creating instance from async factory ${type.toString()}',
+          );
+        }
       }
 
       final instance = await factory();
@@ -128,7 +181,14 @@ class ServiceLocator {
   void unregister<T>() {
     final type = T;
     if (kDebugMode) {
-      debugPrint('ServiceLocator: Unregistering ${type.toString()}');
+      try {
+        LoggingService.instance.debug(
+          'Unregistering ${type.toString()}',
+          context: 'ServiceLocator',
+        );
+      } catch (e) {
+        debugPrint('ServiceLocator: Unregistering ${type.toString()}');
+      }
     }
     _services.remove(type);
     _factories.remove(type);
@@ -137,7 +197,14 @@ class ServiceLocator {
   /// Clear all services (useful for testing)
   void clear() {
     if (kDebugMode) {
-      debugPrint('ServiceLocator: Clearing all services');
+      try {
+        LoggingService.instance.debug(
+          'Clearing all services',
+          context: 'ServiceLocator',
+        );
+      } catch (e) {
+        debugPrint('ServiceLocator: Clearing all services');
+      }
     }
     _services.clear();
     _factories.clear();
@@ -154,9 +221,24 @@ class ServiceLocator {
   /// Print debug information about registered services
   void debugPrintServices() {
     if (kDebugMode) {
-      debugPrint('ServiceLocator registered services:');
-      debugPrint('Singletons: ${_services.keys.toList()}');
-      debugPrint('Factories: ${_factories.keys.toList()}');
+      try {
+        LoggingService.instance.debug(
+          'registered services:',
+          context: 'ServiceLocator',
+        );
+        LoggingService.instance.debug(
+          'Singletons: ${_services.keys.toList()}',
+          context: 'ServiceLocator',
+        );
+        LoggingService.instance.debug(
+          'Factories: ${_factories.keys.toList()}',
+          context: 'ServiceLocator',
+        );
+      } catch (e) {
+        debugPrint('ServiceLocator registered services:');
+        debugPrint('Singletons: ${_services.keys.toList()}');
+        debugPrint('Factories: ${_factories.keys.toList()}');
+      }
     }
   }
 }
