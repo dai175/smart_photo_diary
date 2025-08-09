@@ -227,21 +227,34 @@
   - [x] 未使用インポート削除とコード品質向上
 - [x] 動作確認（全写真取得機能の包括テスト）
 
-##### Phase 6-3: PastPhotosNotifier移行（Premium機能）  
-- [ ] 権限系メソッドのResult<T>実装
-  - [ ] `requestPermissionResult()` 実装
-  - [ ] `isPermissionPermanentlyDeniedResult()` 実装
-  - [ ] `isLimitedAccessResult()` 実装
-  - [ ] `presentLimitedLibraryPickerResult()` 実装
-- [ ] PastPhotosNotifierでの権限処理Result<T>移行
-- [ ] Limited Access対応の改善
-- [ ] 統一的なエラー表示処理実装
-- [ ] PastPhotosNotifierテスト更新
-- [ ] Premium機能動作確認（過去写真アクセス）
+##### Phase 6-3: UI層権限系メソッドResult<T>移行（Premium機能関連）
+- [x] 権限系Result<T>メソッド実装確認（Phase 5で完了済み）
+  - [x] `requestPermissionResult()` 実装完了確認
+  - [x] `isPermissionPermanentlyDeniedResult()` 実装完了確認
+  - [x] `isLimitedAccessResult()` 実装完了確認
+  - [x] `presentLimitedLibraryPickerResult()` 実装完了確認
+- [x] PastPhotosNotifier確認（既にResult<T>対応済み）
+  - [x] `getPhotosEfficientResult()` 使用済み確認
+  - [x] Result<T>エラーハンドリング実装済み確認
+- [x] UI層での権限系メソッドResult<T>移行
+  - [x] `home_screen.dart:262` - `requestPermission()` → `requestPermissionResult()`
+  - [x] `home_screen.dart:332` - `isLimitedAccess()` → `isLimitedAccessResult()`
+  - [x] `home_content_widget.dart:615` - `requestPermission()` → `requestPermissionResult()`
+- [x] 統一権限エラーハンドリング実装
+  - [x] 権限拒否時の統一エラーハンドリングメソッド追加（`_handlePermissionError()`）
+  - [x] LoggingServiceによる構造化ログ実装
+  - [x] 権限失敗時のフォールバック処理（boolean false返却）
+- [x] Premium機能（過去写真）の権限処理改善
+  - [x] Limited Access対応の詳細化（isLimitedAccessResult使用）
+  - [x] 権限失敗時のフォールバック処理（UI処理継続）
+- [x] 品質確認・テスト実行
+  - [x] `flutter analyze` 完全クリア（0 issues）
+  - [x] `flutter test` 全テスト成功（800+テスト）
+  - [x] コードフォーマット完了（2ファイル調整）
 
-##### Phase 6-4A: UI層高優先更新（メイン画面）
-- [ ] `home_screen.dart` 権限リクエスト処理のResult<T>移行
-- [ ] `home_content_widget.dart` 写真権限チェックのResult<T>移行
+##### Phase 6-4A: UI層高優先更新（残りのメイン画面機能）
+- [x] `home_screen.dart` 権限リクエスト処理のResult<T>移行（Phase 6-3で完了）
+- [x] `home_content_widget.dart` 写真権限チェックのResult<T>移行（Phase 6-3で完了）
 - [ ] エラーダイアログの統一実装
 - [ ] UI層テスト更新（高優先画面のみ）
 - [ ] ユーザー体験確認（メイン画面動作）

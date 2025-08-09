@@ -611,10 +611,21 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     try {
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
 
-      // 権限チェック
-      final hasPermission = await photoService.requestPermission();
+      // 権限チェック（Result<T>版）
+      final permissionResult = await photoService.requestPermissionResult();
 
       if (!mounted) return;
+
+      bool hasPermission;
+      if (permissionResult.isSuccess) {
+        hasPermission = permissionResult.value;
+      } else {
+        // 権限エラーを処理（過去写真機能向け）
+        hasPermission = await _handlePermissionError(
+          permissionResult.error,
+          '過去写真権限チェック',
+        );
+      }
 
       widget.pastPhotoController.setPermission(hasPermission);
 
@@ -1021,5 +1032,17 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     );
     // 空リストを返して処理を継続
     return <AssetEntity>[];
+  }
+
+  /// 権限エラーの統一ハンドリング
+  Future<bool> _handlePermissionError(Exception error, String context) async {
+    final loggingService = await LoggingService.getInstance();
+    loggingService.error(
+      '写真アクセス権限エラー',
+      context: 'HomeContentWidget.$context',
+      error: error,
+    );
+    // 権限失敗時は false を返して処理を継続
+    return false;
   }
 }

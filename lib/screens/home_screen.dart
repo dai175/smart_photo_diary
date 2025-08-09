@@ -257,11 +257,25 @@ class _HomeScreenState extends State<HomeScreen>
     _photoController.setLoading(true);
 
     try {
-      // 権限リクエスト
+      // 権限リクエスト（Result<T>版）
       final photoService = ServiceRegistration.get<PhotoServiceInterface>();
-      final hasPermission = await photoService.requestPermission();
+      final permissionResult = await photoService.requestPermissionResult();
 
       if (!mounted) return;
+
+      bool hasPermission;
+      if (permissionResult.isSuccess) {
+        hasPermission = permissionResult.value;
+      } else {
+        // 権限エラーをログに記録
+        final loggingService = await LoggingService.getInstance();
+        loggingService.error(
+          '写真アクセス権限リクエストエラー',
+          context: 'HomeScreen._loadTodayPhotos',
+          error: permissionResult.error,
+        );
+        hasPermission = false; // フォールバック
+      }
 
       _photoController.setPermission(hasPermission);
 
@@ -313,9 +327,24 @@ class _HomeScreenState extends State<HomeScreen>
         },
       );
 
-      // 従来の分散ロジック（統合メソッドとの並行実行）
+      // 従来の分散ロジック（統合メソッドとの並行実行）（Result<T>版）
       if (photos.isEmpty) {
-        final isLimited = await photoService.isLimitedAccess();
+        final limitedAccessResult = await photoService.isLimitedAccessResult();
+        bool isLimited = false;
+
+        if (limitedAccessResult.isSuccess) {
+          isLimited = limitedAccessResult.value;
+        } else {
+          // Limited Access確認エラーをログに記録
+          final loggingService = await LoggingService.getInstance();
+          loggingService.error(
+            'Limited Accessステータス確認エラー',
+            context: 'HomeScreen._loadTodayPhotos',
+            error: limitedAccessResult.error,
+          );
+          // エラー時は通常のアクセス状態と仮定
+        }
+
         if (isLimited) {
           await _showLimitedAccessDialog();
         }
