@@ -360,42 +360,52 @@ void main() {
     // Result<T> Pattern Tests - 新規追加
     group('Result<T> Pattern Tests - Permission Methods', () {
       group('requestPermissionResult', () {
-        test('should return Success(true) when permission is granted', () async {
-          // Act
-          final result = await photoService.requestPermissionResult();
+        test(
+          'should return Success(true) when permission is granted',
+          () async {
+            // Act
+            final result = await photoService.requestPermissionResult();
 
-          // Assert
-          expect(result, isA<Result<bool>>());
-          // 実際の権限状態に依存するため、型チェックのみ
-          // テスト環境では通常権限が拒否されるためFalseまたは例外が返される
-        });
+            // Assert
+            expect(result, isA<Result<bool>>());
+            // 実際の権限状態に依存するため、型チェックのみ
+            // テスト環境では通常権限が拒否されるためFalseまたは例外が返される
+          },
+        );
 
-        test('should return Success(false) when permission is denied', () async {
-          // Act
-          final result = await photoService.requestPermissionResult();
+        test(
+          'should return Success(false) when permission is denied',
+          () async {
+            // Act
+            final result = await photoService.requestPermissionResult();
 
-          // Assert
-          expect(result, isA<Result<bool>>());
-          // Mock環境では権限拒否が一般的
-          result.fold(
-            (granted) => expect(granted, isA<bool>()),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<bool>>());
+            // Mock環境では権限拒否が一般的
+            result.fold(
+              (granted) => expect(granted, isA<bool>()),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
       });
 
       group('isPermissionPermanentlyDeniedResult', () {
-        test('should return Result<bool> for permission permanently denied check', () async {
-          // Act
-          final result = await photoService.isPermissionPermanentlyDeniedResult();
+        test(
+          'should return Result<bool> for permission permanently denied check',
+          () async {
+            // Act
+            final result = await photoService
+                .isPermissionPermanentlyDeniedResult();
 
-          // Assert
-          expect(result, isA<Result<bool>>());
-          result.fold(
-            (isPermanentlyDenied) => expect(isPermanentlyDenied, isA<bool>()),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<bool>>());
+            result.fold(
+              (isPermanentlyDenied) => expect(isPermanentlyDenied, isA<bool>()),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
       });
 
       group('isLimitedAccessResult', () {
@@ -429,17 +439,20 @@ void main() {
 
     group('Result<T> Pattern Tests - Photo Retrieval Methods', () {
       group('getTodayPhotosResult', () {
-        test('should return Result<List<AssetEntity>> for today photos', () async {
-          // Act
-          final result = await photoService.getTodayPhotosResult(limit: 10);
+        test(
+          'should return Result<List<AssetEntity>> for today photos',
+          () async {
+            // Act
+            final result = await photoService.getTodayPhotosResult(limit: 10);
 
-          // Assert
-          expect(result, isA<Result<List<AssetEntity>>>());
-          result.fold(
-            (photos) => expect(photos, isA<List<AssetEntity>>()),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<List<AssetEntity>>>());
+            result.fold(
+              (photos) => expect(photos, isA<List<AssetEntity>>()),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
 
         test('should handle limit parameter in getTodayPhotosResult', () async {
           // Act
@@ -447,77 +460,83 @@ void main() {
 
           // Assert
           expect(result, isA<Result<List<AssetEntity>>>());
-          result.fold(
-            (photos) {
-              expect(photos, isA<List<AssetEntity>>());
-              // 実際の写真数は環境に依存するため、型チェックのみ
-            },
-            (error) => expect(error, isA<AppException>()),
-          );
+          result.fold((photos) {
+            expect(photos, isA<List<AssetEntity>>());
+            // 実際の写真数は環境に依存するため、型チェックのみ
+          }, (error) => expect(error, isA<AppException>()));
         });
       });
 
       group('getPhotosInDateRangeResult', () {
-        test('should return Result<List<AssetEntity>> for date range photos', () async {
-          // Arrange
-          final startDate = DateTime(2024, 1, 1);
-          final endDate = DateTime(2024, 1, 31);
+        test(
+          'should return Result<List<AssetEntity>> for date range photos',
+          () async {
+            // Arrange
+            final startDate = DateTime(2024, 1, 1);
+            final endDate = DateTime(2024, 1, 31);
 
-          // Act
-          final result = await photoService.getPhotosInDateRangeResult(
-            startDate: startDate,
-            endDate: endDate,
-            limit: 50,
-          );
+            // Act
+            final result = await photoService.getPhotosInDateRangeResult(
+              startDate: startDate,
+              endDate: endDate,
+              limit: 50,
+            );
 
-          // Assert
-          expect(result, isA<Result<List<AssetEntity>>>());
-          result.fold(
-            (photos) => expect(photos, isA<List<AssetEntity>>()),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<List<AssetEntity>>>());
+            result.fold(
+              (photos) => expect(photos, isA<List<AssetEntity>>()),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
 
-        test('should handle invalid date range in getPhotosInDateRangeResult', () async {
-          // Arrange
-          final startDate = DateTime(2024, 12, 31);
-          final endDate = DateTime(2024, 1, 1); // End before start
+        test(
+          'should handle invalid date range in getPhotosInDateRangeResult',
+          () async {
+            // Arrange
+            final startDate = DateTime(2024, 12, 31);
+            final endDate = DateTime(2024, 1, 1); // End before start
 
-          // Act
-          final result = await photoService.getPhotosInDateRangeResult(
-            startDate: startDate,
-            endDate: endDate,
-          );
+            // Act
+            final result = await photoService.getPhotosInDateRangeResult(
+              startDate: startDate,
+              endDate: endDate,
+            );
 
-          // Assert
-          expect(result, isA<Result<List<AssetEntity>>>());
-          // 不正な日付範囲でもエラーにならず空のリストが返されることを期待
-          result.fold(
-            (photos) => expect(photos, isEmpty),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<List<AssetEntity>>>());
+            // 不正な日付範囲でもエラーにならず空のリストが返されることを期待
+            result.fold(
+              (photos) => expect(photos, isEmpty),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
       });
 
       group('getPhotosForDateResult', () {
-        test('should return Result<List<AssetEntity>> for specific date photos', () async {
-          // Arrange
-          final testDate = DateTime(2024, 7, 25);
+        test(
+          'should return Result<List<AssetEntity>> for specific date photos',
+          () async {
+            // Arrange
+            final testDate = DateTime(2024, 7, 25);
 
-          // Act
-          final result = await photoService.getPhotosForDateResult(
-            testDate,
-            offset: 0,
-            limit: 10,
-          );
+            // Act
+            final result = await photoService.getPhotosForDateResult(
+              testDate,
+              offset: 0,
+              limit: 10,
+            );
 
-          // Assert
-          expect(result, isA<Result<List<AssetEntity>>>());
-          result.fold(
-            (photos) => expect(photos, isA<List<AssetEntity>>()),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<List<AssetEntity>>>());
+            result.fold(
+              (photos) => expect(photos, isA<List<AssetEntity>>()),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
 
         test('should handle pagination in getPhotosForDateResult', () async {
           // Arrange
@@ -532,31 +551,31 @@ void main() {
 
           // Assert
           expect(result, isA<Result<List<AssetEntity>>>());
-          result.fold(
-            (photos) {
-              expect(photos, isA<List<AssetEntity>>());
-              expect(photos.length, lessThanOrEqualTo(5));
-            },
-            (error) => expect(error, isA<AppException>()),
-          );
+          result.fold((photos) {
+            expect(photos, isA<List<AssetEntity>>());
+            expect(photos.length, lessThanOrEqualTo(5));
+          }, (error) => expect(error, isA<AppException>()));
         });
       });
 
       group('getPhotosEfficientResult', () {
-        test('should return Result<List<AssetEntity>> for efficient photo retrieval', () async {
-          // Act
-          final result = await photoService.getPhotosEfficientResult(
-            offset: 0,
-            limit: 30,
-          );
+        test(
+          'should return Result<List<AssetEntity>> for efficient photo retrieval',
+          () async {
+            // Act
+            final result = await photoService.getPhotosEfficientResult(
+              offset: 0,
+              limit: 30,
+            );
 
-          // Assert
-          expect(result, isA<Result<List<AssetEntity>>>());
-          result.fold(
-            (photos) => expect(photos, isA<List<AssetEntity>>()),
-            (error) => expect(error, isA<AppException>()),
-          );
-        });
+            // Assert
+            expect(result, isA<Result<List<AssetEntity>>>());
+            result.fold(
+              (photos) => expect(photos, isA<List<AssetEntity>>()),
+              (error) => expect(error, isA<AppException>()),
+            );
+          },
+        );
 
         test('should handle date range in getPhotosEfficientResult', () async {
           // Arrange
@@ -704,6 +723,32 @@ void main() {
           limit: 10,
         );
         expect(result3, isA<Result<List<AssetEntity>>>());
+      });
+    });
+
+    group('Edge Cases and Boundary Value Tests', () {
+      test('getPhotosForDateResult handles basic scenarios', () async {
+        final result = await photoService.getPhotosForDateResult(
+          DateTime.now(),
+          offset: 0,
+          limit: 10,
+        );
+
+        expect(result, isA<Result<List<AssetEntity>>>());
+        result.fold(
+          (photos) => expect(photos, isA<List<AssetEntity>>()),
+          (error) => expect(error, isA<AppException>()),
+        );
+      });
+
+      test('getTodayPhotosResult handles basic request', () async {
+        final result = await photoService.getTodayPhotosResult(limit: 5);
+
+        expect(result, isA<Result<List<AssetEntity>>>());
+        result.fold(
+          (photos) => expect(photos, isA<List<AssetEntity>>()),
+          (error) => expect(error, isA<AppException>()),
+        );
       });
     });
   });

@@ -291,7 +291,8 @@ void main() {
       test('should handle daylight saving time transitions', () {
         // Arrange
         // Note: This is more relevant for systems that use DST
-        final photoDate = DateTime.now().subtract(const Duration(hours: 25));
+        // Use 23 hours to stay within the same day for BasicPlan (1 day access)
+        final photoDate = DateTime.now().subtract(const Duration(hours: 23));
 
         // Act
         final isAccessible = accessControlService.isPhotoAccessible(
@@ -300,7 +301,7 @@ void main() {
         );
 
         // Assert
-        // Should be accessible as it's within 2 days
+        // Should be accessible as it's within the same day
         expect(isAccessible, isTrue);
       });
 
