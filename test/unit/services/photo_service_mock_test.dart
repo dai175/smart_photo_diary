@@ -546,6 +546,501 @@ void main() {
       });
     });
 
+    // Result<T> Mock Tests - 新規追加
+    group('Result<T> Mock Tests - Permission Methods', () {
+      group('requestPermissionResult', () {
+        test('should return Success(true) when permission is granted', () async {
+          // Arrange
+          when(
+            () => mockPhotoService.requestPermissionResult(),
+          ).thenAnswer((_) async => const Success(true));
+
+          // Act
+          final result = await mockPhotoService.requestPermissionResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, isTrue);
+          verify(() => mockPhotoService.requestPermissionResult()).called(1);
+        });
+
+        test('should return Success(false) when permission is denied', () async {
+          // Arrange
+          when(
+            () => mockPhotoService.requestPermissionResult(),
+          ).thenAnswer((_) async => const Success(false));
+
+          // Act
+          final result = await mockPhotoService.requestPermissionResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, isFalse);
+          verify(() => mockPhotoService.requestPermissionResult()).called(1);
+        });
+
+        test('should return Failure when permission request fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('権限リクエストに失敗しました');
+          when(
+            () => mockPhotoService.requestPermissionResult(),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.requestPermissionResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+          verify(() => mockPhotoService.requestPermissionResult()).called(1);
+        });
+      });
+
+      group('isPermissionPermanentlyDeniedResult', () {
+        test('should return Success(true) when permission permanently denied', () async {
+          // Arrange
+          when(
+            () => mockPhotoService.isPermissionPermanentlyDeniedResult(),
+          ).thenAnswer((_) async => const Success(true));
+
+          // Act
+          final result = await mockPhotoService.isPermissionPermanentlyDeniedResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, isTrue);
+          verify(() => mockPhotoService.isPermissionPermanentlyDeniedResult()).called(1);
+        });
+
+        test('should return Failure when check fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('権限確認に失敗しました');
+          when(
+            () => mockPhotoService.isPermissionPermanentlyDeniedResult(),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.isPermissionPermanentlyDeniedResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('isLimitedAccessResult', () {
+        test('should return Success(true) when access is limited', () async {
+          // Arrange
+          when(
+            () => mockPhotoService.isLimitedAccessResult(),
+          ).thenAnswer((_) async => const Success(true));
+
+          // Act
+          final result = await mockPhotoService.isLimitedAccessResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, isTrue);
+          verify(() => mockPhotoService.isLimitedAccessResult()).called(1);
+        });
+
+        test('should return Failure when limited access check fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('Limited Access確認に失敗しました');
+          when(
+            () => mockPhotoService.isLimitedAccessResult(),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.isLimitedAccessResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('presentLimitedLibraryPickerResult', () {
+        test('should return Success(true) when picker succeeds', () async {
+          // Arrange
+          when(
+            () => mockPhotoService.presentLimitedLibraryPickerResult(),
+          ).thenAnswer((_) async => const Success(true));
+
+          // Act
+          final result = await mockPhotoService.presentLimitedLibraryPickerResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, isTrue);
+          verify(() => mockPhotoService.presentLimitedLibraryPickerResult()).called(1);
+        });
+
+        test('should return Failure when picker fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('Limited Library Picker表示に失敗しました');
+          when(
+            () => mockPhotoService.presentLimitedLibraryPickerResult(),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.presentLimitedLibraryPickerResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+    });
+
+    group('Result<T> Mock Tests - Photo Retrieval Methods', () {
+      group('getTodayPhotosResult', () {
+        test('should return Success with photos list', () async {
+          // Arrange
+          final mockPhotos = [mockAssetEntity, mockAssetEntity];
+          when(
+            () => mockPhotoService.getTodayPhotosResult(limit: any(named: 'limit')),
+          ).thenAnswer((_) async => Success(mockPhotos));
+
+          // Act
+          final result = await mockPhotoService.getTodayPhotosResult(limit: 10);
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockPhotos));
+          expect(result.value.length, equals(2));
+          verify(() => mockPhotoService.getTodayPhotosResult(limit: 10)).called(1);
+        });
+
+        test('should return Failure when today photos retrieval fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('今日の写真取得に失敗しました');
+          when(
+            () => mockPhotoService.getTodayPhotosResult(limit: any(named: 'limit')),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getTodayPhotosResult(limit: 10);
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('getPhotosInDateRangeResult', () {
+        test('should return Success with photos in range', () async {
+          // Arrange
+          final startDate = DateTime(2024, 1, 1);
+          final endDate = DateTime(2024, 1, 31);
+          final mockPhotos = [mockAssetEntity];
+          when(
+            () => mockPhotoService.getPhotosInDateRangeResult(
+              startDate: any(named: 'startDate'),
+              endDate: any(named: 'endDate'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Success(mockPhotos));
+
+          // Act
+          final result = await mockPhotoService.getPhotosInDateRangeResult(
+            startDate: startDate,
+            endDate: endDate,
+            limit: 50,
+          );
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockPhotos));
+          verify(
+            () => mockPhotoService.getPhotosInDateRangeResult(
+              startDate: startDate,
+              endDate: endDate,
+              limit: 50,
+            ),
+          ).called(1);
+        });
+
+        test('should return Failure when date range photos retrieval fails', () async {
+          // Arrange
+          final startDate = DateTime(2024, 1, 1);
+          final endDate = DateTime(2024, 1, 31);
+          final mockError = PhotoAccessException('日付範囲写真取得に失敗しました');
+          when(
+            () => mockPhotoService.getPhotosInDateRangeResult(
+              startDate: any(named: 'startDate'),
+              endDate: any(named: 'endDate'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getPhotosInDateRangeResult(
+            startDate: startDate,
+            endDate: endDate,
+          );
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('getPhotosForDateResult', () {
+        test('should return Success with photos for date', () async {
+          // Arrange
+          final testDate = DateTime(2024, 7, 25);
+          final mockPhotos = [mockAssetEntity];
+          when(
+            () => mockPhotoService.getPhotosForDateResult(
+              any(),
+              offset: any(named: 'offset'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Success(mockPhotos));
+
+          // Act
+          final result = await mockPhotoService.getPhotosForDateResult(
+            testDate,
+            offset: 0,
+            limit: 10,
+          );
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockPhotos));
+          verify(
+            () => mockPhotoService.getPhotosForDateResult(
+              testDate,
+              offset: 0,
+              limit: 10,
+            ),
+          ).called(1);
+        });
+
+        test('should return Failure when date photos retrieval fails', () async {
+          // Arrange
+          final testDate = DateTime(2024, 7, 25);
+          final mockError = PhotoAccessException('指定日写真取得に失敗しました');
+          when(
+            () => mockPhotoService.getPhotosForDateResult(
+              any(),
+              offset: any(named: 'offset'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getPhotosForDateResult(
+            testDate,
+            offset: 0,
+            limit: 10,
+          );
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('getPhotosEfficientResult', () {
+        test('should return Success with efficient photos', () async {
+          // Arrange
+          final mockPhotos = List.generate(30, (index) => mockAssetEntity);
+          when(
+            () => mockPhotoService.getPhotosEfficientResult(
+              startDate: any(named: 'startDate'),
+              endDate: any(named: 'endDate'),
+              offset: any(named: 'offset'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Success(mockPhotos));
+
+          // Act
+          final result = await mockPhotoService.getPhotosEfficientResult(
+            offset: 0,
+            limit: 30,
+          );
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockPhotos));
+          expect(result.value.length, equals(30));
+        });
+
+        test('should return Failure when efficient photos retrieval fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('効率的写真取得に失敗しました');
+          when(
+            () => mockPhotoService.getPhotosEfficientResult(
+              startDate: any(named: 'startDate'),
+              endDate: any(named: 'endDate'),
+              offset: any(named: 'offset'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getPhotosEfficientResult(
+            offset: 0,
+            limit: 30,
+          );
+
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+    });
+
+    group('Result<T> Mock Tests - Data Access Methods', () {
+      group('getPhotoDataResult', () {
+        test('should return Success with photo data', () async {
+          // Arrange
+          final mockData = [1, 2, 3, 4, 5];
+          when(
+            () => mockPhotoService.getPhotoDataResult(any()),
+          ).thenAnswer((_) async => Success(mockData));
+
+          // Act
+          final result = await mockPhotoService.getPhotoDataResult(mockAssetEntity);
+
+          // Assert
+          expect(result, isA<Result<List<int>>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockData));
+          verify(() => mockPhotoService.getPhotoDataResult(mockAssetEntity)).called(1);
+        });
+
+        test('should return Failure when photo data retrieval fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('写真データ取得に失敗しました');
+          when(
+            () => mockPhotoService.getPhotoDataResult(any()),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getPhotoDataResult(mockAssetEntity);
+
+          // Assert
+          expect(result, isA<Result<List<int>>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('getThumbnailDataResult', () {
+        test('should return Success with thumbnail data', () async {
+          // Arrange
+          final mockThumbnailData = [10, 20, 30, 40];
+          when(
+            () => mockPhotoService.getThumbnailDataResult(any()),
+          ).thenAnswer((_) async => Success(mockThumbnailData));
+
+          // Act
+          final result = await mockPhotoService.getThumbnailDataResult(mockAssetEntity);
+
+          // Assert
+          expect(result, isA<Result<List<int>>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockThumbnailData));
+          verify(() => mockPhotoService.getThumbnailDataResult(mockAssetEntity)).called(1);
+        });
+
+        test('should return Failure when thumbnail data retrieval fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('サムネイルデータ取得に失敗しました');
+          when(
+            () => mockPhotoService.getThumbnailDataResult(any()),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getThumbnailDataResult(mockAssetEntity);
+
+          // Assert
+          expect(result, isA<Result<List<int>>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      group('getThumbnailResult', () {
+        test('should return Success with thumbnail', () async {
+          // Arrange
+          final mockThumbnail = Uint8List.fromList([1, 2, 3, 4, 5]);
+          when(
+            () => mockPhotoService.getThumbnailResult(
+              any(),
+              width: any(named: 'width'),
+              height: any(named: 'height'),
+            ),
+          ).thenAnswer((_) async => Success(mockThumbnail));
+
+          // Act
+          final result = await mockPhotoService.getThumbnailResult(
+            mockAssetEntity,
+            width: 200,
+            height: 200,
+          );
+
+          // Assert
+          expect(result, isA<Result<Uint8List>>());
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockThumbnail));
+          verify(
+            () => mockPhotoService.getThumbnailResult(
+              mockAssetEntity,
+              width: 200,
+              height: 200,
+            ),
+          ).called(1);
+        });
+
+        test('should return Failure when thumbnail retrieval fails', () async {
+          // Arrange
+          final mockError = PhotoAccessException('サムネイル取得に失敗しました');
+          when(
+            () => mockPhotoService.getThumbnailResult(
+              any(),
+              width: any(named: 'width'),
+              height: any(named: 'height'),
+            ),
+          ).thenAnswer((_) async => Failure(mockError));
+
+          // Act
+          final result = await mockPhotoService.getThumbnailResult(
+            mockAssetEntity,
+            width: 300,
+            height: 300,
+          );
+
+          // Assert
+          expect(result, isA<Result<Uint8List>>());
+          expect(result.isFailure, isTrue);
+          expect(result.error, equals(mockError));
+        });
+      });
+
+      // getOriginalFileResultのテストは既存なので維持
+    });
+
     group('Interface Compliance', () {
       test('should implement PhotoServiceInterface', () {
         expect(mockPhotoService, isA<PhotoServiceInterface>());
@@ -559,6 +1054,21 @@ void main() {
         expect(mockPhotoService.getThumbnailData, isA<Function>());
         expect(mockPhotoService.getOriginalFile, isA<Function>());
         expect(mockPhotoService.getThumbnail, isA<Function>());
+      });
+
+      test('should have all Result<T> interface methods', () {
+        expect(mockPhotoService.requestPermissionResult, isA<Function>());
+        expect(mockPhotoService.getTodayPhotosResult, isA<Function>());
+        expect(mockPhotoService.getPhotosInDateRangeResult, isA<Function>());
+        expect(mockPhotoService.getPhotosForDateResult, isA<Function>());
+        expect(mockPhotoService.getPhotosEfficientResult, isA<Function>());
+        expect(mockPhotoService.getPhotoDataResult, isA<Function>());
+        expect(mockPhotoService.getThumbnailDataResult, isA<Function>());
+        expect(mockPhotoService.getOriginalFileResult, isA<Function>());
+        expect(mockPhotoService.getThumbnailResult, isA<Function>());
+        expect(mockPhotoService.presentLimitedLibraryPickerResult, isA<Function>());
+        expect(mockPhotoService.isLimitedAccessResult, isA<Function>());
+        expect(mockPhotoService.isPermissionPermanentlyDeniedResult, isA<Function>());
       });
     });
 
