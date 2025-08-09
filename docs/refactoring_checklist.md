@@ -132,14 +132,36 @@
   - [x] 画像データ整合性チェックの実装
   - [x] `getOriginalFileResult()`メソッド実装完了
 
-##### Phase 5: Advanced Methods（高度な機能系）
-- [ ] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`
-  - [ ] ページネーション関連エラーの詳細化
+##### Phase 5-A: presentLimitedLibraryPicker Result<T>移行（iOS固有・低リスク）
+- [ ] `presentLimitedLibraryPicker()` → `Future<Result<bool>>`（iOS固有）
+  - [ ] プラットフォーム固有エラーの詳細化（iOS専用チェック）
+  - [ ] システムダイアログ表示失敗の詳細エラー情報
+  - [ ] ユーザーキャンセル vs システムエラーの区別
+  - [ ] `presentLimitedLibraryPickerResult()`メソッド実装完了
+- [ ] home_screen.dartでの呼び出し動作確認
+- [ ] 品質保証（テスト・解析・フォーマット）
+
+##### Phase 5-B: handleLimitedPhotoAccess新規実装（統合ロジック・新規）
 - [ ] `handleLimitedPhotoAccess()` 新規メソッド追加
-  - [ ] `Future<Result<void>> handleLimitedPhotoAccess()` 実装
-  - [ ] Limited Access時の統一的なハンドリング
-- [ ] `presentLimitedLibraryPicker()` → `Future<Result<bool>>`
-  - [ ] プラットフォーム固有エラーの詳細化
+  - [ ] `Future<Result<bool>> handleLimitedPhotoAccess()` 実装
+  - [ ] isLimitedAccess() + presentLimitedLibraryPicker() の統合
+  - [ ] Limited Access時の統一的なハンドリング実装
+  - [ ] ユーザーガイダンス機能の統合
+- [ ] 新規例外クラスの実装（UserCancelledException等）
+- [ ] 統合ロジックのテストカバレッジ100%
+- [ ] 品質保証（テスト・解析・フォーマット）
+
+##### Phase 5-C: getPhotosEfficient Result<T>移行（高リスク・慎重実施）
+- [ ] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [ ] 複雑なページネーションエラーの詳細化
+  - [ ] 日付範囲バリデーション（開始日≤終了日等）
+  - [ ] パラメータ検証（offset≥0, limit∈[1,1000]）
+  - [ ] 大量データ取得監視（500件情報/1000件警告）
+  - [ ] アルバム取得失敗・権限エラーの構造化
+  - [ ] `getPhotosEfficientResult()`メソッド実装完了
+- [ ] PastPhotosNotifierでの動作確認（3箇所）
+- [ ] 統合テストの全面的な更新と検証
+- [ ] 品質保証（テスト・解析・フォーマット）
 
 ##### Phase 6: Interface & Caller Updates（インターフェース更新）
 - [ ] PhotoServiceInterface更新
