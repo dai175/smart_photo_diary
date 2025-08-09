@@ -243,7 +243,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // 写真の撮影日時を保存
         _photoDateTime = photoDateTime;
       });
-
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -281,19 +280,26 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を保存
-      await diaryService.saveDiaryEntryWithPhotos(
+      final saveResult = await diaryService.saveDiaryEntryWithPhotos(
         date: _photoDateTime,
         title: _titleController.text,
         content: _contentController.text,
         photos: widget.selectedAssets,
       );
 
-      if (kDebugMode) {
-        LoggingService.instance.info(
-          '日記保存成功',
-          context: 'DiaryPreviewScreen._saveDiaryEntry',
-        );
-      }
+      saveResult.fold(
+        (entry) {
+          if (kDebugMode) {
+            LoggingService.instance.info(
+              '日記保存成功',
+              context: 'DiaryPreviewScreen._saveDiaryEntry',
+            );
+          }
+        },
+        (error) {
+          throw error; // catchブロックで処理される
+        },
+      );
 
       // ウィジェットがまだマウントされている場合のみ状態を更新
       if (mounted) {

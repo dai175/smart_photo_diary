@@ -85,27 +85,38 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記エントリーを取得
-      final entry = await diaryService.getDiaryEntry(widget.diaryId);
+      final entryResult = await diaryService.getDiaryEntry(widget.diaryId);
 
-      if (entry == null) {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-          _errorMessage = AppConstants.diaryNotFoundMessage;
-        });
-        return;
-      }
+      entryResult.fold(
+        (entry) async {
+          if (entry == null) {
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+              _errorMessage = AppConstants.diaryNotFoundMessage;
+            });
+            return;
+          }
 
-      // 写真アセットを取得
-      final assets = await entry.getPhotoAssets();
+          // 写真アセットを取得
+          final assets = await entry.getPhotoAssets();
 
-      setState(() {
-        _diaryEntry = entry;
-        _titleController.text = entry.title;
-        _contentController.text = entry.content;
-        _photoAssets = assets;
-        _isLoading = false;
-      });
+          setState(() {
+            _diaryEntry = entry;
+            _titleController.text = entry.title;
+            _contentController.text = entry.content;
+            _photoAssets = assets;
+            _isLoading = false;
+          });
+        },
+        (error) {
+          setState(() {
+            _isLoading = false;
+            _hasError = true;
+            _errorMessage = error.message;
+          });
+        },
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -137,21 +148,37 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         content: _contentController.text,
         updatedAt: DateTime.now(),
       );
-      await diaryService.updateDiaryEntry(updatedEntry);
 
-      // 日記エントリーを再読み込み
-      await _loadDiaryEntry();
+      final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
 
-      if (mounted) {
-        setState(() {
-          _isEditing = false;
-        });
+      updateResult.fold(
+        (entry) async {
+          // 更新成功時の処理
+          // 日記エントリーを再読み込み
+          await _loadDiaryEntry();
 
-        // 更新成功メッセージを表示
-        scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text(AppConstants.diaryUpdateSuccessMessage)),
-        );
-      }
+          if (mounted) {
+            setState(() {
+              _isEditing = false;
+            });
+
+            // 更新成功メッセージを表示
+            scaffoldMessenger.showSnackBar(
+              const SnackBar(
+                content: Text(AppConstants.diaryUpdateSuccessMessage),
+              ),
+            );
+          }
+        },
+        (error) {
+          // 更新失敗時の処理
+          if (mounted) {
+            scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text('日記の更新に失敗しました: ${error.message}')),
+            );
+          }
+        },
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -196,17 +223,34 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           await ServiceRegistration.getAsync<DiaryServiceInterface>();
 
       // 日記を削除
-      await diaryService.deleteDiaryEntry(_diaryEntry!.id);
+      final deleteResult = await diaryService.deleteDiaryEntry(_diaryEntry!.id);
 
-      if (mounted) {
-        // 削除成功メッセージを表示
-        scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text(AppConstants.diaryDeleteSuccessMessage)),
-        );
+      deleteResult.fold(
+        (_) {
+          if (mounted) {
+            // 削除成功メッセージを表示
+            scaffoldMessenger.showSnackBar(
+              const SnackBar(
+                content: Text(AppConstants.diaryDeleteSuccessMessage),
+              ),
+            );
 
-        // 前の画面に戻る（削除成功を示すフラグを返す）
-        navigator.pop(true);
-      }
+            // 前の画面に戻る（削除成功を示すフラグを返す）
+            navigator.pop(true);
+          }
+        },
+        (error) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+            });
+            scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text('日記の削除に失敗しました: ${error.message}')),
+            );
+          }
+        },
+      );
     } catch (e) {
       if (mounted) {
         setState(() {

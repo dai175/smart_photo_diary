@@ -4,11 +4,15 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_filter.dart';
+import '../models/import_result.dart';
+import '../core/result/result.dart';
+import '../core/errors/app_exceptions.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
 import 'logging_service.dart';
+import 'storage_service.dart';
 
 class DiaryService implements DiaryServiceInterface {
   static const String _boxName = 'diary_entries';
@@ -69,7 +73,7 @@ class DiaryService implements DiaryServiceInterface {
 
   // 日記エントリーを保存
   @override
-  Future<DiaryEntry> saveDiaryEntry({
+  Future<Result<DiaryEntry>> saveDiaryEntry({
     required DateTime date,
     required String title,
     required String content,
@@ -112,44 +116,114 @@ class DiaryService implements DiaryServiceInterface {
       // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
       _generateTagsInBackground(entry);
 
-      return entry;
+      return Success(entry);
     } catch (e, stackTrace) {
       _loggingService.error('日記保存エラー', error: e, stackTrace: stackTrace);
-      rethrow;
+      return Failure(
+        DatabaseException(
+          '日記エントリーの保存に失敗しました',
+          details: 'ID: ${_uuid.v4()}, 日付: $date',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
     }
   }
 
   // 日記エントリーを更新
   @override
-  Future<void> updateDiaryEntry(DiaryEntry entry) async {
-    if (_diaryBox == null) await _init();
-    await _diaryBox!.put(entry.id, entry);
+  Future<Result<DiaryEntry>> updateDiaryEntry(DiaryEntry entry) async {
+    try {
+      if (_diaryBox == null) await _init();
+
+      // 更新日時を設定
+      final updatedEntry = DiaryEntry(
+        id: entry.id,
+        date: entry.date,
+        title: entry.title,
+        content: entry.content,
+        photoIds: entry.photoIds,
+        location: entry.location,
+        tags: entry.tags,
+        createdAt: entry.createdAt,
+        updatedAt: DateTime.now(),
+      );
+
+      await _diaryBox!.put(updatedEntry.id, updatedEntry);
+      _loggingService.info('日記エントリー更新完了: ${updatedEntry.id}');
+      return Success(updatedEntry);
+    } catch (e, stackTrace) {
+      _loggingService.error('日記更新エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '日記エントリーの更新に失敗しました',
+          details: 'ID: ${entry.id}',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   // 日記エントリーを削除
   @override
-  Future<void> deleteDiaryEntry(String id) async {
-    if (_diaryBox == null) await _init();
-    await _diaryBox!.delete(id);
+  Future<Result<void>> deleteDiaryEntry(String id) async {
+    try {
+      if (_diaryBox == null) await _init();
+
+      // 削除前に存在確認
+      if (!_diaryBox!.containsKey(id)) {
+        return const Failure(DataNotFoundException('指定された日記エントリーが見つかりません'));
+      }
+
+      await _diaryBox!.delete(id);
+      _loggingService.info('日記エントリー削除完了: $id');
+      return const Success(null);
+    } catch (e, stackTrace) {
+      _loggingService.error('日記削除エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '日記エントリーの削除に失敗しました',
+          details: 'ID: $id',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   // すべての日記エントリーを取得
-  Future<List<DiaryEntry>> getAllDiaryEntries() async {
-    if (_diaryBox == null) await _init();
-    return _diaryBox!.values.toList();
+  Future<Result<List<DiaryEntry>>> getAllDiaryEntries() async {
+    try {
+      if (_diaryBox == null) await _init();
+      final entries = _diaryBox!.values.toList();
+      return Success(entries);
+    } catch (e, stackTrace) {
+      _loggingService.error('日記エントリー取得エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '日記エントリーの取得に失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   // 日付でソートされた日記エントリーを取得
   @override
-  Future<List<DiaryEntry>> getSortedDiaryEntries({
+  Future<Result<List<DiaryEntry>>> getSortedDiaryEntries({
     bool descending = true,
   }) async {
-    final entries = await getAllDiaryEntries();
-    entries.sort(
-      (a, b) =>
-          descending ? b.date.compareTo(a.date) : a.date.compareTo(b.date),
-    );
-    return entries;
+    final entriesResult = await getAllDiaryEntries();
+    return entriesResult.map((entries) {
+      final sortedEntries = List<DiaryEntry>.from(entries);
+      sortedEntries.sort(
+        (a, b) =>
+            descending ? b.date.compareTo(a.date) : a.date.compareTo(b.date),
+      );
+      return sortedEntries;
+    });
   }
 
   // 特定の日付の日記エントリーを取得
@@ -175,9 +249,22 @@ class DiaryService implements DiaryServiceInterface {
 
   // IDで日記エントリーを取得
   @override
-  Future<DiaryEntry?> getDiaryEntry(String id) async {
-    if (_diaryBox == null) await _init();
-    return _diaryBox!.get(id);
+  Future<Result<DiaryEntry?>> getDiaryEntry(String id) async {
+    try {
+      if (_diaryBox == null) await _init();
+      final entry = _diaryBox!.get(id);
+      return Success(entry);
+    } catch (e, stackTrace) {
+      _loggingService.error('日記エントリー取得エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '指定された日記エントリーの取得に失敗しました',
+          details: 'ID: $id',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   // バックグラウンドでタグを生成
@@ -221,13 +308,13 @@ class DiaryService implements DiaryServiceInterface {
 
   // 日記エントリーのタグを取得（キャッシュ優先）
   @override
-  Future<List<String>> getTagsForEntry(DiaryEntry entry) async {
-    // 有効なキャッシュがあればそれを返す
-    if (entry.hasValidTags) {
-      return entry.cachedTags!;
-    }
-
+  Future<Result<List<String>>> getTagsForEntry(DiaryEntry entry) async {
     try {
+      // 有効なキャッシュがあればそれを返す
+      if (entry.hasValidTags) {
+        return Success(entry.cachedTags!);
+      }
+
       // キャッシュが無効または存在しない場合は新しく生成
       _loggingService.debug('新しいタグを生成中: ${entry.id}');
       final tagsResult = await _aiService.generateTagsFromContent(
@@ -245,16 +332,16 @@ class DiaryService implements DiaryServiceInterface {
             await latestEntry.updateTags(tagsResult.value);
           }
         }
-        return tagsResult.value;
+        return Success(tagsResult.value);
       } else {
         _loggingService.error('タグ生成エラー', error: tagsResult.error);
         // エラー時はフォールバックタグを返す
-        return _generateFallbackTags(entry);
+        return Success(_generateFallbackTags(entry));
       }
-    } catch (e) {
-      _loggingService.error('タグ生成エラー', error: e);
+    } catch (e, stackTrace) {
+      _loggingService.error('タグ生成エラー', error: e, stackTrace: stackTrace);
       // エラー時はフォールバックタグを返す
-      return _generateFallbackTags(entry);
+      return Success(_generateFallbackTags(entry));
     }
   }
 
@@ -279,26 +366,40 @@ class DiaryService implements DiaryServiceInterface {
 
   // フィルタを適用して日記エントリーを取得
   @override
-  Future<List<DiaryEntry>> getFilteredDiaryEntries(DiaryFilter filter) async {
-    final allEntries = await getSortedDiaryEntries();
-    if (!filter.isActive) return allEntries;
-
-    return allEntries.where((entry) => filter.matches(entry)).toList();
+  Future<Result<List<DiaryEntry>>> getFilteredDiaryEntries(
+    DiaryFilter filter,
+  ) async {
+    final allEntriesResult = await getSortedDiaryEntries();
+    return allEntriesResult.map((allEntries) {
+      if (!filter.isActive) return allEntries;
+      return allEntries.where((entry) => filter.matches(entry)).toList();
+    });
   }
 
   // 全ての日記からユニークなタグを取得
   @override
-  Future<Set<String>> getAllTags() async {
-    if (_diaryBox == null) await _init();
-    final allTags = <String>{};
+  Future<Result<Set<String>>> getAllTags() async {
+    try {
+      if (_diaryBox == null) await _init();
+      final allTags = <String>{};
 
-    for (final entry in _diaryBox!.values) {
-      if (entry.cachedTags != null) {
-        allTags.addAll(entry.cachedTags!);
+      for (final entry in _diaryBox!.values) {
+        if (entry.cachedTags != null) {
+          allTags.addAll(entry.cachedTags!);
+        }
       }
-    }
 
-    return allTags;
+      return Success(allTags);
+    } catch (e, stackTrace) {
+      _loggingService.error('タグ取得エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          'タグの取得に失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   // よく使われるタグを取得（使用頻度順）
@@ -322,22 +423,51 @@ class DiaryService implements DiaryServiceInterface {
 
   // インターフェース実装のための追加メソッド
   @override
-  Future<int> getTotalDiaryCount() async {
-    if (_diaryBox == null) await _init();
-    return _diaryBox!.length;
+  Future<Result<int>> getTotalDiaryCount() async {
+    try {
+      if (_diaryBox == null) await _init();
+      return Success(_diaryBox!.length);
+    } catch (e, stackTrace) {
+      _loggingService.error('日記数取得エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '日記数の取得に失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   @override
-  Future<int> getDiaryCountInPeriod(DateTime start, DateTime end) async {
-    if (_diaryBox == null) await _init();
-    return _diaryBox!.values
-        .where((entry) => entry.date.isAfter(start) && entry.date.isBefore(end))
-        .length;
+  Future<Result<int>> getDiaryCountInPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      if (_diaryBox == null) await _init();
+      final count = _diaryBox!.values
+          .where(
+            (entry) => entry.date.isAfter(start) && entry.date.isBefore(end),
+          )
+          .length;
+      return Success(count);
+    } catch (e, stackTrace) {
+      _loggingService.error('期間内日記数取得エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '期間内の日記数の取得に失敗しました',
+          details: '期間: $start - $end',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   // 写真付きで日記エントリーを保存（後方互換性）
   @override
-  Future<DiaryEntry> saveDiaryEntryWithPhotos({
+  Future<Result<DiaryEntry>> saveDiaryEntryWithPhotos({
     required DateTime date,
     required String title,
     required String content,
@@ -370,7 +500,7 @@ class DiaryService implements DiaryServiceInterface {
   /// [tags]: タグリスト（オプション）
   /// 戻り値: 作成された日記エントリー
   @override
-  Future<DiaryEntry> createDiaryForPastPhoto({
+  Future<Result<DiaryEntry>> createDiaryForPastPhoto({
     required DateTime photoDate,
     required String title,
     required String content,
@@ -385,8 +515,11 @@ class DiaryService implements DiaryServiceInterface {
       }
 
       // 既存の日記との重複チェック
-      final existingDiaries = await getDiaryByPhotoDate(photoDate);
-      if (existingDiaries.isNotEmpty) {
+      final existingDiariesResult = await getDiaryByPhotoDate(photoDate);
+      if (existingDiariesResult.isFailure) {
+        return Failure(existingDiariesResult.error);
+      }
+      if (existingDiariesResult.value.isNotEmpty) {
         _loggingService.warning(
           '${photoDate.toString().split(' ')[0]}の日記が既に存在します',
         );
@@ -419,10 +552,17 @@ class DiaryService implements DiaryServiceInterface {
       // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
       _generateTagsInBackgroundForPastPhoto(entry);
 
-      return entry;
+      return Success(entry);
     } catch (e, stackTrace) {
       _loggingService.error('過去写真日記作成エラー', error: e, stackTrace: stackTrace);
-      rethrow;
+      return Failure(
+        DatabaseException(
+          '過去の写真からの日記作成に失敗しました',
+          details: '撮影日: $photoDate',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
     }
   }
 
@@ -431,19 +571,41 @@ class DiaryService implements DiaryServiceInterface {
   /// [photoDate]: 写真の撮影日時
   /// 戻り値: 該当する日記エントリーのリスト
   @override
-  Future<List<DiaryEntry>> getDiaryByPhotoDate(DateTime photoDate) async {
-    if (_diaryBox == null) await _init();
+  Future<Result<List<DiaryEntry>>> getDiaryByPhotoDate(
+    DateTime photoDate,
+  ) async {
+    try {
+      if (_diaryBox == null) await _init();
 
-    final targetDate = DateTime(photoDate.year, photoDate.month, photoDate.day);
-
-    return _diaryBox!.values.where((entry) {
-      final entryDate = DateTime(
-        entry.date.year,
-        entry.date.month,
-        entry.date.day,
+      final targetDate = DateTime(
+        photoDate.year,
+        photoDate.month,
+        photoDate.day,
       );
-      return entryDate.isAtSameMomentAs(targetDate);
-    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 作成日時の降順
+
+      final entries = _diaryBox!.values.where(
+        (entry) {
+          final entryDate = DateTime(
+            entry.date.year,
+            entry.date.month,
+            entry.date.day,
+          );
+          return entryDate.isAtSameMomentAs(targetDate);
+        },
+      ).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 作成日時の降順
+
+      return Success(entries);
+    } catch (e, stackTrace) {
+      _loggingService.error('写真日付日記検索エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '写真の撮影日付での日記検索に失敗しました',
+          details: '撮影日: $photoDate',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 
   /// 過去の写真用のバックグラウンドタグ生成
@@ -503,5 +665,114 @@ class DiaryService implements DiaryServiceInterface {
         _loggingService.error('過去写真日記のタグ生成エラー', error: e);
       }
     });
+  }
+
+  /// 日記を検索
+  @override
+  Future<Result<List<DiaryEntry>>> searchDiaries({
+    String? query,
+    List<String>? tags,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      final allEntriesResult = await getSortedDiaryEntries();
+      if (allEntriesResult.isFailure) {
+        return Failure(allEntriesResult.error);
+      }
+
+      var filteredEntries = allEntriesResult.value;
+
+      // テキスト検索
+      if (query != null && query.isNotEmpty) {
+        final lowerQuery = query.toLowerCase();
+        filteredEntries = filteredEntries.where((entry) {
+          return entry.title.toLowerCase().contains(lowerQuery) ||
+              entry.content.toLowerCase().contains(lowerQuery);
+        }).toList();
+      }
+
+      // タグ検索
+      if (tags != null && tags.isNotEmpty) {
+        filteredEntries = filteredEntries.where((entry) {
+          if (entry.cachedTags == null) return false;
+          return tags.any((tag) => entry.cachedTags!.contains(tag));
+        }).toList();
+      }
+
+      // 日付範囲検索
+      if (startDate != null) {
+        filteredEntries = filteredEntries.where((entry) {
+          return entry.date.isAfter(startDate) ||
+              entry.date.isAtSameMomentAs(startDate);
+        }).toList();
+      }
+
+      if (endDate != null) {
+        filteredEntries = filteredEntries.where((entry) {
+          return entry.date.isBefore(endDate) ||
+              entry.date.isAtSameMomentAs(endDate);
+        }).toList();
+      }
+
+      return Success(filteredEntries);
+    } catch (e, stackTrace) {
+      _loggingService.error('日記検索エラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        DatabaseException(
+          '日記の検索に失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// 日記をエクスポート
+  @override
+  Future<Result<String>> exportDiaries({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      final storageService = StorageService.getInstance();
+      final result = await storageService.exportData(
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      if (result != null) {
+        return Success(result);
+      } else {
+        return const Failure(ServiceException('エクスポートに失敗しました'));
+      }
+    } catch (e, stackTrace) {
+      _loggingService.error('日記エクスポートエラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        ServiceException(
+          '日記のエクスポートに失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// 日記をインポート
+  @override
+  Future<Result<ImportResult>> importDiaries() async {
+    try {
+      final storageService = StorageService.getInstance();
+      return await storageService.importData();
+    } catch (e, stackTrace) {
+      _loggingService.error('日記インポートエラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        ServiceException(
+          '日記のインポートに失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
   }
 }

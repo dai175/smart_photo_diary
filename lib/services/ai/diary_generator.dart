@@ -217,10 +217,7 @@ $emphasis、個人的で心に響く日記を作成してください。'''
           LoggingService.instance.debug(
             '画像分析中',
             context: 'DiaryGenerator.generateFromMultipleImages',
-            data: {
-              'current': i + 1,
-              'total': sortedImages.length,
-            },
+            data: {'current': i + 1, 'total': sortedImages.length},
           );
         }
 

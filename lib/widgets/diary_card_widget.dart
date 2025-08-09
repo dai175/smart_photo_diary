@@ -22,7 +22,8 @@ class DiaryCardWidget extends StatelessWidget {
   Future<List<String>> _generateTags() async {
     try {
       final diaryService = await DiaryService.getInstance();
-      return await diaryService.getTagsForEntry(entry);
+      final result = await diaryService.getTagsForEntry(entry);
+      return result.getOrDefault([]);
     } catch (e) {
       // エラー時はフォールバックタグを返す（時間帯のみ）
       final fallbackTags = <String>[];

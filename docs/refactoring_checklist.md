@@ -57,15 +57,26 @@
 ### 3. Result<T>パターンへの移行強化
 
 #### DiaryService
-- [ ] `saveDiaryEntry()` → `Future<Result<DiaryEntry>>`
-- [ ] `updateDiaryEntry()` → `Future<Result<DiaryEntry>>`
-- [ ] `deleteDiaryEntry()` → `Future<Result<void>>`
-- [ ] `getDiaryEntries()` → `Future<Result<List<DiaryEntry>>>`
-- [ ] `searchDiaries()` → `Future<Result<List<DiaryEntry>>>`
-- [ ] `exportDiaries()` → `Future<Result<String>>`
-- [ ] `importDiaries()` → `Future<Result<ImportResult>>`
-- [ ] エラーハンドリングのAppException統一
-- [ ] 呼び出し元での.fold()処理実装
+- [x] `saveDiaryEntry()` → `Future<Result<DiaryEntry>>`
+- [x] `updateDiaryEntry()` → `Future<Result<DiaryEntry>>`
+- [x] `deleteDiaryEntry()` → `Future<Result<void>>`
+- [x] `getDiaryEntries()` → `Future<Result<List<DiaryEntry>>>`
+- [x] `searchDiaries()` → `Future<Result<List<DiaryEntry>>>`
+- [x] `exportDiaries()` → `Future<Result<String>>`
+- [x] `importDiaries()` → `Future<Result<ImportResult>>`
+- [x] エラーハンドリングのAppException統一
+- [x] 呼び出し元での.fold()処理実装
+
+#### DiaryService Result<T>移行の残作業（今後の課題）
+- [ ] `diary_screen_controller.dart` - Result<T>対応
+- [ ] `home_content_widget.dart` - forループのResult<T>対応
+- [ ] `past_photo_calendar_widget.dart` - Result<T>対応
+- [ ] テストファイルの移行（102個のエラー修正）
+  - [ ] `test/integration/diary_service_integration_test.dart`
+  - [ ] `test/integration/diary_service_past_photo_integration_test.dart`
+  - [ ] `test/integration/mocks/mock_services.dart`
+  - [ ] `test/integration/test_helpers/integration_test_helpers.dart`
+- [ ] `flutter analyze`の完全クリア
 
 #### PhotoService
 - [ ] `requestPermission()` → `Future<Result<bool>>`

@@ -48,7 +48,13 @@ class StorageService {
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
       final diaryService = await DiaryService.getInstance();
-      var entries = await diaryService.getSortedDiaryEntries();
+      final entriesResult = await diaryService.getSortedDiaryEntries();
+
+      if (entriesResult.isFailure) {
+        return null;
+      }
+
+      var entries = entriesResult.value;
 
       // 期間フィルター
       if (startDate != null || endDate != null) {
@@ -205,7 +211,11 @@ class StorageService {
       final List<String> warnings = [];
 
       // パフォーマンス最適化: 既存エントリーを一度だけ取得
-      final existingEntries = await diaryService.getSortedDiaryEntries();
+      final existingEntriesResult = await diaryService.getSortedDiaryEntries();
+      if (existingEntriesResult.isFailure) {
+        return Failure(existingEntriesResult.error);
+      }
+      final existingEntries = existingEntriesResult.value;
 
       for (int i = 0; i < entries.length; i++) {
         final entryData = entries[i];
@@ -314,7 +324,7 @@ class StorageService {
       }
 
       // エントリーを保存
-      await diaryService.saveDiaryEntry(
+      final saveResult = await diaryService.saveDiaryEntry(
         date: date,
         title: entryData['title'] as String,
         content: entryData['content'] as String,
@@ -324,6 +334,10 @@ class StorageService {
             ? (entryData['tags'] as List<dynamic>).cast<String>()
             : null,
       );
+
+      if (saveResult.isFailure) {
+        return Failure(saveResult.error);
+      }
 
       return const Success('imported');
     } catch (e) {

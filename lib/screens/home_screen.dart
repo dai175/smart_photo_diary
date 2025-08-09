@@ -172,22 +172,36 @@ class _HomeScreenState extends State<HomeScreen>
 
       final diaryService =
           await ServiceRegistration.getAsync<DiaryServiceInterface>();
-      final allEntries = await diaryService.getSortedDiaryEntries();
+      final allEntriesResult = await diaryService.getSortedDiaryEntries();
 
       if (!mounted) return;
 
-      // 最新の3つの日記を取得
-      final recentEntries = allEntries.take(3).toList();
+      allEntriesResult.fold(
+        (allEntries) {
+          // 成功時の処理
+          // 最新の3つの日記を取得
+          final recentEntries = allEntries.take(3).toList();
 
-      // 使用済み写真IDを収集
-      _collectUsedPhotoIds(allEntries);
+          // 使用済み写真IDを収集
+          _collectUsedPhotoIds(allEntries);
 
-      if (!mounted) return;
-
-      setState(() {
-        _recentDiaries = recentEntries;
-        _loadingDiaries = false;
-      });
+          if (mounted) {
+            setState(() {
+              _recentDiaries = recentEntries;
+              _loadingDiaries = false;
+            });
+          }
+        },
+        (error) {
+          // 失敗時の処理
+          if (mounted) {
+            setState(() {
+              _loadingDiaries = false;
+            });
+          }
+          // エラーはログに記録するが、ユーザーには空の状態を表示
+        },
+      );
     } catch (e) {
       if (kDebugMode) {
         LoggingService.instance.error(

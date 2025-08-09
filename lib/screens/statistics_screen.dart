@@ -48,13 +48,22 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     try {
       _diaryService = await DiaryService.getInstance();
-      _allDiaries = await _diaryService.getSortedDiaryEntries();
+      final allDiariesResult = await _diaryService.getSortedDiaryEntries();
 
-      _calculateStatistics();
-
-      setState(() {
-        _isLoading = false;
-      });
+      allDiariesResult.fold(
+        (allDiaries) {
+          _allDiaries = allDiaries;
+          _calculateStatistics();
+          setState(() {
+            _isLoading = false;
+          });
+        },
+        (error) {
+          setState(() {
+            _isLoading = false;
+          });
+        },
+      );
     } catch (e) {
       if (kDebugMode) {
         LoggingService.instance.error(

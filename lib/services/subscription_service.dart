@@ -862,10 +862,7 @@ class SubscriptionService implements ISubscriptionService {
         'Resetting monthly usage',
         level: LogLevel.info,
         context: 'SubscriptionService._resetMonthlyUsageIfNeeded',
-        data: {
-          'previousMonth': statusMonth,
-          'currentMonth': currentMonth,
-        },
+        data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
       );
 
       final resetStatus = SubscriptionStatus(
@@ -957,10 +954,7 @@ class SubscriptionService implements ISubscriptionService {
             'プラン強制設定により Premium アクセス',
             level: LogLevel.debug,
             context: 'SubscriptionService.canAccessPremiumFeatures',
-            data: {
-              'result': forceResult,
-              'plan': forcePlan,
-            },
+            data: {'result': forceResult, 'plan': forcePlan},
           );
           return Success(forceResult);
         } else {
@@ -991,10 +985,7 @@ class SubscriptionService implements ISubscriptionService {
         'Premium features access check',
         level: LogLevel.debug,
         context: 'SubscriptionService.canAccessPremiumFeatures',
-        data: {
-          'planId': currentPlan.id,
-          'valid': isPremiumValid,
-        },
+        data: {'planId': currentPlan.id, 'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
@@ -2007,10 +1998,7 @@ class SubscriptionService implements ISubscriptionService {
         '購入処理開始',
         level: LogLevel.info,
         context: 'SubscriptionService.purchasePlanClass',
-        data: {
-          'planId': plan.id,
-          'productId': plan.productId,
-        },
+        data: {'planId': plan.id, 'productId': plan.productId},
       );
       _isPurchasing = true;
 

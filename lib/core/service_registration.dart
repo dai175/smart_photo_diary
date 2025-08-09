@@ -65,7 +65,9 @@ class ServiceRegistration {
 
       _isInitialized = true;
       if (kDebugMode) {
-        debugPrint('ServiceRegistration: All services initialized successfully');
+        debugPrint(
+          'ServiceRegistration: All services initialized successfully',
+        );
       }
 
       // Debug print all registered services

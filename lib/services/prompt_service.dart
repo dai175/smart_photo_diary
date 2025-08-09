@@ -338,7 +338,6 @@ class PromptService implements IPromptService {
     _isInitialized = false;
     _allPrompts.clear();
     clearCache();
-
   }
 
   @override
