@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
@@ -639,11 +640,18 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           999,
         );
 
-        final photos = await photoService.getPhotosInDateRange(
+        final photosResult = await photoService.getPhotosInDateRangeResult(
           startDate: startOfDay,
           endDate: endOfDay,
           limit: 200,
         );
+
+        final photos = photosResult.isSuccess
+            ? photosResult.value
+            : await _handlePhotoLoadingError(
+                photosResult.error,
+                'カレンダー選択日写真取得',
+              );
 
         if (!mounted) return;
 
@@ -672,11 +680,15 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       // 今日の00:00:00を終了日として設定（今日は除外）
       final endDate = today;
 
-      final photos = await photoService.getPhotosInDateRange(
+      final photosResult = await photoService.getPhotosInDateRangeResult(
         startDate: startDate,
         endDate: endDate,
         limit: 200,
       );
+
+      final photos = photosResult.isSuccess
+          ? photosResult.value
+          : await _handlePhotoLoadingError(photosResult.error, '過去写真範囲取得');
 
       if (!mounted) return;
 
@@ -994,5 +1006,20 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     } catch (e) {
       // エラーは無視（クリーンアップは必須ではない）
     }
+  }
+
+  /// 写真読み込みエラーの統一ハンドリング
+  Future<List<AssetEntity>> _handlePhotoLoadingError(
+    Exception error,
+    String context,
+  ) async {
+    final loggingService = await LoggingService.getInstance();
+    loggingService.error(
+      '写真読み込みエラー',
+      context: 'HomeContentWidget.$context',
+      error: error,
+    );
+    // 空リストを返して処理を継続
+    return <AssetEntity>[];
   }
 }

@@ -98,12 +98,16 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
           ? today.subtract(const Duration(days: 1))
           : endOfMonth;
 
-      // 月単位で写真を取得
-      final photos = await photoService.getPhotosInDateRange(
+      // 月単位で写真を取得（Result<T>版）
+      final photosResult = await photoService.getPhotosInDateRangeResult(
         startDate: startOfMonth,
         endDate: adjustedEnd.add(const Duration(days: 1)),
         limit: 1000, // 月単位の写真数上限
       );
+
+      final photos = photosResult.isSuccess
+          ? photosResult.value
+          : await _handlePhotoError(photosResult.error, '月別写真数読み込み');
 
       // 日付別に写真数をカウント
       final counts = <DateTime, int>{};
@@ -152,11 +156,15 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         999,
       );
 
-      final photos = await photoService.getPhotosInDateRange(
+      final photosResult = await photoService.getPhotosInDateRangeResult(
         startDate: startOfDay,
         endDate: endOfDay,
         limit: 200, // 1日あたりの写真数上限
       );
+
+      final photos = photosResult.isSuccess
+          ? photosResult.value
+          : await _handlePhotoError(photosResult.error, '日別写真読み込み');
 
       // 写真をキャッシュ
       _photosByDate[startOfDay] = photos;
@@ -524,5 +532,20 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
           ),
       ],
     );
+  }
+
+  /// 写真読み込みエラーの統一ハンドリング
+  Future<List<AssetEntity>> _handlePhotoError(
+    Exception error,
+    String context,
+  ) async {
+    final loggingService = await LoggingService.getInstance();
+    loggingService.error(
+      '写真読み込みエラー',
+      context: 'PastPhotoCalendarWidget.$context',
+      error: error,
+    );
+    // 空リストを返して処理を継続
+    return <AssetEntity>[];
   }
 }

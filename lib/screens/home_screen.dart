@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
@@ -271,8 +272,22 @@ class _HomeScreenState extends State<HomeScreen>
         return;
       }
 
-      // 今日撮影された写真だけを取得
-      final photos = await photoService.getTodayPhotos();
+      // 今日撮影された写真だけを取得（Result<T>版）
+      final photosResult = await photoService.getTodayPhotosResult();
+      List<AssetEntity> photos;
+
+      if (photosResult.isSuccess) {
+        photos = photosResult.value;
+      } else {
+        // 詳細エラーログ + UI継続処理
+        final loggingService = await LoggingService.getInstance();
+        loggingService.error(
+          '今日の写真取得エラー',
+          context: 'HomeScreen._loadTodayPhotos',
+          error: photosResult.error,
+        );
+        photos = <AssetEntity>[]; // 空リストで処理継続
+      }
 
       if (!mounted) return;
 

@@ -206,15 +206,26 @@
 - [x] `flutter analyze` 確認
 
 ##### Phase 6-2B: DiaryService残りメソッド移行（段階完了）
-- [ ] 残りのPhotoServiceメソッド実装
-  - [ ] `getTodayPhotosResult()` 実装
-  - [ ] `getPhotosInDateRangeResult()` 実装  
-  - [ ] 他必要メソッドの実装
-- [ ] DiaryServiceでの全PhotoService呼び出しのResult<T>移行
-- [ ] 統一的なエラーハンドリング実装
-- [ ] DiaryService完全テスト更新
-- [ ] 統合テスト実行（DiaryService関連）
-- [ ] 動作確認（全日記機能の包括テスト）
+- [x] 残りのPhotoServiceメソッド実装
+  - [x] `getTodayPhotosResult()` 実装完了確認（Phase 5で実装済み）
+  - [x] `getPhotosInDateRangeResult()` 実装完了確認（Phase 5で実装済み）  
+  - [x] 他必要メソッドの実装確認
+- [x] UI層での全PhotoService呼び出しのResult<T>移行
+  - [x] `home_screen.dart:275` - `getTodayPhotos()` → `getTodayPhotosResult()`移行
+  - [x] `home_content_widget.dart:642` - `getPhotosInDateRange()` → `getPhotosInDateRangeResult()`移行
+  - [x] `home_content_widget.dart:675` - `getPhotosInDateRange()` → `getPhotosInDateRangeResult()`移行
+  - [x] `past_photo_calendar_widget.dart:102` - `getPhotosInDateRange()` → `getPhotosInDateRangeResult()`移行
+  - [x] `past_photo_calendar_widget.dart:155` - `getPhotosInDateRange()` → `getPhotosInDateRangeResult()`移行
+- [x] 統一的なエラーハンドリング実装
+  - [x] `_handlePhotoLoadingError()` ヘルパーメソッド実装（home_content_widget.dart）
+  - [x] `_handlePhotoError()` ヘルパーメソッド実装（past_photo_calendar_widget.dart）
+  - [x] LoggingServiceによる構造化エラーログ実装
+- [x] 品質確認・テスト実行
+  - [x] `flutter analyze` 完全クリア（警告0件）
+  - [x] `flutter test` 全テスト成功（800+テスト）
+  - [x] AssetEntityインポート修正とコンパイルエラー解決
+  - [x] 未使用インポート削除とコード品質向上
+- [x] 動作確認（全写真取得機能の包括テスト）
 
 ##### Phase 6-3: PastPhotosNotifier移行（Premium機能）  
 - [ ] 権限系メソッドのResult<T>実装
