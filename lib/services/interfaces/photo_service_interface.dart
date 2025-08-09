@@ -1,4 +1,5 @@
 import 'package:photo_manager/photo_manager.dart';
+import '../../core/result/result.dart';
 
 /// 写真サービスのインターフェース
 abstract class PhotoServiceInterface {
@@ -49,6 +50,14 @@ abstract class PhotoServiceInterface {
 
   /// 効率的な写真取得（ページネーション対応）
   Future<List<AssetEntity>> getPhotosEfficient({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  });
+
+  /// 効率的な写真取得（Result<T>版・ページネーション対応）
+  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
     DateTime? startDate,
     DateTime? endDate,
     int offset = 0,

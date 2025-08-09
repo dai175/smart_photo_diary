@@ -2199,6 +2199,196 @@ class PhotoService implements PhotoServiceInterface {
     }
   }
 
+  /// 効率的な写真取得（Result<T>版・ページネーション対応）
+  ///
+  /// [startDate]: 開始日時（指定しない場合は全期間）
+  /// [endDate]: 終了日時（指定しない場合は現在まで）
+  /// [offset]: 取得開始位置（0以上）
+  /// [limit]: 取得する写真の最大数（1-1000の範囲）
+  /// 戻り値: Result<List<AssetEntity>>
+  @override
+  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      // パラメータ検証
+      if (offset < 0) {
+        return PhotoResultHelper.fromError<List<AssetEntity>>(
+          ArgumentError('オフセットは0以上である必要があります'),
+          context: 'PhotoService.getPhotosEfficientResult',
+          customMessage: '無効なオフセット値です',
+        );
+      }
+
+      if (limit < 1 || limit > 1000) {
+        return PhotoResultHelper.fromError<List<AssetEntity>>(
+          ArgumentError('制限値は1-1000の範囲で指定してください'),
+          context: 'PhotoService.getPhotosEfficientResult',
+          customMessage: '無効な制限値です',
+        );
+      }
+
+      // 日付範囲の妥当性チェック
+      if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+        return PhotoResultHelper.fromError<List<AssetEntity>>(
+          ArgumentError('開始日は終了日より前である必要があります'),
+          context: 'PhotoService.getPhotosEfficientResult',
+          customMessage: '無効な日付範囲です',
+        );
+      }
+
+      // 大量データ取得の警告
+      if (limit >= 1000) {
+        loggingService.warning(
+          '大量データ取得警告',
+          context: 'PhotoService.getPhotosEfficientResult',
+          data: '制限値: $limit (推奨最大1000)',
+        );
+      } else if (limit >= 500) {
+        loggingService.info(
+          '大量データ取得情報',
+          context: 'PhotoService.getPhotosEfficientResult',
+          data: '制限値: $limit',
+        );
+      }
+
+      // 権限チェック
+      final permissionResult = await requestPermissionResult();
+      if (!permissionResult.isSuccess) {
+        return Failure(permissionResult.error);
+      }
+
+      if (!permissionResult.value) {
+        return PhotoResultHelper.photoAccessResult(
+          null,
+          hasPermission: false,
+          errorMessage: '写真アクセス権限が拒否されました',
+        );
+      }
+
+      loggingService.debug(
+        '効率的な写真取得を開始',
+        context: 'PhotoService.getPhotosEfficientResult',
+        data: {
+          'startDate': startDate?.toIso8601String(),
+          'endDate': endDate?.toIso8601String(),
+          'offset': offset,
+          'limit': limit,
+        }.toString(),
+      );
+
+      // フィルターオプションの作成
+      final FilterOptionGroup filterOption;
+      if (startDate != null || endDate != null) {
+        filterOption = FilterOptionGroup(
+          orders: [const OrderOption()],
+          createTimeCond: DateTimeCond(
+            min: startDate ?? DateTime(1970),
+            max: endDate ?? DateTime.now(),
+          ),
+        );
+      } else {
+        filterOption = FilterOptionGroup(orders: [const OrderOption()]);
+      }
+
+      // アルバムを取得
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        filterOption: filterOption,
+      );
+
+      loggingService.debug(
+        '取得したアルバム数: ${albums.length}',
+        context: 'PhotoService.getPhotosEfficientResult',
+      );
+
+      if (albums.isEmpty) {
+        loggingService.debug(
+          'アルバムが見つかりません',
+          context: 'PhotoService.getPhotosEfficientResult',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '指定した条件に該当するアルバムが見つかりませんでした',
+        );
+      }
+
+      // メインアルバムから写真を取得
+      final AssetPathEntity album = albums.first;
+      final int totalCount = await album.assetCountAsync;
+
+      loggingService.debug(
+        'アルバム情報',
+        context: 'PhotoService.getPhotosEfficientResult',
+        data: 'アルバム名: ${album.name}, 総写真数: $totalCount',
+      );
+
+      // オフセットが総数を超えている場合
+      if (offset >= totalCount) {
+        loggingService.debug(
+          'オフセットが総数を超えています',
+          context: 'PhotoService.getPhotosEfficientResult',
+          data: 'オフセット: $offset, 総数: $totalCount',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: 'これ以上の写真はありません',
+        );
+      }
+
+      // 実際に取得可能な数を計算
+      final int actualLimit = (offset + limit > totalCount)
+          ? totalCount - offset
+          : limit;
+
+      if (actualLimit <= 0) {
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '取得可能な写真がありません',
+        );
+      }
+
+      // ページネーション処理で写真を取得
+      final List<AssetEntity> assets = await album.getAssetListRange(
+        start: offset,
+        end: offset + actualLimit,
+      );
+
+      loggingService.debug(
+        '効率的な写真取得完了',
+        context: 'PhotoService.getPhotosEfficientResult',
+        data: '取得数: ${assets.length}, 実際の制限: $actualLimit, オフセット: $offset',
+      );
+
+      return PhotoResultHelper.photoAccessResult(assets);
+    } on PlatformException catch (e) {
+      return PhotoResultHelper.fromError<List<AssetEntity>>(
+        e,
+        context: 'PhotoService.getPhotosEfficientResult',
+        customMessage: 'プラットフォーム固有のエラーが発生しました',
+      );
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.getPhotosEfficientResult',
+      );
+      loggingService.error(
+        '効率的な写真取得エラー',
+        context: 'PhotoService.getPhotosEfficientResult',
+        error: appError,
+      );
+      return PhotoResultHelper.fromError<List<AssetEntity>>(
+        appError,
+        context: 'PhotoService.getPhotosEfficientResult',
+        customMessage: '写真の効率的な取得に失敗しました',
+      );
+    }
+  }
+
   /// 画像データの基本的な整合性をチェック
   ///
   /// [data]: 画像データ

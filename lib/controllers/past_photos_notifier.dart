@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../models/states/past_photos_state.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../models/plans/plan.dart';
 import '../core/service_registration.dart';
 import '../core/errors/error_handler.dart';
+import '../core/errors/app_exceptions.dart';
 import '../services/logging_service.dart';
 
 /// 過去の写真機能の状態を管理するNotifier
@@ -74,11 +76,27 @@ class PastPhotosNotifier extends ChangeNotifier {
         }.toString(),
       );
 
-      // 写真を取得
-      final photos = await _photoService.getPhotosEfficient(
+      // 写真を取得（Result<T>版使用）
+      final photosResult = await _photoService.getPhotosEfficientResult(
         startDate: startDate,
         endDate: endDate,
         limit: _state.photosPerPage,
+      );
+
+      // Result<T>からの写真抽出とエラーハンドリング
+      late final List<AssetEntity> photos;
+      photosResult.fold(
+        (retrievedPhotos) {
+          photos = retrievedPhotos;
+        },
+        (error) {
+          // Resultエラーを上位にre-throw
+          throw ServiceException(
+            '過去の写真取得に失敗しました',
+            originalError: error,
+            details: error.message,
+          );
+        },
       );
 
       // 月別にグループ化
@@ -136,12 +154,28 @@ class PastPhotosNotifier extends ChangeNotifier {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
-      // 追加の写真を取得
-      final morePhotos = await _photoService.getPhotosEfficient(
+      // 追加の写真を取得（Result<T>版使用）
+      final morePhotosResult = await _photoService.getPhotosEfficientResult(
         startDate: accessibleDate,
         endDate: today,
         limit: _state.photosPerPage,
         offset: offset,
+      );
+
+      // Result<T>からの写真抽出とエラーハンドリング
+      late final List<AssetEntity> morePhotos;
+      morePhotosResult.fold(
+        (retrievedPhotos) {
+          morePhotos = retrievedPhotos;
+        },
+        (error) {
+          // Resultエラーを上位にre-throw
+          throw ServiceException(
+            '追加の写真取得に失敗しました',
+            originalError: error,
+            details: error.message,
+          );
+        },
       );
 
       if (morePhotos.isEmpty) {
@@ -203,10 +237,27 @@ class PastPhotosNotifier extends ChangeNotifier {
         999,
       );
 
-      final photos = await _photoService.getPhotosEfficient(
+      // 指定日の写真を取得（Result<T>版使用）
+      final photosResult = await _photoService.getPhotosEfficientResult(
         startDate: startOfDay,
         endDate: endOfDay,
         limit: 200, // 1日分なので多めに取得
+      );
+
+      // Result<T>からの写真抽出とエラーハンドリング
+      late final List<AssetEntity> photos;
+      photosResult.fold(
+        (retrievedPhotos) {
+          photos = retrievedPhotos;
+        },
+        (error) {
+          // Resultエラーを上位にre-throw
+          throw ServiceException(
+            '指定日の写真取得に失敗しました',
+            originalError: error,
+            details: error.message,
+          );
+        },
       );
 
       // 選択された日付の写真のみでグループ化

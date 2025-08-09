@@ -164,16 +164,16 @@
   - [ ] エラーシナリオの網羅的テスト
 
 ##### Phase 5-C: getPhotosEfficient Result<T>移行（高リスク・慎重実施）
-- [ ] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`（高優先度）
-  - [ ] 複雑なページネーションエラーの詳細化
-  - [ ] 日付範囲バリデーション（開始日≤終了日等）
-  - [ ] パラメータ検証（offset≥0, limit∈[1,1000]）
-  - [ ] 大量データ取得監視（500件情報/1000件警告）
-  - [ ] アルバム取得失敗・権限エラーの構造化
-  - [ ] `getPhotosEfficientResult()`メソッド実装完了
-- [ ] PastPhotosNotifierでの動作確認（3箇所）
-- [ ] 統合テストの全面的な更新と検証
-- [ ] 品質保証（テスト・解析・フォーマット）
+- [x] `getPhotosEfficient()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [x] 複雑なページネーションエラーの詳細化
+  - [x] 日付範囲バリデーション（開始日≤終了日等）
+  - [x] パラメータ検証（offset≥0, limit∈[1,1000]）
+  - [x] 大量データ取得監視（500件情報/1000件警告）
+  - [x] アルバム取得失敗・権限エラーの構造化
+  - [x] `getPhotosEfficientResult()`メソッド実装完了
+- [x] PastPhotosNotifierでの動作確認（3箇所）
+- [x] 統合テストの全面的な更新と検証
+- [x] 品質保証（テスト・解析・フォーマット）
 
 ##### Phase 6: Interface & Caller Updates（インターフェース更新）
 - [ ] PhotoServiceInterface更新
