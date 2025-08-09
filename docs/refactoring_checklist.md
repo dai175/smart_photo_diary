@@ -178,21 +178,21 @@
 ##### Phase 6: Interface & Caller Updates（インターフェース更新・Option A: 最小リスク分割）
 
 ##### Phase 6-1: Interface基盤整備（インターフェース更新のみ）
-- [ ] PhotoServiceInterfaceに10個のResult<T>メソッド追加
-  - [ ] `requestPermissionResult()` シグネチャ追加
-  - [ ] `isPermissionPermanentlyDeniedResult()` シグネチャ追加  
-  - [ ] `isLimitedAccessResult()` シグネチャ追加
-  - [ ] `getTodayPhotosResult()` シグネチャ追加
-  - [ ] `getPhotosInDateRangeResult()` シグネチャ追加
-  - [ ] `getPhotosForDateResult()` シグネチャ追加
-  - [ ] `getPhotoDataResult()` シグネチャ追加
-  - [ ] `getThumbnailDataResult()` シグネチャ追加
-  - [ ] `getOriginalFileResult()` シグネチャ追加
-  - [ ] `getThumbnailResult()` シグネチャ追加
-  - [ ] `presentLimitedLibraryPickerResult()` シグネチャ追加
-- [ ] JSDocコメントでResult<T>版推奨を明記
-- [ ] 後方互換性維持（既存メソッド併存）
-- [ ] ビルド確認（インターフェース変更のコンパイル確認）
+- [x] PhotoServiceInterfaceに10個のResult<T>メソッド追加
+  - [x] `requestPermissionResult()` シグネチャ追加
+  - [x] `isPermissionPermanentlyDeniedResult()` シグネチャ追加  
+  - [x] `isLimitedAccessResult()` シグネチャ追加
+  - [x] `getTodayPhotosResult()` シグネチャ追加
+  - [x] `getPhotosInDateRangeResult()` シグネチャ追加
+  - [x] `getPhotosForDateResult()` シグネチャ追加
+  - [x] `getPhotoDataResult()` シグネチャ追加
+  - [x] `getThumbnailDataResult()` シグネチャ追加
+  - [x] `getOriginalFileResult()` シグネチャ追加
+  - [x] `getThumbnailResult()` シグネチャ追加
+  - [x] `presentLimitedLibraryPickerResult()` シグネチャ追加
+- [x] JSDocコメントでResult<T>版推奨を明記
+- [x] 後方互換性維持（既存メソッド併存）
+- [x] ビルド確認（インターフェース変更のコンパイル確認）
 
 ##### Phase 6-2A: DiaryService高優先メソッド移行（最重要1個）
 - [ ] `getOriginalFileResult()` 実装完了確認（Phase 5で実装済み）

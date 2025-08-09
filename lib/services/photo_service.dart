@@ -135,6 +135,7 @@ class PhotoService implements PhotoServiceInterface {
   /// 写真アクセス権限をリクエストする（Result版）
   ///
   /// 戻り値: 権限が付与されたかどうかのResult<bool>
+  @override
   Future<Result<bool>> requestPermissionResult() async {
     final loggingService = await LoggingService.getInstance();
 
@@ -270,6 +271,7 @@ class PhotoService implements PhotoServiceInterface {
   /// 権限が永続的に拒否されているかチェック（Result版）
   ///
   /// 戻り値: 永続的拒否かどうかのResult<bool>
+  @override
   Future<Result<bool>> isPermissionPermanentlyDeniedResult() async {
     final loggingService = await LoggingService.getInstance();
 
@@ -322,6 +324,7 @@ class PhotoService implements PhotoServiceInterface {
   ///
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリストのResult型
+  @override
   Future<Result<List<AssetEntity>>> getTodayPhotosResult({
     int limit = 20,
   }) async {
@@ -519,6 +522,7 @@ class PhotoService implements PhotoServiceInterface {
   /// [endDate]: 終了日時
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリストのResult型
+  @override
   Future<Result<List<AssetEntity>>> getPhotosInDateRangeResult({
     required DateTime startDate,
     required DateTime endDate,
@@ -911,6 +915,7 @@ class PhotoService implements PhotoServiceInterface {
   ///
   /// [asset]: 写真アセット
   /// 戻り値: 写真データのList<int>のResult型
+  @override
   Future<Result<List<int>>> getPhotoDataResult(AssetEntity asset) async {
     final loggingService = await LoggingService.getInstance();
 
@@ -1035,6 +1040,7 @@ class PhotoService implements PhotoServiceInterface {
   /// [width]: サムネイル幅（デフォルト: AppConstants.defaultThumbnailWidth）
   /// [height]: サムネイル高さ（デフォルト: AppConstants.defaultThumbnailHeight）
   /// 戻り値: サムネイルデータのList<int>のResult型
+  @override
   Future<Result<List<int>>> getThumbnailDataResult(
     AssetEntity asset, {
     int width = AppConstants.defaultThumbnailWidth,
@@ -1150,6 +1156,7 @@ class PhotoService implements PhotoServiceInterface {
   /// [offset]: 取得開始位置（ページネーション用）
   /// [limit]: 取得する写真の最大数
   /// 戻り値: 写真アセットのリストのResult型
+  @override
   Future<Result<List<AssetEntity>>> getPhotosForDateResult(
     DateTime date, {
     required int offset,
@@ -1543,6 +1550,7 @@ class PhotoService implements PhotoServiceInterface {
   /// - Success(true): ユーザーが写真を選択/変更した
   /// - Success(false): ユーザーがキャンセルした
   /// - Failure: システムエラーが発生した
+  @override
   Future<Result<bool>> presentLimitedLibraryPickerResult() async {
     final loggingService = await LoggingService.getInstance();
 
@@ -1639,6 +1647,7 @@ class PhotoService implements PhotoServiceInterface {
   /// 現在の権限状態が Limited Access かチェック（Result版）
   ///
   /// 戻り値: Limited AccessかどうかのResult<bool>
+  @override
   Future<Result<bool>> isLimitedAccessResult() async {
     final loggingService = await LoggingService.getInstance();
 
@@ -1820,6 +1829,7 @@ class PhotoService implements PhotoServiceInterface {
   /// [height]: サムネイル高さ（デフォルト: AppConstants.defaultThumbnailHeight）
   /// [quality]: 品質（デフォルト: 80）
   /// 戻り値: サムネイル画像のUint8ListのResult型
+  @override
   Future<Result<Uint8List>> getThumbnailResult(
     AssetEntity asset, {
     int width = AppConstants.defaultThumbnailWidth,
@@ -1953,6 +1963,7 @@ class PhotoService implements PhotoServiceInterface {
   ///
   /// [asset]: 写真アセット
   /// 戻り値: 元画像データのResult型
+  @override
   Future<Result<Uint8List>> getOriginalFileResult(AssetEntity asset) async {
     final loggingService = await LoggingService.getInstance();
 
