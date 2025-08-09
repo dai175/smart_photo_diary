@@ -33,9 +33,9 @@
 - [x] `screens/statistics_screen.dart` - print文を削除またはkDebugMode条件付き
 
 #### ウィジェット
-- [ ] `widgets/home_content_widget.dart` - print文を削除
-- [ ] `widgets/prompt_selection_modal.dart` - print文を削除
-- [ ] `shared/filter_bottom_sheet.dart` - print文を削除
+- [x] `widgets/home_content_widget.dart` - print文を削除
+- [x] `widgets/prompt_selection_modal.dart` - print文を削除
+- [x] `shared/filter_bottom_sheet.dart` - print文を削除
 
 #### その他
 - [ ] `main.dart` - 初期化ログの条件付き出力

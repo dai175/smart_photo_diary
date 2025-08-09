@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
@@ -7,6 +8,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_dialog.dart';
 import '../utils/prompt_category_utils.dart';
+import '../services/logging_service.dart';
 
 /// プロンプト選択モーダル
 class PromptSelectionModal extends StatefulWidget {
@@ -56,9 +58,16 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       _availablePrompts = _promptService.getPromptsForPlan(
         isPremium: _isPremium,
       );
-      debugPrint(
-        'プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium',
-      );
+      if (kDebugMode) {
+        LoggingService.instance.info(
+          'プロンプト初期化完了',
+          context: 'PromptSelectionModal._loadPrompts',
+          data: {
+            'promptCount': _availablePrompts.length,
+            'isPremium': _isPremium,
+          },
+        );
+      }
 
       if (mounted) {
         setState(() {
@@ -66,7 +75,13 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         });
       }
     } catch (e) {
-      debugPrint('プロンプトサービス初期化エラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'プロンプトサービス初期化エラー',
+          context: 'PromptSelectionModal._loadPrompts',
+          error: e,
+        );
+      }
       if (mounted) {
         setState(() {
           _isLoading = false;

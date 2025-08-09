@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/diary_filter.dart';
 import '../services/diary_service.dart';
 import '../constants/app_constants.dart';
 import '../ui/components/animated_button.dart';
+import '../services/logging_service.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
@@ -47,7 +49,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       setState(() {
         _isLoadingTags = false;
       });
-      debugPrint('タグ読み込みエラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'タグ読み込みエラー',
+          context: 'FilterBottomSheet._loadAvailableTags',
+          error: e,
+        );
+      }
     }
   }
 
@@ -87,7 +95,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         });
       }
     } catch (e) {
-      debugPrint('日付範囲選択エラー: $e');
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          '日付範囲選択エラー',
+          context: 'FilterBottomSheet._selectDateRange',
+          error: e,
+        );
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
