@@ -6,6 +6,8 @@ import 'interfaces/photo_service_interface.dart';
 import 'photo_cache_service.dart';
 import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
+import '../core/result/result.dart';
+import '../core/result/photo_result_helper.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
 class PhotoService implements PhotoServiceInterface {
@@ -129,6 +131,130 @@ class PhotoService implements PhotoServiceInterface {
     }
   }
 
+  /// 写真アクセス権限をリクエストする（Result版）
+  ///
+  /// 戻り値: 権限が付与されたかどうかのResult<bool>
+  Future<Result<bool>> requestPermissionResult() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug(
+        '権限リクエスト開始 (Result版)',
+        context: 'PhotoService.requestPermissionResult',
+      );
+
+      // まずはPhotoManagerで権限リクエスト（これがメイン）
+      final pmState = await PhotoManager.requestPermissionExtend();
+      loggingService.debug(
+        'PhotoManager権限状態: $pmState',
+        context: 'PhotoService.requestPermissionResult',
+      );
+
+      if (pmState.isAuth) {
+        loggingService.info(
+          '写真アクセス権限が付与されました',
+          context: 'PhotoService.requestPermissionResult',
+        );
+        return PhotoResultHelper.photoPermissionResult(granted: true);
+      }
+
+      // Limited access の場合も部分的に許可とみなす（iOS専用）
+      if (pmState == PermissionState.limited) {
+        loggingService.info(
+          '制限つき写真アクセスが許可されました',
+          context: 'PhotoService.requestPermissionResult',
+        );
+        return PhotoResultHelper.photoPermissionResult(
+          granted: false,
+          isLimited: true,
+        );
+      }
+
+      // PhotoManagerで権限が拒否された場合、Androidでは追加でpermission_handlerを試す
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        loggingService.debug(
+          'Android: permission_handlerで追加の権限チェックを実行',
+          context: 'PhotoService.requestPermissionResult',
+        );
+
+        // Android 13以降は Permission.photos、それ以前は Permission.storage
+        Permission permission = Permission.photos;
+
+        var status = await permission.status;
+        loggingService.debug(
+          'permission_handler権限状態: $status',
+          context: 'PhotoService.requestPermissionResult',
+        );
+
+        // 権限が未決定または拒否の場合は明示的にリクエスト
+        if (status.isDenied) {
+          loggingService.debug(
+            'Android: 権限を明示的にリクエストします',
+            context: 'PhotoService.requestPermissionResult',
+          );
+          status = await permission.request();
+          loggingService.debug(
+            'Android: リクエスト後の権限状態: $status',
+            context: 'PhotoService.requestPermissionResult',
+          );
+
+          if (status.isGranted) {
+            loggingService.info(
+              'Android: 権限が付与されました',
+              context: 'PhotoService.requestPermissionResult',
+            );
+            // PhotoManagerで再度確認
+            final pmStateAfter = await PhotoManager.requestPermissionExtend();
+            loggingService.debug(
+              'Android: PhotoManager再確認結果: $pmStateAfter',
+              context: 'PhotoService.requestPermissionResult',
+            );
+            return PhotoResultHelper.photoPermissionResult(
+              granted: pmStateAfter.isAuth,
+            );
+          }
+        }
+
+        // 永続的に拒否されている場合
+        if (status.isPermanentlyDenied) {
+          loggingService.warning(
+            'Android: 権限が永続的に拒否されています',
+            context: 'PhotoService.requestPermissionResult',
+          );
+          return PhotoResultHelper.photoPermissionResult(
+            granted: false,
+            isPermanentlyDenied: true,
+            errorMessage: 'Android: 写真アクセス権限が永続的に拒否されています。設定アプリから権限を有効にしてください。',
+          );
+        }
+      }
+
+      loggingService.warning(
+        '写真アクセス権限が拒否されました',
+        context: 'PhotoService.requestPermissionResult',
+        data: 'pmState: $pmState',
+      );
+
+      // PhotoManagerの状態に基づいてエラーを分類
+      return PhotoResultHelper.fromPermissionState(pmState);
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.requestPermissionResult',
+      );
+      loggingService.error(
+        '権限リクエストエラー',
+        context: 'PhotoService.requestPermissionResult',
+        error: appError,
+      );
+      return PhotoResultHelper.fromError(
+        e,
+        context: 'PhotoService.requestPermissionResult',
+        customMessage: '写真アクセス権限のリクエスト中にエラーが発生しました',
+      );
+    }
+  }
+
   /// 権限が永続的に拒否されているかチェック
   @override
   Future<bool> isPermissionPermanentlyDenied() async {
@@ -137,6 +263,57 @@ class PhotoService implements PhotoServiceInterface {
       return currentStatus.isPermanentlyDenied;
     } catch (e) {
       return false;
+    }
+  }
+
+  /// 権限が永続的に拒否されているかチェック（Result版）
+  ///
+  /// 戻り値: 永続的拒否かどうかのResult<bool>
+  Future<Result<bool>> isPermissionPermanentlyDeniedResult() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug(
+        '永続的権限拒否チェック開始',
+        context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+      );
+
+      final currentStatus = await Permission.photos.status;
+      loggingService.debug(
+        'permission_handler権限状態: $currentStatus',
+        context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+      );
+
+      final isPermanentlyDenied = currentStatus.isPermanentlyDenied;
+
+      if (isPermanentlyDenied) {
+        loggingService.warning(
+          '権限が永続的に拒否されています',
+          context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+        );
+      } else {
+        loggingService.debug(
+          '権限は永続的に拒否されていません',
+          context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+        );
+      }
+
+      return Success(isPermanentlyDenied);
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+      );
+      loggingService.error(
+        '永続的権限拒否チェックエラー',
+        context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+        error: appError,
+      );
+      return PhotoResultHelper.fromError(
+        e,
+        context: 'PhotoService.isPermissionPermanentlyDeniedResult',
+        customMessage: '永続的権限拒否状態のチェック中にエラーが発生しました',
+      );
     }
   }
 
@@ -662,6 +839,57 @@ class PhotoService implements PhotoServiceInterface {
         error: appError,
       );
       return false;
+    }
+  }
+
+  /// 現在の権限状態が Limited Access かチェック（Result版）
+  ///
+  /// 戻り値: Limited AccessかどうかのResult<bool>
+  Future<Result<bool>> isLimitedAccessResult() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug(
+        'Limited Accessチェック開始',
+        context: 'PhotoService.isLimitedAccessResult',
+      );
+
+      final pmState = await PhotoManager.requestPermissionExtend();
+      loggingService.debug(
+        'PhotoManager権限状態: $pmState',
+        context: 'PhotoService.isLimitedAccessResult',
+      );
+
+      final isLimited = pmState == PermissionState.limited;
+
+      if (isLimited) {
+        loggingService.info(
+          '現在Limited Accessモードです',
+          context: 'PhotoService.isLimitedAccessResult',
+        );
+      } else {
+        loggingService.debug(
+          'Limited Accessではありません: $pmState',
+          context: 'PhotoService.isLimitedAccessResult',
+        );
+      }
+
+      return Success(isLimited);
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.isLimitedAccessResult',
+      );
+      loggingService.error(
+        'Limited Accessチェックエラー',
+        context: 'PhotoService.isLimitedAccessResult',
+        error: appError,
+      );
+      return PhotoResultHelper.fromError(
+        e,
+        context: 'PhotoService.isLimitedAccessResult',
+        customMessage: 'Limited Access状態のチェック中にエラーが発生しました',
+      );
     }
   }
 

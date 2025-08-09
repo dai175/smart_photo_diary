@@ -10,7 +10,7 @@ void main() {
     group('photoPermissionResult', () {
       test('権限が付与された場合はSuccessを返す', () {
         final result = PhotoResultHelper.photoPermissionResult(granted: true);
-        
+
         expect(result.isSuccess, true);
         expect(result.value, true);
       });
@@ -20,7 +20,7 @@ void main() {
           granted: false,
           isLimited: true,
         );
-        
+
         expect(result.isSuccess, true);
         expect(result.value, false);
       });
@@ -30,7 +30,7 @@ void main() {
           granted: false,
           isDenied: true,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoPermissionDeniedException>());
       });
@@ -40,7 +40,7 @@ void main() {
           granted: false,
           isPermanentlyDenied: true,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoPermissionPermanentlyDeniedException>());
       });
@@ -52,7 +52,7 @@ void main() {
           isDenied: true,
           errorMessage: customMessage,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error.message, customMessage);
       });
@@ -62,7 +62,7 @@ void main() {
       test('写真が取得できた場合はSuccessを返す', () {
         final photos = <AssetEntity>[];
         final result = PhotoResultHelper.photoAccessResult(photos);
-        
+
         expect(result.isSuccess, true);
         expect(result.value, photos);
       });
@@ -72,7 +72,7 @@ void main() {
           [],
           hasPermission: false,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
         expect(result.error.message, contains('権限がありません'));
@@ -80,7 +80,7 @@ void main() {
 
       test('写真がnullの場合はPhotoAccessExceptionを返す', () {
         final result = PhotoResultHelper.photoAccessResult(null);
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
         expect(result.error.message, contains('取得に失敗'));
@@ -91,7 +91,7 @@ void main() {
       test('データが正常な場合はSuccessを返す', () {
         final data = Uint8List.fromList([1, 2, 3, 4, 5]);
         final result = PhotoResultHelper.photoDataResult(data);
-        
+
         expect(result.isSuccess, true);
         expect(result.value, data);
       });
@@ -102,14 +102,14 @@ void main() {
           data,
           isCorrupted: true,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoDataCorruptedException>());
       });
 
       test('データがnullの場合はPhotoAccessExceptionを返す', () {
         final result = PhotoResultHelper.photoDataResult(null);
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
       });
@@ -117,7 +117,7 @@ void main() {
       test('データが空の場合はPhotoAccessExceptionを返す', () {
         final data = Uint8List.fromList([]);
         final result = PhotoResultHelper.photoDataResult(data);
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
       });
@@ -126,13 +126,13 @@ void main() {
     group('voidResult', () {
       test('成功時はSuccessを返す', () {
         final result = PhotoResultHelper.voidResult(success: true);
-        
+
         expect(result.isSuccess, true);
       });
 
       test('失敗時はPhotoAccessExceptionを返す', () {
         final result = PhotoResultHelper.voidResult(success: false);
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
       });
@@ -141,13 +141,13 @@ void main() {
     group('limitedAccessResult', () {
       test('成功時はSuccessを返す', () {
         final result = PhotoResultHelper.limitedAccessResult(success: true);
-        
+
         expect(result.isSuccess, true);
       });
 
       test('失敗時はPhotoLimitedAccessExceptionを返す', () {
         final result = PhotoResultHelper.limitedAccessResult(success: false);
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoLimitedAccessException>());
       });
@@ -157,7 +157,7 @@ void main() {
       test('写真がある場合はSuccessを返す', () {
         final photos = <AssetEntity>[];
         final result = PhotoResultHelper.validatePhotoList(photos);
-        
+
         expect(result.isSuccess, true);
         expect(result.value, photos);
       });
@@ -168,7 +168,7 @@ void main() {
           photos,
           allowEmpty: true,
         );
-        
+
         expect(result.isSuccess, true);
         expect(result.value, photos);
       });
@@ -179,7 +179,7 @@ void main() {
           photos,
           allowEmpty: false,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<DataNotFoundException>());
       });
@@ -190,7 +190,7 @@ void main() {
         final result = PhotoResultHelper.fromPermissionState(
           PermissionState.authorized,
         );
-        
+
         expect(result.isSuccess, true);
         expect(result.value, true);
       });
@@ -199,7 +199,7 @@ void main() {
         final result = PhotoResultHelper.fromPermissionState(
           PermissionState.limited,
         );
-        
+
         expect(result.isSuccess, true);
         expect(result.value, true);
       });
@@ -208,7 +208,7 @@ void main() {
         final result = PhotoResultHelper.fromPermissionState(
           PermissionState.denied,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoPermissionDeniedException>());
       });
@@ -217,7 +217,7 @@ void main() {
         final result = PhotoResultHelper.fromPermissionState(
           PermissionState.restricted,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoPermissionDeniedException>());
       });
@@ -226,7 +226,7 @@ void main() {
         final result = PhotoResultHelper.fromPermissionState(
           PermissionState.notDetermined,
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
       });
@@ -240,7 +240,7 @@ void main() {
           context: 'test context',
           customMessage: 'カスタムメッセージ',
         );
-        
+
         expect(result.isFailure, true);
         expect(result.error, isA<PhotoAccessException>());
         expect(result.error.message, contains('test context'));
@@ -256,9 +256,9 @@ void main() {
           const Success('b'),
           const Success('c'),
         ];
-        
+
         final combined = PhotoResultHelper.combineResults(results);
-        
+
         expect(combined.isSuccess, true);
         expect(combined.value, ['a', 'b', 'c']);
       });
@@ -268,9 +268,9 @@ void main() {
           Failure(PhotoAccessException('エラー1')),
           Failure(PhotoAccessException('エラー2')),
         ];
-        
+
         final combined = PhotoResultHelper.combineResults(results);
-        
+
         expect(combined.isFailure, true);
         expect(combined.error, isA<PhotoAccessException>());
       });
@@ -281,12 +281,12 @@ void main() {
           Failure(PhotoAccessException('エラー')),
           const Success('c'),
         ];
-        
+
         final combined = PhotoResultHelper.combineResults(
           results,
           allowPartialSuccess: true,
         );
-        
+
         expect(combined.isSuccess, true);
         expect(combined.value, ['a', 'c']);
       });
@@ -297,12 +297,12 @@ void main() {
           Failure(PhotoAccessException('エラー')),
           const Success('c'),
         ];
-        
+
         final combined = PhotoResultHelper.combineResults(
           results,
           allowPartialSuccess: false,
         );
-        
+
         expect(combined.isFailure, true);
         expect(combined.error, isA<PhotoAccessException>());
       });

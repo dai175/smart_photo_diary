@@ -201,16 +201,24 @@ class TestServiceSetup {
     final mock = MockDiaryServiceInterface();
 
     // Default mock behavior for DiaryService (Result<T> pattern)
-    when(() => mock.getSortedDiaryEntries()).thenAnswer((_) async => const Success(<DiaryEntry>[]));
-    when(() => mock.getDiaryEntry(any())).thenAnswer((_) async => const Success<DiaryEntry?>(null));
-    when(() => mock.getTotalDiaryCount()).thenAnswer((_) async => const Success(0));
+    when(
+      () => mock.getSortedDiaryEntries(),
+    ).thenAnswer((_) async => const Success(<DiaryEntry>[]));
+    when(
+      () => mock.getDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success<DiaryEntry?>(null));
+    when(
+      () => mock.getTotalDiaryCount(),
+    ).thenAnswer((_) async => const Success(0));
     when(
       () => mock.getAllTags(),
     ).thenAnswer((_) async => const Success({'mock', 'test', 'tags'}));
     when(
       () => mock.getDiaryCountInPeriod(any(), any()),
     ).thenAnswer((_) async => const Success(0));
-    when(() => mock.getFilteredDiaryEntries(any())).thenAnswer((_) async => const Success(<DiaryEntry>[]));
+    when(
+      () => mock.getFilteredDiaryEntries(any()),
+    ).thenAnswer((_) async => const Success(<DiaryEntry>[]));
     when(
       () => mock.getTagsForEntry(any()),
     ).thenAnswer((_) async => const Success(['mock', 'test']));
@@ -236,18 +244,22 @@ class TestServiceSetup {
         ),
       ),
     );
-    when(() => mock.updateDiaryEntry(any())).thenAnswer((_) async => Success(
-      DiaryEntry(
-        id: 'mock-updated-id',
-        date: DateTime.now(),
-        title: 'Updated Mock Title',
-        content: 'Updated Mock Content',
-        photoIds: [],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+    when(() => mock.updateDiaryEntry(any())).thenAnswer(
+      (_) async => Success(
+        DiaryEntry(
+          id: 'mock-updated-id',
+          date: DateTime.now(),
+          title: 'Updated Mock Title',
+          content: 'Updated Mock Content',
+          photoIds: [],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
       ),
-    ));
-    when(() => mock.deleteDiaryEntry(any())).thenAnswer((_) async => const Success(null));
+    );
+    when(
+      () => mock.deleteDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success(null));
 
     // Additional DiaryServiceInterface methods
     when(
@@ -314,9 +326,7 @@ class TestServiceSetup {
       ),
     ).thenAnswer((_) async => const Success('Mock export data'));
 
-    when(
-      () => mock.importDiaries(),
-    ).thenAnswer(
+    when(() => mock.importDiaries()).thenAnswer(
       (_) async => Success(
         ImportResult(
           totalEntries: 0,

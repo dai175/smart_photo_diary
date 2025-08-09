@@ -4,14 +4,14 @@ import 'result.dart';
 import '../errors/app_exceptions.dart';
 
 /// PhotoService専用のResult型作成ヘルパーユーティリティ
-/// 
+///
 /// PhotoServiceで使用される一般的なResult型の作成を簡素化し、
 /// 一貫したエラーハンドリングを提供します。
 class PhotoResultHelper {
   PhotoResultHelper._();
 
   /// 写真権限の結果を作成
-  /// 
+  ///
   /// [granted] 権限が付与されたかどうか
   /// [isDenied] 権限が拒否されたか
   /// [isPermanentlyDenied] 権限が永続的に拒否されたか
@@ -28,24 +28,24 @@ class PhotoResultHelper {
     }
 
     if (isPermanentlyDenied) {
-      return Failure(PhotoPermissionPermanentlyDeniedException(
-        errorMessage ?? '写真アクセス権限が永続的に拒否されています。設定から権限を有効にしてください。',
-      ));
+      return Failure(
+        PhotoPermissionPermanentlyDeniedException(
+          errorMessage ?? '写真アクセス権限が永続的に拒否されています。設定から権限を有効にしてください。',
+        ),
+      );
     }
 
     if (isDenied) {
-      return Failure(PhotoPermissionDeniedException(
-        errorMessage ?? '写真アクセス権限が拒否されました。',
-      ));
+      return Failure(
+        PhotoPermissionDeniedException(errorMessage ?? '写真アクセス権限が拒否されました。'),
+      );
     }
 
-    return Failure(PhotoAccessException(
-      errorMessage ?? '写真アクセス権限の取得に失敗しました。',
-    ));
+    return Failure(PhotoAccessException(errorMessage ?? '写真アクセス権限の取得に失敗しました。'));
   }
 
   /// 写真アクセスの結果を作成
-  /// 
+  ///
   /// [photos] 取得した写真のリスト
   /// [hasPermission] 権限があるか
   /// [errorMessage] エラーメッセージ
@@ -57,24 +57,28 @@ class PhotoResultHelper {
     dynamic originalError,
   }) {
     if (!hasPermission) {
-      return Failure(PhotoAccessException(
-        errorMessage ?? '写真アクセス権限がありません。',
-        originalError: originalError,
-      ));
+      return Failure(
+        PhotoAccessException(
+          errorMessage ?? '写真アクセス権限がありません。',
+          originalError: originalError,
+        ),
+      );
     }
 
     if (photos == null) {
-      return Failure(PhotoAccessException(
-        errorMessage ?? '写真の取得に失敗しました。',
-        originalError: originalError,
-      ));
+      return Failure(
+        PhotoAccessException(
+          errorMessage ?? '写真の取得に失敗しました。',
+          originalError: originalError,
+        ),
+      );
     }
 
     return Success(photos);
   }
 
   /// 写真データの結果を作成
-  /// 
+  ///
   /// [data] 写真のバイナリデータ
   /// [isCorrupted] データが破損しているか
   /// [errorMessage] エラーメッセージ
@@ -86,24 +90,28 @@ class PhotoResultHelper {
     dynamic originalError,
   }) {
     if (isCorrupted) {
-      return Failure(PhotoDataCorruptedException(
-        errorMessage ?? '写真データが破損しています。',
-        originalError: originalError,
-      ));
+      return Failure(
+        PhotoDataCorruptedException(
+          errorMessage ?? '写真データが破損しています。',
+          originalError: originalError,
+        ),
+      );
     }
 
     if (data == null || data.isEmpty) {
-      return Failure(PhotoAccessException(
-        errorMessage ?? '写真データの取得に失敗しました。',
-        originalError: originalError,
-      ));
+      return Failure(
+        PhotoAccessException(
+          errorMessage ?? '写真データの取得に失敗しました。',
+          originalError: originalError,
+        ),
+      );
     }
 
     return Success(data);
   }
 
   /// void操作の結果を作成
-  /// 
+  ///
   /// [success] 操作が成功したか
   /// [errorMessage] エラーメッセージ
   /// [originalError] 元のエラー
@@ -116,14 +124,16 @@ class PhotoResultHelper {
       return const Success(null);
     }
 
-    return Failure(PhotoAccessException(
-      errorMessage ?? '写真操作に失敗しました。',
-      originalError: originalError,
-    ));
+    return Failure(
+      PhotoAccessException(
+        errorMessage ?? '写真操作に失敗しました。',
+        originalError: originalError,
+      ),
+    );
   }
 
   /// Limited Access処理の結果を作成
-  /// 
+  ///
   /// [success] 処理が成功したか
   /// [errorMessage] エラーメッセージ
   /// [originalError] 元のエラー
@@ -136,14 +146,16 @@ class PhotoResultHelper {
       return const Success(null);
     }
 
-    return Failure(PhotoLimitedAccessException(
-      errorMessage ?? '制限付き写真アクセスの処理に失敗しました。',
-      originalError: originalError,
-    ));
+    return Failure(
+      PhotoLimitedAccessException(
+        errorMessage ?? '制限付き写真アクセスの処理に失敗しました。',
+        originalError: originalError,
+      ),
+    );
   }
 
   /// 写真リストが空の場合の処理
-  /// 
+  ///
   /// [photos] 写真リスト
   /// [allowEmpty] 空リストを許可するか
   /// [emptyMessage] 空の場合のメッセージ
@@ -153,16 +165,14 @@ class PhotoResultHelper {
     String? emptyMessage,
   }) {
     if (photos.isEmpty && !allowEmpty) {
-      return Failure(DataNotFoundException(
-        emptyMessage ?? '写真が見つかりません。',
-      ));
+      return Failure(DataNotFoundException(emptyMessage ?? '写真が見つかりません。'));
     }
 
     return Success(photos);
   }
 
   /// 写真権限の状態から結果を作成
-  /// 
+  ///
   /// [state] PhotoManagerの権限状態
   static Result<bool> fromPermissionState(PermissionState state) {
     switch (state) {
@@ -171,24 +181,18 @@ class PhotoResultHelper {
       case PermissionState.limited:
         return const Success(true); // Limited Accessも部分的に許可とみなす
       case PermissionState.denied:
-        return Failure(PhotoPermissionDeniedException(
-          '写真アクセス権限が拒否されました。',
-        ));
+        return Failure(PhotoPermissionDeniedException('写真アクセス権限が拒否されました。'));
       case PermissionState.restricted:
-        return Failure(PhotoPermissionDeniedException(
-          '写真アクセスが制限されています。',
-        ));
+        return Failure(PhotoPermissionDeniedException('写真アクセスが制限されています。'));
       // PhotoManagerにはpermanentlyDeniedが存在しないため、
       // この処理は他の権限チェック（permission_handler）で使用
       case PermissionState.notDetermined:
-        return Failure(PhotoAccessException(
-          '写真アクセス権限が未確定です。',
-        ));
+        return Failure(PhotoAccessException('写真アクセス権限が未確定です。'));
     }
   }
 
   /// エラーから適切なPhotoAccessExceptionを生成
-  /// 
+  ///
   /// [error] 元のエラー
   /// [context] エラーのコンテキスト
   static Result<T> fromError<T>(
@@ -197,20 +201,22 @@ class PhotoResultHelper {
     String? customMessage,
   }) {
     String message = customMessage ?? '写真操作でエラーが発生しました。';
-    
+
     if (context != null) {
       message = '$context: $message';
     }
 
-    return Failure(PhotoAccessException(
-      message,
-      originalError: error,
-      details: error.toString(),
-    ));
+    return Failure(
+      PhotoAccessException(
+        message,
+        originalError: error,
+        details: error.toString(),
+      ),
+    );
   }
 
   /// 複数の写真操作結果をまとめる
-  /// 
+  ///
   /// [results] 複数のResult
   /// [allowPartialSuccess] 部分的な成功を許可するか
   static Result<List<T>> combineResults<T>(
@@ -238,11 +244,14 @@ class PhotoResultHelper {
     }
 
     // すべて失敗またはすべて失敗で部分的成功を許可しない場合
-    return Failure(PhotoAccessException(
-      '複数の写真操作中にエラーが発生しました。',
-      details: '${errors.length}件のエラー: ${errors.map((e) => e.message).join(', ')}',
-      originalError: errors.first,
-    ));
+    return Failure(
+      PhotoAccessException(
+        '複数の写真操作中にエラーが発生しました。',
+        details:
+            '${errors.length}件のエラー: ${errors.map((e) => e.message).join(', ')}',
+        originalError: errors.first,
+      ),
+    );
   }
 }
 

@@ -91,11 +91,14 @@
   - [x] `PhotoDataCorruptedException` 追加
 
 ##### Phase 2: Core Permission Methods（基本権限系）
-- [ ] `requestPermission()` → `Future<Result<bool>>`（高優先度）
-  - [ ] 権限拒否時の`PhotoPermissionDeniedException`
-  - [ ] 永続拒否時の`PhotoPermissionPermanentlyDeniedException`
-- [ ] `isPermissionPermanentlyDenied()` → `Future<Result<bool>>`
-- [ ] `isLimitedAccess()` → `Future<Result<bool>>`
+- [x] `requestPermission()` → `Future<Result<bool>>`（高優先度）
+  - [x] 権限拒否時の`PhotoPermissionDeniedException`
+  - [x] 永続拒否時の`PhotoPermissionPermanentlyDeniedException`
+  - [x] `requestPermissionResult()`メソッド実装完了
+- [x] `isPermissionPermanentlyDenied()` → `Future<Result<bool>>`
+  - [x] `isPermissionPermanentlyDeniedResult()`メソッド実装完了
+- [x] `isLimitedAccess()` → `Future<Result<bool>>`
+  - [x] `isLimitedAccessResult()`メソッド実装完了
 
 ##### Phase 3: Core Photo Retrieval Methods（写真取得系）
 - [ ] `getTodayPhotos()` → `Future<Result<List<AssetEntity>>>`（高優先度）
