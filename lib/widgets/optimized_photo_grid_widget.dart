@@ -47,6 +47,9 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   bool _isScrolling = false;
   DateTime? _lastScrollTime;
   static const Duration _scrollDebounce = Duration(milliseconds: 100);
+  
+  // サムネイルプリロード重複実行防止フラグ
+  bool _isPreloadingThumbnails = false;
 
   @override
   void initState() {
@@ -155,22 +158,31 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   /// 初期サムネイルのプリロード
   Future<void> _preloadInitialThumbnails() async {
     if (widget.controller.photoAssets.isEmpty) return;
+    
+    // 重複実行防止チェック
+    if (_isPreloadingThumbnails) return;
 
-    PerformanceMonitor.startMeasurement('initial_thumbnail_preload');
+    _isPreloadingThumbnails = true;
+    
+    try {
+      PerformanceMonitor.startMeasurement('initial_thumbnail_preload');
 
-    final initialBatch = widget.controller.photoAssets
-        .take(_itemsPerPage)
-        .toList();
-    await _cacheService.preloadThumbnails(
-      initialBatch,
-      width: AppConstants.photoThumbnailSize.toInt(),
-      height: AppConstants.photoThumbnailSize.toInt(),
-    );
+      final initialBatch = widget.controller.photoAssets
+          .take(_itemsPerPage)
+          .toList();
+      await _cacheService.preloadThumbnails(
+        initialBatch,
+        width: AppConstants.photoThumbnailSize.toInt(),
+        height: AppConstants.photoThumbnailSize.toInt(),
+      );
 
-    await PerformanceMonitor.endMeasurement(
-      'initial_thumbnail_preload',
-      context: 'OptimizedPhotoGridWidget',
-    );
+      await PerformanceMonitor.endMeasurement(
+        'initial_thumbnail_preload',
+        context: 'OptimizedPhotoGridWidget',
+      );
+    } finally {
+      _isPreloadingThumbnails = false;
+    }
   }
 
   @override

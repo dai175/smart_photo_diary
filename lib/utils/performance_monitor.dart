@@ -17,7 +17,16 @@ class PerformanceMonitor {
     final startTime = _startTimes[label];
     if (startTime == null) {
       if (kDebugMode) {
-        debugPrint('PerformanceMonitor: 計測開始されていません - $label');
+        try {
+          final loggingService = await LoggingService.getInstance();
+          loggingService.warning(
+            '計測開始されていません - $label',
+            context: 'PerformanceMonitor',
+          );
+        } catch (e) {
+          // LoggingServiceが利用できない場合のフォールバック
+          debugPrint('PerformanceMonitor: 計測開始されていません - $label');
+        }
       }
       return;
     }
