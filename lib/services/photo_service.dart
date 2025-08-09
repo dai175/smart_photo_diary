@@ -317,6 +317,113 @@ class PhotoService implements PhotoServiceInterface {
     }
   }
 
+  /// 今日撮影された写真を取得する（Result<T>版）
+  ///
+  /// [limit]: 取得する写真の最大数
+  /// 戻り値: 写真アセットのリストのResult型
+  Future<Result<List<AssetEntity>>> getTodayPhotosResult({
+    int limit = 20,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    // 権限チェック（Result<T>版を使用）
+    final permissionResult = await requestPermissionResult();
+    if (permissionResult.isFailure) {
+      return Failure(permissionResult.error);
+    }
+    if (!permissionResult.value) {
+      return PhotoResultHelper.photoAccessResult(
+        null,
+        hasPermission: false,
+        errorMessage: '写真アクセス権限がありません',
+      );
+    }
+
+    try {
+      // タイムゾーン対応: 今日の日付の範囲を計算（ローカルタイムゾーン）
+      final DateTime now = DateTime.now();
+      final DateTime startOfDay = DateTime(now.year, now.month, now.day);
+      final DateTime endOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        23,
+        59,
+        59,
+        999,
+      );
+
+      loggingService.debug(
+        '今日の写真を検索',
+        context: 'PhotoService.getTodayPhotosResult',
+        data: '検索範囲: $startOfDay - $endOfDay, 制限: $limit',
+      );
+
+      // 写真を取得
+      final FilterOptionGroup filterOption = FilterOptionGroup(
+        orders: [const OrderOption()],
+        createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
+      );
+
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        filterOption: filterOption,
+      );
+
+      loggingService.debug(
+        '取得したアルバム数: ${albums.length}',
+        context: 'PhotoService.getTodayPhotosResult',
+      );
+
+      if (albums.isEmpty) {
+        loggingService.debug(
+          '今日のアルバムが見つかりません',
+          context: 'PhotoService.getTodayPhotosResult',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '今日の写真が見つかりませんでした',
+        );
+      }
+
+      // 最近の写真アルバムから写真を取得
+      final AssetPathEntity recentAlbum = albums.first;
+      loggingService.debug(
+        'アルバム名: ${recentAlbum.name}',
+        context: 'PhotoService.getTodayPhotosResult',
+      );
+
+      final List<AssetEntity> assets = await recentAlbum.getAssetListRange(
+        start: 0,
+        end: limit,
+      );
+
+      if (assets.isEmpty) {
+        loggingService.debug(
+          '今日の写真がありません',
+          context: 'PhotoService.getTodayPhotosResult',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '今日撮影された写真がありません',
+        );
+      }
+
+      loggingService.info(
+        '今日の写真を取得しました',
+        context: 'PhotoService.getTodayPhotosResult',
+        data: '取得数: ${assets.length}枚',
+      );
+
+      return PhotoResultHelper.photoAccessResult(assets);
+    } catch (e) {
+      return PhotoResultHelper.fromError<List<AssetEntity>>(
+        e,
+        context: 'PhotoService.getTodayPhotosResult',
+        customMessage: '今日の写真取得中にエラーが発生しました',
+      );
+    }
+  }
+
   /// 今日撮影された写真を取得する
   ///
   /// [limit]: 取得する写真の最大数
@@ -402,6 +509,203 @@ class PhotoService implements PhotoServiceInterface {
         error: appError,
       );
       return [];
+    }
+  }
+
+  /// 指定された日付範囲の写真を取得する（Result<T>版）
+  ///
+  /// [startDate]: 開始日時
+  /// [endDate]: 終了日時
+  /// [limit]: 取得する写真の最大数
+  /// 戻り値: 写真アセットのリストのResult型
+  Future<Result<List<AssetEntity>>> getPhotosInDateRangeResult({
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 100,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    // 権限チェック（Result<T>版を使用）
+    final permissionResult = await requestPermissionResult();
+    if (permissionResult.isFailure) {
+      return Failure(permissionResult.error);
+    }
+    if (!permissionResult.value) {
+      return PhotoResultHelper.photoAccessResult(
+        null,
+        hasPermission: false,
+        errorMessage: '写真アクセス権限がありません',
+      );
+    }
+
+    try {
+      // 日付の妥当性チェック
+      final now = DateTime.now();
+      if (startDate.isAfter(now)) {
+        loggingService.warning(
+          '開始日が未来の日付です',
+          context: 'PhotoService.getPhotosInDateRangeResult',
+          data: 'startDate: $startDate',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '開始日が未来の日付のため、写真を取得できません',
+        );
+      }
+
+      if (startDate.isAfter(endDate)) {
+        return PhotoResultHelper.fromError<List<AssetEntity>>(
+          ArgumentError('開始日が終了日より後です: $startDate > $endDate'),
+          context: 'PhotoService.getPhotosInDateRangeResult',
+          customMessage: '日付範囲が不正です',
+        );
+      }
+
+      // タイムゾーン対応: デバイスのローカルタイムゾーンで日付を正規化
+      final localStartDate = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+        startDate.hour,
+        startDate.minute,
+        startDate.second,
+      );
+      final localEndDate = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+        endDate.hour,
+        endDate.minute,
+        endDate.second,
+      );
+
+      loggingService.debug(
+        '日付範囲の写真を検索',
+        context: 'PhotoService.getPhotosInDateRangeResult',
+        data: '範囲: $localStartDate - $localEndDate, 制限: $limit',
+      );
+
+      // 写真を取得
+      final FilterOptionGroup filterOption = FilterOptionGroup(
+        orders: [const OrderOption()],
+        createTimeCond: DateTimeCond(min: localStartDate, max: localEndDate),
+      );
+
+      // アルバムを取得
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        filterOption: filterOption,
+      );
+
+      if (albums.isEmpty) {
+        loggingService.debug(
+          '指定期間のアルバムが見つかりません',
+          context: 'PhotoService.getPhotosInDateRangeResult',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '指定した期間の写真が見つかりませんでした',
+        );
+      }
+
+      // アルバムから写真を取得
+      final AssetPathEntity album = albums.first;
+
+      final List<AssetEntity> assets = await album.getAssetListRange(
+        start: 0,
+        end: limit,
+      );
+
+      // エッジケース処理: 破損した写真やEXIF情報のない写真をフィルタリング
+      final List<AssetEntity> validAssets = [];
+      final List<String> corruptedPhotos = [];
+
+      for (final asset in assets) {
+        try {
+          // 写真の作成日時を確認
+          final createDate = asset.createDateTime;
+
+          // 日付が不正な場合（例: 1970年以前、未来の日付）
+          if (createDate.year < 1970 ||
+              createDate.isAfter(now.add(const Duration(days: 1)))) {
+            loggingService.debug(
+              '無効な日付の写真をスキップ',
+              context: 'PhotoService.getPhotosInDateRangeResult',
+              data: 'createDate: $createDate, assetId: ${asset.id}',
+            );
+            continue;
+          }
+
+          // タイムゾーン変更対応: 日付範囲内に含まれるかを再確認
+          final localCreateDate = DateTime(
+            createDate.year,
+            createDate.month,
+            createDate.day,
+            createDate.hour,
+            createDate.minute,
+            createDate.second,
+          );
+
+          if (localCreateDate.isBefore(localStartDate) ||
+              localCreateDate.isAfter(localEndDate)) {
+            loggingService.debug(
+              'タイムゾーン調整後、日付範囲外の写真をスキップ',
+              context: 'PhotoService.getPhotosInDateRangeResult',
+              data:
+                  'createDate: $localCreateDate, range: $localStartDate - $localEndDate',
+            );
+            continue;
+          }
+
+          // サムネイルを取得してファイルの有効性を確認
+          final thumbnail = await asset.thumbnailDataWithSize(
+            const ThumbnailSize(100, 100),
+            quality: 50,
+          );
+
+          if (thumbnail == null || thumbnail.isEmpty) {
+            loggingService.warning(
+              'サムネイルを取得できない写真をスキップ',
+              context: 'PhotoService.getPhotosInDateRangeResult',
+              data: 'assetId: ${asset.id}',
+            );
+            corruptedPhotos.add(asset.id);
+            continue;
+          }
+
+          validAssets.add(asset);
+        } catch (e) {
+          loggingService.warning(
+            '写真の検証中にエラーが発生',
+            context: 'PhotoService.getPhotosInDateRangeResult',
+            data: 'assetId: ${asset.id}, error: $e',
+          );
+          corruptedPhotos.add(asset.id);
+          continue;
+        }
+      }
+
+      // 破損写真が多数ある場合は警告
+      if (corruptedPhotos.length > assets.length * 0.3) {
+        loggingService.warning(
+          '多数の破損写真が検出されました',
+          context: 'PhotoService.getPhotosInDateRangeResult',
+          data: '破損写真数: ${corruptedPhotos.length}/${assets.length}',
+        );
+      }
+
+      loggingService.info(
+        '日付範囲の写真を取得しました',
+        context: 'PhotoService.getPhotosInDateRangeResult',
+        data: '全${assets.length}枚中、有効${validAssets.length}枚',
+      );
+
+      return PhotoResultHelper.photoAccessResult(validAssets);
+    } catch (e) {
+      return PhotoResultHelper.fromError<List<AssetEntity>>(
+        e,
+        context: 'PhotoService.getPhotosInDateRangeResult',
+        customMessage: '指定期間の写真取得中にエラーが発生しました',
+      );
     }
   }
 
@@ -628,6 +932,209 @@ class PhotoService implements PhotoServiceInterface {
         error: appError,
       );
       return null;
+    }
+  }
+
+  /// 指定された日付の写真を取得する（Result<T>版）
+  ///
+  /// [date]: 取得したい日付
+  /// [offset]: 取得開始位置（ページネーション用）
+  /// [limit]: 取得する写真の最大数
+  /// 戻り値: 写真アセットのリストのResult型
+  Future<Result<List<AssetEntity>>> getPhotosForDateResult(
+    DateTime date, {
+    required int offset,
+    required int limit,
+  }) async {
+    final loggingService = await LoggingService.getInstance();
+
+    // 権限チェック（Result<T>版を使用）
+    final permissionResult = await requestPermissionResult();
+    if (permissionResult.isFailure) {
+      return Failure(permissionResult.error);
+    }
+    if (!permissionResult.value) {
+      return PhotoResultHelper.photoAccessResult(
+        null,
+        hasPermission: false,
+        errorMessage: '写真アクセス権限がありません',
+      );
+    }
+
+    try {
+      // パラメータ妥当性チェック
+      if (offset < 0) {
+        return PhotoResultHelper.fromError<List<AssetEntity>>(
+          ArgumentError('オフセットは0以上である必要があります: $offset'),
+          context: 'PhotoService.getPhotosForDateResult',
+          customMessage: 'ページネーション設定が不正です',
+        );
+      }
+
+      if (limit <= 0) {
+        return PhotoResultHelper.fromError<List<AssetEntity>>(
+          ArgumentError('リミットは1以上である必要があります: $limit'),
+          context: 'PhotoService.getPhotosForDateResult',
+          customMessage: 'ページネーション設定が不正です',
+        );
+      }
+
+      // 未来の日付チェック
+      final now = DateTime.now();
+      if (date.isAfter(now.add(const Duration(days: 1)))) {
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '未来の日付の写真は取得できません',
+        );
+      }
+
+      // タイムゾーン対応: 指定日の日付範囲を計算（その日の00:00:00から23:59:59まで）
+      final DateTime startOfDay = DateTime(date.year, date.month, date.day);
+      final DateTime endOfDay = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        23,
+        59,
+        59,
+        999,
+      );
+
+      loggingService.debug(
+        '指定日の写真を検索',
+        context: 'PhotoService.getPhotosForDateResult',
+        data:
+            '日付: $date, オフセット: $offset, 制限: $limit, 検索範囲: $startOfDay - $endOfDay',
+      );
+
+      // 写真を取得
+      final FilterOptionGroup filterOption = FilterOptionGroup(
+        orders: [const OrderOption()], // 作成日時の降順（新しい順）
+        createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
+      );
+
+      // アルバムを取得
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        filterOption: filterOption,
+      );
+
+      loggingService.debug(
+        '取得したアルバム数: ${albums.length}',
+        context: 'PhotoService.getPhotosForDateResult',
+      );
+
+      if (albums.isEmpty) {
+        loggingService.debug(
+          '指定日のアルバムが見つかりません',
+          context: 'PhotoService.getPhotosForDateResult',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '指定日の写真が見つかりませんでした',
+        );
+      }
+
+      // 最近の写真アルバムから写真を取得（ページネーション対応）
+      final AssetPathEntity album = albums.first;
+
+      // アルバム内の総写真数を確認
+      final int totalCount = await album.assetCountAsync;
+      loggingService.debug(
+        'アルバム情報',
+        context: 'PhotoService.getPhotosForDateResult',
+        data: 'アルバム名: ${album.name}, 総写真数: $totalCount',
+      );
+
+      // オフセットが総数を超えている場合
+      if (offset >= totalCount) {
+        loggingService.debug(
+          'オフセットが総数を超えています',
+          context: 'PhotoService.getPhotosForDateResult',
+          data: 'オフセット: $offset, 総数: $totalCount',
+        );
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: 'これ以上の写真はありません',
+        );
+      }
+
+      // 実際に取得可能な数を計算
+      final int actualLimit = (offset + limit > totalCount)
+          ? totalCount - offset
+          : limit;
+
+      if (actualLimit <= 0) {
+        return PhotoResultHelper.photoAccessResult(
+          <AssetEntity>[],
+          errorMessage: '取得可能な写真がありません',
+        );
+      }
+
+      final List<AssetEntity> assets = await album.getAssetListRange(
+        start: offset,
+        end: offset + actualLimit,
+      );
+
+      // タイムゾーン変更対応: 取得した写真の日付を再確認
+      final List<AssetEntity> validAssets = [];
+      int skippedCount = 0;
+
+      for (final asset in assets) {
+        try {
+          final createDate = asset.createDateTime;
+          final localCreateDate = DateTime(
+            createDate.year,
+            createDate.month,
+            createDate.day,
+          );
+          final targetDate = DateTime(date.year, date.month, date.day);
+
+          // 日付が一致するかを確認（タイムゾーン対応）
+          if (!localCreateDate.isAtSameMomentAs(targetDate)) {
+            loggingService.debug(
+              '日付不一致の写真をスキップ',
+              context: 'PhotoService.getPhotosForDateResult',
+              data:
+                  'expected: ${targetDate.toIso8601String()}, actual: ${localCreateDate.toIso8601String()}',
+            );
+            skippedCount++;
+            continue;
+          }
+
+          validAssets.add(asset);
+        } catch (e) {
+          loggingService.warning(
+            '写真の日付確認中にエラー',
+            context: 'PhotoService.getPhotosForDateResult',
+            data: 'assetId: ${asset.id}, error: $e',
+          );
+          // エラーが発生した写真も含める（除外すると写真が表示されない可能性があるため）
+          validAssets.add(asset);
+        }
+      }
+
+      if (skippedCount > 0) {
+        loggingService.debug(
+          '日付不一致でスキップされた写真',
+          context: 'PhotoService.getPhotosForDateResult',
+          data: 'スキップ数: $skippedCount',
+        );
+      }
+
+      loggingService.info(
+        '指定日の写真を取得しました',
+        context: 'PhotoService.getPhotosForDateResult',
+        data:
+            '取得数: ${validAssets.length}枚（元: ${assets.length}枚）, 取得範囲: $offset - ${offset + actualLimit}',
+      );
+
+      return PhotoResultHelper.photoAccessResult(validAssets);
+    } catch (e) {
+      return PhotoResultHelper.fromError<List<AssetEntity>>(
+        e,
+        context: 'PhotoService.getPhotosForDateResult',
+        customMessage: '指定日の写真取得中にエラーが発生しました',
+      );
     }
   }
 

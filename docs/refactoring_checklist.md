@@ -101,14 +101,17 @@
   - [x] `isLimitedAccessResult()`メソッド実装完了
 
 ##### Phase 3: Core Photo Retrieval Methods（写真取得系）
-- [ ] `getTodayPhotos()` → `Future<Result<List<AssetEntity>>>`（高優先度）
-  - [ ] 権限エラー処理をResult型に統一
-  - [ ] 写真取得失敗時の詳細エラー情報
-- [ ] `getPhotosInDateRange()` → `Future<Result<List<AssetEntity>>>`（高優先度）
-  - [ ] 複雑な日付範囲チェックのエラー処理改善
-  - [ ] 破損写真検出時の詳細エラー情報
-- [ ] `getPhotosForDate()` → `Future<Result<List<AssetEntity>>>`（高優先度）
-  - [ ] タイムゾーン関連エラーの詳細化
+- [x] `getTodayPhotos()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [x] 権限エラー処理をResult型に統一
+  - [x] 写真取得失敗時の詳細エラー情報
+  - [x] `getTodayPhotosResult()`メソッド実装完了
+- [x] `getPhotosInDateRange()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [x] 複雑な日付範囲チェックのエラー処理改善
+  - [x] 破損写真検出時の詳細エラー情報
+  - [x] `getPhotosInDateRangeResult()`メソッド実装完了
+- [x] `getPhotosForDate()` → `Future<Result<List<AssetEntity>>>`（高優先度）
+  - [x] タイムゾーン関連エラーの詳細化
+  - [x] `getPhotosForDateResult()`メソッド実装完了
 
 ##### Phase 4: Data Access Methods（データアクセス系）
 - [ ] `getPhotoData()` → `Future<Result<Uint8List?>>`
