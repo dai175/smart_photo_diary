@@ -178,7 +178,7 @@ class ErrorDialogWidget extends StatelessWidget {
     if (severity != ErrorSeverity.critical) {
       return false;
     }
-    
+
     // userMessageとmessageが異なる場合のみ詳細を表示
     return error.userMessage != error.message;
   }

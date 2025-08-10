@@ -368,124 +368,140 @@ void main() {
     });
 
     group('Result<T> Pattern Integration Tests', () {
-      test('requestPermissionResult should integrate with real permission system', () async {
-        // Act
-        final result = await photoService.requestPermissionResult();
+      test(
+        'requestPermissionResult should integrate with real permission system',
+        () async {
+          // Act
+          final result = await photoService.requestPermissionResult();
 
-        // Assert
-        expect(result, isA<Result<bool>>());
-        result.fold(
-          (granted) {
-            expect(granted, isA<bool>());
-            // 権限の状態は実行環境に依存するため、型チェックのみ
-          },
-          (error) {
-            expect(error, isA<AppException>());
-          },
-        );
-      });
+          // Assert
+          expect(result, isA<Result<bool>>());
+          result.fold(
+            (granted) {
+              expect(granted, isA<bool>());
+              // 権限の状態は実行環境に依存するため、型チェックのみ
+            },
+            (error) {
+              expect(error, isA<AppException>());
+            },
+          );
+        },
+      );
 
-      test('getTodayPhotosResult should integrate with real photo library', () async {
-        // Act
-        final result = await photoService.getTodayPhotosResult(limit: 10);
+      test(
+        'getTodayPhotosResult should integrate with real photo library',
+        () async {
+          // Act
+          final result = await photoService.getTodayPhotosResult(limit: 10);
 
-        // Assert
-        expect(result, isA<Result<List<AssetEntity>>>());
-        result.fold(
-          (photos) {
-            expect(photos, isA<List<AssetEntity>>());
-            expect(photos.length, lessThanOrEqualTo(10));
-          },
-          (error) {
-            expect(error, isA<AppException>());
-            // 権限がない場合はエラーが返される可能性がある
-          },
-        );
-      });
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          result.fold(
+            (photos) {
+              expect(photos, isA<List<AssetEntity>>());
+              expect(photos.length, lessThanOrEqualTo(10));
+            },
+            (error) {
+              expect(error, isA<AppException>());
+              // 権限がない場合はエラーが返される可能性がある
+            },
+          );
+        },
+      );
 
-      test('getPhotosForDateResult should handle Result<T> pattern correctly', () async {
-        // Arrange
-        final testDate = DateTime.now();
+      test(
+        'getPhotosForDateResult should handle Result<T> pattern correctly',
+        () async {
+          // Arrange
+          final testDate = DateTime.now();
 
-        // Act
-        final result = await photoService.getPhotosForDateResult(
-          testDate,
-          offset: 0,
-          limit: 10,
-        );
+          // Act
+          final result = await photoService.getPhotosForDateResult(
+            testDate,
+            offset: 0,
+            limit: 10,
+          );
 
-        // Assert
-        expect(result, isA<Result<List<AssetEntity>>>());
-        result.fold(
-          (photos) {
-            expect(photos, isA<List<AssetEntity>>());
-            expect(photos.length, lessThanOrEqualTo(10));
-          },
-          (error) {
-            expect(error, isA<AppException>());
-          },
-        );
-      });
+          // Assert
+          expect(result, isA<Result<List<AssetEntity>>>());
+          result.fold(
+            (photos) {
+              expect(photos, isA<List<AssetEntity>>());
+              expect(photos.length, lessThanOrEqualTo(10));
+            },
+            (error) {
+              expect(error, isA<AppException>());
+            },
+          );
+        },
+      );
 
-      test('getPhotosEfficientResult should integrate with pagination', () async {
-        // Act - First page
-        final firstPageResult = await photoService.getPhotosEfficientResult(
-          offset: 0,
-          limit: 5,
-        );
+      test(
+        'getPhotosEfficientResult should integrate with pagination',
+        () async {
+          // Act - First page
+          final firstPageResult = await photoService.getPhotosEfficientResult(
+            offset: 0,
+            limit: 5,
+          );
 
-        // Second page  
-        final secondPageResult = await photoService.getPhotosEfficientResult(
-          offset: 5,
-          limit: 5,
-        );
+          // Second page
+          final secondPageResult = await photoService.getPhotosEfficientResult(
+            offset: 5,
+            limit: 5,
+          );
 
-        // Assert
-        expect(firstPageResult, isA<Result<List<AssetEntity>>>());
-        expect(secondPageResult, isA<Result<List<AssetEntity>>>());
+          // Assert
+          expect(firstPageResult, isA<Result<List<AssetEntity>>>());
+          expect(secondPageResult, isA<Result<List<AssetEntity>>>());
 
-        firstPageResult.fold(
-          (firstPhotos) {
-            expect(firstPhotos, isA<List<AssetEntity>>());
-            
-            secondPageResult.fold(
-              (secondPhotos) {
-                expect(secondPhotos, isA<List<AssetEntity>>());
-                
-                // ページネーションが正しく動作することを確認
-                if (firstPhotos.isNotEmpty && secondPhotos.isNotEmpty) {
-                  final firstIds = firstPhotos.map((e) => e.id).toSet();
-                  final secondIds = secondPhotos.map((e) => e.id).toSet();
-                  expect(firstIds.intersection(secondIds), isEmpty);
-                }
-              },
-              (error) {
-                // 2ページ目でエラーが発生する可能性もある（写真数が少ない場合）
-                expect(error, isA<AppException>());
-              },
-            );
-          },
-          (error) {
-            expect(error, isA<AppException>());
-          },
-        );
-      });
+          firstPageResult.fold(
+            (firstPhotos) {
+              expect(firstPhotos, isA<List<AssetEntity>>());
 
-      test('isPermissionPermanentlyDeniedResult should check real permission state', () async {
-        // Act
-        final result = await photoService.isPermissionPermanentlyDeniedResult();
+              secondPageResult.fold(
+                (secondPhotos) {
+                  expect(secondPhotos, isA<List<AssetEntity>>());
 
-        // Assert
-        expect(result, isA<Result<bool>>());
-        result.fold(
-          (isPermanentlyDenied) {
-            expect(isPermanentlyDenied, isA<bool>());
-          },
-          (error) {
-            expect(error, isA<AppException>());
-          },
-        );
-      });
+                  // ページネーションが正しく動作することを確認
+                  if (firstPhotos.isNotEmpty && secondPhotos.isNotEmpty) {
+                    final firstIds = firstPhotos.map((e) => e.id).toSet();
+                    final secondIds = secondPhotos.map((e) => e.id).toSet();
+                    expect(firstIds.intersection(secondIds), isEmpty);
+                  }
+                },
+                (error) {
+                  // 2ページ目でエラーが発生する可能性もある（写真数が少ない場合）
+                  expect(error, isA<AppException>());
+                },
+              );
+            },
+            (error) {
+              expect(error, isA<AppException>());
+            },
+          );
+        },
+      );
+
+      test(
+        'isPermissionPermanentlyDeniedResult should check real permission state',
+        () async {
+          // Act
+          final result = await photoService
+              .isPermissionPermanentlyDeniedResult();
+
+          // Assert
+          expect(result, isA<Result<bool>>());
+          result.fold(
+            (isPermanentlyDenied) {
+              expect(isPermanentlyDenied, isA<bool>());
+            },
+            (error) {
+              expect(error, isA<AppException>());
+            },
+          );
+        },
+      );
 
       test('Result<T> error handling should propagate correctly', () async {
         // Arrange - 過去の日付で権限エラーが発生する可能性をテスト
@@ -516,50 +532,56 @@ void main() {
     });
 
     group('End-to-End Result<T> Integration', () {
-      test('should handle full Result<T> flow from permission to photo retrieval', () async {
-        // Step 1: Check permission
-        final permissionResult = await photoService.requestPermissionResult();
-        
-        await permissionResult.fold(
-          (granted) async {
-            if (granted) {
-              // Step 2: Get today's photos if permission is granted
-              final photosResult = await photoService.getTodayPhotosResult(limit: 5);
-              
-              await photosResult.fold(
-                (photos) async {
-                  expect(photos, isA<List<AssetEntity>>());
-                  
-                  // Step 3: Try to get photo data if photos exist
-                  if (photos.isNotEmpty) {
-                    final firstPhoto = photos.first;
-                    final photoDataResult = await photoService.getPhotoDataResult(firstPhoto);
-                    
-                    photoDataResult.fold(
-                      (data) {
-                        expect(data, isA<List<int>>());
-                        expect(data, isNotEmpty);
-                      },
-                      (error) {
-                        expect(error, isA<AppException>());
-                      },
-                    );
-                  }
-                },
-                (error) {
-                  expect(error, isA<AppException>());
-                },
-              );
-            } else {
-              // Permission denied - this is also a valid state
-              expect(granted, isFalse);
-            }
-          },
-          (error) {
-            expect(error, isA<AppException>());
-          },
-        );
-      });
+      test(
+        'should handle full Result<T> flow from permission to photo retrieval',
+        () async {
+          // Step 1: Check permission
+          final permissionResult = await photoService.requestPermissionResult();
+
+          await permissionResult.fold(
+            (granted) async {
+              if (granted) {
+                // Step 2: Get today's photos if permission is granted
+                final photosResult = await photoService.getTodayPhotosResult(
+                  limit: 5,
+                );
+
+                await photosResult.fold(
+                  (photos) async {
+                    expect(photos, isA<List<AssetEntity>>());
+
+                    // Step 3: Try to get photo data if photos exist
+                    if (photos.isNotEmpty) {
+                      final firstPhoto = photos.first;
+                      final photoDataResult = await photoService
+                          .getPhotoDataResult(firstPhoto);
+
+                      photoDataResult.fold(
+                        (data) {
+                          expect(data, isA<List<int>>());
+                          expect(data, isNotEmpty);
+                        },
+                        (error) {
+                          expect(error, isA<AppException>());
+                        },
+                      );
+                    }
+                  },
+                  (error) {
+                    expect(error, isA<AppException>());
+                  },
+                );
+              } else {
+                // Permission denied - this is also a valid state
+                expect(granted, isFalse);
+              }
+            },
+            (error) {
+              expect(error, isA<AppException>());
+            },
+          );
+        },
+      );
 
       test('should handle concurrent Result<T> requests properly', () async {
         // Arrange

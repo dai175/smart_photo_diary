@@ -52,12 +52,12 @@ class LoggingService {
     if (fromServiceLocator != null) {
       return fromServiceLocator;
     }
-    
+
     // 2. 静的インスタンスが初期化済みであれば使用
     if (_instance != null) {
       return _instance;
     }
-    
+
     // 3. どちらも利用できない場合はnull
     return null;
   }
