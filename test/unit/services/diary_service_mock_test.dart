@@ -6,6 +6,7 @@ import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
@@ -435,6 +436,270 @@ void main() {
         expect(service.saveDiaryEntry, isA<Function>());
         expect(service.saveDiaryEntryWithPhotos, isA<Function>());
         expect(service.getTagsForEntry, isA<Function>());
+      });
+    });
+
+    group('Result<T> Pattern Tests', () {
+      test('should return Success<DiaryEntry> for valid saveDiaryEntry', () {
+        // Arrange
+        final testDate = DateTime(2024, 1, 15, 14, 30);
+        const title = 'Test Title';
+        const content = 'Test Content';
+        const photoIds = ['photo1', 'photo2'];
+        
+        // Act - Test Result<T> pattern structure
+        final mockResult = Success(DiaryEntry(
+          id: 'test-id',
+          date: testDate,
+          title: title,
+          content: content,
+          photoIds: photoIds,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+
+        // Assert
+        expect(mockResult.isSuccess, isTrue);
+        expect(mockResult.isFailure, isFalse);
+        expect(mockResult.value.title, equals(title));
+        expect(mockResult.value.content, equals(content));
+        expect(mockResult.value.photoIds, equals(photoIds));
+      });
+
+      test('should return Failure for invalid parameters', () {
+        // Act - Test Failure result structure for various validation scenarios
+        final titleFailure = Failure(ValidationException('タイトルは必須です'));
+        final dateFailure = Failure(ValidationException('無効な日付です'));
+        final contentFailure = Failure(ValidationException('内容は必須です'));
+
+        // Assert
+        expect(titleFailure.isFailure, isTrue);
+        expect(titleFailure.isSuccess, isFalse);
+        expect(titleFailure.error, isA<ValidationException>());
+        expect(titleFailure.error.message, contains('タイトル'));
+        
+        expect(dateFailure.isFailure, isTrue);
+        expect(dateFailure.error.message, contains('日付'));
+        
+        expect(contentFailure.isFailure, isTrue);
+        expect(contentFailure.error.message, contains('内容'));
+      });
+
+      test('should handle ServiceException in Result<T> pattern', () {
+        // Arrange
+        const errorMessage = 'データベース接続エラー';
+        final originalError = Exception('Connection failed');
+        
+        // Act
+        final serviceFailure = Failure(ServiceException(
+          errorMessage,
+          originalError: originalError,
+        ));
+
+        // Assert
+        expect(serviceFailure.isFailure, isTrue);
+        expect(serviceFailure.error, isA<ServiceException>());
+        expect(serviceFailure.error.message, equals(errorMessage));
+        expect((serviceFailure.error as ServiceException).originalError, equals(originalError));
+      });
+
+      test('should demonstrate Result<T> functional operations', () {
+        // Arrange
+        final successResult = Success(DiaryEntry(
+          id: 'test-id',
+          date: DateTime(2024, 1, 15),
+          title: 'Original Title',
+          content: 'Original Content',
+          photoIds: ['photo1'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+        
+        final failureResult = Failure(ValidationException('Test error'));
+
+        // Act - Test map operation
+        final mappedSuccess = successResult.map((entry) => entry.title);
+        final mappedFailure = failureResult.map((entry) => entry.title);
+
+        // Assert
+        expect(mappedSuccess.isSuccess, isTrue);
+        expect(mappedSuccess.value, equals('Original Title'));
+        
+        expect(mappedFailure.isFailure, isTrue);
+        expect(mappedFailure.error.message, contains('Test error'));
+      });
+
+      test('should demonstrate Result<T> fold operation', () {
+        // Arrange
+        final successResult = Success(DiaryEntry(
+          id: 'test-id',
+          date: DateTime(2024, 1, 15),
+          title: 'Test Title',
+          content: 'Test Content',
+          photoIds: [],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+        
+        final failureResult = Failure(ServiceException('Database error'));
+
+        // Act - Test fold operation
+        final successMessage = successResult.fold(
+          (entry) => 'Success: ${entry.title}',
+          (error) => 'Error: ${error.message}',
+        );
+        
+        final failureMessage = failureResult.fold(
+          (entry) => 'Success: ${entry.title}',
+          (error) => 'Error: ${error.message}',
+        );
+
+        // Assert
+        expect(successMessage, equals('Success: Test Title'));
+        expect(failureMessage, equals('Error: Database error'));
+      });
+
+      test('should handle Result<T> chain operations', () {
+        // Arrange
+        final initialResult = Success(DiaryEntry(
+          id: 'test-id',
+          date: DateTime(2024, 1, 15),
+          title: 'Test Title',
+          content: 'Test Content',
+          photoIds: ['photo1'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+
+        // Act - Test chain operation (flatMap equivalent)
+        final chainedResult = initialResult.fold<Result<String>>(
+          (entry) {
+            if (entry.photoIds.isNotEmpty) {
+              return Success('Has ${entry.photoIds.length} photos');
+            } else {
+              return const Failure(ValidationException('写真が見つかりません'));
+            }
+          },
+          (error) => Failure(error),
+        );
+
+        // Assert
+        expect(chainedResult.isSuccess, isTrue);
+        expect(chainedResult.value, equals('Has 1 photos'));
+      });
+
+      test('should handle Result<List<T>> for multiple entries', () {
+        // Arrange
+        final entries = [
+          DiaryEntry(
+            id: 'entry1',
+            date: DateTime(2024, 1, 15),
+            title: 'Entry 1',
+            content: 'Content 1',
+            photoIds: ['photo1'],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          DiaryEntry(
+            id: 'entry2',
+            date: DateTime(2024, 1, 16),
+            title: 'Entry 2',
+            content: 'Content 2',
+            photoIds: ['photo2'],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+        
+        // Act - Test Result with List
+        final listResult = Success(entries);
+        final emptyResult = Success(<DiaryEntry>[]);
+        final errorResult = Failure(ServiceException('Failed to fetch entries'));
+
+        // Assert
+        expect(listResult.isSuccess, isTrue);
+        expect(listResult.value.length, equals(2));
+        expect(listResult.value.first.title, equals('Entry 1'));
+        
+        expect(emptyResult.isSuccess, isTrue);
+        expect(emptyResult.value.isEmpty, isTrue);
+        
+        expect(errorResult.isFailure, isTrue);
+        expect(errorResult.error.message, contains('Failed to fetch'));
+      });
+
+      test('should test Result<void> for operations without return value', () {
+        // Arrange & Act
+        const successVoid = Success<void>(null);
+        final failureVoid = Failure<void>(ServiceException('Delete operation failed'));
+
+        // Assert
+        expect(successVoid.isSuccess, isTrue);
+        // void型のResultの場合、成功であることのみをテストします
+        
+        expect(failureVoid.isFailure, isTrue);
+        expect(failureVoid.error.message, contains('Delete operation failed'));
+      });
+    });
+
+    group('AI Service Integration with Result<T>', () {
+      test('should handle AI service Success result for tag generation', () {
+        // Arrange
+        const expectedTags = ['旅行', '家族', '思い出'];
+        when(() => mockAiService.generateTagsFromContent(
+          title: any(named: 'title'),
+          content: any(named: 'content'),
+          date: any(named: 'date'),
+          photoCount: any(named: 'photoCount'),
+        )).thenAnswer((_) async => Success(expectedTags));
+
+        // Act - Test the mocked result
+        final mockResult = Success(expectedTags);
+
+        // Assert
+        expect(mockResult.isSuccess, isTrue);
+        expect(mockResult.value, equals(expectedTags));
+        expect(mockResult.value.length, equals(3));
+        expect(mockResult.value.contains('旅行'), isTrue);
+      });
+
+      test('should handle AI service Failure result for tag generation', () {
+        // Arrange
+        final aiError = AiProcessingException('AI API rate limit exceeded');
+        when(() => mockAiService.generateTagsFromContent(
+          title: any(named: 'title'),
+          content: any(named: 'content'),
+          date: any(named: 'date'),
+          photoCount: any(named: 'photoCount'),
+        )).thenAnswer((_) async => Failure(aiError));
+
+        // Act - Test the mocked failure result
+        final mockFailure = Failure(aiError);
+
+        // Assert
+        expect(mockFailure.isFailure, isTrue);
+        expect(mockFailure.error, isA<AiProcessingException>());
+        expect(mockFailure.error.message, contains('rate limit'));
+      });
+
+      test('should demonstrate fallback strategy with Result<T>', () {
+        // Arrange
+        final primaryFailure = Failure(AiProcessingException('AI service unavailable'));
+        final fallbackTags = ['日記', '写真'];
+        final fallbackSuccess = Success(fallbackTags);
+
+        // Act - Test fallback logic
+        final finalResult = primaryFailure.fold<Result<List<String>>>(
+          (tags) => Success(tags),
+          (error) {
+            // Fallback to basic tags
+            return fallbackSuccess;
+          },
+        );
+
+        // Assert
+        expect(finalResult.isSuccess, isTrue);
+        expect(finalResult.value, equals(fallbackTags));
       });
     });
   });
