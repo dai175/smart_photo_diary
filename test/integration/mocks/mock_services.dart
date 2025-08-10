@@ -160,6 +160,7 @@ class TestServiceSetup {
 
     // Default mock behavior for AiService
     when(() => mock.isOnline()).thenAnswer((_) async => true);
+    when(() => mock.isOnlineResult()).thenAnswer((_) async => Success(true));
 
     when(
       () => mock.generateDiaryFromImage(

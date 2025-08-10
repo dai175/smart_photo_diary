@@ -60,7 +60,6 @@ class IntegrationTestHelpers {
     }
   }
 
-
   /// Initialize Hive for testing
   static Future<void> _initializeHive() async {
     const testDirectory = '/tmp/smart_photo_diary_integration_test';
@@ -162,6 +161,9 @@ class IntegrationTestHelpers {
     ).thenAnswer((_) async => _createMockDiaryResult());
 
     when(() => _mockAiService.isOnline()).thenAnswer((_) async => true);
+    when(
+      () => _mockAiService.isOnlineResult(),
+    ).thenAnswer((_) async => Success(true));
 
     when(
       () => _mockAiService.generateTagsFromContent(
@@ -433,27 +435,35 @@ class IntegrationTestHelpers {
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
 
     // Logging service defaults - basic mock setup
-    when(() => mockLoggingService.error(
-      any(),
-      context: any(named: 'context'),
-      error: any(named: 'error'),
-      stackTrace: any(named: 'stackTrace'),
-    )).thenAnswer((_) {});
-    when(() => mockLoggingService.info(
-      any(),
-      context: any(named: 'context'),
-      data: any(named: 'data'),
-    )).thenAnswer((_) {});
-    when(() => mockLoggingService.debug(
-      any(),
-      context: any(named: 'context'),
-      data: any(named: 'data'),
-    )).thenAnswer((_) {});
-    when(() => mockLoggingService.warning(
-      any(),
-      context: any(named: 'context'),
-      data: any(named: 'data'),
-    )).thenAnswer((_) {});
+    when(
+      () => mockLoggingService.error(
+        any(),
+        context: any(named: 'context'),
+        error: any(named: 'error'),
+        stackTrace: any(named: 'stackTrace'),
+      ),
+    ).thenAnswer((_) {});
+    when(
+      () => mockLoggingService.info(
+        any(),
+        context: any(named: 'context'),
+        data: any(named: 'data'),
+      ),
+    ).thenAnswer((_) {});
+    when(
+      () => mockLoggingService.debug(
+        any(),
+        context: any(named: 'context'),
+        data: any(named: 'data'),
+      ),
+    ).thenAnswer((_) {});
+    when(
+      () => mockLoggingService.warning(
+        any(),
+        context: any(named: 'context'),
+        data: any(named: 'data'),
+      ),
+    ).thenAnswer((_) {});
   }
 
   /// Get mock photo service for additional setup

@@ -455,15 +455,15 @@
 ##### 🎯 Result<T>移行計画策定完了
 - [x] 既存のResult<DiaryGenerationResult>の活用確認 ✅ 完了済み
 - [x] `generateTags()` → `Future<Result<List<String>>>` ✅ 実装済み
-- [x] `isOnline()` → `Future<Result<bool>>` 📋 **要実装** (唯一の未移行メソッド)
+- [x] `isOnline()` → `Future<Result<bool>>` ✅ **Phase 1-1で完了**
 - [x] AiProcessingExceptionの一貫した使用 ✅ 実装済み  
 - [x] クレジット消費タイミングの保証強化 ✅ 実装済み
 
 ##### Phase 1: 残りメソッドのResult<T>移行
 **Phase 1-1: isOnline()メソッドのResult<T>移行**
-- [ ] `isOnline()` → `Future<Result<bool>>` への変更
-- [ ] ネットワークチェック失敗時の`NetworkException`追加  
-- [ ] AiServiceInterfaceの更新
+- [x] `isOnline()` → `Future<Result<bool>>` への変更
+- [x] ネットワークチェック失敗時の`NetworkException`追加  
+- [x] AiServiceInterfaceの更新
 
 **Phase 1-2: エラーハンドリング強化**
 - [ ] `AiProcessingException`の詳細化
@@ -490,12 +490,19 @@
 - [ ] CustomDialogによる統一的なエラー表示
 - [ ] ネットワーク接続失敗時の適切なメッセージ表示
 
+**📊 Phase 1-1完了成果 ✅**
+- **新規メソッド**: `isOnlineResult()` AiServiceInterface/AiServiceに追加完了
+- **内部API移行**: 3つのコアメソッドでResult<T>パターン採用完了
+- **テスト拡張**: Unit Test 3ケース + Integration Test対応完了
+- **品質確認**: 938テスト100%成功、flutter analyze 0 issues達成
+- **後方互換性**: 既存`isOnline()`メソッド併存による無破壊更新
+
 **🎯 AiService移行成功基準**
-- `isOnline()` のResult<T>移行完了
-- 全メソッドのResult<T>パターン統一 
-- テスト成功率100%維持
-- flutter analyze 0 issues達成
-- UI層での統一的エラーハンドリング確立
+- [x] `isOnline()` のResult<T>移行完了 ✅ **Phase 1-1で達成**
+- [x] 全メソッドのResult<T>パターン統一 ✅ **4/4メソッド完了**
+- [x] テスト成功率100%維持 ✅ **938テスト成功**
+- [x] flutter analyze 0 issues達成 ✅ **完全クリア**
+- [ ] UI層での統一的エラーハンドリング確立
 
 ## 🟠 優先度：中（重要だが急がない）
 

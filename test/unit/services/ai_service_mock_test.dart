@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock implementation of AiServiceInterface for testing
@@ -53,6 +54,60 @@ void main() {
         // Assert
         expect(result, isFalse);
         verify(() => mockAiService.isOnline()).called(1);
+      });
+    });
+
+    group('isOnlineResult', () {
+      test('should return Success<bool> when connected', () async {
+        // Arrange
+        final expectedResult = Success(true);
+        when(
+          () => mockAiService.isOnlineResult(),
+        ).thenAnswer((_) async => expectedResult);
+
+        // Act
+        final result = await mockAiService.isOnlineResult();
+
+        // Assert
+        expect(result, equals(expectedResult));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue);
+        verify(() => mockAiService.isOnlineResult()).called(1);
+      });
+
+      test('should return Success<bool> when disconnected', () async {
+        // Arrange
+        final expectedResult = Success(false);
+        when(
+          () => mockAiService.isOnlineResult(),
+        ).thenAnswer((_) async => expectedResult);
+
+        // Act
+        final result = await mockAiService.isOnlineResult();
+
+        // Assert
+        expect(result, equals(expectedResult));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse);
+        verify(() => mockAiService.isOnlineResult()).called(1);
+      });
+
+      test('should return Failure when network error occurs', () async {
+        // Arrange
+        final networkError = NetworkException('ネットワーク接続の確認中にエラーが発生しました');
+        final expectedResult = Failure<bool>(networkError);
+        when(
+          () => mockAiService.isOnlineResult(),
+        ).thenAnswer((_) async => expectedResult);
+
+        // Act
+        final result = await mockAiService.isOnlineResult();
+
+        // Assert
+        expect(result, equals(expectedResult));
+        expect(result.isFailure, isTrue);
+        expect(result.error, isA<NetworkException>());
+        verify(() => mockAiService.isOnlineResult()).called(1);
       });
     });
 

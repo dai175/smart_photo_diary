@@ -16,6 +16,10 @@ abstract class AiServiceInterface {
   /// インターネット接続があるかどうかを確認
   Future<bool> isOnline();
 
+  /// インターネット接続があるかどうかを確認（Result<T>パターン）
+  /// Phase 1-1: ネットワークエラーハンドリング強化
+  Future<Result<bool>> isOnlineResult();
+
   /// 画像から直接日記を生成（Vision API使用）
   /// Phase 1.7.1: 使用量制限チェック統合
   /// Phase 2.3.2: プロンプト統合対応

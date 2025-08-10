@@ -35,6 +35,25 @@ class AiService implements AiServiceInterface {
   }
 
   @override
+  Future<Result<bool>> isOnlineResult() async {
+    try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isConnected = connectivityResult.any(
+        (result) => result != ConnectivityResult.none,
+      );
+      return Success(isConnected);
+    } catch (e) {
+      return Failure(
+        NetworkException(
+          'ネットワーク接続の確認中にエラーが発生しました',
+          details: e.toString(),
+          originalError: e,
+        ),
+      );
+    }
+  }
+
+  @override
   Future<Result<DiaryGenerationResult>> generateDiaryFromImage({
     required Uint8List imageData,
     required DateTime date,
@@ -78,14 +97,18 @@ class AiService implements AiServiceInterface {
         }
       }
 
-      final online = await isOnline();
+      final onlineResult = await isOnlineResult();
+      if (onlineResult.isFailure) {
+        return Failure(onlineResult.error);
+      }
+
       final result = await _diaryGenerator.generateFromImage(
         imageData: imageData,
         date: date,
         location: location,
         photoTimes: photoTimes,
         prompt: prompt,
-        isOnline: online,
+        isOnline: onlineResult.value,
       );
 
       // Phase 1.7.1.3: 使用量カウント統合
@@ -149,13 +172,17 @@ class AiService implements AiServiceInterface {
         }
       }
 
-      final online = await isOnline();
+      final onlineResult = await isOnlineResult();
+      if (onlineResult.isFailure) {
+        return Failure(onlineResult.error);
+      }
+
       final result = await _diaryGenerator.generateFromMultipleImages(
         imagesWithTimes: imagesWithTimes,
         location: location,
         prompt: prompt,
         onProgress: onProgress,
-        isOnline: online,
+        isOnline: onlineResult.value,
       );
 
       // Phase 1.7.1.3: 使用量カウント統合
@@ -185,13 +212,17 @@ class AiService implements AiServiceInterface {
   }) async {
     try {
       // Phase 1.7.1: タグ生成は使用量にカウントしない
-      final online = await isOnline();
+      final onlineResult = await isOnlineResult();
+      if (onlineResult.isFailure) {
+        return Failure(onlineResult.error);
+      }
+
       final result = await _tagGenerator.generateTags(
         title: title,
         content: content,
         date: date,
         photoCount: photoCount,
-        isOnline: online,
+        isOnline: onlineResult.value,
       );
 
       return Success(result);
