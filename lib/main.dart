@@ -10,6 +10,7 @@ import 'models/subscription_status.dart';
 import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
 import 'services/settings_service.dart';
+import 'services/logging_service.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_colors.dart';
 
@@ -44,6 +45,18 @@ Future<void> main() async {
   await ServiceRegistration.initialize();
   if (kDebugMode) {
     debugPrint('🔧 ServiceRegistration初期化完了');
+  }
+
+  // LoggingServiceの事前初期化（UI コンポーネントでの安全なアクセスのため）
+  try {
+    await LoggingService.getInstance();
+    if (kDebugMode) {
+      debugPrint('🔧 LoggingService事前初期化完了');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      debugPrint('🔧 LoggingService事前初期化エラー: $e');
+    }
   }
 
   runApp(const MyApp());

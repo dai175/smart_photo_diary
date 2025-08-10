@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -18,6 +18,7 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
+import 'package:smart_photo_diary/services/logging_service.dart';
 import '../mocks/mock_services.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -59,6 +60,7 @@ class IntegrationTestHelpers {
     }
   }
 
+
   /// Initialize Hive for testing
   static Future<void> _initializeHive() async {
     const testDirectory = '/tmp/smart_photo_diary_integration_test';
@@ -83,6 +85,7 @@ class IntegrationTestHelpers {
     final mockSubscriptionService = MockSubscriptionServiceInterface();
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
+    final mockLoggingService = MockLoggingService();
 
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
@@ -91,6 +94,7 @@ class IntegrationTestHelpers {
       mockSubscriptionService,
       mockSettingsService,
       mockStorageService,
+      mockLoggingService,
     );
 
     // Register all mock services
@@ -102,6 +106,7 @@ class IntegrationTestHelpers {
     );
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<StorageService>(mockStorageService);
+    _serviceLocator.registerSingleton<LoggingService>(mockLoggingService);
   }
 
   /// Setup default behaviors for mock services
@@ -359,6 +364,7 @@ class IntegrationTestHelpers {
     MockSubscriptionServiceInterface mockSubscriptionService,
     MockSettingsService mockSettingsService,
     MockStorageService mockStorageService,
+    MockLoggingService mockLoggingService,
   ) {
     // Diary service defaults - using Result<T> pattern
     when(
@@ -425,6 +431,29 @@ class IntegrationTestHelpers {
 
     // Storage service defaults - basic mock setup
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
+
+    // Logging service defaults - basic mock setup
+    when(() => mockLoggingService.error(
+      any(),
+      context: any(named: 'context'),
+      error: any(named: 'error'),
+      stackTrace: any(named: 'stackTrace'),
+    )).thenAnswer((_) {});
+    when(() => mockLoggingService.info(
+      any(),
+      context: any(named: 'context'),
+      data: any(named: 'data'),
+    )).thenAnswer((_) {});
+    when(() => mockLoggingService.debug(
+      any(),
+      context: any(named: 'context'),
+      data: any(named: 'data'),
+    )).thenAnswer((_) {});
+    when(() => mockLoggingService.warning(
+      any(),
+      context: any(named: 'context'),
+      data: any(named: 'data'),
+    )).thenAnswer((_) {});
   }
 
   /// Get mock photo service for additional setup

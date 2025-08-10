@@ -173,7 +173,8 @@ class _AnimatedButtonState extends State<AnimatedButton>
 
   void _handleTapDown(TapDownDetails details) {
     if (kDebugMode) {
-      LoggingService.instance.debug(
+      final loggingService = LoggingService.getSafely();
+      loggingService?.debug(
         '_handleTapDown が呼び出されました',
         context: 'AnimatedButton',
       );
@@ -251,7 +252,8 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTap: widget.onPressed != null
                     ? () {
                         if (kDebugMode) {
-                          LoggingService.instance.debug(
+                          final loggingService = LoggingService.getSafely();
+                          loggingService?.debug(
                             'onTap が呼び出されました',
                             context: 'AnimatedButton',
                           );
@@ -317,7 +319,8 @@ class PrimaryButton extends StatelessWidget {
           : (onPressed != null
                 ? () {
                     if (kDebugMode) {
-                      LoggingService.instance.debug(
+                      final loggingService = LoggingService.getSafely();
+                      loggingService?.debug(
                         'onPressed が呼び出されました',
                         context: 'PrimaryButton',
                       );

@@ -17,7 +17,7 @@ class ErrorDisplayService {
 
   LoggingService? get loggingService {
     try {
-      _loggingService ??= LoggingService.instance;
+      _loggingService ??= LoggingService.getSafely();
       return _loggingService;
     } catch (e) {
       // LoggingServiceが初期化されていない場合

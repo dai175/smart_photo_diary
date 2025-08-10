@@ -389,12 +389,12 @@
 - **テスト品質**: DST境界値問題修正・100%成功率維持
 
 ##### Phase 7-3: Integration Tests確認・更新
-- [ ] 既存Integration Test確認
-  - [ ] `test/integration/photo_service_integration_test.dart` Result<T>対応確認
-  - [ ] 必要に応じたResult<T>パターン更新実装
-- [ ] End-to-End Result<T>テスト
-  - [ ] PhotoService → UI層のResult<T>統合フロー確認
-  - [ ] エラー発生から表示まで一気通貫テスト
+- [x] 既存Integration Test確認
+  - [x] `test/integration/photo_service_integration_test.dart` Result<T>対応確認
+  - [x] 必要に応じたResult<T>パターン更新実装
+- [x] End-to-End Result<T>テスト
+  - [x] PhotoService → UI層のResult<T>統合フロー確認
+  - [x] エラー発生から表示まで一気通貫テスト
 
 ##### Phase 7-4: 品質保証・実行確認（subagent活用）
 - [ ] テスト実行確認

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../core/errors/error_handler.dart';
+import '../core/service_locator.dart';
 
 /// ログレベル定義
 enum LogLevel { debug, info, warning, error }
@@ -31,6 +32,34 @@ class LoggingService {
       );
     }
     return _instance!;
+  }
+
+  /// ServiceLocator経由での安全なインスタンス取得
+  static LoggingService? tryGetFromServiceLocator() {
+    try {
+      final serviceLocator = ServiceLocator();
+      return serviceLocator.get<LoggingService>();
+    } catch (e) {
+      // ServiceLocatorに登録されていない場合は静的インスタンスを試行
+      return _instance;
+    }
+  }
+
+  /// ServiceLocator経由または静的インスタンスでの安全な取得
+  static LoggingService? getSafely() {
+    // 1. ServiceLocatorから取得を試行
+    final fromServiceLocator = tryGetFromServiceLocator();
+    if (fromServiceLocator != null) {
+      return fromServiceLocator;
+    }
+    
+    // 2. 静的インスタンスが初期化済みであれば使用
+    if (_instance != null) {
+      return _instance;
+    }
+    
+    // 3. どちらも利用できない場合はnull
+    return null;
   }
 
   /// デバッグログ

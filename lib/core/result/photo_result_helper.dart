@@ -265,7 +265,16 @@ class PhotoPermissionDeniedException extends PhotoAccessException {
   });
 
   @override
-  String get userMessage => '写真アクセス権限が必要です。設定から権限を許可してください。';
+  String get userMessage {
+    // より具体的で親切なメッセージに変換
+    if (message.contains('拒否') || message.contains('denied')) {
+      return '写真アクセス権限が必要です。設定から権限を許可してください。';
+    } else if (message.contains('制限') || message.contains('limited')) {
+      return '写真アクセスが制限されています。設定で権限を確認してください。';
+    } else {
+      return '写真アクセス権限が必要です。設定から権限を許可してください。';
+    }
+  }
 }
 
 class PhotoPermissionPermanentlyDeniedException extends PhotoAccessException {

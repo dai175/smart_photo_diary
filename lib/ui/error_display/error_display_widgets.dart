@@ -93,7 +93,10 @@ class ErrorDialogWidget extends StatelessWidget {
       ),
       const SizedBox(height: 4),
       Text(
-        error.message,
+        // userMessageと異なる場合は詳細メッセージを表示、同じ場合はエラータイプを表示
+        error.userMessage != error.message
+            ? error.message
+            : 'エラータイプ: ${error.runtimeType}',
         style: TextStyle(
           fontSize: AppConstants.captionFontSize,
           color: Colors.grey[600],
@@ -171,7 +174,13 @@ class ErrorDialogWidget extends StatelessWidget {
   }
 
   bool _shouldShowDetails(ErrorSeverity severity) {
-    return severity == ErrorSeverity.critical;
+    // Critical severityでも、userMessageとmessageが同じ場合は詳細表示を避ける
+    if (severity != ErrorSeverity.critical) {
+      return false;
+    }
+    
+    // userMessageとmessageが異なる場合のみ詳細を表示
+    return error.userMessage != error.message;
   }
 }
 
