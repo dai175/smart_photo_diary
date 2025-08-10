@@ -451,11 +451,51 @@
 - 段階的実装: PhotoService関連最優先、各段階で100%成功率維持
 
 #### AiService
-- [ ] 既存のResult<DiaryGenerationResult>の活用確認
-- [ ] `generateTags()` → `Future<Result<List<String>>>`
-- [ ] `isOnline()` → `Future<Result<bool>>`
-- [ ] AiProcessingExceptionの一貫した使用
-- [ ] クレジット消費タイミングの保証強化
+
+##### 🎯 Result<T>移行計画策定完了
+- [x] 既存のResult<DiaryGenerationResult>の活用確認 ✅ 完了済み
+- [x] `generateTags()` → `Future<Result<List<String>>>` ✅ 実装済み
+- [x] `isOnline()` → `Future<Result<bool>>` 📋 **要実装** (唯一の未移行メソッド)
+- [x] AiProcessingExceptionの一貫した使用 ✅ 実装済み  
+- [x] クレジット消費タイミングの保証強化 ✅ 実装済み
+
+##### Phase 1: 残りメソッドのResult<T>移行
+**Phase 1-1: isOnline()メソッドのResult<T>移行**
+- [ ] `isOnline()` → `Future<Result<bool>>` への変更
+- [ ] ネットワークチェック失敗時の`NetworkException`追加  
+- [ ] AiServiceInterfaceの更新
+
+**Phase 1-2: エラーハンドリング強化**
+- [ ] `AiProcessingException`の詳細化
+- [ ] ネットワーク関連エラーとAI処理エラーの分離
+- [ ] 統一的なエラーレスポンス形式の確立
+
+##### Phase 2: テスト強化
+**Phase 2-1: Unit Test拡張** 
+- [ ] 現在のモックテストを実装テストに拡張
+- [ ] `isOnlineResult()` メソッドのテスト追加
+- [ ] Result<T>パターンのエラーシナリオテスト
+
+**Phase 2-2: Integration Test追加**
+- [ ] AiService統合テストの作成
+- [ ] SubscriptionServiceとの連携テスト
+- [ ] エンドツーエンドのResult<T>フローテスト
+
+##### Phase 3: UI層連携確認
+**Phase 3-1: 既存呼び出し元の確認**
+- [ ] `diary_preview_screen.dart`での利用確認
+- [ ] Result<T>への対応状況確認
+
+**Phase 3-2: エラーハンドリングUI更新**
+- [ ] CustomDialogによる統一的なエラー表示
+- [ ] ネットワーク接続失敗時の適切なメッセージ表示
+
+**🎯 AiService移行成功基準**
+- `isOnline()` のResult<T>移行完了
+- 全メソッドのResult<T>パターン統一 
+- テスト成功率100%維持
+- flutter analyze 0 issues達成
+- UI層での統一的エラーハンドリング確立
 
 ## 🟠 優先度：中（重要だが急がない）
 
