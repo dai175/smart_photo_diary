@@ -466,9 +466,9 @@
 - [x] AiServiceInterfaceの更新
 
 **Phase 1-2: エラーハンドリング強化**
-- [ ] `AiProcessingException`の詳細化
-- [ ] ネットワーク関連エラーとAI処理エラーの分離
-- [ ] 統一的なエラーレスポンス形式の確立
+- [x] `AiProcessingException`の詳細化
+- [x] ネットワーク関連エラーとAI処理エラーの分離
+- [x] 統一的なエラーレスポンス形式の確立
 
 ##### Phase 2: テスト強化
 **Phase 2-1: Unit Test拡張** 
@@ -496,6 +496,14 @@
 - **テスト拡張**: Unit Test 3ケース + Integration Test対応完了
 - **品質確認**: 938テスト100%成功、flutter analyze 0 issues達成
 - **後方互換性**: 既存`isOnline()`メソッド併存による無破壊更新
+
+**📊 Phase 1-2完了成果 ✅**
+- **AI専用例外クラス**: 4種類実装完了（AiGenerationException, AiApiResponseException, AiOfflineException, AiResourceException）
+- **DiaryGenerator統一化**: 8箇所の汎用Exception → 専用例外に置換完了
+- **GeminiApiClient強化**: `sendTextRequestResult()`でResult<T>パターン対応完了
+- **TagGenerator防御化**: `generateTagsResult()`で入力検証・エラー処理追加完了
+- **テスト拡張**: AI例外階層テスト3ケース追加、938+テスト100%成功維持
+- **品質確認**: flutter analyze 0 issues達成、エラーハンドリング詳細化完了
 
 **🎯 AiService移行成功基準**
 - [x] `isOnline()` のResult<T>移行完了 ✅ **Phase 1-1で達成**

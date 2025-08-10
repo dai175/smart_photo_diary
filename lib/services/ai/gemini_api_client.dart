@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/result/result.dart';
 import '../logging_service.dart';
 
 /// Gemini APIクライアント - API通信を担当
@@ -94,6 +96,90 @@ class GeminiApiClient {
         );
       }
       return null;
+    }
+  }
+
+  /// テキストベースのAPIリクエストを送信（Result<T>パターン）
+  Future<Result<Map<String, dynamic>>> sendTextRequestResult({
+    required String prompt,
+    double? temperature,
+    int? maxOutputTokens,
+  }) async {
+    try {
+      // APIキーの事前検証
+      if (!EnvironmentConfig.hasValidApiKey) {
+        return Failure(
+          AiResourceException(
+            'Gemini API: 有効なAPIキーが設定されていません',
+            details: '環境変数GEMINI_API_KEYを確認してください',
+          ),
+        );
+      }
+
+      final response = await http.post(
+        Uri.parse(_apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': _apiKey,
+        },
+        body: jsonEncode({
+          'contents': [
+            {
+              'parts': [
+                {'text': prompt},
+              ],
+            },
+          ],
+          'generationConfig': {
+            'temperature': temperature ?? AiConstants.defaultTemperature,
+            'maxOutputTokens':
+                maxOutputTokens ?? AiConstants.defaultMaxOutputTokens,
+            'topP': AiConstants.defaultTopP,
+            'topK': AiConstants.defaultTopK,
+            'thinkingConfig': {'thinkingBudget': 0},
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (kDebugMode) {
+          LoggingService.instance.debug(
+            'Gemini API レスポンス受信',
+            context: 'GeminiApiClient.sendTextRequestResult',
+            data: {'responseSize': response.body.length},
+          );
+        }
+        return Success(data);
+      } else {
+        if (kDebugMode) {
+          LoggingService.instance.error(
+            'Gemini API エラー: ${response.statusCode} - ${response.body}',
+            context: 'GeminiApiClient.sendTextRequestResult',
+          );
+        }
+        return Failure(
+          NetworkException(
+            'Gemini API リクエストが失敗しました',
+            details: 'HTTP ${response.statusCode}: ${response.body}',
+          ),
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'Gemini API リクエストエラー',
+          context: 'GeminiApiClient.sendTextRequestResult',
+          error: e,
+        );
+      }
+      return Failure(
+        NetworkException(
+          'Gemini API通信中にエラーが発生しました',
+          details: e.toString(),
+          originalError: e,
+        ),
+      );
     }
   }
 

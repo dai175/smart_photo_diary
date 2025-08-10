@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
+import '../../core/errors/app_exceptions.dart';
 import 'ai_service_interface.dart';
 import 'gemini_api_client.dart';
 import '../logging_service.dart';
@@ -88,7 +89,10 @@ class DiaryGenerator {
     required bool isOnline,
   }) async {
     if (!isOnline) {
-      throw Exception('オフライン状態では日記を生成できません');
+      throw AiOfflineException(
+        'オフライン状態では日記を生成できません',
+        details: 'インターネット接続を確認してください',
+      );
     }
 
     try {
@@ -171,7 +175,10 @@ $emphasis、個人的で心に響く日記を作成してください。'''
       }
 
       // APIエラーの場合は例外を再スロー
-      throw Exception('AI日記生成に失敗しました: APIレスポンスが不正です');
+      throw AiApiResponseException(
+        'AI日記生成に失敗しました: APIレスポンスが不正です',
+        details: 'APIから有効な応答が得られませんでした',
+      );
     } catch (e) {
       if (kDebugMode) {
         LoggingService.instance.error(
@@ -194,11 +201,17 @@ $emphasis、個人的で心に響く日記を作成してください。'''
     required bool isOnline,
   }) async {
     if (imagesWithTimes.isEmpty) {
-      throw Exception('画像が提供されていません');
+      throw AiGenerationException(
+        '画像が提供されていません',
+        details: '日記生成には少なくとも1つの画像が必要です',
+      );
     }
 
     if (!isOnline) {
-      throw Exception('オフライン状態では日記を生成できません');
+      throw AiOfflineException(
+        'オフライン状態では日記を生成できません',
+        details: 'インターネット接続を確認してください',
+      );
     }
 
     try {
@@ -408,7 +421,7 @@ ${location != null ? '場所: $location\n' : ''}
     String? customPrompt,
   ) async {
     if (photoAnalyses.isEmpty) {
-      throw Exception('写真の分析結果がありません');
+      throw AiGenerationException('写真の分析結果がありません', details: '画像の分析に失敗しました');
     }
 
     // プロンプト種別分析と最適化パラメータ取得
@@ -499,7 +512,10 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
       }
 
       // APIエラーの場合は例外を再スロー
-      throw Exception('AI日記生成に失敗しました: APIレスポンスが不正です');
+      throw AiApiResponseException(
+        'AI日記生成に失敗しました: APIレスポンスが不正です',
+        details: 'APIから有効な応答が得られませんでした',
+      );
     } catch (e) {
       if (kDebugMode) {
         LoggingService.instance.error(

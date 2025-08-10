@@ -111,6 +111,83 @@ void main() {
       });
     });
 
+    group('AiProcessingException Hierarchy', () {
+      test('should handle AiGenerationException properly', () async {
+        // Arrange
+        final generationError = AiGenerationException('日記生成に失敗しました');
+        final expectedResult = Failure<DiaryGenerationResult>(generationError);
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+          ),
+        ).thenAnswer((_) async => expectedResult);
+
+        // Act
+        final result = await mockAiService.generateDiaryFromImage(
+          imageData: Uint8List.fromList([1, 2, 3]),
+          date: DateTime.now(),
+        );
+
+        // Assert
+        expect(result.isFailure, isTrue);
+        expect(result.error, isA<AiGenerationException>());
+        expect(result.error, isA<AiProcessingException>());
+      });
+
+      test('should handle AiApiResponseException properly', () async {
+        // Arrange
+        final apiError = AiApiResponseException('APIレスポンスが不正です');
+        final expectedResult = Failure<DiaryGenerationResult>(apiError);
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+          ),
+        ).thenAnswer((_) async => expectedResult);
+
+        // Act
+        final result = await mockAiService.generateDiaryFromImage(
+          imageData: Uint8List.fromList([1, 2, 3]),
+          date: DateTime.now(),
+        );
+
+        // Assert
+        expect(result.isFailure, isTrue);
+        expect(result.error, isA<AiApiResponseException>());
+        expect(result.error, isA<AiProcessingException>());
+      });
+
+      test('should handle AiOfflineException properly', () async {
+        // Arrange
+        final offlineError = AiOfflineException('オフライン状態では利用できません');
+        final expectedResult = Failure<DiaryGenerationResult>(offlineError);
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+          ),
+        ).thenAnswer((_) async => expectedResult);
+
+        // Act
+        final result = await mockAiService.generateDiaryFromImage(
+          imageData: Uint8List.fromList([1, 2, 3]),
+          date: DateTime.now(),
+        );
+
+        // Assert
+        expect(result.isFailure, isTrue);
+        expect(result.error, isA<AiOfflineException>());
+        expect(result.error, isA<AiProcessingException>());
+      });
+    });
+
     group('generateDiaryFromImage', () {
       test('should generate diary from image data', () async {
         // Arrange

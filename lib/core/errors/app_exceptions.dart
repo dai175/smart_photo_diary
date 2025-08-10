@@ -58,6 +58,46 @@ class AiProcessingException extends AppException {
   });
 }
 
+/// AI日記生成エラー
+class AiGenerationException extends AiProcessingException {
+  const AiGenerationException(
+    super.message, {
+    super.details,
+    super.originalError,
+    super.stackTrace,
+  });
+}
+
+/// AI APIレスポンスエラー
+class AiApiResponseException extends AiProcessingException {
+  const AiApiResponseException(
+    super.message, {
+    super.details,
+    super.originalError,
+    super.stackTrace,
+  });
+}
+
+/// AIオフライン処理エラー
+class AiOfflineException extends AiProcessingException {
+  const AiOfflineException(
+    super.message, {
+    super.details,
+    super.originalError,
+    super.stackTrace,
+  });
+}
+
+/// AIリソース不足エラー
+class AiResourceException extends AiProcessingException {
+  const AiResourceException(
+    super.message, {
+    super.details,
+    super.originalError,
+    super.stackTrace,
+  });
+}
+
 /// データベース関連エラー
 class DatabaseException extends AppException {
   const DatabaseException(

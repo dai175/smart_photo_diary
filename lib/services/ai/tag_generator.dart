@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/result/result.dart';
 import 'gemini_api_client.dart';
 import '../logging_service.dart';
 
@@ -96,6 +98,108 @@ class TagGenerator {
         );
       }
       return _generateOfflineTags(title, content, date, photoCount);
+    }
+  }
+
+  /// 日記の内容からタグを自動生成（Result<T>パターン）
+  Future<Result<List<String>>> generateTagsResult({
+    required String title,
+    required String content,
+    required DateTime date,
+    required int photoCount,
+    required bool isOnline,
+  }) async {
+    try {
+      // 入力検証
+      if (title.trim().isEmpty && content.trim().isEmpty) {
+        return Failure(
+          AiGenerationException(
+            'タグ生成には日記のタイトルまたは内容が必要です',
+            details: '空の日記からタグを生成することはできません',
+          ),
+        );
+      }
+
+      if (!isOnline) {
+        final offlineTags = _generateOfflineTags(
+          title,
+          content,
+          date,
+          photoCount,
+        );
+        return Success(offlineTags);
+      }
+
+      // 時間帯を取得
+      final timeOfDay = _getTimeOfDay(date);
+
+      // タグ生成用プロンプト
+      final prompt =
+          '''
+以下の日記の内容から、適切なタグを3-5個生成してください。
+タグは日記の内容を表現する短い単語（1-3文字程度）で、カテゴリ分けに役立つものにしてください。
+
+日付: ${DateFormat('yyyy年MM月dd日').format(date)}
+時間帯: $timeOfDay
+写真枚数: $photoCount枚
+
+タイトル: $title
+内容: $content
+
+タグは以下の形式で出力してください（例）:
+散歩,公園,天気,友達,楽しい
+''';
+
+      final response = await _apiClient.sendTextRequestResult(
+        prompt: prompt,
+        temperature: 0.7,
+        maxOutputTokens: 100,
+      );
+
+      if (response.isSuccess) {
+        final content = _apiClient.extractTextFromResponse(response.value);
+        if (content != null && content.isNotEmpty) {
+          final tags = _parseTags(content);
+          final filteredTags = _filterTags(tags);
+
+          if (filteredTags.isNotEmpty) {
+            return Success(filteredTags.take(5).toList());
+          }
+        }
+      } else {
+        // API呼び出しが失敗した場合は詳細エラーを返す
+        return Failure(response.error);
+      }
+
+      // API成功だがタグ抽出に失敗した場合はオフラインタグにフォールバック
+      if (kDebugMode) {
+        LoggingService.instance.warning(
+          'タグ生成 API レスポンス解析に失敗、オフラインタグを使用',
+          context: 'TagGenerator.generateTagsResult',
+        );
+      }
+      final offlineTags = _generateOfflineTags(
+        title,
+        content,
+        date,
+        photoCount,
+      );
+      return Success(offlineTags);
+    } catch (e) {
+      if (kDebugMode) {
+        LoggingService.instance.error(
+          'タグ生成エラー',
+          context: 'TagGenerator.generateTagsResult',
+          error: e,
+        );
+      }
+      return Failure(
+        AiProcessingException(
+          'タグ生成中にエラーが発生しました',
+          details: e.toString(),
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -226,6 +330,27 @@ class TagGenerator {
         filteredTags.add(tag);
       }
     }
+
+    return filteredTags;
+  }
+
+  /// レスポンスからタグをパース
+  List<String> _parseTags(String content) {
+    return content
+        .trim()
+        .split(',')
+        .map((tag) => tag.trim())
+        .where((tag) => tag.isNotEmpty)
+        .toList();
+  }
+
+  /// タグをフィルタリング（基本タグ追加と重複除去）
+  List<String> _filterTags(List<String> tags) {
+    // 基本タグと組み合わせ
+    final allTags = [...tags];
+
+    // 似たようなタグを統合
+    final filteredTags = _filterSimilarTags(allTags);
 
     return filteredTags;
   }
