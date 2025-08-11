@@ -70,7 +70,6 @@ void main() {
       ).thenReturn(null);
     }
 
-
     void setupSuccessfulPhotoServiceMock(
       MockPhotoServiceInterface mock,
       List<MockAssetEntity> photos,
@@ -401,7 +400,8 @@ void main() {
         final today = DateTime(now.year, now.month, now.day);
 
         // 現在の日付から365日前（正確なアクセス境界）
-        final accessibleDate = photoAccessControlService.getAccessibleDateForPlan(premiumPlan);
+        final accessibleDate = photoAccessControlService
+            .getAccessibleDateForPlan(premiumPlan);
 
         // Act & Assert - アクセス境界日はアクセス可能
         final result = photoAccessControlService.isPhotoAccessible(
@@ -426,7 +426,8 @@ void main() {
         final premiumPlan = PremiumMonthlyPlan();
 
         // 現在の日付から365日前（正確なアクセス境界）
-        final accessibleDate = photoAccessControlService.getAccessibleDateForPlan(premiumPlan);
+        final accessibleDate = photoAccessControlService
+            .getAccessibleDateForPlan(premiumPlan);
 
         // Act & Assert - アクセス境界日はアクセス可能
         expect(
@@ -450,10 +451,7 @@ void main() {
         // アクセス境界より新しい日付はアクセス可能
         final oneDayLater = accessibleDate.add(const Duration(days: 1));
         expect(
-          photoAccessControlService.isPhotoAccessible(
-            oneDayLater,
-            premiumPlan,
-          ),
+          photoAccessControlService.isPhotoAccessible(oneDayLater, premiumPlan),
           isTrue,
         );
       });

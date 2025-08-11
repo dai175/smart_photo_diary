@@ -55,12 +55,12 @@ void main() {
         final photo = MockAssetEntity();
         when(() => photo.id).thenReturn('permission-test-photo-$i');
         when(() => photo.title).thenReturn('Permission Test Photo $i');
-        when(() => photo.createDateTime).thenReturn(
-          now.subtract(Duration(hours: i)),
-        );
-        when(() => photo.modifiedDateTime).thenReturn(
-          now.subtract(Duration(hours: i)),
-        );
+        when(
+          () => photo.createDateTime,
+        ).thenReturn(now.subtract(Duration(hours: i)));
+        when(
+          () => photo.modifiedDateTime,
+        ).thenReturn(now.subtract(Duration(hours: i)));
         when(() => photo.type).thenReturn(AssetType.image);
         when(() => photo.width).thenReturn(1920);
         when(() => photo.height).thenReturn(1080);
@@ -98,74 +98,98 @@ void main() {
     });
 
     void setupPermissionDeniedMock() {
-      when(() => photoService.requestPermission())
-          .thenAnswer((_) async => false);
-      
-      when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-          .thenThrow(PhotoAccessException('写真アクセス権限が拒否されています'));
-      
-      when(() => photoService.getPhotosInDateRange(
-        startDate: any(named: 'startDate'),
-        endDate: any(named: 'endDate'),
-      )).thenThrow(PhotoAccessException('写真アクセス権限が拒否されています'));
+      when(
+        () => photoService.requestPermission(),
+      ).thenAnswer((_) async => false);
+
+      when(
+        () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+      ).thenThrow(PhotoAccessException('写真アクセス権限が拒否されています'));
+
+      when(
+        () => photoService.getPhotosInDateRange(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenThrow(PhotoAccessException('写真アクセス権限が拒否されています'));
     }
 
     void setupPermissionGrantedMock() {
-      when(() => photoService.requestPermission())
-          .thenAnswer((_) async => true);
-      
-      when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-          .thenAnswer((_) async => mockPhotos);
-      
-      when(() => photoService.getPhotosInDateRange(
-        startDate: any(named: 'startDate'),
-        endDate: any(named: 'endDate'),
-      )).thenAnswer((_) async => mockPhotos);
+      when(
+        () => photoService.requestPermission(),
+      ).thenAnswer((_) async => true);
 
-      when(() => photoService.getOriginalFileResult(any()))
-          .thenAnswer((_) async => Success(createMockImageData()));
+      when(
+        () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+      ).thenAnswer((_) async => mockPhotos);
+
+      when(
+        () => photoService.getPhotosInDateRange(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => mockPhotos);
+
+      when(
+        () => photoService.getOriginalFileResult(any()),
+      ).thenAnswer((_) async => Success(createMockImageData()));
     }
 
     void setupSuccessfulAiServiceMock() {
-      when(() => aiService.isOnlineResult())
-          .thenAnswer((_) async => Success(true));
+      when(
+        () => aiService.isOnlineResult(),
+      ).thenAnswer((_) async => Success(true));
 
-      when(() => aiService.generateDiaryFromMultipleImages(
-        imagesWithTimes: any(named: 'imagesWithTimes'),
-        location: any(named: 'location'),
-        onProgress: any(named: 'onProgress'),
-      )).thenAnswer((_) async => Success(DiaryGenerationResult(
-        title: '権限テスト日記',
-        content: '写真アクセス権限が正常に取得され、素敵な日記を作成できました。',
-      )));
+      when(
+        () => aiService.generateDiaryFromMultipleImages(
+          imagesWithTimes: any(named: 'imagesWithTimes'),
+          location: any(named: 'location'),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).thenAnswer(
+        (_) async => Success(
+          DiaryGenerationResult(
+            title: '権限テスト日記',
+            content: '写真アクセス権限が正常に取得され、素敵な日記を作成できました。',
+          ),
+        ),
+      );
 
-      when(() => aiService.generateTagsFromContent(
-        title: any(named: 'title'),
-        content: any(named: 'content'),
-        date: any(named: 'date'),
-        photoCount: any(named: 'photoCount'),
-      )).thenAnswer((_) async => Success(['権限', 'テスト', '成功']));
+      when(
+        () => aiService.generateTagsFromContent(
+          title: any(named: 'title'),
+          content: any(named: 'content'),
+          date: any(named: 'date'),
+          photoCount: any(named: 'photoCount'),
+        ),
+      ).thenAnswer((_) async => Success(['権限', 'テスト', '成功']));
     }
 
     void setupSuccessfulDiaryServiceMock() {
-      when(() => diaryService.saveDiaryEntry(
-        date: any(named: 'date'),
-        title: any(named: 'title'),
-        content: any(named: 'content'),
-        photoIds: any(named: 'photoIds'),
-        location: any(named: 'location'),
-        tags: any(named: 'tags'),
-      )).thenAnswer((_) async => Success(DiaryEntry(
-        id: 'permission-test-diary',
-        title: '権限テスト日記',
-        content: '写真アクセス権限が正常に取得され、素敵な日記を作成できました。',
-        date: DateTime.now(),
-        photoIds: mockPhotos.map((p) => p.id).toList(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        location: '東京都渋谷区',
-        tags: ['権限', 'テスト', '成功'],
-      )));
+      when(
+        () => diaryService.saveDiaryEntry(
+          date: any(named: 'date'),
+          title: any(named: 'title'),
+          content: any(named: 'content'),
+          photoIds: any(named: 'photoIds'),
+          location: any(named: 'location'),
+          tags: any(named: 'tags'),
+        ),
+      ).thenAnswer(
+        (_) async => Success(
+          DiaryEntry(
+            id: 'permission-test-diary',
+            title: '権限テスト日記',
+            content: '写真アクセス権限が正常に取得され、素敵な日記を作成できました。',
+            date: DateTime.now(),
+            photoIds: mockPhotos.map((p) => p.id).toList(),
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            location: '東京都渋谷区',
+            tags: ['権限', 'テスト', '成功'],
+          ),
+        ),
+      );
     }
 
     // =================================================================
@@ -198,10 +222,13 @@ void main() {
         // Act & Assert - 写真取得で例外がスローされる
         expect(
           () => photoService.getTodayPhotos(),
-          throwsA(predicate((e) => 
-            e is PhotoAccessException && 
-            e.message.contains('写真アクセス権限が拒否されています')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is PhotoAccessException &&
+                  e.message.contains('写真アクセス権限が拒否されています'),
+            ),
+          ),
         );
 
         expect(
@@ -241,11 +268,13 @@ void main() {
         );
 
         // 後続処理は実行されない（写真がないため）
-        verifyNever(() => aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: any(named: 'location'),
-          onProgress: any(named: 'onProgress'),
-        ));
+        verifyNever(
+          () => aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: any(named: 'location'),
+            onProgress: any(named: 'onProgress'),
+          ),
+        );
       });
     });
 
@@ -256,16 +285,18 @@ void main() {
     group('Group 2: 権限再要求処理テスト', () {
       test('ユーザー操作による権限再要求 - 拒否→許可への状態変更', () async {
         // Arrange - 最初は拒否状態
-        when(() => photoService.requestPermission())
-            .thenAnswer((_) async => false);
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => false);
 
         // Act - 初回要求（拒否）
         final firstRequest = await photoService.requestPermission();
         expect(firstRequest, isFalse);
 
         // システム設定変更をシミュレート（ユーザーが設定アプリで権限許可）
-        when(() => photoService.requestPermission())
-            .thenAnswer((_) async => true);
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => true);
 
         // Act - 再要求（許可）
         final secondRequest = await photoService.requestPermission();
@@ -296,7 +327,9 @@ void main() {
         expect(rangePhotos, isNotEmpty);
 
         // 写真データ取得も成功
-        final imageDataResult = await photoService.getOriginalFileResult(mockPhotos.first);
+        final imageDataResult = await photoService.getOriginalFileResult(
+          mockPhotos.first,
+        );
         expect(imageDataResult, isA<Success>());
       });
 
@@ -311,7 +344,7 @@ void main() {
             case 2:
               return false; // 2回目も拒否
             case 3:
-              return true;  // 3回目で許可
+              return true; // 3回目で許可
             default:
               return true;
           }
@@ -320,7 +353,7 @@ void main() {
         // Act & Assert - 段階的な状態変更
         expect(await photoService.requestPermission(), isFalse); // 1回目
         expect(await photoService.requestPermission(), isFalse); // 2回目
-        expect(await photoService.requestPermission(), isTrue);  // 3回目
+        expect(await photoService.requestPermission(), isTrue); // 3回目
 
         // 最終的に3回呼ばれた
         verify(() => photoService.requestPermission()).called(3);
@@ -358,10 +391,16 @@ void main() {
         }
 
         // Phase 4: AI生成
-        final imagesWithTimes = selectedPhotos.asMap().entries.map((entry) => (
-          imageData: imageDataResults[entry.key].data,
-          time: entry.value.createDateTime,
-        )).toList();
+        final imagesWithTimes = selectedPhotos
+            .asMap()
+            .entries
+            .map(
+              (entry) => (
+                imageData: imageDataResults[entry.key].data,
+                time: entry.value.createDateTime,
+              ),
+            )
+            .toList();
 
         final diaryResult = await aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
@@ -402,24 +441,30 @@ void main() {
         // 全フローが正常に実行されたことを確認
         verify(() => photoService.requestPermission()).called(1);
         verify(() => photoService.getTodayPhotos()).called(1);
-        verify(() => aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: any(named: 'location'),
-        )).called(1);
-        verify(() => aiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).called(1);
-        verify(() => diaryService.saveDiaryEntry(
-          date: any(named: 'date'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          photoIds: any(named: 'photoIds'),
-          location: any(named: 'location'),
-          tags: any(named: 'tags'),
-        )).called(1);
+        verify(
+          () => aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: any(named: 'location'),
+          ),
+        ).called(1);
+        verify(
+          () => aiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).called(1);
+        verify(
+          () => diaryService.saveDiaryEntry(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photoIds: any(named: 'photoIds'),
+            location: any(named: 'location'),
+            tags: any(named: 'tags'),
+          ),
+        ).called(1);
       });
 
       test('権限許可後のエラー回復力テスト - ネットワークエラーからの復旧', () async {
@@ -428,8 +473,9 @@ void main() {
         setupSuccessfulDiaryServiceMock();
 
         // AI service initially offline
-        when(() => aiService.isOnlineResult())
-            .thenAnswer((_) async => Success(false));
+        when(
+          () => aiService.isOnlineResult(),
+        ).thenAnswer((_) async => Success(false));
 
         // Act - 権限取得は成功
         final permissionGranted = await photoService.requestPermission();
@@ -456,10 +502,16 @@ void main() {
           imageDataResults.add(result as Success<Uint8List>);
         }
 
-        final imagesWithTimes = selectedPhotos.asMap().entries.map((entry) => (
-          imageData: imageDataResults[entry.key].data,
-          time: entry.value.createDateTime,
-        )).toList();
+        final imagesWithTimes = selectedPhotos
+            .asMap()
+            .entries
+            .map(
+              (entry) => (
+                imageData: imageDataResults[entry.key].data,
+                time: entry.value.createDateTime,
+              ),
+            )
+            .toList();
 
         final diaryResult = await aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
@@ -480,16 +532,19 @@ void main() {
     group('Group 4: iOS限定アクセス権限（Limited Access）処理テスト', () {
       test('Limited access状態での制限された写真取得', () async {
         // Arrange - limited access状態をシミュレート
-        when(() => photoService.requestPermission())
-            .thenAnswer((_) async => true); // 権限はあるが制限あり
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => true); // 権限はあるが制限あり
 
         // 制限された写真のみ取得可能
         final limitedPhotos = [mockPhotos.first]; // 1枚のみアクセス可能
-        when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => limitedPhotos);
+        when(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => limitedPhotos);
 
-        when(() => photoService.getOriginalFileResult(any()))
-            .thenAnswer((_) async => Success(createMockImageData()));
+        when(
+          () => photoService.getOriginalFileResult(any()),
+        ).thenAnswer((_) async => Success(createMockImageData()));
 
         // Act
         final permissionGranted = await photoService.requestPermission();
@@ -499,26 +554,30 @@ void main() {
         expect(availablePhotos.length, equals(1)); // 制限されている
 
         // Limited accessでも日記作成は可能
-        final imageResult = await photoService.getOriginalFileResult(availablePhotos.first);
+        final imageResult = await photoService.getOriginalFileResult(
+          availablePhotos.first,
+        );
         expect(imageResult, isA<Success<Uint8List>>());
       });
 
       test('Limited access状態でのユーザーガイダンス確認', () async {
         // Arrange - limited access detection
-        when(() => photoService.requestPermission())
-            .thenAnswer((_) async => true);
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => true);
 
         // 通常より少ない写真数（limited accessの兆候）
         final limitedPhotos = [mockPhotos.first];
-        when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => limitedPhotos);
+        when(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => limitedPhotos);
 
         // Act
         final availablePhotos = await photoService.getTodayPhotos(limit: 10);
 
         // Assert - 想定より少ない写真数（limited accessの可能性）
         expect(availablePhotos.length, lessThan(3));
-        
+
         // この状態でもアプリは動作する
         expect(availablePhotos, isNotEmpty);
       });
@@ -541,7 +600,7 @@ void main() {
         expect(await photoService.requestPermission(), isFalse); // 1回目
         expect(await photoService.requestPermission(), isFalse); // 2回目
         expect(await photoService.requestPermission(), isFalse); // 3回目
-        expect(await photoService.requestPermission(), isTrue);  // 4回目
+        expect(await photoService.requestPermission(), isTrue); // 4回目
 
         // Assert
         verify(() => photoService.requestPermission()).called(4);
@@ -553,15 +612,20 @@ void main() {
         when(() => photoService.requestPermission()).thenAnswer((_) async {
           callOrder++;
           switch (callOrder) {
-            case 1: return true;  // 最初は許可
-            case 2: return false; // システム設定で拒否に変更
-            case 3: return true;  // 再度許可
-            default: return true;
+            case 1:
+              return true; // 最初は許可
+            case 2:
+              return false; // システム設定で拒否に変更
+            case 3:
+              return true; // 再度許可
+            default:
+              return true;
           }
         });
 
-        when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async {
+        when(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async {
           if (callOrder == 2) {
             throw PhotoAccessException('権限が取り消されました');
           }
@@ -569,16 +633,16 @@ void main() {
         });
 
         // Act & Assert - 動的な権限状態変化
-        expect(await photoService.requestPermission(), isTrue);  // 初回許可
+        expect(await photoService.requestPermission(), isTrue); // 初回許可
         expect(await photoService.requestPermission(), isFalse); // 権限取り消し
-        
+
         // 権限拒否状態では写真取得エラー
         expect(
           () => photoService.getTodayPhotos(),
           throwsA(isA<PhotoAccessException>()),
         );
 
-        expect(await photoService.requestPermission(), isTrue);  // 再許可
+        expect(await photoService.requestPermission(), isTrue); // 再許可
 
         // 再許可後は正常動作
         final photos = await photoService.getTodayPhotos();
@@ -616,8 +680,9 @@ void main() {
           return attemptCount >= 2; // 2回目で成功
         });
 
-        when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async {
+        when(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async {
           if (attemptCount < 2) {
             throw PhotoAccessException('権限が不十分です');
           }
@@ -649,11 +714,13 @@ void main() {
         setupSuccessfulDiaryServiceMock();
 
         // AI service fails
-        when(() => aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: any(named: 'location'),
-          onProgress: any(named: 'onProgress'),
-        )).thenAnswer((_) async => Failure(AiProcessingException('AI処理エラー')));
+        when(
+          () => aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: any(named: 'location'),
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).thenAnswer((_) async => Failure(AiProcessingException('AI処理エラー')));
 
         // Act - 写真取得は成功
         final permissionGranted = await photoService.requestPermission();
@@ -670,10 +737,16 @@ void main() {
           imageResults.add(result as Success<Uint8List>);
         }
 
-        final imagesWithTimes = photos.asMap().entries.map((entry) => (
-          imageData: imageResults[entry.key].data,
-          time: entry.value.createDateTime,
-        )).toList();
+        final imagesWithTimes = photos
+            .asMap()
+            .entries
+            .map(
+              (entry) => (
+                imageData: imageResults[entry.key].data,
+                time: entry.value.createDateTime,
+              ),
+            )
+            .toList();
 
         final diaryResult = await aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
@@ -684,10 +757,12 @@ void main() {
         // Assert - 権限問題は解決、AI問題のみ
         verify(() => photoService.requestPermission()).called(1);
         verify(() => photoService.getTodayPhotos()).called(1);
-        verify(() => aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: any(named: 'location'),
-        )).called(1);
+        verify(
+          () => aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: any(named: 'location'),
+          ),
+        ).called(1);
       });
 
       test('全サービス統合でのエラーチェーン確認', () async {
@@ -707,7 +782,7 @@ void main() {
 
         // Phase 3: 権限解決後、全て正常動作
         setupPermissionGrantedMock();
-        
+
         expect(await photoService.requestPermission(), isTrue);
         final photos = await photoService.getTodayPhotos();
         expect(photos, isNotEmpty);
@@ -718,4 +793,3 @@ void main() {
     });
   });
 }
-

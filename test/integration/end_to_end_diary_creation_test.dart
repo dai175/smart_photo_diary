@@ -44,11 +44,11 @@ void main() {
     List<MockAssetEntity> createMockPhotosWithMetadata(int count) {
       final photos = <MockAssetEntity>[];
       final now = DateTime.now();
-      
+
       for (int i = 0; i < count; i++) {
         final mockPhoto = MockAssetEntity();
         final photoTime = now.subtract(Duration(hours: i));
-        
+
         when(() => mockPhoto.id).thenReturn('e2e-photo-$i');
         when(() => mockPhoto.title).thenReturn('E2E Test Photo $i');
         when(() => mockPhoto.createDateTime).thenReturn(photoTime);
@@ -57,10 +57,10 @@ void main() {
         when(() => mockPhoto.width).thenReturn(1920);
         when(() => mockPhoto.height).thenReturn(1080);
         when(() => mockPhoto.duration).thenReturn(0);
-        
+
         photos.add(mockPhoto);
       }
-      
+
       return photos;
     }
 
@@ -70,63 +70,91 @@ void main() {
 
     void setupSuccessfulPhotoFlow(List<AssetEntity> photos) {
       // PhotoService成功パターン
-      when(() => photoService.requestPermission()).thenAnswer((_) async => true);
-      when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-          .thenAnswer((_) async => photos);
-      
+      when(
+        () => photoService.requestPermission(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+      ).thenAnswer((_) async => photos);
+
       for (final photo in photos) {
-        when(() => photoService.getOriginalFileResult(photo))
-            .thenAnswer((_) async => Success(createMockImageData()));
-        when(() => photoService.getThumbnailData(photo))
-            .thenAnswer((_) async => createMockImageData(size: 512));
+        when(
+          () => photoService.getOriginalFileResult(photo),
+        ).thenAnswer((_) async => Success(createMockImageData()));
+        when(
+          () => photoService.getThumbnailData(photo),
+        ).thenAnswer((_) async => createMockImageData(size: 512));
       }
     }
 
     void setupSuccessfulAiFlow({String? customTitle, String? customContent}) {
       // AiService成功パターン
-      when(() => aiService.isOnlineResult()).thenAnswer((_) async => Success(true));
-      when(() => aiService.canUseAiGeneration()).thenAnswer((_) async => Success(true));
-      when(() => aiService.getRemainingGenerations()).thenAnswer((_) async => Success(10));
-      
-      when(() => aiService.generateDiaryFromImage(
-        imageData: any(named: 'imageData'),
-        date: any(named: 'date'),
-        location: any(named: 'location'),
-        photoTimes: any(named: 'photoTimes'),
-        prompt: any(named: 'prompt'),
-      )).thenAnswer((_) async => Success(DiaryGenerationResult(
-        title: customTitle ?? 'AIが生成したタイトル',
-        content: customContent ?? 'AIが生成した日記の内容。今日は素晴らしい一日でした。写真からの思い出を記録します。',
-      )));
+      when(
+        () => aiService.isOnlineResult(),
+      ).thenAnswer((_) async => Success(true));
+      when(
+        () => aiService.canUseAiGeneration(),
+      ).thenAnswer((_) async => Success(true));
+      when(
+        () => aiService.getRemainingGenerations(),
+      ).thenAnswer((_) async => Success(10));
 
-      when(() => aiService.generateDiaryFromMultipleImages(
-        imagesWithTimes: any(named: 'imagesWithTimes'),
-        location: any(named: 'location'),
-        prompt: any(named: 'prompt'),
-        onProgress: any(named: 'onProgress'),
-      )).thenAnswer((_) async => Success(DiaryGenerationResult(
-        title: customTitle ?? 'AIが生成した複数画像タイトル',
-        content: customContent ?? 'AIが複数の写真から生成した日記の内容。多くの瞬間を記録できました。',
-      )));
-      
-      when(() => aiService.generateTagsFromContent(
-        title: any(named: 'title'),
-        content: any(named: 'content'),
-        date: any(named: 'date'),
-        photoCount: any(named: 'photoCount'),
-      )).thenAnswer((_) async => Success(['日記', 'AI生成', 'テスト', '思い出']));
+      when(
+        () => aiService.generateDiaryFromImage(
+          imageData: any(named: 'imageData'),
+          date: any(named: 'date'),
+          location: any(named: 'location'),
+          photoTimes: any(named: 'photoTimes'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenAnswer(
+        (_) async => Success(
+          DiaryGenerationResult(
+            title: customTitle ?? 'AIが生成したタイトル',
+            content:
+                customContent ?? 'AIが生成した日記の内容。今日は素晴らしい一日でした。写真からの思い出を記録します。',
+          ),
+        ),
+      );
+
+      when(
+        () => aiService.generateDiaryFromMultipleImages(
+          imagesWithTimes: any(named: 'imagesWithTimes'),
+          location: any(named: 'location'),
+          prompt: any(named: 'prompt'),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).thenAnswer(
+        (_) async => Success(
+          DiaryGenerationResult(
+            title: customTitle ?? 'AIが生成した複数画像タイトル',
+            content: customContent ?? 'AIが複数の写真から生成した日記の内容。多くの瞬間を記録できました。',
+          ),
+        ),
+      );
+
+      when(
+        () => aiService.generateTagsFromContent(
+          title: any(named: 'title'),
+          content: any(named: 'content'),
+          date: any(named: 'date'),
+          photoCount: any(named: 'photoCount'),
+        ),
+      ).thenAnswer((_) async => Success(['日記', 'AI生成', 'テスト', '思い出']));
     }
 
     void setupSuccessfulDiaryFlow() {
       // DiaryService成功パターン
-      when(() => diaryService.saveDiaryEntry(
-        date: any(named: 'date'),
-        title: any(named: 'title'),
-        content: any(named: 'content'),
-        photoIds: any(named: 'photoIds'),
-        location: any(named: 'location'),
-        tags: any(named: 'tags'),
-      )).thenAnswer((invocation) async {
+      when(
+        () => diaryService.saveDiaryEntry(
+          date: any(named: 'date'),
+          title: any(named: 'title'),
+          content: any(named: 'content'),
+          photoIds: any(named: 'photoIds'),
+          location: any(named: 'location'),
+          tags: any(named: 'tags'),
+        ),
+      ).thenAnswer((invocation) async {
         final date = invocation.namedArguments[#date] as DateTime;
         final title = invocation.namedArguments[#title] as String;
         final content = invocation.namedArguments[#content] as String;
@@ -134,41 +162,48 @@ void main() {
         final location = invocation.namedArguments[#location] as String?;
         final tags = invocation.namedArguments[#tags] as List<String>?;
 
-        return Success(DiaryEntry(
-          id: 'e2e-diary-${date.millisecondsSinceEpoch}',
-          date: date,
-          title: title,
-          content: content,
-          photoIds: photoIds,
-          location: location,
-          tags: tags ?? [],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ));
+        return Success(
+          DiaryEntry(
+            id: 'e2e-diary-${date.millisecondsSinceEpoch}',
+            date: date,
+            title: title,
+            content: content,
+            photoIds: photoIds,
+            location: location,
+            tags: tags ?? [],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
       });
 
-      when(() => diaryService.saveDiaryEntryWithAiGeneration(
-        photos: any(named: 'photos'),
-        date: any(named: 'date'),
-        location: any(named: 'location'),
-        prompt: any(named: 'prompt'),
-        onProgress: any(named: 'onProgress'),
-      )).thenAnswer((invocation) async {
+      when(
+        () => diaryService.saveDiaryEntryWithAiGeneration(
+          photos: any(named: 'photos'),
+          date: any(named: 'date'),
+          location: any(named: 'location'),
+          prompt: any(named: 'prompt'),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).thenAnswer((invocation) async {
         final photos = invocation.namedArguments[#photos] as List<AssetEntity>;
-        final date = invocation.namedArguments[#date] as DateTime? ?? DateTime.now();
+        final date =
+            invocation.namedArguments[#date] as DateTime? ?? DateTime.now();
         final location = invocation.namedArguments[#location] as String?;
 
-        return Success(DiaryEntry(
-          id: 'e2e-ai-diary-${date.millisecondsSinceEpoch}',
-          date: date,
-          title: 'AIが生成したタイトル',
-          content: 'AIが生成した日記の内容',
-          photoIds: photos.map((p) => p.id).toList(),
-          location: location,
-          tags: ['日記', 'AI生成', 'テスト'],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ));
+        return Success(
+          DiaryEntry(
+            id: 'e2e-ai-diary-${date.millisecondsSinceEpoch}',
+            date: date,
+            title: 'AIが生成したタイトル',
+            content: 'AIが生成した日記の内容',
+            photoIds: photos.map((p) => p.id).toList(),
+            location: location,
+            tags: ['日記', 'AI生成', 'テスト'],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
       });
     }
 
@@ -184,14 +219,18 @@ void main() {
 
       // 基本的なサブスクリプション設定（Basic Plan）
       when(() => subscriptionService.isInitialized).thenReturn(true);
-      when(() => subscriptionService.getCurrentPlanClass())
-          .thenAnswer((_) async => Success(BasicPlan()));
-      when(() => subscriptionService.canUseAiGeneration())
-          .thenAnswer((_) async => Success(true));
-      when(() => subscriptionService.getRemainingGenerations())
-          .thenAnswer((_) async => Success(10));
-      when(() => subscriptionService.incrementAiUsage())
-          .thenAnswer((_) async => Success(null));
+      when(
+        () => subscriptionService.getCurrentPlanClass(),
+      ).thenAnswer((_) async => Success(BasicPlan()));
+      when(
+        () => subscriptionService.canUseAiGeneration(),
+      ).thenAnswer((_) async => Success(true));
+      when(
+        () => subscriptionService.getRemainingGenerations(),
+      ).thenAnswer((_) async => Success(10));
+      when(
+        () => subscriptionService.incrementAiUsage(),
+      ).thenAnswer((_) async => Success(null));
     });
 
     tearDown(() async {
@@ -222,7 +261,9 @@ void main() {
 
         // Act & Assert - Step 3: 各写真のデータ取得
         for (final photo in photos) {
-          final imageDataResult = await photoService.getOriginalFileResult(photo);
+          final imageDataResult = await photoService.getOriginalFileResult(
+            photo,
+          );
           expect(imageDataResult, isA<Success<Uint8List>>());
           expect(imageDataResult.valueOrNull, isNotNull);
           expect(imageDataResult.valueOrNull!.length, greaterThan(0));
@@ -241,29 +282,39 @@ void main() {
 
       test('写真選択エラー時のハンドリング - 権限拒否シナリオ', () async {
         // Arrange
-        when(() => photoService.requestPermission()).thenAnswer((_) async => false);
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => false);
 
         // Act
         final permissionResult = await photoService.requestPermission();
 
         // Assert
         expect(permissionResult, isFalse);
-        
+
         // 権限がない場合は写真取得を試行しない
-        verifyNever(() => photoService.getTodayPhotos(limit: any(named: 'limit')));
+        verifyNever(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        );
       });
 
       test('写真データ取得エラー時のハンドリング', () async {
         // Arrange
-        when(() => photoService.requestPermission()).thenAnswer((_) async => true);
-        when(() => photoService.getTodayPhotos(limit: any(named: 'limit')))
-            .thenAnswer((_) async => mockPhotos);
-        when(() => photoService.getOriginalFileResult(any()))
-            .thenAnswer((_) async => Failure(PhotoAccessException('画像データ取得エラー')));
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => true);
+        when(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        ).thenAnswer((_) async => mockPhotos);
+        when(
+          () => photoService.getOriginalFileResult(any()),
+        ).thenAnswer((_) async => Failure(PhotoAccessException('画像データ取得エラー')));
 
         // Act
         final photos = await photoService.getTodayPhotos(limit: 10);
-        final imageDataResult = await photoService.getOriginalFileResult(photos.first);
+        final imageDataResult = await photoService.getOriginalFileResult(
+          photos.first,
+        );
 
         // Assert
         expect(photos, isNotEmpty);
@@ -325,19 +376,23 @@ void main() {
         // Verify interactions
         verify(() => aiService.isOnlineResult()).called(1);
         verify(() => aiService.canUseAiGeneration()).called(1);
-        verify(() => aiService.generateDiaryFromImage(
-          imageData: imageData,
-          date: testDate,
-          location: '東京都渋谷区',
-          photoTimes: [photo.createDateTime],
-          prompt: 'テスト用のプロンプト',
-        )).called(1);
-        verify(() => aiService.generateTagsFromContent(
-          title: generatedDiary.title,
-          content: generatedDiary.content,
-          date: testDate,
-          photoCount: 1,
-        )).called(1);
+        verify(
+          () => aiService.generateDiaryFromImage(
+            imageData: imageData,
+            date: testDate,
+            location: '東京都渋谷区',
+            photoTimes: [photo.createDateTime],
+            prompt: 'テスト用のプロンプト',
+          ),
+        ).called(1);
+        verify(
+          () => aiService.generateTagsFromContent(
+            title: generatedDiary.title,
+            content: generatedDiary.content,
+            date: testDate,
+            photoCount: 1,
+          ),
+        ).called(1);
       });
 
       test('複数画像からAI日記生成 - プログレスコールバック付き', () async {
@@ -347,11 +402,14 @@ void main() {
           customContent: '複数の写真から生成された素晴らしい日記です。',
         );
 
-        final imagesWithTimes = mockPhotos.map((photo) => (
-          imageData: createMockImageData(),
-          time: photo.createDateTime
-        )).toList();
-
+        final imagesWithTimes = mockPhotos
+            .map(
+              (photo) => (
+                imageData: createMockImageData(),
+                time: photo.createDateTime,
+              ),
+            )
+            .toList();
 
         // Act
         final diaryResult = await aiService.generateDiaryFromMultipleImages(
@@ -370,17 +428,21 @@ void main() {
         expect(generatedDiary.content, contains('複数の写真'));
 
         // プログレスコールバックは実際のサービスでは呼ばれるが、モックでは検証しない
-        verify(() => aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: imagesWithTimes,
-          location: '東京都新宿区',
-          prompt: '複数画像用プロンプト',
-          onProgress: any(named: 'onProgress'),
-        )).called(1);
+        verify(
+          () => aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: imagesWithTimes,
+            location: '東京都新宿区',
+            prompt: '複数画像用プロンプト',
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).called(1);
       });
 
       test('AI生成エラー時のハンドリング - オフライン状態', () async {
         // Arrange
-        when(() => aiService.isOnlineResult()).thenAnswer((_) async => Success(false));
+        when(
+          () => aiService.isOnlineResult(),
+        ).thenAnswer((_) async => Success(false));
 
         // Act
         final onlineResult = await aiService.isOnlineResult();
@@ -390,20 +452,28 @@ void main() {
         expect(onlineResult.valueOrNull, isFalse);
 
         // オフライン時はAI生成を呼ばない
-        verifyNever(() => aiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-          prompt: any(named: 'prompt'),
-        ));
+        verifyNever(
+          () => aiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+            prompt: any(named: 'prompt'),
+          ),
+        );
       });
 
       test('AI生成エラー時のハンドリング - 使用制限到達', () async {
         // Arrange
-        when(() => aiService.isOnlineResult()).thenAnswer((_) async => Success(true));
-        when(() => aiService.canUseAiGeneration()).thenAnswer((_) async => Success(false));
-        when(() => aiService.getRemainingGenerations()).thenAnswer((_) async => Success(0));
+        when(
+          () => aiService.isOnlineResult(),
+        ).thenAnswer((_) async => Success(true));
+        when(
+          () => aiService.canUseAiGeneration(),
+        ).thenAnswer((_) async => Success(false));
+        when(
+          () => aiService.getRemainingGenerations(),
+        ).thenAnswer((_) async => Success(0));
 
         // Act
         final canUseResult = await aiService.canUseAiGeneration();
@@ -418,15 +488,21 @@ void main() {
 
       test('AI生成エラー時のハンドリング - API呼び出し失敗', () async {
         // Arrange
-        when(() => aiService.isOnlineResult()).thenAnswer((_) async => Success(true));
-        when(() => aiService.canUseAiGeneration()).thenAnswer((_) async => Success(true));
-        when(() => aiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-          location: any(named: 'location'),
-          photoTimes: any(named: 'photoTimes'),
-          prompt: any(named: 'prompt'),
-        )).thenAnswer((_) async => Failure(AiProcessingException('AI生成APIエラー')));
+        when(
+          () => aiService.isOnlineResult(),
+        ).thenAnswer((_) async => Success(true));
+        when(
+          () => aiService.canUseAiGeneration(),
+        ).thenAnswer((_) async => Success(true));
+        when(
+          () => aiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+            prompt: any(named: 'prompt'),
+          ),
+        ).thenAnswer((_) async => Failure(AiProcessingException('AI生成APIエラー')));
 
         // Act
         final diaryResult = await aiService.generateDiaryFromImage(
@@ -448,9 +524,10 @@ void main() {
       test('日記内容からのタグ自動生成 - 内容解析とカテゴリ分類', () async {
         // Arrange
         setupSuccessfulAiFlow();
-        
+
         final title = '公園での散歩';
-        final content = '今日は天気が良かったので、家族と一緒に近所の公園を散歩しました。桜が咲いていてとても綺麗でした。子供たちも楽しそうに遊んでいて、素晴らしい一日になりました。';
+        final content =
+            '今日は天気が良かったので、家族と一緒に近所の公園を散歩しました。桜が咲いていてとても綺麗でした。子供たちも楽しそうに遊んでいて、素晴らしい一日になりました。';
         final date = DateTime.now();
         final photoCount = 2;
 
@@ -467,27 +544,31 @@ void main() {
         final tags = tagsResult.valueOrNull!;
         expect(tags, isNotEmpty);
         expect(tags.length, greaterThanOrEqualTo(3));
-        
+
         // 期待されるタグが含まれているかチェック
         expect(tags, contains('日記'));
         expect(tags, contains('AI生成'));
 
-        verify(() => aiService.generateTagsFromContent(
-          title: title,
-          content: content,
-          date: date,
-          photoCount: photoCount,
-        )).called(1);
+        verify(
+          () => aiService.generateTagsFromContent(
+            title: title,
+            content: content,
+            date: date,
+            photoCount: photoCount,
+          ),
+        ).called(1);
       });
 
       test('タグ生成エラー時のハンドリング - 内容不足', () async {
         // Arrange
-        when(() => aiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => Failure(AiProcessingException('内容が不十分です')));
+        when(
+          () => aiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => Failure(AiProcessingException('内容が不十分です')));
 
         // Act
         final tagsResult = await aiService.generateTagsFromContent(
@@ -504,12 +585,14 @@ void main() {
 
       test('タグ生成成功時のフォールバック - 空タグリスト処理', () async {
         // Arrange
-        when(() => aiService.generateTagsFromContent(
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          date: any(named: 'date'),
-          photoCount: any(named: 'photoCount'),
-        )).thenAnswer((_) async => Success(<String>[]));
+        when(
+          () => aiService.generateTagsFromContent(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            date: any(named: 'date'),
+            photoCount: any(named: 'photoCount'),
+          ),
+        ).thenAnswer((_) async => Success(<String>[]));
 
         // Act
         final tagsResult = await aiService.generateTagsFromContent(
@@ -534,7 +617,7 @@ void main() {
       test('AI生成結果の日記保存 - タグ付きエントリー永続化', () async {
         // Arrange
         setupSuccessfulDiaryFlow();
-        
+
         final date = DateTime.now();
         final title = 'AI生成タイトル';
         final content = 'AI生成された日記内容です。今日の思い出を記録します。';
@@ -555,7 +638,7 @@ void main() {
         // Assert
         expect(saveResult, isA<Success<DiaryEntry>>());
         final savedEntry = saveResult.valueOrNull!;
-        
+
         expect(savedEntry.title, equals(title));
         expect(savedEntry.content, equals(content));
         expect(savedEntry.photoIds, equals(photoIds));
@@ -566,25 +649,27 @@ void main() {
         expect(savedEntry.createdAt, isNotNull);
         expect(savedEntry.updatedAt, isNotNull);
 
-        verify(() => diaryService.saveDiaryEntry(
-          date: date,
-          title: title,
-          content: content,
-          photoIds: photoIds,
-          location: location,
-          tags: tags,
-        )).called(1);
+        verify(
+          () => diaryService.saveDiaryEntry(
+            date: date,
+            title: title,
+            content: content,
+            photoIds: photoIds,
+            location: location,
+            tags: tags,
+          ),
+        ).called(1);
       });
 
       test('DiaryServiceの高レベルAPI使用 - saveDiaryEntryWithAiGeneration', () async {
         // Arrange
         setupSuccessfulDiaryFlow();
         setupSuccessfulAiFlow();
-        
+
         final testDate = DateTime.now();
         final location = '東京都新宿区';
         final prompt = 'テスト用プロンプト';
-        
+
         // Act
         final saveResult = await diaryService.saveDiaryEntryWithAiGeneration(
           photos: mockPhotos,
@@ -599,34 +684,41 @@ void main() {
         // Assert
         expect(saveResult, isA<Success<DiaryEntry>>());
         final savedEntry = saveResult.valueOrNull!;
-        
+
         expect(savedEntry.title, equals('AIが生成したタイトル'));
         expect(savedEntry.content, equals('AIが生成した日記の内容'));
-        expect(savedEntry.photoIds, equals(mockPhotos.map((p) => p.id).toList()));
+        expect(
+          savedEntry.photoIds,
+          equals(mockPhotos.map((p) => p.id).toList()),
+        );
         expect(savedEntry.location, equals(location));
         expect(savedEntry.tags, contains('日記'));
         expect(savedEntry.tags, contains('AI生成'));
         expect(savedEntry.date, equals(testDate));
 
-        verify(() => diaryService.saveDiaryEntryWithAiGeneration(
-          photos: mockPhotos,
-          date: testDate,
-          location: location,
-          prompt: prompt,
-          onProgress: any(named: 'onProgress'),
-        )).called(1);
+        verify(
+          () => diaryService.saveDiaryEntryWithAiGeneration(
+            photos: mockPhotos,
+            date: testDate,
+            location: location,
+            prompt: prompt,
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).called(1);
       });
 
       test('日記保存エラー時のハンドリング - データベースエラー', () async {
         // Arrange
-        when(() => diaryService.saveDiaryEntry(
-          date: any(named: 'date'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          photoIds: any(named: 'photoIds'),
-          location: any(named: 'location'),
-          tags: any(named: 'tags'),
-        )).thenAnswer((_) async => Failure(ServiceException('データベース保存エラー')));
+        when(
+          () => diaryService.saveDiaryEntry(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photoIds: any(named: 'photoIds'),
+            location: any(named: 'location'),
+            tags: any(named: 'tags'),
+          ),
+        ).thenAnswer((_) async => Failure(ServiceException('データベース保存エラー')));
 
         // Act
         final saveResult = await diaryService.saveDiaryEntry(
@@ -664,7 +756,7 @@ void main() {
         expect(availablePhotos, isNotEmpty);
 
         final selectedPhotos = availablePhotos.take(2).toList(); // 2枚選択
-        
+
         // 選択写真の画像データ取得
         final imageDataResults = <Result<Uint8List>>[];
         for (final photo in selectedPhotos) {
@@ -681,10 +773,16 @@ void main() {
         expect(canUseAi.valueOrNull, isTrue);
 
         // 複数画像からAI生成
-        final imagesWithTimes = selectedPhotos.asMap().entries.map((entry) => (
-          imageData: imageDataResults[entry.key].valueOrNull!,
-          time: entry.value.createDateTime
-        )).toList();
+        final imagesWithTimes = selectedPhotos
+            .asMap()
+            .entries
+            .map(
+              (entry) => (
+                imageData: imageDataResults[entry.key].valueOrNull!,
+                time: entry.value.createDateTime,
+              ),
+            )
+            .toList();
 
         final diaryResult = await aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
@@ -736,25 +834,31 @@ void main() {
         verify(() => photoService.getOriginalFileResult(any())).called(2);
         verify(() => aiService.isOnlineResult()).called(1);
         verify(() => aiService.canUseAiGeneration()).called(1);
-        verify(() => aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: any(named: 'imagesWithTimes'),
-          location: location,
-          onProgress: any(named: 'onProgress'),
-        )).called(1);
-        verify(() => aiService.generateTagsFromContent(
-          title: generatedDiary.title,
-          content: generatedDiary.content,
-          date: testDate,
-          photoCount: 2,
-        )).called(1);
-        verify(() => diaryService.saveDiaryEntry(
-          date: testDate,
-          title: generatedDiary.title,
-          content: generatedDiary.content,
-          photoIds: selectedPhotos.map((p) => p.id).toList(),
-          location: location,
-          tags: generatedTags,
-        )).called(1);
+        verify(
+          () => aiService.generateDiaryFromMultipleImages(
+            imagesWithTimes: any(named: 'imagesWithTimes'),
+            location: location,
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).called(1);
+        verify(
+          () => aiService.generateTagsFromContent(
+            title: generatedDiary.title,
+            content: generatedDiary.content,
+            date: testDate,
+            photoCount: 2,
+          ),
+        ).called(1);
+        verify(
+          () => diaryService.saveDiaryEntry(
+            date: testDate,
+            title: generatedDiary.title,
+            content: generatedDiary.content,
+            photoIds: selectedPhotos.map((p) => p.id).toList(),
+            location: location,
+            tags: generatedTags,
+          ),
+        ).called(1);
       });
 
       test('エンドツーエンド高レベルAPI使用 - saveDiaryEntryWithAiGeneration統合', () async {
@@ -781,7 +885,7 @@ void main() {
         // Assert
         expect(result, isA<Success<DiaryEntry>>());
         final savedEntry = result.valueOrNull!;
-        
+
         expect(savedEntry.title, isNotEmpty);
         expect(savedEntry.content, isNotEmpty);
         expect(savedEntry.photoIds.length, equals(mockPhotos.length));
@@ -790,13 +894,15 @@ void main() {
         expect(savedEntry.date, equals(testDate));
 
         // 高レベルAPIが1回呼ばれることを確認
-        verify(() => diaryService.saveDiaryEntryWithAiGeneration(
-          photos: mockPhotos,
-          date: testDate,
-          location: location,
-          prompt: prompt,
-          onProgress: any(named: 'onProgress'),
-        )).called(1);
+        verify(
+          () => diaryService.saveDiaryEntryWithAiGeneration(
+            photos: mockPhotos,
+            date: testDate,
+            location: location,
+            prompt: prompt,
+            onProgress: any(named: 'onProgress'),
+          ),
+        ).called(1);
       });
     });
 
@@ -807,32 +913,42 @@ void main() {
     group('Group 6: エラーハンドリング統合テスト - 各段階での異常系処理確認', () {
       test('写真選択段階でのエラー波及 - 権限拒否時の処理停止', () async {
         // Arrange - 写真権限拒否
-        when(() => photoService.requestPermission()).thenAnswer((_) async => false);
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => false);
 
         // Act
         final permissionResult = await photoService.requestPermission();
 
         // Assert
         expect(permissionResult, isFalse);
-        
+
         // 権限がない場合、後続処理は実行されないことを確認
-        verifyNever(() => photoService.getTodayPhotos(limit: any(named: 'limit')));
-        verifyNever(() => aiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-        ));
-        verifyNever(() => diaryService.saveDiaryEntry(
-          date: any(named: 'date'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          photoIds: any(named: 'photoIds'),
-        ));
+        verifyNever(
+          () => photoService.getTodayPhotos(limit: any(named: 'limit')),
+        );
+        verifyNever(
+          () => aiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+          ),
+        );
+        verifyNever(
+          () => diaryService.saveDiaryEntry(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photoIds: any(named: 'photoIds'),
+          ),
+        );
       });
 
       test('AI生成段階でのエラー波及 - オフライン時の処理停止', () async {
         // Arrange
         setupSuccessfulPhotoFlow(mockPhotos);
-        when(() => aiService.isOnlineResult()).thenAnswer((_) async => Success(false));
+        when(
+          () => aiService.isOnlineResult(),
+        ).thenAnswer((_) async => Success(false));
 
         // Act - 写真選択は成功
         final photos = await photoService.getTodayPhotos(limit: 5);
@@ -843,23 +959,31 @@ void main() {
         expect(onlineResult.valueOrNull, isFalse);
 
         // Assert - AI生成とその後の処理は実行されない
-        verifyNever(() => aiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-        ));
-        verifyNever(() => diaryService.saveDiaryEntry(
-          date: any(named: 'date'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          photoIds: any(named: 'photoIds'),
-        ));
+        verifyNever(
+          () => aiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+          ),
+        );
+        verifyNever(
+          () => diaryService.saveDiaryEntry(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photoIds: any(named: 'photoIds'),
+          ),
+        );
       });
 
       test('AI生成段階でのエラー波及 - 使用制限到達時の処理停止', () async {
         // Arrange
         setupSuccessfulPhotoFlow(mockPhotos);
-        when(() => aiService.isOnlineResult()).thenAnswer((_) async => Success(true));
-        when(() => aiService.canUseAiGeneration()).thenAnswer((_) async => Success(false));
+        when(
+          () => aiService.isOnlineResult(),
+        ).thenAnswer((_) async => Success(true));
+        when(
+          () => aiService.canUseAiGeneration(),
+        ).thenAnswer((_) async => Success(false));
 
         // Act - 写真選択は成功
         final photos = await photoService.getTodayPhotos(limit: 5);
@@ -874,29 +998,35 @@ void main() {
         expect(canUseResult.valueOrNull, isFalse);
 
         // Assert - AI生成は実行されない
-        verifyNever(() => aiService.generateDiaryFromImage(
-          imageData: any(named: 'imageData'),
-          date: any(named: 'date'),
-        ));
+        verifyNever(
+          () => aiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+          ),
+        );
       });
 
       test('保存段階でのエラー処理 - データベースエラー時の適切なエラー返却', () async {
         // Arrange
         setupSuccessfulPhotoFlow(mockPhotos);
         setupSuccessfulAiFlow();
-        when(() => diaryService.saveDiaryEntry(
-          date: any(named: 'date'),
-          title: any(named: 'title'),
-          content: any(named: 'content'),
-          photoIds: any(named: 'photoIds'),
-          location: any(named: 'location'),
-          tags: any(named: 'tags'),
-        )).thenAnswer((_) async => Failure(ServiceException('データベース保存失敗')));
+        when(
+          () => diaryService.saveDiaryEntry(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photoIds: any(named: 'photoIds'),
+            location: any(named: 'location'),
+            tags: any(named: 'tags'),
+          ),
+        ).thenAnswer((_) async => Failure(ServiceException('データベース保存失敗')));
 
         // Act - AI生成まで成功
         final photos = await photoService.getTodayPhotos(limit: 1);
-        final imageResult = await photoService.getOriginalFileResult(photos.first);
-        
+        final imageResult = await photoService.getOriginalFileResult(
+          photos.first,
+        );
+
         final diaryResult = await aiService.generateDiaryFromImage(
           imageData: imageResult.valueOrNull!,
           date: DateTime.now(),
@@ -934,17 +1064,21 @@ void main() {
     group('Group 7: プラン制限統合テスト - Basic/Premium別のAI生成制限確認', () {
       test('Basic Planでの使用制限 - 月間上限到達時の制限動作', () async {
         // Arrange - Basic Plan使用制限到達
-        when(() => subscriptionService.getCurrentPlanClass())
-            .thenAnswer((_) async => Success(BasicPlan()));
-        when(() => subscriptionService.canUseAiGeneration())
-            .thenAnswer((_) async => Success(false));
-        when(() => subscriptionService.getRemainingGenerations())
-            .thenAnswer((_) async => Success(0));
+        when(
+          () => subscriptionService.getCurrentPlanClass(),
+        ).thenAnswer((_) async => Success(BasicPlan()));
+        when(
+          () => subscriptionService.canUseAiGeneration(),
+        ).thenAnswer((_) async => Success(false));
+        when(
+          () => subscriptionService.getRemainingGenerations(),
+        ).thenAnswer((_) async => Success(0));
 
         // Act
         final planResult = await subscriptionService.getCurrentPlanClass();
         final canUseResult = await subscriptionService.canUseAiGeneration();
-        final remainingResult = await subscriptionService.getRemainingGenerations();
+        final remainingResult = await subscriptionService
+            .getRemainingGenerations();
 
         // Assert
         expect(planResult, isA<Success<Plan>>());
@@ -962,23 +1096,30 @@ void main() {
       test('Premium Planでの使用制限 - より多い制限での動作', () async {
         // Arrange - Premium Plan
         final premiumPlan = PremiumMonthlyPlan();
-        when(() => subscriptionService.getCurrentPlanClass())
-            .thenAnswer((_) async => Success(premiumPlan));
-        when(() => subscriptionService.canUseAiGeneration())
-            .thenAnswer((_) async => Success(true));
-        when(() => subscriptionService.getRemainingGenerations())
-            .thenAnswer((_) async => Success(85)); // 100 - 15 used
+        when(
+          () => subscriptionService.getCurrentPlanClass(),
+        ).thenAnswer((_) async => Success(premiumPlan));
+        when(
+          () => subscriptionService.canUseAiGeneration(),
+        ).thenAnswer((_) async => Success(true));
+        when(
+          () => subscriptionService.getRemainingGenerations(),
+        ).thenAnswer((_) async => Success(85)); // 100 - 15 used
 
         // Act
         final planResult = await subscriptionService.getCurrentPlanClass();
         final canUseResult = await subscriptionService.canUseAiGeneration();
-        final remainingResult = await subscriptionService.getRemainingGenerations();
+        final remainingResult = await subscriptionService
+            .getRemainingGenerations();
 
         // Assert
         expect(planResult, isA<Success<Plan>>());
         final plan = planResult.valueOrNull! as PremiumMonthlyPlan;
         expect(plan.isPremium, isTrue);
-        expect(plan.monthlyAiGenerationLimit, equals(100)); // Premium plan limit
+        expect(
+          plan.monthlyAiGenerationLimit,
+          equals(100),
+        ); // Premium plan limit
 
         expect(canUseResult, isA<Success<bool>>());
         expect(canUseResult.valueOrNull, isTrue);
@@ -993,7 +1134,9 @@ void main() {
         setupSuccessfulAiFlow();
         setupSuccessfulDiaryFlow();
 
-        when(() => subscriptionService.incrementAiUsage()).thenAnswer((_) async {
+        when(() => subscriptionService.incrementAiUsage()).thenAnswer((
+          _,
+        ) async {
           return Success(null);
         });
 

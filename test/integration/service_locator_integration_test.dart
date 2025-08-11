@@ -30,7 +30,7 @@ void main() {
   group('Phase 2-2: ServiceLocator依存性注入テスト拡張 - 全サービス間複雑依存関係', () {
     // テスト用ServiceLocator（完全分離）
     late ServiceLocator testServiceLocator;
-    
+
     setUpAll(() async {
       registerMockFallbacks();
       await IntegrationTestHelpers.setUpIntegrationEnvironment();
@@ -43,7 +43,7 @@ void main() {
     setUp(() async {
       // 各テストで完全に独立したServiceLocatorを作成
       testServiceLocator = ServiceLocator();
-      
+
       // テスト用のクリーンな環境確立
       ServiceRegistration.reset();
     });
@@ -60,37 +60,49 @@ void main() {
     // =================================================================
 
     group('Group 1: 依存関係アーキテクチャテスト - 循環・欠落・不正依存検証', () {
-      test('正常な依存関係チェーン確認 - DiaryService → AiService → SubscriptionService', () async {
-        // Arrange - 正しい順序で依存関係を登録
-        final mockSubscriptionService = MockSubscriptionServiceInterface();
-        final mockAiService = MockAiServiceInterface();
-        final mockDiaryService = MockDiaryServiceInterface();
-        final mockPhotoService = MockPhotoServiceInterface();
+      test(
+        '正常な依存関係チェーン確認 - DiaryService → AiService → SubscriptionService',
+        () async {
+          // Arrange - 正しい順序で依存関係を登録
+          final mockSubscriptionService = MockSubscriptionServiceInterface();
+          final mockAiService = MockAiServiceInterface();
+          final mockDiaryService = MockDiaryServiceInterface();
+          final mockPhotoService = MockPhotoServiceInterface();
 
-        // 基底依存から順番に登録
-        testServiceLocator.registerSingleton<ISubscriptionService>(mockSubscriptionService);
-        testServiceLocator.registerSingleton<PhotoServiceInterface>(mockPhotoService);
-        testServiceLocator.registerSingleton<AiServiceInterface>(mockAiService);
-        testServiceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
+          // 基底依存から順番に登録
+          testServiceLocator.registerSingleton<ISubscriptionService>(
+            mockSubscriptionService,
+          );
+          testServiceLocator.registerSingleton<PhotoServiceInterface>(
+            mockPhotoService,
+          );
+          testServiceLocator.registerSingleton<AiServiceInterface>(
+            mockAiService,
+          );
+          testServiceLocator.registerSingleton<DiaryServiceInterface>(
+            mockDiaryService,
+          );
 
-        // Act - 依存関係チェーンの取得
-        final subscriptionService = testServiceLocator.get<ISubscriptionService>();
-        final aiService = testServiceLocator.get<AiServiceInterface>();
-        final diaryService = testServiceLocator.get<DiaryServiceInterface>();
+          // Act - 依存関係チェーンの取得
+          final subscriptionService = testServiceLocator
+              .get<ISubscriptionService>();
+          final aiService = testServiceLocator.get<AiServiceInterface>();
+          final diaryService = testServiceLocator.get<DiaryServiceInterface>();
 
-        // Assert - 全ての依存関係が正しく解決される
-        expect(subscriptionService, isNotNull);
-        expect(aiService, isNotNull);
-        expect(diaryService, isNotNull);
-        expect(subscriptionService, same(mockSubscriptionService));
-        expect(aiService, same(mockAiService));
-        expect(diaryService, same(mockDiaryService));
-      });
+          // Assert - 全ての依存関係が正しく解決される
+          expect(subscriptionService, isNotNull);
+          expect(aiService, isNotNull);
+          expect(diaryService, isNotNull);
+          expect(subscriptionService, same(mockSubscriptionService));
+          expect(aiService, same(mockAiService));
+          expect(diaryService, same(mockDiaryService));
+        },
+      );
 
       test('循環依存検出テスト - サービスA → サービスB → サービスAの検証', () {
         // Arrange - 循環依存を模擬するMockサービス
         var callCount = 0;
-        
+
         // 制限付き循環依存テスト（StackOverflowの代わりにカウント制限）
         testServiceLocator.registerFactory<MockServiceA>(() {
           callCount++;
@@ -100,7 +112,7 @@ void main() {
           testServiceLocator.get<MockServiceB>();
           return MockServiceA();
         });
-        
+
         testServiceLocator.registerFactory<MockServiceB>(() {
           callCount++;
           if (callCount > 3) {
@@ -113,10 +125,12 @@ void main() {
         // Act & Assert - 循環依存によりServiceExceptionが発生することを確認
         expect(
           () => testServiceLocator.get<MockServiceA>(),
-          throwsA(predicate((e) => 
-            e is ServiceException && 
-            e.message.contains('循環依存が検出されました')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is ServiceException && e.message.contains('循環依存が検出されました'),
+            ),
+          ),
         );
       });
 
@@ -126,18 +140,28 @@ void main() {
         // Act & Assert - 登録されていないサービスにアクセスすると例外が発生
         expect(
           () => testServiceLocator.get<ISubscriptionService>(),
-          throwsA(predicate((e) => 
-            e is Exception && 
-            e.toString().contains('Service of type ISubscriptionService is not registered')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is Exception &&
+                  e.toString().contains(
+                    'Service of type ISubscriptionService is not registered',
+                  ),
+            ),
+          ),
         );
 
         expect(
           () => testServiceLocator.get<AiServiceInterface>(),
-          throwsA(predicate((e) => 
-            e is Exception && 
-            e.toString().contains('Service of type AiServiceInterface is not registered')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is Exception &&
+                  e.toString().contains(
+                    'Service of type AiServiceInterface is not registered',
+                  ),
+            ),
+          ),
         );
       });
 
@@ -157,7 +181,8 @@ void main() {
         });
 
         // Act - 非同期サービスの取得
-        final asyncService = await testServiceLocator.getAsync<MockAsyncService>();
+        final asyncService = await testServiceLocator
+            .getAsync<MockAsyncService>();
 
         // Assert - 依存関係が正しく解決される
         expect(asyncService, same(mockAsyncService));
@@ -171,10 +196,15 @@ void main() {
         // Act & Assert - 異なる型でサービスを要求すると例外が発生
         expect(
           () => testServiceLocator.get<AiServiceInterface>(),
-          throwsA(predicate((e) => 
-            e is Exception && 
-            e.toString().contains('Service of type AiServiceInterface is not registered')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is Exception &&
+                  e.toString().contains(
+                    'Service of type AiServiceInterface is not registered',
+                  ),
+            ),
+          ),
         );
 
         // 正しい型では正常に取得できる
@@ -187,10 +217,14 @@ void main() {
         final firstService = MockSubscriptionServiceInterface();
         final secondService = MockSubscriptionServiceInterface();
 
-        testServiceLocator.registerSingleton<ISubscriptionService>(firstService);
-        
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          firstService,
+        );
+
         // Act - 同じ型で再登録
-        testServiceLocator.registerSingleton<ISubscriptionService>(secondService);
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          secondService,
+        );
 
         // Assert - 後で登録されたサービスが取得される（上書き動作）
         final retrievedService = testServiceLocator.get<ISubscriptionService>();
@@ -225,15 +259,22 @@ void main() {
         final mockAiService = MockAiServiceInterface();
 
         // Mockサービスの動作設定
-        when(() => mockPhotoService.getTodayPhotos()).thenAnswer((_) async => []);
-        when(() => mockAiService.isOnlineResult()).thenAnswer((_) async => const Success(true));
+        when(
+          () => mockPhotoService.getTodayPhotos(),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockAiService.isOnlineResult(),
+        ).thenAnswer((_) async => const Success(true));
 
         // Act - ServiceLocatorにMockを注入
-        testServiceLocator.registerSingleton<PhotoServiceInterface>(mockPhotoService);
+        testServiceLocator.registerSingleton<PhotoServiceInterface>(
+          mockPhotoService,
+        );
         testServiceLocator.registerSingleton<AiServiceInterface>(mockAiService);
 
         // Assert - Mockサービスが正しく注入される
-        final retrievedPhotoService = testServiceLocator.get<PhotoServiceInterface>();
+        final retrievedPhotoService = testServiceLocator
+            .get<PhotoServiceInterface>();
         final retrievedAiService = testServiceLocator.get<AiServiceInterface>();
 
         expect(retrievedPhotoService, same(mockPhotoService));
@@ -243,16 +284,24 @@ void main() {
       test('テスト間の状態完全分離確認', () async {
         // Phase 1: 最初のテスト状態
         final firstMockService = MockSubscriptionServiceInterface();
-        testServiceLocator.registerSingleton<ISubscriptionService>(firstMockService);
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          firstMockService,
+        );
 
         expect(testServiceLocator.isRegistered<ISubscriptionService>(), isTrue);
-        expect(testServiceLocator.get<ISubscriptionService>(), same(firstMockService));
+        expect(
+          testServiceLocator.get<ISubscriptionService>(),
+          same(firstMockService),
+        );
 
         // Phase 2: クリーンアップ
         testServiceLocator.clear();
 
         // Phase 3: 状態がクリアされていることを確認
-        expect(testServiceLocator.isRegistered<ISubscriptionService>(), isFalse);
+        expect(
+          testServiceLocator.isRegistered<ISubscriptionService>(),
+          isFalse,
+        );
         expect(testServiceLocator.registeredTypes, isEmpty);
         expect(
           () => testServiceLocator.get<ISubscriptionService>(),
@@ -261,10 +310,18 @@ void main() {
 
         // Phase 4: 新しい状態で再テスト
         final secondMockService = MockSubscriptionServiceInterface();
-        testServiceLocator.registerSingleton<ISubscriptionService>(secondMockService);
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          secondMockService,
+        );
 
-        expect(testServiceLocator.get<ISubscriptionService>(), same(secondMockService));
-        expect(testServiceLocator.get<ISubscriptionService>(), isNot(same(firstMockService)));
+        expect(
+          testServiceLocator.get<ISubscriptionService>(),
+          same(secondMockService),
+        );
+        expect(
+          testServiceLocator.get<ISubscriptionService>(),
+          isNot(same(firstMockService)),
+        );
       });
 
       test('大量サービス登録・クリーンアップのメモリ効率確認', () {
@@ -278,11 +335,16 @@ void main() {
 
         // Act - 大量登録
         for (int i = 0; i < serviceCount; i++) {
-          testServiceLocator.registerSingleton<MockPerformanceService>(mockServices[i]);
+          testServiceLocator.registerSingleton<MockPerformanceService>(
+            mockServices[i],
+          );
         }
 
         // Assert - 正しく登録されている
-        expect(testServiceLocator.registeredTypes.length, greaterThanOrEqualTo(1));
+        expect(
+          testServiceLocator.registeredTypes.length,
+          greaterThanOrEqualTo(1),
+        );
 
         // Act - 一括クリーンアップ
         testServiceLocator.clear();
@@ -322,21 +384,28 @@ void main() {
       test('Factoryパターンの遅延初期化確認', () {
         // Arrange - Factory登録（実際の作成は遅延）
         var factoryCallCount = 0;
-        testServiceLocator.registerFactory<MockSubscriptionServiceInterface>(() {
-          factoryCallCount++;
-          return MockSubscriptionServiceInterface();
-        });
+        testServiceLocator.registerFactory<MockSubscriptionServiceInterface>(
+          () {
+            factoryCallCount++;
+            return MockSubscriptionServiceInterface();
+          },
+        );
 
         // Assert - まだファクトリは呼ばれていない
         expect(factoryCallCount, equals(0));
-        expect(testServiceLocator.isRegistered<MockSubscriptionServiceInterface>(), isTrue);
+        expect(
+          testServiceLocator.isRegistered<MockSubscriptionServiceInterface>(),
+          isTrue,
+        );
 
         // Act - 初回取得
-        final instance1 = testServiceLocator.get<MockSubscriptionServiceInterface>();
+        final instance1 = testServiceLocator
+            .get<MockSubscriptionServiceInterface>();
         expect(factoryCallCount, equals(1));
 
         // Act - 2回目取得（Singletonとしてキャッシュされるはず）
-        final instance2 = testServiceLocator.get<MockSubscriptionServiceInterface>();
+        final instance2 = testServiceLocator
+            .get<MockSubscriptionServiceInterface>();
         expect(factoryCallCount, equals(1)); // 呼ばれない
         expect(instance1, same(instance2)); // 同じインスタンス
       });
@@ -366,15 +435,23 @@ void main() {
       test('異なるパターンの混在確認 - Singleton + Factory + AsyncFactory', () async {
         // Arrange - 3パターンを混在登録
         final singletonService = MockSubscriptionServiceInterface();
-        testServiceLocator.registerSingleton<ISubscriptionService>(singletonService);
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          singletonService,
+        );
 
-        testServiceLocator.registerFactory<MockSyncService>(() => MockSyncService());
-        testServiceLocator.registerAsyncFactory<MockAsyncService>(() async => MockAsyncService());
+        testServiceLocator.registerFactory<MockSyncService>(
+          () => MockSyncService(),
+        );
+        testServiceLocator.registerAsyncFactory<MockAsyncService>(
+          () async => MockAsyncService(),
+        );
 
         // Act - 各パターンからサービス取得
-        final singletonInstance = testServiceLocator.get<ISubscriptionService>();
+        final singletonInstance = testServiceLocator
+            .get<ISubscriptionService>();
         final factoryInstance = testServiceLocator.get<MockSyncService>();
-        final asyncInstance = await testServiceLocator.getAsync<MockAsyncService>();
+        final asyncInstance = await testServiceLocator
+            .getAsync<MockAsyncService>();
 
         // Assert - 全て正常に取得できる
         expect(singletonInstance, same(singletonService));
@@ -399,10 +476,13 @@ void main() {
         // Act & Assert - 同期取得でエラーが発生
         expect(
           () => testServiceLocator.get<MockAsyncService>(),
-          throwsA(predicate((e) => 
-            e is Exception && 
-            e.toString().contains('requires async initialization')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is Exception &&
+                  e.toString().contains('requires async initialization'),
+            ),
+          ),
         );
       });
     });
@@ -416,7 +496,7 @@ void main() {
         // Arrange - 推奨される線形依存関係
         final baseService = MockBaseService();
         testServiceLocator.registerSingleton<MockBaseService>(baseService);
-        
+
         testServiceLocator.registerFactory<MockCircularServiceA>(() {
           final base = testServiceLocator.get<MockBaseService>();
           return MockCircularServiceA(base);
@@ -424,7 +504,7 @@ void main() {
 
         // Act - 正常な依存関係は問題なく動作
         final serviceA = testServiceLocator.get<MockCircularServiceA>();
-        
+
         // Assert - 正常な依存関係の動作確認
         expect(serviceA, isNotNull);
         expect(serviceA.dependency, same(baseService));
@@ -434,12 +514,12 @@ void main() {
         // Arrange - 階層的な依存関係（推奨パターン）
         final level1Service = MockLevel1Service();
         testServiceLocator.registerSingleton<MockLevel1Service>(level1Service);
-        
+
         testServiceLocator.registerFactory<MockLevel2Service>(() {
           final level1 = testServiceLocator.get<MockLevel1Service>();
           return MockLevel2Service(level1);
         });
-        
+
         testServiceLocator.registerFactory<MockLevel3Service>(() {
           final level2 = testServiceLocator.get<MockLevel2Service>();
           return MockLevel3Service(level2);
@@ -447,7 +527,7 @@ void main() {
 
         // Act - 階層的依存関係の確認
         final level3Service = testServiceLocator.get<MockLevel3Service>();
-        
+
         // Assert - 適切な依存関係チェーン
         expect(level3Service, isNotNull);
         expect(level3Service.dependency, isNotNull);
@@ -457,13 +537,15 @@ void main() {
       test('共有依存関係パターンの確認', () {
         // Arrange - 複数サービスが同一の共通サービスに依存
         final sharedService = MockSharedDependencyService();
-        testServiceLocator.registerSingleton<MockSharedDependencyService>(sharedService);
-        
+        testServiceLocator.registerSingleton<MockSharedDependencyService>(
+          sharedService,
+        );
+
         testServiceLocator.registerFactory<MockParallelServiceA>(() {
           final shared = testServiceLocator.get<MockSharedDependencyService>();
           return MockParallelServiceA(shared);
         });
-        
+
         testServiceLocator.registerFactory<MockParallelServiceB>(() {
           final shared = testServiceLocator.get<MockSharedDependencyService>();
           return MockParallelServiceB(shared);
@@ -483,9 +565,13 @@ void main() {
         // Arrange - 独立したサービス群
         final independentServiceA = MockIndependentServiceA();
         final independentServiceB = MockIndependentServiceB();
-        
-        testServiceLocator.registerSingleton<MockIndependentServiceA>(independentServiceA);
-        testServiceLocator.registerSingleton<MockIndependentServiceB>(independentServiceB);
+
+        testServiceLocator.registerSingleton<MockIndependentServiceA>(
+          independentServiceA,
+        );
+        testServiceLocator.registerSingleton<MockIndependentServiceB>(
+          independentServiceB,
+        );
 
         // Act - 独立サービスの取得
         final serviceA = testServiceLocator.get<MockIndependentServiceA>();
@@ -552,7 +638,7 @@ void main() {
           return MockParallelServiceA(shared);
         });
 
-        // 並列サービスB  
+        // 並列サービスB
         testServiceLocator.registerFactory<MockParallelServiceB>(() {
           final shared = testServiceLocator.get<MockSharedDependencyService>();
           initializationOrder.add('ParallelB');
@@ -569,9 +655,14 @@ void main() {
         expect(initializationOrder.first, equals('SharedDependency'));
         expect(initializationOrder.contains('ParallelA'), isTrue);
         expect(initializationOrder.contains('ParallelB'), isTrue);
-        
+
         // 共通依存は1回だけ初期化される
-        expect(initializationOrder.where((item) => item == 'SharedDependency').length, equals(1));
+        expect(
+          initializationOrder
+              .where((item) => item == 'SharedDependency')
+              .length,
+          equals(1),
+        );
       });
 
       test('非同期依存関係の初期化順序確認', () async {
@@ -586,15 +677,19 @@ void main() {
         });
 
         // 非同期依存サービス
-        testServiceLocator.registerAsyncFactory<MockAsyncDependentService>(() async {
-          final base = await testServiceLocator.getAsync<MockAsyncBaseService>();
-          await Future.delayed(const Duration(milliseconds: 5));
-          initializationOrder.add('AsyncDependent');
-          return MockAsyncDependentService(base);
-        });
+        testServiceLocator.registerAsyncFactory<MockAsyncDependentService>(
+          () async {
+            final base = await testServiceLocator
+                .getAsync<MockAsyncBaseService>();
+            await Future.delayed(const Duration(milliseconds: 5));
+            initializationOrder.add('AsyncDependent');
+            return MockAsyncDependentService(base);
+          },
+        );
 
         // Act - 非同期依存サービスを取得
-        final service = await testServiceLocator.getAsync<MockAsyncDependentService>();
+        final service = await testServiceLocator
+            .getAsync<MockAsyncDependentService>();
 
         // Assert - 正しい非同期初期化順序
         expect(service, isNotNull);
@@ -608,7 +703,9 @@ void main() {
         // Singletonサービス（即座に登録）
         final singletonService = MockSingletonInitService();
         initializationOrder.add('Singleton');
-        testServiceLocator.registerSingleton<MockSingletonInitService>(singletonService);
+        testServiceLocator.registerSingleton<MockSingletonInitService>(
+          singletonService,
+        );
 
         // Factory（遅延初期化）
         testServiceLocator.registerFactory<MockFactoryInitService>(() {
@@ -626,17 +723,21 @@ void main() {
         });
 
         // Act - AsyncFactoryサービスを取得（全チェーンを辿る）
-        final service = await testServiceLocator.getAsync<MockAsyncInitService>();
+        final service = await testServiceLocator
+            .getAsync<MockAsyncInitService>();
 
         // Assert - 混合パターンでも正しい順序
         expect(service, isNotNull);
-        expect(initializationOrder, equals(['Singleton', 'Factory', 'AsyncFactory']));
+        expect(
+          initializationOrder,
+          equals(['Singleton', 'Factory', 'AsyncFactory']),
+        );
       });
 
       test('初期化順序の一意性確認 - 複数回アクセスでの順序保証', () {
         // Arrange
         final initializationOrder = <String>[];
-        
+
         testServiceLocator.registerFactory<MockOrderTestService>(() {
           initializationOrder.add('Service');
           return MockOrderTestService();
@@ -654,7 +755,7 @@ void main() {
       });
     });
 
-    // =================================================================  
+    // =================================================================
     // Group 6: サービス間相互作用テスト - 実際のユースケース依存チェーン
     // =================================================================
 
@@ -667,32 +768,44 @@ void main() {
         final mockDiaryService = MockDiaryServiceInterface();
 
         // Mockの動作設定
-        when(() => mockSubscriptionService.canUseAiGeneration())
-            .thenAnswer((_) async => const Success(true));
-        when(() => mockAiService.isOnlineResult())
-            .thenAnswer((_) async => const Success(true));
-        when(() => mockPhotoService.getTodayPhotos())
-            .thenAnswer((_) async => []);
+        when(
+          () => mockSubscriptionService.canUseAiGeneration(),
+        ).thenAnswer((_) async => const Success(true));
+        when(
+          () => mockAiService.isOnlineResult(),
+        ).thenAnswer((_) async => const Success(true));
+        when(
+          () => mockPhotoService.getTodayPhotos(),
+        ).thenAnswer((_) async => []);
 
         // 依存関係登録（実際のアプリと同様の順序）
-        testServiceLocator.registerSingleton<ISubscriptionService>(mockSubscriptionService);
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          mockSubscriptionService,
+        );
         testServiceLocator.registerSingleton<AiServiceInterface>(mockAiService);
-        testServiceLocator.registerSingleton<PhotoServiceInterface>(mockPhotoService);
-        testServiceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
+        testServiceLocator.registerSingleton<PhotoServiceInterface>(
+          mockPhotoService,
+        );
+        testServiceLocator.registerSingleton<DiaryServiceInterface>(
+          mockDiaryService,
+        );
 
         // Act - 実際のユースケースをシミュレート
-        final subscriptionService = testServiceLocator.get<ISubscriptionService>();
+        final subscriptionService = testServiceLocator
+            .get<ISubscriptionService>();
         final canUseAi = await subscriptionService.canUseAiGeneration();
-        
+
         if (canUseAi.isSuccess && canUseAi.value) {
           final aiService = testServiceLocator.get<AiServiceInterface>();
           final isOnline = await aiService.isOnlineResult();
-          
+
           if (isOnline.isSuccess && isOnline.value) {
-            final photoService = testServiceLocator.get<PhotoServiceInterface>();
+            final photoService = testServiceLocator
+                .get<PhotoServiceInterface>();
             await photoService.getTodayPhotos();
-            
-            final diaryService = testServiceLocator.get<DiaryServiceInterface>();
+
+            final diaryService = testServiceLocator
+                .get<DiaryServiceInterface>();
             expect(diaryService, isNotNull);
           }
         }
@@ -711,10 +824,18 @@ void main() {
         final mockSettingsService = MockSettingsService();
 
         // 全サービス登録
-        testServiceLocator.registerSingleton<PhotoServiceInterface>(mockPhotoService);
-        testServiceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
-        testServiceLocator.registerSingleton<ISubscriptionService>(mockSubscriptionService);
-        testServiceLocator.registerSingleton<SettingsService>(mockSettingsService);
+        testServiceLocator.registerSingleton<PhotoServiceInterface>(
+          mockPhotoService,
+        );
+        testServiceLocator.registerSingleton<DiaryServiceInterface>(
+          mockDiaryService,
+        );
+        testServiceLocator.registerSingleton<ISubscriptionService>(
+          mockSubscriptionService,
+        );
+        testServiceLocator.registerSingleton<SettingsService>(
+          mockSettingsService,
+        );
 
         // Act - UI層での同時サービス利用をシミュレート
         final List<dynamic> services = [];
@@ -759,7 +880,7 @@ void main() {
         // Assert - 依存チェーンが正しく解決される
         expect(topService, isNotNull);
         expect(topService, isA<MockTopService>());
-        
+
         // 内部的な依存関係も確認
         expect(topService.middleService, isNotNull);
         expect(topService.middleService.baseService, same(mockBaseService));
@@ -767,7 +888,9 @@ void main() {
 
       test('並行サービス取得の動作確認', () async {
         // Arrange - 複数のサービスを並行で取得可能にする
-        testServiceLocator.registerFactory<MockPerformanceService>(() => MockPerformanceService());
+        testServiceLocator.registerFactory<MockPerformanceService>(
+          () => MockPerformanceService(),
+        );
         testServiceLocator.registerAsyncFactory<MockAsyncService>(() async {
           await Future.delayed(const Duration(milliseconds: 50));
           return MockAsyncService();
@@ -775,9 +898,13 @@ void main() {
 
         // Act - 並行取得
         final futures = <Future>[];
-        futures.add(Future(() => testServiceLocator.get<MockPerformanceService>()));
+        futures.add(
+          Future(() => testServiceLocator.get<MockPerformanceService>()),
+        );
         futures.add(testServiceLocator.getAsync<MockAsyncService>());
-        futures.add(Future(() => testServiceLocator.get<MockPerformanceService>()));
+        futures.add(
+          Future(() => testServiceLocator.get<MockPerformanceService>()),
+        );
 
         final results = await Future.wait(futures);
 
@@ -806,27 +933,34 @@ void main() {
         // Act & Assert - 適切な例外が発生
         expect(
           () => testServiceLocator.get<MockErrorProneService>(),
-          throwsA(predicate((e) => 
-            e is ServiceException && 
-            e.message.contains('Factory初期化エラー')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is ServiceException && e.message.contains('Factory初期化エラー'),
+            ),
+          ),
         );
       });
 
       test('非同期Factory初期化失敗時のエラー伝播確認', () async {
         // Arrange - 非同期初期化時に例外を投げるAsyncFactory
-        testServiceLocator.registerAsyncFactory<MockErrorProneAsyncService>(() async {
-          await Future.delayed(const Duration(milliseconds: 10));
-          throw ServiceException('非同期Factory初期化エラー');
-        });
+        testServiceLocator.registerAsyncFactory<MockErrorProneAsyncService>(
+          () async {
+            await Future.delayed(const Duration(milliseconds: 10));
+            throw ServiceException('非同期Factory初期化エラー');
+          },
+        );
 
         // Act & Assert - 適切な例外が非同期で発生
         expect(
           () => testServiceLocator.getAsync<MockErrorProneAsyncService>(),
-          throwsA(predicate((e) => 
-            e is ServiceException && 
-            e.message.contains('非同期Factory初期化エラー')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is ServiceException &&
+                  e.message.contains('非同期Factory初期化エラー'),
+            ),
+          ),
         );
       });
 
@@ -841,17 +975,24 @@ void main() {
         // Act & Assert - 依存関係エラーが適切に伝播
         expect(
           () => testServiceLocator.get<MockDependentService>(),
-          throwsA(predicate((e) => 
-            e is Exception && 
-            e.toString().contains('MockNonExistentService is not registered')
-          )),
+          throwsA(
+            predicate(
+              (e) =>
+                  e is Exception &&
+                  e.toString().contains(
+                    'MockNonExistentService is not registered',
+                  ),
+            ),
+          ),
         );
       });
 
       test('部分的サービス障害時のGraceful Degradation', () {
         // Arrange - 一部が正常、一部が障害のサービス群
         final workingService = MockWorkingService();
-        testServiceLocator.registerSingleton<MockWorkingService>(workingService);
+        testServiceLocator.registerSingleton<MockWorkingService>(
+          workingService,
+        );
 
         testServiceLocator.registerFactory<MockFailingService>(() {
           throw ServiceException('サービス障害');
@@ -882,10 +1023,11 @@ void main() {
         // Act & Assert - 初回・2回目は失敗
         expect(
           () => testServiceLocator.get<MockResourceIntensiveService>(),
-          throwsA(predicate((e) => 
-            e is ServiceException && 
-            e.message.contains('リソース不足')
-          )),
+          throwsA(
+            predicate(
+              (e) => e is ServiceException && e.message.contains('リソース不足'),
+            ),
+          ),
         );
 
         // サービスを再登録（リソース回復をシミュレート）
@@ -908,7 +1050,7 @@ void main() {
 
         // Act - タイムアウト設定でサービス取得
         final stopwatch = Stopwatch()..start();
-        
+
         try {
           await testServiceLocator.getAsync<MockSlowService>().timeout(
             const Duration(milliseconds: 100),
@@ -934,16 +1076,26 @@ void main() {
 
         // Phase 1: 登録性能測定
         stopwatch.start();
-        
+
         // 異なる種類のサービスを登録
-        testServiceLocator.registerFactory<MockPerformanceService>(() => MockPerformanceService());
-        testServiceLocator.registerFactory<MockConcurrentService>(() => MockConcurrentService());
-        testServiceLocator.registerFactory<MockCachingTestService>(() => MockCachingTestService());
-        testServiceLocator.registerFactory<MockMemoryTestService>(() => MockMemoryTestService());
-        testServiceLocator.registerFactory<MockMemoryEfficiencyService>(() => MockMemoryEfficiencyService());
-        
+        testServiceLocator.registerFactory<MockPerformanceService>(
+          () => MockPerformanceService(),
+        );
+        testServiceLocator.registerFactory<MockConcurrentService>(
+          () => MockConcurrentService(),
+        );
+        testServiceLocator.registerFactory<MockCachingTestService>(
+          () => MockCachingTestService(),
+        );
+        testServiceLocator.registerFactory<MockMemoryTestService>(
+          () => MockMemoryTestService(),
+        );
+        testServiceLocator.registerFactory<MockMemoryEfficiencyService>(
+          () => MockMemoryEfficiencyService(),
+        );
+
         stopwatch.stop();
-        
+
         final registrationTime = stopwatch.elapsedMilliseconds;
         expect(registrationTime, lessThan(100)); // 100ms以内
 
@@ -959,7 +1111,7 @@ void main() {
           testServiceLocator.get<MockMemoryEfficiencyService>();
         }
         stopwatch.stop();
-        
+
         final retrievalTime = stopwatch.elapsedMilliseconds;
         expect(retrievalTime, lessThan(500)); // 500ms以内
       });
@@ -969,23 +1121,25 @@ void main() {
         final stopwatch = Stopwatch();
 
         // 階層的な依存関係を構築
-        testServiceLocator.registerFactory<MockPerfLevel1Service>(() => MockPerfLevel1Service());
-        
+        testServiceLocator.registerFactory<MockPerfLevel1Service>(
+          () => MockPerfLevel1Service(),
+        );
+
         testServiceLocator.registerFactory<MockPerfLevel2Service>(() {
           final level1 = testServiceLocator.get<MockPerfLevel1Service>();
           return MockPerfLevel2Service(level1);
         });
-        
+
         testServiceLocator.registerFactory<MockPerfLevel3Service>(() {
           final level2 = testServiceLocator.get<MockPerfLevel2Service>();
           return MockPerfLevel3Service(level2);
         });
-        
+
         testServiceLocator.registerFactory<MockPerfLevel4Service>(() {
           final level3 = testServiceLocator.get<MockPerfLevel3Service>();
           return MockPerfLevel4Service(level3);
         });
-        
+
         testServiceLocator.registerFactory<MockPerfLevel5Service>(() {
           final level4 = testServiceLocator.get<MockPerfLevel4Service>();
           return MockPerfLevel5Service(level4);
@@ -1011,36 +1165,50 @@ void main() {
         // Act - 大量の並列アクセス
         const concurrentCount = 100;
         final stopwatch = Stopwatch()..start();
-        
+
         final futures = List.generate(concurrentCount, (index) {
           return Future(() => testServiceLocator.get<MockConcurrentService>());
         });
-        
+
         final results = await Future.wait(futures);
         stopwatch.stop();
 
         // Assert - 並列アクセスでも高速
         expect(results, hasLength(concurrentCount));
         expect(stopwatch.elapsedMilliseconds, lessThan(500)); // 500ms以内
-        
+
         // 全て同一インスタンス（Singleton化）
         final firstInstance = results.first;
-        expect(results.every((service) => identical(service, firstInstance)), isTrue);
+        expect(
+          results.every((service) => identical(service, firstInstance)),
+          isTrue,
+        );
       });
 
       test('メモリ使用量の効率性確認', () {
         // Arrange - メモリ使用量測定
-        
+
         // Phase 1: ベースライン測定（異なる型で登録）
-        testServiceLocator.registerSingleton<MockMemoryTestService>(MockMemoryTestService());
-        testServiceLocator.registerSingleton<MockMemoryEfficiencyService>(MockMemoryEfficiencyService());
-        
-        final baselineRegisteredCount = testServiceLocator.registeredTypes.length;
+        testServiceLocator.registerSingleton<MockMemoryTestService>(
+          MockMemoryTestService(),
+        );
+        testServiceLocator.registerSingleton<MockMemoryEfficiencyService>(
+          MockMemoryEfficiencyService(),
+        );
+
+        final baselineRegisteredCount =
+            testServiceLocator.registeredTypes.length;
 
         // Phase 2: 追加登録（異なる型）
-        testServiceLocator.registerFactory<MockPerformanceService>(() => MockPerformanceService());
-        testServiceLocator.registerFactory<MockConcurrentService>(() => MockConcurrentService());
-        testServiceLocator.registerFactory<MockCachingTestService>(() => MockCachingTestService());
+        testServiceLocator.registerFactory<MockPerformanceService>(
+          () => MockPerformanceService(),
+        );
+        testServiceLocator.registerFactory<MockConcurrentService>(
+          () => MockConcurrentService(),
+        );
+        testServiceLocator.registerFactory<MockCachingTestService>(
+          () => MockCachingTestService(),
+        );
 
         // Assert - 期待される登録数
         final finalRegisteredCount = testServiceLocator.registeredTypes.length;
@@ -1062,18 +1230,21 @@ void main() {
         // Act - 複数回アクセス
         const accessCount = 50;
         final stopwatch = Stopwatch()..start();
-        
+
         final services = <MockCachingTestService>[];
         for (int i = 0; i < accessCount; i++) {
           services.add(testServiceLocator.get<MockCachingTestService>());
         }
-        
+
         stopwatch.stop();
 
         // Assert - キャッシングによる効率化
         expect(factoryCallCount, equals(1)); // ファクトリは1回だけ呼ばれる
         expect(services, hasLength(accessCount));
-        expect(services.every((service) => identical(service, services.first)), isTrue);
+        expect(
+          services.every((service) => identical(service, services.first)),
+          isTrue,
+        );
         expect(stopwatch.elapsedMilliseconds, lessThan(50)); // キャッシュにより高速
       });
     });
@@ -1090,7 +1261,7 @@ class MockServiceInterface extends Mock {}
 /// 循環依存テスト用MockサービスA
 class MockServiceA extends Mock {}
 
-/// 循環依存テスト用MockサービスB  
+/// 循環依存テスト用MockサービスB
 class MockServiceB extends Mock {}
 
 /// 同期サービステスト用Mock
@@ -1102,7 +1273,7 @@ class MockAsyncService extends Mock {}
 /// 3階層依存テスト用 - Base Service
 class MockBaseService extends Mock {}
 
-/// 3階層依存テスト用 - Middle Service  
+/// 3階層依存テスト用 - Middle Service
 class MockMiddleService extends Mock {
   final MockBaseService baseService;
   MockMiddleService(this.baseService);
