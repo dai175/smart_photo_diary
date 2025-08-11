@@ -631,14 +631,14 @@
   - [x] SubscriptionServiceを新しいStatusManagerを使用するように更新
   - [x] インポート文とサービス登録を更新
   - [x] テストケースの更新と動作確認
-- [ ] `subscription_usage_tracker.dart` の作成
-  - [ ] 新ファイル `subscription_usage_tracker.dart` を作成
-  - [ ] SubscriptionServiceからAI使用量カウントのメソッドを新ファイルに移動
-  - [ ] 月次リセットロジックを新ファイルに移動
-  - [ ] 使用制限チェックのメソッドを新ファイルに移動
-  - [ ] SubscriptionServiceを新しいUsageTrackerを使用するように更新
-  - [ ] インポート文とサービス登録を更新
-  - [ ] テストケースの更新と動作確認
+- [x] `subscription_usage_tracker.dart` の作成
+  - [x] 新ファイル `subscription_usage_tracker.dart` を作成
+  - [x] SubscriptionServiceからAI使用量カウントのメソッドを新ファイルに移動
+  - [x] 月次リセットロジックを新ファイルに移動
+  - [x] 使用制限チェックのメソッドを新ファイルに移動
+  - [x] SubscriptionServiceを新しいUsageTrackerを使用するように更新
+  - [x] インポート文とサービス登録を更新
+  - [x] テストケースの更新と動作確認
 - [ ] `subscription_service.dart` をファサードパターンに変更
   - [ ] 3つの新しいマネージャーを統合するファサードクラスに変更
   - [ ] 既存のパブリックAPIの互換性を保持
