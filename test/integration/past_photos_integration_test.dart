@@ -424,8 +424,6 @@ void main() {
       test('月末日境界での日付計算確認', () {
         // Arrange
         final premiumPlan = PremiumMonthlyPlan();
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
 
         // 現在の日付から365日前（正確なアクセス境界）
         final accessibleDate = photoAccessControlService.getAccessibleDateForPlan(premiumPlan);
