@@ -114,7 +114,7 @@ void main() {
       });
 
       test('should return null when no instance available', () {
-        // Act  
+        // Act
         final result = LoggingService.getSafely();
 
         // Assert
@@ -208,10 +208,12 @@ void main() {
         // Assert
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(1));
-        
+
         // ISO8601形式のタイムスタンプを確認
         final logMessage = logs[0];
-        final timestampRegex = RegExp(r'\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}');
+        final timestampRegex = RegExp(
+          r'\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}',
+        );
         expect(logMessage, matches(timestampRegex));
       });
 
@@ -234,7 +236,7 @@ void main() {
         expect(logs[0], contains('ERROR'));
         expect(logs[0], contains('Error message'));
         expect(logs[0], contains('Exception: Test exception'));
-        
+
         if (kDebugMode && logs.length > 1) {
           expect(logs[1], contains('StackTrace:'));
         }
@@ -270,7 +272,7 @@ void main() {
         // Assert
         expect(stopwatch, isA<Stopwatch>());
         expect(stopwatch.isRunning, isTrue);
-        
+
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(1));
         expect(logs[0], contains('DEBUG'));
@@ -286,7 +288,7 @@ void main() {
 
         // Assert
         expect(stopwatch.isRunning, isTrue);
-        
+
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(1));
         expect(logs[0], contains('[TestContext]'));
@@ -297,7 +299,7 @@ void main() {
         // Arrange
         final stopwatch = loggingService.startTimer('test operation');
         DebugPrintCapture.clear(); // スタートログをクリア
-        
+
         // 短い待機時間を追加して測定可能な時間を作る
         await Future.delayed(const Duration(milliseconds: 10));
 
@@ -307,7 +309,7 @@ void main() {
         // Assert
         expect(stopwatch.isRunning, isFalse);
         expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(0));
-        
+
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(1));
         expect(logs[0], contains('INFO'));
@@ -338,7 +340,7 @@ void main() {
         // Arrange
         final stopwatch = loggingService.startTimer('timing test');
         DebugPrintCapture.clear();
-        
+
         // 測定可能な遅延を追加
         await Future.delayed(const Duration(milliseconds: 50));
 
@@ -348,13 +350,13 @@ void main() {
         // Assert
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(1));
-        
+
         // ログから経過時間を抽出
         final logMessage = logs[0];
         final timeRegex = RegExp(r'in (\d+)ms');
         final match = timeRegex.firstMatch(logMessage);
         expect(match, isNotNull);
-        
+
         final elapsedMs = int.parse(match!.group(1)!);
         expect(elapsedMs, greaterThanOrEqualTo(40)); // 多少の誤差を考慮
         expect(elapsedMs, lessThan(200)); // 上限チェック
@@ -411,13 +413,13 @@ void main() {
             Future.microtask(() => loggingService.info('Concurrent log $i')),
           );
         }
-        
+
         await Future.wait(futures);
 
         // Assert
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(10));
-        
+
         // すべてのログが正しく記録されていることを確認
         for (int i = 0; i < 10; i++) {
           final hasLog = logs.any((log) => log.contains('Concurrent log $i'));
@@ -430,8 +432,14 @@ void main() {
         expect(() => loggingService.info(''), returnsNormally);
         expect(() => loggingService.info('test', context: ''), returnsNormally);
         expect(() => loggingService.info('test', data: null), returnsNormally);
-        expect(() => loggingService.error('test', error: null), returnsNormally);
-        expect(() => loggingService.error('test', stackTrace: null), returnsNormally);
+        expect(
+          () => loggingService.error('test', error: null),
+          returnsNormally,
+        );
+        expect(
+          () => loggingService.error('test', stackTrace: null),
+          returnsNormally,
+        );
 
         final logs = DebugPrintCapture.logs;
         expect(logs, hasLength(5)); // すべてのログが出力される

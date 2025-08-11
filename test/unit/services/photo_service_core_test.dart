@@ -12,8 +12,11 @@ import '../../test_helpers/mock_platform_channels.dart';
 
 // モッククラス
 class MockAssetEntity extends Mock implements AssetEntity {}
+
 class MockAssetPathEntity extends Mock implements AssetPathEntity {}
+
 class MockLoggingService extends Mock implements LoggingService {}
+
 class MockPhotoCacheService extends Mock {}
 
 void main() {
@@ -25,7 +28,7 @@ void main() {
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       MockPlatformChannels.setupMocks();
-      
+
       // registerFallbackValue
       registerFallbackValue(MockAssetEntity());
       registerFallbackValue(DateTime.now());
@@ -41,15 +44,39 @@ void main() {
     setUp(() {
       mockAsset = MockAssetEntity();
       mockLoggingService = MockLoggingService();
-      
+
       // PhotoServiceのインスタンス取得（シングルトンパターン）
       photoService = PhotoService.getInstance();
-      
+
       // 基本的なモック設定
-      when(() => mockLoggingService.debug(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.info(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.warning(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.error(any(), context: any(named: 'context'), error: any(named: 'error'))).thenReturn(null);
+      when(
+        () => mockLoggingService.debug(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.info(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.warning(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.error(
+          any(),
+          context: any(named: 'context'),
+          error: any(named: 'error'),
+        ),
+      ).thenReturn(null);
     });
 
     tearDown(() {
@@ -84,7 +111,7 @@ void main() {
         // Act & Assert - 各状態の処理を確認
         for (final state in permissionStates) {
           expect(state, isA<PermissionState>());
-          
+
           // PhotoManager.requestPermissionExtendの各戻り値に対する
           // 期待される動作をテスト
           switch (state) {
@@ -106,15 +133,12 @@ void main() {
 
       test('should validate platform-specific permission handling', () {
         // Arrange - プラットフォーム固有の権限処理テスト
-        const platforms = [
-          TargetPlatform.android,
-          TargetPlatform.iOS,
-        ];
+        const platforms = [TargetPlatform.android, TargetPlatform.iOS];
 
         // Act & Assert
         for (final platform in platforms) {
           expect(platform, isA<TargetPlatform>());
-          
+
           // プラットフォーム固有のロジック確認
           if (platform == TargetPlatform.android) {
             // Android固有の Permission.photos 処理
@@ -135,7 +159,9 @@ void main() {
         const limit = 10;
 
         // Act - パラメータ検証のロジックテスト
-        final dateIsValid = testDate.isBefore(DateTime.now().add(const Duration(days: 1)));
+        final dateIsValid = testDate.isBefore(
+          DateTime.now().add(const Duration(days: 1)),
+        );
         final offsetIsValid = offset >= 0;
         final limitIsValid = limit > 0 && limit <= 100;
 
@@ -156,7 +182,7 @@ void main() {
         expect(yesterday.isBefore(today), isTrue);
         expect(futureDate.isAfter(today), isTrue);
         expect(farPastDate.isBefore(today), isTrue);
-        
+
         // 日付の正規化テスト
         final normalizedToday = DateTime(today.year, today.month, today.day);
         expect(normalizedToday.hour, equals(0));
@@ -174,7 +200,7 @@ void main() {
 
         final invalidCases = [
           {'offset': -1, 'limit': 10}, // 負のオフセット
-          {'offset': 0, 'limit': 0},   // ゼロの制限
+          {'offset': 0, 'limit': 0}, // ゼロの制限
           {'offset': 0, 'limit': 101}, // 制限超過
         ];
 
@@ -182,7 +208,7 @@ void main() {
         for (final testCase in validCases) {
           final offset = testCase['offset'] as int;
           final limit = testCase['limit'] as int;
-          
+
           expect(offset >= 0, isTrue);
           expect(limit > 0 && limit <= 100, isTrue);
         }
@@ -191,7 +217,7 @@ void main() {
         for (final testCase in invalidCases) {
           final offset = testCase['offset'] as int;
           final limit = testCase['limit'] as int;
-          
+
           final isValid = offset >= 0 && limit > 0 && limit <= 100;
           expect(isValid, isFalse);
         }
@@ -208,11 +234,11 @@ void main() {
         // Act & Assert
         expect(startDate.isBefore(endDate), isTrue);
         expect(startDate.isBefore(invalidEndDate), isFalse);
-        
+
         // 日付範囲の計算
         final daysDifference = endDate.difference(startDate).inDays;
         expect(daysDifference, equals(30));
-        
+
         // 範囲の妥当性チェック
         const maxRangeDays = 365;
         expect(daysDifference <= maxRangeDays, isTrue);
@@ -226,11 +252,11 @@ void main() {
 
         // Act & Assert
         expect(daysDifference, equals(365));
-        
+
         // パフォーマンス考慮事項
         const recommendedMaxDays = 90; // 推奨最大日数
         final isRecommendedRange = daysDifference <= recommendedMaxDays;
-        
+
         if (!isRecommendedRange) {
           // 大きな範囲の場合の分割処理が必要
           final chunks = (daysDifference / recommendedMaxDays).ceil();
@@ -243,8 +269,12 @@ void main() {
       test('should process AssetEntity properties correctly', () {
         // Arrange
         when(() => mockAsset.id).thenReturn('test-asset-id');
-        when(() => mockAsset.createDateTime).thenReturn(DateTime(2024, 1, 15, 10, 30));
-        when(() => mockAsset.modifiedDateTime).thenReturn(DateTime(2024, 1, 15, 11, 0));
+        when(
+          () => mockAsset.createDateTime,
+        ).thenReturn(DateTime(2024, 1, 15, 10, 30));
+        when(
+          () => mockAsset.modifiedDateTime,
+        ).thenReturn(DateTime(2024, 1, 15, 11, 0));
         when(() => mockAsset.width).thenReturn(1920);
         when(() => mockAsset.height).thenReturn(1080);
         when(() => mockAsset.type).thenReturn(AssetType.image);
@@ -269,7 +299,7 @@ void main() {
         expect(videoType == AssetType.video, isTrue);
         expect(audioType == AssetType.audio, isTrue);
         expect(otherType == AssetType.other, isTrue);
-        
+
         // 画像タイプのみをフィルターする条件
         final supportedTypes = [AssetType.image];
         expect(supportedTypes.contains(imageType), isTrue);
@@ -279,7 +309,7 @@ void main() {
       test('should validate asset dimensions', () {
         // Arrange
         final validDimensions = [
-          {'width': 100, 'height': 100},   // 最小サイズ
+          {'width': 100, 'height': 100}, // 最小サイズ
           {'width': 1920, 'height': 1080}, // HD
           {'width': 4096, 'height': 3072}, // 高解像度
         ];
@@ -294,7 +324,7 @@ void main() {
         for (final dim in validDimensions) {
           final width = dim['width'] as int;
           final height = dim['height'] as int;
-          
+
           expect(width > 0 && height > 0, isTrue);
         }
 
@@ -302,7 +332,7 @@ void main() {
         for (final dim in invalidDimensions) {
           final width = dim['width'] as int;
           final height = dim['height'] as int;
-          
+
           expect(width > 0 && height > 0, isFalse);
         }
       });
@@ -327,14 +357,15 @@ void main() {
         for (final size in validSizes) {
           final width = size['width'] as int;
           final height = size['height'] as int;
-          
+
           const minSize = 50;
           const maxSize = 500;
-          
-          final isValid = width >= minSize && 
-                         height >= minSize && 
-                         width <= maxSize && 
-                         height <= maxSize;
+
+          final isValid =
+              width >= minSize &&
+              height >= minSize &&
+              width <= maxSize &&
+              height <= maxSize;
           expect(isValid, isTrue);
         }
 
@@ -342,14 +373,15 @@ void main() {
         for (final size in invalidSizes) {
           final width = size['width'] as int;
           final height = size['height'] as int;
-          
+
           const minSize = 50;
           const maxSize = 500;
-          
-          final isValid = width >= minSize && 
-                         height >= minSize && 
-                         width <= maxSize && 
-                         height <= maxSize;
+
+          final isValid =
+              width >= minSize &&
+              height >= minSize &&
+              width <= maxSize &&
+              height <= maxSize;
           expect(isValid, isFalse);
         }
       });
@@ -357,11 +389,11 @@ void main() {
       test('should handle thumbnail quality settings', () {
         // Arrange
         final qualitySettings = [1, 25, 50, 75, 80, 90, 100];
-        
+
         // Act & Assert
         for (final quality in qualitySettings) {
           expect(quality >= 1 && quality <= 100, isTrue);
-          
+
           // 品質に基づく設定の妥当性
           if (quality <= 30) {
             // 低品質：高速処理、小サイズ
@@ -383,10 +415,12 @@ void main() {
           0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, // JFIF marker
         ]);
 
-        when(() => mockAsset.thumbnailDataWithSize(
-          any(),
-          quality: any(named: 'quality'),
-        )).thenAnswer((_) async => mockThumbnailData);
+        when(
+          () => mockAsset.thumbnailDataWithSize(
+            any(),
+            quality: any(named: 'quality'),
+          ),
+        ).thenAnswer((_) async => mockThumbnailData);
 
         // Act
         final thumbnailData = await mockAsset.thumbnailDataWithSize(
@@ -398,7 +432,7 @@ void main() {
         expect(thumbnailData, isNotNull);
         expect(thumbnailData!.isNotEmpty, isTrue);
         expect(thumbnailData.length, greaterThan(0));
-        
+
         // JPEGフォーマットの基本的な検証
         if (thumbnailData.length >= 2) {
           expect(thumbnailData[0], equals(0xFF));
@@ -419,7 +453,7 @@ void main() {
         // Act & Assert
         for (final errorMessage in permissionErrors) {
           final exception = PhotoAccessException(errorMessage);
-          
+
           expect(exception, isA<PhotoAccessException>());
           expect(exception.message, equals(errorMessage));
           expect(exception, isA<AppException>());
@@ -437,7 +471,7 @@ void main() {
         // Act & Assert
         for (final errorMessage in assetLoadErrors) {
           final exception = PhotoAccessException(errorMessage);
-          
+
           expect(exception.message, contains(errorMessage));
           expect(exception, isA<AppException>());
         }
@@ -445,17 +479,21 @@ void main() {
 
       test('should create Result<T> failure for various error scenarios', () {
         // Arrange & Act
-        final permissionFailure = Failure(PhotoAccessException('Permission denied'));
+        final permissionFailure = Failure(
+          PhotoAccessException('Permission denied'),
+        );
         final assetFailure = Failure(PhotoAccessException('Asset not found'));
-        final validationFailure = Failure(ValidationException('Invalid parameters'));
+        final validationFailure = Failure(
+          ValidationException('Invalid parameters'),
+        );
 
         // Assert
         expect(permissionFailure.isFailure, isTrue);
         expect(permissionFailure.error, isA<PhotoAccessException>());
-        
+
         expect(assetFailure.isFailure, isTrue);
         expect(assetFailure.error.message, contains('Asset not found'));
-        
+
         expect(validationFailure.isFailure, isTrue);
         expect(validationFailure.error, isA<ValidationException>());
       });
@@ -470,7 +508,7 @@ void main() {
         // Act & Assert
         for (final batchSize in batchSizes) {
           expect(batchSize > 0, isTrue);
-          
+
           if (batchSize <= maxRecommendedBatchSize) {
             // 推奨範囲内
             expect(batchSize, lessThanOrEqualTo(maxRecommendedBatchSize));
@@ -485,15 +523,16 @@ void main() {
       test('should validate memory usage considerations', () {
         // Arrange
         const thumbnailSizes = [100, 200, 300, 400, 500];
-        
+
         // Act & Assert
         for (final size in thumbnailSizes) {
           // 概算メモリ使用量（RGBA: 4バイト/ピクセル）
           final estimatedMemoryBytes = size * size * 4;
           const maxMemoryPerThumbnail = 1024 * 1024; // 1MB
-          
-          final isMemoryEfficient = estimatedMemoryBytes <= maxMemoryPerThumbnail;
-          
+
+          final isMemoryEfficient =
+              estimatedMemoryBytes <= maxMemoryPerThumbnail;
+
           if (size <= 200) {
             expect(isMemoryEfficient, isTrue);
           } else {
@@ -515,7 +554,7 @@ void main() {
         // Act & Assert
         for (final strategy in cacheStrategies) {
           expect(strategy, isA<String>());
-          
+
           // 各戦略の特性を確認
           switch (strategy) {
             case 'memory_only':
@@ -540,16 +579,19 @@ void main() {
     });
 
     group('Result<T> pattern integration', () {
-      test('should return Success<List<AssetEntity>> for valid operations', () async {
-        // Arrange
-        final mockAssets = [mockAsset];
-        final successResult = Success(mockAssets);
+      test(
+        'should return Success<List<AssetEntity>> for valid operations',
+        () async {
+          // Arrange
+          final mockAssets = [mockAsset];
+          final successResult = Success(mockAssets);
 
-        // Act & Assert
-        expect(successResult.isSuccess, isTrue);
-        expect(successResult.value, equals(mockAssets));
-        expect(successResult.value.length, equals(1));
-      });
+          // Act & Assert
+          expect(successResult.isSuccess, isTrue);
+          expect(successResult.value, equals(mockAssets));
+          expect(successResult.value.length, equals(1));
+        },
+      );
 
       test('should handle Result<T> functional operations', () {
         // Arrange
@@ -564,7 +606,7 @@ void main() {
         // Assert
         expect(mappedSuccess.isSuccess, isTrue);
         expect(mappedSuccess.value, equals(1));
-        
+
         expect(mappedFailure.isFailure, isTrue);
         expect(mappedFailure.error.message, contains('Access denied'));
       });
@@ -581,7 +623,7 @@ void main() {
           (assets) => '${assets.length} photos loaded',
           (error) => 'Error: ${error.message}',
         );
-        
+
         final failureMessage = failureResult.fold(
           (assets) => '${assets.length} photos loaded',
           (error) => 'Error: ${error.message}',

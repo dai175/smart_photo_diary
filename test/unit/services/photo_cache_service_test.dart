@@ -8,6 +8,7 @@ import 'package:smart_photo_diary/services/logging_service.dart';
 
 // モッククラス
 class MockAssetEntity extends Mock implements AssetEntity {}
+
 class MockLoggingService extends Mock implements LoggingService {}
 
 void main() {
@@ -17,10 +18,10 @@ void main() {
 
     setUp(() {
       mockAsset = MockAssetEntity();
-      
+
       // PhotoCacheServiceのシングルトンを取得
       photoCacheService = PhotoCacheService.getInstance();
-      
+
       // registerFallbackValueの設定
       registerFallbackValue(ThumbnailSize(200, 200));
     });
@@ -63,12 +64,15 @@ void main() {
       test('should clear cache for specific asset', () {
         // Arrange
         const assetId = 'test-asset-id';
-        
+
         // Act - 特定アセットのキャッシュをクリア
         photoCacheService.clearCacheForAsset(assetId);
 
         // Assert - エラーが発生しないことを確認
-        expect(() => photoCacheService.clearCacheForAsset(assetId), returnsNormally);
+        expect(
+          () => photoCacheService.clearCacheForAsset(assetId),
+          returnsNormally,
+        );
       });
     });
 
@@ -76,10 +80,12 @@ void main() {
       test('should handle thumbnail generation gracefully', () async {
         // Arrange
         when(() => mockAsset.id).thenReturn('test-asset-id');
-        when(() => mockAsset.thumbnailDataWithSize(
-          any<ThumbnailSize>(),
-          quality: any(named: 'quality'),
-        )).thenAnswer((_) async => Uint8List.fromList([1, 2, 3, 4]));
+        when(
+          () => mockAsset.thumbnailDataWithSize(
+            any<ThumbnailSize>(),
+            quality: any(named: 'quality'),
+          ),
+        ).thenAnswer((_) async => Uint8List.fromList([1, 2, 3, 4]));
 
         // Act
         final result = await photoCacheService.getThumbnail(
@@ -96,10 +102,12 @@ void main() {
       test('should handle null thumbnail response', () async {
         // Arrange
         when(() => mockAsset.id).thenReturn('test-asset-id-null');
-        when(() => mockAsset.thumbnailDataWithSize(
-          any<ThumbnailSize>(),
-          quality: any(named: 'quality'),
-        )).thenAnswer((_) async => null);
+        when(
+          () => mockAsset.thumbnailDataWithSize(
+            any<ThumbnailSize>(),
+            quality: any(named: 'quality'),
+          ),
+        ).thenAnswer((_) async => null);
 
         // Act
         final result = await photoCacheService.getThumbnail(mockAsset);
@@ -111,10 +119,12 @@ void main() {
       test('should handle thumbnail generation error', () async {
         // Arrange
         when(() => mockAsset.id).thenReturn('test-asset-id-error');
-        when(() => mockAsset.thumbnailDataWithSize(
-          any<ThumbnailSize>(),
-          quality: any(named: 'quality'),
-        )).thenThrow(Exception('Thumbnail generation failed'));
+        when(
+          () => mockAsset.thumbnailDataWithSize(
+            any<ThumbnailSize>(),
+            quality: any(named: 'quality'),
+          ),
+        ).thenThrow(Exception('Thumbnail generation failed'));
 
         // Act
         final result = await photoCacheService.getThumbnail(mockAsset);
@@ -137,25 +147,32 @@ void main() {
         // Arrange
         final mockAsset1 = MockAssetEntity();
         final mockAsset2 = MockAssetEntity();
-        
+
         when(() => mockAsset1.id).thenReturn('asset-1');
         when(() => mockAsset2.id).thenReturn('asset-2');
-        
-        when(() => mockAsset1.thumbnailDataWithSize(
-          any<ThumbnailSize>(),
-          quality: any(named: 'quality'),
-        )).thenAnswer((_) async => Uint8List.fromList([1, 2, 3]));
-        
-        when(() => mockAsset2.thumbnailDataWithSize(
-          any<ThumbnailSize>(),
-          quality: any(named: 'quality'),
-        )).thenAnswer((_) async => Uint8List.fromList([4, 5, 6]));
+
+        when(
+          () => mockAsset1.thumbnailDataWithSize(
+            any<ThumbnailSize>(),
+            quality: any(named: 'quality'),
+          ),
+        ).thenAnswer((_) async => Uint8List.fromList([1, 2, 3]));
+
+        when(
+          () => mockAsset2.thumbnailDataWithSize(
+            any<ThumbnailSize>(),
+            quality: any(named: 'quality'),
+          ),
+        ).thenAnswer((_) async => Uint8List.fromList([4, 5, 6]));
 
         // Act
         await photoCacheService.preloadThumbnails([mockAsset1, mockAsset2]);
 
         // Assert - エラーが発生しないことを確認
-        expect(() => photoCacheService.preloadThumbnails([mockAsset1, mockAsset2]), returnsNormally);
+        expect(
+          () => photoCacheService.preloadThumbnails([mockAsset1, mockAsset2]),
+          returnsNormally,
+        );
       });
     });
 
@@ -196,15 +213,17 @@ void main() {
       test('should handle concurrent cache operations', () async {
         // Arrange
         final futures = <Future>[];
-        
+
         // Act - 複数の並行操作
         for (int i = 0; i < 5; i++) {
-          futures.add(Future.microtask(() {
-            photoCacheService.clearMemoryCache();
-            return photoCacheService.getCacheSize();
-          }));
+          futures.add(
+            Future.microtask(() {
+              photoCacheService.clearMemoryCache();
+              return photoCacheService.getCacheSize();
+            }),
+          );
         }
-        
+
         final results = await Future.wait(futures);
 
         // Assert

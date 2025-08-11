@@ -55,7 +55,7 @@ void main() {
         // Act
         final result = await storageService.importData();
 
-        // Assert  
+        // Assert
         expect(result.isFailure, isTrue);
         // ファイルが選択されないため、バリデーション前でエラーになる
       });
@@ -80,7 +80,10 @@ void main() {
       expect(info3.formattedDiaryDataSize, '1.0MB');
 
       // Gigabytes
-      final info4 = StorageInfo(totalSize: 1610612736, diaryDataSize: 1073741824);
+      final info4 = StorageInfo(
+        totalSize: 1610612736,
+        diaryDataSize: 1073741824,
+      );
       expect(info4.formattedTotalSize, '1.5GB');
       expect(info4.formattedDiaryDataSize, '1.0GB');
     });
