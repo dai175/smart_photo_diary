@@ -6,6 +6,7 @@ import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_access_control_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
@@ -13,6 +14,7 @@ import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/import_result.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
@@ -44,6 +46,9 @@ class MockStorageService extends Mock implements StorageService {}
 
 /// Mock LoggingService for integration testing
 class MockLoggingService extends Mock implements LoggingService {}
+
+/// Mock PromptService for integration testing
+class MockPromptServiceInterface extends Mock implements IPromptService {}
 
 /// Mock AssetEntity for integration testing
 class MockAssetEntity extends Mock implements AssetEntity {}
@@ -580,6 +585,17 @@ void registerMockFallbacks() {
     ),
   );
   registerFallbackValue(BasicPlan());
+  registerFallbackValue(PromptCategory.emotion);
+  registerFallbackValue(
+    WritingPrompt(
+      id: 'fallback-prompt',
+      text: 'Fallback prompt text',
+      category: PromptCategory.emotion,
+      isPremiumOnly: false,
+      tags: ['fallback'],
+      priority: 50,
+    ),
+  );
   registerFallbackValue(
     SubscriptionStatus(
       planId: 'basic',

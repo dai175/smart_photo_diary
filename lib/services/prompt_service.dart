@@ -190,6 +190,16 @@ class PromptService implements IPromptService {
   @override
   List<WritingPrompt> getPromptsForPlan({required bool isPremium}) {
     _ensureInitialized();
+
+    // キャッシュが存在しない場合は再構築
+    if (!_planFilterCache.containsKey(isPremium) ||
+        _planFilterCache[isPremium]!.isEmpty) {
+      _planFilterCache[isPremium] = PromptCategoryUtils.filterPromptsByPlan(
+        _allPrompts,
+        isPremium: isPremium,
+      );
+    }
+
     return List.unmodifiable(_planFilterCache[isPremium] ?? []);
   }
 
@@ -199,6 +209,14 @@ class PromptService implements IPromptService {
     required bool isPremium,
   }) {
     _ensureInitialized();
+
+    // キャッシュが存在しない場合は再構築
+    if (!_categoryCache.containsKey(category) ||
+        _categoryCache[category]!.isEmpty) {
+      _categoryCache[category] = _allPrompts
+          .where((prompt) => prompt.category == category && prompt.isActive)
+          .toList();
+    }
 
     // カテゴリのプロンプトを取得
     final categoryPrompts = _categoryCache[category] ?? [];

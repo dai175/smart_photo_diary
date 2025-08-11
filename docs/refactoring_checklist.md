@@ -504,8 +504,17 @@
 - **依存性注入**: createWithDependencies()によるテスト可能な設計実装
 - **テスト成功率**: 19/19テスト全て成功、全analyze issues解決
 - **機能完全性**: 進行状況コールバック・フォールバックタグ・完全なエラー処理実装
-- [ ] **PromptService統合テスト拡張 - assets/data/writing_prompts.jsonからの実データ読み込み**
-- [ ] **PromptService統合テスト拡張 - 3層キャッシングシステム（メモリ、ローカル、アセット）**
+- [x] **PromptService統合テスト拡張 - assets/data/writing_prompts.jsonからの実データ読み込み** ✅
+- [x] **PromptService統合テスト拡張 - 3層キャッシングシステム（メモリ、ローカル、アセット）** ✅
+
+**📊 PromptService統合テスト拡張完了成果 (Phase 2-2.6-2.7)**
+- **統合テストファイル**: `test/integration/prompt_service_integration_test.dart` (24テスト・7グループ)
+- **実データ統合検証**: writing_prompts.json完全読み込み（20プロンプト・9カテゴリ）
+- **プラン制限システム**: Basic 5個/Premium 20個の正確な分類・アクセス制御
+- **3層キャッシング**: メモリ・ローカル・アセット層のパフォーマンス最適化確認
+- **機能網羅**: ランダム選択・検索・統計・エラー処理の完全統合動作
+- **品質保証**: 24/24テスト成功・1.2秒実行・0 analyze issues
+- **技術修正**: キャッシュ再構築ロジック追加・MockPromptService統合環境構築
 - [ ] **Past Photos機能統合テスト拡張 - プラン制限の実動作確認（Basic vs Premium）**
 - [ ] **Past Photos機能統合テスト拡張 - 365日範囲の日付計算ロジック**
 - [ ] **エンドツーエンド統合テスト - 写真選択→AI生成→タグ付け→保存の完全フロー**
