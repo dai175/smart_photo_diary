@@ -493,8 +493,17 @@
 - **品質保証**: flutter analyze 0 issues達成、コードフォーマット完了
 - **安定性確認**: 並行処理30回・大量呼び出し20回での安定動作確認
 
-- [ ] **DiaryService + AiService統合フロー - saveDiaryEntryWithAiGeneration完全フロー**
-- [ ] **DiaryService + AiService統合フロー - AI生成失敗時のフォールバック処理**
+- [x] **DiaryService + AiService統合フロー - saveDiaryEntryWithAiGeneration完全フロー** ✅
+- [x] **DiaryService + AiService統合フロー - AI生成失敗時のフォールバック処理** ✅
+
+**📊 DiaryService + AiService統合フロー実装完了成果 (Phase 2-2.4-2.5)**
+- **新規メソッド**: `saveDiaryEntryWithAiGeneration()` (DiaryServiceInterface・DiaryService実装完了)
+- **統合テストファイル**: `test/integration/diary_ai_service_integration_test.dart` (19テスト)
+- **統合フロー実装**: 写真データ取得→AI生成→タグ付け→保存の4段階完全実装
+- **エラーハンドリング**: PhotoService・AiService・DiaryService各層のResult<T>統合対応
+- **依存性注入**: createWithDependencies()によるテスト可能な設計実装
+- **テスト成功率**: 19/19テスト全て成功、全analyze issues解決
+- **機能完全性**: 進行状況コールバック・フォールバックタグ・完全なエラー処理実装
 - [ ] **PromptService統合テスト拡張 - assets/data/writing_prompts.jsonからの実データ読み込み**
 - [ ] **PromptService統合テスト拡張 - 3層キャッシングシステム（メモリ、ローカル、アセット）**
 - [ ] **Past Photos機能統合テスト拡張 - プラン制限の実動作確認（Basic vs Premium）**
