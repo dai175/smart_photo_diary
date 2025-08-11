@@ -79,6 +79,15 @@ abstract class ISubscriptionService {
   /// 優先サポートにアクセスできるかどうか
   Future<Result<bool>> canAccessPrioritySupport();
 
+  /// データエクスポート機能にアクセスできるかどうか
+  Future<Result<bool>> canAccessDataExport();
+
+  /// 統計ダッシュボード機能にアクセスできるかどうか
+  Future<Result<bool>> canAccessStatsDashboard();
+
+  /// プラン別の機能制限情報を取得
+  Future<Result<Map<String, bool>>> getFeatureAccess();
+
   // ========================================
   // 購入・復元メソッド
   // ========================================

@@ -162,6 +162,32 @@ class MockSubscriptionService implements ISubscriptionService {
     // Mock implementation - nothing to dispose
   }
 
+  @override
+  Future<Result<bool>> canAccessDataExport() async {
+    return const Success(true); // データエクスポートは全プランで利用可能
+  }
+
+  @override
+  Future<Result<bool>> canAccessStatsDashboard() async {
+    final status = _currentStatus;
+    return Success(status.canAccessPremiumFeatures); // Premiumプランのみ
+  }
+
+  @override
+  Future<Result<Map<String, bool>>> getFeatureAccess() async {
+    final status = _currentStatus;
+    final featureAccess = {
+      'premiumFeatures': status.canAccessPremiumFeatures,
+      'writingPrompts': status.canAccessWritingPrompts,
+      'advancedFilters': status.canAccessAdvancedFilters,
+      'dataExport': true,
+      'statsDashboard': status.canAccessPremiumFeatures,
+      'advancedAnalytics': status.canAccessAdvancedAnalytics,
+      'prioritySupport': status.canAccessPremiumFeatures,
+    };
+    return Success(featureAccess);
+  }
+
   // Plan class related methods
   @override
   Future<Result<void>> changePlanClass(Plan newPlan) async {

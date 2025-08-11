@@ -513,6 +513,68 @@ class MockSubscriptionService implements ISubscriptionService {
     return Success(planResult.value.hasPrioritySupport);
   }
 
+  @override
+  Future<Result<bool>> canAccessDataExport() async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    // データエクスポートは全プランで利用可能（Basicは基本形式のみ）
+    return const Success(true);
+  }
+
+  @override
+  Future<Result<bool>> canAccessStatsDashboard() async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+    return Success(status.canAccessAdvancedAnalytics); // Premiumプランのみ
+  }
+
+  @override
+  Future<Result<Map<String, bool>>> getFeatureAccess() async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+
+    final featureAccess = {
+      'premiumFeatures': status.canAccessPremiumFeatures,
+      'writingPrompts': status.canAccessWritingPrompts,
+      'advancedFilters': status.canAccessAdvancedFilters,
+      'dataExport': true, // 全プランでアクセス可能
+      'statsDashboard': status.canAccessAdvancedAnalytics, // Premiumプランのみ
+      'advancedAnalytics': status.canAccessAdvancedAnalytics,
+      'prioritySupport': status.canAccessPremiumFeatures,
+    };
+
+    return Success(featureAccess);
+  }
+
   // =================================================================
   // 購入・復元メソッド（Phase 1.6機能のモック実装）
   // =================================================================

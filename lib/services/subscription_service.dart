@@ -628,6 +628,7 @@ class SubscriptionService implements ISubscriptionService {
   }
 
   /// データエクスポート機能にアクセスできるかどうか
+  @override
   Future<Result<bool>> canAccessDataExport() async {
     if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
       return Failure(ServiceException('SubscriptionService is not initialized'));
@@ -646,6 +647,7 @@ class SubscriptionService implements ISubscriptionService {
   }
 
   /// 統計ダッシュボード機能にアクセスできるかどうか
+  @override
   Future<Result<bool>> canAccessStatsDashboard() async {
     if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
       return Failure(ServiceException('SubscriptionService is not initialized'));
@@ -664,6 +666,7 @@ class SubscriptionService implements ISubscriptionService {
   }
 
   /// プラン別の機能制限情報を取得
+  @override
   Future<Result<Map<String, bool>>> getFeatureAccess() async {
     if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
       return Failure(ServiceException('SubscriptionService is not initialized'));
