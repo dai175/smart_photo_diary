@@ -623,14 +623,14 @@
   - [x] SubscriptionServiceを新しいPurchaseManagerを使用するように更新
   - [x] インポート文とサービス登録を更新
   - [x] テストケースの更新と動作確認
-- [ ] `subscription_status_manager.dart` の作成
-  - [ ] 新ファイル `subscription_status_manager.dart` を作成
-  - [ ] SubscriptionServiceからステータス管理メソッドを新ファイルに移動
-  - [ ] プラン判定ロジックを新ファイルに移動
-  - [ ] 有効期限管理のメソッドを新ファイルに移動
-  - [ ] SubscriptionServiceを新しいStatusManagerを使用するように更新
-  - [ ] インポート文とサービス登録を更新
-  - [ ] テストケースの更新と動作確認
+- [x] `subscription_status_manager.dart` の作成
+  - [x] 新ファイル `subscription_status_manager.dart` を作成
+  - [x] SubscriptionServiceからステータス管理メソッドを新ファイルに移動
+  - [x] プラン判定ロジックを新ファイルに移動
+  - [x] 有効期限管理のメソッドを新ファイルに移動
+  - [x] SubscriptionServiceを新しいStatusManagerを使用するように更新
+  - [x] インポート文とサービス登録を更新
+  - [x] テストケースの更新と動作確認
 - [ ] `subscription_usage_tracker.dart` の作成
   - [ ] 新ファイル `subscription_usage_tracker.dart` を作成
   - [ ] SubscriptionServiceからAI使用量カウントのメソッドを新ファイルに移動

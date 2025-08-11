@@ -13,6 +13,7 @@ import '../config/environment_config.dart';
 import 'interfaces/subscription_service_interface.dart';
 import 'logging_service.dart';
 import 'subscription_purchase_manager.dart';
+import 'subscription_status_manager.dart';
 
 /// SubscriptionService
 ///
@@ -52,6 +53,9 @@ class SubscriptionService implements ISubscriptionService {
 
   // Purchase Manager（新しい購入管理コンポーネント）
   SubscriptionPurchaseManager? _purchaseManager;
+
+  // Status Manager（新しいステータス管理コンポーネント）
+  SubscriptionStatusManager? _statusManager;
 
   // プライベートコンストラクタ
   SubscriptionService._();
@@ -94,6 +98,9 @@ class SubscriptionService implements ISubscriptionService {
 
       // Purchase Manager初期化
       await _initializePurchaseManager();
+
+      // Status Manager初期化
+      await _initializeStatusManager();
 
       _isInitialized = true;
       _log(
@@ -203,6 +210,37 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
+  /// Status Manager初期化処理
+  Future<void> _initializeStatusManager() async {
+    try {
+      _log('Initializing StatusManager...', level: LogLevel.info);
+
+      // Status Managerインスタンスを作成（依存性注入）
+      _statusManager = SubscriptionStatusManager(
+        _subscriptionBox!,
+        _loggingService!,
+      );
+
+      _log(
+        'StatusManager initialization completed',
+        level: LogLevel.info,
+        context: 'SubscriptionService._initializeStatusManager',
+      );
+    } catch (e) {
+      _log(
+        'Unexpected error during StatusManager initialization',
+        level: LogLevel.error,
+        error: e,
+        context: 'SubscriptionService._initializeStatusManager',
+      );
+      throw ServiceException(
+        'Failed to initialize StatusManager',
+        details: e.toString(),
+        originalError: e,
+      );
+    }
+  }
+
   // =================================================================
   // Hive操作メソッド（Phase 1.3.2）
   // =================================================================
@@ -214,304 +252,91 @@ class SubscriptionService implements ISubscriptionService {
   /// 特定のプラン情報を取得（新Planクラス）
   @override
   Result<Plan> getPlanClass(String planId) {
-    try {
-      _log(
-        'Getting plan class by ID',
-        level: LogLevel.debug,
-        data: {'planId': planId},
+    if (!_isInitialized || _statusManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
       );
-
-      final plan = PlanFactory.createPlan(planId);
-
-      _log(
-        'Successfully retrieved plan class',
-        level: LogLevel.debug,
-        data: {'planId': plan.id, 'displayName': plan.displayName},
-      );
-
-      return Success(plan);
-    } catch (e) {
-      return _handleError(e, 'getPlanClass', details: 'planId: $planId');
     }
+
+    // StatusManagerにデリゲート
+    return _statusManager!.getPlanClass(planId);
   }
 
   /// 現在のプランを取得（新Planクラス）
   @override
   Future<Result<Plan>> getCurrentPlanClass() async {
-    try {
-      _log('Getting current plan class', level: LogLevel.debug);
-
-      if (!_isInitialized) {
-        return _handleError(
-          StateError('Service not initialized'),
-          'getCurrentPlanClass',
-          details: 'SubscriptionService must be initialized before use',
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        _log(
-          'Failed to get current status',
-          level: LogLevel.warning,
-          error: statusResult.error,
-        );
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final plan = PlanFactory.createPlan(status.planId);
-
-      _log(
-        'Successfully retrieved current plan class',
-        level: LogLevel.debug,
-        data: {'planId': plan.id, 'displayName': plan.displayName},
+    if (!_isInitialized || _statusManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
       );
-
-      return Success(plan);
-    } catch (e) {
-      return _handleError(e, 'getCurrentPlanClass');
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.getCurrentPlanClass();
   }
 
   /// 現在のサブスクリプション状態を取得
   /// デバッグモードでプラン強制設定がある場合、実際のデータは変更せずに返り値のみプレミアムプランとして返します
   @override
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      // 実際のデータベース状態を取得
-      final status = _subscriptionBox?.get(SubscriptionConstants.statusKey);
-      if (status == null) {
-        // 状態が存在しない場合は初期状態を作成
-        await _ensureInitialStatus();
-        final initialStatus = _subscriptionBox?.get(
-          SubscriptionConstants.statusKey,
-        );
-        if (initialStatus == null) {
-          return Failure(
-            ServiceException('Failed to create initial subscription status'),
-          );
-        }
-        return Success(initialStatus);
-      }
-
-      // デバッグモードでプラン強制設定がある場合、返り値のみを動的に変更
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        if (forcePlan != null) {
-          _log(
-            'プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）',
-            level: LogLevel.debug,
-            context: 'SubscriptionService.getCurrentStatus',
-            data: {'forcePlan': forcePlan},
-          );
-
-          // 実際のデータはそのままで、プランIDのみを強制設定に変更した状態を返す
-          final forcedPlanId = _getForcedPlanId(forcePlan);
-          final forcedPlan = PlanFactory.createPlan(forcedPlanId);
-
-          // プランに応じて適切な有効期限を設定
-          final expiryDuration =
-              forcedPlan.id == SubscriptionConstants.premiumYearlyPlanId
-              ? const Duration(days: 365)
-              : const Duration(days: 30);
-
-          final forcedStatus = SubscriptionStatus(
-            planId: forcedPlanId,
-            isActive: true,
-            startDate: status.startDate ?? DateTime.now(),
-            expiryDate: DateTime.now().add(expiryDuration),
-            monthlyUsageCount: status.monthlyUsageCount, // 実際の使用量を保持
-            usageMonth: status.usageMonth,
-            lastResetDate: status.lastResetDate,
-            autoRenewal: status.autoRenewal,
-            transactionId: status.transactionId,
-            lastPurchaseDate: status.lastPurchaseDate,
-            cancelDate: status.cancelDate,
-            planChangeDate: status.planChangeDate,
-            pendingPlanId: status.pendingPlanId,
-          );
-
-          return Success(forcedStatus);
-        }
-      }
-
-      return Success(status);
-    } catch (e) {
-      _log(
-        'Error getting current status',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.getCurrentStatus',
-      );
+    if (!_isInitialized || _statusManager == null) {
       return Failure(
-        ServiceException('Failed to get current status', details: e.toString()),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.getCurrentStatus();
   }
 
   /// サブスクリプション状態を更新
   Future<Result<void>> updateStatus(SubscriptionStatus status) async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      await _subscriptionBox?.put(SubscriptionConstants.statusKey, status);
-      _log(
-        'Status updated successfully',
-        level: LogLevel.info,
-        context: 'SubscriptionService.updateStatus',
-      );
-      return const Success(null);
-    } catch (e) {
-      _log(
-        'Error updating status',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.updateStatus',
-      );
+    if (!_isInitialized || _statusManager == null) {
       return Failure(
-        ServiceException('Failed to update status', details: e.toString()),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.updateStatus(status);
   }
 
   /// サブスクリプション状態をリロード（強制再読み込み）
   @override
   Future<Result<void>> refreshStatus() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      // Hiveボックスを再読み込み
-      await _subscriptionBox?.close();
-      _subscriptionBox = await Hive.openBox<SubscriptionStatus>(
-        SubscriptionConstants.hiveBoxName,
-      );
-
-      return const Success(null);
-    } catch (e) {
-      _log(
-        'Error refreshing status',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.refreshStatus',
-      );
+    if (!_isInitialized || _statusManager == null) {
       return Failure(
-        ServiceException('Failed to refresh status', details: e.toString()),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.refreshStatus();
   }
 
   /// 指定されたプランでサブスクリプション状態を作成（Planクラス版）
   Future<Result<SubscriptionStatus>> createStatusClass(Plan plan) async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final now = DateTime.now();
-      SubscriptionStatus newStatus;
-
-      if (plan is BasicPlan) {
-        // Basicプランの場合
-        newStatus = SubscriptionStatus(
-          planId: plan.id,
-          isActive: true,
-          startDate: now,
-          expiryDate: null, // Basicプランは期限なし
-          autoRenewal: false,
-          monthlyUsageCount: 0,
-          lastResetDate: now,
-          transactionId: null,
-          lastPurchaseDate: null,
-        );
-      } else {
-        // Premiumプランの場合
-        final expiryDate = plan.isYearly
-            ? now.add(
-                Duration(days: SubscriptionConstants.subscriptionYearDays),
-              )
-            : now.add(
-                Duration(days: SubscriptionConstants.subscriptionMonthDays),
-              );
-
-        newStatus = SubscriptionStatus(
-          planId: plan.id,
-          isActive: true,
-          startDate: now,
-          expiryDate: expiryDate,
-          autoRenewal: true,
-          monthlyUsageCount: 0,
-          lastResetDate: now,
-          transactionId: null,
-          lastPurchaseDate: now,
-        );
-      }
-
-      await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
-      _log(
-        'Created new status for plan',
-        level: LogLevel.info,
-        context: 'SubscriptionService.createStatusClass',
-        data: {'planId': plan.id},
-      );
-      return Success(newStatus);
-    } catch (e) {
-      _log(
-        'Error creating status',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.createStatusClass',
-      );
+    if (!_isInitialized || _statusManager == null) {
       return Failure(
-        ServiceException('Failed to create status', details: e.toString()),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.createStatus(plan);
   }
 
   /// サブスクリプション状態を削除（テスト用）
   @visibleForTesting
   Future<Result<void>> clearStatus() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      await _subscriptionBox?.delete(SubscriptionConstants.statusKey);
-      _log(
-        'Status cleared',
-        level: LogLevel.info,
-        context: 'SubscriptionService.clearStatus',
-      );
-      return const Success(null);
-    } catch (e) {
-      _log(
-        'Error clearing status',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.clearStatus',
-      );
+    if (!_isInitialized || _statusManager == null) {
       return Failure(
-        ServiceException('Failed to clear status', details: e.toString()),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.clearStatus();
   }
 
   // =================================================================
@@ -625,7 +450,7 @@ class SubscriptionService implements ISubscriptionService {
       final status = statusResult.value;
 
       // サブスクリプションが有効でない場合は使用不可
-      if (!_isSubscriptionValid(status)) {
+      if (!_statusManager!.isSubscriptionValid(status)) {
         _log(
           'Subscription is not valid - AI generation unavailable',
           level: LogLevel.warning,
@@ -685,7 +510,7 @@ class SubscriptionService implements ISubscriptionService {
       final status = statusResult.value;
 
       // サブスクリプションが有効でない場合はインクリメント不可
-      if (!_isSubscriptionValid(status)) {
+      if (!_statusManager!.isSubscriptionValid(status)) {
         return Failure(
           ServiceException('Cannot increment usage: subscription is not valid'),
         );
@@ -798,7 +623,7 @@ class SubscriptionService implements ISubscriptionService {
       final status = statusResult.value;
 
       // サブスクリプションが有効でない場合は0
-      if (!_isSubscriptionValid(status)) {
+      if (!_statusManager!.isSubscriptionValid(status)) {
         return const Success(0);
       }
 
@@ -872,19 +697,6 @@ class SubscriptionService implements ISubscriptionService {
   // 内部使用量管理ヘルパーメソッド
   // =================================================================
 
-  /// サブスクリプションが有効かどうかをチェック
-  bool _isSubscriptionValid(SubscriptionStatus status) {
-    if (!status.isActive) return false;
-
-    final currentPlan = PlanFactory.createPlan(status.planId);
-
-    // Basicプランは常に有効
-    if (currentPlan is BasicPlan) return true;
-
-    // Premiumプランは有効期限をチェック
-    if (status.expiryDate == null) return false;
-    return DateTime.now().isBefore(status.expiryDate!);
-  }
 
   /// 月次使用量リセットが必要かチェックしてリセット（内部用）
   Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
@@ -946,19 +758,6 @@ class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  /// 強制プラン名からプランIDを取得
-  String _getForcedPlanId(String forcePlan) {
-    switch (forcePlan.toLowerCase()) {
-      case 'premium':
-      case 'premium_monthly':
-        return SubscriptionConstants.premiumMonthlyPlanId;
-      case 'premium_yearly':
-        return SubscriptionConstants.premiumYearlyPlanId;
-      case 'basic':
-      default:
-        return SubscriptionConstants.basicPlanId;
-    }
-  }
 
   // =================================================================
   // アクセス権限チェックメソッド（Phase 1.3.4）
@@ -967,77 +766,14 @@ class SubscriptionService implements ISubscriptionService {
   /// プレミアム機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      // デバッグモードでプラン強制設定をチェック
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        _log(
-          'デバッグモードチェック',
-          level: LogLevel.debug,
-          context: 'SubscriptionService.canAccessPremiumFeatures',
-          data: {'forcePlan': forcePlan},
-        );
-        if (forcePlan != null) {
-          final forceResult = forcePlan.startsWith('premium');
-          _log(
-            'プラン強制設定により Premium アクセス',
-            level: LogLevel.debug,
-            context: 'SubscriptionService.canAccessPremiumFeatures',
-            data: {'result': forceResult, 'plan': forcePlan},
-          );
-          return Success(forceResult);
-        } else {
-          _log(
-            'プラン強制設定なし、通常のプランチェックに進む',
-            level: LogLevel.debug,
-            context: 'SubscriptionService.canAccessPremiumFeatures',
-          );
-        }
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // Basicプランは基本機能のみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      // Premiumプランは有効期限をチェック
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Premium features access check',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.canAccessPremiumFeatures',
-        data: {'planId': currentPlan.id, 'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking premium features access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessPremiumFeatures',
-      );
+    if (!_isInitialized || _statusManager == null) {
       return Failure(
-        ServiceException(
-          'Failed to check premium features access',
-          details: e.toString(),
-        ),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // StatusManagerにデリゲート
+    return await _statusManager!.canAccessPremiumFeatures();
   }
 
   /// ライティングプロンプト機能にアクセスできるかどうか
@@ -1083,7 +819,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       // Premiumプランの場合
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
       if (isPremiumValid) {
         // 有効なPremiumプランは全プロンプトにアクセス可能
         _log(
@@ -1141,7 +877,7 @@ class SubscriptionService implements ISubscriptionService {
         return const Success(false);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
       _log(
         'Advanced filters access check',
         level: LogLevel.debug,
@@ -1194,7 +930,7 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       // Premiumプランは複数形式でエクスポート可能
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
       _log(
         'Data export access - Premium plan',
         level: LogLevel.debug,
@@ -1241,7 +977,7 @@ class SubscriptionService implements ISubscriptionService {
         return const Success(false);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
       _log(
         'Stats dashboard access check',
         level: LogLevel.debug,
@@ -1342,7 +1078,7 @@ class SubscriptionService implements ISubscriptionService {
         return const Success(false);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
       _log(
         'Advanced analytics access check',
         level: LogLevel.debug,
@@ -1390,7 +1126,7 @@ class SubscriptionService implements ISubscriptionService {
         return const Success(false);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
       _log(
         'Priority support access check',
         level: LogLevel.debug,
@@ -1723,12 +1459,19 @@ class SubscriptionService implements ISubscriptionService {
       _purchaseManager = null;
     }
 
+    // Status Managerの破棄
+    if (_statusManager != null) {
+      _statusManager!.dispose();
+      _statusManager = null;
+    }
+
     _log('SubscriptionService disposed', level: LogLevel.info);
   }
 
   /// テスト用リセットメソッド
   static void resetForTesting() {
     _instance?._purchaseManager?.dispose();
+    _instance?._statusManager?.dispose();
     _instance = null;
   }
 }
