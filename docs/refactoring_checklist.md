@@ -614,11 +614,15 @@
 
 ### 4. SubscriptionService（2,032行）のリファクタリング
 
-#### ファイル分割計画
+#### ファイル分割計画（詳細化版）
 - [ ] `subscription_purchase_manager.dart` の作成
-  - [ ] 購入関連メソッドの移動
-  - [ ] リストア処理の移動
-  - [ ] 購入検証ロジックの移動
+  - [ ] 新ファイル `subscription_purchase_manager.dart` を作成
+  - [ ] SubscriptionServiceから購入関連メソッドを新ファイルに移動
+  - [ ] リストア処理のメソッドを新ファイルに移動
+  - [ ] 購入検証ロジックを新ファイルに移動
+  - [ ] SubscriptionServiceを新しいPurchaseManagerを使用するように更新
+  - [ ] インポート文とサービス登録を更新
+  - [ ] テストケースの更新と動作確認
 - [ ] `subscription_status_manager.dart` の作成
   - [ ] ステータス管理メソッドの移動
   - [ ] プラン判定ロジックの移動
