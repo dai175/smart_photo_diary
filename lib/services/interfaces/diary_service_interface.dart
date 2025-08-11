@@ -80,4 +80,20 @@ abstract class DiaryServiceInterface {
 
   /// 日記をインポート
   Future<Result<ImportResult>> importDiaries();
+
+  /// AI生成を使用して写真から日記エントリーを作成・保存
+  ///
+  /// [photos]: 日記に含める写真のリスト
+  /// [date]: 日記の日付（省略時は現在日時）
+  /// [location]: 場所情報（オプション）
+  /// [prompt]: AI生成用の追加プロンプト（オプション）
+  /// [onProgress]: 進行状況を通知するコールバック（オプション）
+  /// 戻り値: AI生成された内容で保存された日記エントリー
+  Future<Result<DiaryEntry>> saveDiaryEntryWithAiGeneration({
+    required List<AssetEntity> photos,
+    DateTime? date,
+    String? location,
+    String? prompt,
+    Function(String)? onProgress,
+  });
 }

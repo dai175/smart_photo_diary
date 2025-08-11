@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -20,10 +21,11 @@ class DiaryService implements DiaryServiceInterface {
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
   final AiServiceInterface _aiService;
+  final PhotoServiceInterface? _photoService;
   late final LoggingService _loggingService;
 
   // プライベートコンストラクタ（依存性注入用）
-  DiaryService._(this._aiService);
+  DiaryService._(this._aiService, [this._photoService]);
 
   // 従来のシングルトンパターン（後方互換性のため保持）
   static Future<DiaryService> getInstance() async {
@@ -40,7 +42,7 @@ class DiaryService implements DiaryServiceInterface {
     required AiServiceInterface aiService,
     required PhotoServiceInterface photoService,
   }) {
-    return DiaryService._(aiService);
+    return DiaryService._(aiService, photoService);
   }
 
   // 初期化メソッド（外部から呼び出し可能）
@@ -298,10 +300,10 @@ class DiaryService implements DiaryServiceInterface {
             _loggingService.warning('バックグラウンドタグ生成: Hiveボックスが利用できません');
           }
         } else {
-          _loggingService.error('バックグラウンドタグ生成エラー', error: tagsResult.error);
+          _loggingService.error('バックグラウンドタグ生成エラー');
         }
       } catch (e) {
-        _loggingService.error('バックグラウンドタグ生成エラー', error: e);
+        _loggingService.error('バックグラウンドタグ生成エラー');
       }
     });
   }
@@ -769,6 +771,171 @@ class DiaryService implements DiaryServiceInterface {
       return Failure(
         ServiceException(
           '日記のインポートに失敗しました',
+          originalError: e,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// AI生成を使用して写真から日記エントリーを作成・保存
+  @override
+  Future<Result<DiaryEntry>> saveDiaryEntryWithAiGeneration({
+    required List<AssetEntity> photos,
+    DateTime? date,
+    String? location,
+    String? prompt,
+    Function(String)? onProgress,
+  }) async {
+    try {
+      // 初期化確認
+      if (_diaryBox == null) {
+        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
+        await _init();
+      }
+
+      // PhotoServiceが利用可能かチェック
+      if (_photoService == null) {
+        return Failure(
+          ServiceException(
+            'PhotoServiceが利用できません。統合フローを実行するにはPhotoServiceが必要です',
+            details: 'createWithDependencies()を使用してPhotoServiceを注入してください',
+          ),
+        );
+      }
+
+      // 日付の設定（未指定の場合は現在時刻）
+      final diaryDate = date ?? DateTime.now();
+
+      // 写真の検証
+      if (photos.isEmpty) {
+        return Failure(
+          ValidationException('日記作成には最低1枚の写真が必要です', details: 'photos配列が空です'),
+        );
+      }
+
+      _loggingService.info(
+        'AI日記生成開始: ${photos.length}枚の写真から日記を生成',
+        context: 'saveDiaryEntryWithAiGeneration',
+      );
+
+      // Phase 1: 写真データの取得
+      onProgress?.call('写真データを取得中...');
+      final photoDataList = <({Uint8List imageData, DateTime time})>[];
+
+      for (int i = 0; i < photos.length; i++) {
+        final photo = photos[i];
+        onProgress?.call('写真${i + 1}/${photos.length}を処理中...');
+
+        final photoDataResult = await _photoService.getOriginalFileResult(
+          photo,
+        );
+        if (photoDataResult.isFailure) {
+          _loggingService.error(
+            '写真データ取得エラー: ${photo.id}',
+            error: photoDataResult.error,
+          );
+          return Failure(photoDataResult.error);
+        }
+
+        photoDataList.add((
+          imageData: photoDataResult.value,
+          time: photo.createDateTime,
+        ));
+      }
+
+      // Phase 2: AI日記生成
+      onProgress?.call('AIが日記を生成中...');
+      final Result<DiaryGenerationResult> aiResult;
+
+      if (photos.length == 1) {
+        // 単一写真の場合
+        aiResult = await _aiService.generateDiaryFromImage(
+          imageData: photoDataList.first.imageData,
+          date: diaryDate,
+          location: location,
+          photoTimes: photoDataList.map((p) => p.time).toList(),
+          prompt: prompt,
+        );
+      } else {
+        // 複数写真の場合
+        aiResult = await _aiService.generateDiaryFromMultipleImages(
+          imagesWithTimes: photoDataList,
+          location: location,
+          prompt: prompt,
+          onProgress: (current, total) {
+            onProgress?.call('写真$current/$totalを分析中...');
+          },
+        );
+      }
+
+      if (aiResult.isFailure) {
+        _loggingService.error('AI日記生成エラー', error: aiResult.error);
+        return Failure(aiResult.error);
+      }
+
+      final diaryContent = aiResult.value;
+      _loggingService.debug(
+        'AI日記生成完了: タイトル="${diaryContent.title}", 内容長=${diaryContent.content.length}文字',
+      );
+
+      // Phase 3: タグ生成
+      onProgress?.call('タグを生成中...');
+      final tagsResult = await _aiService.generateTagsFromContent(
+        title: diaryContent.title,
+        content: diaryContent.content,
+        date: diaryDate,
+        photoCount: photos.length,
+      );
+
+      List<String> generatedTags = [];
+      if (tagsResult.isSuccess) {
+        generatedTags = tagsResult.value;
+        _loggingService.debug('タグ生成完了: ${generatedTags.join(', ')}');
+      } else {
+        _loggingService.warning('タグ生成失敗、フォールバックタグを使用');
+        generatedTags = _generateFallbackTags(
+          DiaryEntry(
+            id: 'temp',
+            date: diaryDate,
+            title: diaryContent.title,
+            content: diaryContent.content,
+            photoIds: [],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
+      }
+
+      // Phase 4: 日記エントリーの保存
+      onProgress?.call('日記を保存中...');
+      final photoIds = photos.map((photo) => photo.id).toList();
+
+      final saveResult = await saveDiaryEntry(
+        date: diaryDate,
+        title: diaryContent.title,
+        content: diaryContent.content,
+        photoIds: photoIds,
+        location: location,
+        tags: generatedTags,
+      );
+
+      if (saveResult.isSuccess) {
+        _loggingService.info(
+          'AI日記生成・保存完了: ID=${saveResult.value.id}',
+          context: 'saveDiaryEntryWithAiGeneration',
+        );
+        onProgress?.call('完了');
+        return Success(saveResult.value);
+      } else {
+        return Failure(saveResult.error);
+      }
+    } catch (e, stackTrace) {
+      _loggingService.error('AI日記生成統合フローエラー', error: e, stackTrace: stackTrace);
+      return Failure(
+        ServiceException(
+          'AI日記生成中にエラーが発生しました',
+          details: 'photos: ${photos.length}枚, location: $location',
           originalError: e,
           stackTrace: stackTrace,
         ),
