@@ -96,10 +96,10 @@ abstract class DiaryServiceInterface {
     String? prompt,
     Function(String)? onProgress,
   });
-  
+
   /// テスト環境でバックグラウンド処理を無効化
   void disableBackgroundProcessing();
-  
+
   /// バックグラウンド処理を有効化（デフォルト）
   void enableBackgroundProcessing();
 }

@@ -23,7 +23,7 @@ class DiaryService implements DiaryServiceInterface {
   final AiServiceInterface _aiService;
   final PhotoServiceInterface? _photoService;
   late final LoggingService _loggingService;
-  
+
   // バックグラウンド処理制御フラグ（テスト環境では無効化）
   bool _backgroundProcessingEnabled = true;
 
@@ -53,7 +53,7 @@ class DiaryService implements DiaryServiceInterface {
   void disableBackgroundProcessing() {
     _backgroundProcessingEnabled = false;
   }
-  
+
   /// バックグラウンド処理を有効化（デフォルト）
   @override
   void enableBackgroundProcessing() {
@@ -290,7 +290,7 @@ class DiaryService implements DiaryServiceInterface {
     if (!_backgroundProcessingEnabled) {
       return;
     }
-    
+
     // 非同期でタグ生成を実行（UI をブロックしない）
     Future.delayed(Duration.zero, () async {
       try {
@@ -638,7 +638,7 @@ class DiaryService implements DiaryServiceInterface {
     if (!_backgroundProcessingEnabled) {
       return;
     }
-    
+
     Future.delayed(Duration.zero, () async {
       try {
         _loggingService.debug('過去写真日記のバックグラウンドタグ生成開始: ${entry.id}');
