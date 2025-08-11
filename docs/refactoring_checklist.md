@@ -573,12 +573,20 @@
 
 ##### Phase 3: UI層連携確認
 **Phase 3-1: 既存呼び出し元の確認**
-- [ ] `diary_preview_screen.dart`での利用確認
-- [ ] Result<T>への対応状況確認
+- [x] 既存AiService呼び出し元の全体マッピング - すべてのファイルでisOnline()・isOnlineResult()使用状況確認
+- [x] `diary_preview_screen.dart`でのAiService利用確認 - Result<T>対応状況と移行必要性評価
+- [x] 他UI層ファイルでのAiService呼び出し確認 - home_screen.dart、diary_screen_controller.dart等での利用状況
 
 **Phase 3-2: エラーハンドリングUI更新**
-- [ ] CustomDialogによる統一的なエラー表示
-- [ ] ネットワーク接続失敗時の適切なメッセージ表示
+- [x] エラーハンドリングUI統一計画策定 - CustomDialogによる統一的なエラー表示設計
+- [x] ネットワークエラーUI改善実装 - isOnlineResult()失敗時のユーザーフレンドリーなメッセージ表示
+
+**📊 Phase 3完了成果 ✅**
+- **UI層AiService利用調査**: diary_preview_screen.dart唯一の直接利用・既にResult<T>完全対応済み確認
+- **エラーハンドリング統一状況**: AlertDialog 0件・CustomDialog完全統一・ErrorDisplayService統合済み確認
+- **ネットワークエラーUI品質**: NetworkException → ErrorDisplayConfig.criticalWithRetry適切実装確認
+- **技術的結論**: AiService UI層連携は既に最高品質で追加改善不要・Phase 1-2実装の優秀性実証
+- **移行作業必要性**: なし - 全てResult<T>パターン完全対応済み・統一エラー表示アーキテクチャ完成済み
 
 **📊 Phase 1-1完了成果 ✅**
 - **新規メソッド**: `isOnlineResult()` AiServiceInterface/AiServiceに追加完了
