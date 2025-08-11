@@ -480,10 +480,31 @@
 - [x] 1000+テスト、100%成功率達成
 - [x] Flutter analyze警告0件達成
 
-**Phase 2-2: Integration Test追加**
-- [ ] AiService統合テストの作成
-- [ ] SubscriptionServiceとの連携テスト
-- [ ] エンドツーエンドのResult<T>フローテスト
+**Phase 2-2: Integration Test追加** ✅
+- [x] **AiService統合テスト実装 - Gemini API呼び出しとResult<T>パターン** ✅
+- [x] **AiService統合テスト実装 - エラーハンドリング（ネットワークエラー、API制限エラー）** ✅
+- [x] **AiService統合テスト実装 - isOnline()メソッドの実際のネットワーク状態確認** ✅
+
+**📊 AiService統合テスト実装完了成果 (Phase 2-2.1-2.3)**
+- **新規テストファイル**: `test/integration/ai_service_integration_test.dart` (22テスト)
+- **テスト実行結果**: 22/22テスト全て成功、実行時間1秒
+- **検証範囲**: Gemini API統合、Result<T>パターン、SubscriptionService統合、ネットワーク状態確認
+- **エラーハンドリング**: AiProcessingException、NetworkException、ServiceException完全対応
+- **品質保証**: flutter analyze 0 issues達成、コードフォーマット完了
+- **安定性確認**: 並行処理30回・大量呼び出し20回での安定動作確認
+
+- [ ] **DiaryService + AiService統合フロー - saveDiaryEntryWithAiGeneration完全フロー**
+- [ ] **DiaryService + AiService統合フロー - AI生成失敗時のフォールバック処理**
+- [ ] **PromptService統合テスト拡張 - assets/data/writing_prompts.jsonからの実データ読み込み**
+- [ ] **PromptService統合テスト拡張 - 3層キャッシングシステム（メモリ、ローカル、アセット）**
+- [ ] **Past Photos機能統合テスト拡張 - プラン制限の実動作確認（Basic vs Premium）**
+- [ ] **Past Photos機能統合テスト拡張 - 365日範囲の日付計算ロジック**
+- [ ] **エンドツーエンド統合テスト - 写真選択→AI生成→タグ付け→保存の完全フロー**
+- [ ] **エンドツーエンド統合テスト - 権限拒否→再要求→写真取得→日記作成フロー**
+- [ ] **ServiceLocator依存性注入テスト拡張 - 全サービス間の複雑な依存関係**
+- [ ] **統合テスト実行 - 新規追加テスト単体での動作確認**
+- [ ] **統合テスト実行 - 全integration testスイート実行（800+テスト）**
+- [ ] **テストカバレッジ確認 - 統合テストによる新たなカバレッジ向上測定**
 
 ##### Phase 3: UI層連携確認
 **Phase 3-1: 既存呼び出し元の確認**

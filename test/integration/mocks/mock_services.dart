@@ -418,6 +418,9 @@ class TestServiceSetup {
     // Purchase-related defaults
     // when(() => mock.restorePurchases()).thenAnswer((_) async => const Success(<PurchaseResult>[])); // コメントアウト - 必要に応じて有効化
 
+    // Reset usage method
+    when(() => mock.resetMonthlyUsageIfNeeded()).thenAnswer((_) async {});
+
     return mock;
   }
 
@@ -505,6 +508,14 @@ class TestServiceSetup {
     when(
       () => mock.canAccessPrioritySupport(),
     ).thenAnswer((_) async => Success(plan.hasPrioritySupport));
+
+    // Reset usage method
+    when(() => mock.resetMonthlyUsageIfNeeded()).thenAnswer((_) async {});
+
+    // Date-related methods
+    when(() => mock.getNextResetDate()).thenAnswer(
+      (_) async => Success(DateTime.now().add(const Duration(days: 30))),
+    );
   }
 
   /// Get SubscriptionService mock configured for Basic plan
@@ -520,6 +531,10 @@ class TestServiceSetup {
       BasicPlan(),
       usageCount: usageCount,
     );
+
+    // Additional mocking for reset usage method
+    when(() => mock.resetMonthlyUsageIfNeeded()).thenAnswer((_) async {});
+
     return mock;
   }
 
@@ -534,6 +549,10 @@ class TestServiceSetup {
 
     final plan = isYearly ? PremiumYearlyPlan() : PremiumMonthlyPlan();
     configureSubscriptionServiceForPlan(mock, plan, usageCount: usageCount);
+
+    // Additional mocking for reset usage method
+    when(() => mock.resetMonthlyUsageIfNeeded()).thenAnswer((_) async {});
+
     return mock;
   }
 }
