@@ -6,15 +6,14 @@ import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/subscription_status.dart';
 import '../models/plans/plan.dart';
-import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
 import '../constants/subscription_constants.dart';
-import '../config/environment_config.dart';
 import 'interfaces/subscription_service_interface.dart';
 import 'logging_service.dart';
 import 'subscription_purchase_manager.dart';
 import 'subscription_status_manager.dart';
 import 'subscription_usage_tracker.dart';
+import 'subscription_access_control_manager.dart';
 
 /// SubscriptionService
 ///
@@ -60,6 +59,9 @@ class SubscriptionService implements ISubscriptionService {
 
   // Usage Tracker（新しい使用量追跡コンポーネント）
   SubscriptionUsageTracker? _usageTracker;
+
+  // Access Control Manager（新しいアクセス制御コンポーネント）
+  SubscriptionAccessControlManager? _accessControlManager;
 
   // プライベートコンストラクタ
   SubscriptionService._();
@@ -108,6 +110,9 @@ class SubscriptionService implements ISubscriptionService {
 
       // Usage Tracker初期化
       await _initializeUsageTracker();
+
+      // Access Control Manager初期化
+      await _initializeAccessControlManager();
 
       _isInitialized = true;
       _log(
@@ -273,6 +278,36 @@ class SubscriptionService implements ISubscriptionService {
       );
       throw ServiceException(
         'Failed to initialize UsageTracker',
+        details: e.toString(),
+        originalError: e,
+      );
+    }
+  }
+
+  /// Access Control Manager初期化処理
+  Future<void> _initializeAccessControlManager() async {
+    try {
+      _log('Initializing AccessControlManager...', level: LogLevel.info);
+
+      // Access Control Managerインスタンスを作成（依存性注入）
+      _accessControlManager = SubscriptionAccessControlManager(
+        _loggingService!,
+      );
+
+      _log(
+        'AccessControlManager initialization completed',
+        level: LogLevel.info,
+        context: 'SubscriptionService._initializeAccessControlManager',
+      );
+    } catch (e) {
+      _log(
+        'Unexpected error during AccessControlManager initialization',
+        level: LogLevel.error,
+        error: e,
+        context: 'SubscriptionService._initializeAccessControlManager',
+      );
+      throw ServiceException(
+        'Failed to initialize AccessControlManager',
         details: e.toString(),
         originalError: e,
       );
@@ -523,389 +558,165 @@ class SubscriptionService implements ISubscriptionService {
   /// プレミアム機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    if (!_isInitialized || _statusManager == null) {
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
       return Failure(
         ServiceException('SubscriptionService is not initialized'),
       );
     }
 
-    // StatusManagerにデリゲート
-    return await _statusManager!.canAccessPremiumFeatures();
+    // 現在の状態を取得
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+
+    // AccessControlManagerにデリゲート（有効性チェック関数を渡す）
+    return await _accessControlManager!.canAccessPremiumFeatures(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// ライティングプロンプト機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessWritingPrompts() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      // デバッグモードでプラン強制設定をチェック
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        if (forcePlan != null) {
-          _log(
-            'プラン強制設定により Writing Prompts アクセス: true',
-            level: LogLevel.debug,
-            context: 'SubscriptionService.canAccessWritingPrompts',
-            data: {'plan': forcePlan},
-          );
-          return const Success(true); // 全プランでライティングプロンプトは利用可能
-        }
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // ライティングプロンプトは全プランで利用可能（Basicは限定版）
-      if (currentPlan is BasicPlan) {
-        _log(
-          'Writing prompts access - Basic plan (limited prompts)',
-          level: LogLevel.debug,
-          context: 'SubscriptionService.canAccessWritingPrompts',
-        );
-        return const Success(true); // Basicプランでも基本プロンプトは利用可能
-      }
-
-      // Premiumプランの場合
-      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
-      if (isPremiumValid) {
-        // 有効なPremiumプランは全プロンプトにアクセス可能
-        _log(
-          'Writing prompts access - Premium plan',
-          level: LogLevel.debug,
-          context: 'SubscriptionService.canAccessWritingPrompts',
-          data: {'valid': isPremiumValid},
-        );
-        return const Success(true);
-      } else {
-        // 期限切れ・非アクティブなPremiumプランでも基本プロンプトアクセスは可能
-        _log(
-          'Writing prompts access - Premium plan expired/inactive, basic access only',
-          level: LogLevel.debug,
-          context: 'SubscriptionService.canAccessWritingPrompts',
-        );
-        return const Success(true);
-      }
-    } catch (e) {
-      _log(
-        'Error checking writing prompts access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessWritingPrompts',
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
       return Failure(
-        ServiceException(
-          'Failed to check writing prompts access',
-          details: e.toString(),
-        ),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // 現在の状態を取得
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+
+    // AccessControlManagerにデリゲート（有効性チェック関数を渡す）
+    return await _accessControlManager!.canAccessWritingPrompts(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// 高度なフィルタ機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedFilters() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 高度なフィルタはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
-      _log(
-        'Advanced filters access check',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.canAccessAdvancedFilters',
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking advanced filters access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessAdvancedFilters',
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
       return Failure(
-        ServiceException(
-          'Failed to check advanced filters access',
-          details: e.toString(),
-        ),
+        ServiceException('SubscriptionService is not initialized'),
       );
     }
+
+    // 現在の状態を取得
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+
+    // AccessControlManagerにデリゲート（有効性チェック関数を渡す）
+    return await _accessControlManager!.canAccessAdvancedFilters(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// データエクスポート機能にアクセスできるかどうか
   Future<Result<bool>> canAccessDataExport() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // データエクスポートは全プランで利用可能（Basicは基本形式のみ）
-      if (currentPlan is BasicPlan) {
-        _log(
-          'Data export access - Basic plan (JSON only)',
-          level: LogLevel.debug,
-          context: 'SubscriptionService.canAccessDataExport',
-        );
-        return const Success(true); // BasicプランでもJSON形式は利用可能
-      }
-
-      // Premiumプランは複数形式でエクスポート可能
-      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
-      _log(
-        'Data export access - Premium plan',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.canAccessDataExport',
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking data export access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessDataExport',
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check data export access',
-          details: e.toString(),
-        ),
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+      return Failure(ServiceException('SubscriptionService is not initialized'));
     }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+    return await _accessControlManager!.canAccessDataExport(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// 統計ダッシュボード機能にアクセスできるかどうか
   Future<Result<bool>> canAccessStatsDashboard() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 統計ダッシュボードはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
-      _log(
-        'Stats dashboard access check',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.canAccessStatsDashboard',
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking stats dashboard access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessStatsDashboard',
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check stats dashboard access',
-          details: e.toString(),
-        ),
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+      return Failure(ServiceException('SubscriptionService is not initialized'));
     }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+    return await _accessControlManager!.canAccessStatsDashboard(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// プラン別の機能制限情報を取得
   Future<Result<Map<String, bool>>> getFeatureAccess() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final premiumFeaturesResult = await canAccessPremiumFeatures();
-      final writingPromptsResult = await canAccessWritingPrompts();
-      final advancedFiltersResult = await canAccessAdvancedFilters();
-      final dataExportResult = await canAccessDataExport();
-      final statsDashboardResult = await canAccessStatsDashboard();
-
-      if (premiumFeaturesResult.isFailure)
-        return Failure(premiumFeaturesResult.error);
-      if (writingPromptsResult.isFailure)
-        return Failure(writingPromptsResult.error);
-      if (advancedFiltersResult.isFailure)
-        return Failure(advancedFiltersResult.error);
-      if (dataExportResult.isFailure) return Failure(dataExportResult.error);
-      if (statsDashboardResult.isFailure)
-        return Failure(statsDashboardResult.error);
-
-      final featureAccess = {
-        'premiumFeatures': premiumFeaturesResult.value,
-        'writingPrompts': writingPromptsResult.value,
-        'advancedFilters': advancedFiltersResult.value,
-        'dataExport': dataExportResult.value,
-        'statsDashboard': statsDashboardResult.value,
-      };
-
-      _log(
-        'Feature access map generated',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.getFeatureAccess',
-        data: featureAccess,
-      );
-      return Success(featureAccess);
-    } catch (e) {
-      _log(
-        'Error getting feature access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.getFeatureAccess',
-      );
-      return Failure(
-        ServiceException('Failed to get feature access', details: e.toString()),
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+      return Failure(ServiceException('SubscriptionService is not initialized'));
     }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+    return await _accessControlManager!.getFeatureAccess(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// 高度な分析にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedAnalytics() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 高度な分析はPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
-      _log(
-        'Advanced analytics access check',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.canAccessAdvancedAnalytics',
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking advanced analytics access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessAdvancedAnalytics',
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check advanced analytics access',
-          details: e.toString(),
-        ),
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+      return Failure(ServiceException('SubscriptionService is not initialized'));
     }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+    return await _accessControlManager!.canAccessAdvancedAnalytics(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   /// 優先サポートにアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPrioritySupport() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 優先サポートはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _statusManager!.isSubscriptionValid(status);
-      _log(
-        'Priority support access check',
-        level: LogLevel.debug,
-        context: 'SubscriptionService.canAccessPrioritySupport',
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking priority support access',
-        level: LogLevel.error,
-        error: e,
-        context: 'SubscriptionService.canAccessPrioritySupport',
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check priority support access',
-          details: e.toString(),
-        ),
-      );
+    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+      return Failure(ServiceException('SubscriptionService is not initialized'));
     }
+
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isFailure) {
+      return Failure(statusResult.error);
+    }
+
+    final status = statusResult.value;
+    return await _accessControlManager!.canAccessPrioritySupport(
+      status,
+      (status) => _statusManager!.isSubscriptionValid(status),
+    );
   }
 
   // =================================================================
@@ -1228,6 +1039,12 @@ class SubscriptionService implements ISubscriptionService {
       _usageTracker = null;
     }
 
+    // Access Control Managerの破棄
+    if (_accessControlManager != null) {
+      _accessControlManager!.dispose();
+      _accessControlManager = null;
+    }
+
     _log('SubscriptionService disposed', level: LogLevel.info);
   }
 
@@ -1236,6 +1053,7 @@ class SubscriptionService implements ISubscriptionService {
     _instance?._purchaseManager?.dispose();
     _instance?._statusManager?.dispose();
     _instance?._usageTracker?.dispose();
+    _instance?._accessControlManager?.dispose();
     _instance = null;
   }
 }
