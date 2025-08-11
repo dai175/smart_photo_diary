@@ -23,6 +23,9 @@ class DiaryService implements DiaryServiceInterface {
   final AiServiceInterface _aiService;
   final PhotoServiceInterface? _photoService;
   late final LoggingService _loggingService;
+  
+  // バックグラウンド処理制御フラグ（テスト環境では無効化）
+  bool _backgroundProcessingEnabled = true;
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService, [this._photoService]);
@@ -43,6 +46,18 @@ class DiaryService implements DiaryServiceInterface {
     required PhotoServiceInterface photoService,
   }) {
     return DiaryService._(aiService, photoService);
+  }
+
+  /// テスト環境でバックグラウンド処理を無効化
+  @override
+  void disableBackgroundProcessing() {
+    _backgroundProcessingEnabled = false;
+  }
+  
+  /// バックグラウンド処理を有効化（デフォルト）
+  @override
+  void enableBackgroundProcessing() {
+    _backgroundProcessingEnabled = true;
   }
 
   // 初期化メソッド（外部から呼び出し可能）
@@ -271,6 +286,11 @@ class DiaryService implements DiaryServiceInterface {
 
   // バックグラウンドでタグを生成
   void _generateTagsInBackground(DiaryEntry entry) {
+    // テスト環境ではバックグラウンド処理をスキップ
+    if (!_backgroundProcessingEnabled) {
+      return;
+    }
+    
     // 非同期でタグ生成を実行（UI をブロックしない）
     Future.delayed(Duration.zero, () async {
       try {
@@ -614,6 +634,11 @@ class DiaryService implements DiaryServiceInterface {
   ///
   /// 通常のタグ生成と異なり、過去の日付であることを考慮してタグを生成
   void _generateTagsInBackgroundForPastPhoto(DiaryEntry entry) {
+    // テスト環境ではバックグラウンド処理をスキップ
+    if (!_backgroundProcessingEnabled) {
+      return;
+    }
+    
     Future.delayed(Duration.zero, () async {
       try {
         _loggingService.debug('過去写真日記のバックグラウンドタグ生成開始: ${entry.id}');

@@ -32,6 +32,9 @@ void main() {
 
       // Initialize DiaryService with real Hive database
       diaryService = await DiaryService.getInstance();
+      
+      // テスト環境でバックグラウンド処理を無効化（CI環境での非同期処理継続問題を回避）
+      diaryService.disableBackgroundProcessing();
     });
 
     group('Database Operations', () {
