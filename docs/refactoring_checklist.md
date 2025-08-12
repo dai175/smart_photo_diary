@@ -668,12 +668,14 @@
     - [x] Result<T>パターン完全対応・MockLoggingService使用
     - [x] flutter analyze 0 issues・全テスト100%成功確認済み
   
-  - [ ] SubscriptionStatusManager テスト作成
-    - [ ] 新ファイル: `subscription_status_manager_test.dart`
-    - [ ] サブスクリプション状態取得・更新テスト
-    - [ ] プラン情報取得・判定テスト
-    - [ ] 有効期限管理・チェックテスト
-    - [ ] デバッグモード対応テスト
+  - [x] SubscriptionStatusManager テスト作成 ✅
+    - [x] 新ファイル: `subscription_status_manager_test.dart` (29テスト)
+    - [x] 新ファイル: `subscription_status_manager_mock_test.dart` (16テスト)
+    - [x] サブスクリプション状態取得・更新テスト (getCurrentStatus, updateStatus, refreshStatus)
+    - [x] プラン情報取得・判定テスト (getPlanClass, getCurrentPlanClass, isSubscriptionValid)
+    - [x] 有効期限管理・チェックテスト (canAccessPremiumFeatures, 境界値テスト)
+    - [x] エラーハンドリング・初期化状態管理テスト (未初期化エラー、Hive操作エラー)
+    - [x] Result<T>パターン完全対応・flutter analyze 0 issues・全45テスト100%成功
   
   - [ ] SubscriptionUsageTracker テスト作成
     - [ ] 新ファイル: `subscription_usage_tracker_test.dart`
