@@ -654,9 +654,56 @@
   - [x] 型チェックとコンパイル確認（テスト100%成功）
   - [x] flutter analyzeで品質確認（警告0件）
 - [ ] テストの分割と更新
-  - [ ] 既存テストケースの3つのマネージャーへの分割
-  - [ ] 各マネージャーの単体テストケース作成
-  - [ ] 統合テストでのファサードパターン動作確認
+  
+  #### Phase 1: マネージャー別テストファイル作成
+  - [x] SubscriptionPurchaseManager テスト作成 ✅
+    - [x] 新ファイル: `subscription_purchase_manager_test.dart` (313行、18テスト)
+    - [x] In-App Purchase初期化・管理テスト (3テスト - 初期化、コールバック設定、破棄処理)
+    - [x] 商品情報取得テスト (1テスト - 未初期化時エラー処理)
+    - [x] 購入処理実行・ハンドリングテスト (4テスト - 未初期化、Basicプラン拒否、プラン変更)
+    - [x] 購入状態監視テスト (1テスト - ストリーム可用性確認)
+    - [x] 復元・検証機能テスト (7テスト - 復元処理、購入検証、エラーケース)
+    - [x] エラーハンドリングテスト (1テスト - In-App Purchase利用不可対応)
+    - [x] プロパティ・アクセサーテスト (2テスト - 初期状態、ストリーム確認)
+    - [x] Result<T>パターン完全対応・MockLoggingService使用
+    - [x] flutter analyze 0 issues・全テスト100%成功確認済み
+  
+  - [ ] SubscriptionStatusManager テスト作成
+    - [ ] 新ファイル: `subscription_status_manager_test.dart`
+    - [ ] サブスクリプション状態取得・更新テスト
+    - [ ] プラン情報取得・判定テスト
+    - [ ] 有効期限管理・チェックテスト
+    - [ ] デバッグモード対応テスト
+  
+  - [ ] SubscriptionUsageTracker テスト作成
+    - [ ] 新ファイル: `subscription_usage_tracker_test.dart`
+    - [ ] subscription_service_usage_test.dart（471行）からの移行
+    - [ ] AI生成使用可否チェック（11グループのテスト移行）
+    - [ ] 使用量管理・リセット機能テスト
+    - [ ] エラーケース・境界値・並行処理テスト
+  
+  - [ ] SubscriptionAccessControlManager テスト作成
+    - [ ] 新ファイル: `subscription_access_control_manager_test.dart`
+    - [ ] subscription_service_access_test.dart（627行）からの移行
+    - [ ] プラン別アクセス権限テスト（16グループの移行）
+    - [ ] 機能別詳細テスト（プロンプト、フィルタ、分析等）
+  
+  #### Phase 2: ファサードパターン統合テスト更新
+  - [ ] SubscriptionService ファサードテスト更新
+    - [ ] subscription_service_test.dart をファサード用に縮小・リネーム
+    - [ ] シングルトンパターン維持確認
+    - [ ] 各マネージャーへの委譲確認テスト
+    - [ ] インターフェース整合性テスト
+  
+  - [ ] 統合テスト更新
+    - [ ] subscription_service_integration_test.dart の更新
+    - [ ] 新マネージャー間連携動作確認
+    - [ ] エンドツーエンドワークフローテスト
+  
+  #### Phase 3: テストヘルパー・モック更新
+  - [ ] 各マネージャー用モッククラス作成
+  - [ ] 既存モックサービスの新マネージャー対応
+  - [ ] テストヘルパー統合・最適化
   - [ ] テスト成功率100%の維持確認
 
 ### 5. StatefulWidgetの状態管理改善（20ファイル）
