@@ -697,11 +697,12 @@
     - [x] Result<T>パターン、エラーハンドリング、並行処理テスト
   
   #### Phase 2: ファサードパターン統合テスト更新
-  - [ ] SubscriptionService ファサードテスト更新
-    - [ ] subscription_service_test.dart をファサード用に縮小・リネーム
-    - [ ] シングルトンパターン維持確認
-    - [ ] 各マネージャーへの委譲確認テスト
-    - [ ] インターフェース整合性テスト
+  - [x] SubscriptionService ファサードテスト更新
+    - [x] subscription_service_facade_test.dart を新規作成（26テスト）
+    - [x] subscription_service_test.dart を統合テスト（レガシー）にリネーム（36テスト）
+    - [x] シングルトンパターン維持確認
+    - [x] 各マネージャーへの委譲確認テスト
+    - [x] インターフェース整合性テスト
   
   - [ ] 統合テスト更新
     - [ ] subscription_service_integration_test.dart の更新

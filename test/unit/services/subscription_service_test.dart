@@ -9,7 +9,7 @@ import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import '../helpers/hive_test_helpers.dart';
 
 void main() {
-  group('SubscriptionService', () {
+  group('SubscriptionService 統合テスト（レガシー）', () {
     late SubscriptionService subscriptionService;
 
     setUpAll(() async {
