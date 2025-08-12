@@ -578,6 +578,198 @@ void main() {
       });
     });
 
+    // =================================================================
+    // Phase 1.5.3.3: 新マネージャー構造連携テスト
+    // =================================================================
+
+    group('Phase 1.5.3.3: 新マネージャー構造連携テスト', () {
+      late ISubscriptionService subscriptionService;
+
+      setUp(() async {
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(
+          () async => await SubscriptionService.getInstance(),
+        );
+        subscriptionService = await serviceLocator
+            .getAsync<ISubscriptionService>();
+      });
+
+      test('StatusManager と UsageTracker の連携確認', () async {
+        // 1. 初期ステータス取得（StatusManager経由）
+        final initialStatus = await subscriptionService.getCurrentStatus();
+        expect(initialStatus.isSuccess, isTrue);
+        expect(initialStatus.value.planId, equals('basic'));
+        expect(initialStatus.value.monthlyUsageCount, equals(0));
+
+        // 2. 使用量インクリメント（UsageTracker経由）
+        for (int i = 1; i <= 3; i++) {
+          final incrementResult = await subscriptionService.incrementAiUsage();
+          expect(incrementResult.isSuccess, isTrue);
+
+          // ステータスマネージャー経由でステータス確認
+          final statusAfterIncrement = await subscriptionService.getCurrentStatus();
+          expect(statusAfterIncrement.value.monthlyUsageCount, equals(i));
+          expect(statusAfterIncrement.value.remainingGenerations, equals(10 - i));
+        }
+
+        // 3. UsageTracker経由で残り回数確認
+        final remainingResult = await subscriptionService.getRemainingGenerations();
+        expect(remainingResult.isSuccess, isTrue);
+        expect(remainingResult.value, equals(7));
+
+        // 4. UsageTracker経由でリセット
+        final resetResult = await subscriptionService.resetUsage();
+        expect(resetResult.isSuccess, isTrue);
+
+        // 5. StatusManager経由でリセット後確認
+        final statusAfterReset = await subscriptionService.getCurrentStatus();
+        expect(statusAfterReset.value.monthlyUsageCount, equals(0));
+        expect(statusAfterReset.value.remainingGenerations, equals(10));
+      });
+
+      test('StatusManager と AccessControlManager の連携確認', () async {
+        // 1. 初期状態（Basic）でのアクセス制御確認
+        final initialStatus = await subscriptionService.getCurrentStatus();
+        expect(initialStatus.value.planId, equals('basic'));
+
+        // 2. AccessControlManager経由でプレミアム機能アクセス確認
+        final premiumAccess = await subscriptionService.canAccessPremiumFeatures();
+        expect(premiumAccess.isSuccess, isTrue);
+        expect(premiumAccess.value, isFalse); // Basic プランなのでfalse
+
+        // 3. AccessControlManager経由でライティングプロンプトアクセス確認
+        final promptsAccess = await subscriptionService.canAccessWritingPrompts();
+        expect(promptsAccess.isSuccess, isTrue);
+        expect(promptsAccess.value, isTrue); // Basic でも制限付きアクセス可能
+
+        // 4. AccessControlManager経由で高度フィルタアクセス確認
+        final filtersAccess = await subscriptionService.canAccessAdvancedFilters();
+        expect(filtersAccess.isSuccess, isTrue);
+        expect(filtersAccess.value, isFalse); // Basic プランなのでfalse
+      });
+
+      test('UsageTracker と AccessControlManager の連携確認', () async {
+        // 1. AI生成可能状態確認（UsageTracker + AccessControlManager）
+        final canUseInitial = await subscriptionService.canUseAiGeneration();
+        expect(canUseInitial.isSuccess, isTrue);
+        expect(canUseInitial.value, isTrue);
+
+        // 2. 使用量を制限近くまで増加
+        for (int i = 0; i < 9; i++) {
+          await subscriptionService.incrementAiUsage();
+        }
+
+        // 3. まだ使用可能であることを確認
+        final canUseNearLimit = await subscriptionService.canUseAiGeneration();
+        expect(canUseNearLimit.value, isTrue);
+
+        // 4. 最後の1回を使用
+        await subscriptionService.incrementAiUsage();
+
+        // 5. 制限到達により使用不可になることを確認
+        final canUseAtLimit = await subscriptionService.canUseAiGeneration();
+        expect(canUseAtLimit.value, isFalse);
+
+        // 6. 使用量確認
+        final remainingAtLimit = await subscriptionService.getRemainingGenerations();
+        expect(remainingAtLimit.value, equals(0));
+      });
+
+      test('全マネージャー間の統合動作確認', () async {
+        // 1. StatusManager: 初期状態確認
+        final initialStatus = await subscriptionService.getCurrentStatus();
+        expect(initialStatus.value.planId, equals('basic'));
+        expect(initialStatus.value.monthlyUsageCount, equals(0));
+
+        // 2. AccessControlManager: 初期アクセス権限確認
+        final premiumAccess = await subscriptionService.canAccessPremiumFeatures();
+        expect(premiumAccess.value, isFalse);
+
+        // 3. UsageTracker: 使用量操作
+        for (int i = 1; i <= 5; i++) {
+          final incrementResult = await subscriptionService.incrementAiUsage();
+          expect(incrementResult.isSuccess, isTrue);
+        }
+
+        // 4. StatusManager: 使用後状態確認
+        final usageStatus = await subscriptionService.getCurrentStatus();
+        expect(usageStatus.value.monthlyUsageCount, equals(5));
+        expect(usageStatus.value.remainingGenerations, equals(5));
+
+        // 5. AccessControlManager: 使用後もアクセス権限は同じ
+        final premiumAccessAfterUsage = await subscriptionService.canAccessPremiumFeatures();
+        expect(premiumAccessAfterUsage.value, isFalse);
+
+        // 6. UsageTracker: AI生成はまだ可能
+        final canUseAfterUsage = await subscriptionService.canUseAiGeneration();
+        expect(canUseAfterUsage.value, isTrue);
+
+        // 7. UsageTracker: 使用量リセット
+        await subscriptionService.resetUsage();
+
+        // 8. StatusManager: リセット後状態確認
+        final resetStatus = await subscriptionService.getCurrentStatus();
+        expect(resetStatus.value.monthlyUsageCount, equals(0));
+        expect(resetStatus.value.remainingGenerations, equals(10));
+
+        // 9. AccessControlManager: リセット後もアクセス権限は同じ（プラン依存）
+        final premiumAccessAfterReset = await subscriptionService.canAccessPremiumFeatures();
+        expect(premiumAccessAfterReset.value, isFalse);
+      });
+
+      test('マネージャー間のエラー伝播確認', () async {
+        // 1. 正常状態確認
+        final initialStatus = await subscriptionService.getCurrentStatus();
+        expect(initialStatus.isSuccess, isTrue);
+
+        // 2. 制限到達
+        for (int i = 0; i < 10; i++) {
+          await subscriptionService.incrementAiUsage();
+        }
+
+        // 3. 制限超過エラーの確認
+        final overLimitResult = await subscriptionService.incrementAiUsage();
+        expect(overLimitResult.isFailure, isTrue);
+        expect(
+          overLimitResult.error.toString(),
+          contains('Monthly AI generation limit reached'),
+        );
+
+        // 4. エラー状態でも他の操作は正常動作
+        final statusAfterError = await subscriptionService.getCurrentStatus();
+        expect(statusAfterError.isSuccess, isTrue);
+        expect(statusAfterError.value.monthlyUsageCount, equals(10));
+
+        final accessCheckAfterError = await subscriptionService.canAccessPremiumFeatures();
+        expect(accessCheckAfterError.isSuccess, isTrue);
+      });
+
+      test('マネージャー並行処理の競合確認', () async {
+        // 1. 複数マネージャーの並行操作
+        final futures = await Future.wait([
+          subscriptionService.getCurrentStatus(), // StatusManager
+          subscriptionService.canUseAiGeneration(), // UsageTracker + AccessControlManager
+          subscriptionService.canAccessPremiumFeatures(), // AccessControlManager
+          subscriptionService.getRemainingGenerations(), // UsageTracker
+          subscriptionService.getNextResetDate(), // StatusManager
+        ]);
+
+        // 2. 全ての操作が成功することを確認
+        for (final result in futures) {
+          expect(result.isSuccess, isTrue);
+        }
+
+        // 3. データ整合性確認
+        final status = futures[0].value as SubscriptionStatus;
+        final canUse = futures[1].value as bool;
+        final remaining = futures[3].value as int;
+
+        expect(status.planId, equals('basic'));
+        expect(canUse, isTrue);
+        expect(remaining, equals(10)); // Basic プラン初期値
+        expect(status.remainingGenerations, equals(remaining));
+      });
+    });
+
     group('Phase 1.5.3.x: 総合統合確認', () {
       test('完全なライフサイクルテスト: 登録→使用→プラン変更→リセット', () async {
         // 1. Service Registration
@@ -640,6 +832,251 @@ void main() {
 
         // 6. クリーンアップ
         testServiceLocator.clear();
+      });
+    });
+
+    // =================================================================
+    // Phase 1.5.3.5: エンドツーエンドワークフロー統合テスト
+    // =================================================================
+
+    group('Phase 1.5.3.5: エンドツーエンドワークフロー統合テスト', () {
+      test('完全なサブスクリプションワークフロー: 登録→使用→制限→リセット→再使用', () async {
+        // 1. Service Registration and Initialization
+        final testServiceLocator = ServiceLocator();
+        testServiceLocator.registerAsyncFactory<ISubscriptionService>(
+          () async => await SubscriptionService.getInstance(),
+        );
+
+        final service = await testServiceLocator.getAsync<ISubscriptionService>();
+        expect(service, isNotNull);
+        expect((service as SubscriptionService).isInitialized, isTrue);
+
+        // 2. 初期状態確認 (StatusManager)
+        final initialStatus = await service.getCurrentStatus();
+        expect(initialStatus.isSuccess, isTrue);
+        expect(initialStatus.value.planId, equals('basic'));
+        expect(initialStatus.value.monthlyUsageCount, equals(0));
+        expect(initialStatus.value.remainingGenerations, equals(10));
+
+        // 3. アクセス権限確認 (AccessControlManager)
+        final premiumAccess = await service.canAccessPremiumFeatures();
+        final promptsAccess = await service.canAccessWritingPrompts();
+        final filtersAccess = await service.canAccessAdvancedFilters();
+
+        expect(premiumAccess.value, isFalse);
+        expect(promptsAccess.value, isTrue); // Basic でも制限付きアクセス
+        expect(filtersAccess.value, isFalse);
+
+        // 4. AI生成使用フロー (UsageTracker)
+        for (int cycle = 1; cycle <= 3; cycle++) {
+          // 4.1 使用前確認
+          final canUseBefore = await service.canUseAiGeneration();
+          expect(canUseBefore.value, isTrue);
+
+          final remainingBefore = await service.getRemainingGenerations();
+          expect(remainingBefore.value, equals(10 - (cycle - 1) * 3));
+
+          // 4.2 3回使用
+          for (int i = 0; i < 3; i++) {
+            final incrementResult = await service.incrementAiUsage();
+            expect(incrementResult.isSuccess, isTrue);
+          }
+
+          // 4.3 使用後確認 (StatusManager)
+          final statusAfterUsage = await service.getCurrentStatus();
+          expect(statusAfterUsage.value.monthlyUsageCount, equals(cycle * 3));
+          expect(statusAfterUsage.value.remainingGenerations, equals(10 - cycle * 3));
+
+          // 4.4 アクセス権限は変わらず (AccessControlManager)
+          final accessAfterUsage = await service.canAccessPremiumFeatures();
+          expect(accessAfterUsage.value, isFalse);
+        }
+
+        // 5. 制限到達確認 (9回使用済み、あと1回)
+        final nearLimitStatus = await service.getCurrentStatus();
+        expect(nearLimitStatus.value.monthlyUsageCount, equals(9));
+        expect(nearLimitStatus.value.remainingGenerations, equals(1));
+
+        final canUseNearLimit = await service.canUseAiGeneration();
+        expect(canUseNearLimit.value, isTrue); // まだ1回残っている
+
+        // 6. 最後の1回使用
+        final lastIncrementResult = await service.incrementAiUsage();
+        expect(lastIncrementResult.isSuccess, isTrue);
+
+        final limitStatus = await service.getCurrentStatus();
+        expect(limitStatus.value.monthlyUsageCount, equals(10));
+        expect(limitStatus.value.remainingGenerations, equals(0));
+
+        // 7. 制限到達後の使用不可確認
+        final canUseAtLimit = await service.canUseAiGeneration();
+        expect(canUseAtLimit.value, isFalse);
+
+        final overLimitResult = await service.incrementAiUsage();
+        expect(overLimitResult.isFailure, isTrue);
+
+        // 8. 月次リセット (UsageTracker)
+        final resetResult = await service.resetUsage();
+        expect(resetResult.isSuccess, isTrue);
+
+        // 9. リセット後の完全復旧確認
+        final resetStatus = await service.getCurrentStatus();
+        expect(resetStatus.value.monthlyUsageCount, equals(0));
+        expect(resetStatus.value.remainingGenerations, equals(10));
+
+        final canUseAfterReset = await service.canUseAiGeneration();
+        expect(canUseAfterReset.value, isTrue);
+
+        // 10. リセット後の正常動作確認
+        for (int i = 1; i <= 5; i++) {
+          final incrementResult = await service.incrementAiUsage();
+          expect(incrementResult.isSuccess, isTrue);
+
+          final statusAfterIncrement = await service.getCurrentStatus();
+          expect(statusAfterIncrement.value.monthlyUsageCount, equals(i));
+          expect(statusAfterIncrement.value.remainingGenerations, equals(10 - i));
+        }
+
+        // 11. 最終状態確認
+        final finalStatus = await service.getCurrentStatus();
+        expect(finalStatus.value.monthlyUsageCount, equals(5));
+        expect(finalStatus.value.remainingGenerations, equals(5));
+
+        final finalCanUse = await service.canUseAiGeneration();
+        expect(finalCanUse.value, isTrue);
+
+        // 12. アクセス権限は一貫してBasicのまま
+        final finalPremiumAccess = await service.canAccessPremiumFeatures();
+        expect(finalPremiumAccess.value, isFalse);
+
+        // 13. クリーンアップ
+        testServiceLocator.clear();
+      });
+
+      test('高負荷環境での統合動作確認', () async {
+        // 1. サービス初期化
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(
+          () async => await SubscriptionService.getInstance(),
+        );
+        final service = await serviceLocator.getAsync<ISubscriptionService>();
+
+        // 2. 大量の並行読み取り操作（全マネージャー）
+        final readFutures = <Future>[];
+        for (int i = 0; i < 50; i++) {
+          readFutures.add(service.getCurrentStatus()); // StatusManager
+          readFutures.add(service.canUseAiGeneration()); // UsageTracker + AccessControlManager
+          readFutures.add(service.canAccessPremiumFeatures()); // AccessControlManager
+          readFutures.add(service.getRemainingGenerations()); // UsageTracker
+        }
+
+        final readResults = await Future.wait(readFutures);
+
+        // 3. 全ての読み取り操作が成功
+        for (final result in readResults) {
+          expect((result as Result).isSuccess, isTrue);
+        }
+
+        // 4. 順次書き込み操作（競合回避のため）
+        for (int i = 1; i <= 10; i++) {
+          final incrementResult = await service.incrementAiUsage();
+          expect(incrementResult.isSuccess, isTrue);
+
+          // 各段階での整合性確認
+          final status = await service.getCurrentStatus();
+          expect(status.value.monthlyUsageCount, equals(i));
+        }
+
+        // 5. 制限到達後の並行エラー処理確認
+        final errorFutures = <Future<Result<void>>>[];
+        for (int i = 0; i < 10; i++) {
+          errorFutures.add(service.incrementAiUsage());
+        }
+
+        final errorResults = await Future.wait(errorFutures);
+        for (final result in errorResults) {
+          expect(result.isFailure, isTrue);
+        }
+
+        // 6. エラー後も他の操作は正常
+        final finalStatus = await service.getCurrentStatus();
+        expect(finalStatus.isSuccess, isTrue);
+        expect(finalStatus.value.monthlyUsageCount, equals(10));
+      });
+
+      test('異常状態からの復旧ワークフロー', () async {
+        // 1. サービス初期化
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(
+          () async => await SubscriptionService.getInstance(),
+        );
+        final service = await serviceLocator.getAsync<ISubscriptionService>();
+
+        // 2. 通常使用
+        for (int i = 0; i < 5; i++) {
+          await service.incrementAiUsage();
+        }
+
+        // 3. 異常状態シミュレーション（期限切れ状態）
+        final expiredStatus = SubscriptionStatus(
+          planId: 'premium_yearly',
+          isActive: true,
+          startDate: DateTime.now().subtract(const Duration(days: 400)),
+          expiryDate: DateTime.now().subtract(const Duration(days: 1)),
+          autoRenewal: false,
+          monthlyUsageCount: 50, // 異常に高い値
+          lastResetDate: DateTime.now().subtract(const Duration(days: 32)),
+          transactionId: 'expired_test',
+          lastPurchaseDate: DateTime.now().subtract(const Duration(days: 400)),
+        );
+
+        final subscriptionServiceImpl = service as SubscriptionService;
+        await subscriptionServiceImpl.updateStatus(expiredStatus);
+
+        // 4. 異常状態での制限確認
+        final canUseExpired = await service.canUseAiGeneration();
+        expect(canUseExpired.value, isFalse); // 期限切れなので使用不可
+
+        final premiumAccessExpired = await service.canAccessPremiumFeatures();
+        expect(premiumAccessExpired.value, isFalse); // 期限切れなのでアクセス不可
+
+        // 5. リセット（復旧処理）
+        final resetResult = await service.resetUsage();
+        expect(resetResult.isSuccess, isTrue);
+
+        // 6. リセット後も期限切れなので制限は継続
+        final canUseAfterReset = await service.canUseAiGeneration();
+        expect(canUseAfterReset.value, isFalse);
+
+        // 7. 正常状態に戻す（Basic プラン）
+        final normalStatus = SubscriptionStatus(
+          planId: 'basic',
+          isActive: true,
+          startDate: DateTime.now(),
+          expiryDate: null,
+          autoRenewal: false,
+          monthlyUsageCount: 0,
+          lastResetDate: DateTime.now(),
+          transactionId: 'recovery_test',
+          lastPurchaseDate: DateTime.now(),
+        );
+
+        await subscriptionServiceImpl.updateStatus(normalStatus);
+
+        // 8. 正常状態復旧確認
+        final recoveredStatus = await service.getCurrentStatus();
+        expect(recoveredStatus.value.planId, equals('basic'));
+        expect(recoveredStatus.value.monthlyUsageCount, equals(0));
+        expect(recoveredStatus.value.remainingGenerations, equals(10));
+
+        final canUseRecovered = await service.canUseAiGeneration();
+        expect(canUseRecovered.value, isTrue);
+
+        // 9. 復旧後の正常動作確認
+        final incrementAfterRecovery = await service.incrementAiUsage();
+        expect(incrementAfterRecovery.isSuccess, isTrue);
+
+        final finalStatus = await service.getCurrentStatus();
+        expect(finalStatus.value.monthlyUsageCount, equals(1));
+        expect(finalStatus.value.remainingGenerations, equals(9));
       });
     });
   });
