@@ -62,7 +62,7 @@ void main() {
         final mockManagerWithCustomState = MockSubscriptionStatusManager(
           initialStatus: customStatus,
         );
-        
+
         final result = await mockManagerWithCustomState.getCurrentStatus();
 
         // Assert
@@ -99,7 +99,10 @@ void main() {
 
       test('状態取得失敗を設定できる', () async {
         // Arrange
-        mockManager.setGetCurrentStatusFailure(true, 'Test getCurrentStatus error');
+        mockManager.setGetCurrentStatusFailure(
+          true,
+          'Test getCurrentStatus error',
+        );
 
         // Act
         final result = await mockManager.getCurrentStatus();
@@ -278,9 +281,11 @@ void main() {
         expect(result.isSuccess, true);
         expect(result.value.planId, equals(yearlyPlan.id));
         expect(result.value.expiryDate, isNotNull);
-        
+
         // 有効期限が約1年後であることを確認（誤差を考慮して360-370日の範囲で確認）
-        final daysDifference = result.value.expiryDate!.difference(DateTime.now()).inDays;
+        final daysDifference = result.value.expiryDate!
+            .difference(DateTime.now())
+            .inDays;
         expect(daysDifference, greaterThanOrEqualTo(360));
         expect(daysDifference, lessThanOrEqualTo(370));
       });
@@ -373,23 +378,44 @@ void main() {
 
       test('現在のプラン取得失敗を設定できる', () async {
         // Arrange
-        mockManager.setGetCurrentPlanClassFailure(true, 'Test getCurrentPlanClass error');
+        mockManager.setGetCurrentPlanClassFailure(
+          true,
+          'Test getCurrentPlanClass error',
+        );
 
         // Act
         final result = await mockManager.getCurrentPlanClass();
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Test getCurrentPlanClass error'));
+        expect(
+          result.error.message,
+          contains('Test getCurrentPlanClass error'),
+        );
       });
 
       test('強制プランID取得が正常に動作する', () {
         // Assert
-        expect(mockManager.getForcedPlanId('premium'), equals(SubscriptionConstants.premiumMonthlyPlanId));
-        expect(mockManager.getForcedPlanId('premium_monthly'), equals(SubscriptionConstants.premiumMonthlyPlanId));
-        expect(mockManager.getForcedPlanId('premium_yearly'), equals(SubscriptionConstants.premiumYearlyPlanId));
-        expect(mockManager.getForcedPlanId('basic'), equals(SubscriptionConstants.basicPlanId));
-        expect(mockManager.getForcedPlanId('unknown'), equals(SubscriptionConstants.basicPlanId));
+        expect(
+          mockManager.getForcedPlanId('premium'),
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
+        expect(
+          mockManager.getForcedPlanId('premium_monthly'),
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
+        expect(
+          mockManager.getForcedPlanId('premium_yearly'),
+          equals(SubscriptionConstants.premiumYearlyPlanId),
+        );
+        expect(
+          mockManager.getForcedPlanId('basic'),
+          equals(SubscriptionConstants.basicPlanId),
+        );
+        expect(
+          mockManager.getForcedPlanId('unknown'),
+          equals(SubscriptionConstants.basicPlanId),
+        );
       });
     });
 
@@ -547,14 +573,20 @@ void main() {
 
       test('プレミアム機能アクセス権限チェック失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessPremiumFeaturesFailure(true, 'Test canAccessPremiumFeatures error');
+        mockManager.setCanAccessPremiumFeaturesFailure(
+          true,
+          'Test canAccessPremiumFeatures error',
+        );
 
         // Act
         final result = await mockManager.canAccessPremiumFeatures();
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Test canAccessPremiumFeatures error'));
+        expect(
+          result.error.message,
+          contains('Test canAccessPremiumFeatures error'),
+        );
       });
     });
 
@@ -589,7 +621,10 @@ void main() {
 
         // Assert
         expect(result.isSuccess, true);
-        expect(result.value.planId, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          result.value.planId,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(result.value.isActive, true);
         expect(result.value.expiryDate!.isBefore(DateTime.now()), true);
         expect(mockManager.isSubscriptionValid(result.value), false);

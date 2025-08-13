@@ -61,7 +61,7 @@ class SubscriptionTestHelpers {
     final now = DateTime.now();
     final start = startDate ?? now;
     final expiry = expiryDate ?? start.add(const Duration(days: 30));
-    
+
     return SubscriptionStatus(
       planId: SubscriptionConstants.premiumMonthlyPlanId,
       isActive: isActive,
@@ -70,7 +70,8 @@ class SubscriptionTestHelpers {
       autoRenewal: autoRenewal,
       monthlyUsageCount: usageCount,
       lastResetDate: start,
-      transactionId: transactionId ?? 'premium_monthly_${now.millisecondsSinceEpoch}',
+      transactionId:
+          transactionId ?? 'premium_monthly_${now.millisecondsSinceEpoch}',
       lastPurchaseDate: start,
     );
   }
@@ -87,7 +88,7 @@ class SubscriptionTestHelpers {
     final now = DateTime.now();
     final start = startDate ?? now;
     final expiry = expiryDate ?? start.add(const Duration(days: 365));
-    
+
     return SubscriptionStatus(
       planId: SubscriptionConstants.premiumYearlyPlanId,
       isActive: isActive,
@@ -96,7 +97,8 @@ class SubscriptionTestHelpers {
       autoRenewal: autoRenewal,
       monthlyUsageCount: usageCount,
       lastResetDate: start,
-      transactionId: transactionId ?? 'premium_yearly_${now.millisecondsSinceEpoch}',
+      transactionId:
+          transactionId ?? 'premium_yearly_${now.millisecondsSinceEpoch}',
       lastPurchaseDate: start,
     );
   }
@@ -113,7 +115,7 @@ class SubscriptionTestHelpers {
     final now = DateTime.now();
     final expiredDate = now.subtract(Duration(days: daysExpired));
     final startDate = expiredDate.subtract(const Duration(days: 30));
-    
+
     return SubscriptionStatus(
       planId: planId,
       isActive: true,
@@ -132,7 +134,7 @@ class SubscriptionTestHelpers {
     String planId = SubscriptionConstants.premiumMonthlyPlanId,
   }) {
     final now = DateTime.now();
-    
+
     return SubscriptionStatus(
       planId: planId,
       isActive: false,
@@ -151,9 +153,13 @@ class SubscriptionTestHelpers {
     if (plan.id == SubscriptionConstants.basicPlanId) {
       return createBasicPlanStatus(usageCount: plan.monthlyAiGenerationLimit);
     } else if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
-      return createPremiumMonthlyStatus(usageCount: plan.monthlyAiGenerationLimit);
+      return createPremiumMonthlyStatus(
+        usageCount: plan.monthlyAiGenerationLimit,
+      );
     } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
-      return createPremiumYearlyStatus(usageCount: plan.monthlyAiGenerationLimit);
+      return createPremiumYearlyStatus(
+        usageCount: plan.monthlyAiGenerationLimit,
+      );
     }
     throw ArgumentError('Unsupported plan: ${plan.id}');
   }
@@ -185,7 +191,9 @@ class SubscriptionTestHelpers {
   }
 
   /// 使用制限に達したSubscriptionServiceをセットアップ
-  static MockSubscriptionServiceInterface setupUsageLimitReachedService(Plan plan) {
+  static MockSubscriptionServiceInterface setupUsageLimitReachedService(
+    Plan plan,
+  ) {
     final mock = MockSubscriptionServiceInterface();
     TestServiceSetup.configureSubscriptionServiceForPlan(
       mock,
@@ -206,7 +214,7 @@ class SubscriptionTestHelpers {
   }) {
     final plan = BasicPlan();
     final status = createBasicPlanStatus(usageCount: usageCount);
-    
+
     return _createManagerSetup(plan, status, enableErrors);
   }
 
@@ -217,10 +225,10 @@ class SubscriptionTestHelpers {
     bool enableErrors = false,
   }) {
     final plan = isYearly ? PremiumYearlyPlan() : PremiumMonthlyPlan();
-    final status = isYearly 
+    final status = isYearly
         ? createPremiumYearlyStatus(usageCount: usageCount)
         : createPremiumMonthlyStatus(usageCount: usageCount);
-    
+
     return _createManagerSetup(plan, status, enableErrors);
   }
 
@@ -234,7 +242,7 @@ class SubscriptionTestHelpers {
       planId: plan.id,
       daysExpired: daysExpired,
     );
-    
+
     return _createManagerSetup(plan, status, false);
   }
 
@@ -271,7 +279,10 @@ class SubscriptionTestHelpers {
       accessControlManager.createBasicRestrictedState();
     }
     if (enableErrors) {
-      accessControlManager.setCanAccessPremiumFeaturesFailure(true, 'Test access error');
+      accessControlManager.setCanAccessPremiumFeaturesFailure(
+        true,
+        'Test access error',
+      );
     }
 
     return ManagerIntegratedSetup(
@@ -307,7 +318,11 @@ class SubscriptionTestHelpers {
   ) {
     final actualRemaining = plan.monthlyAiGenerationLimit - currentUsage;
     expect(actualRemaining, equals(expectedRemaining));
-    expect(actualRemaining >= 0, isTrue, reason: 'Remaining generations should not be negative');
+    expect(
+      actualRemaining >= 0,
+      isTrue,
+      reason: 'Remaining generations should not be negative',
+    );
   }
 
   /// プレミアム機能へのアクセス権をアサーション
@@ -328,11 +343,11 @@ class SubscriptionTestHelpers {
     bool expectedValid,
   ) {
     bool isValid = status.isActive;
-    
+
     if (status.expiryDate != null) {
       isValid = isValid && DateTime.now().isBefore(status.expiryDate!);
     }
-    
+
     expect(isValid, equals(expectedValid));
   }
 
@@ -459,7 +474,7 @@ class ManagerIntegratedSetup {
     statusManager.resetToDefaults();
     usageTracker.resetToDefaults();
     accessControlManager.resetToDefaults();
-    
+
     // 再度プランと状態を設定
     statusManager.setCurrentPlan(plan);
     usageTracker.setCurrentStatus(status);

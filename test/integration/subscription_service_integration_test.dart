@@ -606,13 +606,18 @@ void main() {
           expect(incrementResult.isSuccess, isTrue);
 
           // ステータスマネージャー経由でステータス確認
-          final statusAfterIncrement = await subscriptionService.getCurrentStatus();
+          final statusAfterIncrement = await subscriptionService
+              .getCurrentStatus();
           expect(statusAfterIncrement.value.monthlyUsageCount, equals(i));
-          expect(statusAfterIncrement.value.remainingGenerations, equals(10 - i));
+          expect(
+            statusAfterIncrement.value.remainingGenerations,
+            equals(10 - i),
+          );
         }
 
         // 3. UsageTracker経由で残り回数確認
-        final remainingResult = await subscriptionService.getRemainingGenerations();
+        final remainingResult = await subscriptionService
+            .getRemainingGenerations();
         expect(remainingResult.isSuccess, isTrue);
         expect(remainingResult.value, equals(7));
 
@@ -632,17 +637,20 @@ void main() {
         expect(initialStatus.value.planId, equals('basic'));
 
         // 2. AccessControlManager経由でプレミアム機能アクセス確認
-        final premiumAccess = await subscriptionService.canAccessPremiumFeatures();
+        final premiumAccess = await subscriptionService
+            .canAccessPremiumFeatures();
         expect(premiumAccess.isSuccess, isTrue);
         expect(premiumAccess.value, isFalse); // Basic プランなのでfalse
 
         // 3. AccessControlManager経由でライティングプロンプトアクセス確認
-        final promptsAccess = await subscriptionService.canAccessWritingPrompts();
+        final promptsAccess = await subscriptionService
+            .canAccessWritingPrompts();
         expect(promptsAccess.isSuccess, isTrue);
         expect(promptsAccess.value, isTrue); // Basic でも制限付きアクセス可能
 
         // 4. AccessControlManager経由で高度フィルタアクセス確認
-        final filtersAccess = await subscriptionService.canAccessAdvancedFilters();
+        final filtersAccess = await subscriptionService
+            .canAccessAdvancedFilters();
         expect(filtersAccess.isSuccess, isTrue);
         expect(filtersAccess.value, isFalse); // Basic プランなのでfalse
       });
@@ -670,7 +678,8 @@ void main() {
         expect(canUseAtLimit.value, isFalse);
 
         // 6. 使用量確認
-        final remainingAtLimit = await subscriptionService.getRemainingGenerations();
+        final remainingAtLimit = await subscriptionService
+            .getRemainingGenerations();
         expect(remainingAtLimit.value, equals(0));
       });
 
@@ -681,7 +690,8 @@ void main() {
         expect(initialStatus.value.monthlyUsageCount, equals(0));
 
         // 2. AccessControlManager: 初期アクセス権限確認
-        final premiumAccess = await subscriptionService.canAccessPremiumFeatures();
+        final premiumAccess = await subscriptionService
+            .canAccessPremiumFeatures();
         expect(premiumAccess.value, isFalse);
 
         // 3. UsageTracker: 使用量操作
@@ -696,7 +706,8 @@ void main() {
         expect(usageStatus.value.remainingGenerations, equals(5));
 
         // 5. AccessControlManager: 使用後もアクセス権限は同じ
-        final premiumAccessAfterUsage = await subscriptionService.canAccessPremiumFeatures();
+        final premiumAccessAfterUsage = await subscriptionService
+            .canAccessPremiumFeatures();
         expect(premiumAccessAfterUsage.value, isFalse);
 
         // 6. UsageTracker: AI生成はまだ可能
@@ -712,7 +723,8 @@ void main() {
         expect(resetStatus.value.remainingGenerations, equals(10));
 
         // 9. AccessControlManager: リセット後もアクセス権限は同じ（プラン依存）
-        final premiumAccessAfterReset = await subscriptionService.canAccessPremiumFeatures();
+        final premiumAccessAfterReset = await subscriptionService
+            .canAccessPremiumFeatures();
         expect(premiumAccessAfterReset.value, isFalse);
       });
 
@@ -739,7 +751,8 @@ void main() {
         expect(statusAfterError.isSuccess, isTrue);
         expect(statusAfterError.value.monthlyUsageCount, equals(10));
 
-        final accessCheckAfterError = await subscriptionService.canAccessPremiumFeatures();
+        final accessCheckAfterError = await subscriptionService
+            .canAccessPremiumFeatures();
         expect(accessCheckAfterError.isSuccess, isTrue);
       });
 
@@ -747,8 +760,10 @@ void main() {
         // 1. 複数マネージャーの並行操作
         final futures = await Future.wait([
           subscriptionService.getCurrentStatus(), // StatusManager
-          subscriptionService.canUseAiGeneration(), // UsageTracker + AccessControlManager
-          subscriptionService.canAccessPremiumFeatures(), // AccessControlManager
+          subscriptionService
+              .canUseAiGeneration(), // UsageTracker + AccessControlManager
+          subscriptionService
+              .canAccessPremiumFeatures(), // AccessControlManager
           subscriptionService.getRemainingGenerations(), // UsageTracker
           subscriptionService.getNextResetDate(), // StatusManager
         ]);
@@ -847,7 +862,8 @@ void main() {
           () async => await SubscriptionService.getInstance(),
         );
 
-        final service = await testServiceLocator.getAsync<ISubscriptionService>();
+        final service = await testServiceLocator
+            .getAsync<ISubscriptionService>();
         expect(service, isNotNull);
         expect((service as SubscriptionService).isInitialized, isTrue);
 
@@ -885,7 +901,10 @@ void main() {
           // 4.3 使用後確認 (StatusManager)
           final statusAfterUsage = await service.getCurrentStatus();
           expect(statusAfterUsage.value.monthlyUsageCount, equals(cycle * 3));
-          expect(statusAfterUsage.value.remainingGenerations, equals(10 - cycle * 3));
+          expect(
+            statusAfterUsage.value.remainingGenerations,
+            equals(10 - cycle * 3),
+          );
 
           // 4.4 アクセス権限は変わらず (AccessControlManager)
           final accessAfterUsage = await service.canAccessPremiumFeatures();
@@ -934,7 +953,10 @@ void main() {
 
           final statusAfterIncrement = await service.getCurrentStatus();
           expect(statusAfterIncrement.value.monthlyUsageCount, equals(i));
-          expect(statusAfterIncrement.value.remainingGenerations, equals(10 - i));
+          expect(
+            statusAfterIncrement.value.remainingGenerations,
+            equals(10 - i),
+          );
         }
 
         // 11. 最終状態確認
@@ -964,8 +986,12 @@ void main() {
         final readFutures = <Future>[];
         for (int i = 0; i < 50; i++) {
           readFutures.add(service.getCurrentStatus()); // StatusManager
-          readFutures.add(service.canUseAiGeneration()); // UsageTracker + AccessControlManager
-          readFutures.add(service.canAccessPremiumFeatures()); // AccessControlManager
+          readFutures.add(
+            service.canUseAiGeneration(),
+          ); // UsageTracker + AccessControlManager
+          readFutures.add(
+            service.canAccessPremiumFeatures(),
+          ); // AccessControlManager
           readFutures.add(service.getRemainingGenerations()); // UsageTracker
         }
 

@@ -36,7 +36,7 @@ class SubscriptionStatusManager {
 
   // Hiveボックス（SubscriptionServiceから注入）
   final Box<SubscriptionStatus> _subscriptionBox;
-  
+
   // ロギングサービス（SubscriptionServiceから注入）
   final LoggingService _loggingService;
 
@@ -48,10 +48,7 @@ class SubscriptionStatusManager {
   // =================================================================
 
   /// コンストラクタ（依存性注入）
-  SubscriptionStatusManager(
-    this._subscriptionBox,
-    this._loggingService,
-  ) {
+  SubscriptionStatusManager(this._subscriptionBox, this._loggingService) {
     _isInitialized = true;
     _log('SubscriptionStatusManager initialized', level: LogLevel.debug);
   }
@@ -142,9 +139,7 @@ class SubscriptionStatusManager {
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('StatusManager is not initialized'),
-        );
+        return Failure(ServiceException('StatusManager is not initialized'));
       }
 
       _log('Getting current subscription status...', level: LogLevel.debug);
@@ -163,11 +158,11 @@ class SubscriptionStatusManager {
         // 初期状態（Basicプラン）を作成
         final basicPlan = BasicPlan();
         final initialStatusResult = await createStatus(basicPlan);
-        
+
         if (initialStatusResult.isFailure) {
           return Failure(initialStatusResult.error);
         }
-        
+
         currentStatus = initialStatusResult.value;
       } else {
         currentStatus = storedStatus;
@@ -187,7 +182,7 @@ class SubscriptionStatusManager {
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null && forcePlan.isNotEmpty) {
           final forcedPlanId = getForcedPlanId(forcePlan);
-          
+
           _log(
             'Debug mode: Force plan detected, returning modified status',
             level: LogLevel.warning,
@@ -205,7 +200,8 @@ class SubscriptionStatusManager {
             autoRenewal: true,
             monthlyUsageCount: currentStatus.monthlyUsageCount,
             lastResetDate: currentStatus.lastResetDate,
-            transactionId: 'debug_forced_${DateTime.now().millisecondsSinceEpoch}',
+            transactionId:
+                'debug_forced_${DateTime.now().millisecondsSinceEpoch}',
             lastPurchaseDate: DateTime.now(),
           );
 
@@ -231,9 +227,7 @@ class SubscriptionStatusManager {
   Future<Result<void>> updateStatus(SubscriptionStatus status) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('StatusManager is not initialized'),
-        );
+        return Failure(ServiceException('StatusManager is not initialized'));
       }
 
       _log(
@@ -269,9 +263,7 @@ class SubscriptionStatusManager {
   Future<Result<void>> refreshStatus() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('StatusManager is not initialized'),
-        );
+        return Failure(ServiceException('StatusManager is not initialized'));
       }
 
       _log('Refreshing subscription status...', level: LogLevel.info);
@@ -297,9 +289,7 @@ class SubscriptionStatusManager {
   Future<Result<SubscriptionStatus>> createStatus(Plan plan) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('StatusManager is not initialized'),
-        );
+        return Failure(ServiceException('StatusManager is not initialized'));
       }
 
       _log(
@@ -331,8 +321,8 @@ class SubscriptionStatusManager {
         transactionId: plan.id == SubscriptionConstants.basicPlanId
             ? ''
             : 'created_${now.millisecondsSinceEpoch}',
-        lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId 
-            ? null 
+        lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId
+            ? null
             : now,
       );
 
@@ -348,11 +338,7 @@ class SubscriptionStatusManager {
 
       return Success(newStatus);
     } catch (e) {
-      return _handleError(
-        e,
-        'createStatus',
-        details: 'planId: ${plan.id}',
-      );
+      return _handleError(e, 'createStatus', details: 'planId: ${plan.id}');
     }
   }
 
@@ -363,21 +349,19 @@ class SubscriptionStatusManager {
   Future<Result<void>> clearStatus() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('StatusManager is not initialized'),
-        );
+        return Failure(ServiceException('StatusManager is not initialized'));
       }
 
-      _log('Clearing subscription status (TEST ONLY)...', level: LogLevel.warning);
+      _log(
+        'Clearing subscription status (TEST ONLY)...',
+        level: LogLevel.warning,
+      );
 
       // Hiveから削除
       const statusKey = SubscriptionConstants.statusKey;
       await _subscriptionBox.delete(statusKey);
 
-      _log(
-        'Subscription status cleared successfully',
-        level: LogLevel.warning,
-      );
+      _log('Subscription status cleared successfully', level: LogLevel.warning);
 
       return const Success(null);
     } catch (e) {
@@ -425,7 +409,7 @@ class SubscriptionStatusManager {
       }
 
       final status = statusResult.value;
-      
+
       // プラン情報を取得
       final planResult = getPlanClass(status.planId);
       if (planResult.isFailure) {
@@ -499,13 +483,17 @@ class SubscriptionStatusManager {
 
       // サブスクリプションの有効性をチェック
       if (!isSubscriptionValid(status)) {
-        _log('Premium features access denied: inactive subscription', level: LogLevel.debug);
+        _log(
+          'Premium features access denied: inactive subscription',
+          level: LogLevel.debug,
+        );
         return const Success(false);
       }
 
       // プレミアムプランかどうかをチェック
-      final isPremium = status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
-                       status.planId == SubscriptionConstants.premiumYearlyPlanId;
+      final isPremium =
+          status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
+          status.planId == SubscriptionConstants.premiumYearlyPlanId;
 
       _log(
         'Premium features access check completed',

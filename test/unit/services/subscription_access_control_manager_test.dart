@@ -33,27 +33,33 @@ void main() {
     group('初期化・破棄処理', () {
       test('コンストラクタで正しく初期化される', () {
         expect(manager.isInitialized, isTrue);
-        verify(() => mockLoggingService.debug(
-          'SubscriptionAccessControlManager initialized',
-          context: 'SubscriptionAccessControlManager',
-          data: null,
-        )).called(1);
+        verify(
+          () => mockLoggingService.debug(
+            'SubscriptionAccessControlManager initialized',
+            context: 'SubscriptionAccessControlManager',
+            data: null,
+          ),
+        ).called(1);
       });
 
       test('dispose後は初期化フラグがfalseになる', () {
         manager.dispose();
 
         expect(manager.isInitialized, isFalse);
-        verify(() => mockLoggingService.info(
-          'Disposing SubscriptionAccessControlManager...',
-          context: 'SubscriptionAccessControlManager',
-          data: null,
-        )).called(1);
-        verify(() => mockLoggingService.info(
-          'SubscriptionAccessControlManager disposed',
-          context: 'SubscriptionAccessControlManager',
-          data: null,
-        )).called(1);
+        verify(
+          () => mockLoggingService.info(
+            'Disposing SubscriptionAccessControlManager...',
+            context: 'SubscriptionAccessControlManager',
+            data: null,
+          ),
+        ).called(1);
+        verify(
+          () => mockLoggingService.info(
+            'SubscriptionAccessControlManager disposed',
+            context: 'SubscriptionAccessControlManager',
+            data: null,
+          ),
+        ).called(1);
       });
     });
 
@@ -67,7 +73,7 @@ void main() {
         bool isValidSubscription(SubscriptionStatus s) => s.isActive;
 
         final result = await manager.canAccessPremiumFeatures(
-          status, 
+          status,
           isValidSubscription,
         );
 
@@ -168,8 +174,8 @@ void main() {
           ..isActive = true
           ..expiryDate = DateTime.now().subtract(const Duration(days: 1));
 
-        bool isValidSubscription(SubscriptionStatus s) => 
-          s.isActive && (s.expiryDate?.isAfter(DateTime.now()) ?? false);
+        bool isValidSubscription(SubscriptionStatus s) =>
+            s.isActive && (s.expiryDate?.isAfter(DateTime.now()) ?? false);
 
         final result = await manager.canAccessWritingPrompts(
           status,
@@ -502,7 +508,10 @@ void main() {
 
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('AccessControlManager is not initialized'));
+        expect(
+          result.error.message,
+          contains('AccessControlManager is not initialized'),
+        );
       });
 
       test('例外発生時の適切なエラーハンドリング', () async {
@@ -510,8 +519,8 @@ void main() {
           ..planId = 'basic'
           ..isActive = true;
 
-        bool isValidSubscription(SubscriptionStatus s) => 
-          throw Exception('Test exception');
+        bool isValidSubscription(SubscriptionStatus s) =>
+            throw Exception('Test exception');
 
         final result = await manager.canAccessPremiumFeatures(
           status,
@@ -520,11 +529,13 @@ void main() {
 
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        verify(() => mockLoggingService.error(
-          any(),
-          context: any(named: 'context'),
-          error: any(named: 'error'),
-        )).called(greaterThan(0));
+        verify(
+          () => mockLoggingService.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+          ),
+        ).called(greaterThan(0));
       });
 
       test('getFeatureAccessで個別機能エラー時の伝播', () async {
@@ -557,17 +568,21 @@ void main() {
 
         await manager.canAccessPremiumFeatures(status, isValidSubscription);
 
-        verify(() => mockLoggingService.debug(
-          'Checking premium features access...',
-          context: 'SubscriptionAccessControlManager',
-          data: null,
-        )).called(1);
+        verify(
+          () => mockLoggingService.debug(
+            'Checking premium features access...',
+            context: 'SubscriptionAccessControlManager',
+            data: null,
+          ),
+        ).called(1);
 
-        verify(() => mockLoggingService.debug(
-          'Premium features access check completed',
-          context: 'SubscriptionAccessControlManager',
-          data: any(named: 'data'),
-        )).called(1);
+        verify(
+          () => mockLoggingService.debug(
+            'Premium features access check completed',
+            context: 'SubscriptionAccessControlManager',
+            data: any(named: 'data'),
+          ),
+        ).called(1);
       });
 
       test('エラーログが適切に出力される', () async {
@@ -575,16 +590,19 @@ void main() {
           ..planId = 'basic'
           ..isActive = true;
 
-        bool isValidSubscription(SubscriptionStatus s) => 
-          throw Exception('Test error');
+        bool isValidSubscription(SubscriptionStatus s) =>
+            throw Exception('Test error');
 
         await manager.canAccessPremiumFeatures(status, isValidSubscription);
 
-        verify(() => mockLoggingService.error(
-          any(that: contains('Operation failed: canAccessPremiumFeatures')),
-          context: 'SubscriptionAccessControlManager.canAccessPremiumFeatures',
-          error: any(named: 'error'),
-        )).called(1);
+        verify(
+          () => mockLoggingService.error(
+            any(that: contains('Operation failed: canAccessPremiumFeatures')),
+            context:
+                'SubscriptionAccessControlManager.canAccessPremiumFeatures',
+            error: any(named: 'error'),
+          ),
+        ).called(1);
       });
     });
 

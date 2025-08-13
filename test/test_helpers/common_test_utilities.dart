@@ -33,55 +33,93 @@ class CommonTestUtilities {
 
   /// Result<T>が成功であることをアサーション
   static void expectSuccess<T>(Result<T> result) {
-    expect(result.isSuccess, isTrue, reason: 'Expected Success but got Failure: ${result.error}');
+    expect(
+      result.isSuccess,
+      isTrue,
+      reason: 'Expected Success but got Failure: ${result.error}',
+    );
   }
 
   /// Result<T>が失敗であることをアサーション
   static void expectFailure<T>(Result<T> result) {
-    expect(result.isFailure, isTrue, reason: 'Expected Failure but got Success: ${result.value}');
+    expect(
+      result.isFailure,
+      isTrue,
+      reason: 'Expected Failure but got Success: ${result.value}',
+    );
   }
 
   /// Result<T>の成功値をアサーション
   static void expectSuccessValue<T>(Result<T> result, T expectedValue) {
     expectSuccess(result);
-    expect(result.value, equals(expectedValue), reason: 'Success value does not match expected value');
+    expect(
+      result.value,
+      equals(expectedValue),
+      reason: 'Success value does not match expected value',
+    );
   }
 
   /// Result<T>の失敗エラーメッセージをアサーション
-  static void expectFailureMessage<T>(Result<T> result, String expectedMessage) {
+  static void expectFailureMessage<T>(
+    Result<T> result,
+    String expectedMessage,
+  ) {
     expectFailure(result);
-    expect(result.error.message, contains(expectedMessage), reason: 'Error message does not contain expected text');
+    expect(
+      result.error.message,
+      contains(expectedMessage),
+      reason: 'Error message does not contain expected text',
+    );
   }
 
   /// Result<T>の失敗エラータイプをアサーション
   static void expectFailureType<T, E extends AppException>(Result<T> result) {
     expectFailure(result);
-    expect(result.error, isA<E>(), reason: 'Error type does not match expected type');
+    expect(
+      result.error,
+      isA<E>(),
+      reason: 'Error type does not match expected type',
+    );
   }
 
   /// Result<T>の成功・失敗に関わらず値の存在をアサーション
   static void expectResultHasValue<T>(Result<T> result) {
     if (result.isSuccess) {
-      expect(result.value, isNotNull, reason: 'Success result should have non-null value');
+      expect(
+        result.value,
+        isNotNull,
+        reason: 'Success result should have non-null value',
+      );
     } else {
-      expect(result.error, isNotNull, reason: 'Failure result should have non-null error');
+      expect(
+        result.error,
+        isNotNull,
+        reason: 'Failure result should have non-null error',
+      );
     }
   }
 
   /// 非同期Result<T>のアサーション
-  static Future<void> expectAsyncSuccess<T>(Future<Result<T>> futureResult) async {
+  static Future<void> expectAsyncSuccess<T>(
+    Future<Result<T>> futureResult,
+  ) async {
     final result = await futureResult;
     expectSuccess(result);
   }
 
   /// 非同期Result<T>の失敗アサーション
-  static Future<void> expectAsyncFailure<T>(Future<Result<T>> futureResult) async {
+  static Future<void> expectAsyncFailure<T>(
+    Future<Result<T>> futureResult,
+  ) async {
     final result = await futureResult;
     expectFailure(result);
   }
 
   /// 非同期Result<T>の成功値アサーション
-  static Future<void> expectAsyncSuccessValue<T>(Future<Result<T>> futureResult, T expectedValue) async {
+  static Future<void> expectAsyncSuccessValue<T>(
+    Future<Result<T>> futureResult,
+    T expectedValue,
+  ) async {
     final result = await futureResult;
     expectSuccessValue(result, expectedValue);
   }
@@ -101,10 +139,10 @@ class CommonTestUtilities {
     group('Error Scenario: $testName', () {
       test('should return failure with expected message', () async {
         final result = await operation();
-        
+
         expectFailure(result);
         expectFailureMessage(result, expectedErrorMessage);
-        
+
         if (expectedErrorType != null) {
           expect(result.error, isA<AppException>());
         }
@@ -115,12 +153,15 @@ class CommonTestUtilities {
   /// 複数のエラーシナリオを一括テスト
   static void testMultipleErrorScenarios<T>(
     String operationName,
-    List<({
-      String scenario,
-      Future<Result<T>> Function() operation,
-      String expectedMessage,
-      Type? expectedType,
-    })> scenarios,
+    List<
+      ({
+        String scenario,
+        Future<Result<T>> Function() operation,
+        String expectedMessage,
+        Type? expectedType,
+      })
+    >
+    scenarios,
   ) {
     group('$operationName Error Scenarios', () {
       for (final scenario in scenarios) {
@@ -139,11 +180,14 @@ class CommonTestUtilities {
     String componentName,
     Future<Result<void>> Function() initOperation,
   ) {
-    test('$componentName initialization should fail when not properly configured', () async {
-      final result = await initOperation();
-      expectFailure(result);
-      expect(result.error.message, contains('initialization'));
-    });
+    test(
+      '$componentName initialization should fail when not properly configured',
+      () async {
+        final result = await initOperation();
+        expectFailure(result);
+        expect(result.error.message, contains('initialization'));
+      },
+    );
   }
 
   // =================================================================
@@ -157,14 +201,20 @@ class CommonTestUtilities {
     String? customErrorMessage,
   }) {
     final manager = MockSubscriptionPurchaseManager();
-    
+
     if (shouldFailInitialization) {
-      manager.setInitializationFailure(true, customErrorMessage ?? 'Test initialization failure');
+      manager.setInitializationFailure(
+        true,
+        customErrorMessage ?? 'Test initialization failure',
+      );
     }
     if (shouldFailPurchase) {
-      manager.setPurchaseFailure(true, customErrorMessage ?? 'Test purchase failure');
+      manager.setPurchaseFailure(
+        true,
+        customErrorMessage ?? 'Test purchase failure',
+      );
     }
-    
+
     return manager;
   }
 
@@ -175,14 +225,17 @@ class CommonTestUtilities {
     String? customErrorMessage,
   }) {
     final manager = MockSubscriptionStatusManager();
-    
+
     if (initialPlan != null) {
       manager.setCurrentPlan(initialPlan);
     }
     if (shouldFailGetStatus) {
-      manager.setGetCurrentStatusFailure(true, customErrorMessage ?? 'Test status failure');
+      manager.setGetCurrentStatusFailure(
+        true,
+        customErrorMessage ?? 'Test status failure',
+      );
     }
-    
+
     return manager;
   }
 
@@ -193,14 +246,17 @@ class CommonTestUtilities {
     String? customErrorMessage,
   }) {
     final manager = MockSubscriptionUsageTracker();
-    
+
     if (initialStatus != null) {
       manager.setCurrentStatus(initialStatus);
     }
     if (shouldFailUsageCheck) {
-      manager.setCanUseAiGenerationFailure(true, customErrorMessage ?? 'Test usage failure');
+      manager.setCanUseAiGenerationFailure(
+        true,
+        customErrorMessage ?? 'Test usage failure',
+      );
     }
-    
+
     return manager;
   }
 
@@ -211,17 +267,20 @@ class CommonTestUtilities {
     String? customErrorMessage,
   }) {
     final manager = MockSubscriptionAccessControlManager();
-    
+
     if (isPremium) {
       manager.createPremiumFullAccessState();
     } else {
       manager.createBasicRestrictedState();
     }
-    
+
     if (shouldFailAccessCheck) {
-      manager.setCanAccessPremiumFeaturesFailure(true, customErrorMessage ?? 'Test access failure');
+      manager.setCanAccessPremiumFeaturesFailure(
+        true,
+        customErrorMessage ?? 'Test access failure',
+      );
     }
-    
+
     return manager;
   }
 
@@ -232,39 +291,41 @@ class CommonTestUtilities {
     bool enableErrors = false,
   }) {
     final selectedPlan = plan ?? BasicPlan();
-    
+
     final purchaseManager = setupPurchaseManager(
       shouldFailPurchase: enableErrors,
     );
-    
+
     final statusManager = setupStatusManager(
       initialPlan: selectedPlan,
       shouldFailGetStatus: enableErrors,
     );
-    
+
     final now = DateTime.now();
     final status = SubscriptionStatus(
       planId: selectedPlan.id,
       isActive: true,
       startDate: now,
-      expiryDate: selectedPlan.isPremium ? now.add(const Duration(days: 30)) : null,
+      expiryDate: selectedPlan.isPremium
+          ? now.add(const Duration(days: 30))
+          : null,
       autoRenewal: selectedPlan.isPremium,
       monthlyUsageCount: usageCount,
       lastResetDate: now,
       transactionId: selectedPlan.isPremium ? 'test_transaction' : '',
       lastPurchaseDate: selectedPlan.isPremium ? now : null,
     );
-    
+
     final usageTracker = setupUsageTracker(
       initialStatus: status,
       shouldFailUsageCheck: enableErrors,
     );
-    
+
     final accessControlManager = setupAccessControlManager(
       isPremium: selectedPlan.isPremium,
       shouldFailAccessCheck: enableErrors,
     );
-    
+
     return ManagerSetup(
       purchaseManager: purchaseManager,
       statusManager: statusManager,
@@ -293,11 +354,15 @@ class CommonTestUtilities {
 
   /// 使用制限到達シナリオの設定
   static ManagerSetup setupUsageLimitReachedScenario(Plan plan) {
-    return setupAllManagers(plan: plan, usageCount: plan.monthlyAiGenerationLimit);
+    return setupAllManagers(
+      plan: plan,
+      usageCount: plan.monthlyAiGenerationLimit,
+    );
   }
 
   /// プランの基本情報をアサーション
-  static void assertPlanBasics(Plan plan, {
+  static void assertPlanBasics(
+    Plan plan, {
     required String expectedId,
     required String expectedDisplayName,
     required int expectedGenerationLimit,
@@ -310,7 +375,8 @@ class CommonTestUtilities {
   }
 
   /// プランの機能をアサーション
-  static void assertPlanFeatures(Plan plan, {
+  static void assertPlanFeatures(
+    Plan plan, {
     required bool expectedHasWritingPrompts,
     required bool expectedHasAdvancedFilters,
     required bool expectedHasAdvancedAnalytics,
@@ -418,7 +484,7 @@ class CommonTestUtilities {
   }) async {
     final actualValues = <T>[];
     final completer = Completer<List<T>>();
-    
+
     late StreamSubscription<T> subscription;
     subscription = stream.listen(
       (value) {
@@ -433,7 +499,7 @@ class CommonTestUtilities {
         completer.completeError(error);
       },
     );
-    
+
     final result = await completer.future.timeout(timeout);
     expect(result, equals(expectedValues));
     return result;

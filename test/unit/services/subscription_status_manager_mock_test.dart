@@ -31,32 +31,40 @@ void main() {
     setUp(() {
       mockSubscriptionBox = MockSubscriptionBox();
       mockLoggingService = MockLoggingService();
-      
+
       // LoggingServiceのモック設定
-      when(() => mockLoggingService.debug(
-        any(),
-        context: any(named: 'context'),
-        data: any(named: 'data'),
-      )).thenReturn(null);
-      
-      when(() => mockLoggingService.info(
-        any(),
-        context: any(named: 'context'),
-        data: any(named: 'data'),
-      )).thenReturn(null);
-      
-      when(() => mockLoggingService.warning(
-        any(),
-        context: any(named: 'context'),
-        data: any(named: 'data'),
-      )).thenReturn(null);
-      
-      when(() => mockLoggingService.error(
-        any(),
-        context: any(named: 'context'),
-        error: any(named: 'error'),
-      )).thenReturn(null);
-      
+      when(
+        () => mockLoggingService.debug(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+
+      when(
+        () => mockLoggingService.info(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+
+      when(
+        () => mockLoggingService.warning(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+
+      when(
+        () => mockLoggingService.error(
+          any(),
+          context: any(named: 'context'),
+          error: any(named: 'error'),
+        ),
+      ).thenReturn(null);
+
       statusManager = SubscriptionStatusManager(
         mockSubscriptionBox,
         mockLoggingService,
@@ -82,27 +90,35 @@ void main() {
           lastPurchaseDate: DateTime.now().subtract(const Duration(days: 5)),
         );
 
-        when(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey))
-            .thenReturn(mockStatus);
+        when(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).thenReturn(mockStatus);
 
         // Act
         final result = await statusManager.getCurrentStatus();
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.value.planId, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          result.value.planId,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(result.value.monthlyUsageCount, equals(3));
-        
+
         // Hiveのget()が呼ばれたことを確認
-        verify(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey)).called(1);
+        verify(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).called(1);
       });
 
       test('Hiveにデータがない場合、初期Basic状態を作成する', () async {
         // Arrange
-        when(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey))
-            .thenReturn(null);
-        when(() => mockSubscriptionBox.put(any(), any()))
-            .thenAnswer((_) => Future.value());
+        when(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).thenReturn(null);
+        when(
+          () => mockSubscriptionBox.put(any(), any()),
+        ).thenAnswer((_) => Future.value());
 
         // Act
         final result = await statusManager.getCurrentStatus();
@@ -112,19 +128,21 @@ void main() {
         expect(result.value.planId, equals(SubscriptionConstants.basicPlanId));
         expect(result.value.isActive, isTrue);
         expect(result.value.expiryDate, isNull);
-        
+
         // Hiveのgetとputが呼ばれたことを確認
-        verify(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey)).called(1);
-        verify(() => mockSubscriptionBox.put(
-          SubscriptionConstants.statusKey,
-          any(),
-        )).called(1);
+        verify(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).called(1);
+        verify(
+          () => mockSubscriptionBox.put(SubscriptionConstants.statusKey, any()),
+        ).called(1);
       });
 
       test('Hiveでエラーが発生した場合、適切にハンドリングされる', () async {
         // Arrange
-        when(() => mockSubscriptionBox.get(any()))
-            .thenThrow(Exception('Hive error'));
+        when(
+          () => mockSubscriptionBox.get(any()),
+        ).thenThrow(Exception('Hive error'));
 
         // Act
         final result = await statusManager.getCurrentStatus();
@@ -132,13 +150,15 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        
+
         // エラーログが呼ばれたことを確認
-        verify(() => mockLoggingService.error(
-          any(),
-          context: any(named: 'context'),
-          error: any(named: 'error'),
-        )).called(greaterThan(0));
+        verify(
+          () => mockLoggingService.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+          ),
+        ).called(greaterThan(0));
       });
     });
 
@@ -157,27 +177,32 @@ void main() {
           lastPurchaseDate: DateTime.now(),
         );
 
-        when(() => mockSubscriptionBox.put(any(), any()))
-            .thenAnswer((_) => Future.value());
+        when(
+          () => mockSubscriptionBox.put(any(), any()),
+        ).thenAnswer((_) => Future.value());
 
         // Act
         final result = await statusManager.updateStatus(newStatus);
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         // Hiveのput()が正しい引数で呼ばれたことを確認
-        verify(() => mockSubscriptionBox.put(
-          SubscriptionConstants.statusKey,
-          newStatus,
-        )).called(1);
-        
+        verify(
+          () => mockSubscriptionBox.put(
+            SubscriptionConstants.statusKey,
+            newStatus,
+          ),
+        ).called(1);
+
         // 情報ログが呼ばれたことを確認
-        verify(() => mockLoggingService.info(
-          any(),
-          context: any(named: 'context'),
-          data: any(named: 'data'),
-        )).called(greaterThan(0));
+        verify(
+          () => mockLoggingService.info(
+            any(),
+            context: any(named: 'context'),
+            data: any(named: 'data'),
+          ),
+        ).called(greaterThan(0));
       });
 
       test('Hive保存でエラーが発生した場合、適切にハンドリングされる', () async {
@@ -194,8 +219,9 @@ void main() {
           lastPurchaseDate: null,
         );
 
-        when(() => mockSubscriptionBox.put(any(), any()))
-            .thenThrow(Exception('Hive put error'));
+        when(
+          () => mockSubscriptionBox.put(any(), any()),
+        ).thenThrow(Exception('Hive put error'));
 
         // Act
         final result = await statusManager.updateStatus(testStatus);
@@ -203,13 +229,15 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        
+
         // エラーログが呼ばれたことを確認
-        verify(() => mockLoggingService.error(
-          any(),
-          context: any(named: 'context'),
-          error: any(named: 'error'),
-        )).called(greaterThan(0));
+        verify(
+          () => mockLoggingService.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+          ),
+        ).called(greaterThan(0));
       });
     });
 
@@ -217,15 +245,16 @@ void main() {
       test('Basicプラン用ステータスが正常に作成・保存される', () async {
         // Arrange
         final basicPlan = BasicPlan();
-        when(() => mockSubscriptionBox.put(any(), any()))
-            .thenAnswer((_) => Future.value());
+        when(
+          () => mockSubscriptionBox.put(any(), any()),
+        ).thenAnswer((_) => Future.value());
 
         // Act
         final result = await statusManager.createStatus(basicPlan);
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
         expect(status.planId, equals(SubscriptionConstants.basicPlanId));
         expect(status.isActive, isTrue);
@@ -233,73 +262,82 @@ void main() {
         expect(status.autoRenewal, isFalse);
         expect(status.transactionId, isEmpty);
         expect(status.lastPurchaseDate, isNull);
-        
+
         // Hiveのput()が呼ばれたことを確認
-        verify(() => mockSubscriptionBox.put(
-          SubscriptionConstants.statusKey,
-          any(),
-        )).called(1);
+        verify(
+          () => mockSubscriptionBox.put(SubscriptionConstants.statusKey, any()),
+        ).called(1);
       });
 
       test('PremiumMonthlyプラン用ステータスが正常に作成・保存される', () async {
         // Arrange
         final premiumPlan = PremiumMonthlyPlan();
-        when(() => mockSubscriptionBox.put(any(), any()))
-            .thenAnswer((_) => Future.value());
+        when(
+          () => mockSubscriptionBox.put(any(), any()),
+        ).thenAnswer((_) => Future.value());
 
         // Act
         final result = await statusManager.createStatus(premiumPlan);
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
-        expect(status.planId, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          status.planId,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(status.isActive, isTrue);
         expect(status.expiryDate, isNotNull);
         expect(status.autoRenewal, isTrue);
         expect(status.transactionId, isNotEmpty);
         expect(status.lastPurchaseDate, isNotNull);
-        
+
         // 有効期限が30日後に設定されていることを確認
         final expectedExpiry = DateTime.now().add(const Duration(days: 30));
         final actualExpiry = status.expiryDate!;
-        expect(actualExpiry.difference(expectedExpiry).inMinutes.abs(), lessThan(1));
-        
+        expect(
+          actualExpiry.difference(expectedExpiry).inMinutes.abs(),
+          lessThan(1),
+        );
+
         // Hiveのput()が呼ばれたことを確認
-        verify(() => mockSubscriptionBox.put(
-          SubscriptionConstants.statusKey,
-          any(),
-        )).called(1);
+        verify(
+          () => mockSubscriptionBox.put(SubscriptionConstants.statusKey, any()),
+        ).called(1);
       });
     });
 
     group('clearStatus() - モック動作確認', () {
       test('ステータスが正常に削除される', () async {
         // Arrange
-        when(() => mockSubscriptionBox.delete(any()))
-            .thenAnswer((_) => Future.value());
+        when(
+          () => mockSubscriptionBox.delete(any()),
+        ).thenAnswer((_) => Future.value());
 
         // Act
         final result = await statusManager.clearStatus();
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         // Hiveのdelete()が呼ばれたことを確認
-        verify(() => mockSubscriptionBox.delete(SubscriptionConstants.statusKey)).called(1);
-        
+        verify(
+          () => mockSubscriptionBox.delete(SubscriptionConstants.statusKey),
+        ).called(1);
+
         // 警告ログが呼ばれたことを確認（テスト専用機能のため）
-        verify(() => mockLoggingService.warning(
-          any(),
-          context: any(named: 'context'),
-        )).called(greaterThan(0));
+        verify(
+          () =>
+              mockLoggingService.warning(any(), context: any(named: 'context')),
+        ).called(greaterThan(0));
       });
 
       test('削除でエラーが発生した場合、適切にハンドリングされる', () async {
         // Arrange
-        when(() => mockSubscriptionBox.delete(any()))
-            .thenThrow(Exception('Hive delete error'));
+        when(
+          () => mockSubscriptionBox.delete(any()),
+        ).thenThrow(Exception('Hive delete error'));
 
         // Act
         final result = await statusManager.clearStatus();
@@ -307,13 +345,15 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        
+
         // エラーログが呼ばれたことを確認
-        verify(() => mockLoggingService.error(
-          any(),
-          context: any(named: 'context'),
-          error: any(named: 'error'),
-        )).called(greaterThan(0));
+        verify(
+          () => mockLoggingService.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+          ),
+        ).called(greaterThan(0));
       });
     });
 
@@ -332,8 +372,9 @@ void main() {
           lastPurchaseDate: DateTime.now(),
         );
 
-        when(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey))
-            .thenReturn(premiumStatus);
+        when(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).thenReturn(premiumStatus);
 
         // Act
         final result = await statusManager.canAccessPremiumFeatures();
@@ -341,13 +382,15 @@ void main() {
         // Assert
         expect(result.isSuccess, isTrue);
         expect(result.value, isTrue);
-        
+
         // デバッグログが呼ばれたことを確認
-        verify(() => mockLoggingService.debug(
-          any(),
-          context: any(named: 'context'),
-          data: any(named: 'data'),
-        )).called(greaterThan(0));
+        verify(
+          () => mockLoggingService.debug(
+            any(),
+            context: any(named: 'context'),
+            data: any(named: 'data'),
+          ),
+        ).called(greaterThan(0));
       });
 
       test('Basicプランでfalseが返される', () async {
@@ -364,8 +407,9 @@ void main() {
           lastPurchaseDate: null,
         );
 
-        when(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey))
-            .thenReturn(basicStatus);
+        when(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).thenReturn(basicStatus);
 
         // Act
         final result = await statusManager.canAccessPremiumFeatures();
@@ -389,8 +433,9 @@ void main() {
           lastPurchaseDate: DateTime.now(),
         );
 
-        when(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey))
-            .thenReturn(expiredStatus);
+        when(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).thenReturn(expiredStatus);
 
         // Act
         final result = await statusManager.canAccessPremiumFeatures();
@@ -405,10 +450,12 @@ void main() {
       test('初期化時にデバッグログが出力される', () {
         // SubscriptionStatusManager の初期化は setUp で行われているので、
         // デバッグログが呼ばれたことを確認
-        verify(() => mockLoggingService.debug(
-          'SubscriptionStatusManager initialized',
-          context: any(named: 'context'),
-        )).called(1);
+        verify(
+          () => mockLoggingService.debug(
+            'SubscriptionStatusManager initialized',
+            context: any(named: 'context'),
+          ),
+        ).called(1);
       });
 
       test('dispose時に情報ログが出力される', () {
@@ -416,15 +463,19 @@ void main() {
         statusManager.dispose();
 
         // Assert
-        verify(() => mockLoggingService.info(
-          'Disposing SubscriptionStatusManager...',
-          context: any(named: 'context'),
-        )).called(1);
-        
-        verify(() => mockLoggingService.info(
-          'SubscriptionStatusManager disposed',
-          context: any(named: 'context'),
-        )).called(1);
+        verify(
+          () => mockLoggingService.info(
+            'Disposing SubscriptionStatusManager...',
+            context: any(named: 'context'),
+          ),
+        ).called(1);
+
+        verify(
+          () => mockLoggingService.info(
+            'SubscriptionStatusManager disposed',
+            context: any(named: 'context'),
+          ),
+        ).called(1);
       });
     });
 
@@ -433,7 +484,7 @@ void main() {
         // LoggingServiceのモックが設定されていることを確認
         expect(mockLoggingService, isA<MockLoggingService>());
         expect(mockSubscriptionBox, isA<MockSubscriptionBox>());
-        
+
         // StatusManagerが初期化されていることを確認
         expect(statusManager.isInitialized, isTrue);
       });
@@ -441,8 +492,9 @@ void main() {
       test('呼び出し回数の検証が正しく動作する', () async {
         // Arrange
         when(() => mockSubscriptionBox.get(any())).thenReturn(null);
-        when(() => mockSubscriptionBox.put(any(), any()))
-            .thenAnswer((_) => Future.value());
+        when(
+          () => mockSubscriptionBox.put(any(), any()),
+        ).thenAnswer((_) => Future.value());
 
         // Act
         await statusManager.getCurrentStatus();
@@ -450,7 +502,9 @@ void main() {
 
         // Assert
         // getCurrentStatus()を2回呼んだので、get()も2回呼ばれる
-        verify(() => mockSubscriptionBox.get(SubscriptionConstants.statusKey)).called(2);
+        verify(
+          () => mockSubscriptionBox.get(SubscriptionConstants.statusKey),
+        ).called(2);
       });
     });
   });

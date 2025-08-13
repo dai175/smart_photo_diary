@@ -550,7 +550,6 @@ class SubscriptionService implements ISubscriptionService {
     return await _usageTracker!.getNextResetDate();
   }
 
-
   // =================================================================
   // アクセス権限チェックメソッド（Phase 1.3.4）
   // =================================================================
@@ -558,7 +557,9 @@ class SubscriptionService implements ISubscriptionService {
   /// プレミアム機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
       return Failure(
         ServiceException('SubscriptionService is not initialized'),
       );
@@ -582,7 +583,9 @@ class SubscriptionService implements ISubscriptionService {
   /// ライティングプロンプト機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessWritingPrompts() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
       return Failure(
         ServiceException('SubscriptionService is not initialized'),
       );
@@ -606,7 +609,9 @@ class SubscriptionService implements ISubscriptionService {
   /// 高度なフィルタ機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedFilters() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
       return Failure(
         ServiceException('SubscriptionService is not initialized'),
       );
@@ -630,8 +635,12 @@ class SubscriptionService implements ISubscriptionService {
   /// データエクスポート機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessDataExport() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
-      return Failure(ServiceException('SubscriptionService is not initialized'));
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
+      );
     }
 
     final statusResult = await getCurrentStatus();
@@ -649,8 +658,12 @@ class SubscriptionService implements ISubscriptionService {
   /// 統計ダッシュボード機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessStatsDashboard() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
-      return Failure(ServiceException('SubscriptionService is not initialized'));
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
+      );
     }
 
     final statusResult = await getCurrentStatus();
@@ -668,8 +681,12 @@ class SubscriptionService implements ISubscriptionService {
   /// プラン別の機能制限情報を取得
   @override
   Future<Result<Map<String, bool>>> getFeatureAccess() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
-      return Failure(ServiceException('SubscriptionService is not initialized'));
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
+      );
     }
 
     final statusResult = await getCurrentStatus();
@@ -687,8 +704,12 @@ class SubscriptionService implements ISubscriptionService {
   /// 高度な分析にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedAnalytics() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
-      return Failure(ServiceException('SubscriptionService is not initialized'));
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
+      );
     }
 
     final statusResult = await getCurrentStatus();
@@ -706,8 +727,12 @@ class SubscriptionService implements ISubscriptionService {
   /// 優先サポートにアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPrioritySupport() async {
-    if (!_isInitialized || _statusManager == null || _accessControlManager == null) {
-      return Failure(ServiceException('SubscriptionService is not initialized'));
+    if (!_isInitialized ||
+        _statusManager == null ||
+        _accessControlManager == null) {
+      return Failure(
+        ServiceException('SubscriptionService is not initialized'),
+      );
     }
 
     final statusResult = await getCurrentStatus();
@@ -883,7 +908,7 @@ class SubscriptionService implements ISubscriptionService {
   // =================================================================
 
   @override
-  Stream<PurchaseResult> get purchaseStream => 
+  Stream<PurchaseResult> get purchaseStream =>
       _purchaseManager?.purchaseStream ?? const Stream.empty();
 
   /// サブスクリプション状態変更を監視
@@ -1007,13 +1032,12 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       // Purchase Managerに委譲（ヘルパー関数を渡す）
-      return await _purchaseManager!.cancelSubscription(
-        getCurrentStatus,
-        (updatedStatus) async {
-          const statusKey = SubscriptionConstants.statusKey;
-          await _subscriptionBox?.put(statusKey, updatedStatus);
-        },
-      );
+      return await _purchaseManager!.cancelSubscription(getCurrentStatus, (
+        updatedStatus,
+      ) async {
+        const statusKey = SubscriptionConstants.statusKey;
+        await _subscriptionBox?.put(statusKey, updatedStatus);
+      });
     } catch (e) {
       return _handleError(e, 'cancelSubscription');
     }

@@ -168,10 +168,10 @@ class SubscriptionPurchaseManager {
       final prefix = level == LogLevel.error
           ? 'ERROR'
           : level == LogLevel.warning
-              ? 'WARNING'
-              : level == LogLevel.debug
-                  ? 'DEBUG'
-                  : 'INFO';
+          ? 'WARNING'
+          : level == LogLevel.debug
+          ? 'DEBUG'
+          : 'INFO';
 
       debugPrint('[$prefix] $logContext: $message');
       if (error != null) {
@@ -524,9 +524,7 @@ class SubscriptionPurchaseManager {
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('PurchaseManager is not initialized'),
-        );
+        return Failure(ServiceException('PurchaseManager is not initialized'));
       }
 
       if (_inAppPurchase == null) {
@@ -594,9 +592,7 @@ class SubscriptionPurchaseManager {
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('PurchaseManager is not initialized'),
-        );
+        return Failure(ServiceException('PurchaseManager is not initialized'));
       }
 
       if (_inAppPurchase == null) {
@@ -625,9 +621,7 @@ class SubscriptionPurchaseManager {
   ) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('PurchaseManager is not initialized'),
-        );
+        return Failure(ServiceException('PurchaseManager is not initialized'));
       }
 
       _log('Validating purchase: $transactionId', level: LogLevel.info);
@@ -642,8 +636,8 @@ class SubscriptionPurchaseManager {
       }
 
       final status = statusResult.value;
-      final isValid = status.transactionId == transactionId && 
-                     _isSubscriptionValid(status);
+      final isValid =
+          status.transactionId == transactionId && _isSubscriptionValid(status);
 
       _log('Purchase validation result: $isValid', level: LogLevel.info);
 
@@ -673,9 +667,7 @@ class SubscriptionPurchaseManager {
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('PurchaseManager is not initialized'),
-        );
+        return Failure(ServiceException('PurchaseManager is not initialized'));
       }
 
       if (_inAppPurchase == null) {
@@ -820,7 +812,7 @@ class SubscriptionPurchaseManager {
             );
 
             await Future.delayed(const Duration(milliseconds: 1000));
-            
+
             // モック成功のためのダミー状態作成
             final now = DateTime.now();
             DateTime expiryDate;
@@ -845,7 +837,7 @@ class SubscriptionPurchaseManager {
             );
 
             _onSubscriptionStatusUpdate?.call(mockStatus);
-            
+
             return Success(
               PurchaseResult(
                 status: ssi.PurchaseStatus.purchased,
@@ -880,9 +872,7 @@ class SubscriptionPurchaseManager {
   Future<Result<void>> changePlanClass(Plan newPlan) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('PurchaseManager is not initialized'),
-        );
+        return Failure(ServiceException('PurchaseManager is not initialized'));
       }
 
       // 直接実装（プラン変更は将来の実装予定）
@@ -904,9 +894,7 @@ class SubscriptionPurchaseManager {
   ) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('PurchaseManager is not initialized'),
-        );
+        return Failure(ServiceException('PurchaseManager is not initialized'));
       }
 
       _log('Canceling subscription...', level: LogLevel.info);

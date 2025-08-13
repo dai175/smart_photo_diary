@@ -35,7 +35,7 @@ import 'subscription_test_helpers.dart';
 /// void main() {
 ///   group('My Test Group', () {
 ///     UnifiedTestSetup.standardSetup();
-///     
+///
 ///     testWidgets('my test', (tester) async {
 ///       final setup = UnifiedTestSetup.createBasicPlanSetup();
 ///       // テスト実行
@@ -135,11 +135,11 @@ class UnifiedTestSetup {
       usageCount: usageCount,
       enableErrors: enableErrors,
     );
-    
+
     final subscriptionService = SubscriptionTestHelpers.setupBasicPlanService(
       usageCount: usageCount,
     );
-    
+
     return UnifiedTestContext._(
       plan: BasicPlan(),
       managerSetup: managerSetup,
@@ -159,12 +159,12 @@ class UnifiedTestSetup {
       usageCount: usageCount,
       enableErrors: enableErrors,
     );
-    
+
     final subscriptionService = SubscriptionTestHelpers.setupPremiumPlanService(
       isYearly: isYearly,
       usageCount: usageCount,
     );
-    
+
     return UnifiedTestContext._(
       plan: managerSetup.plan,
       managerSetup: managerSetup,
@@ -179,14 +179,14 @@ class UnifiedTestSetup {
     String? errorMessage,
   }) {
     final selectedPlan = plan ?? BasicPlan();
-    
+
     final managerSetup = CommonTestUtilities.setupAllManagers(
       plan: selectedPlan,
       enableErrors: true,
     );
-    
+
     final subscriptionService = TestServiceSetup.getSubscriptionService();
-    
+
     return UnifiedTestContext._(
       plan: selectedPlan,
       managerSetup: ManagerIntegratedSetup(
@@ -229,7 +229,10 @@ class UnifiedTestSetup {
       purchaseManager.setPurchaseFailure(true, errorMessage);
       statusManager.setGetCurrentStatusFailure(true, errorMessage);
       usageTracker.setCanUseAiGenerationFailure(true, errorMessage);
-      accessControlManager.setCanAccessPremiumFeaturesFailure(true, errorMessage);
+      accessControlManager.setCanAccessPremiumFeaturesFailure(
+        true,
+        errorMessage,
+      );
     }
 
     final managerSetup = ManagerIntegratedSetup(
@@ -267,7 +270,7 @@ class UnifiedTestSetup {
     TestWidgetsFlutterBinding.ensureInitialized();
     await _initializeMockPlatformChannels();
     registerMockFallbacks();
-    
+
     _isGloballyInitialized = true;
   }
 
@@ -278,7 +281,7 @@ class UnifiedTestSetup {
 
   static Future<void> _testCleanup() async {
     await _clearTestResources();
-    
+
     // アクティブなDisposerを実行
     for (final completer in _activeDisposers) {
       if (!completer.isCompleted) {
@@ -286,7 +289,7 @@ class UnifiedTestSetup {
       }
     }
     _activeDisposers.clear();
-    
+
     _currentServiceLocator?.clear();
     _currentServiceLocator = null;
   }
@@ -294,13 +297,13 @@ class UnifiedTestSetup {
   static Future<void> _globalCleanup() async {
     MockPlatformChannels.clearMocks();
     TestServiceSetup.clearAllMocks();
-    
+
     try {
       await Hive.deleteFromDisk();
     } catch (e) {
       // Ignore cleanup errors
     }
-    
+
     _isGloballyInitialized = false;
   }
 
@@ -339,9 +342,7 @@ class UnifiedTestSetup {
     serviceLocator.registerSingleton<StorageService>(
       TestServiceSetup.getStorageService(),
     );
-    serviceLocator.registerSingleton<LoggingService>(
-      MockLoggingService(),
-    );
+    serviceLocator.registerSingleton<LoggingService>(MockLoggingService());
   }
 
   static Future<void> _cleanupHive() async {
@@ -363,7 +364,7 @@ class UnifiedTestSetup {
 }
 
 /// 統合テストコンテキスト
-/// 
+///
 /// テストに必要な全てのMockオブジェクトとセットアップを含む
 class UnifiedTestContext {
   final Plan plan;
@@ -386,7 +387,8 @@ class UnifiedTestContext {
   // =================================================================
 
   /// Purchase Manager への参照
-  MockSubscriptionPurchaseManager get purchaseManager => managerSetup.purchaseManager;
+  MockSubscriptionPurchaseManager get purchaseManager =>
+      managerSetup.purchaseManager;
 
   /// Status Manager への参照
   MockSubscriptionStatusManager get statusManager => managerSetup.statusManager;
@@ -395,7 +397,8 @@ class UnifiedTestContext {
   MockSubscriptionUsageTracker get usageTracker => managerSetup.usageTracker;
 
   /// Access Control Manager への参照
-  MockSubscriptionAccessControlManager get accessControlManager => managerSetup.accessControlManager;
+  MockSubscriptionAccessControlManager get accessControlManager =>
+      managerSetup.accessControlManager;
 
   /// 現在のサブスクリプション状態への参照
   SubscriptionStatus get currentStatus => managerSetup.status;
@@ -407,7 +410,7 @@ class UnifiedTestContext {
   /// プランを変更
   void changePlan(Plan newPlan) {
     statusManager.setCurrentPlan(newPlan);
-    
+
     if (newPlan.isPremium) {
       accessControlManager.createPremiumFullAccessState();
     } else {
@@ -442,7 +445,7 @@ class UnifiedTestContext {
   /// リソースを破棄
   Future<void> dispose() async {
     await managerSetup.dispose();
-    
+
     if (!_disposer.isCompleted) {
       _disposer.complete();
     }
@@ -465,7 +468,10 @@ mixin UnifiedTestMixin {
   }
 
   /// テストコンテキストを初期化（Premium プラン）
-  void initializePremiumPlanContext({bool isYearly = true, int usageCount = 0}) {
+  void initializePremiumPlanContext({
+    bool isYearly = true,
+    int usageCount = 0,
+  }) {
     testContext = UnifiedTestSetup.createPremiumPlanSetup(
       isYearly: isYearly,
       usageCount: usageCount,

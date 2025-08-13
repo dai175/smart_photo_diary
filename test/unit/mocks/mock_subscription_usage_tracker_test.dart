@@ -56,7 +56,7 @@ void main() {
           initialStatus: customStatus,
           initialUsage: 15,
         );
-        
+
         final result = await mockTrackerWithCustomState.getMonthlyUsage();
 
         // Assert
@@ -94,7 +94,10 @@ void main() {
 
       test('月次使用量取得失敗を設定できる', () async {
         // Arrange
-        mockTracker.setGetMonthlyUsageFailure(true, 'Test getMonthlyUsage error');
+        mockTracker.setGetMonthlyUsageFailure(
+          true,
+          'Test getMonthlyUsage error',
+        );
 
         // Act
         final result = await mockTracker.getMonthlyUsage();
@@ -121,7 +124,9 @@ void main() {
         mockTracker.setMonthlyUsage(3);
 
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -134,7 +139,9 @@ void main() {
         mockTracker.setMonthlyUsage(25);
 
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isValidPremiumSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -146,7 +153,9 @@ void main() {
         mockTracker.createLimitReachedState();
 
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -158,7 +167,9 @@ void main() {
         mockTracker.setMonthlyUsage(15); // BasicPlan制限10を超過
 
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -167,7 +178,9 @@ void main() {
 
       test('無効なサブスクリプションでは0が返される', () async {
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isInvalidSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -176,14 +189,22 @@ void main() {
 
       test('残り回数取得失敗を設定できる', () async {
         // Arrange
-        mockTracker.setGetRemainingGenerationsFailure(true, 'Test getRemainingGenerations error');
+        mockTracker.setGetRemainingGenerationsFailure(
+          true,
+          'Test getRemainingGenerations error',
+        );
 
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Test getRemainingGenerations error'));
+        expect(
+          result.error.message,
+          contains('Test getRemainingGenerations error'),
+        );
       });
     });
 
@@ -193,7 +214,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -206,7 +230,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -219,7 +246,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -233,7 +263,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidPremiumSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -245,7 +278,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isInvalidSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -254,11 +290,17 @@ void main() {
 
       test('使用可否判定失敗を設定できる', () async {
         // Arrange
-        mockTracker.setCanUseAiGenerationFailure(true, 'Test canUseAiGeneration error');
+        mockTracker.setCanUseAiGenerationFailure(
+          true,
+          'Test canUseAiGeneration error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -272,7 +314,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final result = await mockTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -288,7 +333,10 @@ void main() {
 
         // Act
         for (int i = 0; i < 3; i++) {
-          final result = await mockTracker.incrementAiUsage(status, _isValidBasicSubscription);
+          final result = await mockTracker.incrementAiUsage(
+            status,
+            _isValidBasicSubscription,
+          );
           expect(result.isSuccess, true);
         }
 
@@ -303,11 +351,17 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final result = await mockTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Monthly AI generation limit reached'));
+        expect(
+          result.error.message,
+          contains('Monthly AI generation limit reached'),
+        );
       });
 
       test('無効なサブスクリプションではインクリメント失敗', () async {
@@ -315,7 +369,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.incrementAiUsage(status, _isInvalidSubscription);
+        final result = await mockTracker.incrementAiUsage(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -324,11 +381,17 @@ void main() {
 
       test('インクリメント失敗を設定できる', () async {
         // Arrange
-        mockTracker.setIncrementAiUsageFailure(true, 'Test incrementAiUsage error');
+        mockTracker.setIncrementAiUsageFailure(
+          true,
+          'Test incrementAiUsage error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final result = await mockTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -357,14 +420,20 @@ void main() {
         final status = _createBasicStatus();
 
         // リセット前は使用不可
-        final beforeReset = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final beforeReset = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(beforeReset.value, false);
 
         // Act
         await mockTracker.resetUsage();
 
         // Assert
-        final afterReset = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final afterReset = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(afterReset.value, true);
       });
 
@@ -416,7 +485,10 @@ void main() {
 
       test('次回リセット日取得失敗を設定できる', () async {
         // Arrange
-        mockTracker.setGetNextResetDateFailure(true, 'Test getNextResetDate error');
+        mockTracker.setGetNextResetDateFailure(
+          true,
+          'Test getNextResetDate error',
+        );
 
         // Act
         final result = await mockTracker.getNextResetDate();
@@ -452,7 +524,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, true);
-        
+
         // リセット後の使用量を確認
         final afterReset = await mockTracker.getMonthlyUsage();
         expect(afterReset.value, equals(0)); // 月次リセットによって0になる
@@ -460,14 +532,20 @@ void main() {
 
       test('月次リセット失敗を設定できる', () async {
         // Arrange
-        mockTracker.setResetMonthlyUsageIfNeededFailure(true, 'Test resetMonthlyUsageIfNeeded error');
+        mockTracker.setResetMonthlyUsageIfNeededFailure(
+          true,
+          'Test resetMonthlyUsageIfNeeded error',
+        );
 
         // Act
         final result = await mockTracker.resetMonthlyUsageIfNeeded();
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Test resetMonthlyUsageIfNeeded error'));
+        expect(
+          result.error.message,
+          contains('Test resetMonthlyUsageIfNeeded error'),
+        );
       });
     });
 
@@ -503,7 +581,10 @@ void main() {
 
         // Act
         mockTracker.createLimitReachedState();
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -513,10 +594,10 @@ void main() {
       test('月次リセット必要状態を作成できる', () async {
         // Arrange - 初期使用量を設定
         mockTracker.setMonthlyUsage(5);
-        
+
         // Act
         mockTracker.createMonthlyResetNeededState();
-        
+
         // 初回取得でリセットが発動し、使用量が0になることを確認
         final result = await mockTracker.getMonthlyUsage();
 
@@ -530,7 +611,10 @@ void main() {
         mockTracker.createPremiumState();
         mockTracker.setMonthlyUsage(10);
         final status = _createPremiumMonthlyStatus();
-        final result = await mockTracker.canUseAiGeneration(status, _isValidPremiumSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -560,7 +644,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -574,7 +661,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidPremiumSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -587,7 +677,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -596,7 +689,9 @@ void main() {
 
       test('使用量0の状態で残り回数を取得', () async {
         // Act
-        final result = await mockTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await mockTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -614,13 +709,20 @@ void main() {
         final getMonthlyUsage = await mockTracker.getMonthlyUsage();
         expect(getMonthlyUsage.isFailure, true);
 
-        final getRemainingGenerations = await mockTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final getRemainingGenerations = await mockTracker
+            .getRemainingGenerations(_isValidBasicSubscription);
         expect(getRemainingGenerations.isFailure, true);
 
-        final canUseAiGeneration = await mockTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final canUseAiGeneration = await mockTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(canUseAiGeneration.isFailure, true);
 
-        final incrementAiUsage = await mockTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final incrementAiUsage = await mockTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(incrementAiUsage.isFailure, true);
 
         final resetUsage = await mockTracker.resetUsage();
@@ -629,7 +731,8 @@ void main() {
         final getNextResetDate = await mockTracker.getNextResetDate();
         expect(getNextResetDate.isFailure, true);
 
-        final resetMonthlyUsageIfNeeded = await mockTracker.resetMonthlyUsageIfNeeded();
+        final resetMonthlyUsageIfNeeded = await mockTracker
+            .resetMonthlyUsageIfNeeded();
         expect(resetMonthlyUsageIfNeeded.isFailure, true);
       });
     });
@@ -687,11 +790,12 @@ bool _isValidBasicSubscription(SubscriptionStatus status) {
 
 /// Premiumプラン有効性チェック関数
 bool _isValidPremiumSubscription(SubscriptionStatus status) {
-  final isPremium = status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
-                    status.planId == SubscriptionConstants.premiumYearlyPlanId;
+  final isPremium =
+      status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
+      status.planId == SubscriptionConstants.premiumYearlyPlanId;
   final isActive = status.isActive;
   final isNotExpired = status.expiryDate?.isAfter(DateTime.now()) ?? false;
-  
+
   return isPremium && isActive && isNotExpired;
 }
 

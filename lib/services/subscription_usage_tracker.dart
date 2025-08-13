@@ -33,7 +33,7 @@ class SubscriptionUsageTracker {
 
   // Hiveボックス（SubscriptionServiceから注入）
   final Box<SubscriptionStatus> _subscriptionBox;
-  
+
   // ロギングサービス（SubscriptionServiceから注入）
   final LoggingService _loggingService;
 
@@ -45,10 +45,7 @@ class SubscriptionUsageTracker {
   // =================================================================
 
   /// コンストラクタ（依存性注入）
-  SubscriptionUsageTracker(
-    this._subscriptionBox,
-    this._loggingService,
-  ) {
+  SubscriptionUsageTracker(this._subscriptionBox, this._loggingService) {
     _isInitialized = true;
     _log('SubscriptionUsageTracker initialized', level: LogLevel.debug);
   }
@@ -168,9 +165,7 @@ class SubscriptionUsageTracker {
   Future<Result<int>> getMonthlyUsage() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
       _log('Getting monthly usage...', level: LogLevel.debug);
@@ -181,7 +176,7 @@ class SubscriptionUsageTracker {
       }
 
       final status = statusResult.value;
-      
+
       // 月次リセットをチェック（必要に応じて）
       await _resetMonthlyUsageIfNeeded(status);
 
@@ -211,9 +206,7 @@ class SubscriptionUsageTracker {
   Future<Result<void>> resetUsage() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
       _log('Manually resetting usage...', level: LogLevel.info);
@@ -258,9 +251,7 @@ class SubscriptionUsageTracker {
   ) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
       _log('Getting remaining generations...', level: LogLevel.debug);
@@ -318,9 +309,7 @@ class SubscriptionUsageTracker {
   Future<Result<DateTime>> getNextResetDate() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
       _log('Getting next reset date...', level: LogLevel.debug);
@@ -360,12 +349,13 @@ class SubscriptionUsageTracker {
   ) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
-      _log('Checking AI generation usage availability...', level: LogLevel.debug);
+      _log(
+        'Checking AI generation usage availability...',
+        level: LogLevel.debug,
+      );
 
       // サブスクリプションが有効でない場合は使用不可
       if (!isValidSubscription(status)) {
@@ -420,9 +410,7 @@ class SubscriptionUsageTracker {
   ) async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
       _log('Incrementing AI usage...', level: LogLevel.info);
@@ -495,9 +483,7 @@ class SubscriptionUsageTracker {
   Future<Result<void>> resetMonthlyUsageIfNeeded() async {
     try {
       if (!_isInitialized) {
-        return Failure(
-          ServiceException('UsageTracker is not initialized'),
-        );
+        return Failure(ServiceException('UsageTracker is not initialized'));
       }
 
       final statusResult = await _getCurrentStatus();

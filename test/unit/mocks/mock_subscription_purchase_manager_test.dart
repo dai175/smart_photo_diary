@@ -22,12 +22,36 @@ void main() {
     setUp(() {
       mockManager = MockSubscriptionPurchaseManager();
       mockLoggingService = MockLoggingService();
-      
+
       // LoggingServiceの基本セットアップ
-      when(() => mockLoggingService.debug(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.info(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.warning(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.error(any(), context: any(named: 'context'), error: any(named: 'error'))).thenReturn(null);
+      when(
+        () => mockLoggingService.debug(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.info(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.warning(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.error(
+          any(),
+          context: any(named: 'context'),
+          error: any(named: 'error'),
+        ),
+      ).thenReturn(null);
     });
 
     tearDown(() async {
@@ -71,7 +95,10 @@ void main() {
         }
 
         // Act & Assert
-        expect(() => mockManager.setSubscriptionStatusUpdateCallback(callback), returnsNormally);
+        expect(
+          () => mockManager.setSubscriptionStatusUpdateCallback(callback),
+          returnsNormally,
+        );
       });
     });
 
@@ -96,7 +123,10 @@ void main() {
         expect(result.isSuccess, true);
         expect(result.value, isA<List<PurchaseProduct>>());
         expect(result.value.length, equals(2)); // Monthly + Yearly
-        expect(result.value.first.id, equals('smart_photo_diary_premium_monthly'));
+        expect(
+          result.value.first.id,
+          equals('smart_photo_diary_premium_monthly'),
+        );
       });
 
       test('商品取得失敗を設定できる', () async {
@@ -161,7 +191,10 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Basic plan cannot be purchased'));
+        expect(
+          result.error.message,
+          contains('Basic plan cannot be purchased'),
+        );
       });
 
       test('購入処理中は二重購入を拒否する', () async {
@@ -175,7 +208,10 @@ void main() {
 
         // Assert
         expect(result.isFailure, true);
-        expect(result.error.message, contains('Another purchase is already in progress'));
+        expect(
+          result.error.message,
+          contains('Another purchase is already in progress'),
+        );
       });
 
       test('正常な購入処理が成功する', () async {
@@ -183,9 +219,11 @@ void main() {
         await mockManager.initialize(mockLoggingService);
         final plan = PremiumMonthlyPlan();
         final List<PurchaseResult> streamResults = [];
-        
+
         // ストリームを監視
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         final result = await mockManager.purchasePlanClass(plan);
@@ -196,7 +234,7 @@ void main() {
         expect(result.value.productId, equals(plan.productId));
         expect(result.value.transactionId, isNotNull);
         expect(result.value.purchaseDate, isNotNull);
-        
+
         // ストリーム通知も確認
         await Future.delayed(const Duration(milliseconds: 100));
         expect(streamResults.length, equals(1));
@@ -211,8 +249,10 @@ void main() {
         mockManager.setPurchaseFailure(true, 'Test purchase error');
         final plan = PremiumYearlyPlan();
         final List<PurchaseResult> streamResults = [];
-        
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         final result = await mockManager.purchasePlanClass(plan);
@@ -221,7 +261,7 @@ void main() {
         expect(result.isSuccess, true); // 購入失敗もPurchaseResultで返される
         expect(result.value.status, equals(PurchaseStatus.error));
         expect(result.value.errorMessage, contains('Test purchase error'));
-        
+
         // ストリーム通知も確認
         await Future.delayed(const Duration(milliseconds: 100));
         expect(streamResults.length, equals(1));
@@ -279,8 +319,10 @@ void main() {
         ];
         mockManager.setPurchaseHistory(mockHistory);
         final List<PurchaseResult> streamResults = [];
-        
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         final result = await mockManager.restorePurchases();
@@ -288,7 +330,7 @@ void main() {
         // Assert
         expect(result.isSuccess, true);
         expect(result.value.length, equals(1));
-        
+
         // ストリーム通知で復元が通知される
         await Future.delayed(const Duration(milliseconds: 300));
         expect(streamResults.length, equals(1));
@@ -314,17 +356,19 @@ void main() {
         // Act
         final result = await mockManager.validatePurchase(
           'test_transaction',
-          () => Success(SubscriptionStatus(
-            planId: 'basic',
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: null,
-            autoRenewal: false,
-            monthlyUsageCount: 0,
-            lastResetDate: DateTime.now(),
-            transactionId: '',
-            lastPurchaseDate: null,
-          )),
+          () => Success(
+            SubscriptionStatus(
+              planId: 'basic',
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: null,
+              autoRenewal: false,
+              monthlyUsageCount: 0,
+              lastResetDate: DateTime.now(),
+              transactionId: '',
+              lastPurchaseDate: null,
+            ),
+          ),
         );
 
         // Assert
@@ -336,23 +380,28 @@ void main() {
         // Arrange
         await mockManager.initialize(mockLoggingService);
         const transactionId = 'test_transaction_123';
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: 'premium_monthly',
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 30)),
-            autoRenewal: true,
-            monthlyUsageCount: 5,
-            lastResetDate: DateTime.now(),
-            transactionId: transactionId,
-            lastPurchaseDate: DateTime.now(),
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: 'premium_monthly',
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: DateTime.now().add(const Duration(days: 30)),
+              autoRenewal: true,
+              monthlyUsageCount: 5,
+              lastResetDate: DateTime.now(),
+              transactionId: transactionId,
+              lastPurchaseDate: DateTime.now(),
+            ),
+          );
         }
 
         // Act
-        final result = await mockManager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await mockManager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -363,23 +412,28 @@ void main() {
         // Arrange
         await mockManager.initialize(mockLoggingService);
         const transactionId = 'invalid_transaction';
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: 'premium_monthly',
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 30)),
-            autoRenewal: true,
-            monthlyUsageCount: 5,
-            lastResetDate: DateTime.now(),
-            transactionId: 'different_transaction',
-            lastPurchaseDate: DateTime.now(),
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: 'premium_monthly',
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: DateTime.now().add(const Duration(days: 30)),
+              autoRenewal: true,
+              monthlyUsageCount: 5,
+              lastResetDate: DateTime.now(),
+              transactionId: 'different_transaction',
+              lastPurchaseDate: DateTime.now(),
+            ),
+          );
         }
 
         // Act
-        final result = await mockManager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await mockManager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -390,23 +444,28 @@ void main() {
         // Arrange
         await mockManager.initialize(mockLoggingService);
         mockManager.setValidationFailure(true, 'Test validation error');
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: 'basic',
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: null,
-            autoRenewal: false,
-            monthlyUsageCount: 0,
-            lastResetDate: DateTime.now(),
-            transactionId: '',
-            lastPurchaseDate: null,
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: 'basic',
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: null,
+              autoRenewal: false,
+              monthlyUsageCount: 0,
+              lastResetDate: DateTime.now(),
+              transactionId: '',
+              lastPurchaseDate: null,
+            ),
+          );
         }
 
         // Act
-        final result = await mockManager.validatePurchase('test', getCurrentStatus);
+        final result = await mockManager.validatePurchase(
+          'test',
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -418,17 +477,19 @@ void main() {
       test('初期化前はキャンセルエラーを返す', () async {
         // Act
         final result = await mockManager.cancelSubscription(
-          () => Success(SubscriptionStatus(
-            planId: 'basic',
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: null,
-            autoRenewal: false,
-            monthlyUsageCount: 0,
-            lastResetDate: DateTime.now(),
-            transactionId: '',
-            lastPurchaseDate: null,
-          )),
+          () => Success(
+            SubscriptionStatus(
+              planId: 'basic',
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: null,
+              autoRenewal: false,
+              monthlyUsageCount: 0,
+              lastResetDate: DateTime.now(),
+              transactionId: '',
+              lastPurchaseDate: null,
+            ),
+          ),
           (status) {},
         );
 
@@ -441,27 +502,32 @@ void main() {
         // Arrange
         await mockManager.initialize(mockLoggingService);
         SubscriptionStatus? updatedStatus;
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: 'premium_monthly',
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 30)),
-            autoRenewal: true,
-            monthlyUsageCount: 5,
-            lastResetDate: DateTime.now(),
-            transactionId: 'test_transaction',
-            lastPurchaseDate: DateTime.now(),
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: 'premium_monthly',
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: DateTime.now().add(const Duration(days: 30)),
+              autoRenewal: true,
+              monthlyUsageCount: 5,
+              lastResetDate: DateTime.now(),
+              transactionId: 'test_transaction',
+              lastPurchaseDate: DateTime.now(),
+            ),
+          );
         }
-        
+
         void updateStatus(SubscriptionStatus status) {
           updatedStatus = status;
         }
 
         // Act
-        final result = await mockManager.cancelSubscription(getCurrentStatus, updateStatus);
+        final result = await mockManager.cancelSubscription(
+          getCurrentStatus,
+          updateStatus,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -478,8 +544,10 @@ void main() {
         const productId = 'test_product';
         final plan = PremiumMonthlyPlan();
         final List<PurchaseResult> streamResults = [];
-        
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         mockManager.simulatePurchaseComplete(productId, plan);
@@ -499,8 +567,10 @@ void main() {
         mockManager.setPurchasing(true);
         const productId = 'test_product';
         final List<PurchaseResult> streamResults = [];
-        
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         mockManager.simulatePurchaseCancel(productId);
@@ -521,8 +591,10 @@ void main() {
         const productId = 'test_product';
         const errorMessage = 'Test error';
         final List<PurchaseResult> streamResults = [];
-        
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         mockManager.simulatePurchaseError(productId, errorMessage);
@@ -571,7 +643,7 @@ void main() {
         // Assert
         expect(mockManager.isInitialized, false);
         expect(mockManager.isPurchasing, false);
-        
+
         // リセット後は正常に初期化できる
         final result = await mockManager.initialize(mockLoggingService);
         expect(result.isSuccess, true);
@@ -595,8 +667,10 @@ void main() {
           productId: 'test_product',
         );
         final List<PurchaseResult> streamResults = [];
-        
-        final subscription = mockManager.purchaseStream.listen(streamResults.add);
+
+        final subscription = mockManager.purchaseStream.listen(
+          streamResults.add,
+        );
 
         // Act
         mockManager.addToPurchaseStream(testResult);

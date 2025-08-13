@@ -33,8 +33,12 @@ void main() {
         final basicStatus = _createBasicStatus();
 
         // Act
-        final writingPromptsResult = await mockManager.canAccessWritingPrompts(basicStatus, _isValidBasicSubscription);
-        final premiumFeaturesResult = await mockManager.canAccessPremiumFeatures(basicStatus, _isValidBasicSubscription);
+        final writingPromptsResult = await mockManager.canAccessWritingPrompts(
+          basicStatus,
+          _isValidBasicSubscription,
+        );
+        final premiumFeaturesResult = await mockManager
+            .canAccessPremiumFeatures(basicStatus, _isValidBasicSubscription);
 
         // Assert
         expect(writingPromptsResult.isSuccess, true);
@@ -54,7 +58,10 @@ void main() {
         // Assert
         expect(mockManager.isInitialized, true);
         final status = _createBasicStatus();
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(result.isSuccess, true);
       });
     });
@@ -66,7 +73,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -78,7 +88,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -90,7 +103,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -102,7 +118,10 @@ void main() {
         final status = _createPremiumYearlyStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -114,7 +133,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isInvalidSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -123,11 +145,17 @@ void main() {
 
       test('プレミアム機能アクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessPremiumFeaturesFailure(true, 'Test premium features error');
+        mockManager.setCanAccessPremiumFeaturesFailure(
+          true,
+          'Test premium features error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -141,7 +169,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessWritingPrompts(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessWritingPrompts(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -153,7 +184,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessWritingPrompts(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessWritingPrompts(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -175,7 +209,10 @@ void main() {
         );
 
         // Act
-        final result = await mockManager.canAccessWritingPrompts(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessWritingPrompts(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -184,11 +221,17 @@ void main() {
 
       test('ライティングプロンプトアクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessWritingPromptsFailure(true, 'Test writing prompts error');
+        mockManager.setCanAccessWritingPromptsFailure(
+          true,
+          'Test writing prompts error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessWritingPrompts(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessWritingPrompts(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -202,7 +245,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedFilters(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessAdvancedFilters(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -214,7 +260,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedFilters(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessAdvancedFilters(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -226,7 +275,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedFilters(status, _isInvalidSubscription);
+        final result = await mockManager.canAccessAdvancedFilters(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -235,11 +287,17 @@ void main() {
 
       test('高度なフィルタアクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessAdvancedFiltersFailure(true, 'Test advanced filters error');
+        mockManager.setCanAccessAdvancedFiltersFailure(
+          true,
+          'Test advanced filters error',
+        );
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedFilters(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessAdvancedFilters(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -253,7 +311,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedAnalytics(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessAdvancedAnalytics(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -265,7 +326,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedAnalytics(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessAdvancedAnalytics(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -274,11 +338,17 @@ void main() {
 
       test('高度な分析アクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessAdvancedAnalyticsFailure(true, 'Test advanced analytics error');
+        mockManager.setCanAccessAdvancedAnalyticsFailure(
+          true,
+          'Test advanced analytics error',
+        );
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessAdvancedAnalytics(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessAdvancedAnalytics(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -292,7 +362,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessDataExport(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessDataExport(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -304,7 +377,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessDataExport(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessDataExport(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -316,7 +392,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessDataExport(status, _isInvalidSubscription);
+        final result = await mockManager.canAccessDataExport(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -325,11 +404,17 @@ void main() {
 
       test('データエクスポートアクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessDataExportFailure(true, 'Test data export error');
+        mockManager.setCanAccessDataExportFailure(
+          true,
+          'Test data export error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessDataExport(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessDataExport(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -343,7 +428,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessStatsDashboard(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessStatsDashboard(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -355,7 +443,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessStatsDashboard(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessStatsDashboard(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -364,11 +455,17 @@ void main() {
 
       test('統計ダッシュボードアクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessStatsDashboardFailure(true, 'Test stats dashboard error');
+        mockManager.setCanAccessStatsDashboardFailure(
+          true,
+          'Test stats dashboard error',
+        );
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessStatsDashboard(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessStatsDashboard(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -382,7 +479,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessPrioritySupport(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessPrioritySupport(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -394,7 +494,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessPrioritySupport(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessPrioritySupport(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -403,11 +506,17 @@ void main() {
 
       test('優先サポートアクセス失敗を設定できる', () async {
         // Arrange
-        mockManager.setCanAccessPrioritySupportFailure(true, 'Test priority support error');
+        mockManager.setCanAccessPrioritySupportFailure(
+          true,
+          'Test priority support error',
+        );
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.canAccessPrioritySupport(status, _isValidPremiumSubscription);
+        final result = await mockManager.canAccessPrioritySupport(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -421,7 +530,10 @@ void main() {
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.getFeatureAccess(status, _isValidBasicSubscription);
+        final result = await mockManager.getFeatureAccess(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -440,7 +552,10 @@ void main() {
         final status = _createPremiumMonthlyStatus();
 
         // Act
-        final result = await mockManager.getFeatureAccess(status, _isValidPremiumSubscription);
+        final result = await mockManager.getFeatureAccess(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -456,11 +571,17 @@ void main() {
 
       test('機能アクセス取得失敗を設定できる', () async {
         // Arrange
-        mockManager.setGetFeatureAccessFailure(true, 'Test getFeatureAccess error');
+        mockManager.setGetFeatureAccessFailure(
+          true,
+          'Test getFeatureAccess error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.getFeatureAccess(status, _isValidBasicSubscription);
+        final result = await mockManager.getFeatureAccess(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -469,11 +590,17 @@ void main() {
 
       test('個別機能でエラーが発生した場合、統合取得もエラーになる', () async {
         // Arrange
-        mockManager.setCanAccessPremiumFeaturesFailure(true, 'Individual feature error');
+        mockManager.setCanAccessPremiumFeaturesFailure(
+          true,
+          'Individual feature error',
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.getFeatureAccess(status, _isValidBasicSubscription);
+        final result = await mockManager.getFeatureAccess(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -484,11 +611,18 @@ void main() {
     group('テスト用ヘルパーメソッド', () {
       test('特定プランの機能アクセスを設定できる', () async {
         // Arrange
-        mockManager.setFeatureAccessForPlan(SubscriptionConstants.basicPlanId, 'premiumFeatures', true);
+        mockManager.setFeatureAccessForPlan(
+          SubscriptionConstants.basicPlanId,
+          'premiumFeatures',
+          true,
+        );
         final status = _createBasicStatus();
 
         // Act
-        final result = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
+        final result = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -499,8 +633,14 @@ void main() {
         // Act
         mockManager.createBasicRestrictedState();
         final status = _createBasicStatus();
-        final premiumResult = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
-        final promptsResult = await mockManager.canAccessWritingPrompts(status, _isValidBasicSubscription);
+        final premiumResult = await mockManager.canAccessPremiumFeatures(
+          status,
+          _isValidBasicSubscription,
+        );
+        final promptsResult = await mockManager.canAccessWritingPrompts(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(premiumResult.value, false);
@@ -511,7 +651,10 @@ void main() {
         // Act
         mockManager.createPremiumFullAccessState();
         final status = _createPremiumMonthlyStatus();
-        final result = await mockManager.getFeatureAccess(status, _isValidPremiumSubscription);
+        final result = await mockManager.getFeatureAccess(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -525,7 +668,10 @@ void main() {
         // Act
         mockManager.createAllAccessDeniedState();
         final status = _createBasicStatus();
-        final result = await mockManager.getFeatureAccess(status, _isValidBasicSubscription);
+        final result = await mockManager.getFeatureAccess(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, true);
@@ -541,9 +687,20 @@ void main() {
 
         // Assert
         expect(accessSettings.isNotEmpty, true);
-        expect(accessSettings.containsKey(SubscriptionConstants.basicPlanId), true);
-        expect(accessSettings.containsKey(SubscriptionConstants.premiumMonthlyPlanId), true);
-        expect(accessSettings.containsKey(SubscriptionConstants.premiumYearlyPlanId), true);
+        expect(
+          accessSettings.containsKey(SubscriptionConstants.basicPlanId),
+          true,
+        );
+        expect(
+          accessSettings.containsKey(
+            SubscriptionConstants.premiumMonthlyPlanId,
+          ),
+          true,
+        );
+        expect(
+          accessSettings.containsKey(SubscriptionConstants.premiumYearlyPlanId),
+          true,
+        );
       });
     });
 
@@ -554,28 +711,40 @@ void main() {
         final status = _createBasicStatus();
 
         // Act & Assert
-        final canAccessPremiumFeatures = await mockManager.canAccessPremiumFeatures(status, _isValidBasicSubscription);
+        final canAccessPremiumFeatures = await mockManager
+            .canAccessPremiumFeatures(status, _isValidBasicSubscription);
         expect(canAccessPremiumFeatures.isFailure, true);
 
-        final canAccessWritingPrompts = await mockManager.canAccessWritingPrompts(status, _isValidBasicSubscription);
+        final canAccessWritingPrompts = await mockManager
+            .canAccessWritingPrompts(status, _isValidBasicSubscription);
         expect(canAccessWritingPrompts.isFailure, true);
 
-        final canAccessAdvancedFilters = await mockManager.canAccessAdvancedFilters(status, _isValidBasicSubscription);
+        final canAccessAdvancedFilters = await mockManager
+            .canAccessAdvancedFilters(status, _isValidBasicSubscription);
         expect(canAccessAdvancedFilters.isFailure, true);
 
-        final canAccessAdvancedAnalytics = await mockManager.canAccessAdvancedAnalytics(status, _isValidBasicSubscription);
+        final canAccessAdvancedAnalytics = await mockManager
+            .canAccessAdvancedAnalytics(status, _isValidBasicSubscription);
         expect(canAccessAdvancedAnalytics.isFailure, true);
 
-        final canAccessDataExport = await mockManager.canAccessDataExport(status, _isValidBasicSubscription);
+        final canAccessDataExport = await mockManager.canAccessDataExport(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(canAccessDataExport.isFailure, true);
 
-        final canAccessStatsDashboard = await mockManager.canAccessStatsDashboard(status, _isValidBasicSubscription);
+        final canAccessStatsDashboard = await mockManager
+            .canAccessStatsDashboard(status, _isValidBasicSubscription);
         expect(canAccessStatsDashboard.isFailure, true);
 
-        final canAccessPrioritySupport = await mockManager.canAccessPrioritySupport(status, _isValidBasicSubscription);
+        final canAccessPrioritySupport = await mockManager
+            .canAccessPrioritySupport(status, _isValidBasicSubscription);
         expect(canAccessPrioritySupport.isFailure, true);
 
-        final getFeatureAccess = await mockManager.getFeatureAccess(status, _isValidBasicSubscription);
+        final getFeatureAccess = await mockManager.getFeatureAccess(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(getFeatureAccess.isFailure, true);
       });
     });
@@ -649,11 +818,12 @@ bool _isValidBasicSubscription(SubscriptionStatus status) {
 
 /// Premiumプラン有効性チェック関数
 bool _isValidPremiumSubscription(SubscriptionStatus status) {
-  final isPremium = status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
-                    status.planId == SubscriptionConstants.premiumYearlyPlanId;
+  final isPremium =
+      status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
+      status.planId == SubscriptionConstants.premiumYearlyPlanId;
   final isActive = status.isActive;
   final isNotExpired = status.expiryDate?.isAfter(DateTime.now()) ?? false;
-  
+
   return isPremium && isActive && isNotExpired;
 }
 

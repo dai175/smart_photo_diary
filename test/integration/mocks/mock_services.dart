@@ -73,7 +73,7 @@ class TestServiceSetup {
   static MockSubscriptionServiceInterface? _mockSubscriptionService;
   static MockSettingsService? _mockSettingsService;
   static MockStorageService? _mockStorageService;
-  
+
   // 新しいマネージャーモック
   static MockSubscriptionPurchaseManager? _mockPurchaseManager;
   static MockSubscriptionStatusManager? _mockStatusManager;
@@ -138,7 +138,7 @@ class TestServiceSetup {
     _mockSubscriptionService = null;
     _mockSettingsService = null;
     _mockStorageService = null;
-    
+
     // 新しいマネージャーモック
     _mockPurchaseManager = null;
     _mockStatusManager = null;
@@ -155,7 +155,7 @@ class TestServiceSetup {
     getSubscriptionService();
     getSettingsService();
     getStorageService();
-    
+
     // 新しいマネージャーを初期化
     getPurchaseManager();
     getStatusManager();

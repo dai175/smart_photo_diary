@@ -8,7 +8,7 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import '../helpers/hive_test_helpers.dart';
 
 /// SubscriptionUsageTracker単体テスト
-/// 
+///
 /// サブスクリプション使用量追跡機能の詳細テスト：
 /// - 月次使用量取得と管理
 /// - 残りAI生成回数の計算
@@ -34,11 +34,13 @@ void main() {
       await HiveTestHelpers.clearSubscriptionBox();
 
       // モックHiveボックス取得
-      mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>('subscription');
-      
+      mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>(
+        'subscription',
+      );
+
       // LoggingServiceインスタンスを作成
       mockLoggingService = await LoggingService.getInstance();
-      
+
       // UsageTrackerインスタンス作成
       usageTracker = SubscriptionUsageTracker(
         mockSubscriptionBox,
@@ -105,14 +107,19 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('UsageTracker is not initialized'));
+        expect(
+          result.error.message,
+          contains('UsageTracker is not initialized'),
+        );
       });
     });
 
     group('getRemainingGenerations()', () {
       test('Basicプラン初期状態で正しい残り回数が返される', () async {
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -124,7 +131,9 @@ void main() {
         await _createStatusWithUsage(mockSubscriptionBox, 3);
 
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -136,7 +145,9 @@ void main() {
         await _createPremiumMonthlyStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isValidPremiumSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -148,7 +159,9 @@ void main() {
         await _createStatusWithUsage(mockSubscriptionBox, 10); // Basicプラン制限
 
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -160,7 +173,9 @@ void main() {
         await _createStatusWithUsage(mockSubscriptionBox, 15); // Basicプラン制限超過
 
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -169,7 +184,9 @@ void main() {
 
       test('無効なサブスクリプションの場合、0が返される', () async {
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isInvalidSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -181,7 +198,9 @@ void main() {
         usageTracker.dispose();
 
         // Act
-        final result = await usageTracker.getRemainingGenerations(_isValidBasicSubscription);
+        final result = await usageTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, isTrue);
@@ -195,7 +214,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -208,7 +230,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -221,7 +246,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -234,7 +262,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidPremiumSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -246,7 +277,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isInvalidSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -259,7 +293,10 @@ void main() {
         usageTracker.dispose();
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, isTrue);
@@ -273,7 +310,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final result = await usageTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -289,7 +329,10 @@ void main() {
 
         // Act
         for (int i = 0; i < 3; i++) {
-          final result = await usageTracker.incrementAiUsage(status, _isValidBasicSubscription);
+          final result = await usageTracker.incrementAiUsage(
+            status,
+            _isValidBasicSubscription,
+          );
           expect(result.isSuccess, isTrue);
         }
 
@@ -304,12 +347,18 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final result = await usageTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('Monthly AI generation limit reached'));
+        expect(
+          result.error.message,
+          contains('Monthly AI generation limit reached'),
+        );
       });
 
       test('無効なサブスクリプションではインクリメント失敗', () async {
@@ -317,7 +366,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.incrementAiUsage(status, _isInvalidSubscription);
+        final result = await usageTracker.incrementAiUsage(
+          status,
+          _isInvalidSubscription,
+        );
 
         // Assert
         expect(result.isFailure, isTrue);
@@ -331,7 +383,10 @@ void main() {
         usageTracker.dispose();
 
         // Act
-        final result = await usageTracker.incrementAiUsage(status, _isValidBasicSubscription);
+        final result = await usageTracker.incrementAiUsage(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isFailure, isTrue);
@@ -360,7 +415,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // リセット前は使用不可
-        final beforeReset = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final beforeReset = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
         expect(beforeReset.value, isFalse);
 
         // Act
@@ -368,7 +426,10 @@ void main() {
 
         // Assert
         final updatedStatus = await _getCurrentStatus(mockSubscriptionBox);
-        final afterReset = await usageTracker.canUseAiGeneration(updatedStatus, _isValidBasicSubscription);
+        final afterReset = await usageTracker.canUseAiGeneration(
+          updatedStatus,
+          _isValidBasicSubscription,
+        );
         expect(afterReset.value, isTrue);
       });
 
@@ -406,7 +467,10 @@ void main() {
 
       test('12月の場合、翌年1月がリセット日になる', () async {
         // Arrange - 12月の場合をシミュレートするため、特定の日付でリセット日を作成
-        await _createStatusWithCustomResetDate(mockSubscriptionBox, DateTime(2023, 12, 15));
+        await _createStatusWithCustomResetDate(
+          mockSubscriptionBox,
+          DateTime(2023, 12, 15),
+        );
 
         // Act
         final result = await usageTracker.getNextResetDate();
@@ -463,7 +527,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -476,7 +543,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidPremiumSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidPremiumSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -489,7 +559,10 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final result = await usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final result = await usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -523,7 +596,9 @@ void main() {
         expect(result.error, isA<ServiceException>());
 
         // テスト後にボックスを再オープン
-        mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>('subscription');
+        mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>(
+          'subscription',
+        );
         usageTracker = SubscriptionUsageTracker(
           mockSubscriptionBox,
           mockLoggingService,
@@ -557,8 +632,13 @@ void main() {
         final status = await _getCurrentStatus(mockSubscriptionBox);
 
         // Act
-        final remainingFuture = usageTracker.getRemainingGenerations(_isValidBasicSubscription);
-        final canUseFuture = usageTracker.canUseAiGeneration(status, _isValidBasicSubscription);
+        final remainingFuture = usageTracker.getRemainingGenerations(
+          _isValidBasicSubscription,
+        );
+        final canUseFuture = usageTracker.canUseAiGeneration(
+          status,
+          _isValidBasicSubscription,
+        );
 
         final results = await Future.wait([remainingFuture, canUseFuture]);
 
@@ -594,7 +674,10 @@ Future<void> _createBasicStatus(Box<SubscriptionStatus> box) async {
 }
 
 /// 指定した使用量でサブスクリプション状態を作成
-Future<void> _createStatusWithUsage(Box<SubscriptionStatus> box, int usage) async {
+Future<void> _createStatusWithUsage(
+  Box<SubscriptionStatus> box,
+  int usage,
+) async {
   final status = SubscriptionStatus(
     planId: SubscriptionConstants.basicPlanId,
     isActive: true,
@@ -628,7 +711,10 @@ Future<void> _createPremiumMonthlyStatus(Box<SubscriptionStatus> box) async {
 }
 
 /// 指定した使用量でPremiumサブスクリプション状態を作成
-Future<void> _createPremiumMonthlyStatusWithUsage(Box<SubscriptionStatus> box, int usage) async {
+Future<void> _createPremiumMonthlyStatusWithUsage(
+  Box<SubscriptionStatus> box,
+  int usage,
+) async {
   final premiumStatus = SubscriptionStatus(
     planId: SubscriptionConstants.premiumMonthlyPlanId,
     isActive: true,
@@ -645,7 +731,10 @@ Future<void> _createPremiumMonthlyStatusWithUsage(Box<SubscriptionStatus> box, i
 }
 
 /// 指定したリセット日でサブスクリプション状態を作成
-Future<void> _createStatusWithCustomResetDate(Box<SubscriptionStatus> box, DateTime resetDate) async {
+Future<void> _createStatusWithCustomResetDate(
+  Box<SubscriptionStatus> box,
+  DateTime resetDate,
+) async {
   final status = SubscriptionStatus(
     planId: SubscriptionConstants.basicPlanId,
     isActive: true,
@@ -662,7 +751,9 @@ Future<void> _createStatusWithCustomResetDate(Box<SubscriptionStatus> box, DateT
 }
 
 /// 現在のサブスクリプション状態を取得
-Future<SubscriptionStatus> _getCurrentStatus(Box<SubscriptionStatus> box) async {
+Future<SubscriptionStatus> _getCurrentStatus(
+  Box<SubscriptionStatus> box,
+) async {
   final status = box.get(SubscriptionConstants.statusKey);
   if (status == null) {
     throw Exception('Status not found');
@@ -677,11 +768,12 @@ bool _isValidBasicSubscription(SubscriptionStatus status) {
 
 /// Premiumプラン有効性チェック関数
 bool _isValidPremiumSubscription(SubscriptionStatus status) {
-  final isPremium = status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
-                    status.planId == SubscriptionConstants.premiumYearlyPlanId;
+  final isPremium =
+      status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
+      status.planId == SubscriptionConstants.premiumYearlyPlanId;
   final isActive = status.isActive;
   final isNotExpired = status.expiryDate?.isAfter(DateTime.now()) ?? false;
-  
+
   return isPremium && isActive && isNotExpired;
 }
 

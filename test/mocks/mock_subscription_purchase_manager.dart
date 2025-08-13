@@ -76,7 +76,7 @@ class MockSubscriptionPurchaseManager {
       ),
       PurchaseProduct(
         id: 'smart_photo_diary_premium_yearly',
-        title: 'Premium Yearly', 
+        title: 'Premium Yearly',
         description: 'Smart Photo Diary Premium Yearly Plan',
         price: '¥2,800',
         priceAmount: 2800.0,
@@ -196,9 +196,7 @@ class MockSubscriptionPurchaseManager {
   /// In-App Purchase商品情報を取得
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('PurchaseManager is not initialized'),
-      );
+      return Failure(ServiceException('PurchaseManager is not initialized'));
     }
 
     if (_shouldFailGetProducts) {
@@ -212,9 +210,7 @@ class MockSubscriptionPurchaseManager {
   /// 購入を復元
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('PurchaseManager is not initialized'),
-      );
+      return Failure(ServiceException('PurchaseManager is not initialized'));
     }
 
     if (_shouldFailRestore) {
@@ -244,9 +240,7 @@ class MockSubscriptionPurchaseManager {
     Function() getCurrentStatus,
   ) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('PurchaseManager is not initialized'),
-      );
+      return Failure(ServiceException('PurchaseManager is not initialized'));
     }
 
     if (_shouldFailValidation) {
@@ -263,24 +257,26 @@ class MockSubscriptionPurchaseManager {
       }
 
       final status = statusResult.value;
-      
+
       // トランザクションIDが一致し、サブスクリプションが有効か確認
-      final isValid = status.transactionId == transactionId && 
-                      status.isActive && 
-                      (status.expiryDate == null || DateTime.now().isBefore(status.expiryDate!));
+      final isValid =
+          status.transactionId == transactionId &&
+          status.isActive &&
+          (status.expiryDate == null ||
+              DateTime.now().isBefore(status.expiryDate!));
 
       return Success(isValid);
     } catch (e) {
-      return Failure(ServiceException('Failed to validate purchase: ${e.toString()}'));
+      return Failure(
+        ServiceException('Failed to validate purchase: ${e.toString()}'),
+      );
     }
   }
 
   /// プランを購入
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('PurchaseManager is not initialized'),
-      );
+      return Failure(ServiceException('PurchaseManager is not initialized'));
     }
 
     if (_isPurchasing) {
@@ -311,7 +307,7 @@ class MockSubscriptionPurchaseManager {
     // 成功した購入をシミュレート
     final now = DateTime.now();
     final transactionId = 'mock_transaction_${now.millisecondsSinceEpoch}';
-    
+
     final result = PurchaseResult(
       status: PurchaseStatus.purchased,
       productId: plan.productId,
@@ -328,7 +324,7 @@ class MockSubscriptionPurchaseManager {
 
     // サブスクリプション状態を更新（コールバック経由）
     if (_onSubscriptionStatusUpdate != null) {
-      final expiryDate = plan.isYearly 
+      final expiryDate = plan.isYearly
           ? now.add(const Duration(days: 365))
           : now.add(const Duration(days: 30));
 
@@ -354,9 +350,7 @@ class MockSubscriptionPurchaseManager {
   /// プランを変更
   Future<Result<void>> changePlanClass(Plan newPlan) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('PurchaseManager is not initialized'),
-      );
+      return Failure(ServiceException('PurchaseManager is not initialized'));
     }
 
     // プラン変更は現在未実装
@@ -374,9 +368,7 @@ class MockSubscriptionPurchaseManager {
     Function(SubscriptionStatus) updateStatus,
   ) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('PurchaseManager is not initialized'),
-      );
+      return Failure(ServiceException('PurchaseManager is not initialized'));
     }
 
     await Future.delayed(const Duration(milliseconds: 100)); // キャンセル処理をシミュレート
@@ -405,7 +397,9 @@ class MockSubscriptionPurchaseManager {
       updateStatus(updatedStatus);
       return const Success(null);
     } catch (e) {
-      return Failure(ServiceException('Failed to cancel subscription: ${e.toString()}'));
+      return Failure(
+        ServiceException('Failed to cancel subscription: ${e.toString()}'),
+      );
     }
   }
 
@@ -417,7 +411,7 @@ class MockSubscriptionPurchaseManager {
   void simulatePurchaseComplete(String productId, Plan plan) {
     final now = DateTime.now();
     final transactionId = 'mock_transaction_${now.millisecondsSinceEpoch}';
-    
+
     final result = PurchaseResult(
       status: PurchaseStatus.purchased,
       productId: productId,

@@ -25,7 +25,7 @@ class MockSubscriptionAccessControlManager {
   // =================================================================
 
   bool _isInitialized = false;
-  
+
   // アクセス制御設定（プランIDごと）
   final Map<String, Map<String, bool>> _accessSettings = {};
 
@@ -54,10 +54,10 @@ class MockSubscriptionAccessControlManager {
     // Basicプランのデフォルト設定
     _accessSettings[SubscriptionConstants.basicPlanId] = {
       'premiumFeatures': false,
-      'writingPrompts': true,  // Basicでも基本プロンプトアクセス可能
+      'writingPrompts': true, // Basicでも基本プロンプトアクセス可能
       'advancedFilters': false,
       'advancedAnalytics': false,
-      'dataExport': true,  // BasicでもJSONエクスポート可能
+      'dataExport': true, // BasicでもJSONエクスポート可能
       'statsDashboard': false,
       'prioritySupport': false,
     };
@@ -90,25 +90,37 @@ class MockSubscriptionAccessControlManager {
   // =================================================================
 
   /// テスト用: canAccessPremiumFeatures失敗を設定
-  void setCanAccessPremiumFeaturesFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessPremiumFeaturesFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessPremiumFeatures = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
 
   /// テスト用: canAccessWritingPrompts失敗を設定
-  void setCanAccessWritingPromptsFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessWritingPromptsFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessWritingPrompts = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
 
   /// テスト用: canAccessAdvancedFilters失敗を設定
-  void setCanAccessAdvancedFiltersFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessAdvancedFiltersFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessAdvancedFilters = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
 
   /// テスト用: canAccessAdvancedAnalytics失敗を設定
-  void setCanAccessAdvancedAnalyticsFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessAdvancedAnalyticsFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessAdvancedAnalytics = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
@@ -120,13 +132,19 @@ class MockSubscriptionAccessControlManager {
   }
 
   /// テスト用: canAccessStatsDashboard失敗を設定
-  void setCanAccessStatsDashboardFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessStatsDashboardFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessStatsDashboard = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
 
   /// テスト用: canAccessPrioritySupport失敗を設定
-  void setCanAccessPrioritySupportFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessPrioritySupportFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessPrioritySupport = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
@@ -209,7 +227,8 @@ class MockSubscriptionAccessControlManager {
     }
 
     // デフォルトロジック：プレミアムプランかどうかをチェック
-    final isPremium = status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
+    final isPremium =
+        status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
         status.planId == SubscriptionConstants.premiumYearlyPlanId;
 
     return Success(isPremium);
@@ -443,10 +462,10 @@ class MockSubscriptionAccessControlManager {
   void createBasicRestrictedState() {
     _accessSettings[SubscriptionConstants.basicPlanId] = {
       'premiumFeatures': false,
-      'writingPrompts': true,  // Basicでも基本プロンプトアクセス可能
+      'writingPrompts': true, // Basicでも基本プロンプトアクセス可能
       'advancedFilters': false,
       'advancedAnalytics': false,
-      'dataExport': true,  // BasicでもJSONエクスポート可能
+      'dataExport': true, // BasicでもJSONエクスポート可能
       'statsDashboard': false,
       'prioritySupport': false,
     };
@@ -464,8 +483,12 @@ class MockSubscriptionAccessControlManager {
       'prioritySupport': true,
     };
 
-    _accessSettings[SubscriptionConstants.premiumMonthlyPlanId] = Map.from(fullAccessMap);
-    _accessSettings[SubscriptionConstants.premiumYearlyPlanId] = Map.from(fullAccessMap);
+    _accessSettings[SubscriptionConstants.premiumMonthlyPlanId] = Map.from(
+      fullAccessMap,
+    );
+    _accessSettings[SubscriptionConstants.premiumYearlyPlanId] = Map.from(
+      fullAccessMap,
+    );
   }
 
   /// テスト用: 全機能アクセス拒否状態を作成

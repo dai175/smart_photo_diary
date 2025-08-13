@@ -14,10 +14,18 @@ import '../helpers/hive_test_helpers.dart';
 
 // モッククラス
 class MockLoggingService extends Mock implements LoggingService {}
-class MockSubscriptionPurchaseManager extends Mock implements SubscriptionPurchaseManager {}
-class MockSubscriptionStatusManager extends Mock implements SubscriptionStatusManager {}
-class MockSubscriptionUsageTracker extends Mock implements SubscriptionUsageTracker {}
-class MockSubscriptionAccessControlManager extends Mock implements SubscriptionAccessControlManager {}
+
+class MockSubscriptionPurchaseManager extends Mock
+    implements SubscriptionPurchaseManager {}
+
+class MockSubscriptionStatusManager extends Mock
+    implements SubscriptionStatusManager {}
+
+class MockSubscriptionUsageTracker extends Mock
+    implements SubscriptionUsageTracker {}
+
+class MockSubscriptionAccessControlManager extends Mock
+    implements SubscriptionAccessControlManager {}
 
 void main() {
   group('SubscriptionService ファサードテスト', () {
@@ -34,10 +42,34 @@ void main() {
       mockLoggingService = MockLoggingService();
 
       // LoggingServiceモックのセットアップ
-      when(() => mockLoggingService.debug(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.info(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.warning(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.error(any(), context: any(named: 'context'), error: any(named: 'error'))).thenReturn(null);
+      when(
+        () => mockLoggingService.debug(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.info(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.warning(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.error(
+          any(),
+          context: any(named: 'context'),
+          error: any(named: 'error'),
+        ),
+      ).thenReturn(null);
 
       // 各テスト前にHiveボックスをクリア
       await HiveTestHelpers.clearSubscriptionBox();
@@ -174,7 +206,7 @@ void main() {
         // Arrange
         final premiumMonthlyPlan = PremiumMonthlyPlan();
         await subscriptionService.createStatusClass(premiumMonthlyPlan);
-        
+
         // 5回使用
         for (int i = 0; i < 5; i++) {
           await subscriptionService.incrementAiUsage();
@@ -196,7 +228,7 @@ void main() {
         expect(result.isSuccess, isTrue);
         final nextReset = result.value;
         final now = DateTime.now();
-        
+
         // 翌月の1日であることを確認
         if (now.month == 12) {
           expect(nextReset.year, equals(now.year + 1));
@@ -217,7 +249,9 @@ void main() {
         // 前月の日付でリセット日を設定
         final status = (await subscriptionService.getCurrentStatus()).value;
         final previousMonth = DateTime(
-          DateTime.now().month == 1 ? DateTime.now().year - 1 : DateTime.now().year,
+          DateTime.now().month == 1
+              ? DateTime.now().year - 1
+              : DateTime.now().year,
           DateTime.now().month == 1 ? 12 : DateTime.now().month - 1,
           1,
         );
@@ -337,10 +371,14 @@ void main() {
         await subscriptionService.createStatusClass(premiumYearlyPlan);
 
         // Act
-        final remainingResult = await subscriptionService.getRemainingAiGenerations();
-        final premiumFeaturesResult = await subscriptionService.canAccessPremiumFeatures();
-        final advancedFiltersResult = await subscriptionService.canAccessAdvancedFilters();
-        final statsDashboardResult = await subscriptionService.canAccessStatsDashboard();
+        final remainingResult = await subscriptionService
+            .getRemainingAiGenerations();
+        final premiumFeaturesResult = await subscriptionService
+            .canAccessPremiumFeatures();
+        final advancedFiltersResult = await subscriptionService
+            .canAccessAdvancedFilters();
+        final statsDashboardResult = await subscriptionService
+            .canAccessStatsDashboard();
 
         // Assert
         expect(remainingResult.isSuccess, isTrue);
@@ -368,10 +406,14 @@ void main() {
 
         // Act
         final canUseResult = await subscriptionService.canUseAiGeneration();
-        final remainingResult = await subscriptionService.getRemainingAiGenerations();
-        final premiumFeaturesResult = await subscriptionService.canAccessPremiumFeatures();
-        final advancedFiltersResult = await subscriptionService.canAccessAdvancedFilters();
-        final statsDashboardResult = await subscriptionService.canAccessStatsDashboard();
+        final remainingResult = await subscriptionService
+            .getRemainingAiGenerations();
+        final premiumFeaturesResult = await subscriptionService
+            .canAccessPremiumFeatures();
+        final advancedFiltersResult = await subscriptionService
+            .canAccessAdvancedFilters();
+        final statsDashboardResult = await subscriptionService
+            .canAccessStatsDashboard();
 
         // Assert
         expect(canUseResult.value, isFalse); // 期限切れなので使用不可
@@ -398,7 +440,10 @@ void main() {
 
         // Assert
         expect(limitResult.isFailure, isTrue);
-        expect(limitResult.error.toString(), contains('Monthly AI generation limit reached'));
+        expect(
+          limitResult.error.toString(),
+          contains('Monthly AI generation limit reached'),
+        );
         expect(canUseResult.value, isFalse); // 制限に達したので使用不可
       });
     });
@@ -412,7 +457,7 @@ void main() {
         // Basic プランのテスト
         final basicPlan = BasicPlan();
         await subscriptionService.createStatusClass(basicPlan);
-        
+
         var featureResult = await subscriptionService.getFeatureAccess();
         expect(featureResult.isSuccess, isTrue);
         var features = featureResult.value;
@@ -425,7 +470,7 @@ void main() {
         // Premium プランのテスト
         final premiumYearlyPlan = PremiumYearlyPlan();
         await subscriptionService.createStatusClass(premiumYearlyPlan);
-        
+
         featureResult = await subscriptionService.getFeatureAccess();
         expect(featureResult.isSuccess, isTrue);
         features = featureResult.value;
@@ -441,11 +486,16 @@ void main() {
         final premiumMonthlyPlan = PremiumMonthlyPlan();
         await subscriptionService.createStatusClass(premiumMonthlyPlan);
 
-        final premiumFeaturesResult = await subscriptionService.canAccessPremiumFeatures();
-        final writingPromptsResult = await subscriptionService.canAccessWritingPrompts();
-        final advancedFiltersResult = await subscriptionService.canAccessAdvancedFilters();
-        final dataExportResult = await subscriptionService.canAccessDataExport();
-        final statsDashboardResult = await subscriptionService.canAccessStatsDashboard();
+        final premiumFeaturesResult = await subscriptionService
+            .canAccessPremiumFeatures();
+        final writingPromptsResult = await subscriptionService
+            .canAccessWritingPrompts();
+        final advancedFiltersResult = await subscriptionService
+            .canAccessAdvancedFilters();
+        final dataExportResult = await subscriptionService
+            .canAccessDataExport();
+        final statsDashboardResult = await subscriptionService
+            .canAccessStatsDashboard();
 
         expect(premiumFeaturesResult.value, isTrue);
         expect(writingPromptsResult.value, isTrue);

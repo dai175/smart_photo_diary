@@ -31,9 +31,12 @@ class IntegrationTestAssertions {
   ) async {
     final result = await operation;
     CommonTestUtilities.expectSuccess(result);
-    
+
     final transformedResult = transform(result.value);
-    CommonTestUtilities.expectSuccessValue(transformedResult, expectedFinalValue);
+    CommonTestUtilities.expectSuccessValue(
+      transformedResult,
+      expectedFinalValue,
+    );
   }
 
   /// 複数のResult<T>操作の並行実行をアサーション
@@ -42,9 +45,9 @@ class IntegrationTestAssertions {
     List<T> expectedValues,
   ) async {
     expect(operations.length, equals(expectedValues.length));
-    
+
     final results = await Future.wait(operations);
-    
+
     for (int i = 0; i < results.length; i++) {
       CommonTestUtilities.expectSuccessValue(results[i], expectedValues[i]);
     }
@@ -79,10 +82,13 @@ class IntegrationTestAssertions {
     // 最初の操作が失敗することを確認
     final initialResult = await initialOperation;
     CommonTestUtilities.expectFailure(initialResult);
-    
+
     // 回復操作が成功することを確認
     final recoveryResult = await recoveryOperation;
-    CommonTestUtilities.expectSuccessValue(recoveryResult, expectedRecoveryValue);
+    CommonTestUtilities.expectSuccessValue(
+      recoveryResult,
+      expectedRecoveryValue,
+    );
   }
 
   // =================================================================
@@ -102,21 +108,27 @@ class IntegrationTestAssertions {
     CommonTestUtilities.expectSuccess(planResult);
     expect(planResult.value.id, equals(expectedPlan.id));
     expect(planResult.value.displayName, equals(expectedPlan.displayName));
-    
+
     // 状態取得の検証
     final statusResult = await service.getCurrentStatus();
     CommonTestUtilities.expectSuccess(statusResult);
     expect(statusResult.value.planId, equals(expectedStatus.planId));
     expect(statusResult.value.isActive, equals(expectedStatus.isActive));
-    expect(statusResult.value.monthlyUsageCount, equals(expectedStatus.monthlyUsageCount));
-    
+    expect(
+      statusResult.value.monthlyUsageCount,
+      equals(expectedStatus.monthlyUsageCount),
+    );
+
     // AI使用可能性の検証
     final canUseAiResult = await service.canUseAiGeneration();
     CommonTestUtilities.expectSuccessValue(canUseAiResult, expectedCanUseAi);
-    
+
     // 残り生成回数の検証
     final remainingResult = await service.getRemainingGenerations();
-    CommonTestUtilities.expectSuccessValue(remainingResult, expectedRemainingGenerations);
+    CommonTestUtilities.expectSuccessValue(
+      remainingResult,
+      expectedRemainingGenerations,
+    );
   }
 
   /// サブスクリプション権限の包括的検証
@@ -127,22 +139,34 @@ class IntegrationTestAssertions {
     // プレミアム機能アクセス権
     final premiumAccessResult = await service.canAccessPremiumFeatures();
     CommonTestUtilities.expectSuccessValue(premiumAccessResult, plan.isPremium);
-    
+
     // ライティングプロンプトアクセス権
     final writingPromptsResult = await service.canAccessWritingPrompts();
-    CommonTestUtilities.expectSuccessValue(writingPromptsResult, plan.hasWritingPrompts);
-    
+    CommonTestUtilities.expectSuccessValue(
+      writingPromptsResult,
+      plan.hasWritingPrompts,
+    );
+
     // 高度なフィルターアクセス権
     final advancedFiltersResult = await service.canAccessAdvancedFilters();
-    CommonTestUtilities.expectSuccessValue(advancedFiltersResult, plan.hasAdvancedFilters);
-    
+    CommonTestUtilities.expectSuccessValue(
+      advancedFiltersResult,
+      plan.hasAdvancedFilters,
+    );
+
     // 高度な分析アクセス権
     final advancedAnalyticsResult = await service.canAccessAdvancedAnalytics();
-    CommonTestUtilities.expectSuccessValue(advancedAnalyticsResult, plan.hasAdvancedAnalytics);
-    
+    CommonTestUtilities.expectSuccessValue(
+      advancedAnalyticsResult,
+      plan.hasAdvancedAnalytics,
+    );
+
     // 優先サポートアクセス権
     final prioritySupportResult = await service.canAccessPrioritySupport();
-    CommonTestUtilities.expectSuccessValue(prioritySupportResult, plan.hasPrioritySupport);
+    CommonTestUtilities.expectSuccessValue(
+      prioritySupportResult,
+      plan.hasPrioritySupport,
+    );
   }
 
   /// プラン変更の統合検証
@@ -155,14 +179,14 @@ class IntegrationTestAssertions {
     // 変更前の状態確認
     final initialPlanResult = await service.getCurrentPlanClass();
     CommonTestUtilities.expectSuccessValue(initialPlanResult, fromPlan);
-    
+
     // プラン変更実行
     await planChangeOperation();
-    
+
     // 変更後の状態確認
     final finalPlanResult = await service.getCurrentPlanClass();
     CommonTestUtilities.expectSuccessValue(finalPlanResult, toPlan);
-    
+
     // 権限の更新確認
     await assertSubscriptionPermissions(service, toPlan);
   }
@@ -177,21 +201,25 @@ class IntegrationTestAssertions {
     // 初期使用量の確認
     final initialUsageResult = await service.getMonthlyUsage();
     CommonTestUtilities.expectSuccessValue(initialUsageResult, initialUsage);
-    
+
     final initialCanUseResult = await service.canUseAiGeneration();
     final expectedCanUse = initialUsage < plan.monthlyAiGenerationLimit;
     CommonTestUtilities.expectSuccessValue(initialCanUseResult, expectedCanUse);
-    
+
     // 使用量増加操作
     await usageIncrementOperation();
-    
+
     // 使用量増加後の確認
     final finalUsageResult = await service.getMonthlyUsage();
     CommonTestUtilities.expectSuccessValue(finalUsageResult, initialUsage + 1);
-    
+
     final finalCanUseResult = await service.canUseAiGeneration();
-    final expectedFinalCanUse = (initialUsage + 1) < plan.monthlyAiGenerationLimit;
-    CommonTestUtilities.expectSuccessValue(finalCanUseResult, expectedFinalCanUse);
+    final expectedFinalCanUse =
+        (initialUsage + 1) < plan.monthlyAiGenerationLimit;
+    CommonTestUtilities.expectSuccessValue(
+      finalCanUseResult,
+      expectedFinalCanUse,
+    );
   }
 
   // =================================================================
@@ -206,11 +234,11 @@ class IntegrationTestAssertions {
   ) async {
     expect(services.keys, containsAll(operations.keys));
     expect(operations.keys, containsAll(expectedResults.keys));
-    
+
     for (final key in operations.keys) {
       final result = await operations[key]!();
       final expectedResult = expectedResults[key];
-      
+
       CommonTestUtilities.expectSuccess(result);
       expect(result.value, equals(expectedResult));
     }
@@ -223,13 +251,13 @@ class IntegrationTestAssertions {
     String consistencyDescription,
   ) async {
     final results = <dynamic>[];
-    
+
     for (final query in queries) {
       final result = await query();
       CommonTestUtilities.expectSuccess(result);
       results.add(result.value);
     }
-    
+
     expect(
       consistencyChecker(results),
       isTrue,
@@ -244,15 +272,19 @@ class IntegrationTestAssertions {
     List<dynamic> expectedFinalStates,
   ) async {
     expect(stateQueries.length, equals(expectedFinalStates.length));
-    
+
     // 操作実行
     await operation();
-    
+
     // 最終状態の確認
     for (int i = 0; i < stateQueries.length; i++) {
       final actualState = await stateQueries[i]();
-      expect(actualState, equals(expectedFinalStates[i]),
-          reason: 'State $i does not match expected value after transactional operation');
+      expect(
+        actualState,
+        equals(expectedFinalStates[i]),
+        reason:
+            'State $i does not match expected value after transactional operation',
+      );
     }
   }
 
@@ -267,16 +299,19 @@ class IntegrationTestAssertions {
     List<String> expectedErrorMessages,
   ) async {
     expect(dependentOperations.length, equals(expectedErrorMessages.length));
-    
+
     // トリガー操作の失敗確認
     final triggerResult = await triggerOperation();
     CommonTestUtilities.expectFailure(triggerResult);
-    
+
     // 依存操作の失敗確認
     for (int i = 0; i < dependentOperations.length; i++) {
       final dependentResult = await dependentOperations[i]();
       CommonTestUtilities.expectFailure(dependentResult);
-      CommonTestUtilities.expectFailureMessage(dependentResult, expectedErrorMessages[i]);
+      CommonTestUtilities.expectFailureMessage(
+        dependentResult,
+        expectedErrorMessages[i],
+      );
     }
   }
 
@@ -288,18 +323,21 @@ class IntegrationTestAssertions {
     List<dynamic> expectedHealthyStates,
   ) async {
     expect(healthCheckOperations.length, equals(expectedHealthyStates.length));
-    
+
     // エラー発生確認
     final errorResult = await errorOperation();
     CommonTestUtilities.expectFailure(errorResult);
-    
+
     // 回復操作実行
     await recoveryOperation();
-    
+
     // ヘルスチェック
     for (int i = 0; i < healthCheckOperations.length; i++) {
       final healthResult = await healthCheckOperations[i]();
-      CommonTestUtilities.expectSuccessValue(healthResult, expectedHealthyStates[i]);
+      CommonTestUtilities.expectSuccessValue(
+        healthResult,
+        expectedHealthyStates[i],
+      );
     }
   }
 
@@ -314,18 +352,18 @@ class IntegrationTestAssertions {
     Duration minDuration,
   ) async {
     final stopwatch = Stopwatch()..start();
-    
+
     final result = await operation();
     stopwatch.stop();
-    
+
     CommonTestUtilities.expectSuccess(result);
-    
+
     expect(
       stopwatch.elapsed,
       lessThan(maxDuration),
       reason: 'Operation took longer than expected: ${stopwatch.elapsed}',
     );
-    
+
     expect(
       stopwatch.elapsed,
       greaterThan(minDuration),
@@ -341,12 +379,12 @@ class IntegrationTestAssertions {
   ) async {
     final futures = concurrentOperations.map((op) => op()).toList();
     final results = await Future.wait(futures);
-    
+
     // 全て成功することを確認
     for (final result in results) {
       CommonTestUtilities.expectSuccess(result);
     }
-    
+
     // 結果の妥当性を確認
     final values = results.map((r) => r.value).toList();
     expect(
@@ -370,19 +408,19 @@ class IntegrationTestAssertions {
     final buffer = StringBuffer();
     buffer.writeln('=== Assertion Result: $testName ===');
     buffer.writeln('Success: $success');
-    
+
     if (!success) {
       buffer.writeln('\nActual Values:');
       actualValues.forEach((key, value) {
         buffer.writeln('  $key: $value');
       });
-      
+
       buffer.writeln('\nExpected Values:');
       expectedValues.forEach((key, value) {
         buffer.writeln('  $key: $value');
       });
     }
-    
+
     buffer.writeln('=====================================');
     // デバッグ情報の出力（テスト環境では許可）
     // ignore: avoid_print
@@ -398,7 +436,7 @@ class IntegrationTestAssertions {
   ) {
     final actualStr = serializer(actual);
     final expectedStr = serializer(expected);
-    
+
     if (actualStr != expectedStr) {
       logAssertionResult(
         objectName,
@@ -407,7 +445,11 @@ class IntegrationTestAssertions {
         false,
       );
     }
-    
-    expect(actual, equals(expected), reason: '$objectName objects do not match');
+
+    expect(
+      actual,
+      equals(expected),
+      reason: '$objectName objects do not match',
+    );
   }
 }

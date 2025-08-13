@@ -46,9 +46,7 @@ class SubscriptionAccessControlManager {
   // =================================================================
 
   /// コンストラクタ（依存性注入）
-  SubscriptionAccessControlManager(
-    this._loggingService,
-  ) {
+  SubscriptionAccessControlManager(this._loggingService) {
     _isInitialized = true;
     _log('SubscriptionAccessControlManager initialized', level: LogLevel.debug);
   }
@@ -160,7 +158,7 @@ class SubscriptionAccessControlManager {
       // プレミアムプランかどうかをチェック
       final isPremium =
           status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
-              status.planId == SubscriptionConstants.premiumYearlyPlanId;
+          status.planId == SubscriptionConstants.premiumYearlyPlanId;
 
       _log(
         'Premium features access check completed',

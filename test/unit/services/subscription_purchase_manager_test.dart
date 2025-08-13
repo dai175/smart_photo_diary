@@ -11,7 +11,8 @@ import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
-import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart' as ssi;
+import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart'
+    as ssi;
 
 // 型のために明示的にインポート
 typedef PurchaseResult = ssi.PurchaseResult;
@@ -26,12 +27,36 @@ void main() {
 
     setUp(() {
       mockLoggingService = MockLoggingService();
-      
+
       // LoggingServiceのセットアップ
-      when(() => mockLoggingService.debug(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.info(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.warning(any(), context: any(named: 'context'), data: any(named: 'data'))).thenReturn(null);
-      when(() => mockLoggingService.error(any(), context: any(named: 'context'), error: any(named: 'error'))).thenReturn(null);
+      when(
+        () => mockLoggingService.debug(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.info(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.warning(
+          any(),
+          context: any(named: 'context'),
+          data: any(named: 'data'),
+        ),
+      ).thenReturn(null);
+      when(
+        () => mockLoggingService.error(
+          any(),
+          context: any(named: 'context'),
+          error: any(named: 'error'),
+        ),
+      ).thenReturn(null);
 
       manager = SubscriptionPurchaseManager();
     });
@@ -49,7 +74,10 @@ void main() {
         }
 
         // Act & Assert（内部状態のため直接検証できないが、例外が発生しないことを確認）
-        expect(() => manager.setSubscriptionStatusUpdateCallback(callback), returnsNormally);
+        expect(
+          () => manager.setSubscriptionStatusUpdateCallback(callback),
+          returnsNormally,
+        );
       });
 
       test('破棄処理が正常に実行される', () async {
@@ -110,7 +138,6 @@ void main() {
         expect(result.isFailure, true);
         expect(result.error.message, contains('not initialized'));
       });
-
     });
 
     group('復元・検証機能', () {
@@ -133,17 +160,19 @@ void main() {
         // Act
         final result = await uninitializedManager.validatePurchase(
           'test_transaction',
-          () => Success(SubscriptionStatus(
-            planId: SubscriptionConstants.basicPlanId,
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: null,
-            autoRenewal: false,
-            monthlyUsageCount: 0,
-            lastResetDate: DateTime.now(),
-            transactionId: '',
-            lastPurchaseDate: null,
-          ))
+          () => Success(
+            SubscriptionStatus(
+              planId: SubscriptionConstants.basicPlanId,
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: null,
+              autoRenewal: false,
+              monthlyUsageCount: 0,
+              lastResetDate: DateTime.now(),
+              transactionId: '',
+              lastPurchaseDate: null,
+            ),
+          ),
         );
 
         // Assert
@@ -154,23 +183,28 @@ void main() {
       test('有効なトランザクションIDの購入検証が成功する', () async {
         // Arrange
         const transactionId = 'test_transaction_123';
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: SubscriptionConstants.premiumMonthlyPlanId,
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 30)),
-            autoRenewal: true,
-            monthlyUsageCount: 5,
-            lastResetDate: DateTime.now(),
-            transactionId: transactionId,
-            lastPurchaseDate: DateTime.now(),
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: SubscriptionConstants.premiumMonthlyPlanId,
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: DateTime.now().add(const Duration(days: 30)),
+              autoRenewal: true,
+              monthlyUsageCount: 5,
+              lastResetDate: DateTime.now(),
+              transactionId: transactionId,
+              lastPurchaseDate: DateTime.now(),
+            ),
+          );
         }
 
         // Act
-        final result = await manager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await manager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -180,23 +214,28 @@ void main() {
       test('無効なトランザクションIDの購入検証は失敗する', () async {
         // Arrange
         const transactionId = 'invalid_transaction';
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: SubscriptionConstants.premiumMonthlyPlanId,
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: DateTime.now().add(const Duration(days: 30)),
-            autoRenewal: true,
-            monthlyUsageCount: 5,
-            lastResetDate: DateTime.now(),
-            transactionId: 'different_transaction',
-            lastPurchaseDate: DateTime.now(),
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: SubscriptionConstants.premiumMonthlyPlanId,
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: DateTime.now().add(const Duration(days: 30)),
+              autoRenewal: true,
+              monthlyUsageCount: 5,
+              lastResetDate: DateTime.now(),
+              transactionId: 'different_transaction',
+              lastPurchaseDate: DateTime.now(),
+            ),
+          );
         }
 
         // Act
-        final result = await manager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await manager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -206,23 +245,30 @@ void main() {
       test('期限切れサブスクリプションの購入検証は失敗する', () async {
         // Arrange
         const transactionId = 'test_transaction_123';
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: SubscriptionConstants.premiumMonthlyPlanId,
-            isActive: true,
-            startDate: DateTime.now().subtract(const Duration(days: 60)),
-            expiryDate: DateTime.now().subtract(const Duration(days: 1)), // 期限切れ
-            autoRenewal: true,
-            monthlyUsageCount: 5,
-            lastResetDate: DateTime.now(),
-            transactionId: transactionId,
-            lastPurchaseDate: DateTime.now(),
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: SubscriptionConstants.premiumMonthlyPlanId,
+              isActive: true,
+              startDate: DateTime.now().subtract(const Duration(days: 60)),
+              expiryDate: DateTime.now().subtract(
+                const Duration(days: 1),
+              ), // 期限切れ
+              autoRenewal: true,
+              monthlyUsageCount: 5,
+              lastResetDate: DateTime.now(),
+              transactionId: transactionId,
+              lastPurchaseDate: DateTime.now(),
+            ),
+          );
         }
 
         // Act
-        final result = await manager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await manager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -232,23 +278,28 @@ void main() {
       test('Basicプランの購入検証は失敗する', () async {
         // Arrange
         const transactionId = '';
-        
+
         Future<Result<SubscriptionStatus>> getCurrentStatus() async {
-          return Success(SubscriptionStatus(
-            planId: SubscriptionConstants.basicPlanId,
-            isActive: true,
-            startDate: DateTime.now(),
-            expiryDate: null,
-            autoRenewal: false,
-            monthlyUsageCount: 3,
-            lastResetDate: DateTime.now(),
-            transactionId: transactionId,
-            lastPurchaseDate: null,
-          ));
+          return Success(
+            SubscriptionStatus(
+              planId: SubscriptionConstants.basicPlanId,
+              isActive: true,
+              startDate: DateTime.now(),
+              expiryDate: null,
+              autoRenewal: false,
+              monthlyUsageCount: 3,
+              lastResetDate: DateTime.now(),
+              transactionId: transactionId,
+              lastPurchaseDate: null,
+            ),
+          );
         }
 
         // Act
-        final result = await manager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await manager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isFailure, true);
@@ -264,7 +315,10 @@ void main() {
         }
 
         // Act
-        final result = await manager.validatePurchase(transactionId, getCurrentStatus);
+        final result = await manager.validatePurchase(
+          transactionId,
+          getCurrentStatus,
+        );
 
         // Assert
         expect(result.isFailure, true);

@@ -85,7 +85,10 @@ class MockSubscriptionUsageTracker {
   }
 
   /// テスト用: getRemainingGenerations失敗を設定
-  void setGetRemainingGenerationsFailure(bool shouldFail, [String? errorMessage]) {
+  void setGetRemainingGenerationsFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailGetRemainingGenerations = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
@@ -115,7 +118,10 @@ class MockSubscriptionUsageTracker {
   }
 
   /// テスト用: resetMonthlyUsageIfNeeded失敗を設定
-  void setResetMonthlyUsageIfNeededFailure(bool shouldFail, [String? errorMessage]) {
+  void setResetMonthlyUsageIfNeededFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailResetMonthlyUsageIfNeeded = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
@@ -181,9 +187,7 @@ class MockSubscriptionUsageTracker {
   /// 今月の使用量を取得
   Future<Result<int>> getMonthlyUsage() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailGetMonthlyUsage) {
@@ -203,9 +207,7 @@ class MockSubscriptionUsageTracker {
     bool Function(SubscriptionStatus) isValidSubscription,
   ) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailGetRemainingGenerations) {
@@ -215,9 +217,7 @@ class MockSubscriptionUsageTracker {
     await Future.delayed(const Duration(milliseconds: 50)); // 非同期処理をシミュレート
 
     if (_currentStatus == null) {
-      return Failure(
-        ServiceException('Subscription status not found'),
-      );
+      return Failure(ServiceException('Subscription status not found'));
     }
 
     // サブスクリプションが有効でない場合は0
@@ -242,9 +242,7 @@ class MockSubscriptionUsageTracker {
     bool Function(SubscriptionStatus) isValidSubscription,
   ) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailCanUseAiGeneration) {
@@ -274,9 +272,7 @@ class MockSubscriptionUsageTracker {
     bool Function(SubscriptionStatus) isValidSubscription,
   ) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailIncrementAiUsage) {
@@ -309,7 +305,7 @@ class MockSubscriptionUsageTracker {
 
     // 使用量をインクリメント
     _monthlyUsage++;
-    
+
     // 現在の状態を更新
     final updatedStatus = SubscriptionStatus(
       planId: status.planId,
@@ -322,7 +318,7 @@ class MockSubscriptionUsageTracker {
       transactionId: status.transactionId,
       lastPurchaseDate: status.lastPurchaseDate,
     );
-    
+
     _updateCurrentStatus(updatedStatus);
 
     return const Success(null);
@@ -331,9 +327,7 @@ class MockSubscriptionUsageTracker {
   /// 使用量を手動でリセット（管理者・テスト用）
   Future<Result<void>> resetUsage() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailResetUsage) {
@@ -343,9 +337,7 @@ class MockSubscriptionUsageTracker {
     await Future.delayed(const Duration(milliseconds: 30)); // 非同期処理をシミュレート
 
     if (_currentStatus == null) {
-      return Failure(
-        ServiceException('Subscription status not found'),
-      );
+      return Failure(ServiceException('Subscription status not found'));
     }
 
     // 使用量とリセット日を更新
@@ -373,9 +365,7 @@ class MockSubscriptionUsageTracker {
   /// 次の使用量リセット日を取得
   Future<Result<DateTime>> getNextResetDate() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailGetNextResetDate) {
@@ -391,9 +381,7 @@ class MockSubscriptionUsageTracker {
   /// 月次使用量リセットが必要かチェックしてリセット
   Future<Result<void>> resetMonthlyUsageIfNeeded() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('UsageTracker is not initialized'),
-      );
+      return Failure(ServiceException('UsageTracker is not initialized'));
     }
 
     if (_shouldFailResetMonthlyUsageIfNeeded) {
@@ -518,7 +506,7 @@ class MockSubscriptionUsageTracker {
     final previousMonth = DateTime.now().month == 1
         ? DateTime(DateTime.now().year - 1, 12, 15)
         : DateTime(DateTime.now().year, DateTime.now().month - 1, 15);
-    
+
     setLastResetDate(previousMonth);
     setMonthlyUsage(5); // 何らかの使用量を設定
   }

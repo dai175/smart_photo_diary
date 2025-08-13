@@ -47,9 +47,8 @@ class MockSubscriptionStatusManager {
   // コンストラクタ
   // =================================================================
 
-  MockSubscriptionStatusManager({
-    SubscriptionStatus? initialStatus,
-  }) : _currentStatus = initialStatus {
+  MockSubscriptionStatusManager({SubscriptionStatus? initialStatus})
+    : _currentStatus = initialStatus {
     _isInitialized = true;
     _initializeDefaultState();
   }
@@ -59,7 +58,7 @@ class MockSubscriptionStatusManager {
     if (_currentStatus == null) {
       final basicPlan = BasicPlan();
       final now = DateTime.now();
-      
+
       _currentStatus = SubscriptionStatus(
         planId: basicPlan.id,
         isActive: true,
@@ -121,7 +120,10 @@ class MockSubscriptionStatusManager {
   }
 
   /// テスト用: canAccessPremiumFeatures失敗を設定
-  void setCanAccessPremiumFeaturesFailure(bool shouldFail, [String? errorMessage]) {
+  void setCanAccessPremiumFeaturesFailure(
+    bool shouldFail, [
+    String? errorMessage,
+  ]) {
     _shouldFailCanAccessPremiumFeatures = shouldFail;
     _forcedErrorMessage = errorMessage;
   }
@@ -134,7 +136,7 @@ class MockSubscriptionStatusManager {
   /// テスト用: プランを設定
   void setCurrentPlan(Plan plan) {
     final now = DateTime.now();
-    
+
     DateTime? expiryDate;
     if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
       expiryDate = now.add(const Duration(days: 30));
@@ -153,8 +155,8 @@ class MockSubscriptionStatusManager {
       transactionId: plan.id == SubscriptionConstants.basicPlanId
           ? ''
           : 'mock_transaction_${now.millisecondsSinceEpoch}',
-      lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId 
-          ? null 
+      lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId
+          ? null
           : now,
     );
   }
@@ -202,9 +204,7 @@ class MockSubscriptionStatusManager {
   /// 現在のサブスクリプション状態を取得
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailGetCurrentStatus) {
@@ -223,9 +223,7 @@ class MockSubscriptionStatusManager {
   /// サブスクリプション状態を更新
   Future<Result<void>> updateStatus(SubscriptionStatus status) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailUpdateStatus) {
@@ -241,9 +239,7 @@ class MockSubscriptionStatusManager {
   /// サブスクリプション状態をリロード
   Future<Result<void>> refreshStatus() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailRefreshStatus) {
@@ -259,9 +255,7 @@ class MockSubscriptionStatusManager {
   /// 指定されたプランでサブスクリプション状態を作成
   Future<Result<SubscriptionStatus>> createStatus(Plan plan) async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailCreateStatus) {
@@ -292,8 +286,8 @@ class MockSubscriptionStatusManager {
       transactionId: plan.id == SubscriptionConstants.basicPlanId
           ? ''
           : 'created_${now.millisecondsSinceEpoch}',
-      lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId 
-          ? null 
+      lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId
+          ? null
           : now,
     );
 
@@ -304,9 +298,7 @@ class MockSubscriptionStatusManager {
   /// サブスクリプション状態を削除
   Future<Result<void>> clearStatus() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailClearStatus) {
@@ -336,9 +328,7 @@ class MockSubscriptionStatusManager {
   /// 現在のプランを取得
   Future<Result<Plan>> getCurrentPlanClass() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailGetCurrentPlanClass) {
@@ -354,7 +344,7 @@ class MockSubscriptionStatusManager {
     }
 
     final status = statusResult.value;
-    
+
     // プラン情報を取得
     final planResult = getPlanClass(status.planId);
     if (planResult.isFailure) {
@@ -393,16 +383,16 @@ class MockSubscriptionStatusManager {
   /// プレミアム機能にアクセスできるかどうか
   Future<Result<bool>> canAccessPremiumFeatures() async {
     if (!_isInitialized) {
-      return Failure(
-        ServiceException('StatusManager is not initialized'),
-      );
+      return Failure(ServiceException('StatusManager is not initialized'));
     }
 
     if (_shouldFailCanAccessPremiumFeatures) {
       return _simulateError('canAccessPremiumFeatures');
     }
 
-    await Future.delayed(const Duration(milliseconds: 30)); // アクセス権限チェック処理をシミュレート
+    await Future.delayed(
+      const Duration(milliseconds: 30),
+    ); // アクセス権限チェック処理をシミュレート
 
     // 現在の状態を取得
     final statusResult = await getCurrentStatus();
@@ -418,8 +408,9 @@ class MockSubscriptionStatusManager {
     }
 
     // プレミアムプランかどうかをチェック
-    final isPremium = status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
-                     status.planId == SubscriptionConstants.premiumYearlyPlanId;
+    final isPremium =
+        status.planId == SubscriptionConstants.premiumMonthlyPlanId ||
+        status.planId == SubscriptionConstants.premiumYearlyPlanId;
 
     return Success(isPremium);
   }

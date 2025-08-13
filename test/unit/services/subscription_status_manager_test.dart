@@ -26,11 +26,13 @@ void main() {
       await HiveTestHelpers.clearSubscriptionBox();
 
       // モックHiveボックス取得
-      mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>('subscription');
-      
+      mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>(
+        'subscription',
+      );
+
       // LoggingServiceインスタンスを作成
       mockLoggingService = await LoggingService.getInstance();
-      
+
       // StatusManagerインスタンス作成
       statusManager = SubscriptionStatusManager(
         mockSubscriptionBox,
@@ -61,7 +63,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
         expect(status.planId, equals(SubscriptionConstants.basicPlanId));
         expect(status.isActive, isTrue);
@@ -83,22 +85,27 @@ void main() {
           transactionId: 'test_transaction',
           lastPurchaseDate: DateTime.now().subtract(const Duration(days: 10)),
         );
-        
-        await mockSubscriptionBox.put(SubscriptionConstants.statusKey, savedStatus);
+
+        await mockSubscriptionBox.put(
+          SubscriptionConstants.statusKey,
+          savedStatus,
+        );
 
         // Act
         final result = await statusManager.getCurrentStatus();
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
-        expect(status.planId, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          status.planId,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(status.isActive, isTrue);
         expect(status.monthlyUsageCount, equals(5));
         expect(status.autoRenewal, isTrue);
       });
-
     });
 
     group('updateStatus()', () {
@@ -121,11 +128,16 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         // 保存されたかを確認
-        final savedStatus = mockSubscriptionBox.get(SubscriptionConstants.statusKey);
+        final savedStatus = mockSubscriptionBox.get(
+          SubscriptionConstants.statusKey,
+        );
         expect(savedStatus, isNotNull);
-        expect(savedStatus!.planId, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          savedStatus!.planId,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(savedStatus.monthlyUsageCount, equals(3));
       });
     });
@@ -144,8 +156,11 @@ void main() {
           transactionId: '',
           lastPurchaseDate: null,
         );
-        
-        await mockSubscriptionBox.put(SubscriptionConstants.statusKey, existingStatus);
+
+        await mockSubscriptionBox.put(
+          SubscriptionConstants.statusKey,
+          existingStatus,
+        );
 
         // Act
         final result = await statusManager.refreshStatus();
@@ -165,7 +180,7 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
         expect(status.planId, equals(SubscriptionConstants.basicPlanId));
         expect(status.isActive, isTrue);
@@ -185,12 +200,20 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
-        expect(status.planId, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          status.planId,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(status.isActive, isTrue);
         expect(status.expiryDate, isNotNull);
-        expect(status.expiryDate!.isAfter(DateTime.now().add(const Duration(days: 29))), isTrue);
+        expect(
+          status.expiryDate!.isAfter(
+            DateTime.now().add(const Duration(days: 29)),
+          ),
+          isTrue,
+        );
         expect(status.autoRenewal, isTrue);
         expect(status.monthlyUsageCount, equals(0));
         expect(status.transactionId, isNotEmpty);
@@ -206,12 +229,20 @@ void main() {
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         final status = result.value;
-        expect(status.planId, equals(SubscriptionConstants.premiumYearlyPlanId));
+        expect(
+          status.planId,
+          equals(SubscriptionConstants.premiumYearlyPlanId),
+        );
         expect(status.isActive, isTrue);
         expect(status.expiryDate, isNotNull);
-        expect(status.expiryDate!.isAfter(DateTime.now().add(const Duration(days: 364))), isTrue);
+        expect(
+          status.expiryDate!.isAfter(
+            DateTime.now().add(const Duration(days: 364)),
+          ),
+          isTrue,
+        );
         expect(status.autoRenewal, isTrue);
         expect(status.monthlyUsageCount, equals(0));
         expect(status.transactionId, isNotEmpty);
@@ -233,17 +264,22 @@ void main() {
           transactionId: '',
           lastPurchaseDate: null,
         );
-        
-        await mockSubscriptionBox.put(SubscriptionConstants.statusKey, existingStatus);
+
+        await mockSubscriptionBox.put(
+          SubscriptionConstants.statusKey,
+          existingStatus,
+        );
 
         // Act
         final result = await statusManager.clearStatus();
 
         // Assert
         expect(result.isSuccess, isTrue);
-        
+
         // 削除されたかを確認
-        final savedStatus = mockSubscriptionBox.get(SubscriptionConstants.statusKey);
+        final savedStatus = mockSubscriptionBox.get(
+          SubscriptionConstants.statusKey,
+        );
         expect(savedStatus, isNull);
       });
     });
@@ -251,7 +287,9 @@ void main() {
     group('getPlanClass()', () {
       test('BasicプランIDから正しいPlanクラスが取得できる', () {
         // Act
-        final result = statusManager.getPlanClass(SubscriptionConstants.basicPlanId);
+        final result = statusManager.getPlanClass(
+          SubscriptionConstants.basicPlanId,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
@@ -261,21 +299,31 @@ void main() {
 
       test('PremiumMonthlyプランIDから正しいPlanクラスが取得できる', () {
         // Act
-        final result = statusManager.getPlanClass(SubscriptionConstants.premiumMonthlyPlanId);
+        final result = statusManager.getPlanClass(
+          SubscriptionConstants.premiumMonthlyPlanId,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.value.id, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          result.value.id,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(result.value.displayName, equals('Premium (月額)'));
       });
 
       test('PremiumYearlyプランIDから正しいPlanクラスが取得できる', () {
         // Act
-        final result = statusManager.getPlanClass(SubscriptionConstants.premiumYearlyPlanId);
+        final result = statusManager.getPlanClass(
+          SubscriptionConstants.premiumYearlyPlanId,
+        );
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.value.id, equals(SubscriptionConstants.premiumYearlyPlanId));
+        expect(
+          result.value.id,
+          equals(SubscriptionConstants.premiumYearlyPlanId),
+        );
         expect(result.value.displayName, equals('Premium (年額)'));
       });
 
@@ -303,15 +351,21 @@ void main() {
           transactionId: 'test_transaction',
           lastPurchaseDate: DateTime.now(),
         );
-        
-        await mockSubscriptionBox.put(SubscriptionConstants.statusKey, premiumStatus);
+
+        await mockSubscriptionBox.put(
+          SubscriptionConstants.statusKey,
+          premiumStatus,
+        );
 
         // Act
         final result = await statusManager.getCurrentPlanClass();
 
         // Assert
         expect(result.isSuccess, isTrue);
-        expect(result.value.id, equals(SubscriptionConstants.premiumMonthlyPlanId));
+        expect(
+          result.value.id,
+          equals(SubscriptionConstants.premiumMonthlyPlanId),
+        );
         expect(result.value.displayName, equals('Premium (月額)'));
       });
     });
@@ -437,8 +491,11 @@ void main() {
           transactionId: 'test',
           lastPurchaseDate: DateTime.now(),
         );
-        
-        await mockSubscriptionBox.put(SubscriptionConstants.statusKey, premiumStatus);
+
+        await mockSubscriptionBox.put(
+          SubscriptionConstants.statusKey,
+          premiumStatus,
+        );
 
         // Act
         final result = await statusManager.canAccessPremiumFeatures();
@@ -472,8 +529,11 @@ void main() {
           transactionId: 'test',
           lastPurchaseDate: DateTime.now(),
         );
-        
-        await mockSubscriptionBox.put(SubscriptionConstants.statusKey, expiredPremiumStatus);
+
+        await mockSubscriptionBox.put(
+          SubscriptionConstants.statusKey,
+          expiredPremiumStatus,
+        );
 
         // Act
         final result = await statusManager.canAccessPremiumFeatures();
@@ -514,7 +574,10 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('StatusManager is not initialized'));
+        expect(
+          result.error.message,
+          contains('StatusManager is not initialized'),
+        );
       });
 
       test('初期化されていない場合、updateStatus()がエラーを返す', () async {
@@ -537,7 +600,10 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('StatusManager is not initialized'));
+        expect(
+          result.error.message,
+          contains('StatusManager is not initialized'),
+        );
       });
 
       test('初期化されていない場合、refreshStatus()がエラーを返す', () async {
@@ -547,7 +613,10 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('StatusManager is not initialized'));
+        expect(
+          result.error.message,
+          contains('StatusManager is not initialized'),
+        );
       });
 
       test('初期化されていない場合、createStatus()がエラーを返す', () async {
@@ -560,7 +629,10 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('StatusManager is not initialized'));
+        expect(
+          result.error.message,
+          contains('StatusManager is not initialized'),
+        );
       });
 
       test('初期化されていない場合、clearStatus()がエラーを返す', () async {
@@ -570,7 +642,10 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
         expect(result.error, isA<ServiceException>());
-        expect(result.error.message, contains('StatusManager is not initialized'));
+        expect(
+          result.error.message,
+          contains('StatusManager is not initialized'),
+        );
       });
 
       test('初期化されていない場合、getCurrentPlanClass()がエラーを返す', () async {
@@ -603,7 +678,9 @@ void main() {
         expect(result.error, isA<ServiceException>());
 
         // テスト後にボックスを再オープン
-        mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>('subscription');
+        mockSubscriptionBox = await Hive.openBox<SubscriptionStatus>(
+          'subscription',
+        );
         statusManager = SubscriptionStatusManager(
           mockSubscriptionBox,
           mockLoggingService,
