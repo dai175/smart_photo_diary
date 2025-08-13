@@ -20,6 +20,10 @@ import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import '../../mocks/mock_subscription_purchase_manager.dart';
+import '../../mocks/mock_subscription_status_manager.dart';
+import '../../mocks/mock_subscription_usage_tracker.dart';
+import '../../mocks/mock_subscription_access_control_manager.dart';
 
 /// Mock PhotoService for integration testing
 class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
@@ -69,6 +73,12 @@ class TestServiceSetup {
   static MockSubscriptionServiceInterface? _mockSubscriptionService;
   static MockSettingsService? _mockSettingsService;
   static MockStorageService? _mockStorageService;
+  
+  // 新しいマネージャーモック
+  static MockSubscriptionPurchaseManager? _mockPurchaseManager;
+  static MockSubscriptionStatusManager? _mockStatusManager;
+  static MockSubscriptionUsageTracker? _mockUsageTracker;
+  static MockSubscriptionAccessControlManager? _mockAccessControlManager;
 
   /// Get or create mock PhotoService with default behavior
   static MockPhotoServiceInterface getPhotoService() {
@@ -100,6 +110,26 @@ class TestServiceSetup {
     return _mockStorageService ??= _createStorageServiceMock();
   }
 
+  /// Get or create mock SubscriptionPurchaseManager with default behavior
+  static MockSubscriptionPurchaseManager getPurchaseManager() {
+    return _mockPurchaseManager ??= MockSubscriptionPurchaseManager();
+  }
+
+  /// Get or create mock SubscriptionStatusManager with default behavior
+  static MockSubscriptionStatusManager getStatusManager() {
+    return _mockStatusManager ??= MockSubscriptionStatusManager();
+  }
+
+  /// Get or create mock SubscriptionUsageTracker with default behavior
+  static MockSubscriptionUsageTracker getUsageTracker() {
+    return _mockUsageTracker ??= MockSubscriptionUsageTracker();
+  }
+
+  /// Get or create mock SubscriptionAccessControlManager with default behavior
+  static MockSubscriptionAccessControlManager getAccessControlManager() {
+    return _mockAccessControlManager ??= MockSubscriptionAccessControlManager();
+  }
+
   /// Clear all mock instances (for test isolation)
   static void clearAllMocks() {
     _mockPhotoService = null;
@@ -108,6 +138,12 @@ class TestServiceSetup {
     _mockSubscriptionService = null;
     _mockSettingsService = null;
     _mockStorageService = null;
+    
+    // 新しいマネージャーモック
+    _mockPurchaseManager = null;
+    _mockStatusManager = null;
+    _mockUsageTracker = null;
+    _mockAccessControlManager = null;
   }
 
   /// Set up all services with default mock behavior
@@ -119,6 +155,12 @@ class TestServiceSetup {
     getSubscriptionService();
     getSettingsService();
     getStorageService();
+    
+    // 新しいマネージャーを初期化
+    getPurchaseManager();
+    getStatusManager();
+    getUsageTracker();
+    getAccessControlManager();
   }
 
   // Private factory methods with default mock behavior

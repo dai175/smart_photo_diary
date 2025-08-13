@@ -737,15 +737,18 @@
     - [x] プラン別アクセス制御設定（Basic/Premium月額/Premium年額）
     - [x] 42件のテストケースで全機能をカバー・flutter analyze 0 issues達成
 
-  ##### Phase 3-2: 既存モックサービス統合更新（2個）
-  - [ ] MockServicesクラス更新
-    - [ ] `test/integration/mocks/mock_services.dart`への新マネージャー統合
-    - [ ] ファサードパターンSubscriptionService対応
-    - [ ] 依存性注入とServiceLocator登録の統一
-  - [ ] IntegrationTestHelpersクラス更新
-    - [ ] `test/integration/test_helpers/integration_test_helpers.dart`更新
-    - [ ] 新マネージャーのセットアップ・破棄処理追加
-    - [ ] 統合テスト用データ・状態管理の最適化
+  ##### Phase 3-2: 既存モックサービス統合更新（2個） ✅
+  - [x] MockServicesクラス更新 ✅
+    - [x] `test/integration/mocks/mock_services.dart`への新マネージャー統合
+    - [x] ファサードパターンSubscriptionService対応
+    - [x] 依存性注入とServiceLocator登録の統一
+    - [x] IntegratedSubscriptionMockSetupクラス追加
+    - [x] 新マネージャー用ファクトリーメソッド実装
+  - [x] IntegrationTestHelpersクラス更新 ✅
+    - [x] `test/integration/test_helpers/integration_test_helpers.dart`更新
+    - [x] 新マネージャーのセットアップ・破棄処理追加
+    - [x] 統合テスト用データ・状態管理の最適化
+    - [x] 新マネージャー統合テストヘルパー16個追加
 
   ##### Phase 3-3: テストヘルパー統合・最適化（2個）
   - [ ] 共通テストユーティリティの作成

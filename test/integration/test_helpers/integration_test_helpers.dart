@@ -18,8 +18,13 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
+import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
 import '../mocks/mock_services.dart';
+import '../../mocks/mock_subscription_purchase_manager.dart';
+import '../../mocks/mock_subscription_status_manager.dart';
+import '../../mocks/mock_subscription_usage_tracker.dart';
+import '../../mocks/mock_subscription_access_control_manager.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 /// Helper utilities for integration testing
@@ -27,6 +32,12 @@ class IntegrationTestHelpers {
   static late ServiceLocator _serviceLocator;
   static late MockPhotoServiceInterface _mockPhotoService;
   static late MockAiServiceInterface _mockAiService;
+  
+  // 新しいマネージャーモックのサポート
+  static MockSubscriptionPurchaseManager? _mockPurchaseManager;
+  static MockSubscriptionStatusManager? _mockStatusManager;
+  static MockSubscriptionUsageTracker? _mockUsageTracker;
+  static MockSubscriptionAccessControlManager? _mockAccessControlManager;
 
   /// Setup comprehensive test environment for integration tests
   static Future<void> setUpIntegrationEnvironment() async {
@@ -51,6 +62,12 @@ class IntegrationTestHelpers {
 
       // Clear service locator
       _serviceLocator.clear();
+      
+      // マネージャーモックのクリーンアップ
+      _mockPurchaseManager = null;
+      _mockStatusManager = null;
+      _mockUsageTracker = null;
+      _mockAccessControlManager = null;
 
       // Clear mock platform channels
       MockPlatformChannels.clearMocks();
@@ -85,6 +102,28 @@ class IntegrationTestHelpers {
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
     final mockLoggingService = MockLoggingService();
+    
+    // 新しいマネージャーモックを作成
+    _mockPurchaseManager = MockSubscriptionPurchaseManager();
+    _mockStatusManager = MockSubscriptionStatusManager();
+    _mockUsageTracker = MockSubscriptionUsageTracker();
+    _mockAccessControlManager = MockSubscriptionAccessControlManager();
+    
+    // マネージャーのデフォルト状態を設定
+    _mockStatusManager!.setCurrentPlan(BasicPlan());
+    final basicStatus = SubscriptionStatus(
+      planId: BasicPlan().id,
+      isActive: true,
+      startDate: DateTime.now(),
+      expiryDate: null,
+      autoRenewal: false,
+      monthlyUsageCount: 0,
+      lastResetDate: DateTime.now(),
+      transactionId: '',
+      lastPurchaseDate: null,
+    );
+    _mockUsageTracker!.setCurrentStatus(basicStatus);
+    _mockAccessControlManager!.createBasicRestrictedState();
 
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
@@ -106,6 +145,9 @@ class IntegrationTestHelpers {
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<StorageService>(mockStorageService);
     _serviceLocator.registerSingleton<LoggingService>(mockLoggingService);
+    
+    // 新しいマネージャーモックをServiceLocatorに登録（必要に応じて）
+    // 現在はファサードパターンのたSubscriptionServiceを使用
   }
 
   /// Setup default behaviors for mock services
@@ -471,6 +513,18 @@ class IntegrationTestHelpers {
 
   /// Get mock AI service for additional setup
   static MockAiServiceInterface get mockAiService => _mockAiService;
+  
+  /// Get mock subscription purchase manager for additional setup
+  static MockSubscriptionPurchaseManager? get mockPurchaseManager => _mockPurchaseManager;
+  
+  /// Get mock subscription status manager for additional setup
+  static MockSubscriptionStatusManager? get mockStatusManager => _mockStatusManager;
+  
+  /// Get mock subscription usage tracker for additional setup
+  static MockSubscriptionUsageTracker? get mockUsageTracker => _mockUsageTracker;
+  
+  /// Get mock subscription access control manager for additional setup
+  static MockSubscriptionAccessControlManager? get mockAccessControlManager => _mockAccessControlManager;
 
   // ========================================
   // Plan Class Integration Test Helpers
@@ -607,6 +661,107 @@ class IntegrationTestHelpers {
       find.textContaining('${plan.monthlyAiGenerationLimit}'),
       findsWidgets,
     );
+  }
+  
+  // ========================================
+  // 新マネージャー統合テストヘルパー
+  // ========================================
+  
+  /// マネージャーモックを特定のプランで設定
+  static void setupIntegratedSubscriptionMocks(
+    Plan plan, {
+    int usageCount = 0,
+    bool isActive = true,
+  }) {
+    if (_mockStatusManager != null) {
+      _mockStatusManager!.setCurrentPlan(plan);
+    }
+    
+    if (_mockUsageTracker != null) {
+      final now = DateTime.now();
+      DateTime? expiryDate;
+      
+      if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
+        expiryDate = now.add(const Duration(days: 30));
+      } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
+        expiryDate = now.add(const Duration(days: 365));
+      }
+      
+      final status = SubscriptionStatus(
+        planId: plan.id,
+        isActive: isActive,
+        startDate: now,
+        expiryDate: expiryDate,
+        autoRenewal: plan.id != SubscriptionConstants.basicPlanId,
+        monthlyUsageCount: usageCount,
+        lastResetDate: now,
+        transactionId: plan.id == SubscriptionConstants.basicPlanId
+            ? ''
+            : 'mock_transaction_${now.millisecondsSinceEpoch}',
+        lastPurchaseDate: plan.id == SubscriptionConstants.basicPlanId ? null : now,
+      );
+      
+      _mockUsageTracker!.setCurrentStatus(status);
+    }
+    
+    if (_mockAccessControlManager != null) {
+      if (plan is BasicPlan) {
+        _mockAccessControlManager!.createBasicRestrictedState();
+      } else {
+        _mockAccessControlManager!.createPremiumFullAccessState();
+      }
+    }
+  }
+  
+  /// Basicプランでマネージャーモックを設定
+  static void setupBasicPlanManagers({int usageCount = 0}) {
+    setupIntegratedSubscriptionMocks(
+      BasicPlan(),
+      usageCount: usageCount,
+    );
+  }
+  
+  /// Premiumプランでマネージャーモックを設定
+  static void setupPremiumPlanManagers({
+    bool isYearly = true,
+    int usageCount = 0,
+  }) {
+    final plan = isYearly ? PremiumYearlyPlan() : PremiumMonthlyPlan();
+    setupIntegratedSubscriptionMocks(
+      plan,
+      usageCount: usageCount,
+    );
+  }
+  
+  /// 使用制限に達したシナリオでマネージャーを設定
+  static void setupUsageLimitReachedManagers(Plan plan) {
+    setupIntegratedSubscriptionMocks(
+      plan,
+      usageCount: plan.monthlyAiGenerationLimit,
+    );
+  }
+  
+  /// マネージャーモックの状態をリセット
+  static void resetManagerMocks() {
+    _mockStatusManager?.resetToDefaults();
+    _mockUsageTracker?.resetToDefaults();
+    _mockAccessControlManager?.resetToDefaults();
+  }
+  
+  /// マネージャーのエラーシナリオを設定
+  static void setupManagerErrorScenarios() {
+    _mockPurchaseManager?.setInitializationFailure(true, 'Test purchase error');
+    _mockStatusManager?.setGetCurrentStatusFailure(true, 'Test status error');
+    _mockUsageTracker?.setCanUseAiGenerationFailure(true, 'Test usage error');
+    _mockAccessControlManager?.setCanAccessPremiumFeaturesFailure(true, 'Test access error');
+  }
+  
+  /// マネージャーのエラーシナリオをクリア
+  static void clearManagerErrorScenarios() {
+    _mockPurchaseManager?.resetToDefaults();
+    _mockStatusManager?.resetToDefaults();
+    _mockUsageTracker?.resetToDefaults();
+    _mockAccessControlManager?.resetToDefaults();
   }
 }
 
