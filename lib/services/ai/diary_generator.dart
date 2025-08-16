@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'ai_service_interface.dart';
 import 'gemini_api_client.dart';
+import '../logging_service.dart';
 
 /// 日記生成を担当するサービス
 class DiaryGenerator {
@@ -10,6 +11,36 @@ class DiaryGenerator {
 
   DiaryGenerator({GeminiApiClient? apiClient})
     : _apiClient = apiClient ?? GeminiApiClient();
+
+  /// ログ出力メソッド
+  void _log(
+    String message, {
+    LogLevel level = LogLevel.info,
+    String? context,
+    dynamic data,
+    dynamic error,
+  }) {
+    try {
+      final loggingService = LoggingService.instance;
+      switch (level) {
+        case LogLevel.debug:
+          loggingService.debug(message, context: context, data: data);
+          break;
+        case LogLevel.info:
+          loggingService.info(message, context: context, data: data);
+          break;
+        case LogLevel.warning:
+          loggingService.warning(message, context: context, data: data);
+          break;
+        case LogLevel.error:
+          loggingService.error(message, context: context, error: error);
+          break;
+      }
+    } catch (e) {
+      // LoggingServiceが初期化されていない場合はフォールバック
+      debugPrint('[$level] $message');
+    }
+  }
 
   /// プロンプト種別を分析
   String _analyzePromptType(String? prompt) {
@@ -140,14 +171,19 @@ $emphasis、個人的で心に響く日記を作成してください。'''
 感情豊かで個人的な日記を作成してください。''';
 
       // デバッグログ: プロンプト統合確認（感情深掘り型対応）
-      debugPrint('=== AI生成プロンプト統合確認 ===');
-      debugPrint('カスタムプロンプト: ${prompt ?? "なし"}');
-      debugPrint('プロンプト種別: $promptType');
-      debugPrint('最適化パラメータ: maxTokens=$maxTokens, emphasis=$emphasis');
-      debugPrint('統合後プロンプト長: ${finalPrompt.length}文字');
-      if (prompt != null) {
-        debugPrint('感情深掘り型プロンプト統合: 成功');
-      }
+      _log(
+        'AI生成プロンプト統合確認',
+        level: LogLevel.debug,
+        context: 'generateFromImage',
+        data: {
+          'カスタムプロンプト': prompt ?? 'なし',
+          'プロンプト種別': promptType,
+          'maxTokens': maxTokens,
+          'emphasis': emphasis,
+          '統合後プロンプト長': '${finalPrompt.length}文字',
+          '感情深掘り型プロンプト統合': prompt != null ? '成功' : 'なし',
+        },
+      );
 
       final response = await _apiClient.sendVisionRequest(
         prompt: finalPrompt,
@@ -165,7 +201,12 @@ $emphasis、個人的で心に響く日記を作成してください。'''
       // APIエラーの場合は例外を再スロー
       throw Exception('AI日記生成に失敗しました: APIレスポンスが不正です');
     } catch (e) {
-      debugPrint('画像ベース日記生成エラー: $e');
+      _log(
+        '画像ベース日記生成エラー',
+        level: LogLevel.error,
+        context: 'generateFromImage',
+        error: e,
+      );
       // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
       rethrow;
     }
@@ -199,7 +240,12 @@ $emphasis、個人的で心に響く日記を作成してください。'''
         final imageWithTime = sortedImages[i];
         onProgress?.call(i + 1, sortedImages.length);
 
-        debugPrint('画像 ${i + 1}/${sortedImages.length} を分析中...');
+        _log(
+          '画像分析中',
+          level: LogLevel.info,
+          context: 'generateFromMultipleImages',
+          data: {'現在': i + 1, '総数': sortedImages.length},
+        );
 
         final analysis = await _analyzeImage(
           imageWithTime.imageData,
@@ -221,7 +267,12 @@ $emphasis、個人的で心に響く日記を作成してください。'''
         prompt,
       );
     } catch (e) {
-      debugPrint('複数画像日記生成エラー: $e');
+      _log(
+        '複数画像日記生成エラー',
+        level: LogLevel.error,
+        context: 'generateFromMultipleImages',
+        error: e,
+      );
       // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
       rethrow;
     }
@@ -261,7 +312,12 @@ $emphasis、個人的で心に響く日記を作成してください。'''
 
       return DiaryGenerationResult(title: title, content: content);
     } catch (e) {
-      debugPrint('日記パース中のエラー: $e');
+      _log(
+        '日記パース中のエラー',
+        level: LogLevel.error,
+        context: '_parseGeneratedDiary',
+        error: e,
+      );
       return DiaryGenerationResult(
         title: '今日の日記',
         content: generatedText.trim(),
@@ -357,7 +413,12 @@ ${location != null ? '場所: $location\n' : ''}
 
       return '$timeStr($timeOfDay): 画像分析に失敗しました';
     } catch (e) {
-      debugPrint('画像分析エラー: $e');
+      _log(
+        '画像分析エラー',
+        level: LogLevel.error,
+        context: '_analyzeImage',
+        error: e,
+      );
       return '$timeStr($timeOfDay): 画像分析に失敗しました';
     }
   }
@@ -432,14 +493,19 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
 感情豊かで個人的な日記を作成してください。''';
 
     // デバッグログ: 複数画像プロンプト統合確認（感情深掘り型対応）
-    debugPrint('=== 複数画像AI生成プロンプト統合確認 ===');
-    debugPrint('カスタムプロンプト: ${customPrompt ?? "なし"}');
-    debugPrint('プロンプト種別: $promptType');
-    debugPrint('最適化パラメータ: maxTokens=$multiImageMaxTokens, emphasis=$emphasis');
-    debugPrint('統合後プロンプト長: ${prompt.length}文字');
-    if (customPrompt != null) {
-      debugPrint('複数画像感情深掘り型プロンプト統合: 成功');
-    }
+    _log(
+      '複数画像AI生成プロンプト統合確認',
+      level: LogLevel.debug,
+      context: '_generateDiaryFromAnalyses',
+      data: {
+        'カスタムプロンプト': customPrompt ?? 'なし',
+        'プロンプト種別': promptType,
+        'maxTokens': multiImageMaxTokens,
+        'emphasis': emphasis,
+        '統合後プロンプト長': '${prompt.length}文字',
+        '複数画像感情深掘り型プロンプト統合': customPrompt != null ? '成功' : 'なし',
+      },
+    );
 
     try {
       final response = await _apiClient.sendTextRequest(
@@ -457,7 +523,12 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
       // APIエラーの場合は例外を再スロー
       throw Exception('AI日記生成に失敗しました: APIレスポンスが不正です');
     } catch (e) {
-      debugPrint('統合日記生成エラー: $e');
+      _log(
+        '統合日記生成エラー',
+        level: LogLevel.error,
+        context: '_generateDiaryFromAnalyses',
+        error: e,
+      );
       // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
       rethrow;
     }
