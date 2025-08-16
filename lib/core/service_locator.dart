@@ -19,19 +19,16 @@ class ServiceLocator {
 
   /// Register a singleton instance
   void registerSingleton<T>(T instance) {
-    debugPrint('ServiceLocator: Registering singleton ${T.toString()}');
     _services[T] = instance;
   }
 
   /// Register a factory function for lazy initialization
   void registerFactory<T>(T Function() factory) {
-    debugPrint('ServiceLocator: Registering factory ${T.toString()}');
     _factories[T] = factory;
   }
 
   /// Register an async factory function for services that require async initialization
   void registerAsyncFactory<T>(Future<T> Function() factory) {
-    debugPrint('ServiceLocator: Registering async factory ${T.toString()}');
     _factories[T] = factory;
   }
 
@@ -41,19 +38,12 @@ class ServiceLocator {
 
     // Check if singleton instance exists
     if (_services.containsKey(type)) {
-      debugPrint(
-        'ServiceLocator: Returning singleton instance of ${type.toString()}',
-      );
       return _services[type] as T;
     }
 
     // Check if factory exists
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
-      debugPrint(
-        'ServiceLocator: Creating instance from factory ${type.toString()}',
-      );
-
       final instance = factory();
 
       // If it's a Future, throw an error - use getAsync instead
@@ -79,19 +69,12 @@ class ServiceLocator {
 
     // Check if singleton instance exists
     if (_services.containsKey(type)) {
-      debugPrint(
-        'ServiceLocator: Returning singleton instance of ${type.toString()}',
-      );
       return _services[type] as T;
     }
 
     // Check if factory exists
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
-      debugPrint(
-        'ServiceLocator: Creating instance from async factory ${type.toString()}',
-      );
-
       final instance = await factory();
 
       // Register as singleton for future use
@@ -113,14 +96,12 @@ class ServiceLocator {
   /// Unregister a service (useful for testing)
   void unregister<T>() {
     final type = T;
-    debugPrint('ServiceLocator: Unregistering ${type.toString()}');
     _services.remove(type);
     _factories.remove(type);
   }
 
   /// Clear all services (useful for testing)
   void clear() {
-    debugPrint('ServiceLocator: Clearing all services');
     _services.clear();
     _factories.clear();
   }
