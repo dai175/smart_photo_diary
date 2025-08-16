@@ -154,13 +154,6 @@ class SettingsService {
     }, context: 'SettingsService.getPlanPeriodInfoV2');
   }
 
-  /// Phase 1.8.1.2: プラン期限情報を取得（互換性レイヤー）
-  @Deprecated('Use getPlanPeriodInfoV2() instead')
-  Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfo() async {
-    // リダイレクトしてV2版を使用
-    return getPlanPeriodInfoV2();
-  }
-
   /// Phase 1.8.1.3: 自動更新状態情報を取得
   Future<Result<AutoRenewalInfoV2>> getAutoRenewalInfo() async {
     return ResultHelper.tryExecuteAsync(() async {

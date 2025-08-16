@@ -70,16 +70,16 @@
 **場所**: `lib/services/settings_service.dart:158`
 
 **作業項目**:
-- [ ] `getPlanPeriodInfo()`メソッドの削除
-- [ ] 呼び出し元の調査: `grep -r "getPlanPeriodInfo(" lib/`
-- [ ] 全ての呼び出し元を`getPlanPeriodInfoV2()`に更新
-- [ ] 関連テストケースの更新
-- [ ] 実装完了後のテスト実行: `fvm flutter test test/unit/services/settings_service_*`
+- [x] `getPlanPeriodInfo()`メソッドの削除
+- [x] 呼び出し元の調査: `grep -r "getPlanPeriodInfo(" lib/`
+- [x] 全ての呼び出し元を`getPlanPeriodInfoV2()`に更新
+- [x] 関連テストケースの更新
+- [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/settings_service_*`
 
 **完了条件**:
-- [ ] @Deprecated アノテーションが完全除去
-- [ ] 全テストが成功
-- [ ] `fvm flutter analyze`でエラーなし
+- [x] @Deprecated アノテーションが完全除去 ✅ **達成済み**
+- [x] 全テストが成功 ✅ **達成済み**
+- [x] `fvm flutter analyze`でエラーなし ✅ **達成済み**
 
 ---
 
@@ -253,7 +253,7 @@
 ### 週次目標
 - **Week 1**: Result<T>移行（DiaryService） ✅ **完了**
 - **Week 2**: Result<T>移行（PhotoService、StorageService） ✅ **完了**
-- **Week 3**: ServiceLocator統一、Deprecated API除去
+- **Week 3**: ServiceLocator統一、Deprecated API除去 🔄 **進行中（Deprecated API除去完了）**
 - **Week 4**: TODO解決、命名規則統一
 - **Week 5**: 状態管理最適化
 - **Week 6-8**: 低優先度項目（オプション）
@@ -268,6 +268,6 @@
 
 ---
 
-**最終更新**: 2025-08-16 (StorageService移行完了)  
+**最終更新**: 2025-08-16 (Deprecated API除去完了)  
 **レビュー者**: [担当者名]  
 **承認日**: [承認日]
