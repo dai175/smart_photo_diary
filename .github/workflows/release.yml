@@ -203,7 +203,7 @@ jobs:
   build-ios-release:
     name: Build iOS Release Artifacts
     needs: [version, test]
-    runs-on: macos-15
+    runs-on: macos-14
     
     steps:
       - name: Checkout code
@@ -217,7 +217,16 @@ jobs:
           cache: true
           
       - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+        
+      - name: Verify Xcode and install iOS platform if needed
+        run: |
+          echo "Xcode version:"
+          xcodebuild -version
+          echo "Available platforms:"
+          xcrun simctl list runtimes
+          echo "Installing iOS platform if missing..."
+          xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
           
       - name: Get dependencies
         run: flutter pub get

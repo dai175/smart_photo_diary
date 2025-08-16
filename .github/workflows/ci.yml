@@ -139,7 +139,7 @@ jobs:
   build-ios:
     name: Build iOS
     needs: quality-check
-    runs-on: macos-15
+    runs-on: macos-14
     timeout-minutes: 45
     
     steps:
@@ -154,7 +154,16 @@ jobs:
           cache: true
           
       - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+        
+      - name: Verify Xcode and install iOS platform if needed
+        run: |
+          echo "Xcode version:"
+          xcodebuild -version
+          echo "Available platforms:"
+          xcrun simctl list runtimes
+          echo "Installing iOS platform if missing..."
+          xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
           
       - name: Get dependencies
         run: flutter pub get
@@ -172,24 +181,24 @@ jobs:
           cd ios
           pod install
           
-      - name: Build iOS (debug, no codesign) for simulator
-        run: flutter build ios --debug --no-codesign --simulator
+      - name: Build iOS (debug, no codesign)
+        run: flutter build ios --debug --no-codesign
         
-      - name: Build iOS (release, no codesign) for simulator  
-        run: flutter build ios --release --no-codesign --simulator
+      - name: Build iOS (release, no codesign)  
+        run: flutter build ios --release --no-codesign
         
       - name: Verify iOS build success
         run: |
           echo "✅ Verifying iOS build outputs..."
-          if [ -d "build/ios/iphonesimulator/Runner.app" ]; then
-            echo "✅ iOS Simulator build completed successfully"
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then
+            echo "✅ iOS device build completed successfully"
           else
-            echo "❌ iOS Simulator build not found"
+            echo "❌ iOS device build not found"
             exit 1
           fi
           
           echo "🎉 iOS builds completed successfully (CI verification only)"
-          echo "ℹ️ Note: CI builds use dummy API keys, no code signing, and target iOS Simulator"
+          echo "ℹ️ Note: CI builds use dummy API keys and no code signing"
 
   ci-summary:
     name: CI Summary
