@@ -4,7 +4,7 @@ import 'package:smart_photo_diary/services/interfaces/photo_service_interface.da
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
-import 'package:smart_photo_diary/services/storage_service.dart';
+import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import '../integration/mocks/mock_services.dart';
 
 /// Widget test specific service setup to avoid service registration errors
@@ -38,7 +38,7 @@ class WidgetTestServiceSetup {
     serviceLocator.registerSingleton<SettingsService>(
       TestServiceSetup.getSettingsService(),
     );
-    serviceLocator.registerSingleton<StorageService>(
+    serviceLocator.registerSingleton<StorageServiceInterface>(
       TestServiceSetup.getStorageService(),
     );
 
@@ -64,7 +64,7 @@ class WidgetTestServiceSetup {
     globalServiceLocator.registerSingleton<SettingsService>(
       TestServiceSetup.getSettingsService(),
     );
-    globalServiceLocator.registerSingleton<StorageService>(
+    globalServiceLocator.registerSingleton<StorageServiceInterface>(
       TestServiceSetup.getStorageService(),
     );
   }

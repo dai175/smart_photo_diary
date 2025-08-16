@@ -7,7 +7,7 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_access_control_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
-import 'package:smart_photo_diary/services/storage_service.dart';
+import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
@@ -38,7 +38,7 @@ class MockPhotoAccessControlServiceInterface extends Mock
 class MockSettingsService extends Mock implements SettingsService {}
 
 /// Mock StorageService for integration testing
-class MockStorageService extends Mock implements StorageService {}
+class MockStorageService extends Mock implements StorageServiceInterface {}
 
 /// Mock AssetEntity for integration testing
 class MockAssetEntity extends Mock implements AssetEntity {}

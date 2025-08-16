@@ -48,11 +48,14 @@
 - [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/photo_service_*`
 
 #### StorageService移行
-- [x] exportDiaries()をResult<String>に変更
-- [x] importDiaries()をResult<ImportResult>に変更
-- [x] 呼び出し元の更新
-- [ ] 関連テストケースの更新
-- [ ] 実装完了後のテスト実行: `fvm flutter test test/unit/storage_service_*`
+- [x] StorageServiceInterfaceの作成
+- [x] exportData()をResult<String?>に変更
+- [x] getStorageInfo()をResult<StorageInfo>に変更
+- [x] optimizeDatabase()をResult<bool>に変更
+- [x] 呼び出し元の更新（settings_screen.dart）
+- [x] ServiceLocator登録の更新
+- [x] 関連テストケースの更新
+- [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/storage_service_test.dart`
 
 **完了条件**:
 - [ ] 全テストが緑（800+テスト100%成功維持）
@@ -265,6 +268,6 @@
 
 ---
 
-**最終更新**: 2025-08-16 (PhotoService移行完了)  
+**最終更新**: 2025-08-16 (StorageService移行完了)  
 **レビュー者**: [担当者名]  
 **承認日**: [承認日]

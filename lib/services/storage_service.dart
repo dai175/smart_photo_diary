@@ -4,13 +4,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/diary_service_interface.dart';
+import 'interfaces/storage_service_interface.dart';
 import 'diary_service.dart'; // compactDatabaseメソッド用に保持
 import '../core/service_locator.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
-class StorageService {
+class StorageService implements StorageServiceInterface {
   static StorageService? _instance;
 
   StorageService._();
@@ -21,6 +22,7 @@ class StorageService {
   }
 
   // ストレージ使用量を取得
+  @override
   Future<StorageInfo> getStorageInfo() async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
@@ -47,6 +49,7 @@ class StorageService {
   }
 
   // データのエクスポート（保存先選択可能）
+  @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
       final diaryService = ServiceLocator().get<DiaryServiceInterface>();
@@ -108,6 +111,7 @@ class StorageService {
   }
 
   // データのインポート（リストア機能）
+  @override
   Future<Result<ImportResult>> importData() async {
     try {
       // ファイル選択
@@ -352,6 +356,7 @@ class StorageService {
   }
 
   // データの最適化
+  @override
   Future<bool> optimizeDatabase() async {
     try {
       final diaryService = await DiaryService.getInstance();
@@ -394,6 +399,46 @@ class StorageService {
       }
     } catch (e) {
       // エラーがあっても続行
+    }
+  }
+
+  // ========================================
+  // Result<T>パターン版のメソッド実装
+  // ========================================
+
+  /// ストレージ使用量を取得する（Result版）
+  @override
+  Future<Result<StorageInfo>> getStorageInfoResult() async {
+    try {
+      final result = await getStorageInfo();
+      return Success(result);
+    } catch (e) {
+      return Failure(ServiceException('ストレージ情報の取得に失敗しました', originalError: e));
+    }
+  }
+
+  /// データのエクスポート（Result版）
+  @override
+  Future<Result<String?>> exportDataResult({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      final result = await exportData(startDate: startDate, endDate: endDate);
+      return Success(result);
+    } catch (e) {
+      return Failure(ServiceException('データエクスポートに失敗しました', originalError: e));
+    }
+  }
+
+  /// データベースの最適化（Result版）
+  @override
+  Future<Result<bool>> optimizeDatabaseResult() async {
+    try {
+      final result = await optimizeDatabase();
+      return Success(result);
+    } catch (e) {
+      return Failure(ServiceException('データベース最適化に失敗しました', originalError: e));
     }
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/settings_service.dart';
-import '../services/storage_service.dart';
+import '../services/storage_service.dart'; // StorageInfoクラス用
+import '../services/interfaces/storage_service_interface.dart';
+import '../core/service_registration.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
@@ -48,7 +50,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _settingsService = await SettingsService.getInstance();
       _packageInfo = await PackageInfo.fromPlatform();
-      _storageInfo = await StorageService.getInstance().getStorageInfo();
+      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final storageResult = await storageService.getStorageInfoResult();
+      if (storageResult.isSuccess) {
+        _storageInfo = storageResult.value;
+      } else {
+        debugPrint('ストレージ情報の取得エラー: ${storageResult.error}');
+      }
 
       // サブスクリプション情報を取得（V2版）
       final subscriptionResult = await _settingsService.getSubscriptionInfoV2();
@@ -931,15 +939,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _showLoadingDialog('バックアップ中...');
 
-      final filePath = await StorageService.getInstance().exportData();
+      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final exportResult = await storageService.exportDataResult();
 
       if (mounted) {
         Navigator.pop(context); // ローディングダイアログを閉じる
 
-        if (filePath != null) {
-          _showSuccessDialog('バックアップ完了', 'バックアップファイルが正常に保存されました');
+        if (exportResult.isSuccess) {
+          final filePath = exportResult.value;
+          if (filePath != null) {
+            _showSuccessDialog('バックアップ完了', 'バックアップファイルが正常に保存されました');
+          } else {
+            _showErrorDialog('バックアップがキャンセルされたか、失敗しました');
+          }
         } else {
-          _showErrorDialog('バックアップがキャンセルされたか、失敗しました');
+          _showErrorDialog('バックアップエラー: ${exportResult.error.message}');
         }
       }
     } catch (e) {
@@ -954,7 +968,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _showLoadingDialog('リストア中...');
 
-      final result = await StorageService.getInstance().importData();
+      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final result = await storageService.importData();
 
       if (mounted) {
         Navigator.pop(context); // ローディングダイアログを閉じる
@@ -980,16 +995,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _showLoadingDialog('最適化中...');
 
-      final success = await StorageService.getInstance().optimizeDatabase();
+      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final optimizeResult = await storageService.optimizeDatabaseResult();
 
       if (mounted) {
         Navigator.pop(context); // ローディングダイアログを閉じる
 
-        if (success) {
+        if (optimizeResult.isSuccess && optimizeResult.value) {
           await _loadSettings(); // ストレージ情報を再読み込み
           _showSuccessDialog('最適化完了', 'データベースの最適化が完了しました');
         } else {
-          _showErrorDialog('最適化に失敗しました');
+          final errorMessage = optimizeResult.isFailure
+              ? '最適化エラー: ${optimizeResult.error.message}'
+              : '最適化に失敗しました';
+          _showErrorDialog(errorMessage);
         }
       }
     } catch (e) {

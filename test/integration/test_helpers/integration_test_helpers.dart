@@ -17,7 +17,7 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
-import 'package:smart_photo_diary/services/storage_service.dart';
+import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import '../mocks/mock_services.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -101,7 +101,9 @@ class IntegrationTestHelpers {
       mockSubscriptionService,
     );
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
-    _serviceLocator.registerSingleton<StorageService>(mockStorageService);
+    _serviceLocator.registerSingleton<StorageServiceInterface>(
+      mockStorageService,
+    );
   }
 
   /// Setup default behaviors for mock services
@@ -422,6 +424,9 @@ class IntegrationTestHelpers {
 
     // Storage service defaults - basic mock setup
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
+    when(
+      () => mockStorageService.exportDataResult(),
+    ).thenAnswer((_) async => Success('{}'));
   }
 
   /// Get mock photo service for additional setup

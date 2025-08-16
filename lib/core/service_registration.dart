@@ -11,6 +11,7 @@ import '../services/photo_access_control_service.dart';
 import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
+import '../services/interfaces/storage_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
 import '../services/interfaces/prompt_service_interface.dart';
@@ -100,7 +101,7 @@ class ServiceRegistration {
     );
 
     // StorageService (singleton pattern)
-    serviceLocator.registerFactory<StorageService>(
+    serviceLocator.registerFactory<StorageServiceInterface>(
       () => StorageService.getInstance(),
     );
 
