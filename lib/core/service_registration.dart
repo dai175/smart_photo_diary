@@ -86,9 +86,8 @@ class ServiceRegistration {
     debugPrint('ServiceRegistration: Registering core services...');
 
     // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
-    serviceLocator.registerAsyncFactory<LoggingService>(
-      () => LoggingService.getInstance(),
-    );
+    final loggingService = await LoggingService.getInstance();
+    serviceLocator.registerSingleton<LoggingService>(loggingService);
 
     // 2. SubscriptionService (Hive依存のみ、LoggingServiceに後で依存)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(

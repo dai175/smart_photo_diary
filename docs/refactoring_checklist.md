@@ -188,10 +188,10 @@
 - [x] subscription_service.dart（44箇所のdebugPrint）
 - [x] ai/diary_generator.dart（18箇所のdebugPrint）
 - [x] ai/gemini_api_client.dart（21箇所のdebugPrint）
-- [x] ai/tag_generator.dart（3箇所のdebugPrint）
-- [ ] エラーハンドリングの統一（error/warning/info レベル分類）
-- [ ] コンテキスト情報の追加
-- [ ] テストの更新
+- [x] ai/tag_generator.dart（3箇所のdebugPrint）✅ **完了** - ServiceLocator経由LoggingService統合
+- [x] エラーハンドリングの統一（error/warning/info レベル分類）✅ **完了**
+- [x] コンテキスト情報の追加 ✅ **完了**
+- [x] debugPrint完全除去・適切なimport整理 ✅ **完了**
 
 #### フェーズ2: 設定・初期化層（1週間）
 **対象**: アプリケーション設定と初期化関連

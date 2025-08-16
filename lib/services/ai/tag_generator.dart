@@ -1,45 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'gemini_api_client.dart';
 import '../logging_service.dart';
+import '../../core/service_locator.dart';
 
 /// タグ生成を担当するサービス
 class TagGenerator {
   final GeminiApiClient _apiClient;
-
   TagGenerator({GeminiApiClient? apiClient})
     : _apiClient = apiClient ?? GeminiApiClient();
 
-  /// ログ出力メソッド
-  void _log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    String? context,
-    dynamic data,
-    dynamic error,
-  }) {
-    try {
-      final loggingService = LoggingService.instance;
-      switch (level) {
-        case LogLevel.debug:
-          loggingService.debug(message, context: context, data: data);
-          break;
-        case LogLevel.info:
-          loggingService.info(message, context: context, data: data);
-          break;
-        case LogLevel.warning:
-          loggingService.warning(message, context: context, data: data);
-          break;
-        case LogLevel.error:
-          loggingService.error(message, context: context, error: error);
-          break;
-      }
-    } catch (e) {
-      // LoggingServiceが初期化されていない場合はフォールバック
-      debugPrint('[$level] $message');
-    }
-  }
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   /// 日記の内容からタグを自動生成
   Future<List<String>> generateTags({
@@ -110,14 +81,13 @@ class TagGenerator {
         }
       }
 
-      _log(
+      _logger.warning(
         'タグ生成 API エラーまたはレスポンスなし',
-        level: LogLevel.warning,
-        context: 'generateTags',
+        context: 'TagGenerator.generateTags',
       );
       return _generateOfflineTags(title, content, date, photoCount);
     } catch (e) {
-      _log('タグ生成エラー', level: LogLevel.error, context: 'generateTags', error: e);
+      _logger.error('タグ生成エラー', context: 'TagGenerator.generateTags', error: e);
       return _generateOfflineTags(title, content, date, photoCount);
     }
   }

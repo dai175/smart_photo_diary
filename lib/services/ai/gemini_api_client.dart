@@ -1,41 +1,14 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
 import '../logging_service.dart';
+import '../../core/service_locator.dart';
 
 /// Gemini APIクライアント - API通信を担当
 class GeminiApiClient {
-  /// ログ出力メソッド
-  void _log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    String? context,
-    dynamic data,
-    dynamic error,
-  }) {
-    try {
-      final loggingService = LoggingService.instance;
-      switch (level) {
-        case LogLevel.debug:
-          loggingService.debug(message, context: context, data: data);
-          break;
-        case LogLevel.info:
-          loggingService.info(message, context: context, data: data);
-          break;
-        case LogLevel.warning:
-          loggingService.warning(message, context: context, data: data);
-          break;
-        case LogLevel.error:
-          loggingService.error(message, context: context, error: error);
-          break;
-      }
-    } catch (e) {
-      // LoggingServiceが初期化されていない場合はフォールバック
-      debugPrint('[$level] $message');
-    }
-  }
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   // Google Gemini APIのエンドポイント
   static String get _apiUrl =>
@@ -46,9 +19,8 @@ class GeminiApiClient {
     final key = EnvironmentConfig.geminiApiKey;
     if (key.isEmpty) {
       final client = GeminiApiClient();
-      client._log(
+      client._logger.warning(
         'GEMINI_API_KEYが設定されていません',
-        level: LogLevel.warning,
         context: 'GeminiApiClient._apiKey',
       );
       EnvironmentConfig.printDebugInfo();
@@ -64,9 +36,8 @@ class GeminiApiClient {
   }) async {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
-      _log(
+      _logger.error(
         'Gemini API エラー: 有効なAPIキーが設定されていません',
-        level: LogLevel.error,
         context: 'sendTextRequest',
       );
       EnvironmentConfig.printDebugInfo();
@@ -99,38 +70,27 @@ class GeminiApiClient {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _log(
+        _logger.debug(
           'Gemini API レスポンス受信成功',
-          level: LogLevel.debug,
           context: 'sendTextRequest',
           data: data,
         );
         return data;
       } else {
-        _log(
-          'Gemini API エラー',
-          level: LogLevel.error,
+        _logger.error(
+          'Gemini API エラー: ${response.statusCode}',
           context: 'sendTextRequest',
-          data: {
-            'statusCode': response.statusCode,
-            'body': response.body,
-            'apiKeyPrefix': _apiKey.isNotEmpty
-                ? '${_apiKey.substring(0, 8)}...'
-                : '空',
-          },
         );
         return null;
       }
     } catch (e) {
-      _log(
+      _logger.error(
         'Gemini API リクエストエラー',
-        level: LogLevel.error,
         context: 'sendTextRequest',
         error: e,
       );
-      _log(
+      _logger.debug(
         'API接続情報',
-        level: LogLevel.debug,
         context: 'sendTextRequest',
         data: {
           'apiKeyPrefix': _apiKey.isNotEmpty
@@ -151,9 +111,8 @@ class GeminiApiClient {
   }) async {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
-      _log(
+      _logger.error(
         'Gemini Vision API エラー: 有効なAPIキーが設定されていません',
-        level: LogLevel.error,
         context: 'sendVisionRequest',
       );
       EnvironmentConfig.printDebugInfo();
@@ -192,38 +151,27 @@ class GeminiApiClient {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _log(
+        _logger.debug(
           'Gemini Vision API レスポンス受信成功',
-          level: LogLevel.debug,
           context: 'sendVisionRequest',
           data: data,
         );
         return data;
       } else {
-        _log(
-          'Gemini Vision API エラー',
-          level: LogLevel.error,
+        _logger.error(
+          'Gemini Vision API エラー: ${response.statusCode}',
           context: 'sendVisionRequest',
-          data: {
-            'statusCode': response.statusCode,
-            'body': response.body,
-            'apiKeyPrefix': _apiKey.isNotEmpty
-                ? '${_apiKey.substring(0, 8)}...'
-                : '空',
-          },
         );
         return null;
       }
     } catch (e) {
-      _log(
+      _logger.error(
         'Gemini Vision API リクエストエラー',
-        level: LogLevel.error,
         context: 'sendVisionRequest',
         error: e,
       );
-      _log(
+      _logger.debug(
         'Vision API接続情報',
-        level: LogLevel.debug,
         context: 'sendVisionRequest',
         data: {
           'apiKeyPrefix': _apiKey.isNotEmpty
@@ -238,11 +186,7 @@ class GeminiApiClient {
   /// APIキーの有効性をテスト
   Future<bool> testApiKey() async {
     if (!EnvironmentConfig.hasValidApiKey) {
-      _log(
-        'APIキーテスト: 有効なAPIキーが設定されていません',
-        level: LogLevel.warning,
-        context: 'testApiKey',
-      );
+      _logger.warning('APIキーテスト: 有効なAPIキーが設定されていません', context: 'testApiKey');
       EnvironmentConfig.printDebugInfo();
       return false;
     }
@@ -250,20 +194,14 @@ class GeminiApiClient {
     try {
       final response = await sendTextRequest(prompt: 'Hello, this is a test.');
       final isValid = response != null;
-      _log(
+      _logger.info(
         'APIキーテスト',
-        level: LogLevel.info,
         context: 'testApiKey',
         data: {'結果': isValid ? '有効' : '無効'},
       );
       return isValid;
     } catch (e) {
-      _log(
-        'APIキーテストエラー',
-        level: LogLevel.error,
-        context: 'testApiKey',
-        error: e,
-      );
+      _logger.error('APIキーテストエラー', context: 'testApiKey', error: e);
       return false;
     }
   }
@@ -297,30 +235,23 @@ class GeminiApiClient {
         if (content != null && content.isNotEmpty) {
           return content.trim();
         } else {
-          _log(
+          _logger.warning(
             'テキストコンテンツが見つかりません',
-            level: LogLevel.warning,
             context: 'extractTextFromResponse',
             data: {'finishReason': candidate['finishReason']},
           );
           return null;
         }
       } else {
-        _log(
+        _logger.warning(
           'レスポンス構造が予期されたものと異なります',
-          level: LogLevel.warning,
           context: 'extractTextFromResponse',
           data: data,
         );
         return null;
       }
     } catch (e) {
-      _log(
-        'レスポンス解析エラー',
-        level: LogLevel.error,
-        context: 'extractTextFromResponse',
-        error: e,
-      );
+      _logger.error('レスポンス解析エラー', context: 'extractTextFromResponse', error: e);
       return null;
     }
   }
