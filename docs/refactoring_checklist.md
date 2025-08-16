@@ -185,7 +185,7 @@
 
 #### フェーズ1: 高優先度サービス層（1-2週間）
 **対象**: APIクライアントと重要なビジネスロジック
-- [ ] subscription_service.dart（44箇所のdebugPrint）
+- [x] subscription_service.dart（44箇所のdebugPrint）
 - [ ] ai/diary_generator.dart（18箇所のdebugPrint）
 - [ ] ai/gemini_api_client.dart（21箇所のdebugPrint）
 - [ ] ai/tag_generator.dart（3箇所のdebugPrint）

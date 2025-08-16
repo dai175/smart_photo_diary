@@ -135,7 +135,7 @@ class SubscriptionService implements ISubscriptionService {
     const statusKey = SubscriptionConstants.statusKey;
 
     if (_subscriptionBox?.get(statusKey) == null) {
-      debugPrint('SubscriptionService: Creating initial Basic plan status');
+      _log('Creating initial Basic plan status', level: LogLevel.info);
 
       final initialStatus = SubscriptionStatus(
         planId: BasicPlan().id,
@@ -150,11 +150,9 @@ class SubscriptionService implements ISubscriptionService {
       );
 
       await _subscriptionBox?.put(statusKey, initialStatus);
-      debugPrint('SubscriptionService: Initial status created successfully');
+      _log('Initial status created successfully', level: LogLevel.info);
     } else {
-      debugPrint(
-        'SubscriptionService: Existing status found, skipping creation',
-      );
+      _log('Existing status found, skipping creation', level: LogLevel.debug);
     }
   }
 
@@ -260,8 +258,10 @@ class SubscriptionService implements ISubscriptionService {
       if (kDebugMode) {
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null) {
-          debugPrint(
-            'SubscriptionService.getCurrentStatus: プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）',
+          _log(
+            'プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）',
+            level: LogLevel.debug,
+            data: {'forcedPlan': forcePlan},
           );
 
           // 実際のデータはそのままで、プランIDのみを強制設定に変更した状態を返す
@@ -296,7 +296,7 @@ class SubscriptionService implements ISubscriptionService {
 
       return Success(status);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting current status - $e');
+      _log('Error getting current status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to get current status', details: e.toString()),
       );
@@ -313,10 +313,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, status);
-      debugPrint('SubscriptionService: Status updated successfully');
+      _log('Status updated successfully', level: LogLevel.info);
       return const Success(null);
     } catch (e) {
-      debugPrint('SubscriptionService: Error updating status - $e');
+      _log('Error updating status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to update status', details: e.toString()),
       );
@@ -341,7 +341,7 @@ class SubscriptionService implements ISubscriptionService {
 
       return const Success(null);
     } catch (e) {
-      debugPrint('SubscriptionService: Error refreshing status - $e');
+      _log('Error refreshing status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to refresh status', details: e.toString()),
       );
@@ -397,12 +397,14 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
-      debugPrint(
-        'SubscriptionService: Created new status for plan: ${plan.id}',
+      _log(
+        'Created new status for plan',
+        level: LogLevel.info,
+        data: {'planId': plan.id},
       );
       return Success(newStatus);
     } catch (e) {
-      debugPrint('SubscriptionService: Error creating status - $e');
+      _log('Error creating status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to create status', details: e.toString()),
       );
@@ -420,10 +422,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       await _subscriptionBox?.delete(SubscriptionConstants.statusKey);
-      debugPrint('SubscriptionService: Status cleared');
+      _log('Status cleared', level: LogLevel.info);
       return const Success(null);
     } catch (e) {
-      debugPrint('SubscriptionService: Error clearing status - $e');
+      _log('Error clearing status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to clear status', details: e.toString()),
       );
@@ -458,7 +460,7 @@ class SubscriptionService implements ISubscriptionService {
       final status = statusResult.value;
       return Success(status.monthlyUsageCount);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting monthly usage - $e');
+      _log('Error getting monthly usage', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to get monthly usage', details: e.toString()),
       );
@@ -494,11 +496,11 @@ class SubscriptionService implements ISubscriptionService {
       );
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
-      debugPrint('SubscriptionService: Usage manually reset');
+      _log('Usage manually reset', level: LogLevel.info);
 
       return const Success(null);
     } catch (e) {
-      debugPrint('SubscriptionService: Error resetting usage - $e');
+      _log('Error resetting usage', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to reset usage', details: e.toString()),
       );
@@ -632,13 +634,15 @@ class SubscriptionService implements ISubscriptionService {
         SubscriptionConstants.statusKey,
         updatedStatus,
       );
-      debugPrint(
-        'SubscriptionService: AI usage incremented to ${updatedStatus.monthlyUsageCount}/$monthlyLimit',
+      _log(
+        'AI usage incremented',
+        level: LogLevel.info,
+        data: {'usage': updatedStatus.monthlyUsageCount, 'limit': monthlyLimit},
       );
 
       return const Success(null);
     } catch (e) {
-      debugPrint('SubscriptionService: Error incrementing AI usage - $e');
+      _log('Error incrementing AI usage', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to increment AI usage', details: e.toString()),
       );
@@ -661,7 +665,7 @@ class SubscriptionService implements ISubscriptionService {
       final status = statusResult.value;
       await _resetMonthlyUsageIfNeeded(status);
     } catch (e) {
-      debugPrint('SubscriptionService: Error resetting monthly usage - $e');
+      _log('Error resetting monthly usage', level: LogLevel.error, error: e);
       // このメソッドは内部的に呼ばれるため、エラーは基本的に無視
       // 致命的でない場合は処理を継続
     }
@@ -704,8 +708,10 @@ class SubscriptionService implements ISubscriptionService {
 
       return Success(remaining > 0 ? remaining : 0);
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error getting remaining generations - $e',
+      _log(
+        'Error getting remaining generations',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -736,7 +742,7 @@ class SubscriptionService implements ISubscriptionService {
 
       return Success(nextResetDate);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting next reset date - $e');
+      _log('Error getting next reset date', level: LogLevel.error, error: e);
       return Failure(
         ServiceException(
           'Failed to get next reset date',
@@ -771,8 +777,10 @@ class SubscriptionService implements ISubscriptionService {
     final statusMonth = _getUsageMonth(status);
 
     if (statusMonth != currentMonth) {
-      debugPrint(
-        'SubscriptionService: Resetting monthly usage - previous month: $statusMonth, current: $currentMonth',
+      _log(
+        'Resetting monthly usage',
+        level: LogLevel.info,
+        data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
       );
 
       final resetStatus = SubscriptionStatus(
@@ -852,15 +860,21 @@ class SubscriptionService implements ISubscriptionService {
       // デバッグモードでプラン強制設定をチェック
       if (kDebugMode) {
         final forcePlan = EnvironmentConfig.forcePlan;
-        debugPrint('SubscriptionService: デバッグモードチェック - forcePlan: $forcePlan');
+        _log(
+          'デバッグモードチェック',
+          level: LogLevel.debug,
+          data: {'forcePlan': forcePlan},
+        );
         if (forcePlan != null) {
           final forceResult = forcePlan.startsWith('premium');
-          debugPrint(
-            'SubscriptionService: プラン強制設定により Premium アクセス: $forceResult (プラン: $forcePlan)',
+          _log(
+            'プラン強制設定により Premium アクセス',
+            level: LogLevel.debug,
+            data: {'access': forceResult, 'plan': forcePlan},
           );
           return Success(forceResult);
         } else {
-          debugPrint('SubscriptionService: プラン強制設定なし、通常のプランチェックに進む');
+          _log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
         }
       }
 
@@ -879,14 +893,18 @@ class SubscriptionService implements ISubscriptionService {
 
       // Premiumプランは有効期限をチェック
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint(
-        'SubscriptionService: Premium features access check - plan: ${currentPlan.id}, valid: $isPremiumValid',
+      _log(
+        'Premium features access check',
+        level: LogLevel.debug,
+        data: {'plan': currentPlan.id, 'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error checking premium features access - $e',
+      _log(
+        'Error checking premium features access',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -911,8 +929,10 @@ class SubscriptionService implements ISubscriptionService {
       if (kDebugMode) {
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null) {
-          debugPrint(
-            'SubscriptionService: プラン強制設定により Writing Prompts アクセス: true (プラン: $forcePlan)',
+          _log(
+            'プラン強制設定により Writing Prompts アクセス: true',
+            level: LogLevel.debug,
+            data: {'plan': forcePlan},
           );
           return const Success(true); // 全プランでライティングプロンプトは利用可能
         }
@@ -928,8 +948,9 @@ class SubscriptionService implements ISubscriptionService {
 
       // ライティングプロンプトは全プランで利用可能（Basicは限定版）
       if (currentPlan is BasicPlan) {
-        debugPrint(
-          'SubscriptionService: Writing prompts access - Basic plan (limited prompts)',
+        _log(
+          'Writing prompts access - Basic plan (limited prompts)',
+          level: LogLevel.debug,
         );
         return const Success(true); // Basicプランでも基本プロンプトは利用可能
       }
@@ -938,20 +959,25 @@ class SubscriptionService implements ISubscriptionService {
       final isPremiumValid = _isSubscriptionValid(status);
       if (isPremiumValid) {
         // 有効なPremiumプランは全プロンプトにアクセス可能
-        debugPrint(
-          'SubscriptionService: Writing prompts access - Premium plan, valid: $isPremiumValid',
+        _log(
+          'Writing prompts access - Premium plan',
+          level: LogLevel.debug,
+          data: {'valid': isPremiumValid},
         );
         return const Success(true);
       } else {
         // 期限切れ・非アクティブなPremiumプランでも基本プロンプトアクセスは可能
-        debugPrint(
-          'SubscriptionService: Writing prompts access - Premium plan expired/inactive, basic access only',
+        _log(
+          'Writing prompts access - Premium plan expired/inactive, basic access only',
+          level: LogLevel.debug,
         );
         return const Success(true);
       }
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error checking writing prompts access - $e',
+      _log(
+        'Error checking writing prompts access',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -986,14 +1012,18 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint(
-        'SubscriptionService: Advanced filters access check - valid: $isPremiumValid',
+      _log(
+        'Advanced filters access check',
+        level: LogLevel.debug,
+        data: {'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error checking advanced filters access - $e',
+      _log(
+        'Error checking advanced filters access',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -1023,21 +1053,28 @@ class SubscriptionService implements ISubscriptionService {
 
       // データエクスポートは全プランで利用可能（Basicは基本形式のみ）
       if (currentPlan is BasicPlan) {
-        debugPrint(
-          'SubscriptionService: Data export access - Basic plan (JSON only)',
+        _log(
+          'Data export access - Basic plan (JSON only)',
+          level: LogLevel.debug,
         );
         return const Success(true); // BasicプランでもJSON形式は利用可能
       }
 
       // Premiumプランは複数形式でエクスポート可能
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint(
-        'SubscriptionService: Data export access - Premium plan, valid: $isPremiumValid',
+      _log(
+        'Data export access - Premium plan',
+        level: LogLevel.debug,
+        data: {'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
     } catch (e) {
-      debugPrint('SubscriptionService: Error checking data export access - $e');
+      _log(
+        'Error checking data export access',
+        level: LogLevel.error,
+        error: e,
+      );
       return Failure(
         ServiceException(
           'Failed to check data export access',
@@ -1070,14 +1107,18 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint(
-        'SubscriptionService: Stats dashboard access check - valid: $isPremiumValid',
+      _log(
+        'Stats dashboard access check',
+        level: LogLevel.debug,
+        data: {'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error checking stats dashboard access - $e',
+      _log(
+        'Error checking stats dashboard access',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -1121,10 +1162,10 @@ class SubscriptionService implements ISubscriptionService {
         'statsDashboard': statsDashboardResult.value,
       };
 
-      debugPrint('SubscriptionService: Feature access map - $featureAccess');
+      _log('Feature access map', level: LogLevel.debug, data: featureAccess);
       return Success(featureAccess);
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting feature access - $e');
+      _log('Error getting feature access', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to get feature access', details: e.toString()),
       );
@@ -1155,14 +1196,18 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint(
-        'SubscriptionService: Advanced analytics access check - valid: $isPremiumValid',
+      _log(
+        'Advanced analytics access check',
+        level: LogLevel.debug,
+        data: {'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error checking advanced analytics access - $e',
+      _log(
+        'Error checking advanced analytics access',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -1197,14 +1242,18 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final isPremiumValid = _isSubscriptionValid(status);
-      debugPrint(
-        'SubscriptionService: Priority support access check - valid: $isPremiumValid',
+      _log(
+        'Priority support access check',
+        level: LogLevel.debug,
+        data: {'valid': isPremiumValid},
       );
 
       return Success(isPremiumValid);
     } catch (e) {
-      debugPrint(
-        'SubscriptionService: Error checking priority support access - $e',
+      _log(
+        'Error checking priority support access',
+        level: LogLevel.error,
+        error: e,
       );
       return Failure(
         ServiceException(
@@ -1232,7 +1281,7 @@ class SubscriptionService implements ISubscriptionService {
       await _initialize();
       return const Success(null);
     } catch (e) {
-      debugPrint('SubscriptionService: Error in public initialize - $e');
+      _log('Error in public initialize', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to initialize service', details: e.toString()),
       );
@@ -1422,8 +1471,9 @@ class SubscriptionService implements ISubscriptionService {
   Future<void> _processPurchaseUpdate(PurchaseDetails purchaseDetails) async {
     try {
       _log(
-        'Processing purchase update: ${purchaseDetails.status}',
+        'Processing purchase update',
         level: LogLevel.info,
+        data: {'status': purchaseDetails.status},
       );
 
       switch (purchaseDetails.status) {
@@ -1465,8 +1515,9 @@ class SubscriptionService implements ISubscriptionService {
   Future<void> _handlePurchaseCompleted(PurchaseDetails purchaseDetails) async {
     try {
       _log(
-        'Purchase completed: ${purchaseDetails.productID}',
+        'Purchase completed',
         level: LogLevel.info,
+        data: {'productId': purchaseDetails.productID},
       );
 
       // 商品IDからプランを特定
@@ -1489,7 +1540,11 @@ class SubscriptionService implements ISubscriptionService {
 
       // 購入完了後にフラグをリセット
       _isPurchasing = false;
-      _log('[_handlePurchaseCompleted] 購入フラグをリセットしました', level: LogLevel.debug);
+      _log(
+        '購入フラグをリセットしました',
+        level: LogLevel.debug,
+        context: '_handlePurchaseCompleted',
+      );
     } catch (e) {
       _log(
         'Error handling purchase completion',
@@ -1504,8 +1559,9 @@ class SubscriptionService implements ISubscriptionService {
   Future<void> _handlePurchaseRestored(PurchaseDetails purchaseDetails) async {
     try {
       _log(
-        'Purchase restored: ${purchaseDetails.productID}',
+        'Purchase restored',
         level: LogLevel.info,
+        data: {'productId': purchaseDetails.productID},
       );
 
       // 復元の場合も購入完了と同様の処理
@@ -1534,8 +1590,9 @@ class SubscriptionService implements ISubscriptionService {
   /// 購入エラー処理
   Future<void> _handlePurchaseError(PurchaseDetails purchaseDetails) async {
     _log(
-      'Purchase error: ${purchaseDetails.error?.message}',
+      'Purchase error',
       level: LogLevel.error,
+      error: purchaseDetails.error?.message,
     );
 
     final result = PurchaseResult(
@@ -1547,14 +1604,19 @@ class SubscriptionService implements ISubscriptionService {
 
     // エラー時にフラグをリセット
     _isPurchasing = false;
-    _log('[_handlePurchaseError] 購入フラグをリセットしました', level: LogLevel.debug);
+    _log(
+      '購入フラグをリセットしました',
+      level: LogLevel.debug,
+      context: '_handlePurchaseError',
+    );
   }
 
   /// 購入キャンセル処理
   Future<void> _handlePurchaseCanceled(PurchaseDetails purchaseDetails) async {
     _log(
-      'Purchase canceled: ${purchaseDetails.productID}',
+      'Purchase canceled',
       level: LogLevel.info,
+      data: {'productId': purchaseDetails.productID},
     );
 
     final result = PurchaseResult(
@@ -1565,14 +1627,19 @@ class SubscriptionService implements ISubscriptionService {
 
     // キャンセル時にフラグをリセット
     _isPurchasing = false;
-    _log('[_handlePurchaseCanceled] 購入フラグをリセットしました', level: LogLevel.debug);
+    _log(
+      '購入フラグをリセットしました',
+      level: LogLevel.debug,
+      context: '_handlePurchaseCanceled',
+    );
   }
 
   /// 購入保留処理
   Future<void> _handlePurchasePending(PurchaseDetails purchaseDetails) async {
     _log(
-      'Purchase pending: ${purchaseDetails.productID}',
+      'Purchase pending',
       level: LogLevel.info,
+      data: {'productId': purchaseDetails.productID},
     );
 
     final result = PurchaseResult(
@@ -1813,27 +1880,41 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       _log(
-        '[purchasePlanClass] 購入処理開始 - plan: ${plan.id}, productId: ${plan.productId}',
+        '購入処理開始',
         level: LogLevel.info,
+        context: 'purchasePlanClass',
+        data: {'planId': plan.id, 'productId': plan.productId},
       );
       _isPurchasing = true;
 
       // 商品IDを取得
       final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
-      _log('[purchasePlanClass] 商品ID取得完了: $productId', level: LogLevel.debug);
+      _log(
+        '商品ID取得完了',
+        level: LogLevel.debug,
+        context: 'purchasePlanClass',
+        data: {'productId': productId},
+      );
 
       try {
         // 商品詳細を取得
         _log(
-          '[purchasePlanClass] 商品詳細をクエリ中: $productId',
+          '商品詳細をクエリ中',
           level: LogLevel.debug,
+          context: 'purchasePlanClass',
+          data: {'productId': productId},
         );
         final productResponse = await _inAppPurchase!.queryProductDetails({
           productId,
         });
         _log(
-          '[purchasePlanClass] 商品クエリ完了 - error: ${productResponse.error}, 商品数: ${productResponse.productDetails.length}',
+          '商品クエリ完了',
           level: LogLevel.debug,
+          context: 'purchasePlanClass',
+          data: {
+            'error': productResponse.error,
+            'productCount': productResponse.productDetails.length,
+          },
         );
 
         if (productResponse.error != null) {
@@ -1853,8 +1934,14 @@ class SubscriptionService implements ISubscriptionService {
 
         final productDetails = productResponse.productDetails.first;
         _log(
-          '[purchasePlanClass] 商品詳細取得: id=${productDetails.id}, title=${productDetails.title}, price=${productDetails.price}',
+          '商品詳細取得',
           level: LogLevel.info,
+          context: 'purchasePlanClass',
+          data: {
+            'id': productDetails.id,
+            'title': productDetails.title,
+            'price': productDetails.price,
+          },
         );
 
         // 購入リクエストを作成
@@ -1864,15 +1951,18 @@ class SubscriptionService implements ISubscriptionService {
 
         // 購入を開始（サブスクリプションはbuyNonConsumableを使用）
         _log(
-          '[purchasePlanClass] buyNonConsumable呼び出し中...',
+          'buyNonConsumable呼び出し中...',
           level: LogLevel.info,
+          context: 'purchasePlanClass',
         );
         final bool success = await _inAppPurchase!.buyNonConsumable(
           purchaseParam: purchaseParam,
         );
         _log(
-          '[purchasePlanClass] buyNonConsumable結果: $success',
+          'buyNonConsumable結果',
           level: LogLevel.info,
+          context: 'purchasePlanClass',
+          data: {'success': success},
         );
 
         if (!success) {
@@ -1880,7 +1970,11 @@ class SubscriptionService implements ISubscriptionService {
           return Failure(ServiceException('Failed to initiate purchase'));
         }
 
-        _log('[purchasePlanClass] 購入処理が正常に開始されました', level: LogLevel.info);
+        _log(
+          '購入処理が正常に開始されました',
+          level: LogLevel.info,
+          context: 'purchasePlanClass',
+        );
 
         // 購入結果は購入ストリームで非同期に処理される
         // ここでは購入開始の成功を返す
@@ -1894,8 +1988,10 @@ class SubscriptionService implements ISubscriptionService {
       } catch (storeError) {
         _isPurchasing = false;
         _log(
-          '[purchasePlanClass] ストアエラー発生: $storeError',
+          'ストアエラー発生',
           level: LogLevel.error,
+          context: 'purchasePlanClass',
+          error: storeError,
         );
 
         // シミュレーター環境でのストアエラー処理
@@ -1905,8 +2001,9 @@ class SubscriptionService implements ISubscriptionService {
               errorString.contains('sandbox') ||
               errorString.contains('StoreKit')) {
             _log(
-              '[purchasePlanClass] シミュレーター環境のストア接続エラー - 成功をモック',
+              'シミュレーター環境のストア接続エラー - 成功をモック',
               level: LogLevel.warning,
+              context: 'purchasePlanClass',
             );
 
             await Future.delayed(const Duration(milliseconds: 1000));
@@ -1929,7 +2026,12 @@ class SubscriptionService implements ISubscriptionService {
       }
     } catch (e) {
       _isPurchasing = false;
-      _log('[purchasePlanClass] 予期しないエラー: $e', level: LogLevel.error);
+      _log(
+        '予期しないエラー',
+        level: LogLevel.error,
+        context: 'purchasePlanClass',
+        error: e,
+      );
       return _handleError(
         e,
         'purchasePlanClass',
