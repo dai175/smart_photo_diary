@@ -58,10 +58,10 @@
 - [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/storage_service_test.dart`
 
 **完了条件**:
-- [ ] 全テストが緑（800+テスト100%成功維持）
-- [ ] `fvm flutter analyze`でエラーなし
-- [ ] 例外ベースのエラーハンドリングが全て除去
-- [ ] 132箇所のthrow/Exception使用箇所を50箇所以下に削減
+- [x] 全テストが緑（800+テスト100%成功維持） ✅ **達成済み**
+- [x] `fvm flutter analyze`でエラーなし ✅ **達成済み**
+- [ ] 例外ベースのエラーハンドリングが全て除去 🔄 **進行中（Result<T>移行完了）**
+- [ ] 132箇所のthrow/Exception使用箇所を50箇所以下に削減 📊 **現状178箇所→目標継続**
 
 ---
 
