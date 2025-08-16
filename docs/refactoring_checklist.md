@@ -175,34 +175,71 @@
 **概要**: LoggingServiceを使用した統一的なログ出力パターンの確立
 
 **現状分析**:
-- 複数のログ出力方法が混在（print、debugPrint、LoggingService等）
-- ログレベルやフォーマットが統一されていない
+- debugPrint使用: 121箇所（主にサービス層に集中）
+- print使用: 2箇所
+- LoggingService使用: 既に一部で利用中（widgets/home_content_widget.dartなど）
+- ログレベルやフォーマットが不統一
 - エラーハンドリング時のログ出力パターンが不統一
 
-**作業項目**:
+**段階的移行計画（3フェーズ）**:
 
-#### 現状調査
-- [ ] 全ファイルでのprint/debugPrint使用箇所を特定: `grep -r "print(" lib/`
-- [ ] LoggingService使用箇所の調査
-- [ ] ログ出力パターンの分析と分類
+#### フェーズ1: 高優先度サービス層（1-2週間）
+**対象**: APIクライアントと重要なビジネスロジック
+- [ ] subscription_service.dart（44箇所のdebugPrint）
+- [ ] ai/diary_generator.dart（18箇所のdebugPrint）
+- [ ] ai/gemini_api_client.dart（21箇所のdebugPrint）
+- [ ] ai/tag_generator.dart（3箇所のdebugPrint）
+- [ ] エラーハンドリングの統一（error/warning/info レベル分類）
+- [ ] コンテキスト情報の追加
+- [ ] テストの更新
 
-#### ログ統一実装
-- [ ] LoggingServiceを使用した統一的なログガイドライン策定
-- [ ] print文をLoggingService.debug/info/errorに変更
-- [ ] エラーハンドリング箇所のログ出力統一
-- [ ] 開発用デバッグログと本番用ログの分離
-- [ ] ログレベル設定の最適化
+#### フェーズ2: 設定・初期化層（1週間）
+**対象**: アプリケーション設定と初期化関連
+- [ ] config/environment_config.dart（16箇所のdebugPrint）
+- [ ] core/service_registration.dart（8箇所のdebugPrint）
+- [ ] main.dart（4箇所のdebugPrint）
+- [ ] core/service_locator.dart（3箇所のdebugPrint）
+- [ ] 初期化関連ログの統一
+- [ ] 設定関連エラーのログレベル分類
+- [ ] 起動時のログフローの最適化
 
-#### テスト・検証
+#### フェーズ3: UI・その他（1週間）
+**対象**: ユーザーインターフェースと残りのコンポーネント
+- [ ] 画面ファイル群（17箇所のdebugPrint）
+- [ ] 写真関連サービス（6箇所のdebugPrint）
+- [ ] ウィジェット・UI関連（8箇所のdebugPrint）
+- [ ] ユーザー操作関連ログの整理
+- [ ] UIエラーの適切なログレベル設定
+- [ ] デバッグ専用ログの識別・整理
+
+#### ログ標準化ルール
+
+**ログレベル分類ガイドライン**:
+- `error`: 例外、API失敗、データ破損
+- `warning`: 設定不備、非推奨機能使用
+- `info`: 正常な状態変更、重要な操作完了
+- `debug`: 詳細なトレース情報
+
+**コンテキスト命名規則**:
+- フォーマット: `サービス名.メソッド名`
+- 例: `SubscriptionService.initializeStatus`
+
+**データ付きログの活用**:
+- 重要な変数値をdataパラメータで記録
+- 例: `logging.info('プラン変更完了', context: 'SubscriptionService.updatePlan', data: newPlan.id)`
+
+#### 全体的なテスト・検証
+- [ ] 各フェーズ完了後のテスト実行
 - [ ] ログ出力の動作確認
 - [ ] パフォーマンス影響の検証
-- [ ] 実装完了後のテスト実行
+- [ ] 本番・デバッグビルドでのログレベル動作確認
 
 **完了条件**:
 - [ ] print/debugPrint使用箇所が0個（LoggingServiceに統一）
 - [ ] 統一されたログフォーマットの適用
-- [ ] 全テストが成功
+- [ ] 各フェーズでのテスト成功（800+テストの100%成功維持）
 - [ ] `fvm flutter analyze`でエラーなし
+- [ ] 構造化されたログによるデバッグ効率向上の確認
 
 ---
 
