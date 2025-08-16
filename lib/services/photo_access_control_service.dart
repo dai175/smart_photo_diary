@@ -5,7 +5,7 @@ import 'interfaces/photo_access_control_service_interface.dart';
 /// 写真アクセス制御サービスの実装
 ///
 /// プランに基づいた写真へのアクセス可否を判定する
-class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
+class PhotoAccessControlService implements IPhotoAccessControlService {
   // シングルトンパターン
   static PhotoAccessControlService? _instance;
 

@@ -2,7 +2,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../core/result/result.dart';
 
 /// 写真サービスのインターフェース
-abstract class PhotoServiceInterface {
+abstract class IPhotoService {
   /// 写真アクセス権限をリクエストする
   Future<bool> requestPermission();
 

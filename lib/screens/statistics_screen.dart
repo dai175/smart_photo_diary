@@ -22,7 +22,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  late DiaryServiceInterface _diaryService;
+  late IDiaryService _diaryService;
   List<DiaryEntry> _allDiaries = [];
   bool _isLoading = true;
   DateTime _focusedDay = DateTime.now();
@@ -46,7 +46,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
-      _diaryService = ServiceLocator().get<DiaryServiceInterface>();
+      _diaryService = ServiceLocator().get<IDiaryService>();
       final result = await _diaryService.getSortedDiaryEntriesResult();
 
       if (result.isSuccess) {

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
 
 /// 写真キャッシュサービスのインターフェース
-abstract class PhotoCacheServiceInterface {
+abstract class IPhotoCacheService {
   /// サムネイルを取得（キャッシュがあればキャッシュから、なければ生成してキャッシュ）
   Future<Uint8List?> getThumbnail(
     AssetEntity asset, {

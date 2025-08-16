@@ -10,7 +10,7 @@ import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
-class PhotoService implements PhotoServiceInterface {
+class PhotoService implements IPhotoService {
   // シングルトンパターン
   static PhotoService? _instance;
 

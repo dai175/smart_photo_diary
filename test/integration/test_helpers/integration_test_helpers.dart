@@ -24,8 +24,8 @@ import '../../test_helpers/mock_platform_channels.dart';
 /// Helper utilities for integration testing
 class IntegrationTestHelpers {
   static late ServiceLocator _serviceLocator;
-  static late MockPhotoServiceInterface _mockPhotoService;
-  static late MockAiServiceInterface _mockAiService;
+  static late MockIPhotoService _mockPhotoService;
+  static late MockIAiService _mockAiService;
 
   /// Setup comprehensive test environment for integration tests
   static Future<void> setUpIntegrationEnvironment() async {
@@ -75,11 +75,11 @@ class IntegrationTestHelpers {
     _serviceLocator = ServiceLocator();
 
     // Create mock services
-    _mockPhotoService = MockPhotoServiceInterface();
-    _mockAiService = MockAiServiceInterface();
+    _mockPhotoService = MockIPhotoService();
+    _mockAiService = MockIAiService();
 
     // Create additional required mock services
-    final mockDiaryService = MockDiaryServiceInterface();
+    final mockDiaryService = MockIDiaryService();
     final mockSubscriptionService = MockSubscriptionServiceInterface();
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
@@ -94,16 +94,14 @@ class IntegrationTestHelpers {
     );
 
     // Register all mock services
-    _serviceLocator.registerSingleton<PhotoServiceInterface>(_mockPhotoService);
-    _serviceLocator.registerSingleton<AiServiceInterface>(_mockAiService);
-    _serviceLocator.registerSingleton<DiaryServiceInterface>(mockDiaryService);
+    _serviceLocator.registerSingleton<IPhotoService>(_mockPhotoService);
+    _serviceLocator.registerSingleton<IAiService>(_mockAiService);
+    _serviceLocator.registerSingleton<IDiaryService>(mockDiaryService);
     _serviceLocator.registerSingleton<ISubscriptionService>(
       mockSubscriptionService,
     );
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
-    _serviceLocator.registerSingleton<StorageServiceInterface>(
-      mockStorageService,
-    );
+    _serviceLocator.registerSingleton<IStorageService>(mockStorageService);
   }
 
   /// Setup default behaviors for mock services
@@ -354,7 +352,7 @@ class IntegrationTestHelpers {
 
   /// Setup additional mock service behaviors
   static void _setupAdditionalMockBehaviors(
-    MockDiaryServiceInterface mockDiaryService,
+    MockIDiaryService mockDiaryService,
     MockSubscriptionServiceInterface mockSubscriptionService,
     MockSettingsService mockSettingsService,
     MockStorageService mockStorageService,
@@ -430,10 +428,10 @@ class IntegrationTestHelpers {
   }
 
   /// Get mock photo service for additional setup
-  static MockPhotoServiceInterface get mockPhotoService => _mockPhotoService;
+  static MockIPhotoService get mockPhotoService => _mockPhotoService;
 
   /// Get mock AI service for additional setup
-  static MockAiServiceInterface get mockAiService => _mockAiService;
+  static MockIAiService get mockAiService => _mockAiService;
 
   // ========================================
   // Plan Class Integration Test Helpers

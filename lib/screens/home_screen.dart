@@ -141,8 +141,7 @@ class _HomeScreenState extends State<HomeScreen>
               icon: Icons.add_photo_alternate_rounded,
               onPressed: () async {
                 Navigator.of(context).pop();
-                final photoService =
-                    ServiceRegistration.get<PhotoServiceInterface>();
+                final photoService = ServiceRegistration.get<IPhotoService>();
                 await photoService.presentLimitedLibraryPicker();
                 // 選択後に写真を再読み込み
                 _loadTodayPhotos();
@@ -168,8 +167,7 @@ class _HomeScreenState extends State<HomeScreen>
         _loadingDiaries = true;
       });
 
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final allEntries = await diaryService.getSortedDiaryEntries();
 
       if (!mounted) return;
@@ -221,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     try {
       // 権限リクエスト
-      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+      final photoService = ServiceRegistration.get<IPhotoService>();
       final hasPermission = await photoService.requestPermission();
 
       if (!mounted) return;

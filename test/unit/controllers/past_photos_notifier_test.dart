@@ -9,10 +9,10 @@ import 'package:smart_photo_diary/services/interfaces/photo_access_control_servi
 import 'package:smart_photo_diary/core/result/result.dart';
 
 // モック
-class MockPhotoService extends Mock implements PhotoServiceInterface {}
+class MockPhotoService extends Mock implements IPhotoService {}
 
 class MockPhotoAccessControlService extends Mock
-    implements PhotoAccessControlServiceInterface {}
+    implements IPhotoAccessControlService {}
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 

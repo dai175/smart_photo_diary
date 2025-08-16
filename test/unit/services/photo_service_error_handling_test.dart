@@ -14,7 +14,7 @@ class MockFilterOptionGroup extends Mock implements FilterOptionGroup {}
 
 void main() {
   group('PhotoService Error Handling Tests', () {
-    late PhotoServiceInterface photoService;
+    late IPhotoService photoService;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();

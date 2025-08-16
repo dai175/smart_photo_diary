@@ -12,12 +12,12 @@ import 'logging_service.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 
-class DiaryService implements DiaryServiceInterface {
+class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
   static DiaryService? _instance;
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
-  final AiServiceInterface _aiService;
+  final IAiService _aiService;
   late final LoggingService _loggingService;
 
   // プライベートコンストラクタ（依存性注入用）
@@ -35,8 +35,8 @@ class DiaryService implements DiaryServiceInterface {
 
   // 依存性注入用のファクトリメソッド
   static DiaryService createWithDependencies({
-    required AiServiceInterface aiService,
-    required PhotoServiceInterface photoService,
+    required IAiService aiService,
+    required IPhotoService photoService,
   }) {
     return DiaryService._(aiService);
   }

@@ -7,7 +7,7 @@ import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 
 void main() {
   group('PhotoAccessControlService Tests', () {
-    late PhotoAccessControlServiceInterface accessControlService;
+    late IPhotoAccessControlService accessControlService;
 
     setUp(() {
       accessControlService = PhotoAccessControlService.getInstance();

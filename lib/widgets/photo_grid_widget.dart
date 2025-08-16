@@ -227,7 +227,7 @@ class PhotoGridWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: AppSpacing.photoRadius,
       child: FutureBuilder<dynamic>(
-        future: ServiceRegistration.get<PhotoServiceInterface>().getThumbnail(
+        future: ServiceRegistration.get<IPhotoService>().getThumbnail(
           controller.photoAssets[index],
         ),
         builder: (context, snapshot) {

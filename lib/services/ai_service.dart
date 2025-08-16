@@ -13,7 +13,7 @@ import '../core/errors/app_exceptions.dart';
 /// - generateDiary前の制限チェック
 /// - 使用量カウント統合
 /// - 月次リセット処理統合
-class AiService implements AiServiceInterface {
+class AiService implements IAiService {
   final DiaryGenerator _diaryGenerator;
   final TagGenerator _tagGenerator;
   final ISubscriptionService? _subscriptionService;

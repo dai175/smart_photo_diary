@@ -6,7 +6,7 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 
 // モック
-class MockStorageService extends Mock implements StorageServiceInterface {}
+class MockStorageService extends Mock implements IStorageService {}
 
 void main() {
   late MockStorageService mockStorageService;
@@ -126,7 +126,7 @@ void main() {
     group('インターフェース互換性テスト', () {
       test('新旧メソッドが正しく実装されている', () {
         // Arrange & Act & Assert
-        expect(mockStorageService, isA<StorageServiceInterface>());
+        expect(mockStorageService, isA<IStorageService>());
 
         // モックが作成された後、何も呼び出されていないことを確認
         verifyNever(() => mockStorageService.getStorageInfo());

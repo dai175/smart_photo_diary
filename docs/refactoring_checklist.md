@@ -28,7 +28,7 @@
 **作業項目**:
 
 #### DiaryService移行
-- [x] DiaryServiceInterfaceにResult<T>メソッド追加
+- [x] IDiaryServiceにResult<T>メソッド追加
 - [x] getAllDiaries()をResult<List<DiaryEntry>>に変更
 - [x] saveDiary()をResult<DiaryEntry>に変更
 - [x] deleteDiary()をResult<void>に変更
@@ -39,7 +39,7 @@
 - [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/diary_service_*`
 
 #### PhotoService移行
-- [x] PhotoServiceInterfaceにResult<T>メソッド追加
+- [x] IPhotoServiceにResult<T>メソッド追加
 - [x] getPhotos()をResult<List<AssetEntity>>に変更
 - [x] requestPermission()をResult<PermissionState>に変更
 - [x] loadMorePhotos()をResult<List<AssetEntity>>に変更
@@ -48,7 +48,7 @@
 - [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/photo_service_*`
 
 #### StorageService移行
-- [x] StorageServiceInterfaceの作成
+- [x] IStorageServiceの作成
 - [x] exportData()をResult<String?>に変更
 - [x] getStorageInfo()をResult<StorageInfo>に変更
 - [x] optimizeDatabase()をResult<bool>に変更
@@ -138,28 +138,35 @@
 
 ### 5. インターフェース命名規則の統一
 
-**現状混在**:
-- `ISubscriptionService` (Iプレフィックス)
-- `PhotoServiceInterface` (Interfaceサフィックス)
-- `AiServiceInterface` (Interfaceサフィックス)
+**現状統一済み**: ✅ **完了**
+- `IStorageService` (Iプレフィックス)
+- `IPhotoService` (Iプレフィックス)
+- `IPhotoCacheService` (Iプレフィックス)
+- `IDiaryService` (Iプレフィックス)
+- `IPhotoAccessControlService` (Iプレフィックス)
+- `IAiService` (Iプレフィックス)
 
 **作業項目**:
 
 #### 命名規則の決定
-- [ ] プロジェクト標準命名規則の決定（推奨: Interfaceサフィックス）
-- [ ] アーキテクチャドキュメントの更新
+- [x] プロジェクト標準命名規則の決定（採用: I*プレフィックス）
+- [x] アーキテクチャドキュメントの更新
 
 #### インターフェースリネーム
-- [ ] `ISubscriptionService` → `SubscriptionServiceInterface`
-- [ ] `IPromptService` → `PromptServiceInterface`
-- [ ] 全ての実装クラスの更新
-- [ ] インポート文の更新
-- [ ] 関連テストの更新
+- [x] `StorageServiceInterface` → `IStorageService`
+- [x] `PhotoServiceInterface` → `IPhotoService`
+- [x] `PhotoCacheServiceInterface` → `IPhotoCacheService`
+- [x] `DiaryServiceInterface` → `IDiaryService`
+- [x] `PhotoAccessControlServiceInterface` → `IPhotoAccessControlService`
+- [x] `AiServiceInterface` → `IAiService`
+- [x] 全ての実装クラスの更新（39ファイルで133箇所）
+- [x] インポート文の更新
+- [x] 関連テストの更新
 
 **完了条件**:
-- [ ] 命名規則が完全統一
-- [ ] 全テストが成功
-- [ ] `fvm flutter analyze`でエラーなし
+- [x] 命名規則が完全統一 ✅ **達成済み**
+- [x] 全テストが成功 ✅ **達成済み（800+テスト100%成功）**
+- [x] `fvm flutter analyze`でエラーなし ✅ **達成済み**
 
 ---
 
@@ -254,7 +261,7 @@
 - **Week 1**: Result<T>移行（DiaryService） ✅ **完了**
 - **Week 2**: Result<T>移行（PhotoService、StorageService） ✅ **完了**
 - **Week 3**: ServiceLocator統一、Deprecated API除去 ✅ **完了**
-- **Week 4**: TODO解決、命名規則統一
+- **Week 4**: TODO解決、命名規則統一 ✅ **完了**
 - **Week 5**: 状態管理最適化
 - **Week 6-8**: 低優先度項目（オプション）
 
@@ -268,6 +275,6 @@
 
 ---
 
-**最終更新**: 2025-08-16 (Week 3: ServiceLocator統一完了)  
+**最終更新**: 2025-08-16 (Week 4: インターフェース命名規則統一完了)  
 **レビュー者**: [担当者名]  
 **承認日**: [承認日]

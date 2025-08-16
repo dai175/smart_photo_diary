@@ -83,7 +83,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
     setState(() => _isLoading = true);
 
     try {
-      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+      final photoService = ServiceRegistration.get<IPhotoService>();
 
       // 月の開始と終了を計算
       final startOfMonth = DateTime(month.year, month.month, 1);
@@ -139,7 +139,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   /// 特定日の写真を読み込み
   Future<void> _loadPhotosForDate(DateTime date) async {
     try {
-      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+      final photoService = ServiceRegistration.get<IPhotoService>();
 
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(
@@ -219,8 +219,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   /// 日記が存在する日付を読み込み
   Future<void> _loadDiaryDates() async {
     try {
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final diaries = await diaryService.getSortedDiaryEntries();
 
       final dates = <DateTime>{};

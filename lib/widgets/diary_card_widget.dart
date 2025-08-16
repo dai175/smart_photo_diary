@@ -22,8 +22,7 @@ class DiaryCardWidget extends StatelessWidget {
   // タグを取得（永続化キャッシュ優先）
   Future<List<String>> _generateTags() async {
     try {
-      final diaryService = await ServiceLocator()
-          .getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
       return await diaryService.getTagsForEntry(entry);
     } catch (e) {
       // エラー時はフォールバックタグを返す（時間帯のみ）

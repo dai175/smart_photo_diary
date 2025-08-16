@@ -9,16 +9,16 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
-class MockAiServiceInterface extends Mock implements AiServiceInterface {}
+class MockIAiService extends Mock implements IAiService {}
 
-class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+class MockIPhotoService extends Mock implements IPhotoService {}
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
   group('DiaryService Mock Tests', () {
-    late MockAiServiceInterface mockAiService;
-    late MockPhotoServiceInterface mockPhotoService;
+    late MockIAiService mockAiService;
+    late MockIPhotoService mockPhotoService;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +31,8 @@ void main() {
     });
 
     setUp(() {
-      mockAiService = MockAiServiceInterface();
-      mockPhotoService = MockPhotoServiceInterface();
+      mockAiService = MockIAiService();
+      mockPhotoService = MockIPhotoService();
     });
 
     group('Past Photo Diary Creation', () {
@@ -387,7 +387,7 @@ void main() {
         ).thenAnswer((_) async => Success(['mock-tag']));
 
         // Act & Assert - Verify mock is properly configured
-        expect(mockAiService, isA<AiServiceInterface>());
+        expect(mockAiService, isA<IAiService>());
 
         // Verify the mock has not been called yet
         verifyNever(

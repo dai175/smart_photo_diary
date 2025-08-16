@@ -50,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _settingsService = await ServiceRegistration.getAsync<SettingsService>();
       _packageInfo = await PackageInfo.fromPlatform();
-      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final storageService = ServiceRegistration.get<IStorageService>();
       final storageResult = await storageService.getStorageInfoResult();
       if (storageResult.isSuccess) {
         _storageInfo = storageResult.value;
@@ -939,7 +939,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _showLoadingDialog('バックアップ中...');
 
-      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final storageService = ServiceRegistration.get<IStorageService>();
       final exportResult = await storageService.exportDataResult();
 
       if (mounted) {
@@ -968,7 +968,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _showLoadingDialog('リストア中...');
 
-      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final storageService = ServiceRegistration.get<IStorageService>();
       final result = await storageService.importData();
 
       if (mounted) {
@@ -995,7 +995,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       _showLoadingDialog('最適化中...');
 
-      final storageService = ServiceRegistration.get<StorageServiceInterface>();
+      final storageService = ServiceRegistration.get<IStorageService>();
       final optimizeResult = await storageService.optimizeDatabaseResult();
 
       if (mounted) {

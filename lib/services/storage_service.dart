@@ -10,7 +10,7 @@ import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
-class StorageService implements StorageServiceInterface {
+class StorageService implements IStorageService {
   static StorageService? _instance;
 
   StorageService._();
@@ -51,7 +51,7 @@ class StorageService implements StorageServiceInterface {
   @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
-      final diaryService = ServiceLocator().get<DiaryServiceInterface>();
+      final diaryService = ServiceLocator().get<IDiaryService>();
       final result = await diaryService.getSortedDiaryEntriesResult();
 
       if (result.isFailure) {
@@ -205,7 +205,7 @@ class StorageService implements StorageServiceInterface {
     Map<String, dynamic> data,
   ) async {
     try {
-      final diaryService = ServiceLocator().get<DiaryServiceInterface>();
+      final diaryService = ServiceLocator().get<IDiaryService>();
       final entries = data['entries'] as List<dynamic>;
 
       int totalEntries = entries.length;
@@ -269,7 +269,7 @@ class StorageService implements StorageServiceInterface {
   // 単一エントリーのインポート
   Future<Result<String>> _importSingleEntry(
     dynamic entryData,
-    DiaryServiceInterface diaryService,
+    IDiaryService diaryService,
     List<dynamic> existingEntries,
   ) async {
     try {
@@ -358,8 +358,7 @@ class StorageService implements StorageServiceInterface {
   @override
   Future<bool> optimizeDatabase() async {
     try {
-      final diaryService = await ServiceLocator()
-          .getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
 
       // Hiveデータベースのコンパクト（断片化を解消）
       await diaryService.compactDatabase();

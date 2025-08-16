@@ -4,7 +4,7 @@ import '../../models/diary_filter.dart';
 import '../../core/result/result.dart';
 
 /// 日記サービスのインターフェース
-abstract class DiaryServiceInterface {
+abstract class IDiaryService {
   /// 日記エントリーを保存
   Future<DiaryEntry> saveDiaryEntry({
     required DateTime date,

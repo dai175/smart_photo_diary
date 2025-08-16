@@ -43,8 +43,8 @@ class DiaryPreviewScreen extends StatefulWidget {
 }
 
 class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
-  late final AiServiceInterface _aiService;
-  late final PhotoServiceInterface _photoService;
+  late final IAiService _aiService;
+  late final IPhotoService _photoService;
 
   bool _isInitializing = true; // プロンプトサービス初期化中
   bool _isLoading = false; // 日記生成中
@@ -71,8 +71,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     _contentController = TextEditingController();
 
     // サービスロケータからサービスを取得
-    _aiService = ServiceRegistration.get<AiServiceInterface>();
-    _photoService = ServiceRegistration.get<PhotoServiceInterface>();
+    _aiService = ServiceRegistration.get<IAiService>();
+    _photoService = ServiceRegistration.get<IPhotoService>();
 
     // 渡されたプロンプトがある場合は設定
     _selectedPrompt = widget.selectedPrompt;
@@ -271,8 +271,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       debugPrint('写真数: ${widget.selectedAssets.length}');
 
       // DiaryServiceのインスタンスを取得
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を保存
       await diaryService.saveDiaryEntryWithPhotos(

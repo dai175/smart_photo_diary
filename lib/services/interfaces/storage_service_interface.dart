@@ -3,7 +3,7 @@ import '../../models/import_result.dart';
 import '../../core/result/result.dart';
 
 /// ストレージサービスのインターフェース
-abstract class StorageServiceInterface {
+abstract class IStorageService {
   /// ストレージ使用量を取得する
   Future<StorageInfo> getStorageInfo();
 

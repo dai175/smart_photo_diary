@@ -8,9 +8,9 @@ import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
 
 // Mock classes for integration testing with real database
-class MockAiServiceInterface extends Mock implements AiServiceInterface {}
+class MockIAiService extends Mock implements IAiService {}
 
-class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+class MockIPhotoService extends Mock implements IPhotoService {}
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 

@@ -9,7 +9,7 @@ import '../ui/components/animated_button.dart';
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
   final Function(DiaryFilter) onApply;
-  final DiaryServiceInterface? diaryService; // テスト用のオプショナル依存性注入
+  final IDiaryService? diaryService; // テスト用のオプショナル依存性注入
 
   const FilterBottomSheet({
     super.key,
@@ -39,7 +39,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       // テスト時は注入されたサービスを使用、本番時はServiceLocator経由
       final diaryService =
           widget.diaryService ??
-          await ServiceLocator().getAsync<DiaryServiceInterface>();
+          await ServiceLocator().getAsync<IDiaryService>();
       final popularTags = await diaryService.getPopularTags(limit: 20);
       setState(() {
         _availableTags = popularTags;

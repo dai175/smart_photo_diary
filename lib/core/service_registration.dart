@@ -101,22 +101,22 @@ class ServiceRegistration {
     );
 
     // 4. PhotoService (LoggingServiceに依存)
-    serviceLocator.registerFactory<PhotoServiceInterface>(
+    serviceLocator.registerFactory<IPhotoService>(
       () => PhotoService.getInstance(),
     );
 
     // 5. PhotoCacheService (LoggingServiceに依存)
-    serviceLocator.registerFactory<PhotoCacheServiceInterface>(
+    serviceLocator.registerFactory<IPhotoCacheService>(
       () => PhotoCacheService.getInstance(),
     );
 
     // 6. PhotoAccessControlService (依存なし)
-    serviceLocator.registerFactory<PhotoAccessControlServiceInterface>(
+    serviceLocator.registerFactory<IPhotoAccessControlService>(
       () => PhotoAccessControlService.getInstance(),
     );
 
     // 7. StorageService (DiaryServiceに依存するが、最適化機能のみ)
-    serviceLocator.registerFactory<StorageServiceInterface>(
+    serviceLocator.registerFactory<IStorageService>(
       () => StorageService.getInstance(),
     );
 
@@ -133,7 +133,7 @@ class ServiceRegistration {
     debugPrint('ServiceRegistration: Registering dependent services...');
 
     // Phase 1.7.1.1: AiService with SubscriptionService dependency injection
-    serviceLocator.registerAsyncFactory<AiServiceInterface>(() async {
+    serviceLocator.registerAsyncFactory<IAiService>(() async {
       // Get SubscriptionService dependency
       final subscriptionService = await serviceLocator
           .getAsync<ISubscriptionService>();
@@ -143,10 +143,10 @@ class ServiceRegistration {
     });
 
     // DiaryService (depends on AiService and PhotoService)
-    serviceLocator.registerAsyncFactory<DiaryServiceInterface>(() async {
+    serviceLocator.registerAsyncFactory<IDiaryService>(() async {
       // Get dependencies
-      final aiService = await serviceLocator.getAsync<AiServiceInterface>();
-      final photoService = serviceLocator.get<PhotoServiceInterface>();
+      final aiService = await serviceLocator.getAsync<IAiService>();
+      final photoService = serviceLocator.get<IPhotoService>();
 
       // Create DiaryService with dependency injection
       final diaryService = DiaryService.createWithDependencies(

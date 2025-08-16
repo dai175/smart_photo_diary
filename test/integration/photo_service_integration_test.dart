@@ -7,7 +7,7 @@ import 'mocks/mock_services.dart';
 
 void main() {
   group('PhotoService Integration Tests', () {
-    late PhotoServiceInterface photoService;
+    late IPhotoService photoService;
 
     setUpAll(() async {
       registerMockFallbacks();

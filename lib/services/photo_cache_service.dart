@@ -18,7 +18,7 @@ class _CacheEntry {
 }
 
 /// 写真のサムネイルキャッシュを管理するサービス
-class PhotoCacheService implements PhotoCacheServiceInterface {
+class PhotoCacheService implements IPhotoCacheService {
   // シングルトンパターン
   static PhotoCacheService? _instance;
 
