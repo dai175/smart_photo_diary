@@ -195,7 +195,7 @@
 
 #### フェーズ2: 設定・初期化層（1週間）
 **対象**: アプリケーション設定と初期化関連
-- [ ] config/environment_config.dart（16箇所のdebugPrint）
+- [x] config/environment_config.dart（16箇所のdebugPrint）
 - [ ] core/service_registration.dart（8箇所のdebugPrint）
 - [ ] main.dart（4箇所のdebugPrint）
 - [ ] core/service_locator.dart（3箇所のdebugPrint）
