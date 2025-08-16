@@ -154,7 +154,7 @@ jobs:
           cache: true
           
       - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
           
       - name: Get dependencies
         run: flutter pub get
@@ -172,24 +172,24 @@ jobs:
           cd ios
           pod install
           
-      - name: Build iOS (debug, no codesign)
-        run: flutter build ios --debug --no-codesign
+      - name: Build iOS (debug, no codesign) for simulator
+        run: flutter build ios --debug --no-codesign --simulator
         
-      - name: Build iOS (release, no codesign)
-        run: flutter build ios --release --no-codesign
+      - name: Build iOS (release, no codesign) for simulator  
+        run: flutter build ios --release --no-codesign --simulator
         
       - name: Verify iOS build success
         run: |
           echo "✅ Verifying iOS build outputs..."
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            echo "✅ iOS Debug build completed successfully"
+          if [ -d "build/ios/iphonesimulator/Runner.app" ]; then
+            echo "✅ iOS Simulator build completed successfully"
           else
-            echo "❌ iOS Debug build not found"
+            echo "❌ iOS Simulator build not found"
             exit 1
           fi
           
           echo "🎉 iOS builds completed successfully (CI verification only)"
-          echo "ℹ️ Note: CI builds use dummy API keys and no code signing"
+          echo "ℹ️ Note: CI builds use dummy API keys, no code signing, and target iOS Simulator"
 
   ci-summary:
     name: CI Summary
