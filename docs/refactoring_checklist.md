@@ -21,22 +21,22 @@
 - ✅ SettingsService: 実装済み
 - ✅ SubscriptionService: 実装済み  
 - ✅ AiService: 実装済み
-- ❌ DiaryService: 未実装
+- ✅ DiaryService: 実装完了
 - ❌ PhotoService: 未実装
-- ❌ StorageService: 未実装
+- ❌ StorageService: 部分実装
 
 **作業項目**:
 
 #### DiaryService移行
-- [ ] DiaryServiceInterfaceにResult<T>メソッド追加
-- [ ] getAllDiaries()をResult<List<DiaryEntry>>に変更
-- [ ] saveDiary()をResult<DiaryEntry>に変更
-- [ ] deleteDiary()をResult<void>に変更
-- [ ] updateDiary()をResult<DiaryEntry>に変更
-- [ ] searchDiaries()をResult<List<DiaryEntry>>に変更
-- [ ] 呼び出し元の更新（DiaryScreenController、統計画面等）
-- [ ] 関連テストケースの更新
-- [ ] 実装完了後のテスト実行: `fvm flutter test test/unit/services/diary_service_*`
+- [x] DiaryServiceInterfaceにResult<T>メソッド追加
+- [x] getAllDiaries()をResult<List<DiaryEntry>>に変更
+- [x] saveDiary()をResult<DiaryEntry>に変更
+- [x] deleteDiary()をResult<void>に変更
+- [x] updateDiary()をResult<DiaryEntry>に変更
+- [x] searchDiaries()をResult<List<DiaryEntry>>に変更
+- [x] 呼び出し元の更新（DiaryScreenController、統計画面等）
+- [x] 関連テストケースの更新
+- [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/diary_service_*`
 
 #### PhotoService移行
 - [ ] PhotoServiceInterfaceにResult<T>メソッド追加
@@ -48,9 +48,9 @@
 - [ ] 実装完了後のテスト実行: `fvm flutter test test/unit/services/photo_service_*`
 
 #### StorageService移行
-- [ ] exportDiaries()をResult<String>に変更
-- [ ] importDiaries()をResult<ImportResult>に変更
-- [ ] 呼び出し元の更新
+- [x] exportDiaries()をResult<String>に変更
+- [x] importDiaries()をResult<ImportResult>に変更
+- [x] 呼び出し元の更新
 - [ ] 関連テストケースの更新
 - [ ] 実装完了後のテスト実行: `fvm flutter test test/unit/storage_service_*`
 
@@ -248,7 +248,7 @@
 ## 進捗追跡
 
 ### 週次目標
-- **Week 1**: Result<T>移行（DiaryService）
+- **Week 1**: Result<T>移行（DiaryService） ✅ **完了**
 - **Week 2**: Result<T>移行（PhotoService、StorageService）
 - **Week 3**: ServiceLocator統一、Deprecated API除去
 - **Week 4**: TODO解決、命名規則統一
@@ -265,6 +265,6 @@
 
 ---
 
-**最終更新**: 2025-08-16  
+**最終更新**: 2025-08-16 (DiaryService移行完了)  
 **レビュー者**: [担当者名]  
 **承認日**: [承認日]

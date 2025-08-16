@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'diary_service.dart';
+import 'interfaces/diary_service_interface.dart';
+import 'diary_service.dart'; // compactDatabaseメソッド用に保持
+import '../core/service_locator.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
@@ -47,8 +49,14 @@ class StorageService {
   // データのエクスポート（保存先選択可能）
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
-      final diaryService = await DiaryService.getInstance();
-      var entries = await diaryService.getSortedDiaryEntries();
+      final diaryService = ServiceLocator().get<DiaryServiceInterface>();
+      final result = await diaryService.getSortedDiaryEntriesResult();
+
+      if (result.isFailure) {
+        throw StorageException('日記データの取得に失敗しました: ${result.error.message}');
+      }
+
+      var entries = result.value;
 
       // 期間フィルター
       if (startDate != null || endDate != null) {
@@ -194,7 +202,7 @@ class StorageService {
     Map<String, dynamic> data,
   ) async {
     try {
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = ServiceLocator().get<DiaryServiceInterface>();
       final entries = data['entries'] as List<dynamic>;
 
       int totalEntries = entries.length;
@@ -205,7 +213,13 @@ class StorageService {
       final List<String> warnings = [];
 
       // パフォーマンス最適化: 既存エントリーを一度だけ取得
-      final existingEntries = await diaryService.getSortedDiaryEntries();
+      final existingResult = await diaryService.getSortedDiaryEntriesResult();
+      if (existingResult.isFailure) {
+        throw StorageException(
+          '既存日記データの取得に失敗しました: ${existingResult.error.message}',
+        );
+      }
+      final existingEntries = existingResult.value;
 
       for (int i = 0; i < entries.length; i++) {
         final entryData = entries[i];
@@ -252,7 +266,7 @@ class StorageService {
   // 単一エントリーのインポート
   Future<Result<String>> _importSingleEntry(
     dynamic entryData,
-    DiaryService diaryService,
+    DiaryServiceInterface diaryService,
     List<dynamic> existingEntries,
   ) async {
     try {
@@ -314,7 +328,7 @@ class StorageService {
       }
 
       // エントリーを保存
-      await diaryService.saveDiaryEntry(
+      final saveResult = await diaryService.saveDiaryEntryResult(
         date: date,
         title: entryData['title'] as String,
         content: entryData['content'] as String,
@@ -324,6 +338,10 @@ class StorageService {
             ? (entryData['tags'] as List<dynamic>).cast<String>()
             : null,
       );
+
+      if (saveResult.isFailure) {
+        throw StorageException('エントリーの保存に失敗しました: ${saveResult.error.message}');
+      }
 
       return const Success('imported');
     } catch (e) {

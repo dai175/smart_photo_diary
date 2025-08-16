@@ -9,6 +9,8 @@ import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
 import 'logging_service.dart';
+import '../core/result/result.dart';
+import '../core/result/result_extensions.dart';
 
 class DiaryService implements DiaryServiceInterface {
   static const String _boxName = 'diary_entries';
@@ -503,5 +505,160 @@ class DiaryService implements DiaryServiceInterface {
         _loggingService.error('過去写真日記のタグ生成エラー', error: e);
       }
     });
+  }
+
+  // ========================================
+  // Result<T>パターン版のメソッド実装
+  // ========================================
+
+  /// 日記エントリーを保存（Result版）
+  @override
+  Future<Result<DiaryEntry>> saveDiaryEntryResult({
+    required DateTime date,
+    required String title,
+    required String content,
+    required List<String> photoIds,
+    String? location,
+    List<String>? tags,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await saveDiaryEntry(
+        date: date,
+        title: title,
+        content: content,
+        photoIds: photoIds,
+        location: location,
+        tags: tags,
+      );
+    }, context: 'DiaryService.saveDiaryEntryResult');
+  }
+
+  /// 指定されたIDの日記エントリーを取得（Result版）
+  @override
+  Future<Result<DiaryEntry?>> getDiaryEntryResult(String id) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getDiaryEntry(id);
+    }, context: 'DiaryService.getDiaryEntryResult');
+  }
+
+  /// すべての日記エントリーを取得（Result版）
+  @override
+  Future<Result<List<DiaryEntry>>> getSortedDiaryEntriesResult({
+    bool descending = true,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getSortedDiaryEntries(descending: descending);
+    }, context: 'DiaryService.getSortedDiaryEntriesResult');
+  }
+
+  /// フィルタに基づいて日記エントリーを取得（Result版）
+  @override
+  Future<Result<List<DiaryEntry>>> getFilteredDiaryEntriesResult(
+    DiaryFilter filter,
+  ) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getFilteredDiaryEntries(filter);
+    }, context: 'DiaryService.getFilteredDiaryEntriesResult');
+  }
+
+  /// 日記エントリーを更新（Result版）
+  @override
+  Future<Result<void>> updateDiaryEntryResult(DiaryEntry entry) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      await updateDiaryEntry(entry);
+    }, context: 'DiaryService.updateDiaryEntryResult');
+  }
+
+  /// 日記エントリーを削除（Result版）
+  @override
+  Future<Result<void>> deleteDiaryEntryResult(String id) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      await deleteDiaryEntry(id);
+    }, context: 'DiaryService.deleteDiaryEntryResult');
+  }
+
+  /// エントリーのタグを取得（Result版）
+  @override
+  Future<Result<List<String>>> getTagsForEntryResult(DiaryEntry entry) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getTagsForEntry(entry);
+    }, context: 'DiaryService.getTagsForEntryResult');
+  }
+
+  /// すべてのタグを取得（Result版）
+  @override
+  Future<Result<Set<String>>> getAllTagsResult() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getAllTags();
+    }, context: 'DiaryService.getAllTagsResult');
+  }
+
+  /// 日記の総数を取得（Result版）
+  @override
+  Future<Result<int>> getTotalDiaryCountResult() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getTotalDiaryCount();
+    }, context: 'DiaryService.getTotalDiaryCountResult');
+  }
+
+  /// 指定期間の日記数を取得（Result版）
+  @override
+  Future<Result<int>> getDiaryCountInPeriodResult(
+    DateTime start,
+    DateTime end,
+  ) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getDiaryCountInPeriod(start, end);
+    }, context: 'DiaryService.getDiaryCountInPeriodResult');
+  }
+
+  /// 写真付きで日記エントリーを保存（Result版）
+  @override
+  Future<Result<DiaryEntry>> saveDiaryEntryWithPhotosResult({
+    required DateTime date,
+    required String title,
+    required String content,
+    required List<AssetEntity> photos,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await saveDiaryEntryWithPhotos(
+        date: date,
+        title: title,
+        content: content,
+        photos: photos,
+      );
+    }, context: 'DiaryService.saveDiaryEntryWithPhotosResult');
+  }
+
+  /// 過去の写真から日記エントリーを作成（Result版）
+  @override
+  Future<Result<DiaryEntry>> createDiaryForPastPhotoResult({
+    required DateTime photoDate,
+    required String title,
+    required String content,
+    required List<String> photoIds,
+    String? location,
+    List<String>? tags,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await createDiaryForPastPhoto(
+        photoDate: photoDate,
+        title: title,
+        content: content,
+        photoIds: photoIds,
+        location: location,
+        tags: tags,
+      );
+    }, context: 'DiaryService.createDiaryForPastPhotoResult');
+  }
+
+  /// 写真の撮影日付で日記を検索（Result版）
+  @override
+  Future<Result<List<DiaryEntry>>> getDiaryByPhotoDateResult(
+    DateTime photoDate,
+  ) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getDiaryByPhotoDate(photoDate);
+    }, context: 'DiaryService.getDiaryByPhotoDateResult');
   }
 }

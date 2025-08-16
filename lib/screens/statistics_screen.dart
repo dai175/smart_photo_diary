@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import '../services/diary_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../core/service_locator.dart';
 import '../models/diary_entry.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
@@ -21,7 +22,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  late DiaryService _diaryService;
+  late DiaryServiceInterface _diaryService;
   List<DiaryEntry> _allDiaries = [];
   bool _isLoading = true;
   DateTime _focusedDay = DateTime.now();
@@ -45,16 +46,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
-      _diaryService = await DiaryService.getInstance();
-      _allDiaries = await _diaryService.getSortedDiaryEntries();
+      _diaryService = ServiceLocator().get<DiaryServiceInterface>();
+      final result = await _diaryService.getSortedDiaryEntriesResult();
 
-      _calculateStatistics();
-
-      setState(() {
-        _isLoading = false;
-      });
+      if (result.isSuccess) {
+        _allDiaries = result.value;
+        _calculateStatistics();
+        setState(() {
+          _isLoading = false;
+        });
+      } else {
+        debugPrint('統計データの読み込みエラー: ${result.error.message}');
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      debugPrint('統計データの読み込みエラー: $e');
+      debugPrint('統計データの読み込み中に予期しないエラー: $e');
       setState(() {
         _isLoading = false;
       });
