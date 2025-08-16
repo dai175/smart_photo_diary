@@ -39,13 +39,13 @@
 - [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/diary_service_*`
 
 #### PhotoService移行
-- [ ] PhotoServiceInterfaceにResult<T>メソッド追加
-- [ ] getPhotos()をResult<List<AssetEntity>>に変更
-- [ ] requestPermission()をResult<PermissionState>に変更
-- [ ] loadMorePhotos()をResult<List<AssetEntity>>に変更
-- [ ] 写真関連Controllerの更新
-- [ ] 関連テストケースの更新
-- [ ] 実装完了後のテスト実行: `fvm flutter test test/unit/services/photo_service_*`
+- [x] PhotoServiceInterfaceにResult<T>メソッド追加
+- [x] getPhotos()をResult<List<AssetEntity>>に変更
+- [x] requestPermission()をResult<PermissionState>に変更
+- [x] loadMorePhotos()をResult<List<AssetEntity>>に変更
+- [x] 写真関連Controllerの更新
+- [x] 関連テストケースの更新
+- [x] 実装完了後のテスト実行: `fvm flutter test test/unit/services/photo_service_*`
 
 #### StorageService移行
 - [x] exportDiaries()をResult<String>に変更
@@ -249,7 +249,7 @@
 
 ### 週次目標
 - **Week 1**: Result<T>移行（DiaryService） ✅ **完了**
-- **Week 2**: Result<T>移行（PhotoService、StorageService）
+- **Week 2**: Result<T>移行（PhotoService、StorageService） ✅ **完了**
 - **Week 3**: ServiceLocator統一、Deprecated API除去
 - **Week 4**: TODO解決、命名規則統一
 - **Week 5**: 状態管理最適化
@@ -265,6 +265,6 @@
 
 ---
 
-**最終更新**: 2025-08-16 (DiaryService移行完了)  
+**最終更新**: 2025-08-16 (PhotoService移行完了)  
 **レビュー者**: [担当者名]  
 **承認日**: [承認日]

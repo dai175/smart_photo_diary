@@ -6,6 +6,8 @@ import 'interfaces/photo_service_interface.dart';
 import 'photo_cache_service.dart';
 import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
+import '../core/result/result.dart';
+import '../core/result/result_extensions.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
 class PhotoService implements PhotoServiceInterface {
@@ -873,5 +875,133 @@ class PhotoService implements PhotoServiceInterface {
       );
       return [];
     }
+  }
+
+  // ========================================
+  // Result<T>パターン版のメソッド実装
+  // ========================================
+
+  /// 写真アクセス権限をリクエストする（Result版）
+  @override
+  Future<Result<bool>> requestPermissionResult() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await requestPermission();
+    }, context: 'PhotoService.requestPermissionResult');
+  }
+
+  /// 権限が永続的に拒否されているかチェック（Result版）
+  @override
+  Future<Result<bool>> isPermissionPermanentlyDeniedResult() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await isPermissionPermanentlyDenied();
+    }, context: 'PhotoService.isPermissionPermanentlyDeniedResult');
+  }
+
+  /// 今日撮影された写真を取得する（Result版）
+  @override
+  Future<Result<List<AssetEntity>>> getTodayPhotosResult({
+    int limit = 20,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getTodayPhotos(limit: limit);
+    }, context: 'PhotoService.getTodayPhotosResult');
+  }
+
+  /// 指定された日付範囲の写真を取得する（Result版）
+  @override
+  Future<Result<List<AssetEntity>>> getPhotosInDateRangeResult({
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 100,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getPhotosInDateRange(
+        startDate: startDate,
+        endDate: endDate,
+        limit: limit,
+      );
+    }, context: 'PhotoService.getPhotosInDateRangeResult');
+  }
+
+  /// 指定された日付の写真を取得する（Result版）
+  @override
+  Future<Result<List<AssetEntity>>> getPhotosForDateResult(
+    DateTime date, {
+    required int offset,
+    required int limit,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getPhotosForDate(date, offset: offset, limit: limit);
+    }, context: 'PhotoService.getPhotosForDateResult');
+  }
+
+  /// 写真のバイナリデータを取得する（Result版）
+  @override
+  Future<Result<List<int>?>> getPhotoDataResult(AssetEntity asset) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getPhotoData(asset);
+    }, context: 'PhotoService.getPhotoDataResult');
+  }
+
+  /// 写真のサムネイルデータを取得する（Result版）
+  @override
+  Future<Result<List<int>?>> getThumbnailDataResult(AssetEntity asset) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getThumbnailData(asset);
+    }, context: 'PhotoService.getThumbnailDataResult');
+  }
+
+  /// 写真の元画像を取得する（Result版）
+  @override
+  Future<Result<dynamic>> getOriginalFileResult(AssetEntity asset) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getOriginalFile(asset);
+    }, context: 'PhotoService.getOriginalFileResult');
+  }
+
+  /// 写真のサムネイルを取得する（Result版）
+  @override
+  Future<Result<dynamic>> getThumbnailResult(
+    AssetEntity asset, {
+    int width = 200,
+    int height = 200,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getThumbnail(asset, width: width, height: height);
+    }, context: 'PhotoService.getThumbnailResult');
+  }
+
+  /// Limited Photo Access時に写真選択画面を表示（Result版）
+  @override
+  Future<Result<bool>> presentLimitedLibraryPickerResult() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await presentLimitedLibraryPicker();
+    }, context: 'PhotoService.presentLimitedLibraryPickerResult');
+  }
+
+  /// 現在の権限状態が Limited Access かチェック（Result版）
+  @override
+  Future<Result<bool>> isLimitedAccessResult() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await isLimitedAccess();
+    }, context: 'PhotoService.isLimitedAccessResult');
+  }
+
+  /// 効率的な写真取得（Result版）
+  @override
+  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getPhotosEfficient(
+        startDate: startDate,
+        endDate: endDate,
+        offset: offset,
+        limit: limit,
+      );
+    }, context: 'PhotoService.getPhotosEfficientResult');
   }
 }

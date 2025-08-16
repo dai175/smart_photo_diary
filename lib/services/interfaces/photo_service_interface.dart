@@ -1,4 +1,5 @@
 import 'package:photo_manager/photo_manager.dart';
+import '../../core/result/result.dart';
 
 /// 写真サービスのインターフェース
 abstract class PhotoServiceInterface {
@@ -49,6 +50,63 @@ abstract class PhotoServiceInterface {
 
   /// 効率的な写真取得（ページネーション対応）
   Future<List<AssetEntity>> getPhotosEfficient({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  });
+
+  // ========================================
+  // Result<T>パターン版のメソッド（新規追加）
+  // ========================================
+
+  /// 写真アクセス権限をリクエストする（Result版）
+  Future<Result<bool>> requestPermissionResult();
+
+  /// 権限が永続的に拒否されているかチェック（Result版）
+  Future<Result<bool>> isPermissionPermanentlyDeniedResult();
+
+  /// 今日撮影された写真を取得する（Result版）
+  Future<Result<List<AssetEntity>>> getTodayPhotosResult({int limit = 20});
+
+  /// 指定された日付範囲の写真を取得する（Result版）
+  Future<Result<List<AssetEntity>>> getPhotosInDateRangeResult({
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 100,
+  });
+
+  /// 指定された日付の写真を取得する（Result版）
+  Future<Result<List<AssetEntity>>> getPhotosForDateResult(
+    DateTime date, {
+    required int offset,
+    required int limit,
+  });
+
+  /// 写真のバイナリデータを取得する（Result版）
+  Future<Result<List<int>?>> getPhotoDataResult(AssetEntity asset);
+
+  /// 写真のサムネイルデータを取得する（Result版）
+  Future<Result<List<int>?>> getThumbnailDataResult(AssetEntity asset);
+
+  /// 写真の元画像を取得する（Result版）
+  Future<Result<dynamic>> getOriginalFileResult(AssetEntity asset);
+
+  /// 写真のサムネイルを取得する（Result版）
+  Future<Result<dynamic>> getThumbnailResult(
+    AssetEntity asset, {
+    int width = 200,
+    int height = 200,
+  });
+
+  /// Limited Photo Access時に写真選択画面を表示（Result版）
+  Future<Result<bool>> presentLimitedLibraryPickerResult();
+
+  /// 現在の権限状態が Limited Access かチェック（Result版）
+  Future<Result<bool>> isLimitedAccessResult();
+
+  /// 効率的な写真取得（Result版）
+  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
     DateTime? startDate,
     DateTime? endDate,
     int offset = 0,
