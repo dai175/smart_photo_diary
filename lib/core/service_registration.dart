@@ -24,23 +24,33 @@ import 'service_locator.dart';
 /// This class handles the registration of all services in the ServiceLocator.
 /// It provides a centralized place to configure dependency injection.
 ///
-/// ## Service Initialization Order
+/// ## Service Initialization Order and Dependencies
 ///
 /// ### Phase 1: Core Services (No Dependencies)
-/// 1. PhotoService - 写真アクセス機能
-/// 2. SettingsService - アプリ設定管理
-/// 3. StorageService - ストレージ操作
-/// 4. AiService - AI日記生成
-/// 5. SubscriptionService - サブスクリプション管理 ✅
+/// 1. **LoggingService** - 基盤ログ機能（他サービスの依存基盤）
+/// 2. **PhotoService** - 写真アクセス機能（LoggingServiceに依存）
+/// 3. **PhotoCacheService** - 写真キャッシュ機能（LoggingServiceに依存）
+/// 4. **PhotoAccessControlService** - 写真アクセス制御
+/// 5. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
+/// 6. **StorageService** - ストレージ操作
+/// 7. **SubscriptionService** - サブスクリプション管理（Hive依存のみ）
+/// 8. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み）
 ///
 /// ### Phase 2: Dependent Services
-/// 1. DiaryService - 日記管理（AiService, PhotoServiceに依存）
+/// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
+/// 2. **DiaryService** - 日記管理（AiService, PhotoServiceに依存）
 ///
-/// ## Subscription Service Dependencies
-/// - **直接依存**: Hive (データ永続化)
-/// - **間接依存**: なし
-/// - **登録場所**: Core Services (_registerCoreServices)
-/// - **登録タイプ**: AsyncFactory (Hive初期化が必要)
+/// ## 依存関係マップ
+/// - LoggingService → なし（基盤サービス）
+/// - PhotoService → LoggingService
+/// - PhotoCacheService → LoggingService
+/// - SettingsService → SubscriptionService
+/// - SubscriptionService → LoggingService
+/// - AiService → SubscriptionService
+/// - DiaryService → AiService + PhotoService + LoggingService
+/// - StorageService → DiaryService（DatabaseOptimization用）
+///
+/// **循環依存**: なし（全て単方向の依存関係）
 class ServiceRegistration {
   static bool _isInitialized = false;
 
@@ -75,42 +85,42 @@ class ServiceRegistration {
   static Future<void> _registerCoreServices() async {
     debugPrint('ServiceRegistration: Registering core services...');
 
-    // LoggingService (基盤サービス - 他のサービスの依存関係として使用)
+    // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
     serviceLocator.registerAsyncFactory<LoggingService>(
       () => LoggingService.getInstance(),
     );
 
-    // PhotoService (singleton pattern)
-    serviceLocator.registerFactory<PhotoServiceInterface>(
-      () => PhotoService.getInstance(),
-    );
-
-    // PhotoCacheService (singleton pattern)
-    serviceLocator.registerFactory<PhotoCacheServiceInterface>(
-      () => PhotoCacheService.getInstance(),
-    );
-
-    // PhotoAccessControlService (singleton pattern)
-    serviceLocator.registerFactory<PhotoAccessControlServiceInterface>(
-      () => PhotoAccessControlService.getInstance(),
-    );
-
-    // SettingsService (async initialization)
-    serviceLocator.registerAsyncFactory<SettingsService>(
-      () => SettingsService.getInstance(),
-    );
-
-    // StorageService (singleton pattern)
-    serviceLocator.registerFactory<StorageServiceInterface>(
-      () => StorageService.getInstance(),
-    );
-
-    // SubscriptionService (Hive依存のみ - コアサービス)
+    // 2. SubscriptionService (Hive依存のみ、LoggingServiceに後で依存)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(
       () => SubscriptionService.getInstance(),
     );
 
-    // PromptService (JSONアセット読み込み - コアサービス)
+    // 3. SettingsService (SubscriptionServiceに依存)
+    serviceLocator.registerAsyncFactory<SettingsService>(
+      () => SettingsService.getInstance(),
+    );
+
+    // 4. PhotoService (LoggingServiceに依存)
+    serviceLocator.registerFactory<PhotoServiceInterface>(
+      () => PhotoService.getInstance(),
+    );
+
+    // 5. PhotoCacheService (LoggingServiceに依存)
+    serviceLocator.registerFactory<PhotoCacheServiceInterface>(
+      () => PhotoCacheService.getInstance(),
+    );
+
+    // 6. PhotoAccessControlService (依存なし)
+    serviceLocator.registerFactory<PhotoAccessControlServiceInterface>(
+      () => PhotoAccessControlService.getInstance(),
+    );
+
+    // 7. StorageService (DiaryServiceに依存するが、最適化機能のみ)
+    serviceLocator.registerFactory<StorageServiceInterface>(
+      () => StorageService.getInstance(),
+    );
+
+    // 8. PromptService (JSONアセット読み込み - 依存なし)
     serviceLocator.registerAsyncFactory<IPromptService>(() async {
       final service = PromptService.instance;
       await service.initialize();

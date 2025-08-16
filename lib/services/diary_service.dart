@@ -304,6 +304,7 @@ class DiaryService implements DiaryServiceInterface {
   }
 
   // よく使われるタグを取得（使用頻度順）
+  @override
   Future<List<String>> getPopularTags({int limit = 10}) async {
     if (_diaryBox == null) await _init();
     final tagCounts = <String, int>{};
@@ -355,6 +356,7 @@ class DiaryService implements DiaryServiceInterface {
   }
 
   // データベースの最適化（StorageServiceから呼び出し用）
+  @override
   Future<void> compactDatabase() async {
     if (_diaryBox == null) await _init();
     if (_diaryBox != null) {

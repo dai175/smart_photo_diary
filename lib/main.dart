@@ -8,6 +8,7 @@ import 'models/diary_entry.dart';
 import 'models/subscription_status.dart';
 import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
+import 'core/service_locator.dart';
 import 'services/settings_service.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_colors.dart';
@@ -48,7 +49,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late SettingsService _settingsService;
+  SettingsService? _settingsService;
   ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
 
@@ -60,9 +61,9 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _loadSettings() async {
     try {
-      _settingsService = await SettingsService.getInstance();
+      _settingsService = await ServiceLocator().getAsync<SettingsService>();
       setState(() {
-        _themeMode = _settingsService.themeMode;
+        _themeMode = _settingsService!.themeMode;
         _isLoading = false;
       });
     } catch (e) {

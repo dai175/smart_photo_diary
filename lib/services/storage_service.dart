@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/storage_service_interface.dart';
-import 'diary_service.dart'; // compactDatabaseメソッド用に保持
 import '../core/service_locator.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
@@ -359,7 +358,8 @@ class StorageService implements StorageServiceInterface {
   @override
   Future<bool> optimizeDatabase() async {
     try {
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceLocator()
+          .getAsync<DiaryServiceInterface>();
 
       // Hiveデータベースのコンパクト（断片化を解消）
       await diaryService.compactDatabase();

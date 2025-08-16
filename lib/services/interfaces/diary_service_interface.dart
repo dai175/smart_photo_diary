@@ -36,6 +36,9 @@ abstract class DiaryServiceInterface {
   /// すべてのタグを取得
   Future<Set<String>> getAllTags();
 
+  /// 人気のタグを取得
+  Future<List<String>> getPopularTags({int limit = 10});
+
   /// 日記の総数を取得
   Future<int> getTotalDiaryCount();
 
@@ -130,4 +133,7 @@ abstract class DiaryServiceInterface {
   Future<Result<List<DiaryEntry>>> getDiaryByPhotoDateResult(
     DateTime photoDate,
   );
+
+  /// データベースの最適化（断片化を解消）
+  Future<void> compactDatabase();
 }

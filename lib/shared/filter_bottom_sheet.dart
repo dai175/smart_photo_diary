@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/diary_filter.dart';
-import '../services/diary_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../core/service_locator.dart';
 import '../constants/app_constants.dart';
 import '../ui/components/animated_button.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
   final Function(DiaryFilter) onApply;
-  final DiaryService? diaryService; // テスト用のオプショナル依存性注入
+  final DiaryServiceInterface? diaryService; // テスト用のオプショナル依存性注入
 
   const FilterBottomSheet({
     super.key,
@@ -35,9 +36,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   Future<void> _loadAvailableTags() async {
     try {
-      // テスト時は注入されたサービスを使用、本番時は通常のgetInstance
+      // テスト時は注入されたサービスを使用、本番時はServiceLocator経由
       final diaryService =
-          widget.diaryService ?? await DiaryService.getInstance();
+          widget.diaryService ??
+          await ServiceLocator().getAsync<DiaryServiceInterface>();
       final popularTags = await diaryService.getPopularTags(limit: 20);
       setState(() {
         _availableTags = popularTags;

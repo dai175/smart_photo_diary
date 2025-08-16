@@ -48,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      _settingsService = await SettingsService.getInstance();
+      _settingsService = await ServiceRegistration.getAsync<SettingsService>();
       _packageInfo = await PackageInfo.fromPlatform();
       final storageService = ServiceRegistration.get<StorageServiceInterface>();
       final storageResult = await storageService.getStorageInfoResult();
