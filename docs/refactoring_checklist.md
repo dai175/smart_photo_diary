@@ -199,7 +199,7 @@
 - [x] core/service_registration.dart（8箇所のdebugPrint）
 - [x] main.dart（5箇所のdebugPrint）
 - [x] core/service_locator.dart（8箇所のdebugPrint）
-- [ ] 初期化関連ログの統一
+- [x] 初期化関連ログの統一
 - [ ] 設定関連エラーのログレベル分類
 - [ ] 起動時のログフローの最適化
 
@@ -215,18 +215,20 @@
 #### ログ標準化ルール
 
 **ログレベル分類ガイドライン**:
-- `error`: 例外、API失敗、データ破損
-- `warning`: 設定不備、非推奨機能使用
-- `info`: 正常な状態変更、重要な操作完了
-- `debug`: 詳細なトレース情報
+- `error`: 例外、API失敗、設定読み込みエラー、初期化失敗
+- `warning`: 設定不備、非推奨機能使用、リトライ可能なエラー
+- `info`: サービス初期化完了、重要な状態変更、成功した操作
+- `debug`: 内部処理開始、詳細なトレース情報、早期リターン
 
 **コンテキスト命名規則**:
-- フォーマット: `サービス名.メソッド名`
-- 例: `SubscriptionService.initializeStatus`
+- **クラスメソッド**: `クラス名.メソッド名` (例: `ServiceRegistration.initialize`)
+- **トップレベル関数**: `ファイル名` または `関数名` (例: `main`)
+- **インスタンスメソッド**: `サービス名.メソッド名` (例: `SubscriptionService.initializeStatus`)
 
-**データ付きログの活用**:
-- 重要な変数値をdataパラメータで記録
-- 例: `logging.info('プラン変更完了', context: 'SubscriptionService.updatePlan', data: newPlan.id)`
+**実装パターン**:
+- **ServiceLocatorアクセス**: `static LoggingService get _logger => serviceLocator.get<LoggingService>();`
+- **循環参照回避**: ServiceLocatorなど基盤システムではdebugPrint完全除去
+- **データ付きログ**: `logger.info('メッセージ', context: 'Context', data: '追加情報')`
 
 #### 全体的なテスト・検証
 - [ ] 各フェーズ完了後のテスト実行

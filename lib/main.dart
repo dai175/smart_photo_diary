@@ -29,18 +29,26 @@ Future<void> main() async {
   Hive.registerAdapter(WritingPromptAdapter());
   Hive.registerAdapter(PromptUsageHistoryAdapter());
 
+  // アプリケーション初期化開始
+  final appStartTime = DateTime.now();
+
   // サービスロケータの初期化（LoggingService登録のため先に実行）
   await ServiceRegistration.initialize();
   final logger = serviceLocator.get<LoggingService>();
+
+  logger.info('アプリケーション初期化開始', context: 'main');
   logger.info('ServiceRegistration初期化完了', context: 'main');
 
   // 環境変数の初期化（LoggingServiceが利用可能になった後）
-  logger.debug('EnvironmentConfig初期化開始', context: 'main');
   await EnvironmentConfig.initialize();
+  logger.info('EnvironmentConfig初期化完了', context: 'main');
+
+  // 初期化完了時間の計測
+  final initDuration = DateTime.now().difference(appStartTime);
   logger.info(
-    'EnvironmentConfig初期化完了',
+    'アプリケーション初期化完了',
     context: 'main',
-    data: 'initialized: ${EnvironmentConfig.isInitialized}',
+    data: '初期化時間: ${initDuration.inMilliseconds}ms',
   );
 
   runApp(const MyApp());

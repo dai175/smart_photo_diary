@@ -61,15 +61,27 @@ class ServiceRegistration {
       return;
     }
 
+    final startTime = DateTime.now();
     try {
       // Register core services that don't have dependencies
       await _registerCoreServices();
+
+      // LoggingService登録後にログ出力
+      _logger.debug(
+        'ServiceRegistration初期化開始',
+        context: 'ServiceRegistration.initialize',
+      );
 
       // Register services with dependencies
       await _registerDependentServices();
 
       _isInitialized = true;
-      _logger.info('サービス初期化完了', context: 'ServiceRegistration.initialize');
+      final duration = DateTime.now().difference(startTime);
+      _logger.info(
+        'サービス初期化完了',
+        context: 'ServiceRegistration.initialize',
+        data: '初期化時間: ${duration.inMilliseconds}ms',
+      );
 
       // Debug print all registered services
       serviceLocator.debugPrintServices();
