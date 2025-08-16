@@ -188,7 +188,7 @@
 - [x] subscription_service.dart（44箇所のdebugPrint）
 - [x] ai/diary_generator.dart（18箇所のdebugPrint）
 - [x] ai/gemini_api_client.dart（21箇所のdebugPrint）
-- [ ] ai/tag_generator.dart（3箇所のdebugPrint）
+- [x] ai/tag_generator.dart（3箇所のdebugPrint）
 - [ ] エラーハンドリングの統一（error/warning/info レベル分類）
 - [ ] コンテキスト情報の追加
 - [ ] テストの更新
