@@ -197,7 +197,7 @@
 **対象**: アプリケーション設定と初期化関連
 - [x] config/environment_config.dart（16箇所のdebugPrint）
 - [x] core/service_registration.dart（8箇所のdebugPrint）
-- [ ] main.dart（4箇所のdebugPrint）
+- [x] main.dart（5箇所のdebugPrint）
 - [ ] core/service_locator.dart（3箇所のdebugPrint）
 - [ ] 初期化関連ログの統一
 - [ ] 設定関連エラーのログレベル分類

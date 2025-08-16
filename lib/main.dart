@@ -10,6 +10,7 @@ import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
 import 'core/service_locator.dart';
 import 'services/settings_service.dart';
+import 'services/logging_service.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_colors.dart';
 
@@ -29,14 +30,18 @@ Future<void> main() async {
   Hive.registerAdapter(PromptUsageHistoryAdapter());
 
   // サービスロケータの初期化（LoggingService登録のため先に実行）
-  debugPrint('🔧 ServiceRegistration初期化開始...');
   await ServiceRegistration.initialize();
-  debugPrint('🔧 ServiceRegistration初期化完了');
+  final logger = serviceLocator.get<LoggingService>();
+  logger.info('ServiceRegistration初期化完了', context: 'main');
 
   // 環境変数の初期化（LoggingServiceが利用可能になった後）
-  debugPrint('🔧 EnvironmentConfig初期化開始...');
+  logger.debug('EnvironmentConfig初期化開始', context: 'main');
   await EnvironmentConfig.initialize();
-  debugPrint('🔧 EnvironmentConfig初期化完了: ${EnvironmentConfig.isInitialized}');
+  logger.info(
+    'EnvironmentConfig初期化完了',
+    context: 'main',
+    data: 'initialized: ${EnvironmentConfig.isInitialized}',
+  );
 
   runApp(const MyApp());
 }
@@ -52,6 +57,9 @@ class _MyAppState extends State<MyApp> {
   SettingsService? _settingsService;
   ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
+
+  // LoggingServiceアクセス用getter
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   @override
   void initState() {
@@ -70,7 +78,11 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _isLoading = false;
       });
-      debugPrint('設定の読み込みエラー: $e');
+      _logger.error(
+        '設定の読み込みエラー',
+        context: '_MyAppState._loadSettings',
+        error: e,
+      );
     }
   }
 
