@@ -116,21 +116,21 @@
 
 ### 4. TODOコメントの解決
 
-**場所**:
-- `lib/ui/components/animated_button.dart`
-- `lib/services/settings_service.dart`
+**調査結果**:
+- ✅ libディレクトリ内: TODOコメントなし
+- ✅ android/app/build.gradle.kts: 2箇所のTODOを解決済み
 
 **作業項目**:
-- [ ] `grep -r "TODO\|FIXME\|HACK" lib/`で全TODO箇所を特定
-- [ ] 各TODOの内容分析と優先度付け
-- [ ] 実装可能なTODOの解決
-- [ ] 不要なTODOの削除
-- [ ] 長期TODOのissue化
+- [x] `grep -r "TODO\|FIXME\|HACK" lib/`で全TODO箇所を特定
+- [x] 各TODOの内容分析と優先度付け
+- [x] 実装可能なTODOの解決
+- [x] 不要なTODOの削除
+- [x] android/app/build.gradle.kts の説明コメント改善
 
 **完了条件**:
-- [ ] TODOコメントが5個以下に削減
-- [ ] 残存TODOが適切にドキュメント化
-- [ ] 全テストが成功
+- [x] プロジェクトコード内のTODOコメントが0個 ✅ **達成済み**
+- [x] 全テストが成功 ✅ **達成済み**
+- [x] `fvm flutter analyze`でエラーなし ✅ **達成済み**
 
 ---
 

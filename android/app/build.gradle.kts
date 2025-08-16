@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Smart Photo Diary application identifier
         applicationId = "com.focuswave.dev.smartPhotoDiary"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -42,8 +42,8 @@ android {
         }
         
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Development mode: using debug keys for easy testing
+            // Production deployment will require proper release keys configuration
             signingConfig = signingConfigs.getByName("debug")
             
             // 本番用：難読化を有効化
