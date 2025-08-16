@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import '../services/ai_service.dart';
 import '../services/ai/ai_service_interface.dart';
+import '../services/logging_service.dart';
 import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/photo_service.dart';
@@ -16,7 +16,6 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/prompt_service.dart';
-import '../services/logging_service.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -53,15 +52,14 @@ import 'service_locator.dart';
 /// **循環依存**: なし（全て単方向の依存関係）
 class ServiceRegistration {
   static bool _isInitialized = false;
+  static LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   /// Initialize and register all services
   static Future<void> initialize() async {
     if (_isInitialized) {
-      debugPrint('ServiceRegistration: Already initialized');
+      _logger.debug('サービス既に初期化済み', context: 'ServiceRegistration.initialize');
       return;
     }
-
-    debugPrint('ServiceRegistration: Initializing services...');
 
     try {
       // Register core services that don't have dependencies
@@ -71,23 +69,33 @@ class ServiceRegistration {
       await _registerDependentServices();
 
       _isInitialized = true;
-      debugPrint('ServiceRegistration: All services initialized successfully');
+      _logger.info('サービス初期化完了', context: 'ServiceRegistration.initialize');
 
       // Debug print all registered services
       serviceLocator.debugPrintServices();
     } catch (e) {
-      debugPrint('ServiceRegistration: Error during initialization: $e');
+      // LoggingService may not be available if initialization failed
+      if (_isInitialized) {
+        _logger.error(
+          'サービス初期化エラー',
+          context: 'ServiceRegistration.initialize',
+          error: e,
+        );
+      }
       rethrow;
     }
   }
 
   /// Register services that don't have dependencies
   static Future<void> _registerCoreServices() async {
-    debugPrint('ServiceRegistration: Registering core services...');
-
     // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
     final loggingService = await LoggingService.getInstance();
     serviceLocator.registerSingleton<LoggingService>(loggingService);
+
+    _logger.debug(
+      'コアサービス登録開始',
+      context: 'ServiceRegistration._registerCoreServices',
+    );
 
     // 2. SubscriptionService (Hive依存のみ、LoggingServiceに後で依存)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(
@@ -129,7 +137,10 @@ class ServiceRegistration {
 
   /// Register services that have dependencies on other services
   static Future<void> _registerDependentServices() async {
-    debugPrint('ServiceRegistration: Registering dependent services...');
+    _logger.debug(
+      '依存関係サービス登録開始',
+      context: 'ServiceRegistration._registerDependentServices',
+    );
 
     // Phase 1.7.1.1: AiService with SubscriptionService dependency injection
     serviceLocator.registerAsyncFactory<IAiService>(() async {
@@ -162,7 +173,9 @@ class ServiceRegistration {
 
   /// Reset service registration (useful for testing)
   static void reset() {
-    debugPrint('ServiceRegistration: Resetting...');
+    if (_isInitialized) {
+      _logger.info('サービス登録リセット', context: 'ServiceRegistration.reset');
+    }
     serviceLocator.clear();
     _isInitialized = false;
   }

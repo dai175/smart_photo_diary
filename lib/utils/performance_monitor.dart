@@ -10,6 +10,11 @@ class PerformanceMonitor {
   /// パフォーマンス計測を開始
   static void startMeasurement(String label) {
     _startTimes[label] = DateTime.now();
+
+    // デバッグビルドの場合はTimelineに記録
+    if (kDebugMode) {
+      developer.Timeline.startSync(label);
+    }
   }
 
   /// パフォーマンス計測を終了
