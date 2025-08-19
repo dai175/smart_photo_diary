@@ -21,12 +21,19 @@ class _CacheEntry {
 class PhotoCacheService implements IPhotoCacheService {
   // シングルトンパターン
   static PhotoCacheService? _instance;
+  LoggingService? _logger;
 
   PhotoCacheService._();
 
   static PhotoCacheService getInstance() {
     _instance ??= PhotoCacheService._();
     return _instance!;
+  }
+
+  /// LoggingServiceを取得（遅延初期化）
+  Future<LoggingService> _getLogger() async {
+    _logger ??= await LoggingService.getInstance();
+    return _logger!;
   }
 
   // メモリキャッシュ
@@ -117,7 +124,12 @@ class PhotoCacheService implements IPhotoCacheService {
     _memoryCache.clear();
     _currentCacheSizeInBytes = 0;
 
-    debugPrint('PhotoCacheService: メモリキャッシュをクリアしました');
+    _getLogger().then(
+      (logger) => logger.info(
+        'メモリキャッシュをクリアしました',
+        context: 'PhotoCacheService.clearMemoryCache',
+      ),
+    );
   }
 
   /// 特定のアセットのキャッシュをクリア
@@ -131,7 +143,12 @@ class PhotoCacheService implements IPhotoCacheService {
       _removeFromCache(key);
     }
 
-    debugPrint('PhotoCacheService: アセット $assetId のキャッシュをクリアしました');
+    _getLogger().then(
+      (logger) => logger.info(
+        'アセット $assetId のキャッシュをクリアしました',
+        context: 'PhotoCacheService.clearCacheForAsset',
+      ),
+    );
   }
 
   /// キャッシュサイズを取得（デバッグ用）
@@ -244,7 +261,12 @@ class PhotoCacheService implements IPhotoCacheService {
       _removeFromCache(sortedEntries[i].key);
     }
 
-    debugPrint('PhotoCacheService: キャッシュエビクション実行 - $entriesToRemove エントリーを削除');
+    _getLogger().then(
+      (logger) => logger.info(
+        'キャッシュエビクション実行 - $entriesToRemove エントリーを削除',
+        context: 'PhotoCacheService._evictOldestEntries',
+      ),
+    );
   }
 
   /// メモリ使用状況をチェック
@@ -329,8 +351,11 @@ class PhotoCacheService implements IPhotoCacheService {
     }
 
     if (keysToRemove.isNotEmpty) {
-      debugPrint(
-        'PhotoCacheService: ${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
+      _getLogger().then(
+        (logger) => logger.info(
+          '${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
+          context: 'PhotoCacheService.cleanupExpiredEntries',
+        ),
       );
     }
   }
