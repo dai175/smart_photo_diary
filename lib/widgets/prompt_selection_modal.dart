@@ -3,6 +3,8 @@ import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/service_locator.dart';
+import '../services/logging_service.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_dialog.dart';
@@ -24,6 +26,7 @@ class PromptSelectionModal extends StatefulWidget {
 }
 
 class _PromptSelectionModalState extends State<PromptSelectionModal> {
+  late final LoggingService _logger;
   late final IPromptService _promptService;
   late final ISubscriptionService _subscriptionService;
 
@@ -36,6 +39,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   @override
   void initState() {
     super.initState();
+    _logger = serviceLocator.get<LoggingService>();
     _initializeServices();
   }
 
@@ -56,8 +60,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       _availablePrompts = _promptService.getPromptsForPlan(
         isPremium: _isPremium,
       );
-      debugPrint(
+      _logger.info(
         'プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium',
+        context: 'PromptSelectionModal',
       );
 
       if (mounted) {
@@ -66,7 +71,11 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         });
       }
     } catch (e) {
-      debugPrint('プロンプトサービス初期化エラー: $e');
+      _logger.error(
+        'プロンプトサービス初期化エラー',
+        error: e,
+        context: 'PromptSelectionModal',
+      );
       if (mounted) {
         setState(() {
           _isLoading = false;

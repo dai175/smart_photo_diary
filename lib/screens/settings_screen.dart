@@ -4,6 +4,8 @@ import '../services/settings_service.dart';
 import '../services/storage_service.dart'; // StorageInfoクラス用
 import '../services/interfaces/storage_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/service_locator.dart';
+import '../services/logging_service.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
@@ -29,6 +31,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late final LoggingService _logger;
   late SettingsService _settingsService;
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
@@ -39,6 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    _logger = serviceLocator.get<LoggingService>();
     _loadSettings();
   }
 
@@ -55,7 +59,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (storageResult.isSuccess) {
         _storageInfo = storageResult.value;
       } else {
-        debugPrint('ストレージ情報の取得エラー: ${storageResult.error}');
+        _logger.error(
+          'ストレージ情報の取得エラー',
+          error: storageResult.error,
+          context: 'SettingsScreen',
+        );
       }
 
       // サブスクリプション情報を取得（V2版）
@@ -63,10 +71,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
       } else {
-        debugPrint('サブスクリプション情報の取得エラー: ${subscriptionResult.error}');
+        _logger.error(
+          'サブスクリプション情報の取得エラー',
+          error: subscriptionResult.error,
+          context: 'SettingsScreen',
+        );
       }
     } catch (e) {
-      debugPrint('設定の読み込みエラー: $e');
+      _logger.error('設定の読み込みエラー', error: e, context: 'SettingsScreen');
     }
 
     setState(() {

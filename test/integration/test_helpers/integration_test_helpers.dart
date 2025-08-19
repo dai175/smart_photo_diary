@@ -18,6 +18,7 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
+import 'package:smart_photo_diary/services/logging_service.dart';
 import '../mocks/mock_services.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -84,6 +85,9 @@ class IntegrationTestHelpers {
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
 
+    // Create LoggingService
+    final loggingService = await LoggingService.getInstance();
+
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
     _setupAdditionalMockBehaviors(
@@ -102,6 +106,7 @@ class IntegrationTestHelpers {
     );
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<IStorageService>(mockStorageService);
+    _serviceLocator.registerSingleton<LoggingService>(loggingService);
   }
 
   /// Setup default behaviors for mock services

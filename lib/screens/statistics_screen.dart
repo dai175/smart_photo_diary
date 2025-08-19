@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_locator.dart';
+import '../services/logging_service.dart';
 import '../models/diary_entry.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
@@ -22,6 +23,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
+  late final LoggingService _logger;
   late IDiaryService _diaryService;
   List<DiaryEntry> _allDiaries = [];
   bool _isLoading = true;
@@ -37,6 +39,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
+    _logger = serviceLocator.get<LoggingService>();
     _loadStatistics();
   }
 
@@ -56,13 +59,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           _isLoading = false;
         });
       } else {
-        debugPrint('統計データの読み込みエラー: ${result.error.message}');
+        _logger.error(
+          '統計データの読み込みエラー',
+          error: result.error,
+          context: 'StatisticsScreen',
+        );
         setState(() {
           _isLoading = false;
         });
       }
     } catch (e) {
-      debugPrint('統計データの読み込み中に予期しないエラー: $e');
+      _logger.error(
+        '統計データの読み込み中に予期しないエラー',
+        error: e,
+        context: 'StatisticsScreen',
+      );
       setState(() {
         _isLoading = false;
       });

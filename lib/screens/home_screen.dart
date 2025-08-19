@@ -10,6 +10,8 @@ import '../screens/statistics_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/service_locator.dart';
+import '../services/logging_service.dart';
 import '../utils/dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
 import '../ui/components/custom_dialog.dart';
@@ -28,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   int _currentIndex = 0;
 
+  // サービス
+  late final LoggingService _logger;
+
   // コントローラー
   late final PhotoSelectionController _photoController;
   late final PhotoSelectionController _pastPhotoController;
@@ -44,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _logger = serviceLocator.get<LoggingService>();
     _photoController = PhotoSelectionController();
     _pastPhotoController = PhotoSelectionController();
     // 過去の写真は同じ日付のみ選択可能に制限
@@ -185,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen>
         _loadingDiaries = false;
       });
     } catch (e) {
-      debugPrint('日記の読み込みエラー: $e');
+      _logger.error('日記の読み込みエラー', error: e, context: 'HomeScreen');
       if (mounted) {
         setState(() {
           _recentDiaries = [];

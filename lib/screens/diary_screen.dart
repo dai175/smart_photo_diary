@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../controllers/diary_screen_controller.dart';
 import '../widgets/diary_card_widget.dart';
 import '../shared/filter_bottom_sheet.dart';
+import '../core/service_locator.dart';
+import '../services/logging_service.dart';
 import '../shared/active_filters_display.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
@@ -21,11 +23,13 @@ class DiaryScreen extends StatefulWidget {
 }
 
 class _DiaryScreenState extends State<DiaryScreen> {
+  late final LoggingService _logger;
   late final DiaryScreenController _controller;
 
   @override
   void initState() {
     super.initState();
+    _logger = serviceLocator.get<LoggingService>();
     _controller = DiaryScreenController();
   }
 
@@ -46,7 +50,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
       // 削除された場合の追加処理（必要に応じて）
       if (result == true) {
-        debugPrint('日記が削除されました');
+        _logger.info('日記が削除されました', context: 'DiaryScreen');
       }
     });
   }
