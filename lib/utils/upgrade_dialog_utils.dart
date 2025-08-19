@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/interfaces/subscription_service_interface.dart';
+import '../services/logging_service.dart';
 import '../core/service_locator.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -22,6 +23,9 @@ class UpgradeDialogUtils {
   // 購入処理中フラグ（二重実行防止）
   static bool _isPurchasing = false;
 
+  // LoggingServiceのゲッター
+  static LoggingService get _logger => serviceLocator.get<LoggingService>();
+
   /// プレミアムプラン選択ダイアログを表示
   static Future<void> showUpgradeDialog(BuildContext context) async {
     try {
@@ -39,9 +43,15 @@ class UpgradeDialogUtils {
 
       // プレミアムプラン選択ダイアログを表示
       if (!context.mounted) return;
-      debugPrint('showUpgradeDialog: プラン選択ダイアログ表示開始');
+      _logger.debug(
+        'プラン選択ダイアログ表示開始',
+        context: 'UpgradeDialogUtils.showUpgradeDialog',
+      );
       await _showPremiumPlanDialog(context, premiumPlans);
-      debugPrint('showUpgradeDialog: プラン選択ダイアログ完了');
+      _logger.debug(
+        'プラン選択ダイアログ完了',
+        context: 'UpgradeDialogUtils.showUpgradeDialog',
+      );
     } catch (e) {
       if (!context.mounted) return;
       DialogUtils.showSimpleDialog(context, 'エラーが発生しました: ${e.toString()}');
@@ -106,9 +116,11 @@ class UpgradeDialogUtils {
           onTap: () async {
             MicroInteractions.hapticTap();
 
-            debugPrint('[UpgradeDialog] プランオプションタップ: ${plan.id}');
-            debugPrint(
-              '[UpgradeDialog] プラン詳細: displayName=${plan.displayName}, productId=${plan.productId}',
+            _logger.debug(
+              'プランオプションタップ: ${plan.id}',
+              context: 'UpgradeDialogUtils._buildPlanOption',
+              data:
+                  'displayName=${plan.displayName}, productId=${plan.productId}',
             );
 
             // シンプルなアプローチ：ダイアログを閉じてから購入処理
@@ -173,62 +185,88 @@ class UpgradeDialogUtils {
 
   /// コンテキスト不要のシンプルな購入処理
   static Future<void> _startPurchaseWithoutContext(Plan plan) async {
-    debugPrint('[UpgradeDialog] 購入処理開始 - プラン: ${plan.id}');
-    debugPrint(
-      '[UpgradeDialog] プラン詳細: productId=${plan.productId}, price=${plan.price}',
+    _logger.info(
+      '購入処理開始: ${plan.id}',
+      context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+      data: 'productId=${plan.productId}, price=${plan.price}',
     );
 
     // 二重実行防止チェック
     if (_isPurchasing) {
-      debugPrint('[UpgradeDialog] 既に購入処理中のため中断');
+      _logger.warning(
+        '既に購入処理中のため中断',
+        context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+      );
       return;
     }
 
     _isPurchasing = true;
 
     try {
-      debugPrint('[UpgradeDialog] ServiceLocatorからサブスクリプションサービス取得中...');
+      _logger.debug(
+        'ServiceLocatorからサブスクリプションサービス取得中',
+        context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+      );
       final subscriptionService = await ServiceLocator()
           .getAsync<ISubscriptionService>();
 
-      debugPrint('[UpgradeDialog] purchasePlanClassメソッド呼び出し中...');
+      _logger.debug(
+        'purchasePlanClassメソッド呼び出し中',
+        context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+      );
 
       // Planクラスを使用した購入処理
       final result = await subscriptionService.purchasePlanClass(plan);
 
-      debugPrint(
-        '[UpgradeDialog] 購入処理レスポンス受信 - isSuccess: ${result.isSuccess}',
+      _logger.debug(
+        '購入処理レスポンス受信',
+        context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+        data: 'isSuccess: ${result.isSuccess}',
       );
 
       // 結果に応じた処理
       if (result.isSuccess) {
-        debugPrint('[UpgradeDialog] 購入成功');
         final purchaseResult = result.value;
-        debugPrint(
-          '[UpgradeDialog] 購入結果詳細: status=${purchaseResult.status}, productId=${purchaseResult.productId}',
+        _logger.info(
+          '購入成功',
+          context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+          data:
+              'status=${purchaseResult.status}, productId=${purchaseResult.productId}',
         );
       } else {
         final error = result.error;
-        debugPrint('[UpgradeDialog] 購入失敗 - エラー: $error');
-        debugPrint('[UpgradeDialog] エラー詳細: ${error.toString()}');
 
         // シミュレーター環境での特別処理
         if (error.toString().contains('In-App Purchase not available') ||
             error.toString().contains('Product not found')) {
-          debugPrint('[UpgradeDialog] シミュレーター環境またはTestFlight環境の可能性');
+          _logger.warning(
+            'シミュレーター環境またはTestFlight環境の可能性',
+            context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+            data: error.toString(),
+          );
         } else {
-          debugPrint('[UpgradeDialog] 実際のエラーが発生: $error');
+          _logger.error(
+            '購入失敗',
+            context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+            error: error,
+          );
         }
       }
     } catch (e) {
-      debugPrint('[UpgradeDialog] 予期しないエラー発生: $e');
-      debugPrint('[UpgradeDialog] スタックトレース: ${StackTrace.current}');
+      _logger.error(
+        '予期しないエラー発生',
+        context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+        error: e,
+      );
 
       // 基本的なエラー情報のみログ出力
       // SubscriptionService が適切にエラーハンドリングを行う
     } finally {
       _isPurchasing = false;
-      debugPrint('[UpgradeDialog] 購入処理完了、フラグをリセット');
+      _logger.debug(
+        '購入処理完了、フラグをリセット',
+        context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
+      );
     }
   }
 }

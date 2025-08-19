@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../services/logging_service.dart';
+import '../../core/service_locator.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
 
@@ -137,6 +139,9 @@ class _AnimatedButtonState extends State<AnimatedButton>
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
 
+  // LoggingServiceのゲッター
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
+
   // bool _isPressed = false; // 将来的に使用予定
 
   @override
@@ -170,7 +175,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
   }
 
   void _handleTapDown(TapDownDetails details) {
-    debugPrint('AnimatedButton: _handleTapDown が呼び出されました');
+    _logger.debug(
+      '_handleTapDown が呼び出されました',
+      context: 'AnimatedButton._handleTapDown',
+    );
     if (widget.enableScaleAnimation) {
       // setState(() => _isPressed = true);
       _animationController.forward();
@@ -243,7 +251,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTapCancel: widget.onPressed != null ? _handleTapCancel : null,
                 onTap: widget.onPressed != null
                     ? () {
-                        debugPrint('AnimatedButton: onTap が呼び出されました');
+                        _logger.debug(
+                          'onTap が呼び出されました',
+                          context: 'AnimatedButton.onTap',
+                        );
                         widget.onPressed!();
                       }
                     : null, // メインのタップイベント
@@ -300,14 +311,7 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedButton(
-      onPressed: isLoading
-          ? null
-          : (onPressed != null
-                ? () {
-                    debugPrint('PrimaryButton: onPressed が呼び出されました');
-                    onPressed!();
-                  }
-                : null),
+      onPressed: isLoading ? null : onPressed,
       width: width,
       backgroundColor: theme.colorScheme.primary,
       foregroundColor: theme.colorScheme.onPrimary,

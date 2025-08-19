@@ -1,11 +1,15 @@
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import '../services/logging_service.dart';
+import '../core/service_locator.dart';
 
 /// パフォーマンス監視ユーティリティ
 class PerformanceMonitor {
   static final Map<String, DateTime> _startTimes = {};
   static final Map<String, List<double>> _measurements = {};
+
+  // LoggingServiceのゲッター
+  static LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   /// パフォーマンス計測を開始
   static void startMeasurement(String label) {
@@ -21,7 +25,10 @@ class PerformanceMonitor {
   static Future<void> endMeasurement(String label, {String? context}) async {
     final startTime = _startTimes[label];
     if (startTime == null) {
-      debugPrint('PerformanceMonitor: 計測開始されていません - $label');
+      _logger.warning(
+        '計測開始されていません: $label',
+        context: 'PerformanceMonitor.endMeasurement',
+      );
       return;
     }
 
@@ -42,10 +49,9 @@ class PerformanceMonitor {
     _startTimes.remove(label);
 
     // ログに記録
-    final loggingService = await LoggingService.getInstance();
-    loggingService.debug(
+    _logger.debug(
       'パフォーマンス: $label: ${milliseconds}ms (平均: ${average.toStringAsFixed(1)}ms)',
-      context: context ?? 'PerformanceMonitor',
+      context: context ?? 'PerformanceMonitor.endMeasurement',
     );
 
     // デバッグビルドの場合はTimelineに記録
@@ -64,8 +70,7 @@ class PerformanceMonitor {
       });
     }
 
-    final loggingService = await LoggingService.getInstance();
-    loggingService.debug(
+    _logger.debug(
       'メモリ使用状況記録',
       context: context,
       data: 'Flutter DevToolsで確認してください',

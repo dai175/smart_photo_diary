@@ -3,6 +3,7 @@ import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../../services/logging_service.dart';
+import '../../core/service_locator.dart';
 import 'error_severity.dart';
 import 'error_display_widgets.dart';
 
@@ -48,7 +49,17 @@ class ErrorDisplayService {
         }
       } catch (e) {
         // LoggingService初期化エラーの場合はログ出力をスキップ
-        debugPrint('ErrorDisplayService: Failed to log error - $e');
+        try {
+          final logger = serviceLocator.get<LoggingService>();
+          logger.warning(
+            'Failed to log error',
+            context: 'ErrorDisplayService.showError',
+            data: e.toString(),
+          );
+        } catch (_) {
+          // 最後の手段としてdebugPrintを使用
+          debugPrint('ErrorDisplayService: Failed to log error - $e');
+        }
       }
     }
 

@@ -73,7 +73,7 @@ class GeminiApiClient {
         _logger.debug(
           'Gemini API レスポンス受信成功',
           context: 'sendTextRequest',
-          data: data,
+          data: data.toString(),
         );
         return data;
       } else {
@@ -90,13 +90,8 @@ class GeminiApiClient {
         error: e,
       );
       _logger.debug(
-        'API接続情報',
+        'API接続情報: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : '空'}',
         context: 'sendTextRequest',
-        data: {
-          'apiKeyPrefix': _apiKey.isNotEmpty
-              ? '${_apiKey.substring(0, 8)}...'
-              : '空',
-        },
       );
       return null;
     }
@@ -154,7 +149,7 @@ class GeminiApiClient {
         _logger.debug(
           'Gemini Vision API レスポンス受信成功',
           context: 'sendVisionRequest',
-          data: data,
+          data: data.toString(),
         );
         return data;
       } else {
@@ -171,13 +166,8 @@ class GeminiApiClient {
         error: e,
       );
       _logger.debug(
-        'Vision API接続情報',
+        'Vision API接続情報: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : '空'}',
         context: 'sendVisionRequest',
-        data: {
-          'apiKeyPrefix': _apiKey.isNotEmpty
-              ? '${_apiKey.substring(0, 8)}...'
-              : '空',
-        },
       );
       return null;
     }
@@ -197,7 +187,7 @@ class GeminiApiClient {
       _logger.info(
         'APIキーテスト',
         context: 'testApiKey',
-        data: {'結果': isValid ? '有効' : '無効'},
+        data: '結果: ${isValid ? '有効' : '無効'}',
       );
       return isValid;
     } catch (e) {
@@ -236,9 +226,8 @@ class GeminiApiClient {
           return content.trim();
         } else {
           _logger.warning(
-            'テキストコンテンツが見つかりません',
+            'テキストコンテンツが見つかりません - finishReason: ${candidate['finishReason']}',
             context: 'extractTextFromResponse',
-            data: {'finishReason': candidate['finishReason']},
           );
           return null;
         }
@@ -246,7 +235,7 @@ class GeminiApiClient {
         _logger.warning(
           'レスポンス構造が予期されたものと異なります',
           context: 'extractTextFromResponse',
-          data: data,
+          data: data.toString(),
         );
         return null;
       }
