@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
-import '../services/diary_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../core/service_locator.dart';
 import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -21,7 +22,7 @@ class DiaryCardWidget extends StatelessWidget {
   // タグを取得（永続化キャッシュ優先）
   Future<List<String>> _generateTags() async {
     try {
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
       return await diaryService.getTagsForEntry(entry);
     } catch (e) {
       // エラー時はフォールバックタグを返す（時間帯のみ）

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_filter.dart';
-import '../services/diary_service.dart';
+import '../services/interfaces/diary_service_interface.dart';
+import '../core/service_locator.dart';
+import '../core/errors/app_exceptions.dart';
 import 'base_error_controller.dart';
 
 class DiaryScreenController extends BaseErrorController {
@@ -34,13 +36,29 @@ class DiaryScreenController extends BaseErrorController {
 
   // 日記エントリーを読み込む
   Future<void> loadDiaryEntries() async {
-    final result = await safeExecute(() async {
-      final diaryService = await DiaryService.getInstance();
-      return await diaryService.getFilteredDiaryEntries(_currentFilter);
-    }, context: 'DiaryScreenController.loadDiaryEntries');
+    try {
+      final diaryService = ServiceLocator().get<IDiaryService>();
+      final result = await diaryService.getFilteredDiaryEntriesResult(
+        _currentFilter,
+      );
 
-    if (result != null) {
-      _diaryEntries = result;
+      result.fold(
+        (entries) {
+          _diaryEntries = entries;
+          clearError();
+          setLoading(false);
+          notifyListeners();
+        },
+        (error) {
+          setError(error);
+          setLoading(false);
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      setError(ServiceException('日記の読み込みに失敗しました: $e'));
+      setLoading(false);
+      notifyListeners();
     }
   }
 
@@ -107,21 +125,32 @@ class DiaryScreenController extends BaseErrorController {
 
   // 検索で日記を絞り込み
   Future<void> _searchDiaryEntries(String query) async {
-    final result = await safeExecute(() async {
-      final diaryService = await DiaryService.getInstance();
+    try {
+      final diaryService = ServiceLocator().get<IDiaryService>();
 
-      if (query.isEmpty) {
-        // 検索クエリが空の場合は通常のフィルタを適用
-        return await diaryService.getFilteredDiaryEntries(_currentFilter);
-      } else {
-        // 検索クエリがある場合は検索フィルタを作成
-        final searchFilter = _currentFilter.copyWith(searchText: query);
-        return await diaryService.getFilteredDiaryEntries(searchFilter);
-      }
-    }, context: 'DiaryScreenController.searchDiaryEntries');
+      final filter = query.isEmpty
+          ? _currentFilter
+          : _currentFilter.copyWith(searchText: query);
 
-    if (result != null) {
-      _diaryEntries = result;
+      final result = await diaryService.getFilteredDiaryEntriesResult(filter);
+
+      result.fold(
+        (entries) {
+          _diaryEntries = entries;
+          clearError();
+          setLoading(false);
+          notifyListeners();
+        },
+        (error) {
+          setError(error);
+          setLoading(false);
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      setError(ServiceException('検索に失敗しました: $e'));
+      setLoading(false);
+      notifyListeners();
     }
   }
 

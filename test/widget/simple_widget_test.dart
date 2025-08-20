@@ -3,9 +3,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/ui/components/custom_dialog.dart';
 import 'package:smart_photo_diary/ui/components/animated_button.dart';
 import 'package:smart_photo_diary/ui/components/custom_card.dart';
+import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/core/service_locator.dart';
 
 void main() {
   group('UI Components Widget Tests', () {
+    setUpAll(() async {
+      // テスト用のServiceLocator設定
+      serviceLocator.clear();
+      final loggingService = await LoggingService.getInstance();
+      serviceLocator.registerSingleton<LoggingService>(loggingService);
+    });
+
+    tearDownAll(() {
+      serviceLocator.clear();
+    });
+
     testWidgets('CustomDialog displays title and content', (
       WidgetTester tester,
     ) async {

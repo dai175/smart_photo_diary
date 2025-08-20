@@ -44,7 +44,7 @@ jobs:
   ios-deploy:
     name: Deploy to App Store
     needs: test
-    runs-on: macos-15
+    runs-on: macos-14
     environment: production
     timeout-minutes: 60
     
@@ -63,6 +63,15 @@ jobs:
           
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+        
+      - name: Verify Xcode and install iOS platform if needed
+        run: |
+          echo "Xcode version:"
+          xcodebuild -version
+          echo "Available platforms:"
+          xcrun simctl list runtimes
+          echo "Installing iOS platform if missing..."
+          xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
           
       - name: Get dependencies
         run: flutter pub get

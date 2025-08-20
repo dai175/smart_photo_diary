@@ -7,7 +7,7 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_access_control_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
-import 'package:smart_photo_diary/services/storage_service.dart';
+import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
@@ -18,27 +18,27 @@ import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 
 /// Mock PhotoService for integration testing
-class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+class MockIPhotoService extends Mock implements IPhotoService {}
 
 /// Mock AiService for integration testing
-class MockAiServiceInterface extends Mock implements AiServiceInterface {}
+class MockIAiService extends Mock implements IAiService {}
 
 /// Mock DiaryService for integration testing
-class MockDiaryServiceInterface extends Mock implements DiaryServiceInterface {}
+class MockIDiaryService extends Mock implements IDiaryService {}
 
 /// Mock SubscriptionService for integration testing
 class MockSubscriptionServiceInterface extends Mock
     implements ISubscriptionService {}
 
 /// Mock PhotoAccessControlService for integration testing
-class MockPhotoAccessControlServiceInterface extends Mock
-    implements PhotoAccessControlServiceInterface {}
+class MockIPhotoAccessControlService extends Mock
+    implements IPhotoAccessControlService {}
 
 /// Mock SettingsService for integration testing
 class MockSettingsService extends Mock implements SettingsService {}
 
 /// Mock StorageService for integration testing
-class MockStorageService extends Mock implements StorageService {}
+class MockStorageService extends Mock implements IStorageService {}
 
 /// Mock AssetEntity for integration testing
 class MockAssetEntity extends Mock implements AssetEntity {}
@@ -53,25 +53,25 @@ class MockImageClassifier extends Mock {}
 
 /// Central service mock setup for consistent testing
 class TestServiceSetup {
-  static MockPhotoServiceInterface? _mockPhotoService;
-  static MockAiServiceInterface? _mockAiService;
-  static MockDiaryServiceInterface? _mockDiaryService;
+  static MockIPhotoService? _mockPhotoService;
+  static MockIAiService? _mockAiService;
+  static MockIDiaryService? _mockDiaryService;
   static MockSubscriptionServiceInterface? _mockSubscriptionService;
   static MockSettingsService? _mockSettingsService;
   static MockStorageService? _mockStorageService;
 
   /// Get or create mock PhotoService with default behavior
-  static MockPhotoServiceInterface getPhotoService() {
+  static MockIPhotoService getPhotoService() {
     return _mockPhotoService ??= _createPhotoServiceMock();
   }
 
   /// Get or create mock AiService with default behavior
-  static MockAiServiceInterface getAiService() {
+  static MockIAiService getAiService() {
     return _mockAiService ??= _createAiServiceMock();
   }
 
   /// Get or create mock DiaryService with default behavior
-  static MockDiaryServiceInterface getDiaryService() {
+  static MockIDiaryService getDiaryService() {
     return _mockDiaryService ??= _createDiaryServiceMock();
   }
 
@@ -112,8 +112,8 @@ class TestServiceSetup {
   }
 
   // Private factory methods with default mock behavior
-  static MockPhotoServiceInterface _createPhotoServiceMock() {
-    final mock = MockPhotoServiceInterface();
+  static MockIPhotoService _createPhotoServiceMock() {
+    final mock = MockIPhotoService();
 
     // Default mock behavior for PhotoService
     when(() => mock.requestPermission()).thenAnswer((_) async => true);
@@ -147,8 +147,8 @@ class TestServiceSetup {
     return mock;
   }
 
-  static MockAiServiceInterface _createAiServiceMock() {
-    final mock = MockAiServiceInterface();
+  static MockIAiService _createAiServiceMock() {
+    final mock = MockIAiService();
 
     // Default mock behavior for AiService
     when(() => mock.isOnline()).thenAnswer((_) async => true);
@@ -196,8 +196,8 @@ class TestServiceSetup {
     return mock;
   }
 
-  static MockDiaryServiceInterface _createDiaryServiceMock() {
-    final mock = MockDiaryServiceInterface();
+  static MockIDiaryService _createDiaryServiceMock() {
+    final mock = MockIDiaryService();
 
     // Default mock behavior for DiaryService
     when(() => mock.getSortedDiaryEntries()).thenAnswer((_) async => []);

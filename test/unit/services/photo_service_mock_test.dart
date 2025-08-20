@@ -5,13 +5,13 @@ import 'package:smart_photo_diary/services/interfaces/photo_service_interface.da
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock implementations for testing
-class MockPhotoServiceInterface extends Mock implements PhotoServiceInterface {}
+class MockIPhotoService extends Mock implements IPhotoService {}
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
   group('PhotoService Mock Tests', () {
-    late MockPhotoServiceInterface mockPhotoService;
+    late MockIPhotoService mockPhotoService;
     late MockAssetEntity mockAssetEntity;
 
     setUpAll(() {
@@ -26,7 +26,7 @@ void main() {
     });
 
     setUp(() {
-      mockPhotoService = MockPhotoServiceInterface();
+      mockPhotoService = MockIPhotoService();
       mockAssetEntity = MockAssetEntity();
     });
 
@@ -504,8 +504,8 @@ void main() {
     });
 
     group('Interface Compliance', () {
-      test('should implement PhotoServiceInterface', () {
-        expect(mockPhotoService, isA<PhotoServiceInterface>());
+      test('should implement IPhotoService', () {
+        expect(mockPhotoService, isA<IPhotoService>());
       });
 
       test('should have all required interface methods', () {

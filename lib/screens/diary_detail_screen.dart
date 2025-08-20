@@ -81,8 +81,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記エントリーを取得
       final entry = await diaryService.getDiaryEntry(widget.diaryId);
@@ -128,8 +127,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を更新
       final updatedEntry = _diaryEntry!.copyWith(
@@ -192,8 +190,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
 
       // DiaryServiceのインスタンスを取得
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を削除
       await diaryService.deleteDiaryEntry(_diaryEntry!.id);

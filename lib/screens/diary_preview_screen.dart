@@ -6,6 +6,8 @@ import '../services/ai/ai_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/service_locator.dart';
+import '../services/logging_service.dart';
 import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -19,7 +21,6 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../models/plans/basic_plan.dart';
 import '../models/writing_prompt.dart';
-import '../services/logging_service.dart';
 import '../core/errors/error_handler.dart';
 import '../utils/prompt_category_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
@@ -43,8 +44,9 @@ class DiaryPreviewScreen extends StatefulWidget {
 }
 
 class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
-  late final AiServiceInterface _aiService;
-  late final PhotoServiceInterface _photoService;
+  late final LoggingService _logger;
+  late final IAiService _aiService;
+  late final IPhotoService _photoService;
 
   bool _isInitializing = true; // プロンプトサービス初期化中
   bool _isLoading = false; // 日記生成中
@@ -71,8 +73,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     _contentController = TextEditingController();
 
     // サービスロケータからサービスを取得
-    _aiService = ServiceRegistration.get<AiServiceInterface>();
-    _photoService = ServiceRegistration.get<PhotoServiceInterface>();
+    _logger = serviceLocator.get<LoggingService>();
+    _aiService = ServiceRegistration.get<IAiService>();
+    _photoService = ServiceRegistration.get<IPhotoService>();
 
     // 渡されたプロンプトがある場合は設定
     _selectedPrompt = widget.selectedPrompt;
@@ -171,7 +174,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         result = resultFromAi.value;
       } else {
         // 複数写真の場合：新しい順次処理方式を使用
-        debugPrint('複数写真の順次分析を開始...');
+        _logger.info('複数写真の順次分析を開始', context: 'DiaryPreviewScreen');
 
         // 全ての写真データを収集
         final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
@@ -201,7 +204,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           imagesWithTimes: imagesWithTimes,
           prompt: _selectedPrompt?.text,
           onProgress: (current, total) {
-            debugPrint('画像分析進捗: $current/$total');
+            _logger.info(
+              '画像分析進捗: $current/$total',
+              context: 'DiaryPreviewScreen',
+            );
             setState(() {
               _currentPhotoIndex = current;
               _totalPhotos = total;
@@ -242,7 +248,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               await ServiceRegistration.getAsync<IPromptService>();
           await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
         } catch (e) {
-          debugPrint('プロンプト使用履歴記録エラー: $e');
+          _logger.error(
+            'プロンプト使用履歴記録エラー',
+            error: e,
+            context: 'DiaryPreviewScreen',
+          );
         }
       }
     } catch (e) {
@@ -265,14 +275,22 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _isLoading = true;
       });
 
-      debugPrint('日記保存開始...');
-      debugPrint('タイトル: ${_titleController.text}');
-      debugPrint('本文: ${_contentController.text}');
-      debugPrint('写真数: ${widget.selectedAssets.length}');
+      _logger.info('日記保存開始', context: 'DiaryPreviewScreen');
+      _logger.info(
+        'タイトル: ${_titleController.text}',
+        context: 'DiaryPreviewScreen',
+      );
+      _logger.info(
+        '本文: ${_contentController.text}',
+        context: 'DiaryPreviewScreen',
+      );
+      _logger.info(
+        '写真数: ${widget.selectedAssets.length}',
+        context: 'DiaryPreviewScreen',
+      );
 
       // DiaryServiceのインスタンスを取得
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を保存
       await diaryService.saveDiaryEntryWithPhotos(
@@ -282,7 +300,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         photos: widget.selectedAssets,
       );
 
-      debugPrint('日記保存成功');
+      _logger.info('日記保存成功', context: 'DiaryPreviewScreen');
 
       // ウィジェットがまだマウントされている場合のみ状態を更新
       if (mounted) {

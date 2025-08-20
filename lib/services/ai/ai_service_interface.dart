@@ -12,7 +12,7 @@ class DiaryGenerationResult {
 /// AIサービスのインターフェース
 ///
 /// Phase 1.7.1更新: Result<T>パターンと使用量制限統合
-abstract class AiServiceInterface {
+abstract class IAiService {
   /// インターネット接続があるかどうかを確認
   Future<bool> isOnline();
 

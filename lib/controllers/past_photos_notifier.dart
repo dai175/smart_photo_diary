@@ -9,8 +9,8 @@ import '../services/logging_service.dart';
 
 /// 過去の写真機能の状態を管理するNotifier
 class PastPhotosNotifier extends ChangeNotifier {
-  final PhotoServiceInterface _photoService;
-  final PhotoAccessControlServiceInterface _accessControlService;
+  final IPhotoService _photoService;
+  final IPhotoAccessControlService _accessControlService;
 
   PastPhotosState _state = PastPhotosState.initial();
   PastPhotosState get state => _state;
@@ -24,17 +24,17 @@ class PastPhotosNotifier extends ChangeNotifier {
   Set<String> get usedPhotoIds => Set.unmodifiable(_usedPhotoIds);
 
   PastPhotosNotifier({
-    required PhotoServiceInterface photoService,
-    required PhotoAccessControlServiceInterface accessControlService,
+    required IPhotoService photoService,
+    required IPhotoAccessControlService accessControlService,
   }) : _photoService = photoService,
        _accessControlService = accessControlService;
 
   /// 工場メソッドでサービスを自動注入
   factory PastPhotosNotifier.create() {
     return PastPhotosNotifier(
-      photoService: ServiceRegistration.get<PhotoServiceInterface>(),
+      photoService: ServiceRegistration.get<IPhotoService>(),
       accessControlService:
-          ServiceRegistration.get<PhotoAccessControlServiceInterface>(),
+          ServiceRegistration.get<IPhotoAccessControlService>(),
     );
   }
 
@@ -74,12 +74,18 @@ class PastPhotosNotifier extends ChangeNotifier {
         }.toString(),
       );
 
-      // 写真を取得
-      final photos = await _photoService.getPhotosEfficient(
+      // 写真を取得（Result版）
+      final photosResult = await _photoService.getPhotosEfficientResult(
         startDate: startDate,
         endDate: endDate,
         limit: _state.photosPerPage,
       );
+
+      if (!photosResult.isSuccess) {
+        throw photosResult.error;
+      }
+
+      final photos = photosResult.value;
 
       // 月別にグループ化
       final photosByMonth = _state.groupPhotosByMonth(photos);
@@ -136,13 +142,19 @@ class PastPhotosNotifier extends ChangeNotifier {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
-      // 追加の写真を取得
-      final morePhotos = await _photoService.getPhotosEfficient(
+      // 追加の写真を取得（Result版）
+      final morePhotosResult = await _photoService.getPhotosEfficientResult(
         startDate: accessibleDate,
         endDate: today,
         limit: _state.photosPerPage,
         offset: offset,
       );
+
+      if (!morePhotosResult.isSuccess) {
+        throw morePhotosResult.error;
+      }
+
+      final morePhotos = morePhotosResult.value;
 
       if (morePhotos.isEmpty) {
         _updateState(_state.copyWith(hasMore: false, isLoading: false));
@@ -203,11 +215,17 @@ class PastPhotosNotifier extends ChangeNotifier {
         999,
       );
 
-      final photos = await _photoService.getPhotosEfficient(
+      final photosResult = await _photoService.getPhotosEfficientResult(
         startDate: startOfDay,
         endDate: endOfDay,
         limit: 200, // 1日分なので多めに取得
       );
+
+      if (!photosResult.isSuccess) {
+        throw photosResult.error;
+      }
+
+      final photos = photosResult.value;
 
       // 選択された日付の写真のみでグループ化
       final photosByMonth = _state.groupPhotosByMonth(photos);

@@ -5,12 +5,12 @@ import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
-// Mock implementation of AiServiceInterface for testing
-class MockAiServiceInterface extends Mock implements AiServiceInterface {}
+// Mock implementation of IAiService for testing
+class MockIAiService extends Mock implements IAiService {}
 
 void main() {
   group('AiService Mock Tests', () {
-    late MockAiServiceInterface mockAiService;
+    late MockIAiService mockAiService;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,7 @@ void main() {
     });
 
     setUp(() {
-      mockAiService = MockAiServiceInterface();
+      mockAiService = MockIAiService();
     });
 
     group('isOnline', () {
@@ -335,8 +335,8 @@ void main() {
     });
 
     group('Interface Compliance', () {
-      test('should implement AiServiceInterface', () {
-        expect(mockAiService, isA<AiServiceInterface>());
+      test('should implement IAiService', () {
+        expect(mockAiService, isA<IAiService>());
       });
 
       test('should have all required interface methods', () {

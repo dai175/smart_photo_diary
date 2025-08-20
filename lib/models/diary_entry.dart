@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../services/logging_service.dart';
+import '../core/service_locator.dart';
 
 part 'diary_entry.g.dart';
 
@@ -64,7 +66,17 @@ class DiaryEntry extends HiveObject {
           assets.add(asset);
         }
       } catch (e) {
-        debugPrint('写真の取得エラー: $e');
+        try {
+          final logger = serviceLocator.get<LoggingService>();
+          logger.error(
+            '写真の取得エラー: photoId: $photoId',
+            context: 'DiaryEntry.getPhotoAssets',
+            error: e,
+          );
+        } catch (_) {
+          // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+          debugPrint('写真の取得エラー: $e');
+        }
       }
     }
 

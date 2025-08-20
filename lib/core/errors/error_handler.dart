@@ -1,23 +1,46 @@
 import 'package:flutter/foundation.dart';
 import 'app_exceptions.dart';
+import '../../services/logging_service.dart';
+import '../service_locator.dart';
 
 /// アプリケーション全体のエラーハンドリングユーティリティ
 class ErrorHandler {
   /// エラーをログに記録し、適切なAppExceptionに変換する
   static AppException handleError(dynamic error, {String? context}) {
-    final contextMessage = context != null ? '[$context] ' : '';
-
     // 既にAppExceptionの場合はそのまま返す
     if (error is AppException) {
-      debugPrint('${contextMessage}AppException: ${error.message}');
+      try {
+        final logger = serviceLocator.get<LoggingService>();
+        logger.error(
+          'AppException: ${error.message}',
+          context: context ?? 'ErrorHandler.handleError',
+          error: error,
+        );
+      } catch (_) {
+        // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+        final contextMessage = context != null ? '[$context] ' : '';
+        debugPrint('${contextMessage}AppException: ${error.message}');
+      }
       return error;
     }
 
     // 一般的なエラーの場合は適切なAppExceptionに変換
-    final message = '$contextMessage予期しないエラーが発生しました';
+    final message = '予期しないエラーが発生しました';
     final exception = ServiceException(message, originalError: error);
 
-    debugPrint('${contextMessage}Error: $error');
+    try {
+      final logger = serviceLocator.get<LoggingService>();
+      logger.error(
+        message,
+        context: context ?? 'ErrorHandler.handleError',
+        error: error,
+      );
+    } catch (_) {
+      // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+      final contextMessage = context != null ? '[$context] ' : '';
+      debugPrint('${contextMessage}Error: $error');
+    }
+
     return exception;
   }
 
@@ -27,11 +50,22 @@ class ErrorHandler {
     String? context,
     StackTrace? stackTrace,
   }) {
-    final contextMessage = context != null ? '[$context] ' : '';
-    debugPrint('${contextMessage}Error: $error');
+    try {
+      final logger = serviceLocator.get<LoggingService>();
+      logger.error(
+        'Error: $error',
+        context: context ?? 'ErrorHandler.logError',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    } catch (_) {
+      // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+      final contextMessage = context != null ? '[$context] ' : '';
+      debugPrint('${contextMessage}Error: $error');
 
-    if (stackTrace != null && kDebugMode) {
-      debugPrint('${contextMessage}StackTrace: $stackTrace');
+      if (stackTrace != null && kDebugMode) {
+        debugPrint('${contextMessage}StackTrace: $stackTrace');
+      }
     }
   }
 

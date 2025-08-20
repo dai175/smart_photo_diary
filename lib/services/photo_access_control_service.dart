@@ -1,19 +1,27 @@
-import 'package:flutter/foundation.dart';
 import '../models/plans/plan.dart';
 import 'interfaces/photo_access_control_service_interface.dart';
+import 'logging_service.dart';
+import '../core/service_locator.dart';
 
 /// 写真アクセス制御サービスの実装
 ///
 /// プランに基づいた写真へのアクセス可否を判定する
-class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
+class PhotoAccessControlService implements IPhotoAccessControlService {
   // シングルトンパターン
   static PhotoAccessControlService? _instance;
+  LoggingService? _logger;
 
   PhotoAccessControlService._();
 
   static PhotoAccessControlService getInstance() {
     _instance ??= PhotoAccessControlService._();
     return _instance!;
+  }
+
+  /// LoggingServiceを取得（遅延初期化）
+  LoggingService _getLogger() {
+    _logger ??= serviceLocator.get<LoggingService>();
+    return _logger!;
   }
 
   /// 指定されたプランでアクセス可能な最古の日付を取得
@@ -28,11 +36,17 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
       Duration(days: plan.pastPhotoAccessDays),
     );
 
-    debugPrint(
-      'アクセス可能範囲計算: プラン=${plan.displayName}, '
-      '過去${plan.pastPhotoAccessDays}日前まで, '
-      '最古アクセス可能日=$accessibleDate (ローカルタイムゾーン)',
-    );
+    try {
+      final logger = _getLogger();
+      logger.info(
+        'アクセス可能範囲計算: プラン=${plan.displayName}, '
+        '過去${plan.pastPhotoAccessDays}日前まで, '
+        '最古アクセス可能日=$accessibleDate (ローカルタイムゾーン)',
+        context: 'PhotoAccessControlService.getAccessibleDateForPlan',
+      );
+    } catch (e) {
+      // LoggingServiceが初期化されていない場合は無視
+    }
 
     return accessibleDate;
   }
@@ -53,13 +67,19 @@ class PhotoAccessControlService implements PhotoAccessControlServiceInterface {
         photoDateOnly.isAfter(accessibleDate) ||
         photoDateOnly.isAtSameMomentAs(accessibleDate);
 
-    debugPrint(
-      '写真アクセス判定: '
-      'プラン=${plan.displayName}, '
-      '撮影日=$photoDateOnly (ローカル), '
-      '最古アクセス可能日=$accessibleDate (ローカル), '
-      '結果=$isAccessible',
-    );
+    try {
+      final logger = _getLogger();
+      logger.info(
+        '写真アクセス判定: '
+        'プラン=${plan.displayName}, '
+        '撮影日=$photoDateOnly (ローカル), '
+        '最古アクセス可能日=$accessibleDate (ローカル), '
+        '結果=$isAccessible',
+        context: 'PhotoAccessControlService.isPhotoAccessible',
+      );
+    } catch (e) {
+      // LoggingServiceが初期化されていない場合は無視
+    }
 
     return isAccessible;
   }

@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import '../services/ai_service.dart';
 import '../services/ai/ai_service_interface.dart';
+import '../services/logging_service.dart';
 import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/photo_service.dart';
@@ -11,11 +11,11 @@ import '../services/photo_access_control_service.dart';
 import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/storage_service.dart';
+import '../services/interfaces/storage_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/prompt_service.dart';
-import '../services/logging_service.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -23,93 +23,123 @@ import 'service_locator.dart';
 /// This class handles the registration of all services in the ServiceLocator.
 /// It provides a centralized place to configure dependency injection.
 ///
-/// ## Service Initialization Order
+/// ## Service Initialization Order and Dependencies
 ///
 /// ### Phase 1: Core Services (No Dependencies)
-/// 1. PhotoService - 写真アクセス機能
-/// 2. SettingsService - アプリ設定管理
-/// 3. StorageService - ストレージ操作
-/// 4. AiService - AI日記生成
-/// 5. SubscriptionService - サブスクリプション管理 ✅
+/// 1. **LoggingService** - 基盤ログ機能（他サービスの依存基盤）
+/// 2. **PhotoService** - 写真アクセス機能（LoggingServiceに依存）
+/// 3. **PhotoCacheService** - 写真キャッシュ機能（LoggingServiceに依存）
+/// 4. **PhotoAccessControlService** - 写真アクセス制御
+/// 5. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
+/// 6. **StorageService** - ストレージ操作
+/// 7. **SubscriptionService** - サブスクリプション管理（Hive依存のみ）
+/// 8. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み）
 ///
 /// ### Phase 2: Dependent Services
-/// 1. DiaryService - 日記管理（AiService, PhotoServiceに依存）
+/// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
+/// 2. **DiaryService** - 日記管理（AiService, PhotoServiceに依存）
 ///
-/// ## Subscription Service Dependencies
-/// - **直接依存**: Hive (データ永続化)
-/// - **間接依存**: なし
-/// - **登録場所**: Core Services (_registerCoreServices)
-/// - **登録タイプ**: AsyncFactory (Hive初期化が必要)
+/// ## 依存関係マップ
+/// - LoggingService → なし（基盤サービス）
+/// - PhotoService → LoggingService
+/// - PhotoCacheService → LoggingService
+/// - SettingsService → SubscriptionService
+/// - SubscriptionService → LoggingService
+/// - AiService → SubscriptionService
+/// - DiaryService → AiService + PhotoService + LoggingService
+/// - StorageService → DiaryService（DatabaseOptimization用）
+///
+/// **循環依存**: なし（全て単方向の依存関係）
 class ServiceRegistration {
   static bool _isInitialized = false;
+  static LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   /// Initialize and register all services
   static Future<void> initialize() async {
     if (_isInitialized) {
-      debugPrint('ServiceRegistration: Already initialized');
+      _logger.debug('サービス既に初期化済み', context: 'ServiceRegistration.initialize');
       return;
     }
 
-    debugPrint('ServiceRegistration: Initializing services...');
-
+    final startTime = DateTime.now();
     try {
       // Register core services that don't have dependencies
       await _registerCoreServices();
+
+      // LoggingService登録後にログ出力
+      _logger.debug(
+        'ServiceRegistration初期化開始',
+        context: 'ServiceRegistration.initialize',
+      );
 
       // Register services with dependencies
       await _registerDependentServices();
 
       _isInitialized = true;
-      debugPrint('ServiceRegistration: All services initialized successfully');
+      final duration = DateTime.now().difference(startTime);
+      _logger.info(
+        'サービス初期化完了',
+        context: 'ServiceRegistration.initialize',
+        data: '初期化時間: ${duration.inMilliseconds}ms',
+      );
 
       // Debug print all registered services
       serviceLocator.debugPrintServices();
     } catch (e) {
-      debugPrint('ServiceRegistration: Error during initialization: $e');
+      // LoggingService may not be available if initialization failed
+      if (_isInitialized) {
+        _logger.error(
+          'サービス初期化エラー',
+          context: 'ServiceRegistration.initialize',
+          error: e,
+        );
+      }
       rethrow;
     }
   }
 
   /// Register services that don't have dependencies
   static Future<void> _registerCoreServices() async {
-    debugPrint('ServiceRegistration: Registering core services...');
+    // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
+    final loggingService = await LoggingService.getInstance();
+    serviceLocator.registerSingleton<LoggingService>(loggingService);
 
-    // LoggingService (基盤サービス - 他のサービスの依存関係として使用)
-    serviceLocator.registerAsyncFactory<LoggingService>(
-      () => LoggingService.getInstance(),
+    _logger.debug(
+      'コアサービス登録開始',
+      context: 'ServiceRegistration._registerCoreServices',
     );
 
-    // PhotoService (singleton pattern)
-    serviceLocator.registerFactory<PhotoServiceInterface>(
-      () => PhotoService.getInstance(),
-    );
-
-    // PhotoCacheService (singleton pattern)
-    serviceLocator.registerFactory<PhotoCacheServiceInterface>(
-      () => PhotoCacheService.getInstance(),
-    );
-
-    // PhotoAccessControlService (singleton pattern)
-    serviceLocator.registerFactory<PhotoAccessControlServiceInterface>(
-      () => PhotoAccessControlService.getInstance(),
-    );
-
-    // SettingsService (async initialization)
-    serviceLocator.registerAsyncFactory<SettingsService>(
-      () => SettingsService.getInstance(),
-    );
-
-    // StorageService (singleton pattern)
-    serviceLocator.registerFactory<StorageService>(
-      () => StorageService.getInstance(),
-    );
-
-    // SubscriptionService (Hive依存のみ - コアサービス)
+    // 2. SubscriptionService (Hive依存のみ、LoggingServiceに後で依存)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(
       () => SubscriptionService.getInstance(),
     );
 
-    // PromptService (JSONアセット読み込み - コアサービス)
+    // 3. SettingsService (SubscriptionServiceに依存)
+    serviceLocator.registerAsyncFactory<SettingsService>(
+      () => SettingsService.getInstance(),
+    );
+
+    // 4. PhotoService (LoggingServiceに依存)
+    serviceLocator.registerFactory<IPhotoService>(
+      () => PhotoService.getInstance(),
+    );
+
+    // 5. PhotoCacheService (LoggingServiceに依存)
+    serviceLocator.registerFactory<IPhotoCacheService>(
+      () => PhotoCacheService.getInstance(),
+    );
+
+    // 6. PhotoAccessControlService (依存なし)
+    serviceLocator.registerFactory<IPhotoAccessControlService>(
+      () => PhotoAccessControlService.getInstance(),
+    );
+
+    // 7. StorageService (DiaryServiceに依存するが、最適化機能のみ)
+    serviceLocator.registerFactory<IStorageService>(
+      () => StorageService.getInstance(),
+    );
+
+    // 8. PromptService (JSONアセット読み込み - 依存なし)
     serviceLocator.registerAsyncFactory<IPromptService>(() async {
       final service = PromptService.instance;
       await service.initialize();
@@ -119,10 +149,13 @@ class ServiceRegistration {
 
   /// Register services that have dependencies on other services
   static Future<void> _registerDependentServices() async {
-    debugPrint('ServiceRegistration: Registering dependent services...');
+    _logger.debug(
+      '依存関係サービス登録開始',
+      context: 'ServiceRegistration._registerDependentServices',
+    );
 
     // Phase 1.7.1.1: AiService with SubscriptionService dependency injection
-    serviceLocator.registerAsyncFactory<AiServiceInterface>(() async {
+    serviceLocator.registerAsyncFactory<IAiService>(() async {
       // Get SubscriptionService dependency
       final subscriptionService = await serviceLocator
           .getAsync<ISubscriptionService>();
@@ -132,10 +165,10 @@ class ServiceRegistration {
     });
 
     // DiaryService (depends on AiService and PhotoService)
-    serviceLocator.registerAsyncFactory<DiaryServiceInterface>(() async {
+    serviceLocator.registerAsyncFactory<IDiaryService>(() async {
       // Get dependencies
-      final aiService = await serviceLocator.getAsync<AiServiceInterface>();
-      final photoService = serviceLocator.get<PhotoServiceInterface>();
+      final aiService = await serviceLocator.getAsync<IAiService>();
+      final photoService = serviceLocator.get<IPhotoService>();
 
       // Create DiaryService with dependency injection
       final diaryService = DiaryService.createWithDependencies(
@@ -152,7 +185,9 @@ class ServiceRegistration {
 
   /// Reset service registration (useful for testing)
   static void reset() {
-    debugPrint('ServiceRegistration: Resetting...');
+    if (_isInitialized) {
+      _logger.info('サービス登録リセット', context: 'ServiceRegistration.reset');
+    }
     serviceLocator.clear();
     _isInitialized = false;
   }

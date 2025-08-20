@@ -8,7 +8,9 @@ import 'models/diary_entry.dart';
 import 'models/subscription_status.dart';
 import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
+import 'core/service_locator.dart';
 import 'services/settings_service.dart';
+import 'services/logging_service.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_colors.dart';
 
@@ -27,15 +29,27 @@ Future<void> main() async {
   Hive.registerAdapter(WritingPromptAdapter());
   Hive.registerAdapter(PromptUsageHistoryAdapter());
 
-  // 環境変数の初期化
-  debugPrint('🔧 EnvironmentConfig初期化開始...');
-  await EnvironmentConfig.initialize();
-  debugPrint('🔧 EnvironmentConfig初期化完了: ${EnvironmentConfig.isInitialized}');
+  // アプリケーション初期化開始
+  final appStartTime = DateTime.now();
 
-  // サービスロケータの初期化
-  debugPrint('🔧 ServiceRegistration初期化開始...');
+  // サービスロケータの初期化（LoggingService登録のため先に実行）
   await ServiceRegistration.initialize();
-  debugPrint('🔧 ServiceRegistration初期化完了');
+  final logger = serviceLocator.get<LoggingService>();
+
+  logger.info('アプリケーション初期化開始', context: 'main');
+  logger.info('ServiceRegistration初期化完了', context: 'main');
+
+  // 環境変数の初期化（LoggingServiceが利用可能になった後）
+  await EnvironmentConfig.initialize();
+  logger.info('EnvironmentConfig初期化完了', context: 'main');
+
+  // 初期化完了時間の計測
+  final initDuration = DateTime.now().difference(appStartTime);
+  logger.info(
+    'アプリケーション初期化完了',
+    context: 'main',
+    data: '初期化時間: ${initDuration.inMilliseconds}ms',
+  );
 
   runApp(const MyApp());
 }
@@ -48,9 +62,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late SettingsService _settingsService;
+  SettingsService? _settingsService;
   ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
+
+  // LoggingServiceアクセス用getter
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   @override
   void initState() {
@@ -60,16 +77,20 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _loadSettings() async {
     try {
-      _settingsService = await SettingsService.getInstance();
+      _settingsService = await ServiceLocator().getAsync<SettingsService>();
       setState(() {
-        _themeMode = _settingsService.themeMode;
+        _themeMode = _settingsService!.themeMode;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      debugPrint('設定の読み込みエラー: $e');
+      _logger.error(
+        '設定の読み込みエラー',
+        context: '_MyAppState._loadSettings',
+        error: e,
+      );
     }
   }
 

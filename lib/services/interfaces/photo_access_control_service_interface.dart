@@ -3,7 +3,7 @@ import '../../models/plans/plan.dart';
 /// 写真アクセス制御サービスのインターフェース
 ///
 /// プランに基づいた写真へのアクセス可否を判定する責任を持つ
-abstract class PhotoAccessControlServiceInterface {
+abstract class IPhotoAccessControlService {
   /// 指定されたプランでアクセス可能な最古の日付を取得
   ///
   /// [plan]: 対象のプラン

@@ -550,7 +550,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       final subscriptionService =
           await ServiceRegistration.getAsync<ISubscriptionService>();
       final accessControlService =
-          ServiceRegistration.get<PhotoAccessControlServiceInterface>();
+          ServiceRegistration.get<IPhotoAccessControlService>();
 
       final planResult = await subscriptionService.getCurrentPlanClass();
 
@@ -577,8 +577,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   /// 使用済み写真IDを収集して両方のコントローラーに設定
   Future<void> _loadUsedPhotoIds() async {
     try {
-      final diaryService =
-          await ServiceRegistration.getAsync<DiaryServiceInterface>();
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final allEntries = await diaryService.getSortedDiaryEntries();
 
       // 使用済み写真IDを収集
@@ -601,7 +600,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     widget.pastPhotoController.setLoading(true);
 
     try {
-      final photoService = ServiceRegistration.get<PhotoServiceInterface>();
+      final photoService = ServiceRegistration.get<IPhotoService>();
 
       // 権限チェック
       final hasPermission = await photoService.requestPermission();
@@ -711,7 +710,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
 
     final accessControlService =
-        ServiceRegistration.get<PhotoAccessControlServiceInterface>();
+        ServiceRegistration.get<IPhotoAccessControlService>();
     final rangeDescription = accessControlService.getAccessRangeDescription(
       _currentPlan!,
     );

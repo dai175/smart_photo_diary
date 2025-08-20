@@ -34,7 +34,7 @@ class OptimizedPhotoGridWidget extends StatefulWidget {
 }
 
 class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
-  late final PhotoCacheServiceInterface _cacheService;
+  late final IPhotoCacheService _cacheService;
   final ScrollController _scrollController = ScrollController();
 
   // 遅延読み込み用の変数

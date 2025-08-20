@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'diary_service.dart';
+import 'interfaces/diary_service_interface.dart';
+import 'interfaces/storage_service_interface.dart';
+import '../core/service_locator.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
-class StorageService {
+class StorageService implements IStorageService {
   static StorageService? _instance;
 
   StorageService._();
@@ -19,6 +21,7 @@ class StorageService {
   }
 
   // ストレージ使用量を取得
+  @override
   Future<StorageInfo> getStorageInfo() async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
@@ -45,10 +48,17 @@ class StorageService {
   }
 
   // データのエクスポート（保存先選択可能）
+  @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
-      final diaryService = await DiaryService.getInstance();
-      var entries = await diaryService.getSortedDiaryEntries();
+      final diaryService = ServiceLocator().get<IDiaryService>();
+      final result = await diaryService.getSortedDiaryEntriesResult();
+
+      if (result.isFailure) {
+        throw StorageException('日記データの取得に失敗しました: ${result.error.message}');
+      }
+
+      var entries = result.value;
 
       // 期間フィルター
       if (startDate != null || endDate != null) {
@@ -100,6 +110,7 @@ class StorageService {
   }
 
   // データのインポート（リストア機能）
+  @override
   Future<Result<ImportResult>> importData() async {
     try {
       // ファイル選択
@@ -194,7 +205,7 @@ class StorageService {
     Map<String, dynamic> data,
   ) async {
     try {
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = ServiceLocator().get<IDiaryService>();
       final entries = data['entries'] as List<dynamic>;
 
       int totalEntries = entries.length;
@@ -205,7 +216,13 @@ class StorageService {
       final List<String> warnings = [];
 
       // パフォーマンス最適化: 既存エントリーを一度だけ取得
-      final existingEntries = await diaryService.getSortedDiaryEntries();
+      final existingResult = await diaryService.getSortedDiaryEntriesResult();
+      if (existingResult.isFailure) {
+        throw StorageException(
+          '既存日記データの取得に失敗しました: ${existingResult.error.message}',
+        );
+      }
+      final existingEntries = existingResult.value;
 
       for (int i = 0; i < entries.length; i++) {
         final entryData = entries[i];
@@ -252,7 +269,7 @@ class StorageService {
   // 単一エントリーのインポート
   Future<Result<String>> _importSingleEntry(
     dynamic entryData,
-    DiaryService diaryService,
+    IDiaryService diaryService,
     List<dynamic> existingEntries,
   ) async {
     try {
@@ -314,7 +331,7 @@ class StorageService {
       }
 
       // エントリーを保存
-      await diaryService.saveDiaryEntry(
+      final saveResult = await diaryService.saveDiaryEntryResult(
         date: date,
         title: entryData['title'] as String,
         content: entryData['content'] as String,
@@ -325,6 +342,10 @@ class StorageService {
             : null,
       );
 
+      if (saveResult.isFailure) {
+        throw StorageException('エントリーの保存に失敗しました: ${saveResult.error.message}');
+      }
+
       return const Success('imported');
     } catch (e) {
       return Failure(
@@ -334,9 +355,10 @@ class StorageService {
   }
 
   // データの最適化
+  @override
   Future<bool> optimizeDatabase() async {
     try {
-      final diaryService = await DiaryService.getInstance();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
 
       // Hiveデータベースのコンパクト（断片化を解消）
       await diaryService.compactDatabase();
@@ -376,6 +398,46 @@ class StorageService {
       }
     } catch (e) {
       // エラーがあっても続行
+    }
+  }
+
+  // ========================================
+  // Result<T>パターン版のメソッド実装
+  // ========================================
+
+  /// ストレージ使用量を取得する（Result版）
+  @override
+  Future<Result<StorageInfo>> getStorageInfoResult() async {
+    try {
+      final result = await getStorageInfo();
+      return Success(result);
+    } catch (e) {
+      return Failure(ServiceException('ストレージ情報の取得に失敗しました', originalError: e));
+    }
+  }
+
+  /// データのエクスポート（Result版）
+  @override
+  Future<Result<String?>> exportDataResult({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      final result = await exportData(startDate: startDate, endDate: endDate);
+      return Success(result);
+    } catch (e) {
+      return Failure(ServiceException('データエクスポートに失敗しました', originalError: e));
+    }
+  }
+
+  /// データベースの最適化（Result版）
+  @override
+  Future<Result<bool>> optimizeDatabaseResult() async {
+    try {
+      final result = await optimizeDatabase();
+      return Success(result);
+    } catch (e) {
+      return Failure(ServiceException('データベース最適化に失敗しました', originalError: e));
     }
   }
 }

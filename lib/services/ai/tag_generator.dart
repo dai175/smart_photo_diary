@@ -1,14 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'gemini_api_client.dart';
+import '../logging_service.dart';
+import '../../core/service_locator.dart';
 
 /// タグ生成を担当するサービス
 class TagGenerator {
   final GeminiApiClient _apiClient;
-
   TagGenerator({GeminiApiClient? apiClient})
     : _apiClient = apiClient ?? GeminiApiClient();
+
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   /// 日記の内容からタグを自動生成
   Future<List<String>> generateTags({
@@ -79,10 +81,13 @@ class TagGenerator {
         }
       }
 
-      debugPrint('タグ生成 API エラーまたはレスポンスなし');
+      _logger.warning(
+        'タグ生成 API エラーまたはレスポンスなし',
+        context: 'TagGenerator.generateTags',
+      );
       return _generateOfflineTags(title, content, date, photoCount);
     } catch (e) {
-      debugPrint('タグ生成エラー: $e');
+      _logger.error('タグ生成エラー', context: 'TagGenerator.generateTags', error: e);
       return _generateOfflineTags(title, content, date, photoCount);
     }
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../services/logging_service.dart';
+import '../core/service_locator.dart';
 
 /// フォントデバッグ用の画面
 class FontDebugScreen extends StatefulWidget {
@@ -12,6 +14,9 @@ class FontDebugScreen extends StatefulWidget {
 class _FontDebugScreenState extends State<FontDebugScreen> {
   List<String> systemFonts = [];
 
+  // LoggingServiceのゲッター
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
+
   @override
   void initState() {
     super.initState();
@@ -22,9 +27,17 @@ class _FontDebugScreenState extends State<FontDebugScreen> {
     try {
       // システムフォント一覧を取得
       final fontList = await rootBundle.loadString('FontManifest.json');
-      debugPrint('System fonts: $fontList');
+      _logger.debug(
+        'System fonts loaded',
+        context: 'FontDebugScreen._loadSystemFonts',
+        data: fontList,
+      );
     } catch (e) {
-      debugPrint('Error loading fonts: $e');
+      _logger.error(
+        'Error loading fonts',
+        context: 'FontDebugScreen._loadSystemFonts',
+        error: e,
+      );
     }
   }
 

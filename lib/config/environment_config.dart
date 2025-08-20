@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/logging_service.dart';
+import '../core/service_locator.dart';
 
 /// 環境変数を安全に管理するクラス
 class EnvironmentConfig {
+  static LoggingService get _logger => serviceLocator.get<LoggingService>();
   static bool _isInitialized = false;
   static String? _cachedGeminiApiKey;
   static String? _cachedForcePlan;
@@ -16,8 +19,9 @@ class EnvironmentConfig {
         defaultValue: '',
       );
 
-      debugPrint(
-        '🔑 APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? ".envファイル" : "build-time constants"}',
+      _logger.info(
+        'APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? ".envファイル" : "build-time constants"}',
+        context: 'EnvironmentConfig.initialize',
       );
 
       // 2. 開発環境：.envファイルから読み込み（デバッグビルドのみ）
@@ -26,9 +30,16 @@ class EnvironmentConfig {
           // プロジェクトルートから読み込み（セキュリティを考慮）
           await dotenv.load(fileName: '.env');
           _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-          debugPrint('🔧 開発環境: .envファイルから読み込み完了');
+          _logger.info(
+            '開発環境: .envファイルから読み込み完了',
+            context: 'EnvironmentConfig.initialize',
+          );
         } catch (e) {
-          debugPrint('⚠️ .envファイル読み込み失敗（開発環境）: $e');
+          _logger.warning(
+            '.envファイル読み込み失敗（開発環境）',
+            context: 'EnvironmentConfig.initialize',
+            data: {'error': e.toString()},
+          );
         }
       }
 
@@ -54,12 +65,20 @@ class EnvironmentConfig {
 
       _isInitialized = true;
 
-      debugPrint('🚀 EnvironmentConfig初期化完了');
-      debugPrint(
-        '🔑 APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? "未設定" : (kDebugMode ? "開発環境" : "本番環境")}',
+      _logger.info(
+        'EnvironmentConfig初期化完了',
+        context: 'EnvironmentConfig.initialize',
+      );
+      _logger.info(
+        'APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? "未設定" : (kDebugMode ? "開発環境" : "本番環境")}',
+        context: 'EnvironmentConfig.initialize',
       );
     } catch (e) {
-      debugPrint('❌ 環境変数初期化エラー: $e');
+      _logger.error(
+        '環境変数初期化エラー',
+        context: 'EnvironmentConfig.initialize',
+        error: e,
+      );
       _isInitialized = false;
     }
   }
@@ -67,7 +86,10 @@ class EnvironmentConfig {
   /// Gemini APIキーを取得
   static String get geminiApiKey {
     if (!_isInitialized) {
-      debugPrint('警告: EnvironmentConfigが初期化されていません');
+      _logger.warning(
+        'EnvironmentConfigが初期化されていません',
+        context: 'EnvironmentConfig.geminiApiKey',
+      );
       // テスト環境の場合はダミーキーを返す
       if (kDebugMode &&
           const String.fromEnvironment('FLUTTER_TEST') == 'true') {
@@ -78,7 +100,10 @@ class EnvironmentConfig {
 
     final key = _cachedGeminiApiKey ?? '';
     if (key.isEmpty) {
-      debugPrint('警告: GEMINI_API_KEYが設定されていません');
+      _logger.warning(
+        'GEMINI_API_KEYが設定されていません',
+        context: 'EnvironmentConfig.geminiApiKey',
+      );
       // テスト環境の場合はダミーキーを返す
       if (kDebugMode &&
           const String.fromEnvironment('FLUTTER_TEST') == 'true') {
@@ -125,8 +150,11 @@ class EnvironmentConfig {
       return plan;
     }
 
-    debugPrint('警告: 無効なFORCE_PLANが指定されました: $plan');
-    debugPrint('有効な値: ${validPlans.join(', ')}');
+    _logger.warning(
+      '無効なFORCE_PLANが指定されました',
+      context: 'EnvironmentConfig.forcePlan',
+      data: {'invalidPlan': plan, 'validPlans': validPlans},
+    );
     return null;
   }
 
@@ -146,18 +174,20 @@ class EnvironmentConfig {
 
   /// デバッグ情報を出力
   static void printDebugInfo() {
-    debugPrint('=== Environment Config Debug ===');
-    debugPrint('初期化状態: $_isInitialized');
-    debugPrint('デバッグモード: $kDebugMode');
-    debugPrint(
-      'APIキー設定: ${_cachedGeminiApiKey?.isNotEmpty == true ? "有効" : "無効"}',
+    _logger.debug(
+      'Environment Config Debug Info',
+      context: 'EnvironmentConfig.printDebugInfo',
+      data: {
+        '初期化状態': _isInitialized,
+        'デバッグモード': kDebugMode,
+        'APIキー設定': _cachedGeminiApiKey?.isNotEmpty == true ? '有効' : '無効',
+        'APIキー形式': _cachedGeminiApiKey?.startsWith('AIza') == true
+            ? '正常'
+            : '異常',
+        'プラン強制': _cachedForcePlan,
+        'dotenv環境': '${dotenv.env.keys.length}個のキー',
+      },
     );
-    debugPrint(
-      'APIキー形式: ${_cachedGeminiApiKey?.startsWith('AIza') == true ? "正常" : "異常"}',
-    );
-    debugPrint('プラン強制: $_cachedForcePlan');
-    debugPrint('dotenv環境: ${dotenv.env.keys.length}個のキー');
-    debugPrint('================================');
   }
 
   /// 環境変数を再読み込み
