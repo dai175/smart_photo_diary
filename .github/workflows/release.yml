@@ -109,96 +109,6 @@ jobs:
             exit 1
           fi
 
-  build-android-release:
-    name: Build Android Release Artifacts
-    needs: [version, test]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-          
-      - name: Get dependencies
-        run: flutter pub get
-        
-      - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-        
-      - name: Verify required secrets
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "❌ Error: GEMINI_API_KEY secret is not set"
-            echo "Please add GEMINI_API_KEY to GitHub repository secrets for release builds"
-            exit 1
-          fi
-          echo "✅ Required secrets verified"
-        
-      - name: Build Android artifacts
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          echo "Building Android version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
-          
-          echo "🔑 Using build-time constants for API key injection"
-          # Build Android artifacts with version from version job
-          flutter build apk --release \
-            --build-name=${{ needs.version.outputs.version_name }} \
-            --build-number=${{ needs.version.outputs.build_number }} \
-            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-            
-          flutter build appbundle --release \
-            --build-name=${{ needs.version.outputs.version_name }} \
-            --build-number=${{ needs.version.outputs.build_number }} \
-            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-        
-      - name: Build environment cleanup
-        run: |
-          echo "✅ Build environment cleanup completed"
-        
-      - name: Prepare Android artifacts
-        run: |
-          VERSION=${{ github.ref_name }}
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION=${{ github.event.inputs.version }}
-          fi
-          
-          # Create a flat directory for all Android artifacts
-          mkdir -p android-artifacts
-          
-          # Copy and rename artifacts to the flat directory
-          cp build/app/outputs/flutter-apk/app-release.apk \
-             android-artifacts/smart-photo-diary-${VERSION}.apk
-          cp build/app/outputs/bundle/release/app-release.aab \
-             android-artifacts/smart-photo-diary-${VERSION}.aab
-             
-          # Generate checksums in the flat directory (use subshell to avoid cd issues)
-          (
-            cd android-artifacts
-            sha256sum smart-photo-diary-*.apk > smart-photo-diary-checksums.txt
-            sha256sum smart-photo-diary-*.aab >> smart-photo-diary-checksums.txt
-          )
-          
-      - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-release-artifacts
-          path: android-artifacts/*
-          retention-days: 90
 
   build-ios-release:
     name: Build iOS Release Artifacts
@@ -282,6 +192,12 @@ jobs:
             zip -r ../../../ios-artifacts/smart-photo-diary-ios-${VERSION}.zip Runner.app
           )
           
+          # Generate checksums for iOS artifacts
+          (
+            cd ios-artifacts
+            sha256sum smart-photo-diary-ios-*.zip > smart-photo-diary-checksums.txt
+          )
+          
       - name: Upload iOS artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -291,18 +207,12 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    needs: [version, build-android-release, build-ios-release]
+    needs: [version, build-ios-release]
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Download Android artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: android-release-artifacts
-          path: ./artifacts/android
           
       - name: Download iOS artifacts
         uses: actions/download-artifact@v4
@@ -342,18 +252,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # List all downloaded artifacts
-          echo "=== Android artifacts ==="
-          ls -la ./artifacts/android/
           echo "=== iOS artifacts ==="
           ls -la ./artifacts/ios/
           
           # Upload all release assets using GitHub CLI
-          # Now all files are in flat directories, so we can use simple patterns
           gh release upload ${{ needs.version.outputs.version }} \
-            ./artifacts/android/smart-photo-diary-*.apk \
-            ./artifacts/android/smart-photo-diary-*.aab \
             ./artifacts/ios/smart-photo-diary-ios-*.zip \
-            ./artifacts/android/smart-photo-diary-checksums.txt
+            ./artifacts/ios/smart-photo-diary-checksums.txt
           
       - name: Create release summary
         run: |
@@ -365,8 +270,6 @@ jobs:
           echo "- **Pre-release**: ${{ github.event.inputs.prerelease || false }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Assets" >> $GITHUB_STEP_SUMMARY
-          echo "- Android APK" >> $GITHUB_STEP_SUMMARY
-          echo "- Android AAB (Play Store)" >> $GITHUB_STEP_SUMMARY
           echo "- iOS Build Archive" >> $GITHUB_STEP_SUMMARY
           echo "- SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
