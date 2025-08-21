@@ -8,6 +8,7 @@ import 'models/diary_entry.dart';
 import 'models/subscription_status.dart';
 import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'core/service_locator.dart';
 import 'services/settings_service.dart';
 import 'services/logging_service.dart';
@@ -65,6 +66,7 @@ class _MyAppState extends State<MyApp> {
   SettingsService? _settingsService;
   ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
+  bool _isFirstLaunch = false;
 
   // LoggingServiceアクセス用getter
   LoggingService get _logger => serviceLocator.get<LoggingService>();
@@ -80,6 +82,7 @@ class _MyAppState extends State<MyApp> {
       _settingsService = await ServiceLocator().getAsync<SettingsService>();
       setState(() {
         _themeMode = _settingsService!.themeMode;
+        _isFirstLaunch = _settingsService!.isFirstLaunch;
         _isLoading = false;
       });
     } catch (e) {
@@ -133,7 +136,9 @@ class _MyAppState extends State<MyApp> {
         Locale('en', 'US'), // 英語（フォールバック）
       ],
       locale: const Locale('ja', 'JP'), // デフォルトロケール
-      home: HomeScreen(onThemeChanged: _onThemeChanged),
+      home: _isFirstLaunch
+          ? OnboardingScreen(onThemeChanged: _onThemeChanged)
+          : HomeScreen(onThemeChanged: _onThemeChanged),
     );
   }
 }
