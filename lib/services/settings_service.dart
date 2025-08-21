@@ -65,6 +65,9 @@ class SettingsService {
   // テーマ設定のキー
   static const String _themeKey = 'theme_mode';
 
+  // 初回起動フラグのキー
+  static const String _firstLaunchKey = 'is_first_launch';
+
   // テーマモード
   ThemeMode get themeMode {
     return ErrorHandler.safeExecuteSync(
@@ -86,6 +89,25 @@ class SettingsService {
     return ResultHelper.tryExecuteAsync(() async {
       await _preferences?.setInt(_themeKey, themeMode.index);
     }, context: 'SettingsService.setThemeMode');
+  }
+
+  // 初回起動判定
+  bool get isFirstLaunch {
+    return ErrorHandler.safeExecuteSync(
+          () {
+            return _preferences?.getBool(_firstLaunchKey) ?? true;
+          },
+          context: 'SettingsService.isFirstLaunch',
+          fallbackValue: true,
+        ) ??
+        true;
+  }
+
+  // 初回起動完了を記録
+  Future<Result<void>> setFirstLaunchCompleted() async {
+    return ResultHelper.tryExecuteAsync(() async {
+      await _preferences?.setBool(_firstLaunchKey, false);
+    }, context: 'SettingsService.setFirstLaunchCompleted');
   }
 
   // 日記生成モード（常にvision固定）
