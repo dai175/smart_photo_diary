@@ -6,6 +6,9 @@
     <!-- 写真へのアクセス権限 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- カメラ権限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:label="Smart Photo Diary"
         android:name="${applicationName}"

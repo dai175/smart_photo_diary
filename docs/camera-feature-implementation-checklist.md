@@ -6,12 +6,12 @@
 ## 実装フェーズ
 
 ### フェーズ1: 依存関係とパッケージの追加
-- [ ] `pubspec.yaml`に`image_picker: ^1.0.7`パッケージを追加
+- [x] `pubspec.yaml`に`image_picker: ^1.0.7`パッケージを追加
   - 既存の`photo_manager`と併用してカメラ機能を追加
   - `wechat_camera_picker`も代替選択肢として検討可能
-- [ ] iOS Info.plist にカメラ使用許可の記述追加 (`NSCameraUsageDescription`)
-- [ ] Android AndroidManifest.xml にカメラ権限追加 (`CAMERA`)
-- [ ] `fvm flutter pub get`で依存関係を更新
+- [x] iOS Info.plist にカメラ使用許可の記述追加 (`NSCameraUsageDescription`)
+- [x] Android AndroidManifest.xml にカメラ権限追加 (`CAMERA`)
+- [x] `fvm flutter pub get`で依存関係を更新
 
 ### フェーズ2: サービス層の拡張
 - [ ] `IPhotoServiceInterface`にカメラ撮影用メソッドを追加

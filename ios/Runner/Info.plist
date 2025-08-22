@@ -42,6 +42,8 @@
 	<string>写真ライブラリにアクセスして、日記作成に使用する写真を取得します</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>写真ライブラリに新しい写真を保存します</string>
+	<key>NSCameraUsageDescription</key>
+	<string>カメラを使用して写真を撮影し、日記作成に使用します</string>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
