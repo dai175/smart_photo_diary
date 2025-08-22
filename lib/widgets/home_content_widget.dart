@@ -599,12 +599,20 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         // 今日の写真リストを再読み込みして新しい写真を含める
         await _refreshTodayPhotos();
 
-        // 撮影した写真を選択状態に追加
-        final photoIndex = widget.photoController.photoAssets.indexWhere(
-          (asset) => asset.id == capturedPhoto.id,
+        // 撮影した写真を自動選択状態で追加
+        widget.photoController.refreshPhotosWithNewCapture(
+          widget.photoController.photoAssets,
+          capturedPhoto.id,
         );
-        if (photoIndex != -1) {
-          widget.photoController.toggleSelect(photoIndex);
+
+        // 撮影成功のフィードバックを表示
+        if (mounted) {
+          _showCaptureSuccessSnackBar();
+        }
+
+        // 今日の写真タブにフォーカス（必要に応じて）
+        if (widget.tabController.index != 0) {
+          widget.tabController.animateTo(0);
         }
       } else {
         // キャンセル時
@@ -822,6 +830,34 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         error: e,
       );
     }
+  }
+
+  /// 撮影成功のフィードバックを表示
+  void _showCaptureSuccessSnackBar() {
+    final theme = Theme.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: theme.colorScheme.onInverseSurface,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '写真を撮影しました',
+              style: TextStyle(color: theme.colorScheme.onInverseSurface),
+            ),
+          ],
+        ),
+        backgroundColor: theme.colorScheme.inverseSurface,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      ),
+    );
   }
 
   /// Phase 1.7.2.3: 使用量状況表示メソッド
