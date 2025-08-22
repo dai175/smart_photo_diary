@@ -14,18 +14,18 @@
 - [x] `fvm flutter pub get`で依存関係を更新
 
 ### フェーズ2: サービス層の拡張
-- [ ] `IPhotoServiceInterface`にカメラ撮影用メソッドを追加
-  - [ ] `Future<Result<AssetEntity?>> capturePhoto()`
-  - [ ] `Future<Result<bool>> requestCameraPermission()`
-  - [ ] `Future<Result<bool>> isCameraPermissionDenied()`
-- [ ] `PhotoService`に`image_picker`を使用したカメラ機能実装
-  - [ ] ImagePickerクラスのインスタンス化
-  - [ ] カメラ撮影メソッドの実装
-  - [ ] Result<T>パターンを使用したエラーハンドリング
-  - [ ] LoggingServiceを使用したログ出力
-- [ ] 権限管理の拡張
-  - [ ] カメラ権限のリクエスト処理
-  - [ ] 権限状態の判定ロジック
+- [x] `IPhotoServiceInterface`にカメラ撮影用メソッドを追加
+  - [x] `Future<Result<AssetEntity?>> capturePhoto()`
+  - [x] `Future<Result<bool>> requestCameraPermission()`
+  - [x] `Future<Result<bool>> isCameraPermissionDenied()`
+- [x] `PhotoService`に`image_picker`を使用したカメラ機能実装
+  - [x] ImagePickerクラスのインスタンス化
+  - [x] カメラ撮影メソッドの実装
+  - [x] Result<T>パターンを使用したエラーハンドリング
+  - [x] LoggingServiceを使用したログ出力
+- [x] 権限管理の拡張
+  - [x] カメラ権限のリクエスト処理
+  - [x] 権限状態の判定ロジック
 
 ### フェーズ3: UI層の実装
 - [ ] `HomeContentWidget`にカメラ撮影ボタンを追加

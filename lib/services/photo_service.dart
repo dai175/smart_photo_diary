@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
 import '../constants/app_constants.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'photo_cache_service.dart';
@@ -8,11 +9,15 @@ import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
+import '../core/errors/photo_error.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
 class PhotoService implements IPhotoService {
   // シングルトンパターン
   static PhotoService? _instance;
+
+  // image_picker インスタンス
+  final ImagePicker _imagePicker = ImagePicker();
 
   PhotoService._();
 
@@ -1003,5 +1008,186 @@ class PhotoService implements IPhotoService {
         limit: limit,
       );
     }, context: 'PhotoService.getPhotosEfficientResult');
+  }
+
+  // ========================================
+  // カメラ撮影機能の実装
+  // ========================================
+
+  /// カメラから写真を撮影する
+  @override
+  Future<Result<AssetEntity?>> capturePhoto() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug('カメラ撮影を開始', context: 'PhotoService.capturePhoto');
+
+      // カメラ権限をチェック
+      final cameraPermissionResult = await requestCameraPermission();
+      if (cameraPermissionResult.isFailure) {
+        return Failure(cameraPermissionResult.error);
+      }
+
+      if (!cameraPermissionResult.value) {
+        loggingService.warning(
+          'カメラ権限が拒否されています',
+          context: 'PhotoService.capturePhoto',
+        );
+        return Failure(PhotoError.cameraPermissionDenied());
+      }
+
+      // image_picker で写真を撮影
+      final XFile? photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.rear,
+        imageQuality: 85, // 品質を85%に設定（ファイルサイズとのバランス）
+      );
+
+      if (photo == null) {
+        // ユーザーがキャンセルした場合
+        loggingService.info(
+          'カメラ撮影がキャンセルされました',
+          context: 'PhotoService.capturePhoto',
+        );
+        return Success(null);
+      }
+
+      loggingService.debug(
+        'カメラ撮影完了',
+        context: 'PhotoService.capturePhoto',
+        data: 'ファイルパス: ${photo.path}',
+      );
+
+      // 撮影した写真をphoto_managerのAssetEntityに変換
+      // photo_managerに新しい写真が追加されるまで少し待つ
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // 写真ライブラリを更新
+      await PhotoManager.clearFileCache();
+
+      // 最新の写真を取得してAssetEntityを見つける
+      final latestPhotos = await getTodayPhotos(limit: 5);
+
+      // 撮影時刻に最も近い写真を探す
+      final captureTime = DateTime.now();
+      AssetEntity? capturedAsset;
+
+      for (final asset in latestPhotos) {
+        final timeDiff = captureTime.difference(asset.createDateTime).abs();
+        if (timeDiff.inMinutes < 2) {
+          // 2分以内の写真を対象
+          capturedAsset = asset;
+          break;
+        }
+      }
+
+      if (capturedAsset != null) {
+        loggingService.info(
+          'カメラ撮影が完了し、AssetEntityを取得しました',
+          context: 'PhotoService.capturePhoto',
+          data: 'AssetID: ${capturedAsset.id}',
+        );
+        return Success(capturedAsset);
+      } else {
+        loggingService.warning(
+          'カメラ撮影は完了しましたが、AssetEntityの取得に失敗しました',
+          context: 'PhotoService.capturePhoto',
+        );
+        return Failure(PhotoError.cameraAssetNotFound());
+      }
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.capturePhoto',
+      );
+      loggingService.error(
+        'カメラ撮影エラー',
+        context: 'PhotoService.capturePhoto',
+        error: appError,
+      );
+      return Failure(appError);
+    }
+  }
+
+  /// カメラ権限をリクエストする
+  @override
+  Future<Result<bool>> requestCameraPermission() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      loggingService.debug(
+        'カメラ権限リクエスト開始',
+        context: 'PhotoService.requestCameraPermission',
+      );
+
+      var status = await Permission.camera.status;
+      loggingService.debug(
+        'カメラ権限の現在の状態: $status',
+        context: 'PhotoService.requestCameraPermission',
+      );
+
+      // 権限が未決定または拒否の場合はリクエスト
+      if (status.isDenied) {
+        loggingService.debug(
+          'カメラ権限を明示的にリクエスト',
+          context: 'PhotoService.requestCameraPermission',
+        );
+        status = await Permission.camera.request();
+        loggingService.debug(
+          'リクエスト後のカメラ権限状態: $status',
+          context: 'PhotoService.requestCameraPermission',
+        );
+      }
+
+      final granted = status.isGranted;
+      loggingService.info(
+        granted ? 'カメラ権限が付与されました' : 'カメラ権限が拒否されました',
+        context: 'PhotoService.requestCameraPermission',
+        data: 'status: $status',
+      );
+
+      return Success(granted);
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.requestCameraPermission',
+      );
+      loggingService.error(
+        'カメラ権限リクエストエラー',
+        context: 'PhotoService.requestCameraPermission',
+        error: appError,
+      );
+      return Failure(appError);
+    }
+  }
+
+  /// カメラ権限が拒否されているかチェック
+  @override
+  Future<Result<bool>> isCameraPermissionDenied() async {
+    final loggingService = await LoggingService.getInstance();
+
+    try {
+      final status = await Permission.camera.status;
+      final isDenied = status.isDenied || status.isPermanentlyDenied;
+
+      loggingService.debug(
+        'カメラ権限拒否状態をチェック',
+        context: 'PhotoService.isCameraPermissionDenied',
+        data: 'status: $status, isDenied: $isDenied',
+      );
+
+      return Success(isDenied);
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoService.isCameraPermissionDenied',
+      );
+      loggingService.error(
+        'カメラ権限状態チェックエラー',
+        context: 'PhotoService.isCameraPermissionDenied',
+        error: appError,
+      );
+      return Failure(appError);
+    }
   }
 }
