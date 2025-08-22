@@ -195,7 +195,7 @@ jobs:
           # Generate checksums for iOS artifacts
           (
             cd ios-artifacts
-            sha256sum smart-photo-diary-ios-*.zip > smart-photo-diary-checksums.txt
+            shasum -a 256 smart-photo-diary-ios-*.zip > smart-photo-diary-checksums.txt
           )
           
       - name: Upload iOS artifacts
