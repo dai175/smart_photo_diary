@@ -1,0 +1,91 @@
+# Codecov Configuration - Smart Photo Diary
+# Target only business logic within the lib folder for coverage
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  ignore:
+    # Generated files
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.config.dart"
+    
+    # Test files
+    - "test/**"
+    - "**/*_test.dart"
+    - "**/test_*"
+    - "**/mocks/**"
+    - "**/test_helpers/**"
+    
+    # Platform-specific code
+    - "android/**"
+    - "ios/**"
+    - "macos/**"
+    - "windows/**"
+    - "linux/**"
+    - "web/**"
+    
+    # Build and configuration files
+    - "build/**"
+    - "coverage/**"
+    - "assets/**"
+    - "scripts/**"
+    - "docs/**"
+    
+    # Podfiles and dependencies
+    - "**/Pods/**"
+    - "**/Podfile*"
+    - "pubspec.*"
+    - "*.yaml"
+    - "*.yml"
+    - "*.json"
+    - "*.xml"
+    - "*.md"
+    - "*.gradle*"
+    - "*.cmake"
+    - "*.xcconfig"
+    - "*.plist"
+    - "*.storyboard"
+    - "*.xcscheme"
+    - "*.entitlements"
+    
+    # main file (coverage measurement usually difficult)
+    - "lib/main.dart"
+    
+    # Debug files
+    - "lib/debug/**"
+
+  # Target only Dart files within lib folder
+  paths:
+    - "lib/"
+
+# Comment configuration
+comment:
+  layout: "header, diff, flags, components"
+  behavior: default
+  require_changes: false
+  require_base: false
+
+# Status check configuration
+status:
+  project:
+    default:
+      target: 80%
+      threshold: 2%
+      base: auto
+  patch:
+    default:
+      target: 85%
+      threshold: 5%
+
+# Flags configuration (for separating unit and integration tests in the future)
+flags:
+  unittests:
+    paths:
+      - lib/
+  # Can be added in the future
+  # integration:
+  #   paths:
+  #     - lib/
