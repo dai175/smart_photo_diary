@@ -256,7 +256,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               // 説明テキスト
               Expanded(
                 child: Text(
-                  '写真を撮影するか、ギャラリーから選択',
+                  '写真を撮影またはギャラリーから選択',
                   style: AppTypography.bodyMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
