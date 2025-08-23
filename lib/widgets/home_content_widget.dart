@@ -1249,7 +1249,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
     // 今日タブの場合
     else {
-      return 340.0; // 今日の写真グリッド表示用の高さ
+      return 390.0; // 今日の写真グリッド表示用の高さ（過去タブと同じ高さに調整）
     }
   }
 
