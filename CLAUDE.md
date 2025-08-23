@@ -88,16 +88,16 @@ try {
 All service interfaces use `I` prefix: `IDiaryService`, `IAiService`, etc.
 
 ### Error Handling
-- **New features MUST use Result<T>** for all operations that can fail
+- New features MUST use Result<T> for all operations that can fail
 - Use proper exception types from `lib/core/errors/`
 
 ### Security (CRITICAL)
-- **NEVER commit API keys**: Use `.env` file in project root (gitignored)
-- **NEVER include .env in assets**: Always project root placement
-- **Environment loading**: `dotenv.load(fileName: ".env")`
+- NEVER commit API keys: Use `.env` file in project root (gitignored)
+- NEVER include .env in assets: Always project root placement
+- Environment loading: `dotenv.load(fileName: ".env")`
 
 ### Git Rules (CRITICAL)
-- **Never commit without explicit user approval**
+- Never commit without explicit user approval
 - Always run `fvm flutter analyze` and `fvm dart format .` before commits
 - Wait for user instruction to commit changes
 
@@ -118,9 +118,15 @@ setUpAll(() async {
 });
 ```
 
+### Code Quality Standards
+- Test coverage: All new features must maintain 100% test success rate
+- Pre-commit checks: Always run format and analyze commands before commits
+- Performance: Consider memory usage when handling large assets (photos, videos)
+
 ## Platform Specifics
 
-**iPhone-only application** with specific photo permission handling:
+**iPhone-only application** with specific permission handling:
 - Uses `photo_manager` and `permission_handler`
 - Handle `PermissionState.limited` for iOS 14+
 - Premium users can access photos from past 365 days
+- Required permissions: NSPhotoLibraryUsageDescription, NSCameraUsageDescription in Info.plist
