@@ -43,7 +43,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>写真ライブラリに新しい写真を保存します</string>
 	<key>NSCameraUsageDescription</key>
-	<string>カメラを使用して写真を撮影し、日記作成に使用します</string>
+	<string>Smart Photo Diaryでは、直接写真を撮影して日記に追加できます。撮影した写真は自動的に選択され、すぐに日記作成を開始できます。</string>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

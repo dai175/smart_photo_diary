@@ -1126,10 +1126,19 @@ class PhotoService implements IPhotoService {
         context: 'PhotoService.requestCameraPermission',
       );
 
-      // 権限が未決定または拒否の場合はリクエスト
-      if (status.isDenied) {
+      // 権限が未許可の場合はリクエスト
+      if (!status.isGranted) {
+        // 永続的に拒否されている場合は設定アプリに誘導
+        if (status.isPermanentlyDenied) {
+          loggingService.warning(
+            'カメラ権限が永続的に拒否されています。設定アプリでの許可が必要です。',
+            context: 'PhotoService.requestCameraPermission',
+          );
+          return Success(false); // 権限なしだが、設定誘導のためSuccess(false)を返す
+        }
+
         loggingService.debug(
-          'カメラ権限を明示的にリクエスト',
+          'カメラ権限をリクエスト（現在の状態: $status）',
           context: 'PhotoService.requestCameraPermission',
         );
         status = await Permission.camera.request();

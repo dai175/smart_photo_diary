@@ -28,7 +28,6 @@ import '../ui/design_system/app_colors.dart';
 import '../services/photo_cache_service.dart';
 import '../core/service_locator.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
@@ -533,45 +532,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         context: 'HomeContentWidget._onCameraButtonTapped',
       );
 
-      // カメラ権限をチェック（初回利用時は説明ダイアログを表示）
-      final shouldShowExplanation =
-          await _shouldShowCameraPermissionExplanation();
-
-      if (shouldShowExplanation) {
-        final userAgreed = await _showCameraPermissionExplanationDialog();
-        if (!userAgreed) {
-          _logger.info(
-            'ユーザーがカメラ利用説明をキャンセル',
-            context: 'HomeContentWidget._onCameraButtonTapped',
-          );
-          return;
-        }
-      }
-
-      final permissionResult = await photoService.requestCameraPermission();
-
-      if (permissionResult.isFailure) {
-        _logger.error(
-          'カメラ権限チェックに失敗',
-          context: 'HomeContentWidget._onCameraButtonTapped',
-          error: permissionResult.error,
-        );
-
-        if (mounted) {
-          ErrorDisplayService().showError(context, permissionResult.error);
-        }
-        return;
-      }
-
-      if (!permissionResult.value) {
-        // 権限拒否時のダイアログ表示
-        if (mounted) {
-          await _showCameraPermissionDialog();
-        }
-        return;
-      }
-
-      // カメラで撮影
+      // カメラで撮影（権限チェックはcapturePhoto内で実行）
       final captureResult = await photoService.capturePhoto();
 
       if (captureResult.isFailure) {
@@ -582,7 +543,12 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         );
 
         if (mounted) {
-          ErrorDisplayService().showError(context, captureResult.error);
+          // カメラ権限拒否の場合は設定ダイアログを表示
+          if (captureResult.error.toString().contains('権限が拒否されています')) {
+            await _showCameraPermissionDialog();
+          } else {
+            ErrorDisplayService().showError(context, captureResult.error);
+          }
         }
         return;
       }
@@ -634,81 +600,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         ErrorDisplayService().showError(context, appError);
       }
     }
-  }
-
-  /// カメラ権限の説明ダイアログを表示するかどうかを判定
-  Future<bool> _shouldShowCameraPermissionExplanation() async {
-    try {
-      // 権限の現在の状態をチェック
-      final status = await Permission.camera.status;
-
-      // 既に許可されている場合は説明不要
-      if (status.isGranted) {
-        return false;
-      }
-
-      // 初回利用かどうかをSharedPreferencesでチェック
-      final prefs = await SharedPreferences.getInstance();
-      const key = 'camera_permission_explanation_shown';
-      final hasShownExplanation = prefs.getBool(key) ?? false;
-
-      // 初回利用の場合は説明ダイアログを表示
-      return !hasShownExplanation;
-    } catch (e) {
-      _logger.error(
-        'カメラ権限説明判定でエラー',
-        context: 'HomeContentWidget._shouldShowCameraPermissionExplanation',
-        error: e,
-      );
-      return false;
-    }
-  }
-
-  /// カメラ権限説明ダイアログを表示
-  Future<bool> _showCameraPermissionExplanationDialog() async {
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => CustomDialog(
-        icon: Icons.photo_camera_outlined,
-        iconColor: Theme.of(context).colorScheme.primary,
-        title: 'カメラ機能について',
-        message:
-            'Smart Photo Diaryでは、直接写真を撮影して日記に追加することができます。\n\nこの機能を使用するには、カメラへのアクセス許可が必要です。',
-        actions: [
-          CustomDialogAction(
-            text: 'キャンセル',
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          CustomDialogAction(
-            text: '許可する',
-            isPrimary: true,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    );
-
-    // 説明ダイアログを表示したことを記録
-    if (result == true) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('camera_permission_explanation_shown', true);
-
-        _logger.info(
-          'カメラ権限説明ダイアログを表示済みとして記録',
-          context: 'HomeContentWidget._showCameraPermissionExplanationDialog',
-        );
-      } catch (e) {
-        _logger.error(
-          'カメラ権限説明記録でエラー',
-          context: 'HomeContentWidget._showCameraPermissionExplanationDialog',
-          error: e,
-        );
-      }
-    }
-
-    return result ?? false;
   }
 
   /// カメラ権限拒否時のダイアログを表示
