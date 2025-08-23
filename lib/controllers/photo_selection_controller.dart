@@ -168,6 +168,61 @@ class PhotoSelectionController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 新しい写真をリストの先頭に追加し、自動選択する
+  void addCapturedPhoto(AssetEntity newPhoto) {
+    // 写真リストの先頭に追加
+    _photoAssets.insert(0, newPhoto);
+    // 選択リストも先頭に追加（自動選択）
+    _selected.insert(0, true);
+
+    // 初回選択の場合は、その写真の日付を記録
+    if (_enableDateRestriction && _selectedDate == null) {
+      _selectedDate = newPhoto.createDateTime;
+    }
+
+    notifyListeners();
+  }
+
+  /// 写真リストを更新して撮影写真を含める
+  void refreshPhotosWithNewCapture(
+    List<AssetEntity> updatedAssets,
+    String capturedPhotoId,
+  ) {
+    // 既存の選択状態を保持
+    final previousSelectedIds = <String>{};
+    for (int i = 0; i < _photoAssets.length; i++) {
+      if (i < _selected.length && _selected[i]) {
+        previousSelectedIds.add(_photoAssets[i].id);
+      }
+    }
+
+    // 新しい写真リストを設定
+    _photoAssets = updatedAssets;
+    _selected = List.generate(updatedAssets.length, (index) => false);
+
+    // 既存の選択状態を復元
+    for (int i = 0; i < _photoAssets.length; i++) {
+      if (previousSelectedIds.contains(_photoAssets[i].id)) {
+        _selected[i] = true;
+      }
+    }
+
+    // 撮影した写真を自動選択
+    final capturedIndex = _photoAssets.indexWhere(
+      (asset) => asset.id == capturedPhotoId,
+    );
+    if (capturedIndex != -1 && capturedIndex < _selected.length) {
+      _selected[capturedIndex] = true;
+
+      // 初回選択の場合は、その写真の日付を記録
+      if (_enableDateRestriction && _selectedDate == null) {
+        _selectedDate = _photoAssets[capturedIndex].createDateTime;
+      }
+    }
+
+    notifyListeners();
+  }
+
   /// リソースのクリーンアップ
   @override
   void dispose() {

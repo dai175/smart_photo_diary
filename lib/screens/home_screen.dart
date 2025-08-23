@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
     // 過去の写真は同じ日付のみ選択可能に制限
     _pastPhotoController.setDateRestrictionEnabled(true);
     _tabController = TabController(length: 2, vsync: this);
+
     _loadTodayPhotos();
     _loadRecentDiaries();
   }

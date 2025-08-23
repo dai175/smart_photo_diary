@@ -11,6 +11,7 @@ import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
+import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
@@ -73,7 +74,18 @@ class IntegrationTestHelpers {
 
   /// Setup service locator with mock services
   static Future<void> _setupServiceLocator() async {
-    _serviceLocator = ServiceLocator();
+    // Clear any existing registration to prevent conflicts
+    serviceLocator.clear();
+
+    // Register LoggingService first, as it's needed by ServiceRegistration
+    final loggingService = await LoggingService.getInstance();
+    serviceLocator.registerSingleton<LoggingService>(loggingService);
+
+    // Use the same service registration as main app, then override with mocks
+    await ServiceRegistration.initialize();
+
+    // Get the global service locator
+    _serviceLocator = serviceLocator;
 
     // Create mock services
     _mockPhotoService = MockIPhotoService();
@@ -85,9 +97,6 @@ class IntegrationTestHelpers {
     final mockSettingsService = MockSettingsService();
     final mockStorageService = MockStorageService();
 
-    // Create LoggingService
-    final loggingService = await LoggingService.getInstance();
-
     // Setup default mock behaviors
     _setupDefaultMockBehaviors();
     _setupAdditionalMockBehaviors(
@@ -97,7 +106,14 @@ class IntegrationTestHelpers {
       mockStorageService,
     );
 
-    // Register all mock services
+    // Override real services with mock services
+    _serviceLocator.unregister<IPhotoService>();
+    _serviceLocator.unregister<IAiService>();
+    _serviceLocator.unregister<IDiaryService>();
+    _serviceLocator.unregister<ISubscriptionService>();
+    _serviceLocator.unregister<SettingsService>();
+    _serviceLocator.unregister<IStorageService>();
+
     _serviceLocator.registerSingleton<IPhotoService>(_mockPhotoService);
     _serviceLocator.registerSingleton<IAiService>(_mockAiService);
     _serviceLocator.registerSingleton<IDiaryService>(mockDiaryService);
@@ -106,7 +122,6 @@ class IntegrationTestHelpers {
     );
     _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<IStorageService>(mockStorageService);
-    _serviceLocator.registerSingleton<LoggingService>(loggingService);
   }
 
   /// Setup default behaviors for mock services
@@ -424,6 +439,7 @@ class IntegrationTestHelpers {
 
     // Settings service defaults - basic mock setup
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
+    when(() => mockSettingsService.isFirstLaunch).thenReturn(false);
 
     // Storage service defaults - basic mock setup
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
