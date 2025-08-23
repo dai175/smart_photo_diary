@@ -160,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         MediaQuery.of(context).orientation == Orientation.portrait;
 
     if (isPortrait) {
-      return Padding(
+      return SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -217,7 +217,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         MediaQuery.of(context).orientation == Orientation.portrait;
 
     if (isPortrait) {
-      return Padding(
+      return SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -292,7 +292,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         MediaQuery.of(context).orientation == Orientation.portrait;
 
     if (isPortrait) {
-      return Padding(
+      return SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
