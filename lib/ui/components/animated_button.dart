@@ -335,7 +335,13 @@ class PrimaryButton extends StatelessWidget {
                   Icon(icon, size: AppSpacing.iconSm),
                   const SizedBox(width: AppSpacing.sm),
                 ],
-                Text(text),
+                Flexible(
+                  child: Text(
+                    text,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
               ],
             ),
     );
@@ -416,7 +422,9 @@ class AccentButton extends StatelessWidget {
             Icon(icon, size: AppSpacing.iconSm),
             const SizedBox(width: AppSpacing.sm),
           ],
-          Text(text),
+          Flexible(
+            child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
         ],
       ),
     );
@@ -522,7 +530,9 @@ class SurfaceButton extends StatelessWidget {
             Icon(icon, size: AppSpacing.iconSm),
             const SizedBox(width: AppSpacing.sm),
           ],
-          Text(text),
+          Flexible(
+            child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
         ],
       ),
     );
@@ -574,7 +584,13 @@ class DangerButton extends StatelessWidget {
                   Icon(icon, size: AppSpacing.iconSm),
                   const SizedBox(width: AppSpacing.sm),
                 ],
-                Text(text),
+                Flexible(
+                  child: Text(
+                    text,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
               ],
             ),
     );
@@ -615,7 +631,9 @@ class TextOnlyButton extends StatelessWidget {
             Icon(icon, size: AppSpacing.iconSm),
             const SizedBox(width: AppSpacing.xs),
           ],
-          Text(text),
+          Flexible(
+            child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
         ],
       ),
     );
