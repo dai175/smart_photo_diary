@@ -180,6 +180,7 @@ jobs:
           flutter build ipa --release \
             --build-name=$VERSION_NAME \
             --build-number=$BUILD_NUMBER \
+            --no-codesign \
             --export-options-plist=ios/ExportOptions.plist \
             --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           
