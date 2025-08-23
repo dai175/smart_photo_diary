@@ -55,6 +55,12 @@ class _HomeScreenState extends State<HomeScreen>
     // 過去の写真は同じ日付のみ選択可能に制限
     _pastPhotoController.setDateRestrictionEnabled(true);
     _tabController = TabController(length: 2, vsync: this);
+
+    // デバッグコードは無効化（カメラ権限はimage_picker使用時に自動処理）
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   await _debugCheckCameraPermission();
+    // });
+
     _loadTodayPhotos();
     _loadRecentDiaries();
   }
@@ -224,6 +230,14 @@ class _HomeScreenState extends State<HomeScreen>
     _photoController.setLoading(true);
 
     try {
+      // デバッグ: カメラ権限状態をチェック
+      _logger.info('カメラ権限の初期状態をチェック', context: 'HomeScreen._loadTodayPhotos');
+      final cameraStatus = await Permission.camera.status;
+      _logger.info(
+        'カメラ権限状態: $cameraStatus (isGranted: ${cameraStatus.isGranted}, isDenied: ${cameraStatus.isDenied}, isPermanentlyDenied: ${cameraStatus.isPermanentlyDenied})',
+        context: 'HomeScreen._loadTodayPhotos',
+      );
+
       // 権限リクエスト
       final photoService = ServiceRegistration.get<IPhotoService>();
       final hasPermission = await photoService.requestPermission();

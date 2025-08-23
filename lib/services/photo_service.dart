@@ -1022,21 +1022,34 @@ class PhotoService implements IPhotoService {
     try {
       loggingService.debug('カメラ撮影を開始', context: 'PhotoService.capturePhoto');
 
-      // カメラ権限をチェック
-      final cameraPermissionResult = await requestCameraPermission();
-      if (cameraPermissionResult.isFailure) {
-        return Failure(cameraPermissionResult.error);
-      }
+      // 権限状態の詳細チェック
+      await Future.delayed(
+        const Duration(milliseconds: 100),
+      ); // 少し待機してiOSの権限状態が更新されるのを待つ
+      final cameraStatus = await Permission.camera.status;
+      loggingService.debug(
+        'カメラ権限状態をチェック: $cameraStatus (isGranted: ${cameraStatus.isGranted}, isDenied: ${cameraStatus.isDenied}, isPermanentlyDenied: ${cameraStatus.isPermanentlyDenied})',
+        context: 'PhotoService.capturePhoto',
+      );
 
-      if (!cameraPermissionResult.value) {
+      // 永続的に拒否されている場合のみ事前にブロック
+      if (cameraStatus.isPermanentlyDenied) {
         loggingService.warning(
-          'カメラ権限が拒否されています',
+          'カメラ権限が永続的に拒否されています',
           context: 'PhotoService.capturePhoto',
+          data: 'status: $cameraStatus',
         );
         return Failure(PhotoError.cameraPermissionDenied());
       }
 
-      // image_picker で写真を撮影
+      // denied状態でも初回は image_picker を実行して権限ダイアログを表示させる
+      loggingService.debug(
+        'image_pickerでカメラアクセスを実行（権限ダイアログ表示含む）',
+        context: 'PhotoService.capturePhoto',
+        data: '現在の権限状態: $cameraStatus',
+      );
+
+      // image_pickerでカメラアクセス
       final XFile? photo = await _imagePicker.pickImage(
         source: ImageSource.camera,
         preferredCameraDevice: CameraDevice.rear,
@@ -1058,44 +1071,97 @@ class PhotoService implements IPhotoService {
         data: 'ファイルパス: ${photo.path}',
       );
 
-      // 撮影した写真をphoto_managerのAssetEntityに変換
-      // photo_managerに新しい写真が追加されるまで少し待つ
-      await Future.delayed(const Duration(milliseconds: 500));
+      // 撮影した写真をフォトライブラリに手動保存
+      loggingService.debug(
+        '撮影した写真をフォトライブラリに保存中',
+        context: 'PhotoService.capturePhoto',
+      );
 
-      // 写真ライブラリを更新
-      await PhotoManager.clearFileCache();
+      try {
+        // XFileをUint8Listに変換してフォトライブラリに保存
+        final bytes = await photo.readAsBytes();
+        final savedAsset = await PhotoManager.editor.saveImage(
+          bytes,
+          filename:
+              'Smart_Photo_Diary_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
 
-      // 最新の写真を取得してAssetEntityを見つける
-      final latestPhotos = await getTodayPhotos(limit: 5);
+        loggingService.info(
+          'カメラ撮影が完了し、フォトライブラリに保存されました',
+          context: 'PhotoService.capturePhoto',
+          data: 'AssetID: ${savedAsset.id}',
+        );
+        return Success(savedAsset);
+      } catch (e) {
+        loggingService.error(
+          '撮影した写真の保存処理でエラー: $e',
+          context: 'PhotoService.capturePhoto',
+        );
 
-      // 撮影時刻に最も近い写真を探す
-      final captureTime = DateTime.now();
-      AssetEntity? capturedAsset;
+        // フォールバック: 従来の方法で検索
+        loggingService.debug(
+          'フォールバック: 従来の方法でAssetEntity検索',
+          context: 'PhotoService.capturePhoto',
+        );
 
-      for (final asset in latestPhotos) {
-        final timeDiff = captureTime.difference(asset.createDateTime).abs();
-        if (timeDiff.inMinutes < 2) {
-          // 2分以内の写真を対象
-          capturedAsset = asset;
-          break;
+        // photo_managerに新しい写真が追加されるまで少し待つ
+        await Future.delayed(const Duration(milliseconds: 1500)); // 待機時間を増加
+
+        // 写真ライブラリを更新
+        await PhotoManager.clearFileCache();
+
+        // より広い範囲で最新の写真を取得
+        final latestPhotos = await getTodayPhotos(limit: 10);
+
+        // 撮影時刻に最も近い写真を探す
+        final captureTime = DateTime.now();
+        AssetEntity? capturedAsset;
+
+        for (final asset in latestPhotos) {
+          final timeDiff = captureTime.difference(asset.createDateTime).abs();
+          if (timeDiff.inMinutes < 5) {
+            // 検索範囲を5分に拡大
+            capturedAsset = asset;
+            break;
+          }
+        }
+
+        if (capturedAsset != null) {
+          loggingService.info(
+            'フォールバック検索でAssetEntityを取得しました',
+            context: 'PhotoService.capturePhoto',
+            data: 'AssetID: ${capturedAsset.id}',
+          );
+          return Success(capturedAsset);
+        } else {
+          loggingService.warning(
+            'フォールバック検索でもAssetEntityの取得に失敗しました',
+            context: 'PhotoService.capturePhoto',
+          );
+          return Failure(PhotoError.cameraAssetNotFound());
         }
       }
-
-      if (capturedAsset != null) {
-        loggingService.info(
-          'カメラ撮影が完了し、AssetEntityを取得しました',
-          context: 'PhotoService.capturePhoto',
-          data: 'AssetID: ${capturedAsset.id}',
-        );
-        return Success(capturedAsset);
-      } else {
-        loggingService.warning(
-          'カメラ撮影は完了しましたが、AssetEntityの取得に失敗しました',
-          context: 'PhotoService.capturePhoto',
-        );
-        return Failure(PhotoError.cameraAssetNotFound());
-      }
     } catch (e) {
+      // image_pickerでの権限拒否エラーを特別処理
+      if (e.toString().contains('camera_access_denied') ||
+          e.toString().contains('Permission denied') ||
+          e.toString().contains('User denied')) {
+        loggingService.warning(
+          'カメラ権限がユーザーによって拒否されました',
+          context: 'PhotoService.capturePhoto',
+          data: 'error: $e',
+        );
+
+        // 権限状態を再チェックして正確な状態を把握
+        final statusAfterDenied = await Permission.camera.status;
+        loggingService.debug(
+          '権限拒否後の状態: $statusAfterDenied',
+          context: 'PhotoService.capturePhoto',
+        );
+
+        return Failure(PhotoError.cameraPermissionDenied());
+      }
+
       final appError = ErrorHandler.handleError(
         e,
         context: 'PhotoService.capturePhoto',
@@ -1121,14 +1187,14 @@ class PhotoService implements IPhotoService {
       );
 
       var status = await Permission.camera.status;
-      loggingService.debug(
-        'カメラ権限の現在の状態: $status',
+      loggingService.info(
+        'カメラ権限の現在の状態: $status (isGranted: ${status.isGranted}, isDenied: ${status.isDenied}, isPermanentlyDenied: ${status.isPermanentlyDenied})',
         context: 'PhotoService.requestCameraPermission',
       );
 
       // 権限が未許可の場合はリクエスト
       if (!status.isGranted) {
-        // 永続的に拒否されている場合は設定アプリに誘導
+        // 永続的に拒否されている場合は設定画面への誘導が必要
         if (status.isPermanentlyDenied) {
           loggingService.warning(
             'カメラ権限が永続的に拒否されています。設定アプリでの許可が必要です。',
@@ -1142,8 +1208,8 @@ class PhotoService implements IPhotoService {
           context: 'PhotoService.requestCameraPermission',
         );
         status = await Permission.camera.request();
-        loggingService.debug(
-          'リクエスト後のカメラ権限状態: $status',
+        loggingService.info(
+          'リクエスト後のカメラ権限状態: $status (isGranted: ${status.isGranted}, isDenied: ${status.isDenied}, isPermanentlyDenied: ${status.isPermanentlyDenied})',
           context: 'PhotoService.requestCameraPermission',
         );
       }
