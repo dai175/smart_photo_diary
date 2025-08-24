@@ -48,34 +48,38 @@ class SocialShareService implements ISocialShareService {
         photos: photos,
       );
 
-      return imageResult.fold((imageFile) async {
-        try {
-          // Share Plus を使用してファイルを共有
-          await Share.shareXFiles([
-            XFile(imageFile.path),
-          ], text: '${diary.title}\n\n#SmartPhotoDiary で生成');
+      if (imageResult.isFailure) {
+        return Failure<void>(imageResult.error);
+      }
 
-          _logger.info(
-            'SNS共有成功',
-            context: 'SocialShareService.shareToSocialMedia',
-          );
+      final imageFile = imageResult.value;
 
-          return const Success<void>(null);
-        } catch (e) {
-          _logger.error(
-            'SNS共有エラー',
-            context: 'SocialShareService.shareToSocialMedia',
-            error: e,
-          );
-          return Failure<void>(
-            SocialShareException(
-              'SNSへの共有に失敗しました',
-              details: e.toString(),
-              originalError: e,
-            ),
-          );
-        }
-      }, (error) => Failure<void>(error));
+      try {
+        // Share Plus を使用してファイルを共有
+        await Share.shareXFiles([
+          XFile(imageFile.path),
+        ], text: '${diary.title}\n\n#SmartPhotoDiary で生成');
+
+        _logger.info(
+          'SNS共有成功',
+          context: 'SocialShareService.shareToSocialMedia',
+        );
+
+        return const Success<void>(null);
+      } catch (e) {
+        _logger.error(
+          'SNS共有エラー',
+          context: 'SocialShareService.shareToSocialMedia',
+          error: e,
+        );
+        return Failure<void>(
+          SocialShareException(
+            'SNSへの共有に失敗しました',
+            details: e.toString(),
+            originalError: e,
+          ),
+        );
+      }
     } catch (e) {
       _logger.error(
         '予期しないエラー',

@@ -138,7 +138,7 @@ class DiaryImageGenerator {
         const Color(0xFFf093fb).withOpacity(0.3),
         const Color(0xFFf5576c).withOpacity(0.2),
       ],
-      [0.0, 0.3, 0.7, 1.0],
+      [0.0, 0.3, 0.7, 1.0], // colorStopsを明示的に指定
     );
 
     final backgroundPaint = Paint()..shader = backgroundGradient;
@@ -332,7 +332,7 @@ class DiaryImageGenerator {
         AppColors.primaryDark.withOpacity(0.15),
         Colors.black.withOpacity(0.5),
       ],
-      [0.0, 0.5, 1.0],
+      [0.0, 0.5, 1.0], // colorStopsを明示的に指定
     );
 
     final overlayPaint = Paint()
@@ -356,6 +356,7 @@ class DiaryImageGenerator {
         AppColors.primaryLight.withOpacity(0.3),
         Colors.white.withOpacity(0.1),
       ],
+      [0.0, 0.5, 1.0], // 3色用のcolorStopsを明示的に指定
     );
 
     final borderPaint = Paint()
