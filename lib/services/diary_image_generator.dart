@@ -19,6 +19,48 @@ import 'interfaces/social_share_service_interface.dart';
 /// Canvas描画システムを使用して、日記の内容と写真を組み合わせた
 /// 美しいシェア用画像を生成します。
 class DiaryImageGenerator {
+  // ============= 定数定義 =============
+
+  /// 基準画像サイズ（Instagram Stories標準）
+  static const double _baseWidth = 1080.0;
+  static const double _baseHeight = 1920.0;
+
+  /// スケール制限
+  static const double _minScale = 0.8;
+  static const double _maxScale = 2.0;
+
+  /// ベースフォントサイズ（px）
+  static const double _baseDateFontSize = 36.0;
+  static const double _baseTitleFontSize = 66.0;
+  static const double _baseTitleFontSizeLong = 56.0;
+  static const double _baseContentFontSize = 38.0;
+  static const double _baseContentFontSizeLong = 34.0;
+  static const double _baseBrandFontSize = 28.0;
+
+  /// ベーススペーシング（px）
+  static const double _baseAfterDateSpacing = 32.0;
+  static const double _baseAfterTitleSpacing = 40.0;
+
+  /// テキスト長の閾値
+  static const int _titleLengthThreshold = 20;
+  static const int _titleMaxLengthThreshold = 30;
+  static const int _contentLengthThreshold = 200;
+
+  /// 最大行数
+  static const int _titleMaxLines = 3;
+  static const int _titleMaxLinesLong = 4;
+  static const int _contentMaxLines = 15;
+
+  /// 最大文字数
+  static const int _maxTitleLength = 80;
+  static const int _maxContentLength = 300;
+
+  /// 複数写真表示時の最大枚数
+  static const int _maxPhotoCount = 3;
+
+  /// 写真間のスペーシング
+  static const double _photoSpacing = 6.0;
+
   // シングルトンパターン
   static DiaryImageGenerator? _instance;
 
@@ -222,9 +264,9 @@ class DiaryImageGenerator {
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    final photoCount = math.min(photos.length, 3);
+    final photoCount = math.min(photos.length, _maxPhotoCount);
     final photoWidth = actualWidth / photoCount;
-    final photoSpacing = 6.0 * scaleMultiplier;
+    final photoSpacing = _photoSpacing * scaleMultiplier;
 
     for (int i = 0; i < photoCount; i++) {
       final photo = photos[i];
@@ -482,32 +524,30 @@ class DiaryImageGenerator {
     final actualWidth = format.isHD ? format.scaledWidth : format.width;
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
 
-    // 基準サイズ（1080x1920）に対するスケール計算
-    final widthScale = actualWidth / 1080.0;
-    final heightScale = actualHeight / 1920.0;
+    // 基準サイズに対するスケール計算
+    final widthScale = actualWidth / _baseWidth;
+    final heightScale = actualHeight / _baseHeight;
     final baseScale = (widthScale + heightScale) / 2;
 
     // 最小・最大スケールを制限
-    final scale = baseScale.clamp(0.8, 2.0);
+    final scale = baseScale.clamp(_minScale, _maxScale);
 
     final titleLength = diary.title.length;
     final contentLength = diary.content.length;
 
-    // スケールに応じてフォントサイズを調整（より大きなベースサイズ）
+    // スケールに応じてフォントサイズを調整
     return _TextSizes(
-      dateSize: (36 * scale).round().toDouble(), // 基準36px（28→36に増加）
-      titleSize: titleLength > 20
-          ? (56 * scale)
-                .round()
-                .toDouble() // 基準56px（44→56に増加）
-          : (66 * scale).round().toDouble(), // 基準66px（52→66に増加）
-      titleMaxLines: titleLength > 30 ? 4 : 3,
-      contentSize: contentLength > 200
-          ? (34 * scale)
-                .round()
-                .toDouble() // 基準34px（26→34に増加）
-          : (38 * scale).round().toDouble(), // 基準38px（30→38に増加）
-      contentMaxLines: 15,
+      dateSize: (_baseDateFontSize * scale).round().toDouble(),
+      titleSize: titleLength > _titleLengthThreshold
+          ? (_baseTitleFontSizeLong * scale).round().toDouble()
+          : (_baseTitleFontSize * scale).round().toDouble(),
+      titleMaxLines: titleLength > _titleMaxLengthThreshold
+          ? _titleMaxLinesLong
+          : _titleMaxLines,
+      contentSize: contentLength > _contentLengthThreshold
+          ? (_baseContentFontSizeLong * scale).round().toDouble()
+          : (_baseContentFontSize * scale).round().toDouble(),
+      contentMaxLines: _contentMaxLines,
     );
   }
 
@@ -517,13 +557,13 @@ class DiaryImageGenerator {
     final actualWidth = format.isHD ? format.scaledWidth : format.width;
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
 
-    final widthScale = actualWidth / 1080.0;
-    final heightScale = actualHeight / 1920.0;
-    final scale = ((widthScale + heightScale) / 2).clamp(0.8, 2.0);
+    final widthScale = actualWidth / _baseWidth;
+    final heightScale = actualHeight / _baseHeight;
+    final scale = ((widthScale + heightScale) / 2).clamp(_minScale, _maxScale);
 
     return _Spacing(
-      afterDate: (32 * scale).round().toDouble(), // 基準32px
-      afterTitle: (40 * scale).round().toDouble(), // 基準40px
+      afterDate: (_baseAfterDateSpacing * scale).round().toDouble(),
+      afterTitle: (_baseAfterTitleSpacing * scale).round().toDouble(),
     );
   }
 
@@ -534,7 +574,7 @@ class DiaryImageGenerator {
     bool isTitle = false,
   }) {
     // Storiesのみのサポート
-    final maxLength = isTitle ? 80 : 300;
+    final maxLength = isTitle ? _maxTitleLength : _maxContentLength;
 
     if (text.length <= maxLength) return text;
 
@@ -833,11 +873,11 @@ class DiaryImageGenerator {
     final actualWidth = format.isHD ? format.scaledWidth : format.width;
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
 
-    final widthScale = actualWidth / 1080.0;
-    final heightScale = actualHeight / 1920.0;
-    final scale = ((widthScale + heightScale) / 2).clamp(0.8, 2.0);
+    final widthScale = actualWidth / _baseWidth;
+    final heightScale = actualHeight / _baseHeight;
+    final scale = ((widthScale + heightScale) / 2).clamp(_minScale, _maxScale);
 
-    return (28 * scale).round().toDouble(); // 基準28px（24→28に増加）
+    return (_baseBrandFontSize * scale).round().toDouble();
   }
 
   /// 日付をフォーマット

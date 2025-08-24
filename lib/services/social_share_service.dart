@@ -13,6 +13,14 @@ import 'diary_image_generator.dart';
 
 /// ソーシャル共有サービスの実装クラス
 class SocialShareService implements ISocialShareService {
+  // ============= 定数定義 =============
+
+  /// Instagram URL Schemes
+  static const String _instagramCameraScheme = 'instagram://camera';
+
+  /// 共有待機時間（ミリ秒）
+  static const int _shareDelayMs = 500;
+
   // シングルトンパターン
   static SocialShareService? _instance;
 
@@ -153,7 +161,7 @@ class SocialShareService implements ISocialShareService {
   Future<bool> _shareToInstagram(File imageFile, DiaryEntry diary) async {
     try {
       // まず Instagram アプリを直接起動を試行
-      final instagramUri = Uri.parse('instagram://camera');
+      final instagramUri = Uri.parse(_instagramCameraScheme);
 
       if (await canLaunchUrl(instagramUri)) {
         // Instagram アプリを直接起動
@@ -165,7 +173,7 @@ class SocialShareService implements ISocialShareService {
         );
 
         // 少し待ってから共有シートを表示（Instagramアプリが開いた後）
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: _shareDelayMs));
 
         // 画像を共有
         await Share.shareXFiles([
