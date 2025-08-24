@@ -39,9 +39,9 @@ Smart Photo DiaryのAIが生成した日記の文章を写真にオーバーレ�
   - [x] `SocialShareService`クラス実装
   - [x] LoggingService統合
   - [x] エラーハンドリング実装
-- [ ] **2.3** ServiceLocator登録
-  - [ ] `core/service_registration.dart`への追加
-  - [ ] DI設定の完了
+- [x] **2.3** ServiceLocator登録
+  - [x] `core/service_registration.dart`への追加
+  - [x] DI設定の完了
 
 ### Phase 3: 画像生成機能
 - [ ] **3.1** 画像生成クラス作成
