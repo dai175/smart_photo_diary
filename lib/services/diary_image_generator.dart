@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -48,19 +49,22 @@ class DiaryImageGenerator {
       final fileName = 'diary_${diary.id}_${format.name}_$timestamp.png';
       final outputFile = File('${tempDir.path}/$fileName');
 
-      // キャンバスサイズを設定
+      // キャンバスサイズを設定（スケール対応）
+      final actualWidth = format.isHD ? format.scaledWidth : format.width;
+      final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(
         recorder,
-        Rect.fromLTWH(0, 0, format.width.toDouble(), format.height.toDouble()),
+        Rect.fromLTWH(0, 0, actualWidth.toDouble(), actualHeight.toDouble()),
       );
 
       // 画像を描画
       await _drawCompositeImage(canvas, diary, format, photos);
 
-      // Pictureからイメージに変換
+      // Pictureからイメージに変換（スケール対応）
       final picture = recorder.endRecording();
-      final image = await picture.toImage(format.width, format.height);
+      final image = await picture.toImage(actualWidth, actualHeight);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
@@ -119,10 +123,13 @@ class DiaryImageGenerator {
     ShareFormat format,
     List<AssetEntity>? photos,
   ) async {
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
     // まず単色背景を描画
     final backgroundGradient = ui.Gradient.linear(
       const Offset(0, 0),
-      Offset(format.width.toDouble(), format.height.toDouble()),
+      Offset(actualWidth.toDouble(), actualHeight.toDouble()),
       [
         const Color(0xFF667eea), // 美しいグラデーション
         const Color(0xFF764ba2),
@@ -131,7 +138,7 @@ class DiaryImageGenerator {
 
     final backgroundPaint = Paint()..shader = backgroundGradient;
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, format.width.toDouble(), format.height.toDouble()),
+      Rect.fromLTWH(0, 0, actualWidth.toDouble(), actualHeight.toDouble()),
       backgroundPaint,
     );
 
@@ -148,47 +155,12 @@ class DiaryImageGenerator {
     ShareFormat format,
   ) async {
     try {
-      // メイン写真を背景として使用
-      final mainPhoto = photos.first;
-      final imageData = await mainPhoto.originBytes;
-
-      if (imageData != null) {
-        final codec = await ui.instantiateImageCodec(imageData);
-        final frame = await codec.getNextFrame();
-        final image = frame.image;
-
-        // 画像を適切にスケール・トリミング
-        final imageRect = _calculateImageRect(
-          image.width.toDouble(),
-          image.height.toDouble(),
-          format.width.toDouble(),
-          format.height.toDouble(),
-        );
-
-        canvas.drawImageRect(
-          image,
-          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-          imageRect,
-          Paint(),
-        );
-
-        // 写真の上にオーバーレイを追加
-        final overlayGradient = ui.Gradient.linear(
-          const Offset(0, 0),
-          Offset(0, format.height.toDouble()),
-          [Colors.black.withOpacity(0.2), Colors.black.withOpacity(0.6)],
-        );
-
-        final overlayPaint = Paint()..shader = overlayGradient;
-        canvas.drawRect(
-          Rect.fromLTWH(
-            0,
-            0,
-            format.width.toDouble(),
-            format.height.toDouble(),
-          ),
-          overlayPaint,
-        );
+      // 複数写真の場合、カルーセル風レイアウトを適用
+      if (photos.length > 1) {
+        await _drawMultiplePhotos(canvas, photos, format);
+      } else {
+        // 単一写真の場合、従来通り背景として描画
+        await _drawSinglePhotoBackground(canvas, photos.first, format);
       }
     } catch (e) {
       _logger.error(
@@ -200,19 +172,170 @@ class DiaryImageGenerator {
     }
   }
 
+  /// 単一写真の背景描画
+  Future<void> _drawSinglePhotoBackground(
+    Canvas canvas,
+    AssetEntity photo,
+    ShareFormat format,
+  ) async {
+    final imageData = await photo.originBytes;
+    if (imageData == null) return;
+
+    final codec = await ui.instantiateImageCodec(imageData);
+    final frame = await codec.getNextFrame();
+    final image = frame.image;
+
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
+    // 画像を適切にスケール・トリミング
+    final imageRect = _calculateImageRect(
+      image.width.toDouble(),
+      image.height.toDouble(),
+      actualWidth.toDouble(),
+      actualHeight.toDouble(),
+    );
+
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      imageRect,
+      Paint(),
+    );
+
+    // 写真の上にオーバーレイを追加
+    _drawPhotoOverlay(canvas, format);
+  }
+
+  /// 複数写真のカルーセル風描画
+  Future<void> _drawMultiplePhotos(
+    Canvas canvas,
+    List<AssetEntity> photos,
+    ShareFormat format,
+  ) async {
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+    final scaleMultiplier = format.isHD ? format.scale : 1.0;
+
+    final photoCount = math.min(photos.length, format.isStories ? 3 : 2);
+    final photoWidth = actualWidth / photoCount;
+    final photoSpacing = 6.0 * scaleMultiplier;
+
+    for (int i = 0; i < photoCount; i++) {
+      final photo = photos[i];
+      final imageData = await photo.originBytes;
+      if (imageData == null) continue;
+
+      final codec = await ui.instantiateImageCodec(imageData);
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+
+      // 各写真の配置位置を計算
+      final startX = i * (photoWidth - photoSpacing);
+      final photoRect = Rect.fromLTWH(
+        startX,
+        0,
+        photoWidth - photoSpacing,
+        actualHeight.toDouble(),
+      );
+
+      // 写真をクロップして描画
+      final sourceRect = _calculateCropRect(
+        image.width.toDouble(),
+        image.height.toDouble(),
+        photoRect.width,
+        photoRect.height,
+      );
+
+      canvas.drawImageRect(image, sourceRect, photoRect, Paint());
+
+      // 写真間のエレガントな境界線
+      if (i < photoCount - 1) {
+        final borderPaint = Paint()
+          ..color = Colors.white.withOpacity(0.4)
+          ..strokeWidth = 2 * scaleMultiplier
+          ..strokeCap = StrokeCap.round;
+        canvas.drawLine(
+          Offset(startX + photoRect.width, 0),
+          Offset(startX + photoRect.width, actualHeight.toDouble()),
+          borderPaint,
+        );
+      }
+    }
+
+    // 複数写真の上にオーバーレイを追加
+    _drawPhotoOverlay(canvas, format);
+  }
+
+  /// 写真用オーバーレイ描画
+  void _drawPhotoOverlay(Canvas canvas, ShareFormat format) {
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
+    final overlayGradient = ui.Gradient.linear(
+      const Offset(0, 0),
+      Offset(0, actualHeight.toDouble()),
+      [Colors.black.withOpacity(0.2), Colors.black.withOpacity(0.6)],
+    );
+
+    final overlayPaint = Paint()..shader = overlayGradient;
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, actualWidth.toDouble(), actualHeight.toDouble()),
+      overlayPaint,
+    );
+  }
+
+  /// クロップ用の矩形を計算
+  Rect _calculateCropRect(
+    double imageWidth,
+    double imageHeight,
+    double targetWidth,
+    double targetHeight,
+  ) {
+    final imageAspect = imageWidth / imageHeight;
+    final targetAspect = targetWidth / targetHeight;
+
+    double cropWidth, cropHeight;
+    double offsetX = 0, offsetY = 0;
+
+    if (imageAspect > targetAspect) {
+      // 画像が横長 - 高さに合わせて幅をクロップ
+      cropHeight = imageHeight;
+      cropWidth = cropHeight * targetAspect;
+      offsetX = (imageWidth - cropWidth) / 2;
+    } else {
+      // 画像が縦長 - 幅に合わせて高さをクロップ
+      cropWidth = imageWidth;
+      cropHeight = cropWidth / targetAspect;
+      offsetY = (imageHeight - cropHeight) / 2;
+    }
+
+    return Rect.fromLTWH(offsetX, offsetY, cropWidth, cropHeight);
+  }
+
   /// コンテンツオーバーレイを描画
   void _drawContentOverlay(Canvas canvas, ShareFormat format) {
+    final scaleMultiplier = format.isHD ? format.scale : 1.0;
+
     // コンテンツエリアに半透明の背景を追加
     final contentArea = _getContentArea(format);
     final overlayPaint = Paint()
-      ..color = Colors.black.withOpacity(0.4)
+      ..color = Colors.black.withOpacity(0.35)
       ..style = PaintingStyle.fill;
 
     final rrect = RRect.fromRectAndRadius(
       contentArea,
-      const Radius.circular(16),
+      Radius.circular(20 * scaleMultiplier),
     );
     canvas.drawRRect(rrect, overlayPaint);
+
+    // コンテンツエリアの縁に美しいボーダーを追加
+    final borderPaint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..strokeWidth = 1.5 * scaleMultiplier
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawRRect(rrect, borderPaint);
   }
 
   /// テキスト要素を描画
@@ -222,8 +345,12 @@ class DiaryImageGenerator {
     ShareFormat format,
   ) async {
     final contentArea = _getContentArea(format);
-    final textArea = contentArea.deflate(24); // パディング
+    final textArea = contentArea.deflate(format.isStories ? 32 : 24);
     double currentY = textArea.top;
+
+    // 動的フォントサイズとレイアウト調整
+    final textSizes = _calculateTextSizes(format, diary);
+    final spacing = _calculateSpacing(format);
 
     // 日付を描画
     final dateText = _formatDate(diary.date);
@@ -231,8 +358,9 @@ class DiaryImageGenerator {
       text: dateText,
       style: TextStyle(
         color: Colors.white.withOpacity(0.9),
-        fontSize: format.isStories ? 16 : 14,
+        fontSize: textSizes.dateSize,
         fontWeight: FontWeight.w400,
+        letterSpacing: 0.5,
       ),
     );
 
@@ -242,40 +370,49 @@ class DiaryImageGenerator {
     );
     datePainter.layout(maxWidth: textArea.width);
     datePainter.paint(canvas, Offset(textArea.left, currentY));
-    currentY += datePainter.height + 16;
+    currentY += datePainter.height + spacing.afterDate;
 
     // タイトルを描画
     if (diary.title.isNotEmpty) {
+      final titleText = _optimizeTextForFormat(
+        diary.title,
+        format,
+        isTitle: true,
+      );
       final titleSpan = TextSpan(
-        text: diary.title,
+        text: titleText,
         style: TextStyle(
           color: Colors.white,
-          fontSize: format.isStories ? 28 : 24,
+          fontSize: textSizes.titleSize,
           fontWeight: FontWeight.bold,
-          height: 1.3,
+          height: 1.25,
+          letterSpacing: 0.2,
         ),
       );
 
       final titlePainter = TextPainter(
         text: titleSpan,
         textDirection: TextDirection.ltr,
-        maxLines: format.isStories ? 3 : 2,
+        maxLines: textSizes.titleMaxLines,
       );
       titlePainter.layout(maxWidth: textArea.width);
       titlePainter.paint(canvas, Offset(textArea.left, currentY));
-      currentY += titlePainter.height + 20;
+      currentY += titlePainter.height + spacing.afterTitle;
     }
 
     // 本文を描画
     if (diary.content.isNotEmpty) {
-      final maxLines = format.isStories ? 12 : 8;
-      final contentText = _truncateText(diary.content, maxLines * 40); // 概算
+      final contentText = _optimizeTextForFormat(diary.content, format);
+      final remainingHeight = textArea.bottom - currentY;
+      final availableLines = (remainingHeight / (textSizes.contentSize * 1.5))
+          .floor();
+      final maxLines = math.min(availableLines, textSizes.contentMaxLines);
 
       final contentSpan = TextSpan(
         text: contentText,
         style: TextStyle(
           color: Colors.white.withOpacity(0.95),
-          fontSize: format.isStories ? 16 : 14,
+          fontSize: textSizes.contentSize,
           height: 1.5,
           letterSpacing: 0.3,
         ),
@@ -291,17 +428,85 @@ class DiaryImageGenerator {
     }
   }
 
+  /// フォーマットに応じたテキストサイズを計算
+  _TextSizes _calculateTextSizes(ShareFormat format, DiaryEntry diary) {
+    if (format.isStories) {
+      // Stories用のサイズ調整
+      final titleLength = diary.title.length;
+      final contentLength = diary.content.length;
+
+      return _TextSizes(
+        dateSize: 18,
+        titleSize: titleLength > 20 ? 26 : 30,
+        titleMaxLines: titleLength > 30 ? 4 : 3,
+        contentSize: contentLength > 200 ? 16 : 18,
+        contentMaxLines: 15,
+      );
+    } else {
+      // Feed用のサイズ調整
+      final titleLength = diary.title.length;
+      final contentLength = diary.content.length;
+
+      return _TextSizes(
+        dateSize: 14,
+        titleSize: titleLength > 15 ? 22 : 26,
+        titleMaxLines: 2,
+        contentSize: contentLength > 150 ? 14 : 16,
+        contentMaxLines: 10,
+      );
+    }
+  }
+
+  /// スペーシングを計算
+  _Spacing _calculateSpacing(ShareFormat format) {
+    if (format.isStories) {
+      return _Spacing(afterDate: 20, afterTitle: 24);
+    } else {
+      return _Spacing(afterDate: 16, afterTitle: 20);
+    }
+  }
+
+  /// フォーマットに最適化されたテキストを取得
+  String _optimizeTextForFormat(
+    String text,
+    ShareFormat format, {
+    bool isTitle = false,
+  }) {
+    final maxLength = format.isStories
+        ? (isTitle ? 80 : 300)
+        : (isTitle ? 50 : 200);
+
+    if (text.length <= maxLength) return text;
+
+    // 文章の区切りで切りたいので、句点や改行で適切に切断
+    final sentences = text.split(RegExp(r'[。！？\n]'));
+    final buffer = StringBuffer();
+
+    for (final sentence in sentences) {
+      if (buffer.length + sentence.length > maxLength - 3) break;
+      if (buffer.isNotEmpty) buffer.write('。');
+      buffer.write(sentence);
+    }
+
+    final result = buffer.toString();
+    return result.length < text.length ? '$result...' : result;
+  }
+
   /// ブランディング要素を描画
   void _drawBrandingElements(Canvas canvas, ShareFormat format) {
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+    final scaleMultiplier = format.isHD ? format.scale : 1.0;
+
     // アプリ名ロゴ
     final brandText = 'Smart Photo Diary';
     final brandSpan = TextSpan(
       text: brandText,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.7),
-        fontSize: format.isStories ? 14 : 12,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 1.2,
+        color: Colors.white.withOpacity(0.8),
+        fontSize: (format.isStories ? 16 : 14) * scaleMultiplier,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.5,
       ),
     );
 
@@ -312,57 +517,112 @@ class DiaryImageGenerator {
     brandPainter.layout();
 
     // 右下に配置
-    final brandX = format.width - brandPainter.width - 20;
-    final brandY = format.height - brandPainter.height - 20;
+    final margin = 24 * scaleMultiplier;
+    final brandX = actualWidth - brandPainter.width - margin;
+    final brandY = actualHeight - brandPainter.height - margin;
+
+    // ブランド背景
+    final brandBgPaint = Paint()
+      ..color = Colors.black.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    final brandBgRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        brandX - 12 * scaleMultiplier,
+        brandY - 8 * scaleMultiplier,
+        brandPainter.width + 24 * scaleMultiplier,
+        brandPainter.height + 16 * scaleMultiplier,
+      ),
+      Radius.circular(8 * scaleMultiplier),
+    );
+    canvas.drawRRect(brandBgRect, brandBgPaint);
+
     brandPainter.paint(canvas, Offset(brandX, brandY));
 
-    // 小さなアクセントライン
+    // アクセントライン（より美しく）
     final accentPaint = Paint()
-      ..color = Colors.white.withOpacity(0.3)
-      ..strokeWidth = 2;
+      ..color = Colors.white.withOpacity(0.6)
+      ..strokeWidth = 3 * scaleMultiplier
+      ..strokeCap = StrokeCap.round;
+
+    final lineStartX = brandX - 40 * scaleMultiplier;
+    final lineEndX = brandX - 16 * scaleMultiplier;
+    final lineY = brandY + brandPainter.height / 2;
 
     canvas.drawLine(
-      Offset(brandX - 30, brandY + brandPainter.height / 2),
-      Offset(brandX - 10, brandY + brandPainter.height / 2),
+      Offset(lineStartX, lineY),
+      Offset(lineEndX, lineY),
       accentPaint,
+    );
+
+    // 小さなドット装飾
+    final dotPaint = Paint()
+      ..color = Colors.white.withOpacity(0.4)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(
+      Offset(lineStartX - 8 * scaleMultiplier, lineY),
+      2 * scaleMultiplier,
+      dotPaint,
     );
   }
 
   /// 装飾要素を描画
   void _drawDecorationElements(Canvas canvas, ShareFormat format) {
-    // 左上のアクセント装飾
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+    final scaleMultiplier = format.isHD ? format.scale : 1.0;
+
+    // 改善された装飾デザイン
     final decorPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
+      ..color = Colors.white.withOpacity(0.25)
+      ..strokeWidth = 2.5 * scaleMultiplier
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    // 角装飾
-    final cornerSize = format.isStories ? 40.0 : 30.0;
-    const margin = 20.0;
+    final cornerSize = (format.isStories ? 50.0 : 40.0) * scaleMultiplier;
+    final margin = 30.0 * scaleMultiplier;
 
-    // 左上
-    canvas.drawLine(
-      const Offset(margin, margin),
-      Offset(margin + cornerSize, margin),
-      decorPaint,
-    );
-    canvas.drawLine(
-      const Offset(margin, margin),
-      Offset(margin, margin + cornerSize),
-      decorPaint,
+    // 左上のエレガントなコーナー
+    final cornerPath = Path()
+      ..moveTo(margin, margin + cornerSize)
+      ..lineTo(margin, margin + 10 * scaleMultiplier)
+      ..quadraticBezierTo(margin, margin, margin + 10 * scaleMultiplier, margin)
+      ..lineTo(margin + cornerSize, margin);
+
+    canvas.drawPath(cornerPath, decorPaint);
+
+    // 右上のコーナー
+    final rightCornerPath = Path()
+      ..moveTo(actualWidth - margin, margin + cornerSize)
+      ..lineTo(actualWidth - margin, margin + 10 * scaleMultiplier)
+      ..quadraticBezierTo(
+        actualWidth - margin,
+        margin,
+        actualWidth - margin - 10 * scaleMultiplier,
+        margin,
+      )
+      ..lineTo(actualWidth - margin - cornerSize, margin);
+
+    canvas.drawPath(rightCornerPath, decorPaint);
+
+    // 中央上部に小さなアクセント
+    final centerAccentPaint = Paint()
+      ..color = Colors.white.withOpacity(0.15)
+      ..style = PaintingStyle.fill;
+
+    final accentRect = Rect.fromCenter(
+      center: Offset(actualWidth / 2, margin),
+      width: 60 * scaleMultiplier,
+      height: 3 * scaleMultiplier,
     );
 
-    // 右上
-    canvas.drawLine(
-      Offset(format.width - margin, margin),
-      Offset(format.width - margin - cornerSize, margin),
-      decorPaint,
+    final accentRRect = RRect.fromRectAndRadius(
+      accentRect,
+      Radius.circular(1.5 * scaleMultiplier),
     );
-    canvas.drawLine(
-      Offset(format.width - margin, margin),
-      Offset(format.width - margin, margin + cornerSize),
-      decorPaint,
-    );
+
+    canvas.drawRRect(accentRRect, centerAccentPaint);
   }
 
   /// 画像の適切な配置矩形を計算
@@ -395,15 +655,35 @@ class DiaryImageGenerator {
 
   /// コンテンツエリアを取得
   Rect _getContentArea(ShareFormat format) {
-    final margin = format.isStories ? 50.0 : 40.0;
-    final bottomSpace = format.isStories ? 120.0 : 80.0;
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+    final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    return Rect.fromLTWH(
-      margin,
-      margin * 2,
-      format.width - (margin * 2),
-      format.height - (margin * 2) - bottomSpace,
-    );
+    if (format.isStories) {
+      // Stories用の縦長レイアウト
+      final margin = 70.0 * scaleMultiplier;
+      final topMargin = 120.0 * scaleMultiplier; // 上部により多くのスペース
+      final bottomSpace = 180.0 * scaleMultiplier; // ブランディング用スペース
+
+      return Rect.fromLTWH(
+        margin,
+        topMargin,
+        actualWidth - (margin * 2),
+        actualHeight - topMargin - bottomSpace,
+      );
+    } else {
+      // Feed用の正方形レイアウト
+      final margin = 60.0 * scaleMultiplier;
+      final topMargin = 80.0 * scaleMultiplier;
+      final bottomSpace = 120.0 * scaleMultiplier;
+
+      return Rect.fromLTWH(
+        margin,
+        topMargin,
+        actualWidth - (margin * 2),
+        actualHeight - topMargin - bottomSpace,
+      );
+    }
   }
 
   /// 日付をフォーマット
@@ -431,4 +711,29 @@ class DiaryImageGenerator {
     if (text.length <= maxLength) return text;
     return '${text.substring(0, maxLength - 3)}...';
   }
+}
+
+/// テキストサイズ設定
+class _TextSizes {
+  final double dateSize;
+  final double titleSize;
+  final int titleMaxLines;
+  final double contentSize;
+  final int contentMaxLines;
+
+  _TextSizes({
+    required this.dateSize,
+    required this.titleSize,
+    required this.titleMaxLines,
+    required this.contentSize,
+    required this.contentMaxLines,
+  });
+}
+
+/// スペーシング設定
+class _Spacing {
+  final double afterDate;
+  final double afterTitle;
+
+  _Spacing({required this.afterDate, required this.afterTitle});
 }

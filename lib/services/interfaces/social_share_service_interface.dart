@@ -36,6 +36,9 @@ abstract class ISocialShareService {
 
   /// 指定されたフォーマットがサポートされているかチェック
   bool isFormatSupported(ShareFormat format);
+
+  /// デバイスに適したフォーマットを取得
+  ShareFormat getRecommendedFormat(ShareFormat baseFormat, {bool useHD = true});
 }
 
 /// 共有フォーマットの定義
@@ -46,6 +49,7 @@ enum ShareFormat {
     width: 1080,
     height: 1920,
     displayName: 'Instagram Stories',
+    scale: 2.0,
   ),
 
   /// Instagram Feed用 (1:1)
@@ -54,6 +58,25 @@ enum ShareFormat {
     width: 1080,
     height: 1080,
     displayName: 'Instagram Feed',
+    scale: 2.0,
+  ),
+
+  /// Instagram Stories用 高解像度 (9:16)
+  instagramStoriesHD(
+    aspectRatio: 0.5625,
+    width: 1350,
+    height: 2400,
+    displayName: 'Instagram Stories (HD)',
+    scale: 2.5,
+  ),
+
+  /// Instagram Feed用 高解像度 (1:1)
+  instagramFeedHD(
+    aspectRatio: 1.0,
+    width: 1350,
+    height: 1350,
+    displayName: 'Instagram Feed (HD)',
+    scale: 2.5,
   );
 
   const ShareFormat({
@@ -61,6 +84,7 @@ enum ShareFormat {
     required this.width,
     required this.height,
     required this.displayName,
+    required this.scale,
   });
 
   /// アスペクト比
@@ -75,9 +99,26 @@ enum ShareFormat {
   /// 表示名
   final String displayName;
 
+  /// デバイス解像度スケール
+  final double scale;
+
   /// Stories用かどうか
-  bool get isStories => this == ShareFormat.instagramStories;
+  bool get isStories =>
+      this == ShareFormat.instagramStories ||
+      this == ShareFormat.instagramStoriesHD;
 
   /// Feed用かどうか
-  bool get isFeed => this == ShareFormat.instagramFeed;
+  bool get isFeed =>
+      this == ShareFormat.instagramFeed || this == ShareFormat.instagramFeedHD;
+
+  /// HD版かどうか
+  bool get isHD =>
+      this == ShareFormat.instagramStoriesHD ||
+      this == ShareFormat.instagramFeedHD;
+
+  /// スケールされた幅
+  int get scaledWidth => (width * scale).round();
+
+  /// スケールされた高さ
+  int get scaledHeight => (height * scale).round();
 }

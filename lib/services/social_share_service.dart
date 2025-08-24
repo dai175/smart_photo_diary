@@ -117,6 +117,24 @@ class SocialShareService implements ISocialShareService {
   bool isFormatSupported(ShareFormat format) {
     return ShareFormat.values.contains(format);
   }
+
+  @override
+  ShareFormat getRecommendedFormat(
+    ShareFormat baseFormat, {
+    bool useHD = true,
+  }) {
+    if (!useHD) return baseFormat;
+
+    // デバイス情報を取得してHDフォーマットを推奨
+    switch (baseFormat) {
+      case ShareFormat.instagramStories:
+        return ShareFormat.instagramStoriesHD;
+      case ShareFormat.instagramFeed:
+        return ShareFormat.instagramFeedHD;
+      default:
+        return baseFormat;
+    }
+  }
 }
 
 /// ソーシャル共有関連のエラー
