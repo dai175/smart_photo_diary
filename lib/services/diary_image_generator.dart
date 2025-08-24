@@ -478,23 +478,53 @@ class DiaryImageGenerator {
 
   /// フォーマットに応じたテキストサイズを計算
   _TextSizes _calculateTextSizes(ShareFormat format, DiaryEntry diary) {
-    // Stories用のサイズ調整（現在はStoriesのみサポート）
+    // 画像サイズに基づく基準スケール計算
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
+    // 基準サイズ（1080x1920）に対するスケール計算
+    final widthScale = actualWidth / 1080.0;
+    final heightScale = actualHeight / 1920.0;
+    final baseScale = (widthScale + heightScale) / 2;
+
+    // 最小・最大スケールを制限
+    final scale = baseScale.clamp(0.8, 2.0);
+
     final titleLength = diary.title.length;
     final contentLength = diary.content.length;
 
+    // スケールに応じてフォントサイズを調整（より大きなベースサイズ）
     return _TextSizes(
-      dateSize: 18,
-      titleSize: titleLength > 20 ? 26 : 30,
+      dateSize: (36 * scale).round().toDouble(), // 基準36px（28→36に増加）
+      titleSize: titleLength > 20
+          ? (56 * scale)
+                .round()
+                .toDouble() // 基準56px（44→56に増加）
+          : (66 * scale).round().toDouble(), // 基準66px（52→66に増加）
       titleMaxLines: titleLength > 30 ? 4 : 3,
-      contentSize: contentLength > 200 ? 16 : 18,
+      contentSize: contentLength > 200
+          ? (34 * scale)
+                .round()
+                .toDouble() // 基準34px（26→34に増加）
+          : (38 * scale).round().toDouble(), // 基準38px（30→38に増加）
       contentMaxLines: 15,
     );
   }
 
   /// スペーシングを計算
   _Spacing _calculateSpacing(ShareFormat format) {
-    // Storiesのみのサポート
-    return _Spacing(afterDate: 20, afterTitle: 24);
+    // 画像サイズに基づくスケール計算
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
+    final widthScale = actualWidth / 1080.0;
+    final heightScale = actualHeight / 1920.0;
+    final scale = ((widthScale + heightScale) / 2).clamp(0.8, 2.0);
+
+    return _Spacing(
+      afterDate: (32 * scale).round().toDouble(), // 基準32px
+      afterTitle: (40 * scale).round().toDouble(), // 基準40px
+    );
   }
 
   /// フォーマットに最適化されたテキストを取得
@@ -534,7 +564,7 @@ class DiaryImageGenerator {
       text: brandText,
       style: TextStyle(
         color: Colors.white.withOpacity(0.9),
-        fontSize: 18 * scaleMultiplier,
+        fontSize: _calculateBrandFontSize(format),
         fontWeight: FontWeight.w700, // より強いブランド存在感
         letterSpacing: 1.8,
         fontFamily: 'NotoSansJP', // 日本語フォント統一
@@ -796,6 +826,18 @@ class DiaryImageGenerator {
       actualWidth - (margin * 2),
       actualHeight - topMargin - bottomSpace,
     );
+  }
+
+  /// ブランディング用フォントサイズを計算
+  double _calculateBrandFontSize(ShareFormat format) {
+    final actualWidth = format.isHD ? format.scaledWidth : format.width;
+    final actualHeight = format.isHD ? format.scaledHeight : format.height;
+
+    final widthScale = actualWidth / 1080.0;
+    final heightScale = actualHeight / 1920.0;
+    final scale = ((widthScale + heightScale) / 2).clamp(0.8, 2.0);
+
+    return (28 * scale).round().toDouble(); // 基準28px（24→28に増加）
   }
 
   /// 日付をフォーマット
