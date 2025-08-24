@@ -10,6 +10,8 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/logging_service.dart';
 import '../core/service_locator.dart';
+import '../ui/design_system/app_colors.dart';
+import '../ui/design_system/app_spacing.dart';
 import 'interfaces/social_share_service_interface.dart';
 
 /// 日記画像生成専用クラス
@@ -126,14 +128,17 @@ class DiaryImageGenerator {
     final actualWidth = format.isHD ? format.scaledWidth : format.width;
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
 
-    // まず単色背景を描画
+    // アプリのデザインシステムに基づいたグラデーション背景を描画
     final backgroundGradient = ui.Gradient.linear(
       const Offset(0, 0),
       Offset(actualWidth.toDouble(), actualHeight.toDouble()),
       [
-        const Color(0xFF667eea), // 美しいグラデーション
+        const Color(0xFF667eea), // modernHomeGradientに基づく
         const Color(0xFF764ba2),
+        const Color(0xFFf093fb).withOpacity(0.3),
+        const Color(0xFFf5576c).withOpacity(0.2),
       ],
+      [0.0, 0.3, 0.7, 1.0],
     );
 
     final backgroundPaint = Paint()..shader = backgroundGradient;
@@ -313,26 +318,49 @@ class DiaryImageGenerator {
     return Rect.fromLTWH(offsetX, offsetY, cropWidth, cropHeight);
   }
 
-  /// コンテンツオーバーレイを描画
+  /// コンテンツオーバーレイを描画（デザインシステム統一）
   void _drawContentOverlay(Canvas canvas, ShareFormat format) {
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    // コンテンツエリアに半透明の背景を追加
+    // コンテンツエリアにプレミアムなグラデーションオーバーレイ
     final contentArea = _getContentArea(format);
+    final overlayGradient = ui.Gradient.linear(
+      Offset(contentArea.left, contentArea.top),
+      Offset(contentArea.right, contentArea.bottom),
+      [
+        Colors.black.withOpacity(0.4),
+        AppColors.primaryDark.withOpacity(0.15),
+        Colors.black.withOpacity(0.5),
+      ],
+      [0.0, 0.5, 1.0],
+    );
+
     final overlayPaint = Paint()
-      ..color = Colors.black.withOpacity(0.35)
+      ..shader = overlayGradient
       ..style = PaintingStyle.fill;
 
+    final borderRadius =
+        24.0 * scaleMultiplier; // AppSpacing.cardRadiusLargeに相当
     final rrect = RRect.fromRectAndRadius(
       contentArea,
-      Radius.circular(20 * scaleMultiplier),
+      Radius.circular(borderRadius),
     );
     canvas.drawRRect(rrect, overlayPaint);
 
-    // コンテンツエリアの縁に美しいボーダーを追加
+    // エレガントなボーダー（プライマリカラーアクセント）
+    final borderGradient = ui.Gradient.linear(
+      Offset(contentArea.left, contentArea.top),
+      Offset(contentArea.right, contentArea.top),
+      [
+        Colors.white.withOpacity(0.2),
+        AppColors.primaryLight.withOpacity(0.3),
+        Colors.white.withOpacity(0.1),
+      ],
+    );
+
     final borderPaint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
-      ..strokeWidth = 1.5 * scaleMultiplier
+      ..shader = borderGradient
+      ..strokeWidth = 2 * scaleMultiplier
       ..style = PaintingStyle.stroke;
 
     canvas.drawRRect(rrect, borderPaint);
@@ -352,15 +380,17 @@ class DiaryImageGenerator {
     final textSizes = _calculateTextSizes(format, diary);
     final spacing = _calculateSpacing(format);
 
-    // 日付を描画
+    // 日付を描画（日本語フォント統一）
     final dateText = _formatDate(diary.date);
     final dateSpan = TextSpan(
       text: dateText,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withOpacity(0.95),
         fontSize: textSizes.dateSize,
-        fontWeight: FontWeight.w400,
-        letterSpacing: 0.5,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.8,
+        fontFamily: 'NotoSansJP',
+        height: 1.4,
       ),
     );
 
@@ -384,9 +414,17 @@ class DiaryImageGenerator {
         style: TextStyle(
           color: Colors.white,
           fontSize: textSizes.titleSize,
-          fontWeight: FontWeight.bold,
-          height: 1.25,
-          letterSpacing: 0.2,
+          fontWeight: FontWeight.w700, // タイトルをより強調
+          height: 1.3,
+          letterSpacing: 0.5,
+          fontFamily: 'NotoSansJP',
+          shadows: [
+            Shadow(
+              offset: const Offset(0, 1),
+              blurRadius: 3,
+              color: Colors.black.withOpacity(0.3),
+            ),
+          ],
         ),
       );
 
@@ -411,10 +449,19 @@ class DiaryImageGenerator {
       final contentSpan = TextSpan(
         text: contentText,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.95),
+          color: Colors.white.withOpacity(0.98),
           fontSize: textSizes.contentSize,
-          height: 1.5,
-          letterSpacing: 0.3,
+          height: 1.6, // 日本語テキストの読みやすさを向上
+          letterSpacing: 0.4,
+          fontFamily: 'NotoSansJP',
+          fontWeight: FontWeight.w400,
+          shadows: [
+            Shadow(
+              offset: const Offset(0, 0.5),
+              blurRadius: 2,
+              color: Colors.black.withOpacity(0.2),
+            ),
+          ],
         ),
       );
 
@@ -498,15 +545,16 @@ class DiaryImageGenerator {
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    // アプリ名ロゴ
+    // アプリ名ロゴ（デザインシステムに統一）
     final brandText = 'Smart Photo Diary';
     final brandSpan = TextSpan(
       text: brandText,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.8),
-        fontSize: (format.isStories ? 16 : 14) * scaleMultiplier,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.5,
+        color: Colors.white.withOpacity(0.9),
+        fontSize: (format.isStories ? 18 : 16) * scaleMultiplier,
+        fontWeight: FontWeight.w700, // より強いブランド存在感
+        letterSpacing: 1.8,
+        fontFamily: 'NotoSansJP', // 日本語フォント統一
       ),
     );
 
@@ -521,32 +569,88 @@ class DiaryImageGenerator {
     final brandX = actualWidth - brandPainter.width - margin;
     final brandY = actualHeight - brandPainter.height - margin;
 
-    // ブランド背景
+    // ブランド背景（アプリのプライマリカラーに基づく）
+    final brandBgGradient = ui.Gradient.linear(
+      Offset(brandX - 12 * scaleMultiplier, brandY - 8 * scaleMultiplier),
+      Offset(
+        brandX + brandPainter.width + 12 * scaleMultiplier,
+        brandY + brandPainter.height + 8 * scaleMultiplier,
+      ),
+      [
+        const Color(0xFF5C8DAD).withOpacity(0.6), // AppColors.primary
+        const Color(0xFF8BB5D3).withOpacity(0.4), // AppColors.primaryLight
+      ],
+    );
+
     final brandBgPaint = Paint()
-      ..color = Colors.black.withOpacity(0.3)
+      ..shader = brandBgGradient
       ..style = PaintingStyle.fill;
 
     final brandBgRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
-        brandX - 12 * scaleMultiplier,
-        brandY - 8 * scaleMultiplier,
-        brandPainter.width + 24 * scaleMultiplier,
-        brandPainter.height + 16 * scaleMultiplier,
+        brandX - 16 * scaleMultiplier,
+        brandY - 10 * scaleMultiplier,
+        brandPainter.width + 32 * scaleMultiplier,
+        brandPainter.height + 20 * scaleMultiplier,
       ),
-      Radius.circular(8 * scaleMultiplier),
+      Radius.circular(12 * scaleMultiplier),
     );
     canvas.drawRRect(brandBgRect, brandBgPaint);
 
+    // アプリアイコン風の視覚的要素を追加
+    final iconSize = 24.0 * scaleMultiplier;
+    final iconX = brandX - iconSize - 8 * scaleMultiplier;
+    final iconY = brandY + (brandPainter.height - iconSize) / 2;
+
+    // カメラアイコン風のシンプルな図形
+    final iconPaint = Paint()
+      ..color = Colors.white.withOpacity(0.9)
+      ..style = PaintingStyle.fill;
+
+    // カメラボディ
+    final cameraBody = RRect.fromRectAndRadius(
+      Rect.fromLTWH(iconX, iconY + iconSize * 0.2, iconSize, iconSize * 0.6),
+      Radius.circular(4 * scaleMultiplier),
+    );
+    canvas.drawRRect(cameraBody, iconPaint);
+
+    // レンズ
+    canvas.drawCircle(
+      Offset(iconX + iconSize * 0.5, iconY + iconSize * 0.5),
+      iconSize * 0.15,
+      iconPaint,
+    );
+
+    // フラッシュ
+    canvas.drawRect(
+      Rect.fromLTWH(
+        iconX + iconSize * 0.7,
+        iconY,
+        iconSize * 0.15,
+        iconSize * 0.2,
+      ),
+      iconPaint,
+    );
+
     brandPainter.paint(canvas, Offset(brandX, brandY));
 
-    // アクセントライン（より美しく）
+    // エレガントなアクセントライン（プライマリカラーのアクセント）
+    final accentGradient = ui.Gradient.linear(
+      Offset(brandX - 40 * scaleMultiplier, brandY + brandPainter.height / 2),
+      Offset(brandX - 16 * scaleMultiplier, brandY + brandPainter.height / 2),
+      [
+        const Color(0xFF8BB5D3).withOpacity(0.8), // AppColors.primaryLight
+        Colors.white.withOpacity(0.9),
+      ],
+    );
+
     final accentPaint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
-      ..strokeWidth = 3 * scaleMultiplier
+      ..shader = accentGradient
+      ..strokeWidth = 4 * scaleMultiplier
       ..strokeCap = StrokeCap.round;
 
-    final lineStartX = brandX - 40 * scaleMultiplier;
-    final lineEndX = brandX - 16 * scaleMultiplier;
+    final lineStartX = brandX - 50 * scaleMultiplier;
+    final lineEndX = brandX - 20 * scaleMultiplier;
     final lineY = brandY + brandPainter.height / 2;
 
     canvas.drawLine(
@@ -555,33 +659,45 @@ class DiaryImageGenerator {
       accentPaint,
     );
 
-    // 小さなドット装飾
+    // プレミアムなドット装飾
+    final dotGradient = ui.Gradient.radial(
+      Offset(lineStartX - 10 * scaleMultiplier, lineY),
+      3 * scaleMultiplier,
+      [Colors.white.withOpacity(0.8), const Color(0xFF5C8DAD).withOpacity(0.6)],
+    );
+
     final dotPaint = Paint()
-      ..color = Colors.white.withOpacity(0.4)
+      ..shader = dotGradient
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(
-      Offset(lineStartX - 8 * scaleMultiplier, lineY),
-      2 * scaleMultiplier,
+      Offset(lineStartX - 10 * scaleMultiplier, lineY),
+      3.5 * scaleMultiplier,
       dotPaint,
     );
   }
 
-  /// 装飾要素を描画
+  /// 装飾要素を描画（アプリスタイル統一）
   void _drawDecorationElements(Canvas canvas, ShareFormat format) {
     final actualWidth = format.isHD ? format.scaledWidth : format.width;
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    // 改善された装飾デザイン
+    // プライマリカラーに基づく装飾デザイン
+    final decorGradient = ui.Gradient.linear(
+      const Offset(0, 0),
+      Offset(actualWidth.toDouble() * 0.3, actualHeight.toDouble() * 0.3),
+      [AppColors.primaryLight.withOpacity(0.4), Colors.white.withOpacity(0.6)],
+    );
+
     final decorPaint = Paint()
-      ..color = Colors.white.withOpacity(0.25)
-      ..strokeWidth = 2.5 * scaleMultiplier
+      ..shader = decorGradient
+      ..strokeWidth = 3 * scaleMultiplier
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final cornerSize = (format.isStories ? 50.0 : 40.0) * scaleMultiplier;
-    final margin = 30.0 * scaleMultiplier;
+    final cornerSize = (format.isStories ? 60.0 : 50.0) * scaleMultiplier;
+    final margin = (AppSpacing.lg * 1.5) * scaleMultiplier;
 
     // 左上のエレガントなコーナー
     final cornerPath = Path()
@@ -606,23 +722,50 @@ class DiaryImageGenerator {
 
     canvas.drawPath(rightCornerPath, decorPaint);
 
-    // 中央上部に小さなアクセント
+    // 中央上部にエレガントなアクセントバー
+    final centerAccentGradient = ui.Gradient.linear(
+      Offset(actualWidth / 2 - 40 * scaleMultiplier, margin),
+      Offset(actualWidth / 2 + 40 * scaleMultiplier, margin),
+      [
+        Colors.transparent,
+        AppColors.primaryLight.withOpacity(0.4),
+        Colors.white.withOpacity(0.6),
+        AppColors.primaryLight.withOpacity(0.4),
+        Colors.transparent,
+      ],
+      [0.0, 0.2, 0.5, 0.8, 1.0],
+    );
+
     final centerAccentPaint = Paint()
-      ..color = Colors.white.withOpacity(0.15)
+      ..shader = centerAccentGradient
       ..style = PaintingStyle.fill;
 
     final accentRect = Rect.fromCenter(
       center: Offset(actualWidth / 2, margin),
-      width: 60 * scaleMultiplier,
-      height: 3 * scaleMultiplier,
+      width: 80 * scaleMultiplier,
+      height: 4 * scaleMultiplier,
     );
 
     final accentRRect = RRect.fromRectAndRadius(
       accentRect,
-      Radius.circular(1.5 * scaleMultiplier),
+      Radius.circular(2 * scaleMultiplier),
     );
 
     canvas.drawRRect(accentRRect, centerAccentPaint);
+
+    // 中央に小さなダイヤモンドアクセント
+    final diamondPaint = Paint()
+      ..color = Colors.white.withOpacity(0.8)
+      ..style = PaintingStyle.fill;
+
+    final diamondPath = Path()
+      ..moveTo(actualWidth / 2, margin - 6 * scaleMultiplier)
+      ..lineTo(actualWidth / 2 + 4 * scaleMultiplier, margin)
+      ..lineTo(actualWidth / 2, margin + 6 * scaleMultiplier)
+      ..lineTo(actualWidth / 2 - 4 * scaleMultiplier, margin)
+      ..close();
+
+    canvas.drawPath(diamondPath, diamondPaint);
   }
 
   /// 画像の適切な配置矩形を計算
@@ -704,12 +847,6 @@ class DiaryImageGenerator {
     ];
 
     return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
-  }
-
-  /// テキストを指定長で切り詰める
-  String _truncateText(String text, int maxLength) {
-    if (text.length <= maxLength) return text;
-    return '${text.substring(0, maxLength - 3)}...';
   }
 }
 
