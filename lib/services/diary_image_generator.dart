@@ -222,7 +222,7 @@ class DiaryImageGenerator {
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    final photoCount = math.min(photos.length, format.isStories ? 3 : 2);
+    final photoCount = math.min(photos.length, 3);
     final photoWidth = actualWidth / photoCount;
     final photoSpacing = 6.0 * scaleMultiplier;
 
@@ -478,40 +478,23 @@ class DiaryImageGenerator {
 
   /// フォーマットに応じたテキストサイズを計算
   _TextSizes _calculateTextSizes(ShareFormat format, DiaryEntry diary) {
-    if (format.isStories) {
-      // Stories用のサイズ調整
-      final titleLength = diary.title.length;
-      final contentLength = diary.content.length;
+    // Stories用のサイズ調整（現在はStoriesのみサポート）
+    final titleLength = diary.title.length;
+    final contentLength = diary.content.length;
 
-      return _TextSizes(
-        dateSize: 18,
-        titleSize: titleLength > 20 ? 26 : 30,
-        titleMaxLines: titleLength > 30 ? 4 : 3,
-        contentSize: contentLength > 200 ? 16 : 18,
-        contentMaxLines: 15,
-      );
-    } else {
-      // Feed用のサイズ調整
-      final titleLength = diary.title.length;
-      final contentLength = diary.content.length;
-
-      return _TextSizes(
-        dateSize: 14,
-        titleSize: titleLength > 15 ? 22 : 26,
-        titleMaxLines: 2,
-        contentSize: contentLength > 150 ? 14 : 16,
-        contentMaxLines: 10,
-      );
-    }
+    return _TextSizes(
+      dateSize: 18,
+      titleSize: titleLength > 20 ? 26 : 30,
+      titleMaxLines: titleLength > 30 ? 4 : 3,
+      contentSize: contentLength > 200 ? 16 : 18,
+      contentMaxLines: 15,
+    );
   }
 
   /// スペーシングを計算
   _Spacing _calculateSpacing(ShareFormat format) {
-    if (format.isStories) {
-      return _Spacing(afterDate: 20, afterTitle: 24);
-    } else {
-      return _Spacing(afterDate: 16, afterTitle: 20);
-    }
+    // Storiesのみのサポート
+    return _Spacing(afterDate: 20, afterTitle: 24);
   }
 
   /// フォーマットに最適化されたテキストを取得
@@ -520,9 +503,8 @@ class DiaryImageGenerator {
     ShareFormat format, {
     bool isTitle = false,
   }) {
-    final maxLength = format.isStories
-        ? (isTitle ? 80 : 300)
-        : (isTitle ? 50 : 200);
+    // Storiesのみのサポート
+    final maxLength = isTitle ? 80 : 300;
 
     if (text.length <= maxLength) return text;
 
@@ -552,7 +534,7 @@ class DiaryImageGenerator {
       text: brandText,
       style: TextStyle(
         color: Colors.white.withOpacity(0.9),
-        fontSize: (format.isStories ? 18 : 16) * scaleMultiplier,
+        fontSize: 18 * scaleMultiplier,
         fontWeight: FontWeight.w700, // より強いブランド存在感
         letterSpacing: 1.8,
         fontFamily: 'NotoSansJP', // 日本語フォント統一
@@ -697,7 +679,7 @@ class DiaryImageGenerator {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final cornerSize = (format.isStories ? 60.0 : 50.0) * scaleMultiplier;
+    final cornerSize = 60.0 * scaleMultiplier;
     final margin = (AppSpacing.lg * 1.5) * scaleMultiplier;
 
     // 左上のエレガントなコーナー
@@ -803,31 +785,17 @@ class DiaryImageGenerator {
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    if (format.isStories) {
-      // Stories用の縦長レイアウト
-      final margin = 70.0 * scaleMultiplier;
-      final topMargin = 120.0 * scaleMultiplier; // 上部により多くのスペース
-      final bottomSpace = 180.0 * scaleMultiplier; // ブランディング用スペース
+    // Stories用の縦長レイアウトのみサポート
+    final margin = 70.0 * scaleMultiplier;
+    final topMargin = 120.0 * scaleMultiplier; // 上部により多くのスペース
+    final bottomSpace = 180.0 * scaleMultiplier; // ブランディング用スペース
 
-      return Rect.fromLTWH(
-        margin,
-        topMargin,
-        actualWidth - (margin * 2),
-        actualHeight - topMargin - bottomSpace,
-      );
-    } else {
-      // Feed用の正方形レイアウト
-      final margin = 60.0 * scaleMultiplier;
-      final topMargin = 80.0 * scaleMultiplier;
-      final bottomSpace = 120.0 * scaleMultiplier;
-
-      return Rect.fromLTWH(
-        margin,
-        topMargin,
-        actualWidth - (margin * 2),
-        actualHeight - topMargin - bottomSpace,
-      );
-    }
+    return Rect.fromLTWH(
+      margin,
+      topMargin,
+      actualWidth - (margin * 2),
+      actualHeight - topMargin - bottomSpace,
+    );
   }
 
   /// 日付をフォーマット

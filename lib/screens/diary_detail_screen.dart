@@ -229,7 +229,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     final result = await showDialog<ShareFormat>(
       context: context,
       builder: (context) => CustomDialog(
-        title: 'Instagram共有',
+        title: '共有',
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,17 +244,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               icon: Icons.auto_stories_rounded,
               onTap: () {
                 Navigator.of(context).pop(ShareFormat.instagramStories);
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Feed オプション
-            _buildShareOption(
-              format: ShareFormat.instagramFeed,
-              title: 'Instagram Feed',
-              subtitle: '正方形レイアウト (1:1)',
-              icon: Icons.grid_on_rounded,
-              onTap: () {
-                Navigator.of(context).pop(ShareFormat.instagramFeed);
               },
             ),
           ],
@@ -429,7 +418,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 Icons.share_rounded,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
-              tooltip: 'Instagram共有',
+              tooltip: '共有',
             ),
           // 編集モード切替ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)

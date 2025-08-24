@@ -52,30 +52,12 @@ enum ShareFormat {
     scale: 2.0,
   ),
 
-  /// Instagram Feed用 (1:1)
-  instagramFeed(
-    aspectRatio: 1.0,
-    width: 1080,
-    height: 1080,
-    displayName: 'Instagram Feed',
-    scale: 2.0,
-  ),
-
   /// Instagram Stories用 高解像度 (9:16)
   instagramStoriesHD(
     aspectRatio: 0.5625,
     width: 1350,
     height: 2400,
     displayName: 'Instagram Stories (HD)',
-    scale: 2.5,
-  ),
-
-  /// Instagram Feed用 高解像度 (1:1)
-  instagramFeedHD(
-    aspectRatio: 1.0,
-    width: 1350,
-    height: 1350,
-    displayName: 'Instagram Feed (HD)',
     scale: 2.5,
   );
 
@@ -107,14 +89,8 @@ enum ShareFormat {
       this == ShareFormat.instagramStories ||
       this == ShareFormat.instagramStoriesHD;
 
-  /// Feed用かどうか
-  bool get isFeed =>
-      this == ShareFormat.instagramFeed || this == ShareFormat.instagramFeedHD;
-
   /// HD版かどうか
-  bool get isHD =>
-      this == ShareFormat.instagramStoriesHD ||
-      this == ShareFormat.instagramFeedHD;
+  bool get isHD => this == ShareFormat.instagramStoriesHD;
 
   /// スケールされた幅
   int get scaledWidth => (width * scale).round();

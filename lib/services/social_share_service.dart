@@ -133,8 +133,6 @@ class SocialShareService implements ISocialShareService {
     switch (baseFormat) {
       case ShareFormat.instagramStories:
         return ShareFormat.instagramStoriesHD;
-      case ShareFormat.instagramFeed:
-        return ShareFormat.instagramFeedHD;
       default:
         return baseFormat;
     }
