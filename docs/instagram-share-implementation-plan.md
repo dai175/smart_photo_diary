@@ -63,18 +63,21 @@ Smart Photo DiaryのAIが生成した日記の文章を写真にオーバーレ�
   - [x] エレガントなグラデーション装飾
 
 ### Phase 4: UI統合
-- [ ] **4.1** DiaryDetailScreenに共有ボタン追加
-  - [ ] AppBarまたはFloatingActionButtonに配置
-  - [ ] Material Design 3準拠
-  - [ ] MicroInteractions統合
-- [ ] **4.2** 共有オプションダイアログ
-  - [ ] Stories/Feed選択UI
-  - [ ] プレビュー機能
-  - [ ] CustomDialog使用
-- [ ] **4.3** 共有処理の実装
-  - [ ] share_plusとの連携
-  - [ ] 一時ファイル管理
-  - [ ] ローディング状態表示
+- [x] **4.1** DiaryDetailScreenに共有ボタン追加
+  - [x] AppBarに配置（編集・削除ボタンとの調和）
+  - [x] Material Design 3準拠（Icons.share_rounded使用）
+  - [x] MicroInteractions統合（hapticTap対応）
+  - [x] 編集モード時は非表示（UX配慮）
+- [x] **4.2** 共有オプションダイアログ
+  - [x] Stories/Feed選択UI（視覚的なオプション表示）
+  - [x] カスタマイズされたオプションカード
+  - [x] CustomDialog使用（既存UIコンポーネント活用）
+  - [x] MicroInteractions.bounceOnTap統合
+- [x] **4.3** 共有処理の実装
+  - [x] ISocialShareService連携
+  - [x] Result<T>パターンでのエラーハンドリング
+  - [x] ローディングダイアログ表示（ユーザビリティ向上）
+  - [x] 成功・失敗時のSnackBar表示
 
 ### Phase 5: エラーハンドリング & UX改善
 - [ ] **5.1** エラー対応

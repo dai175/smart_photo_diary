@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/social_share_service_interface.dart';
 import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
@@ -11,8 +12,10 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
+import '../core/service_locator.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -219,6 +222,192 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     }
   }
 
+  /// 共有ダイアログを表示
+  Future<void> _showShareDialog() async {
+    if (_diaryEntry == null) return;
+
+    final result = await showDialog<ShareFormat>(
+      context: context,
+      builder: (context) => CustomDialog(
+        title: 'Instagram共有',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('どの形式で共有しますか？', style: AppTypography.bodyLarge),
+            const SizedBox(height: AppSpacing.lg),
+            // Stories オプション
+            _buildShareOption(
+              format: ShareFormat.instagramStories,
+              title: 'Instagram Stories',
+              subtitle: '縦長レイアウト (9:16)',
+              icon: Icons.auto_stories_rounded,
+              onTap: () {
+                Navigator.of(context).pop(ShareFormat.instagramStories);
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // Feed オプション
+            _buildShareOption(
+              format: ShareFormat.instagramFeed,
+              title: 'Instagram Feed',
+              subtitle: '正方形レイアウト (1:1)',
+              icon: Icons.grid_on_rounded,
+              onTap: () {
+                Navigator.of(context).pop(ShareFormat.instagramFeed);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          CustomDialogAction(
+            text: 'キャンセル',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null) {
+      await _shareToInstagram(result);
+    }
+  }
+
+  /// 共有オプションのウィジェットを構築
+  Widget _buildShareOption({
+    required ShareFormat format,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return MicroInteractions.bounceOnTap(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: AppSpacing.cardPadding,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: AppSpacing.cardRadius,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: Theme.of(context).colorScheme.onPrimary,
+                size: AppSpacing.iconMd,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTypography.titleMedium),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    subtitle,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconSm,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Instagramに共有
+  Future<void> _shareToInstagram(ShareFormat format) async {
+    if (_diaryEntry == null) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      // ローディング表示
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => CustomDialog(
+          title: '共有準備中',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                '美しい画像を生成しています...',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // SocialShareServiceを取得
+      final socialShareService = serviceLocator.get<ISocialShareService>();
+
+      // Instagram共有を実行
+      final result = await socialShareService.shareToSocialMedia(
+        diary: _diaryEntry!,
+        format: format,
+        photos: _photoAssets,
+      );
+
+      // ローディングダイアログを閉じる
+      if (mounted) Navigator.of(context).pop();
+
+      result.fold(
+        (_) {
+          // 成功メッセージ
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('${format.displayName}に共有しました！'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+        },
+        (error) {
+          // エラーメッセージ
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('共有に失敗しました: ${error.message}'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      // ローディングダイアログを閉じる
+      if (mounted) Navigator.of(context).pop();
+
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('予期しないエラーが発生しました: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -229,6 +418,19 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
         actions: [
+          // 共有ボタン
+          if (!_isLoading && !_hasError && _diaryEntry != null && !_isEditing)
+            IconButton(
+              onPressed: () {
+                MicroInteractions.hapticTap();
+                _showShareDialog();
+              },
+              icon: Icon(
+                Icons.share_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              tooltip: 'Instagram共有',
+            ),
           // 編集モード切替ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)
             IconButton(
