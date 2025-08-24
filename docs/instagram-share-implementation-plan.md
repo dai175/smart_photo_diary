@@ -30,10 +30,10 @@ Smart Photo DiaryのAIが生成した日記の文章を写真にオーバーレ�
   - [x] アプリが正常にビルドできることを確認
 
 ### Phase 2: サービス層実装
-- [ ] **2.1** インターフェース作成
-  - [ ] `lib/services/interfaces/social_share_service_interface.dart`
-  - [ ] `ISocialShareService`インターフェース定義
-  - [ ] Result<T>パターンでのメソッド署名
+- [x] **2.1** インターフェース作成
+  - [x] `lib/services/interfaces/social_share_service_interface.dart`
+  - [x] `ISocialShareService`インターフェース定義
+  - [x] Result<T>パターンでのメソッド署名
 - [ ] **2.2** サービス実装
   - [ ] `lib/services/social_share_service.dart`
   - [ ] `SocialShareService`クラス実装
