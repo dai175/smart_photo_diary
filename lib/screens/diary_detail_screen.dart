@@ -236,14 +236,25 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           children: [
             Text('どの形式で共有しますか？', style: AppTypography.bodyLarge),
             const SizedBox(height: AppSpacing.lg),
-            // Stories オプション
+            // 縦長オプション
             _buildShareOption(
-              format: ShareFormat.instagramStories,
-              title: 'Instagram Stories',
-              subtitle: '縦長レイアウト (9:16)',
-              icon: Icons.auto_stories_rounded,
+              format: ShareFormat.portrait,
+              title: '縦長フォーマット',
+              subtitle: '',
+              icon: Icons.crop_portrait_rounded,
               onTap: () {
-                Navigator.of(context).pop(ShareFormat.instagramStories);
+                Navigator.of(context).pop(ShareFormat.portrait);
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // 正方形オプション
+            _buildShareOption(
+              format: ShareFormat.square,
+              title: '正方形フォーマット',
+              subtitle: '',
+              icon: Icons.crop_din_rounded,
+              onTap: () {
+                Navigator.of(context).pop(ShareFormat.square);
               },
             ),
           ],
@@ -300,15 +311,18 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(title, style: AppTypography.titleMedium),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    subtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  if (subtitle.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      subtitle,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -366,13 +380,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
       result.fold(
         (_) {
-          // 成功メッセージ
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text('${format.displayName}に共有しました！'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
+          // 共有成功時は特に何もしない（システム共有シートで完結）
         },
         (error) {
           // エラーメッセージ

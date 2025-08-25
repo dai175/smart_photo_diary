@@ -143,8 +143,8 @@ class SocialShareService implements ISocialShareService {
 
     // デバイス情報を取得してHDフォーマットを推奨
     switch (baseFormat) {
-      case ShareFormat.instagramStories:
-        return ShareFormat.instagramStoriesHD;
+      case ShareFormat.portrait:
+        return ShareFormat.portraitHD;
       default:
         return baseFormat;
     }

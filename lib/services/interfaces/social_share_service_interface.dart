@@ -43,22 +43,31 @@ abstract class ISocialShareService {
 
 /// 共有フォーマットの定義
 enum ShareFormat {
-  /// Instagram Stories用 (9:16)
-  instagramStories(
+  /// 縦長フォーマット (9:16)
+  portrait(
     aspectRatio: 0.5625,
     width: 1080,
     height: 1920,
-    displayName: 'Instagram Stories',
+    displayName: '縦長',
     scale: 2.0,
   ),
 
-  /// Instagram Stories用 高解像度 (9:16)
-  instagramStoriesHD(
+  /// 縦長フォーマット 高解像度 (9:16)
+  portraitHD(
     aspectRatio: 0.5625,
     width: 1350,
     height: 2400,
-    displayName: 'Instagram Stories (HD)',
+    displayName: '縦長 (HD)',
     scale: 2.5,
+  ),
+
+  /// 正方形フォーマット (1:1)
+  square(
+    aspectRatio: 1.0,
+    width: 1080,
+    height: 1080,
+    displayName: '正方形',
+    scale: 2.0,
   );
 
   const ShareFormat({
@@ -84,13 +93,15 @@ enum ShareFormat {
   /// デバイス解像度スケール
   final double scale;
 
-  /// Stories用かどうか
-  bool get isStories =>
-      this == ShareFormat.instagramStories ||
-      this == ShareFormat.instagramStoriesHD;
+  /// 縦長フォーマットかどうか
+  bool get isPortrait =>
+      this == ShareFormat.portrait || this == ShareFormat.portraitHD;
+
+  /// 正方形フォーマットかどうか
+  bool get isSquare => this == ShareFormat.square;
 
   /// HD版かどうか
-  bool get isHD => this == ShareFormat.instagramStoriesHD;
+  bool get isHD => this == ShareFormat.portraitHD;
 
   /// スケールされた幅
   int get scaledWidth => (width * scale).round();

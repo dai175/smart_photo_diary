@@ -416,7 +416,10 @@ class DiaryImageGenerator {
     ShareFormat format,
   ) async {
     final contentArea = _getContentArea(format);
-    final textArea = contentArea.deflate(format.isStories ? 32 : 24);
+    final textAreaPadding = format.isSquare
+        ? 20.0
+        : (format.isPortrait ? 32.0 : 24.0);
+    final textArea = contentArea.deflate(textAreaPadding);
     double currentY = textArea.top;
 
     // 動的フォントサイズとレイアウト調整
@@ -524,10 +527,17 @@ class DiaryImageGenerator {
     final actualWidth = format.isHD ? format.scaledWidth : format.width;
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
 
-    // 基準サイズに対するスケール計算
-    final widthScale = actualWidth / _baseWidth;
-    final heightScale = actualHeight / _baseHeight;
-    final baseScale = (widthScale + heightScale) / 2;
+    // フォーマットに応じたスケール計算
+    late final double baseScale;
+    if (format.isSquare) {
+      // 正方形の場合は幅基準でスケール計算
+      baseScale = actualWidth / _baseWidth;
+    } else {
+      // 縦長の場合は幅と高さの平均
+      final widthScale = actualWidth / _baseWidth;
+      final heightScale = actualHeight / _baseHeight;
+      baseScale = (widthScale + heightScale) / 2;
+    }
 
     // 最小・最大スケールを制限
     final scale = baseScale.clamp(_minScale, _maxScale);
@@ -855,17 +865,32 @@ class DiaryImageGenerator {
     final actualHeight = format.isHD ? format.scaledHeight : format.height;
     final scaleMultiplier = format.isHD ? format.scale : 1.0;
 
-    // Stories用の縦長レイアウトのみサポート
-    final margin = 70.0 * scaleMultiplier;
-    final topMargin = 120.0 * scaleMultiplier; // 上部により多くのスペース
-    final bottomSpace = 180.0 * scaleMultiplier; // ブランディング用スペース
+    // フォーマットに応じたレイアウト計算
+    if (format.isSquare) {
+      // 正方形フォーマット用のレイアウト
+      final margin = 60.0 * scaleMultiplier;
+      final topMargin = 80.0 * scaleMultiplier;
+      final bottomSpace = 120.0 * scaleMultiplier; // ブランディング用スペース
 
-    return Rect.fromLTWH(
-      margin,
-      topMargin,
-      actualWidth - (margin * 2),
-      actualHeight - topMargin - bottomSpace,
-    );
+      return Rect.fromLTWH(
+        margin,
+        topMargin,
+        actualWidth - (margin * 2),
+        actualHeight - topMargin - bottomSpace,
+      );
+    } else {
+      // 縦長フォーマット用のレイアウト
+      final margin = 70.0 * scaleMultiplier;
+      final topMargin = 120.0 * scaleMultiplier;
+      final bottomSpace = 180.0 * scaleMultiplier; // ブランディング用スペース
+
+      return Rect.fromLTWH(
+        margin,
+        topMargin,
+        actualWidth - (margin * 2),
+        actualHeight - topMargin - bottomSpace,
+      );
+    }
   }
 
   /// ブランディング用フォントサイズを計算
