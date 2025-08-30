@@ -345,7 +345,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           color: AppColors.info.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.ios_share_rounded, size: 50, color: AppColors.info),
+        child: Icon(FeatherIcons.share, size: 50, color: AppColors.info),
       ),
       const SizedBox(height: AppSpacing.xl),
 
@@ -365,17 +365,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: AppSpacing.xl),
 
       _buildFeatureStep(
-        icon: Icons.crop_portrait,
+        icon: FeatherIcons.crop,
         color: AppColors.primary,
         title: 'フォーマット選択',
-        description: '縦長/正方形から選択',
+        description: '縦長/正方形を選択',
       ),
       const SizedBox(height: AppSpacing.md),
       _buildFeatureStep(
-        icon: Icons.collections_rounded,
+        icon: FeatherIcons.grid,
         color: AppColors.info,
         title: '複数写真にも対応',
-        description: '複数枚もバランスよく配置',
+        description: '複数枚もバランス配置',
       ),
     ];
   }

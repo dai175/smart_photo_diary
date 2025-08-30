@@ -54,6 +54,9 @@ dependencies:
   in_app_purchase: 3.1.10
   url_launcher: ^6.1.14
   
+  # Outline icon set (Feather)
+  flutter_feather_icons: any
+  
   # Instagram共有機能用パッケージ
   share_plus: ^11.1.0
   image: ^4.5.4

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_icons.dart';
 
 /// Smart Photo Diary アプリケーション定数
 class AppConstants {
@@ -69,12 +70,7 @@ class AppConstants {
   static const List<String> navigationLabels = ['ホーム', '日記', '統計', '設定'];
 
   // アイコン（AppIconsから参照）
-  static const List<IconData> navigationIcons = [
-    Icons.home_filled, // より温かみのあるホームアイコン
-    Icons.menu_book_rounded, // 本を開いた印象的なアイコン
-    Icons.insights_rounded, // より分析的で魅力的な統計アイコン
-    Icons.tune_rounded, // 調整・カスタマイズのイメージ
-  ];
+  static const List<IconData> navigationIcons = AppIcons.navigationIcons;
 
   // アニメーション
   static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
