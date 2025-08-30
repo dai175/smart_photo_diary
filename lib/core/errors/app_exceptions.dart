@@ -127,3 +127,16 @@ class StorageException extends AppException {
     super.stackTrace,
   });
 }
+
+/// 画像生成関連エラー
+class ImageGenerationException extends AppException {
+  const ImageGenerationException(
+    super.message, {
+    super.details,
+    super.originalError,
+    super.stackTrace,
+  });
+
+  @override
+  String get userMessage => '画像生成でエラーが発生しました: $message';
+}

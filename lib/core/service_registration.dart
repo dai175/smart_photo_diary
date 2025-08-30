@@ -16,6 +16,8 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/prompt_service.dart';
+import '../services/social_share_service.dart';
+import '../services/interfaces/social_share_service_interface.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -34,6 +36,7 @@ import 'service_locator.dart';
 /// 6. **StorageService** - ストレージ操作
 /// 7. **SubscriptionService** - サブスクリプション管理（Hive依存のみ）
 /// 8. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み）
+/// 9. **SocialShareService** - ソーシャル共有機能（LoggingServiceに依存）
 ///
 /// ### Phase 2: Dependent Services
 /// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
@@ -145,6 +148,11 @@ class ServiceRegistration {
       await service.initialize();
       return service;
     });
+
+    // 9. SocialShareService (LoggingServiceに依存)
+    serviceLocator.registerFactory<ISocialShareService>(
+      () => SocialShareService.getInstance(),
+    );
   }
 
   /// Register services that have dependencies on other services
