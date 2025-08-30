@@ -356,7 +356,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               const CircularProgressIndicator(),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                '美しい画像を生成しています...',
+                '共有用画像を生成しています...',
                 style: AppTypography.bodyMedium,
                 textAlign: TextAlign.center,
               ),
