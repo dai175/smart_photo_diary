@@ -82,7 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 3) {
+    if (_currentPage < 4) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -107,7 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             // スキップボタン（最後のページ以外で表示）
-            if (_currentPage < 3)
+            if (_currentPage < 4)
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
@@ -138,6 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _buildWelcomePage(),
                   _buildFeaturesPage(),
+                  _buildSharePage(),
                   _buildPlansPage(),
                   _buildPermissionPage(),
                 ],
@@ -250,12 +251,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       const SizedBox(height: AppSpacing.xl),
 
-      Text(
-        '3ステップで簡単日記作成',
-        style: AppTypography.headlineSmall.copyWith(
-          fontWeight: FontWeight.bold,
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Text(
+          '3ステップで簡単日記作成',
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          style: AppTypography.headlineSmall.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
       ),
       const SizedBox(height: AppSpacing.xl),
 
@@ -307,6 +314,72 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  // SNS共有の紹介ページ（3枚目）
+  Widget _buildSharePage() {
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+
+    if (isPortrait) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _buildShareContent(),
+        ),
+      );
+    } else {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(children: _buildShareContent()),
+      );
+    }
+  }
+
+  List<Widget> _buildShareContent() {
+    return [
+      // 共有アイコン
+      Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: AppColors.info.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.ios_share_rounded, size: 50, color: AppColors.info),
+      ),
+      const SizedBox(height: AppSpacing.xl),
+
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Text(
+          '写真と日記をすぐ共有',
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          style: AppTypography.headlineSmall.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.xl),
+
+      _buildFeatureStep(
+        icon: Icons.crop_portrait,
+        color: AppColors.primary,
+        title: 'フォーマット選択',
+        description: '縦長/正方形から選択',
+      ),
+      const SizedBox(height: AppSpacing.md),
+      _buildFeatureStep(
+        icon: Icons.collections_rounded,
+        color: AppColors.info,
+        title: '複数写真にも対応',
+        description: '複数枚もバランスよく配置',
+      ),
+    ];
+  }
+
   List<Widget> _buildPlansContent() {
     return [
       // プランアイコン
@@ -325,12 +398,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       const SizedBox(height: AppSpacing.xl),
 
-      Text(
-        '2つのプランをご用意',
-        style: AppTypography.headlineSmall.copyWith(
-          fontWeight: FontWeight.bold,
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Text(
+          '2つのプランをご用意',
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          style: AppTypography.headlineSmall.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
       ),
       const SizedBox(height: AppSpacing.xl),
 
@@ -408,12 +487,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       const SizedBox(height: AppSpacing.xl),
 
-      Text(
-        '写真へのアクセス許可',
-        style: AppTypography.headlineSmall.copyWith(
-          fontWeight: FontWeight.bold,
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Text(
+          '写真へのアクセス許可',
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          style: AppTypography.headlineSmall.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
       ),
       const SizedBox(height: AppSpacing.lg),
 
@@ -616,7 +701,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(4, (index) {
+        children: List.generate(5, (index) {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
@@ -652,7 +737,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(width: 100),
 
           // 次へ/始めるボタン
-          if (_currentPage < 3)
+          if (_currentPage < 4)
             PrimaryButton(
               onPressed: _isProcessing ? null : _nextPage,
               text: '次へ',
