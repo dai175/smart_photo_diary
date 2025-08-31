@@ -11,6 +11,7 @@ import '../ui/components/animated_button.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/subscription_constants.dart';
 import 'home_screen.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;

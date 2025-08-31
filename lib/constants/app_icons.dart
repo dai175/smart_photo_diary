@@ -52,7 +52,7 @@ class AppIcons {
   static const IconData calendarNext = FeatherIcons.chevronRight;
 
   /// 設定画面アイコン
-  static const IconData settingsTheme = FeatherIcons.palette;
+  static const IconData settingsTheme = FeatherIcons.moon;
   static const IconData settingsStorage = FeatherIcons.hardDrive;
   static const IconData settingsExport = FeatherIcons.download;
   static const IconData settingsImport = FeatherIcons.upload;

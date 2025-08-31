@@ -18,6 +18,8 @@ import '../services/interfaces/prompt_service_interface.dart';
 import '../services/prompt_service.dart';
 import '../services/social_share_service.dart';
 import '../services/interfaces/social_share_service_interface.dart';
+import '../services/x_share_service.dart';
+import '../services/interfaces/x_share_service_interface.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -152,6 +154,11 @@ class ServiceRegistration {
     // 9. SocialShareService (LoggingServiceに依存)
     serviceLocator.registerFactory<ISocialShareService>(
       () => SocialShareService.getInstance(),
+    );
+
+    // 10. XShareService (LoggingServiceに依存)
+    serviceLocator.registerFactory<IXShareService>(
+      () => XShareService.getInstance(),
     );
   }
 

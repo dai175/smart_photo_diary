@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/social_share_service_interface.dart';
+import '../services/interfaces/x_share_service_interface.dart';
 import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
@@ -16,6 +17,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../core/service_locator.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -236,11 +238,23 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           children: [
             Text('どの形式で共有しますか？', style: AppTypography.bodyLarge),
             const SizedBox(height: AppSpacing.lg),
+            // X（旧Twitter）へ直接共有
+            _buildShareOption(
+              format: ShareFormat.square,
+              title: '写真と日記テキスト',
+              subtitle: 'X向け',
+              icon: FeatherIcons.twitter,
+              onTap: () async {
+                Navigator.of(context).pop();
+                await _shareToX();
+              },
+            ),
+            const SizedBox(height: AppSpacing.lg),
             // 縦長オプション
             _buildShareOption(
               format: ShareFormat.portrait,
-              title: '縦長フォーマット',
-              subtitle: '',
+              title: '写真と日記の1枚画像',
+              subtitle: 'Instagram向け（縦長）',
               icon: Icons.crop_portrait_rounded,
               onTap: () {
                 Navigator.of(context).pop(ShareFormat.portrait);
@@ -250,8 +264,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             // 正方形オプション
             _buildShareOption(
               format: ShareFormat.square,
-              title: '正方形フォーマット',
-              subtitle: '',
+              title: '写真と日記の1枚画像',
+              subtitle: 'Instagram向け（正方形）',
               icon: Icons.crop_din_rounded,
               onTap: () {
                 Navigator.of(context).pop(ShareFormat.square);
@@ -335,6 +349,61 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         ),
       ),
     );
+  }
+
+  /// X（旧Twitter）へ共有
+  Future<void> _shareToX() async {
+    final diary = _diaryEntry;
+    if (diary == null) return;
+
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      // ローディングダイアログを表示
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return CustomDialog(
+            title: '共有準備中',
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: AppSpacing.md),
+                Text('準備しています...', style: AppTypography.bodyLarge),
+                const SizedBox(height: AppSpacing.lg),
+                const Center(child: CircularProgressIndicator(strokeWidth: 3)),
+              ],
+            ),
+            actions: const [],
+          );
+        },
+      );
+
+      final xShare = serviceLocator.get<IXShareService>();
+      final result = await xShare.shareToX(diary: diary);
+
+      // ローディングダイアログを閉じる
+      if (mounted) navigator.pop();
+
+      result.fold(
+        (_) {
+          // 成功時は特に何もしない（システム共有シートで完結）
+        },
+        (error) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content: Text('共有に失敗しました: ${error.message}')),
+          );
+        },
+      );
+    } catch (e) {
+      // ローディングダイアログを閉じる
+      if (mounted) navigator.pop();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('予期しないエラーが発生しました: $e')),
+      );
+    }
   }
 
   /// Instagramに共有
