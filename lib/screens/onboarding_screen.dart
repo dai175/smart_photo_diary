@@ -11,7 +11,6 @@ import '../ui/components/animated_button.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/subscription_constants.dart';
 import 'home_screen.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -346,7 +345,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           color: AppColors.info.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(FeatherIcons.share, size: 50, color: AppColors.info),
+        child: Icon(Icons.share_rounded, size: 50, color: AppColors.info),
       ),
       const SizedBox(height: AppSpacing.xl),
 
@@ -366,14 +365,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: AppSpacing.xl),
 
       _buildFeatureStep(
-        icon: FeatherIcons.crop,
+        icon: Icons.crop_rounded,
         color: AppColors.primary,
         title: 'フォーマット選択',
         description: '縦長/正方形を選択',
       ),
       const SizedBox(height: AppSpacing.md),
       _buildFeatureStep(
-        icon: FeatherIcons.grid,
+        icon: Icons.grid_view_rounded,
         color: AppColors.info,
         title: '複数写真にも対応',
         description: '複数枚もバランス配置',

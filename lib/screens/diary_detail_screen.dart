@@ -16,7 +16,6 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../core/service_locator.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -242,7 +241,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               format: ShareFormat.square,
               title: '写真と日記テキスト',
               subtitle: 'X（旧Twitter）向け',
-              icon: FeatherIcons.twitter,
+              icon: Icons.share_rounded,
               onTap: () async {
                 Navigator.of(context).pop();
                 await _shareToX();
