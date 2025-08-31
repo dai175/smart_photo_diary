@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/social_share_service_interface.dart';
-import '../services/interfaces/x_share_service_interface.dart';
 import '../core/service_registration.dart';
 import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
@@ -242,7 +241,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             _buildShareOption(
               format: ShareFormat.square,
               title: '写真と日記テキスト',
-              subtitle: 'X向け',
+              subtitle: 'X（旧Twitter）向け',
               icon: FeatherIcons.twitter,
               onTap: () async {
                 Navigator.of(context).pop();
@@ -253,7 +252,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             // 縦長オプション
             _buildShareOption(
               format: ShareFormat.portrait,
-              title: '写真と日記の1枚画像',
+              title: '写真と日記を画像に',
               subtitle: 'Instagram向け（縦長）',
               icon: Icons.crop_portrait_rounded,
               onTap: () {
@@ -264,7 +263,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             // 正方形オプション
             _buildShareOption(
               format: ShareFormat.square,
-              title: '写真と日記の1枚画像',
+              title: '写真と日記を画像に',
               subtitle: 'Instagram向け（正方形）',
               icon: Icons.crop_din_rounded,
               onTap: () {
@@ -381,8 +380,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         },
       );
 
-      final xShare = serviceLocator.get<IXShareService>();
-      final result = await xShare.shareToX(diary: diary);
+      final share = serviceLocator.get<ISocialShareService>();
+      final result = await share.shareToX(diary: diary);
 
       // ローディングダイアログを閉じる
       if (mounted) navigator.pop();

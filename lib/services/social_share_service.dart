@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../models/diary_entry.dart';
 import '../core/result/result.dart';
@@ -9,14 +8,11 @@ import '../services/logging_service.dart';
 import '../core/service_locator.dart';
 import 'interfaces/social_share_service_interface.dart';
 import 'diary_image_generator.dart';
+import 'social_share/channels/x_share_channel.dart';
+import 'social_share/channels/instagram_share_channel.dart';
 
 /// ソーシャル共有サービスの実装クラス
 class SocialShareService implements ISocialShareService {
-  // ============= 定数定義 =============
-
-  /// 共有タイムアウト時間（秒）
-  static const int _shareTimeoutSeconds = 10;
-
   // シングルトンパターン
   static SocialShareService? _instance;
 
@@ -30,8 +26,12 @@ class SocialShareService implements ISocialShareService {
   /// ログサービスを取得
   LoggingService get _logger => serviceLocator.get<LoggingService>();
 
-  /// 画像生成サービスを取得
+  /// 画像生成サービス（後方互換で保持）
   DiaryImageGenerator get _imageGenerator => DiaryImageGenerator.getInstance();
+
+  /// チャネル実装
+  final XShareChannel _xChannel = XShareChannel();
+  final InstagramShareChannel _igChannel = InstagramShareChannel();
 
   @override
   Future<Result<void>> shareToSocialMedia({
@@ -46,52 +46,13 @@ class SocialShareService implements ISocialShareService {
         data: 'diary_id: ${diary.id}',
       );
 
-      // 共有用画像を生成
-      final imageResult = await generateShareImage(
+      // チャネルへ委譲（Instagram系）
+      final result = await _igChannel.share(
         diary: diary,
         format: format,
         photos: photos,
       );
-
-      if (imageResult.isFailure) {
-        return Failure<void>(imageResult.error);
-      }
-
-      final imageFile = imageResult.value;
-
-      try {
-        // メインスレッドでの実行を保証
-        await Future.delayed(Duration.zero);
-
-        // システム共有機能を使用
-        await Share.shareXFiles([
-          XFile(imageFile.path),
-        ], text: '${diary.title}\n\n#SmartPhotoDiary で生成').timeout(
-          const Duration(seconds: _shareTimeoutSeconds),
-          onTimeout: () {
-            throw Exception('共有がタイムアウトしました');
-          },
-        );
-
-        _logger.info(
-          'SNS共有成功',
-          context: 'SocialShareService.shareToSocialMedia',
-        );
-        return const Success<void>(null);
-      } catch (e) {
-        _logger.error(
-          'SNS共有エラー',
-          context: 'SocialShareService.shareToSocialMedia',
-          error: e,
-        );
-        return Failure<void>(
-          SocialShareException(
-            'SNSへの共有に失敗しました',
-            details: e.toString(),
-            originalError: e,
-          ),
-        );
-      }
+      return result;
     } catch (e) {
       _logger.error(
         '予期しないエラー',
@@ -102,6 +63,14 @@ class SocialShareService implements ISocialShareService {
         SocialShareException('共有処理中に予期しないエラーが発生しました', originalError: e),
       );
     }
+  }
+
+  @override
+  Future<Result<void>> shareToX({
+    required DiaryEntry diary,
+    List<AssetEntity>? photos,
+  }) async {
+    return _xChannel.share(diary: diary, photos: photos);
   }
 
   @override

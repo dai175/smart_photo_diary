@@ -18,6 +18,14 @@ abstract class ISocialShareService {
     List<AssetEntity>? photos,
   });
 
+  /// X（旧Twitter）に共有する（画像とテキストを別々に渡す）
+  /// - 画像: 元の写真 最大3枚
+  /// - テキスト: タイトル+本文+アプリ名（XShareTextBuilderで整形）
+  Future<Result<void>> shareToX({
+    required DiaryEntry diary,
+    List<AssetEntity>? photos,
+  });
+
   /// 共有用の画像を生成する
   ///
   /// [diary] 日記エントリー

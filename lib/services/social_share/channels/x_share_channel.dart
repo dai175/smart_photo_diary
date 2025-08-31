@@ -1,38 +1,28 @@
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../constants/app_constants.dart';
-import '../core/errors/app_exceptions.dart';
-import '../core/result/result.dart';
-import '../core/service_locator.dart';
-import '../models/diary_entry.dart';
-import '../services/logging_service.dart';
-import '../utils/x_share_text_builder.dart';
-import 'interfaces/x_share_service_interface.dart';
+import '../../../constants/app_constants.dart';
+import '../../../core/errors/app_exceptions.dart';
+import '../../../core/result/result.dart';
+import '../../../core/service_locator.dart';
+import '../../../models/diary_entry.dart';
+import '../../logging_service.dart';
+import '../../../utils/x_share_text_builder.dart';
 
-/// X（旧Twitter）向け共有サービス
-class XShareService implements IXShareService {
+/// X（旧Twitter）共有チャネル実装
+class XShareChannel {
   static const int _shareTimeoutSeconds = 10;
-  static XShareService? _instance;
-
-  XShareService._();
-
-  static XShareService getInstance() {
-    _instance ??= XShareService._();
-    return _instance!;
-  }
 
   LoggingService get _logger => serviceLocator.get<LoggingService>();
 
-  @override
-  Future<Result<void>> shareToX({
+  Future<Result<void>> share({
     required DiaryEntry diary,
     List<AssetEntity>? photos,
   }) async {
     try {
       _logger.info(
         'X共有開始',
-        context: 'XShareService.shareToX',
+        context: 'XShareChannel.share',
         data: 'diary_id: ${diary.id}',
       );
 
@@ -47,25 +37,24 @@ class XShareService implements IXShareService {
         }
       }
 
-      // テキスト生成（タイトル+本文+アプリ名）
+      // テキスト生成
       final text = XShareTextBuilder.build(
         title: diary.title,
         body: diary.content,
         appName: AppConstants.appTitle,
       );
 
-      // 共有（システム共有シート）
       await Share.shareXFiles(files, text: text).timeout(
         const Duration(seconds: _shareTimeoutSeconds),
         onTimeout: () => throw Exception('共有がタイムアウトしました'),
       );
 
-      _logger.info('X共有成功', context: 'XShareService.shareToX');
+      _logger.info('X共有成功', context: 'XShareChannel.share');
       return const Success<void>(null);
     } catch (e, st) {
       _logger.error(
         'X共有エラー',
-        context: 'XShareService.shareToX',
+        context: 'XShareChannel.share',
         error: e,
         stackTrace: st,
       );
@@ -76,7 +65,6 @@ class XShareService implements IXShareService {
   }
 }
 
-/// X共有関連の例外
 class XShareException extends AppException {
   const XShareException(
     super.message, {
