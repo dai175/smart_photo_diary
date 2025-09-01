@@ -339,17 +339,33 @@ class _HomeScreenState extends State<HomeScreen>
     return AnimatedBuilder(
       animation: _tabController,
       builder: (context, child) {
-        if (_currentIndex == 0 && _tabController.index == 0) {
-          return FloatingActionButton(
-            onPressed: _onCameraButtonTapped,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            tooltip: '写真を撮影',
-            shape: const CircleBorder(),
-            child: const Icon(Icons.photo_camera_rounded, size: 24),
-          );
-        }
-        return const SizedBox.shrink();
+        final shouldShow = _currentIndex == 0 && _tabController.index == 0;
+
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+                ),
+                child: child,
+              ),
+            );
+          },
+          child: shouldShow
+              ? FloatingActionButton(
+                  key: const ValueKey('fab_camera'),
+                  onPressed: _onCameraButtonTapped,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  tooltip: '写真を撮影',
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.photo_camera_rounded, size: 24),
+                )
+              : const SizedBox.shrink(key: ValueKey('fab_hidden')),
+        );
       },
     );
   }
