@@ -26,8 +26,6 @@ import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../services/photo_cache_service.dart';
-import '../core/service_locator.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
@@ -62,9 +60,6 @@ class HomeContentWidget extends StatefulWidget {
 }
 
 class _HomeContentWidgetState extends State<HomeContentWidget> {
-  // LoggingService getter
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
-
   // アクセス制御関連
   Plan? _currentPlan;
   DateTime? _accessibleDate;
@@ -247,23 +242,13 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.md),
-          // カメラ撮影ボタンとフォトグリッドのセット
-          Row(
-            children: [
-              // カメラ撮影ボタン
-              _buildCameraButton(context),
-              const SizedBox(width: AppSpacing.sm),
-              // 説明テキスト
-              Expanded(
-                child: Text(
-                  '写真を撮影またはギャラリーから選択',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-            ],
+          // 説明テキスト
+          Text(
+            '写真を撮影またはギャラリーから選択',
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.left,
           ),
           const SizedBox(height: AppSpacing.lg),
           OptimizedPhotoGridWidget(
@@ -366,37 +351,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                   ),
                 ),
         ],
-      ),
-    );
-  }
-
-  /// カメラ撮影ボタンを構築
-  Widget _buildCameraButton(BuildContext context) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: MicroInteractions.bounceOnTap(
-        onTap: _onCameraButtonTapped,
-        child: Icon(
-          Icons.photo_camera_rounded,
-          color: Theme.of(context).colorScheme.primary,
-          size: 24,
-        ),
       ),
     );
   }
@@ -520,235 +474,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       widget.photoController.clearSelection();
       widget.pastPhotoController.clearSelection();
     });
-  }
-
-  /// カメラボタンがタップされた時の処理
-  Future<void> _onCameraButtonTapped() async {
-    try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-
-      _logger.info(
-        'カメラ撮影を開始',
-        context: 'HomeContentWidget._onCameraButtonTapped',
-      );
-
-      // カメラで撮影（権限チェックはcapturePhoto内で実行）
-      final captureResult = await photoService.capturePhoto();
-
-      if (captureResult.isFailure) {
-        _logger.error(
-          'カメラ撮影に失敗',
-          context: 'HomeContentWidget._onCameraButtonTapped',
-          error: captureResult.error,
-        );
-
-        if (mounted) {
-          // カメラ権限拒否の場合は設定ダイアログを表示
-          if (captureResult.error.toString().contains('権限が拒否されています')) {
-            await _showCameraPermissionDialog();
-          } else {
-            ErrorDisplayService().showError(context, captureResult.error);
-          }
-        }
-        return;
-      }
-
-      final capturedPhoto = captureResult.value;
-      if (capturedPhoto != null) {
-        // 撮影成功：写真を今日の写真コントローラーに追加
-        _logger.info(
-          'カメラ撮影成功',
-          context: 'HomeContentWidget._onCameraButtonTapped',
-          data: 'Asset ID: ${capturedPhoto.id}',
-        );
-
-        // 今日の写真リストを再読み込みして新しい写真を含める
-        await _refreshTodayPhotos();
-
-        // 撮影した写真を自動選択状態で追加
-        widget.photoController.refreshPhotosWithNewCapture(
-          widget.photoController.photoAssets,
-          capturedPhoto.id,
-        );
-
-        // 撮影成功のフィードバックを表示
-        if (mounted) {
-          _showCaptureSuccessSnackBar();
-        }
-
-        // 今日の写真タブにフォーカス（必要に応じて）
-        if (widget.tabController.index != 0) {
-          widget.tabController.animateTo(0);
-        }
-      } else {
-        // キャンセル時
-        _logger.info(
-          'カメラ撮影をキャンセル',
-          context: 'HomeContentWidget._onCameraButtonTapped',
-        );
-      }
-    } catch (e) {
-      final appError = ErrorHandler.handleError(e, context: 'カメラ撮影');
-
-      _logger.error(
-        'カメラ撮影処理中にエラーが発生',
-        context: 'HomeContentWidget._onCameraButtonTapped',
-        error: appError,
-      );
-
-      if (mounted) {
-        ErrorDisplayService().showError(context, appError);
-      }
-    }
-  }
-
-  /// カメラ権限拒否時のダイアログを表示
-  Future<void> _showCameraPermissionDialog() async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => CustomDialog(
-        icon: Icons.camera_alt_outlined,
-        iconColor: Theme.of(context).colorScheme.primary,
-        title: 'カメラへのアクセス許可が必要です',
-        message: '写真を撮影するには、カメラへのアクセスを許可してください。設定アプリからカメラの権限を有効にできます。',
-        actions: [
-          CustomDialogAction(
-            text: 'キャンセル',
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          CustomDialogAction(
-            text: '設定を開く',
-            isPrimary: true,
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _openAppSettings();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// アプリの設定画面を開く
-  Future<void> _openAppSettings() async {
-    try {
-      _logger.info('設定アプリを開く', context: 'HomeContentWidget._openAppSettings');
-
-      final opened = await openAppSettings();
-
-      if (opened) {
-        _logger.info(
-          '設定アプリを正常に開きました',
-          context: 'HomeContentWidget._openAppSettings',
-        );
-      } else {
-        _logger.warning(
-          '設定アプリを開けませんでした',
-          context: 'HomeContentWidget._openAppSettings',
-        );
-
-        if (mounted) {
-          // フォールバック: 手動で設定を変更するよう案内
-          await _showManualSettingsDialog();
-        }
-      }
-    } catch (e) {
-      _logger.error(
-        '設定アプリを開く際にエラーが発生',
-        context: 'HomeContentWidget._openAppSettings',
-        error: e,
-      );
-
-      if (mounted) {
-        // エラー時も手動設定の案内を表示
-        await _showManualSettingsDialog();
-      }
-    }
-  }
-
-  /// 手動で設定を変更する案内ダイアログ
-  Future<void> _showManualSettingsDialog() async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => CustomDialog(
-        icon: Icons.settings_outlined,
-        iconColor: AppColors.info,
-        title: '設定の変更方法',
-        message:
-            '設定アプリを手動で開き、以下の手順でカメラ権限を有効にしてください：\n\n1. 設定アプリを開く\n2. 「プライバシーとセキュリティ」をタップ\n3. 「カメラ」をタップ\n4. 「Smart Photo Diary」を有効にする',
-        actions: [
-          CustomDialogAction(
-            text: 'OK',
-            isPrimary: true,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 今日の写真リストを再読み込み
-  Future<void> _refreshTodayPhotos() async {
-    try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-
-      // 今日の写真を再取得
-      final todayPhotos = await photoService.getTodayPhotos(limit: 50);
-
-      // 写真コントローラーに設定（選択状態はクリアしない）
-      final currentSelection = widget.photoController.selectedPhotos.toList();
-      widget.photoController.setPhotoAssets(todayPhotos);
-
-      // 以前の選択状態を復元
-      for (final selected in currentSelection) {
-        final index = todayPhotos.indexWhere(
-          (asset) => asset.id == selected.id,
-        );
-        if (index != -1) {
-          widget.photoController.toggleSelect(index);
-        }
-      }
-
-      _logger.info(
-        '今日の写真リストを更新',
-        context: 'HomeContentWidget._refreshTodayPhotos',
-        data: '写真数: ${todayPhotos.length}',
-      );
-    } catch (e) {
-      _logger.error(
-        '今日の写真リスト更新に失敗',
-        context: 'HomeContentWidget._refreshTodayPhotos',
-        error: e,
-      );
-    }
-  }
-
-  /// 撮影成功のフィードバックを表示
-  void _showCaptureSuccessSnackBar() {
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              color: theme.colorScheme.onInverseSurface,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '写真を撮影しました',
-              style: TextStyle(color: theme.colorScheme.onInverseSurface),
-            ),
-          ],
-        ),
-        backgroundColor: theme.colorScheme.inverseSurface,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-      ),
-    );
   }
 
   /// Phase 1.7.2.3: 使用量状況表示メソッド

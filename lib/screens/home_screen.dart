@@ -312,6 +312,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: screens[_currentIndex],
+      floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).colorScheme.primary,
@@ -328,6 +329,151 @@ class _HomeScreenState extends State<HomeScreen>
           }
         },
         items: _buildNavigationItems(),
+      ),
+    );
+  }
+
+  // FloatingActionButtonを構築
+  Widget? _buildFloatingActionButton() {
+    // ホーム画面かつ今日タブの場合のみFABを表示
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        if (_currentIndex == 0 && _tabController.index == 0) {
+          return FloatingActionButton(
+            onPressed: _onCameraButtonTapped,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            tooltip: '写真を撮影',
+            shape: const CircleBorder(),
+            child: const Icon(Icons.photo_camera_rounded, size: 24),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  // カメラボタンがタップされた時の処理
+  Future<void> _onCameraButtonTapped() async {
+    if (_currentIndex == 0) {
+      // カメラ撮影処理を実行
+      await _capturePhoto();
+    }
+  }
+
+  // カメラ撮影処理
+  Future<void> _capturePhoto() async {
+    try {
+      final photoService = ServiceRegistration.get<IPhotoService>();
+
+      _logger.info('カメラ撮影を開始（FABから）', context: 'HomeScreen._capturePhoto');
+
+      // カメラで撮影（権限チェックはcapturePhoto内で実行）
+      final captureResult = await photoService.capturePhoto();
+
+      if (captureResult.isFailure) {
+        _logger.error(
+          'カメラ撮影に失敗（FABから）',
+          context: 'HomeScreen._capturePhoto',
+          error: captureResult.error,
+        );
+
+        if (mounted) {
+          // カメラ権限拒否の場合は設定ダイアログを表示
+          if (captureResult.error.toString().contains('権限が拒否されています')) {
+            await _showCameraPermissionDialog();
+          }
+        }
+        return;
+      }
+
+      final capturedPhoto = captureResult.value;
+      if (capturedPhoto != null) {
+        // 撮影成功：写真を今日の写真コントローラーに追加
+        _logger.info(
+          'カメラ撮影成功（FABから）',
+          context: 'HomeScreen._capturePhoto',
+          data: 'Asset ID: ${capturedPhoto.id}',
+        );
+
+        // 今日の写真リストを再読み込みして新しい写真を含める
+        await _loadTodayPhotos();
+
+        // 撮影した写真を自動選択状態で追加
+        _photoController.refreshPhotosWithNewCapture(
+          _photoController.photoAssets,
+          capturedPhoto.id,
+        );
+
+        // 撮影成功のフィードバックを表示
+        if (mounted) {
+          _showCaptureSuccessSnackBar();
+        }
+      } else {
+        // キャンセル時
+        _logger.info('カメラ撮影をキャンセル（FABから）', context: 'HomeScreen._capturePhoto');
+      }
+    } catch (e) {
+      _logger.error(
+        'カメラ撮影処理中にエラーが発生（FABから）',
+        context: 'HomeScreen._capturePhoto',
+        error: e,
+      );
+    }
+  }
+
+  // カメラ権限拒否時のダイアログを表示
+  Future<void> _showCameraPermissionDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => CustomDialog(
+        icon: Icons.camera_alt_outlined,
+        iconColor: Theme.of(context).colorScheme.primary,
+        title: 'カメラへのアクセス許可が必要です',
+        message: '写真を撮影するには、カメラへのアクセスを許可してください。設定アプリからカメラの権限を有効にできます。',
+        actions: [
+          CustomDialogAction(
+            text: 'キャンセル',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          CustomDialogAction(
+            text: '設定を開く',
+            isPrimary: true,
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await openAppSettings();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 撮影成功のフィードバックを表示
+  void _showCaptureSuccessSnackBar() {
+    final theme = Theme.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: theme.colorScheme.onInverseSurface,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '写真を撮影しました',
+              style: TextStyle(color: theme.colorScheme.onInverseSurface),
+            ),
+          ],
+        ),
+        backgroundColor: theme.colorScheme.inverseSurface,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
       ),
     );
   }
