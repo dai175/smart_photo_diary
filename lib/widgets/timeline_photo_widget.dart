@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/timeline_photo_group.dart';
 import '../services/timeline_grouping_service.dart';
 import '../controllers/photo_selection_controller.dart';
-import '../widgets/timeline_date_header.dart';
-import '../widgets/optimized_photo_grid_widget.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../constants/app_constants.dart';
 
@@ -94,7 +92,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         if (_photoGroups.isEmpty) {
           return _buildEmptyState();
         }
-
         return _buildTimelineContent();
       },
     );
@@ -106,33 +103,64 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.selectedPhotos,
     );
 
-    return CustomScrollView(
-      slivers: [
-        // 各グループごとにヘッダーと写真グリッドを表示
-        for (final group in _photoGroups) ...[
-          // 日付ヘッダー
-          SliverPersistentHeader(
-            delegate: TimelineDateHeaderDelegate(group: group),
-            pinned: true,
-          ),
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: AppConstants.bottomNavPadding),
+      itemCount: _photoGroups.length,
+      itemBuilder: (context, index) {
+        final group = _photoGroups[index];
 
-          // 写真グリッド
-          _buildPhotoGridSliver(group, selectedDate),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 日付ヘッダー
+            Container(
+              height: 48.0,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.95),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  group.displayName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+            ),
 
-          // グループ間のスペース
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-        ],
+            // 写真グリッド表示
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: _buildPhotoGridForGroup(group, selectedDate),
+            ),
 
-        // 底部のスペース
-        const SliverToBoxAdapter(
-          child: SizedBox(height: AppConstants.bottomNavPadding),
-        ),
-      ],
+            const SizedBox(height: AppSpacing.md),
+          ],
+        );
+      },
     );
   }
 
-  /// 写真グリッド用のSliverを構築
-  Widget _buildPhotoGridSliver(
+  /// グループ用の写真グリッドを構築
+  Widget _buildPhotoGridForGroup(
     TimelinePhotoGroup group,
     DateTime? selectedDate,
   ) {
@@ -140,21 +168,158 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final shouldDimGroup =
         selectedDate != null && !_isSameDateAsGroup(selectedDate, group);
 
-    return SliverToBoxAdapter(
-      child: Opacity(
-        opacity: shouldDimGroup ? 0.3 : 1.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: _TimelineGroupPhotoGrid(
-            group: group,
-            controller: widget.controller,
-            onSelectionLimitReached: widget.onSelectionLimitReached,
-            onUsedPhotoSelected: widget.onUsedPhotoSelected,
-            onDifferentDateSelected: widget.onDifferentDateSelected,
-            isDimmed: shouldDimGroup,
-          ),
+    if (group.photos.isEmpty) {
+      return SizedBox(
+        height: 100,
+        child: Center(
+          child: Text('写真がありません', style: TextStyle(color: Colors.grey[600])),
         ),
-      ),
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: widget.controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: shouldDimGroup ? 0.3 : 1.0,
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.0,
+            ),
+            itemCount: group.photos.length,
+            itemBuilder: (context, index) {
+              final photo = group.photos[index];
+
+              // メインコントローラーから該当する写真のインデックスと選択状態を取得
+              final mainIndex = widget.controller.photoAssets.indexOf(photo);
+              final isSelected =
+                  mainIndex >= 0 &&
+                      mainIndex < widget.controller.selected.length
+                  ? widget.controller.selected[mainIndex]
+                  : false;
+              final isUsed = mainIndex >= 0
+                  ? widget.controller.isPhotoUsed(mainIndex)
+                  : false;
+
+              return GestureDetector(
+                onTap: () => _handlePhotoTap(mainIndex),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                    border: isSelected
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 3,
+                          )
+                        : null,
+                  ),
+                  child: Stack(
+                    children: [
+                      // 写真表示
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: FutureBuilder(
+                          future: photo.thumbnailData,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return SizedBox(
+                                width: double.infinity,
+                                height: double.infinity,
+                                child: Image.memory(
+                                  snapshot.data!,
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            } else {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[400],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+
+                      // 選択インジケーター
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            isUsed
+                                ? Icons.done
+                                : isSelected
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            size: 16,
+                            color: isUsed
+                                ? Colors.orange
+                                : isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+
+                      // 使用済みラベル
+                      if (isUsed)
+                        Positioned(
+                          bottom: 4,
+                          left: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '使用済み',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -223,90 +388,40 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         date.month == photoDate.month &&
         date.day == photoDate.day;
   }
-}
 
-/// タイムライングループ専用の最適化された写真グリッドウィジェット
-class _TimelineGroupPhotoGrid extends StatefulWidget {
-  final TimelinePhotoGroup group;
-  final PhotoSelectionController controller;
-  final VoidCallback? onSelectionLimitReached;
-  final VoidCallback? onUsedPhotoSelected;
-  final VoidCallback? onDifferentDateSelected;
-  final bool isDimmed;
+  /// 写真タップ時の処理
+  void _handlePhotoTap(int mainIndex) {
+    if (mainIndex < 0) return;
 
-  const _TimelineGroupPhotoGrid({
-    required this.group,
-    required this.controller,
-    this.onSelectionLimitReached,
-    this.onUsedPhotoSelected,
-    this.onDifferentDateSelected,
-    this.isDimmed = false,
-  });
+    if (widget.controller.isPhotoUsed(mainIndex)) {
+      widget.onUsedPhotoSelected?.call();
+      return;
+    }
 
-  @override
-  State<_TimelineGroupPhotoGrid> createState() =>
-      _TimelineGroupPhotoGridState();
-}
+    // 現在の選択状態を保存
+    final wasSelected = widget.controller.selected[mainIndex];
 
-class _TimelineGroupPhotoGridState extends State<_TimelineGroupPhotoGrid> {
-  late PhotoSelectionController _groupController;
+    // 選択解除の場合は制限チェック不要
+    if (wasSelected) {
+      widget.controller.toggleSelect(mainIndex);
+      return;
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    // グループ専用のコントローラーを作成
-    _groupController = PhotoSelectionController();
-    _groupController.setPhotoAssets(widget.group.photos);
-    _groupController.setUsedPhotoIds(widget.controller.usedPhotoIds);
-    _groupController.setDateRestrictionEnabled(true);
-
-    // メインコントローラーの選択状態を同期
-    _syncSelectionState();
-
-    // メインコントローラーの変更を監視
-    widget.controller.addListener(_onMainControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onMainControllerChanged);
-    _groupController.dispose();
-    super.dispose();
-  }
-
-  void _onMainControllerChanged() {
-    _syncSelectionState();
-  }
-
-  void _syncSelectionState() {
-    // メインコントローラーの選択状態をグループコントローラーに同期
-    for (int i = 0; i < widget.group.photos.length; i++) {
-      final photo = widget.group.photos[i];
-      final mainIndex = widget.controller.photoAssets.indexOf(photo);
-      if (mainIndex >= 0 && mainIndex < widget.controller.selected.length) {
-        if (i < _groupController.selected.length) {
-          _groupController.selected[i] = widget.controller.selected[mainIndex];
-        }
+    // 選択可能かチェック
+    if (!widget.controller.canSelectPhoto(mainIndex)) {
+      // 選択上限に達している場合
+      if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection) {
+        widget.onSelectionLimitReached?.call();
+        return;
       }
-    }
-    // 選択状態の変更を通知
-    if (mounted) {
-      setState(() {
-        // UI更新をトリガー
-      });
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return OptimizedPhotoGridWidget(
-      controller: _groupController,
-      onSelectionLimitReached: widget.onSelectionLimitReached,
-      onUsedPhotoSelected: widget.onUsedPhotoSelected,
-      onRequestPermission: null, // グループ内では不要
-      onDifferentDateSelected: widget.isDimmed
-          ? widget.onDifferentDateSelected
-          : null,
-    );
+      // 日付が異なる場合のチェック
+      if (widget.onDifferentDateSelected != null) {
+        widget.onDifferentDateSelected!();
+      }
+      return;
+    }
+
+    widget.controller.toggleSelect(mainIndex);
   }
 }

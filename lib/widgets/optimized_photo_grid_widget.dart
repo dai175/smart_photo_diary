@@ -39,7 +39,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
 
   // 遅延読み込み用の変数
   static const int _itemsPerPage = 30;
-  int _visibleItemCount = 0; // 初期値を0に変更
+  int _visibleItemCount = _itemsPerPage; // 初期値をitemsPerPageに設定
   bool _isLoadingMore = false;
   int _lastPhotoCount = 0; // 写真リストの長さを追跡
 
@@ -53,6 +53,12 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     super.initState();
     _cacheService = PhotoCacheService.getInstance();
     _scrollController.addListener(_onScroll);
+
+    // 初期表示アイテム数を設定
+    _visibleItemCount = widget.controller.photoAssets.length.clamp(
+      0,
+      _itemsPerPage,
+    );
 
     // 初期プリロード
     WidgetsBinding.instance.addPostFrameCallback((_) {
