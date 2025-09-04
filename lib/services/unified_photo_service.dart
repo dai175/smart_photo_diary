@@ -7,16 +7,17 @@ import '../services/logging_service.dart';
 /// タイムライン表示用の統一写真取得サービス
 class UnifiedPhotoService {
   static const UnifiedPhotoService _instance = UnifiedPhotoService._internal();
-  
+
   factory UnifiedPhotoService() => _instance;
-  
+
   const UnifiedPhotoService._internal();
 
   /// タイムライン用の全写真を取得
   Future<List<AssetEntity>> getTimelinePhotos() async {
     try {
       final photoService = ServiceRegistration.get<IPhotoService>();
-      final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
       final logger = await LoggingService.getInstance();
 
       // 権限チェック
@@ -31,18 +32,18 @@ class UnifiedPhotoService {
 
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
-      
+
       // プランに応じた過去日数を取得
       final planResult = await subscriptionService.getCurrentPlanClass();
-      final daysBack = planResult.isSuccess 
-          ? planResult.value.pastPhotoAccessDays 
+      final daysBack = planResult.isSuccess
+          ? planResult.value.pastPhotoAccessDays
           : 365; // デフォルト1年
 
       final startDate = todayStart.subtract(Duration(days: daysBack));
-      
+
       // 今日を含む全期間の写真を取得（今日の23:59:59まで）
       final endDate = todayStart.add(const Duration(days: 1));
-      
+
       logger.info(
         'タイムライン写真取得開始',
         context: 'UnifiedPhotoService.getTimelinePhotos',

@@ -11,16 +11,16 @@ import '../constants/app_constants.dart';
 class TimelinePhotoWidget extends StatefulWidget {
   /// 写真選択コントローラー
   final PhotoSelectionController controller;
-  
+
   /// 選択上限到達時のコールバック
   final VoidCallback? onSelectionLimitReached;
-  
+
   /// 使用済み写真選択時のコールバック
   final VoidCallback? onUsedPhotoSelected;
-  
+
   /// 権限要求コールバック
   final VoidCallback? onRequestPermission;
-  
+
   /// 異なる日付選択時のコールバック
   final VoidCallback? onDifferentDateSelected;
 
@@ -62,7 +62,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final groups = _groupingService.groupPhotosForTimeline(
       widget.controller.photoAssets,
     );
-    
+
     if (mounted) {
       setState(() {
         _photoGroups = groups;
@@ -107,16 +107,14 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             delegate: TimelineDateHeaderDelegate(group: group),
             pinned: true,
           ),
-          
+
           // 写真グリッド
           _buildPhotoGridSliver(group, selectedDate),
-          
+
           // グループ間のスペース
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.md),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
         ],
-        
+
         // 底部のスペース
         const SliverToBoxAdapter(
           child: SizedBox(height: AppConstants.bottomNavPadding),
@@ -126,10 +124,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   /// 写真グリッド用のSliverを構築
-  Widget _buildPhotoGridSliver(TimelinePhotoGroup group, DateTime? selectedDate) {
+  Widget _buildPhotoGridSliver(
+    TimelinePhotoGroup group,
+    DateTime? selectedDate,
+  ) {
     // 日付制限による視覚的フィードバック
-    final shouldDimGroup = selectedDate != null && 
-        !_isSameDateAsGroup(selectedDate, group);
+    final shouldDimGroup =
+        selectedDate != null && !_isSameDateAsGroup(selectedDate, group);
 
     return SliverToBoxAdapter(
       child: Opacity(
@@ -151,9 +152,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// ローディング状態を構築
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
   /// 権限拒否状態を構築
@@ -210,11 +209,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   bool _isSameDateAsGroup(DateTime date, TimelinePhotoGroup group) {
     final groupFirstPhoto = group.photos.firstOrNull;
     if (groupFirstPhoto == null) return false;
-    
+
     final photoDate = groupFirstPhoto.createDateTime;
     return date.year == photoDate.year &&
-           date.month == photoDate.month &&
-           date.day == photoDate.day;
+        date.month == photoDate.month &&
+        date.day == photoDate.day;
   }
 }
 
@@ -237,7 +236,8 @@ class _TimelineGroupPhotoGrid extends StatefulWidget {
   });
 
   @override
-  State<_TimelineGroupPhotoGrid> createState() => _TimelineGroupPhotoGridState();
+  State<_TimelineGroupPhotoGrid> createState() =>
+      _TimelineGroupPhotoGridState();
 }
 
 class _TimelineGroupPhotoGridState extends State<_TimelineGroupPhotoGrid> {
@@ -251,10 +251,10 @@ class _TimelineGroupPhotoGridState extends State<_TimelineGroupPhotoGrid> {
     _groupController.setPhotoAssets(widget.group.photos);
     _groupController.setUsedPhotoIds(widget.controller.usedPhotoIds);
     _groupController.setDateRestrictionEnabled(true);
-    
+
     // メインコントローラーの選択状態を同期
     _syncSelectionState();
-    
+
     // メインコントローラーの変更を監視
     widget.controller.addListener(_onMainControllerChanged);
   }
@@ -296,7 +296,9 @@ class _TimelineGroupPhotoGridState extends State<_TimelineGroupPhotoGrid> {
       onSelectionLimitReached: widget.onSelectionLimitReached,
       onUsedPhotoSelected: widget.onUsedPhotoSelected,
       onRequestPermission: null, // グループ内では不要
-      onDifferentDateSelected: widget.isDimmed ? widget.onDifferentDateSelected : null,
+      onDifferentDateSelected: widget.isDimmed
+          ? widget.onDifferentDateSelected
+          : null,
     );
   }
 }

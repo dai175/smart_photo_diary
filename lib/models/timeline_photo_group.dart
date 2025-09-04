@@ -4,8 +4,10 @@ import 'package:photo_manager/photo_manager.dart';
 enum TimelineGroupType {
   /// 今日
   today,
+
   /// 昨日
   yesterday,
+
   /// 月単位
   monthly,
 }
@@ -14,13 +16,13 @@ enum TimelineGroupType {
 class TimelinePhotoGroup {
   /// 表示名（"今日", "昨日", "2025年1月"）
   final String displayName;
-  
+
   /// グループを代表する日付
   final DateTime groupDate;
-  
+
   /// グルーピングタイプ
   final TimelineGroupType type;
-  
+
   /// そのグループの写真リスト
   final List<AssetEntity> photos;
 

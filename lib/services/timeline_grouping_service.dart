@@ -3,10 +3,11 @@ import '../models/timeline_photo_group.dart';
 
 /// タイムライン用の写真グルーピングサービス
 class TimelineGroupingService {
-  static const TimelineGroupingService _instance = TimelineGroupingService._internal();
-  
+  static const TimelineGroupingService _instance =
+      TimelineGroupingService._internal();
+
   factory TimelineGroupingService() => _instance;
-  
+
   const TimelineGroupingService._internal();
 
   /// 写真をタイムライン用にグルーピング
@@ -23,7 +24,7 @@ class TimelineGroupingService {
     for (final photo in photos) {
       final photoDate = photo.createDateTime;
       final photoDay = DateTime(photoDate.year, photoDate.month, photoDate.day);
-      
+
       String groupKey;
       if (_isSameDate(photoDay, today)) {
         groupKey = 'today';
@@ -31,7 +32,8 @@ class TimelineGroupingService {
         groupKey = 'yesterday';
       } else {
         // 月単位でグルーピング
-        groupKey = '${photoDate.year}-${photoDate.month.toString().padLeft(2, '0')}';
+        groupKey =
+            '${photoDate.year}-${photoDate.month.toString().padLeft(2, '0')}';
       }
 
       groupMap.putIfAbsent(groupKey, () => []).add(photo);
@@ -39,44 +41,51 @@ class TimelineGroupingService {
 
     // TimelinePhotoGroupに変換
     final List<TimelinePhotoGroup> groups = [];
-    
+
     // 今日のグループ
     if (groupMap.containsKey('today')) {
-      groups.add(TimelinePhotoGroup(
-        displayName: '今日',
-        groupDate: today,
-        type: TimelineGroupType.today,
-        photos: groupMap['today']!,
-      ));
+      groups.add(
+        TimelinePhotoGroup(
+          displayName: '今日',
+          groupDate: today,
+          type: TimelineGroupType.today,
+          photos: groupMap['today']!,
+        ),
+      );
     }
 
     // 昨日のグループ
     if (groupMap.containsKey('yesterday')) {
-      groups.add(TimelinePhotoGroup(
-        displayName: '昨日',
-        groupDate: yesterday,
-        type: TimelineGroupType.yesterday,
-        photos: groupMap['yesterday']!,
-      ));
+      groups.add(
+        TimelinePhotoGroup(
+          displayName: '昨日',
+          groupDate: yesterday,
+          type: TimelineGroupType.yesterday,
+          photos: groupMap['yesterday']!,
+        ),
+      );
     }
 
     // 月単位のグループ（新しい順にソート）
-    final monthlyKeys = groupMap.keys
-        .where((key) => key != 'today' && key != 'yesterday')
-        .toList()
-      ..sort((a, b) => b.compareTo(a)); // 降順（新しい月が上）
+    final monthlyKeys =
+        groupMap.keys
+            .where((key) => key != 'today' && key != 'yesterday')
+            .toList()
+          ..sort((a, b) => b.compareTo(a)); // 降順（新しい月が上）
 
     for (final key in monthlyKeys) {
       final parts = key.split('-');
       final year = int.parse(parts[0]);
       final month = int.parse(parts[1]);
-      
-      groups.add(TimelinePhotoGroup(
-        displayName: '${year}年$month月',
-        groupDate: DateTime(year, month),
-        type: TimelineGroupType.monthly,
-        photos: groupMap[key]!,
-      ));
+
+      groups.add(
+        TimelinePhotoGroup(
+          displayName: '$year年$month月',
+          groupDate: DateTime(year, month),
+          type: TimelineGroupType.monthly,
+          photos: groupMap[key]!,
+        ),
+      );
     }
 
     return groups;
@@ -98,7 +107,7 @@ class TimelineGroupingService {
   /// 指定された写真が薄い表示になるべきかどうかを判定
   bool shouldShowDimmed(AssetEntity photo, DateTime? selectedDate) {
     if (selectedDate == null) return false;
-    
+
     final photoDate = photo.createDateTime;
     return !_isSameDate(photoDate, selectedDate);
   }

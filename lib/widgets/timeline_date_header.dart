@@ -8,10 +8,7 @@ class TimelineDateHeaderDelegate extends SliverPersistentHeaderDelegate {
   final TimelinePhotoGroup group;
   final double height;
 
-  const TimelineDateHeaderDelegate({
-    required this.group,
-    this.height = 48.0,
-  });
+  const TimelineDateHeaderDelegate({required this.group, this.height = 48.0});
 
   @override
   double get minExtent => height;
@@ -20,7 +17,11 @@ class TimelineDateHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return TimelineDateHeader(
       group: group,
       shrinkOffset: shrinkOffset,
@@ -50,7 +51,7 @@ class TimelineDateHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 48.0,
       padding: const EdgeInsets.symmetric(
