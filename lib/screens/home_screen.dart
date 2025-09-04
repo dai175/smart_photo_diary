@@ -36,10 +36,6 @@ class _HomeScreenState extends State<HomeScreen>
   // 統合後の単一コントローラー
   late final PhotoSelectionController _photoController;
 
-  // 最近の日記リスト
-  List<DiaryEntry> _recentDiaries = [];
-  bool _loadingDiaries = true;
-
   // 権限リクエスト中フラグ
   bool _isRequestingPermission = false;
 
@@ -53,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen>
     _photoController.setDateRestrictionEnabled(true);
 
     _loadTodayPhotos();
-    _loadRecentDiaries();
+    _loadUsedPhotoIds();
   }
 
   @override
@@ -156,43 +152,18 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
-    await Future.wait([_loadTodayPhotos(), _loadRecentDiaries()]);
+    await _loadTodayPhotos();
+    await _loadUsedPhotoIds();
   }
 
-  // 最近の日記を読み込む
-  Future<void> _loadRecentDiaries() async {
+  // 使用済み写真IDを読み込む
+  Future<void> _loadUsedPhotoIds() async {
     try {
-      if (!mounted) return;
-
-      setState(() {
-        _loadingDiaries = true;
-      });
-
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final allEntries = await diaryService.getSortedDiaryEntries();
-
-      if (!mounted) return;
-
-      // 最新の3つの日記を取得
-      final recentEntries = allEntries.take(3).toList();
-
-      // 使用済み写真IDを収集
       _collectUsedPhotoIds(allEntries);
-
-      if (!mounted) return;
-
-      setState(() {
-        _recentDiaries = recentEntries;
-        _loadingDiaries = false;
-      });
     } catch (e) {
-      _logger.error('日記の読み込みエラー', error: e, context: 'HomeScreen');
-      if (mounted) {
-        setState(() {
-          _recentDiaries = [];
-          _loadingDiaries = false;
-        });
-      }
+      _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
     }
   }
 
@@ -272,10 +243,7 @@ class _HomeScreenState extends State<HomeScreen>
       // ホーム画面（統合後のタイムライン表示）
       HomeContentWidget(
         photoController: _photoController,
-        recentDiaries: _recentDiaries,
-        isLoadingDiaries: _loadingDiaries,
         onRequestPermission: _loadTodayPhotos,
-        onLoadRecentDiaries: _loadRecentDiaries,
         onSelectionLimitReached: _showSelectionLimitModal,
         onUsedPhotoSelected: _showUsedPhotoModal,
         onRefresh: _refreshHome,
@@ -287,7 +255,6 @@ class _HomeScreenState extends State<HomeScreen>
               builder: (context) => DiaryDetailScreen(diaryId: diaryId),
             ),
           ).then((result) {
-            _loadRecentDiaries();
             if (result == true) {
               _photoController.clearSelection();
             }
@@ -324,8 +291,8 @@ class _HomeScreenState extends State<HomeScreen>
 
           // ホームタブに戻った時にタイムライン表示を再読み込み
           if (index == 0) {
-            _loadRecentDiaries();
             _loadTodayPhotos();
+            _loadUsedPhotoIds();
           }
         },
         items: _buildNavigationItems(),

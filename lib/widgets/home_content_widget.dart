@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
-import '../models/diary_entry.dart';
-import '../widgets/recent_diaries_widget.dart';
 import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -15,10 +13,7 @@ import '../ui/components/custom_dialog.dart';
 
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
-  final List<DiaryEntry> recentDiaries;
-  final bool isLoadingDiaries;
   final VoidCallback onRequestPermission;
-  final VoidCallback onLoadRecentDiaries;
   final VoidCallback onSelectionLimitReached;
   final VoidCallback onUsedPhotoSelected;
   final VoidCallback onCameraPressed;
@@ -28,10 +23,7 @@ class HomeContentWidget extends StatefulWidget {
   const HomeContentWidget({
     super.key,
     required this.photoController,
-    required this.recentDiaries,
-    required this.isLoadingDiaries,
     required this.onRequestPermission,
-    required this.onLoadRecentDiaries,
     required this.onSelectionLimitReached,
     required this.onUsedPhotoSelected,
     required this.onCameraPressed,
@@ -93,11 +85,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           delay: const Duration(milliseconds: 100),
           child: _buildTimelineSection(context),
         ),
-        const SizedBox(height: AppSpacing.md),
-        FadeInWidget(
-          delay: const Duration(milliseconds: 200),
-          child: _buildRecentDiariesSection(context),
-        ),
         const SizedBox(height: AppConstants.bottomNavPadding),
       ],
     );
@@ -140,34 +127,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onRequestPermission: widget.onRequestPermission,
               onCameraPressed: widget.onCameraPressed,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecentDiariesSection(BuildContext context) {
-    return Padding(
-      padding: AppSpacing.cardPadding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.book_rounded,
-                color: Theme.of(context).colorScheme.primary,
-                size: AppSpacing.iconMd,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text('最近の日記', style: AppTypography.titleLarge),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          RecentDiariesWidget(
-            recentDiaries: widget.recentDiaries,
-            isLoading: widget.isLoadingDiaries,
-            onDiaryTap: widget.onDiaryTap,
           ),
         ],
       ),
