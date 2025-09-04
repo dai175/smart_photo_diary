@@ -24,6 +24,12 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 異なる日付選択時のコールバック
   final VoidCallback? onDifferentDateSelected;
 
+  /// カメラ撮影コールバック
+  final VoidCallback? onCameraPressed;
+
+  /// スマートFAB表示制御
+  final bool showFAB;
+
   const TimelinePhotoWidget({
     super.key,
     required this.controller,
@@ -31,6 +37,8 @@ class TimelinePhotoWidget extends StatefulWidget {
     this.onUsedPhotoSelected,
     this.onRequestPermission,
     this.onDifferentDateSelected,
+    this.onCameraPressed,
+    this.showFAB = true,
   });
 
   @override
