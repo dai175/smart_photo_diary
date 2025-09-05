@@ -118,7 +118,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
               height: 48.0,
               width: double.infinity,
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
+                horizontal: AppSpacing.sm,
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
@@ -140,10 +140,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             ),
 
             // 写真グリッド表示
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: _buildPhotoGridForGroup(group, selectedDate),
-            ),
+            _buildPhotoGridForGroup(group, selectedDate),
 
             const SizedBox(height: AppSpacing.md),
           ],
