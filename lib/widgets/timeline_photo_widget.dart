@@ -205,12 +205,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(4),
-                    border: isSelected
-                        ? Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 3,
-                          )
-                        : null,
                   ),
                   child: Stack(
                     children: [
