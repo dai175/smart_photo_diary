@@ -245,11 +245,19 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                         top: 8,
                         right: 8,
                         child: Container(
-                          width: 24,
-                          height: 24,
+                          width: 20,
+                          height: 20,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isSelected || isUsed
+                                ? Colors.white
+                                : Colors.transparent,
                             shape: BoxShape.circle,
+                            border: !isSelected && !isUsed
+                                ? Border.all(
+                                    color: Colors.white.withOpacity(0.7),
+                                    width: 2,
+                                  )
+                                : null,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.2),
@@ -258,19 +266,15 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                               ),
                             ],
                           ),
-                          child: Icon(
-                            isUsed
-                                ? Icons.done
-                                : isSelected
-                                ? Icons.check_circle
-                                : Icons.radio_button_unchecked,
-                            size: 16,
-                            color: isUsed
-                                ? Colors.orange
-                                : isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey,
-                          ),
+                          child: (isSelected || isUsed)
+                              ? Icon(
+                                  isUsed ? Icons.done : Icons.check_circle,
+                                  size: 19,
+                                  color: isUsed
+                                      ? Colors.orange
+                                      : Theme.of(context).colorScheme.primary,
+                                )
+                              : const SizedBox.shrink(),
                         ),
                       ),
 
