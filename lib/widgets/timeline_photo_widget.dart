@@ -171,7 +171,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
+            crossAxisCount: 4,
             crossAxisSpacing: 2,
             mainAxisSpacing: 2,
             childAspectRatio: 1.0,
@@ -369,7 +369,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     if (mainIndex < 0) return;
 
     if (widget.controller.isPhotoUsed(mainIndex)) {
-      widget.onUsedPhotoSelected?.call();
+      // 使用済み写真はタップしても何もしない（視覚的なラベルで十分）
       return;
     }
 
