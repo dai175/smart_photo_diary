@@ -199,112 +199,114 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
             return GestureDetector(
               onTap: () => _handlePhotoTap(mainIndex),
-              child: Opacity(
-                opacity: shouldDimPhoto ? 0.3 : 1.0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Stack(
-                    children: [
-                      // 写真表示
-                      ClipRRect(
+              child: Stack(
+                children: [
+                  Opacity(
+                    opacity: shouldDimPhoto ? 0.6 : 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(4),
-                        child: FutureBuilder(
-                          future: photo.thumbnailData,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData && snapshot.data != null) {
-                              return SizedBox(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: Image.memory(
-                                  snapshot.data!,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            } else {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[400],
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
                       ),
-
-                      // 選択インジケーター
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: isSelected || isUsed
-                                ? Colors.white
-                                : Colors.transparent,
-                            shape: BoxShape.circle,
-                            border: !isSelected && !isUsed
-                                ? Border.all(
-                                    color: Colors.white.withOpacity(0.7),
-                                    width: 2,
-                                  )
-                                : null,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: (isSelected || isUsed)
-                              ? Icon(
-                                  isUsed ? Icons.done : Icons.check_circle,
-                                  size: 19,
-                                  color: isUsed
-                                      ? Colors.orange
-                                      : Theme.of(context).colorScheme.primary,
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ),
-
-                      // 使用済みラベル
-                      if (isUsed)
-                        Positioned(
-                          bottom: 4,
-                          left: 4,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              '使用済み',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: Stack(
+                        children: [
+                          // 写真表示
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: FutureBuilder(
+                              future: photo.thumbnailData,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  return SizedBox(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    child: Image.memory(
+                                      snapshot.data!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                } else {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[400],
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ),
-                        ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  // 選択インジケーター（薄化の対象外）
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: isSelected || isUsed
+                            ? Colors.white
+                            : Colors.transparent,
+                        shape: BoxShape.circle,
+                        border: !isSelected && !isUsed
+                            ? Border.all(
+                                color: Colors.white.withOpacity(0.7),
+                                width: 2,
+                              )
+                            : null,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: (isSelected || isUsed)
+                          ? Icon(
+                              isUsed ? Icons.done : Icons.check_circle,
+                              size: 19,
+                              color: isUsed
+                                  ? Colors.orange
+                                  : Theme.of(context).colorScheme.primary,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                  // 使用済みラベル（薄化の対象外）
+                  if (isUsed)
+                    Positioned(
+                      bottom: 4,
+                      left: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '使用済み',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             );
           },
