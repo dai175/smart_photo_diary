@@ -59,7 +59,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
       actions: [
-        // 使用量カウンター表示ボタン
+        // Phase 1.7.2.3: 使用量カウンター表示ボタン
         Container(
           margin: const EdgeInsets.only(right: AppSpacing.xs),
           child: IconButton(
@@ -115,7 +115,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     );
   }
 
-  /// 使用量状況表示メソッド
+  /// Phase 1.7.2.3: 使用量状況表示メソッド
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
       final subscriptionService =
@@ -186,60 +186,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
   }
 
-  /// プラン変更誘導機能
+  /// Phase 1.7.2.4: プラン変更誘導機能
   void _navigateToUpgrade(BuildContext context) {
     // 共通のアップグレードダイアログを表示
     UpgradeDialogUtils.showUpgradeDialog(context);
-  }
-}
-
-// PresetDialogs の簡易実装（必要なダイアログのみ）
-class PresetDialogs {
-  static Widget error({
-    required String title,
-    required String message,
-    required VoidCallback onConfirm,
-  }) {
-    return Builder(
-      builder: (context) => CustomDialog(
-        icon: Icons.error_outline,
-        title: title,
-        message: message,
-        actions: [
-          CustomDialogAction(text: 'OK', isPrimary: true, onPressed: onConfirm),
-        ],
-      ),
-    );
-  }
-
-  static Widget usageStatus({
-    required String planName,
-    required int used,
-    required int limit,
-    required int remaining,
-    required DateTime nextResetDate,
-    VoidCallback? onUpgrade,
-    required VoidCallback onDismiss,
-  }) {
-    return Builder(
-      builder: (context) => CustomDialog(
-        icon: Icons.analytics_rounded,
-        title: 'AI生成の使用状況',
-        message:
-            '''プラン: $planName
-使用済み: $used/$limit回
-残り: $remaining回
-リセット日: ${nextResetDate.year}年${nextResetDate.month}月${nextResetDate.day}日''',
-        actions: [
-          if (onUpgrade != null)
-            CustomDialogAction(text: 'アップグレード', onPressed: onUpgrade),
-          CustomDialogAction(
-            text: '閉じる',
-            isPrimary: true,
-            onPressed: onDismiss,
-          ),
-        ],
-      ),
-    );
   }
 }
