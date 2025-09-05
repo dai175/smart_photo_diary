@@ -3,7 +3,6 @@ import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
-import '../ui/design_system/app_typography.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -99,24 +98,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // タイムラインヘッダー
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.photo_library_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: AppSpacing.iconMd,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text('写真', style: AppTypography.titleMedium),
-              ],
-            ),
-          ),
           // 統合されたタイムラインFAB表示
           SizedBox(
             height: 450, // 適切な高さを設定

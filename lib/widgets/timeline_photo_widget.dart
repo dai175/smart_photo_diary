@@ -124,14 +124,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 color: Theme.of(
                   context,
                 ).colorScheme.surface.withValues(alpha: 0.95),
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                ),
               ),
               child: Align(
                 alignment: Alignment.centerLeft,
