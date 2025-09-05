@@ -257,7 +257,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                             ? Colors.white
                             : Colors.transparent,
                         shape: BoxShape.circle,
-                        border: !isSelected && !isUsed
+                        border: !isSelected && !isUsed && !shouldDimPhoto
                             ? Border.all(
                                 color: Colors.white.withOpacity(0.7),
                                 width: 2,
