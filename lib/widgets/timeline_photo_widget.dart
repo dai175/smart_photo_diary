@@ -393,9 +393,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
     // 選択可能かチェック
     if (!widget.controller.canSelectPhoto(mainIndex)) {
-      // 選択上限に達している場合
+      // 選択上限に達している場合はダイアログを表示せず、何もしない
       if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection) {
-        widget.onSelectionLimitReached?.call();
         return;
       }
 
