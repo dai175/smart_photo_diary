@@ -104,7 +104,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
 
     return ListView.builder(
-      padding: EdgeInsets.only(bottom: AppConstants.bottomNavPadding),
+      padding: EdgeInsets.zero,
       itemCount: _photoGroups.length,
       itemBuilder: (context, index) {
         final group = _photoGroups[index];

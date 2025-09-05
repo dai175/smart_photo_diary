@@ -36,21 +36,27 @@ class TimelineFABIntegration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: TimelinePhotoWidget(
-        controller: controller,
-        onSelectionLimitReached: onSelectionLimitReached,
-        onUsedPhotoSelected: onUsedPhotoSelected,
-        onRequestPermission: onRequestPermission,
-        onDifferentDateSelected: onDifferentDateSelected,
-        onCameraPressed: onCameraPressed,
-        showFAB: false, // FABは別途管理
-      ),
-      floatingActionButton: SmartFABWidget(
-        photoController: controller,
-        onCameraPressed: onCameraPressed,
-        onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
-      ),
+    return Stack(
+      children: [
+        TimelinePhotoWidget(
+          controller: controller,
+          onSelectionLimitReached: onSelectionLimitReached,
+          onUsedPhotoSelected: onUsedPhotoSelected,
+          onRequestPermission: onRequestPermission,
+          onDifferentDateSelected: onDifferentDateSelected,
+          onCameraPressed: onCameraPressed,
+          showFAB: false, // FABは別途管理
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: SmartFABWidget(
+            photoController: controller,
+            onCameraPressed: onCameraPressed,
+            onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
+          ),
+        ),
+      ],
     );
   }
 

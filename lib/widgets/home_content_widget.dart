@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -77,14 +76,17 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   Widget _buildMainContent(BuildContext context) {
-    return ListView(
-      padding: AppSpacing.screenPadding,
+    return Column(
       children: [
-        FadeInWidget(
-          delay: const Duration(milliseconds: 100),
-          child: _buildTimelineSection(context),
+        Expanded(
+          child: Padding(
+            padding: AppSpacing.screenPadding,
+            child: FadeInWidget(
+              delay: const Duration(milliseconds: 100),
+              child: _buildTimelineSection(context),
+            ),
+          ),
         ),
-        const SizedBox(height: AppConstants.bottomNavPadding),
       ],
     );
   }
@@ -99,8 +101,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 統合されたタイムラインFAB表示
-          SizedBox(
-            height: 450, // 適切な高さを設定
+          Expanded(
             child: TimelineFABIntegration(
               controller: widget.photoController,
               onSelectionLimitReached: widget.onSelectionLimitReached,
