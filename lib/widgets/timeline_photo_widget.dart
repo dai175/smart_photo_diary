@@ -194,9 +194,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 : false;
 
             // 個別写真レベルでの薄化制御
-            final shouldDimPhoto =
-                selectedDate != null &&
-                !_isSameDateAsPhoto(selectedDate, photo);
+            final shouldDimPhoto = _shouldDimPhoto(
+              photo: photo,
+              selectedDate: selectedDate,
+              isSelected: isSelected,
+            );
 
             return GestureDetector(
               onTap: () => _handlePhotoTap(mainIndex),
@@ -413,5 +415,24 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     return date.year == photoDate.year &&
         date.month == photoDate.month &&
         date.day == photoDate.day;
+  }
+
+  /// 写真を薄く表示するかどうかを判定
+  bool _shouldDimPhoto({
+    required AssetEntity photo,
+    required DateTime? selectedDate,
+    required bool isSelected,
+  }) {
+    // 選択済みの写真は薄くしない
+    if (isSelected) return false;
+
+    // 選択がない場合は薄くしない
+    if (selectedDate == null) return false;
+
+    // 3枚選択済みの場合は、未選択の写真をすべて薄くする
+    if (widget.controller.selectedCount >= 3) return true;
+
+    // そうでなければ、異なる日付の写真のみ薄くする
+    return !_isSameDateAsPhoto(selectedDate, photo);
   }
 }
