@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../models/timeline_photo_group.dart';
 import '../services/timeline_grouping_service.dart';
 import '../controllers/photo_selection_controller.dart';
@@ -156,10 +157,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     TimelinePhotoGroup group,
     DateTime? selectedDate,
   ) {
-    // 日付制限による視覚的フィードバック
-    final shouldDimGroup =
-        selectedDate != null && !_isSameDateAsGroup(selectedDate, group);
-
     if (group.photos.isEmpty) {
       return SizedBox(
         height: 100,
@@ -172,35 +169,39 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        return Opacity(
-          opacity: shouldDimGroup ? 0.3 : 1.0,
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1.0,
-            ),
-            itemCount: group.photos.length,
-            itemBuilder: (context, index) {
-              final photo = group.photos[index];
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 1.0,
+          ),
+          itemCount: group.photos.length,
+          itemBuilder: (context, index) {
+            final photo = group.photos[index];
 
-              // メインコントローラーから該当する写真のインデックスと選択状態を取得
-              final mainIndex = widget.controller.photoAssets.indexOf(photo);
-              final isSelected =
-                  mainIndex >= 0 &&
-                      mainIndex < widget.controller.selected.length
-                  ? widget.controller.selected[mainIndex]
-                  : false;
-              final isUsed = mainIndex >= 0
-                  ? widget.controller.isPhotoUsed(mainIndex)
-                  : false;
+            // メインコントローラーから該当する写真のインデックスと選択状態を取得
+            final mainIndex = widget.controller.photoAssets.indexOf(photo);
+            final isSelected =
+                mainIndex >= 0 && mainIndex < widget.controller.selected.length
+                ? widget.controller.selected[mainIndex]
+                : false;
+            final isUsed = mainIndex >= 0
+                ? widget.controller.isPhotoUsed(mainIndex)
+                : false;
 
-              return GestureDetector(
-                onTap: () => _handlePhotoTap(mainIndex),
+            // 個別写真レベルでの薄化制御
+            final shouldDimPhoto =
+                selectedDate != null &&
+                !_isSameDateAsPhoto(selectedDate, photo);
+
+            return GestureDetector(
+              onTap: () => _handlePhotoTap(mainIndex),
+              child: Opacity(
+                opacity: shouldDimPhoto ? 0.3 : 1.0,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -307,9 +308,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -370,17 +371,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
   }
 
-  /// 指定日付がグループと同じ日付かどうかを判定
-  bool _isSameDateAsGroup(DateTime date, TimelinePhotoGroup group) {
-    final groupFirstPhoto = group.photos.firstOrNull;
-    if (groupFirstPhoto == null) return false;
-
-    final photoDate = groupFirstPhoto.createDateTime;
-    return date.year == photoDate.year &&
-        date.month == photoDate.month &&
-        date.day == photoDate.day;
-  }
-
   /// 写真タップ時の処理
   void _handlePhotoTap(int mainIndex) {
     if (mainIndex < 0) return;
@@ -415,5 +405,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
 
     widget.controller.toggleSelect(mainIndex);
+  }
+
+  /// 指定日付が写真と同じ日付かどうかを判定
+  bool _isSameDateAsPhoto(DateTime date, AssetEntity photo) {
+    final photoDate = photo.createDateTime;
+    return date.year == photoDate.year &&
+        date.month == photoDate.month &&
+        date.day == photoDate.day;
   }
 }
