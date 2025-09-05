@@ -175,8 +175,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           padding: EdgeInsets.zero,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            crossAxisSpacing: 2,
+            mainAxisSpacing: 2,
             childAspectRatio: 1.0,
           ),
           itemCount: group.photos.length,
@@ -207,7 +207,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(4),
                     border: isSelected
                         ? Border.all(
                             color: Theme.of(context).colorScheme.primary,
@@ -219,7 +219,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     children: [
                       // 写真表示
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         child: FutureBuilder(
                           future: photo.thumbnailData,
                           builder: (context, snapshot) {
@@ -236,7 +236,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                               return Container(
                                 decoration: BoxDecoration(
                                   color: Colors.grey[400],
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Center(
                                   child: CircularProgressIndicator(
