@@ -51,10 +51,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   // Phase 6.1: スクロール監視用コントローラー追加
   late final ScrollController _scrollController;
 
+  // Phase 6.2: スクロール位置監視とグループ特定用の状態変数
+  int _currentVisibleGroupIndex = 0;
+  final List<double> _groupHeights = [];
+  final List<double> _groupOffsets = [];
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _scrollController.addListener(_onScrollChanged); // Phase 6.2: スクロールリスナー追加
     widget.controller.addListener(_onControllerChanged);
     _updatePhotoGroups();
   }
@@ -62,6 +68,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   @override
   void dispose() {
     widget.controller.removeListener(_onControllerChanged);
+    _scrollController.removeListener(
+      _onScrollChanged,
+    ); // Phase 6.2: スクロールリスナー削除
     _scrollController.dispose();
     super.dispose();
   }
@@ -79,6 +88,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       setState(() {
         _photoGroups = groups;
       });
+      // Phase 6.2: グループ更新時に高さとオフセットを再計算
+      _calculateGroupBoundaries();
     }
   }
 
@@ -443,4 +454,97 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     // そうでなければ、異なる日付の写真のみ薄くする
     return !_isSameDateAsPhoto(selectedDate, photo);
   }
+
+  // ======== Phase 6.2: スクロール位置監視とグループ特定システム ========
+
+  /// 各グループの高さとオフセット位置を計算
+  void _calculateGroupBoundaries() {
+    _groupHeights.clear();
+    _groupOffsets.clear();
+
+    double currentOffset = 0.0;
+
+    for (int i = 0; i < _photoGroups.length; i++) {
+      final group = _photoGroups[i];
+
+      // グループの高さを計算
+      final groupHeight = _calculateSingleGroupHeight(group);
+
+      _groupOffsets.add(currentOffset);
+      _groupHeights.add(groupHeight);
+
+      currentOffset += groupHeight;
+    }
+  }
+
+  /// 単一グループの高さを計算
+  double _calculateSingleGroupHeight(TimelinePhotoGroup group) {
+    const double headerHeight = 48.0; // 日付ヘッダーの固定高さ
+    const double bottomSpacing = 16.0; // AppSpacing.md = 16.0
+
+    if (group.photos.isEmpty) {
+      return headerHeight + 100.0 + bottomSpacing; // 空状態表示の高さ
+    }
+
+    // 写真グリッドの高さを計算
+    const int crossAxisCount = 4; // グリッドの列数
+    const double mainAxisSpacing = 2.0;
+    const double childAspectRatio = 1.0; // 正方形
+
+    final int photoCount = group.photos.length;
+    final int rowCount = (photoCount / crossAxisCount).ceil();
+
+    // GridViewの高さ計算（shrinkWrap: trueの場合）
+    // 各行の高さ = セル幅（画面幅に基づく） + mainAxisSpacing
+    // 実際のセル幅は実行時に決まるため、ここでは近似値を使用
+    const double approximateCellWidth = 80.0; // 近似値（実際は画面幅/4）
+    const double cellHeight = approximateCellWidth / childAspectRatio;
+
+    final double gridHeight =
+        rowCount * cellHeight + (rowCount - 1) * mainAxisSpacing;
+
+    return headerHeight + gridHeight + bottomSpacing;
+  }
+
+  /// スクロールイベント処理
+  void _onScrollChanged() {
+    if (_photoGroups.isEmpty || _groupOffsets.isEmpty) return;
+
+    final double scrollOffset = _scrollController.offset;
+    final int newVisibleGroupIndex = _findVisibleGroupIndex(scrollOffset);
+
+    if (newVisibleGroupIndex != _currentVisibleGroupIndex) {
+      if (mounted) {
+        setState(() {
+          _currentVisibleGroupIndex = newVisibleGroupIndex;
+        });
+      }
+    }
+  }
+
+  /// スクロール位置から現在表示中のグループインデックスを特定
+  int _findVisibleGroupIndex(double scrollOffset) {
+    // 各グループの開始位置と比較して、現在のスクロール位置がどのグループにあるかを判定
+    for (int i = 0; i < _groupOffsets.length; i++) {
+      final groupStart = _groupOffsets[i];
+      final groupEnd = groupStart + _groupHeights[i];
+
+      // スクロール位置がこのグループの範囲内にある場合
+      if (scrollOffset >= groupStart && scrollOffset < groupEnd) {
+        return i;
+      }
+    }
+
+    // 最下部までスクロールした場合は最後のグループ
+    return (_photoGroups.length - 1).clamp(0, _photoGroups.length - 1);
+  }
+
+  /// 現在表示中のグループを取得（Phase 6.3で使用予定）
+  /// 注意：Phase 6.3実装まで未使用のため、analyzer警告回避でコメントアウト
+  // TimelinePhotoGroup? get _currentVisibleGroup {
+  //   if (_photoGroups.isEmpty || _currentVisibleGroupIndex >= _photoGroups.length) {
+  //     return null;
+  //   }
+  //   return _photoGroups[_currentVisibleGroupIndex];
+  // }
 }
