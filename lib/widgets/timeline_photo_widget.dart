@@ -48,9 +48,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   List<TimelinePhotoGroup> _photoGroups = [];
 
+  // Phase 6.1: スクロール監視用コントローラー追加
+  late final ScrollController _scrollController;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     widget.controller.addListener(_onControllerChanged);
     _updatePhotoGroups();
   }
@@ -58,6 +62,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   @override
   void dispose() {
     widget.controller.removeListener(_onControllerChanged);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -104,48 +109,53 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.selectedPhotos,
     );
 
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: _photoGroups.length,
-      itemBuilder: (context, index) {
-        final group = _photoGroups[index];
+    // Phase 6.1: ListView.builder → CustomScrollView + SliverList に変換
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverList.builder(
+          itemCount: _photoGroups.length,
+          itemBuilder: (context, index) {
+            final group = _photoGroups[index];
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 日付ヘッダー
-            Container(
-              height: 48.0,
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.95),
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  group.displayName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 日付ヘッダー（既存と同じスタイルを保持）
+                Container(
+                  height: 48.0,
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.sm,
                   ),
-                  textAlign: TextAlign.left,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.95),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      group.displayName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // 写真グリッド表示
-            _buildPhotoGridForGroup(group, selectedDate),
+                // 写真グリッド表示（既存の実装を保持）
+                _buildPhotoGridForGroup(group, selectedDate),
 
-            const SizedBox(height: AppSpacing.md),
-          ],
-        );
-      },
+                const SizedBox(height: AppSpacing.md),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
