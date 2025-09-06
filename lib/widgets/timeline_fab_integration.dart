@@ -58,6 +58,7 @@ class TimelineFABIntegration extends StatelessWidget {
             photoController: controller,
             onCameraPressed: onCameraPressed,
             onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
+            heroTag: null,
           ),
         ),
       ],

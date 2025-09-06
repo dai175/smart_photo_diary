@@ -17,12 +17,16 @@ class SmartFABWidget extends StatefulWidget {
   /// FAB表示制御（デフォルト: true）
   final bool visible;
 
+  /// ユニークなHeroタグ（オプション）
+  final String? heroTag;
+
   const SmartFABWidget({
     super.key,
     required this.photoController,
     this.onCameraPressed,
     this.onCreateDiaryPressed,
     this.visible = true,
+    this.heroTag,
   });
 
   @override
@@ -79,6 +83,7 @@ class _SmartFABWidgetState extends State<SmartFABWidget> {
 
     return FloatingActionButton(
       key: ValueKey('fab_${state.name}'),
+      heroTag: widget.heroTag,
       onPressed: _onPressed,
       backgroundColor: _fabController.getBackgroundColor(theme.colorScheme),
       foregroundColor: _fabController.getForegroundColor(theme.colorScheme),
