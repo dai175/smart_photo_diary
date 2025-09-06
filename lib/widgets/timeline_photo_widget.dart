@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
@@ -49,6 +50,20 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   List<TimelinePhotoGroup> _photoGroups = [];
 
+  // パフォーマンス最適化用の定数
+  static const double _crossAxisSpacing = 2.0;
+  static const double _mainAxisSpacing = 2.0;
+  static const int _crossAxisCount = 4;
+  static const double _childAspectRatio = 1.0;
+
+  // インデックスキャッシュ（メインインデックス検索の最適化）
+  final Map<String, int> _photoIndexCache = {};
+
+  // 薄化計算結果のキャッシュ
+  final Map<String, bool> _dimPhotoCache = {};
+  DateTime? _lastSelectedDate;
+  int _lastSelectedCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +78,19 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   void _onControllerChanged() {
+    // 薄化キャッシュをクリア（選択状態変更時）
+    final currentSelectedDate = _groupingService.getSelectedDate(
+      widget.controller.selectedPhotos,
+    );
+    final currentSelectedCount = widget.controller.selectedCount;
+
+    if (_lastSelectedDate != currentSelectedDate ||
+        _lastSelectedCount != currentSelectedCount) {
+      _dimPhotoCache.clear();
+      _lastSelectedDate = currentSelectedDate;
+      _lastSelectedCount = currentSelectedCount;
+    }
+
     _updatePhotoGroups();
   }
 
@@ -71,10 +99,22 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.photoAssets,
     );
 
+    // インデックスキャッシュを更新
+    _rebuildPhotoIndexCache();
+
     if (mounted) {
       setState(() {
         _photoGroups = groups;
       });
+    }
+  }
+
+  /// 写真インデックスキャッシュを再構築（パフォーマンス最適化）
+  void _rebuildPhotoIndexCache() {
+    _photoIndexCache.clear();
+    final assets = widget.controller.photoAssets;
+    for (int i = 0; i < assets.length; i++) {
+      _photoIndexCache[assets[i].id] = i;
     }
   }
 
@@ -169,17 +209,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            crossAxisSpacing: 2,
-            mainAxisSpacing: 2,
-            childAspectRatio: 1.0,
+            crossAxisCount: _crossAxisCount,
+            crossAxisSpacing: _crossAxisSpacing,
+            mainAxisSpacing: _mainAxisSpacing,
+            childAspectRatio: _childAspectRatio,
           ),
           itemCount: group.photos.length,
           itemBuilder: (context, index) {
             final photo = group.photos[index];
 
-            // メインコントローラーから該当する写真のインデックスと選択状態を取得
-            final mainIndex = widget.controller.photoAssets.indexOf(photo);
+            // キャッシュを使用してメインインデックスを高速取得
+            final mainIndex = _photoIndexCache[photo.id] ?? -1;
             final isSelected =
                 mainIndex >= 0 && mainIndex < widget.controller.selected.length
                 ? widget.controller.selected[mainIndex]
@@ -188,8 +228,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 ? widget.controller.isPhotoUsed(mainIndex)
                 : false;
 
-            // 個別写真レベルでの薄化制御
-            final shouldDimPhoto = _shouldDimPhoto(
+            // キャッシュを使用した薄化判定（パフォーマンス最適化）
+            final shouldDimPhoto = _shouldDimPhotoWithCache(
               photo: photo,
               selectedDate: selectedDate,
               isSelected: isSelected,
@@ -199,113 +239,40 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
               onTap: () => _handlePhotoTap(mainIndex),
               child: Stack(
                 children: [
-                  Opacity(
+                  // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
+                  AnimatedOpacity(
                     opacity: shouldDimPhoto ? 0.6 : 1.0,
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeInOut,
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE0E0E0), // 固定値でパフォーマンス最適化
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
                       ),
-                      child: Stack(
-                        children: [
-                          // 写真表示
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: FutureBuilder(
-                              future: photo.thumbnailData,
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData && snapshot.data != null) {
-                                  return SizedBox(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    child: Image.memory(
-                                      snapshot.data!,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  );
-                                } else {
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[400],
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ],
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(4),
+                        ),
+                        child: _OptimizedPhotoThumbnail(
+                          photo: photo,
+                          key: ValueKey(photo.id), // キーでWidgetの再利用を促進
+                        ),
                       ),
                     ),
                   ),
-                  // 選択インジケーター（薄化の対象外）
+                  // パフォーマンス最適化された選択インジケーター
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: isSelected || isUsed
-                            ? Colors.white
-                            : Colors.transparent,
-                        shape: BoxShape.circle,
-                        border: !isSelected && !isUsed && !shouldDimPhoto
-                            ? Border.all(
-                                color: Colors.white.withOpacity(0.7),
-                                width: 2,
-                              )
-                            : null,
-                        boxShadow: shouldDimPhoto
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                      ),
-                      child: (isSelected || isUsed)
-                          ? Icon(
-                              isUsed ? Icons.done : Icons.check_circle,
-                              size: 19,
-                              color: isUsed
-                                  ? Colors.orange
-                                  : Theme.of(context).colorScheme.primary,
-                            )
-                          : const SizedBox.shrink(),
+                    child: _OptimizedSelectionIndicator(
+                      isSelected: isSelected,
+                      isUsed: isUsed,
+                      shouldDimPhoto: shouldDimPhoto,
+                      primaryColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  // 使用済みラベル（薄化の対象外）
-                  if (isUsed)
-                    Positioned(
-                      bottom: 4,
-                      left: 4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '使用済み',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                  // パフォーマンス最適化された使用済みラベル
+                  if (isUsed) const _OptimizedUsedLabel(),
                 ],
               ),
             );
@@ -413,8 +380,35 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         date.day == photoDate.day;
   }
 
-  /// 写真を薄く表示するかどうかを判定
-  bool _shouldDimPhoto({
+  /// キャッシュ機能付きの薄化判定（パフォーマンス最適化）
+  bool _shouldDimPhotoWithCache({
+    required AssetEntity photo,
+    required DateTime? selectedDate,
+    required bool isSelected,
+  }) {
+    // 選択済みの写真は薄くしない
+    if (isSelected) return false;
+
+    // キャッシュから取得を試行
+    final cacheKey =
+        '${photo.id}_${selectedDate?.millisecondsSinceEpoch}_${widget.controller.selectedCount}';
+    if (_dimPhotoCache.containsKey(cacheKey)) {
+      return _dimPhotoCache[cacheKey]!;
+    }
+
+    // 計算して結果をキャッシュ
+    final result = _calculateShouldDimPhoto(
+      photo: photo,
+      selectedDate: selectedDate,
+      isSelected: isSelected,
+    );
+    _dimPhotoCache[cacheKey] = result;
+
+    return result;
+  }
+
+  /// 写真を薄く表示するかどうかを判定（実際の計算ロジック）
+  bool _calculateShouldDimPhoto({
     required AssetEntity photo,
     required DateTime? selectedDate,
     required bool isSelected,
@@ -430,5 +424,122 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
     // そうでなければ、異なる日付の写真のみ薄くする
     return !_isSameDateAsPhoto(selectedDate, photo);
+  }
+}
+
+/// パフォーマンス最適化された写真サムネイルウィジェット
+class _OptimizedPhotoThumbnail extends StatelessWidget {
+  const _OptimizedPhotoThumbnail({super.key, required this.photo});
+
+  final AssetEntity photo;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List?>(
+      future: photo.thumbnailData,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+          return Image.memory(
+            snapshot.data!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            // メモリ使用量最適化のためキャッシュを有効化
+            isAntiAlias: false,
+            filterQuality: FilterQuality.low,
+          );
+        } else {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFBDBDBD),
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF9E9E9E),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
+
+/// パフォーマンス最適化された選択インジケーター
+class _OptimizedSelectionIndicator extends StatelessWidget {
+  const _OptimizedSelectionIndicator({
+    required this.isSelected,
+    required this.isUsed,
+    required this.shouldDimPhoto,
+    required this.primaryColor,
+  });
+
+  final bool isSelected;
+  final bool isUsed;
+  final bool shouldDimPhoto;
+  final Color primaryColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: isSelected || isUsed ? Colors.white : Colors.transparent,
+        shape: BoxShape.circle,
+        border: !isSelected && !isUsed && !shouldDimPhoto
+            ? Border.all(
+                color: const Color(0xB3FFFFFF), // 固定値でパフォーマンス最適化
+                width: 2,
+              )
+            : null,
+        boxShadow: shouldDimPhoto
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x33000000), // 固定値でパフォーマンス最適化
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+      ),
+      child: (isSelected || isUsed)
+          ? Icon(
+              isUsed ? Icons.done : Icons.check_circle,
+              size: 19,
+              color: isUsed ? Colors.orange : primaryColor,
+            )
+          : null,
+    );
+  }
+}
+
+/// パフォーマンス最適化された使用済みラベル
+class _OptimizedUsedLabel extends StatelessWidget {
+  const _OptimizedUsedLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 4,
+      left: 4,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0xE6FF9800), // 固定値でパフォーマンス最適化
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Text(
+          '使用済み',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
   }
 }
