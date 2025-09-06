@@ -539,9 +539,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// スクロール位置から現在表示中のグループインデックスを特定
   int _findVisibleGroupIndex(double scrollOffset) {
+    const double headerHeight = 48.0; // 日付ヘッダーの固定高さ
+
     // 各グループの開始位置と比較して、現在のスクロール位置がどのグループにあるかを判定
+    // スティッキーヘッダーの切り替わりタイミングを調整するため、ヘッダー高さ分のオフセットを追加
     for (int i = 0; i < _groupOffsets.length; i++) {
-      final groupStart = _groupOffsets[i];
+      final groupStart = _groupOffsets[i] + headerHeight;
       final groupEnd = groupStart + _groupHeights[i];
 
       // スクロール位置がこのグループの範囲内にある場合
