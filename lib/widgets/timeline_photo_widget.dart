@@ -263,13 +263,15 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                                 width: 2,
                               )
                             : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        boxShadow: shouldDimPhoto
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                       ),
                       child: (isSelected || isUsed)
                           ? Icon(
