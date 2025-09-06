@@ -9,6 +9,7 @@ import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/logging_service.dart';
@@ -209,8 +210,26 @@ class _HomeScreenState extends State<HomeScreen>
       final todayStart = DateTime(today.year, today.month, today.day);
 
       // プラン制限に応じた過去日数を計算
+      int allowedDays = 1; // デフォルトはBasicプラン（昨日まで）
+      try {
+        final subscriptionService =
+            await ServiceRegistration.getAsync<ISubscriptionService>();
+        final planResult = await subscriptionService.getCurrentPlanClass();
+        if (planResult.isSuccess) {
+          final plan = planResult.value;
+          // Premiumプランの場合は365日、Basicプランの場合は1日
+          allowedDays = plan.displayName.contains('Premium') ? 365 : 1;
+        }
+      } catch (e) {
+        _logger.error(
+          'プラン情報取得エラー、Basicプランとして処理',
+          error: e,
+          context: 'HomeScreen._loadTodayPhotos',
+        );
+      }
+
       final photos = await photoService.getPhotosInDateRange(
-        startDate: todayStart.subtract(const Duration(days: 365)), // デフォルト1年
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)), // 今日を含む
         limit: 1000, // タイムライン表示用の上限
       );
