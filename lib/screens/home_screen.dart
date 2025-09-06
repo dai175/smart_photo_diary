@@ -9,6 +9,7 @@ import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/logging_service.dart';
@@ -33,14 +34,8 @@ class _HomeScreenState extends State<HomeScreen>
   // サービス
   late final LoggingService _logger;
 
-  // コントローラー
+  // 統合後の単一コントローラー
   late final PhotoSelectionController _photoController;
-  late final PhotoSelectionController _pastPhotoController;
-  late final TabController _tabController;
-
-  // 最近の日記リスト
-  List<DiaryEntry> _recentDiaries = [];
-  bool _loadingDiaries = true;
 
   // 権限リクエスト中フラグ
   bool _isRequestingPermission = false;
@@ -51,21 +46,17 @@ class _HomeScreenState extends State<HomeScreen>
     WidgetsBinding.instance.addObserver(this);
     _logger = serviceLocator.get<LoggingService>();
     _photoController = PhotoSelectionController();
-    _pastPhotoController = PhotoSelectionController();
-    // 過去の写真は同じ日付のみ選択可能に制限
-    _pastPhotoController.setDateRestrictionEnabled(true);
-    _tabController = TabController(length: 2, vsync: this);
+    // 統合後は日付制限を常時有効化
+    _photoController.setDateRestrictionEnabled(true);
 
     _loadTodayPhotos();
-    _loadRecentDiaries();
+    _loadUsedPhotoIds();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _photoController.dispose();
-    _pastPhotoController.dispose();
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -162,43 +153,18 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
-    await Future.wait([_loadTodayPhotos(), _loadRecentDiaries()]);
+    await _loadTodayPhotos();
+    await _loadUsedPhotoIds();
   }
 
-  // 最近の日記を読み込む
-  Future<void> _loadRecentDiaries() async {
+  // 使用済み写真IDを読み込む
+  Future<void> _loadUsedPhotoIds() async {
     try {
-      if (!mounted) return;
-
-      setState(() {
-        _loadingDiaries = true;
-      });
-
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final allEntries = await diaryService.getSortedDiaryEntries();
-
-      if (!mounted) return;
-
-      // 最新の3つの日記を取得
-      final recentEntries = allEntries.take(3).toList();
-
-      // 使用済み写真IDを収集
       _collectUsedPhotoIds(allEntries);
-
-      if (!mounted) return;
-
-      setState(() {
-        _recentDiaries = recentEntries;
-        _loadingDiaries = false;
-      });
     } catch (e) {
-      _logger.error('日記の読み込みエラー', error: e, context: 'HomeScreen');
-      if (mounted) {
-        setState(() {
-          _recentDiaries = [];
-          _loadingDiaries = false;
-        });
-      }
+      _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
     }
   }
 
@@ -209,10 +175,9 @@ class _HomeScreenState extends State<HomeScreen>
       usedIds.addAll(entry.photoIds);
     }
     _photoController.setUsedPhotoIds(usedIds);
-    _pastPhotoController.setUsedPhotoIds(usedIds);
   }
 
-  // 権限リクエストと写真の読み込み
+  // 統合後のタイムライン写真読み込み
   Future<void> _loadTodayPhotos() async {
     if (!mounted) return;
 
@@ -240,8 +205,34 @@ class _HomeScreenState extends State<HomeScreen>
         return;
       }
 
-      // 今日撮影された写真だけを取得
-      final photos = await photoService.getTodayPhotos();
+      // 統合後：今日を含む過去の写真を全て取得（タイムライン用）
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+
+      // プラン制限に応じた過去日数を計算
+      int allowedDays = 1; // デフォルトはBasicプラン（昨日まで）
+      try {
+        final subscriptionService =
+            await ServiceRegistration.getAsync<ISubscriptionService>();
+        final planResult = await subscriptionService.getCurrentPlanClass();
+        if (planResult.isSuccess) {
+          final plan = planResult.value;
+          // Premiumプランの場合は365日、Basicプランの場合は1日
+          allowedDays = plan.displayName.contains('Premium') ? 365 : 1;
+        }
+      } catch (e) {
+        _logger.error(
+          'プラン情報取得エラー、Basicプランとして処理',
+          error: e,
+          context: 'HomeScreen._loadTodayPhotos',
+        );
+      }
+
+      final photos = await photoService.getPhotosInDateRange(
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        endDate: todayStart.add(const Duration(days: 1)), // 今日を含む
+        limit: 1000, // タイムライン表示用の上限
+      );
 
       if (!mounted) return;
 
@@ -268,18 +259,15 @@ class _HomeScreenState extends State<HomeScreen>
   // 画面一覧を取得するメソッド
   List<Widget> _getScreens() {
     final screens = [
-      // ホーム画面（現在の画面）
+      // ホーム画面（統合後のタイムライン表示）
       HomeContentWidget(
         photoController: _photoController,
-        pastPhotoController: _pastPhotoController,
-        tabController: _tabController,
-        recentDiaries: _recentDiaries,
-        isLoadingDiaries: _loadingDiaries,
         onRequestPermission: _loadTodayPhotos,
-        onLoadRecentDiaries: _loadRecentDiaries,
         onSelectionLimitReached: _showSelectionLimitModal,
         onUsedPhotoSelected: _showUsedPhotoModal,
         onRefresh: _refreshHome,
+        onCameraPressed: _capturePhoto,
+        onDiaryCreated: _loadUsedPhotoIds,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,
@@ -287,10 +275,8 @@ class _HomeScreenState extends State<HomeScreen>
               builder: (context) => DiaryDetailScreen(diaryId: diaryId),
             ),
           ).then((result) {
-            _loadRecentDiaries();
             if (result == true) {
               _photoController.clearSelection();
-              _pastPhotoController.clearSelection();
             }
           });
         },
@@ -323,9 +309,10 @@ class _HomeScreenState extends State<HomeScreen>
             _currentIndex = index;
           });
 
-          // ホームタブに戻った時に最近の日記を再読み込み（使用済み写真状態を更新）
+          // ホームタブに戻った時にタイムライン表示を再読み込み
           if (index == 0) {
-            _loadRecentDiaries();
+            _loadTodayPhotos();
+            _loadUsedPhotoIds();
           }
         },
         items: _buildNavigationItems(),
@@ -333,50 +320,13 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // FloatingActionButtonを構築
+  // FloatingActionButtonを構築（統合後は非表示、TimelineFABIntegrationで管理）
   Widget? _buildFloatingActionButton() {
-    // ホーム画面かつ今日タブの場合のみFABを表示
-    return AnimatedBuilder(
-      animation: _tabController,
-      builder: (context, child) {
-        final shouldShow = _currentIndex == 0 && _tabController.index == 0;
-
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-                  CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-                ),
-                child: child,
-              ),
-            );
-          },
-          child: shouldShow
-              ? FloatingActionButton(
-                  key: const ValueKey('fab_camera'),
-                  onPressed: _onCameraButtonTapped,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  tooltip: '写真を撮影',
-                  shape: const CircleBorder(),
-                  child: const Icon(Icons.photo_camera_rounded, size: 24),
-                )
-              : const SizedBox.shrink(key: ValueKey('fab_hidden')),
-        );
-      },
-    );
+    // 統合後はFABをTimelineFABIntegrationで管理するため、ここでは非表示
+    return _currentIndex == 0 ? null : null;
   }
 
-  // カメラボタンがタップされた時の処理
-  Future<void> _onCameraButtonTapped() async {
-    if (_currentIndex == 0) {
-      // カメラ撮影処理を実行
-      await _capturePhoto();
-    }
-  }
+  // 統合後：カメラ撮影処理（TimelineFABIntegrationから呼び出される）
 
   // カメラ撮影処理
   Future<void> _capturePhoto() async {

@@ -61,7 +61,17 @@ result.fold(
 ### Data Models
 - **`DiaryEntry`**: Primary model with Hive annotations for local storage
 - **Plan Classes**: Type-safe subscription system (BasicPlan, PremiumMonthlyPlan, etc.)
+- **`TimelinePhotoGroup`**: Photo grouping model for timeline display (Today, Yesterday, Monthly)
 - Uses `build_runner` for generating Hive adapters
+
+### Home Screen Architecture (Post Tab Unification)
+The home screen has been unified from a tabbed interface to a single timeline view:
+
+- **`TimelinePhotoWidget`**: Main timeline display with sticky headers and photo grids
+- **`TimelineGroupingService`**: Handles photo grouping by date (Today/Yesterday/Monthly)
+- **`PhotoSelectionController`**: Manages photo selection state and date restrictions
+- **Smart FAB Integration**: Context-sensitive floating action button (Camera/Create Diary)
+- **Performance Optimizations**: Index caching and dimming calculation caching for smooth scrolling
 
 ## Critical Development Guidelines
 
