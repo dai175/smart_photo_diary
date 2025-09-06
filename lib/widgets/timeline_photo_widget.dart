@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import '../models/timeline_photo_group.dart';
 import '../services/timeline_grouping_service.dart';
 import '../controllers/photo_selection_controller.dart';
@@ -48,19 +49,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   List<TimelinePhotoGroup> _photoGroups = [];
 
-  // Phase 6.1: スクロール監視用コントローラー追加
-  late final ScrollController _scrollController;
-
-  // Phase 6.2: スクロール位置監視とグループ特定用の状態変数
-  int _currentVisibleGroupIndex = 0;
-  final List<double> _groupHeights = [];
-  final List<double> _groupOffsets = [];
-
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_onScrollChanged); // Phase 6.2: スクロールリスナー追加
     widget.controller.addListener(_onControllerChanged);
     _updatePhotoGroups();
   }
@@ -68,10 +59,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   @override
   void dispose() {
     widget.controller.removeListener(_onControllerChanged);
-    _scrollController.removeListener(
-      _onScrollChanged,
-    ); // Phase 6.2: スクロールリスナー削除
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -88,8 +75,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       setState(() {
         _photoGroups = groups;
       });
-      // Phase 6.2: グループ更新時に高さとオフセットを再計算
-      _calculateGroupBoundaries();
     }
   }
 
@@ -120,68 +105,52 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.selectedPhotos,
     );
 
-    // Phase 6.1-6.3: ListView.builder → CustomScrollView + SliverList + スティッキーヘッダー
+    // flutter_sticky_headerを使ったシンプルな実装
     return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        // Phase 6.3: スティッキーヘッダーを最初に追加
-        // プルトゥリフレッシュ中（スクロール位置が負の値）の場合は表示しない
-        if (_photoGroups.isNotEmpty &&
-            _currentVisibleGroup != null &&
-            _scrollController.hasClients &&
-            _scrollController.offset >= 0)
-          SliverPersistentHeader(
-            pinned: true, // 画面上部に固定
-            delegate: _StickyDateHeaderDelegate(
-              currentGroup: _currentVisibleGroup,
-              context: context,
-            ),
+      slivers: _photoGroups.map((group) {
+        return SliverStickyHeader(
+          header: _buildStickyHeader(group),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              _buildPhotoGridForGroup(group, selectedDate),
+              const SizedBox(height: AppSpacing.md),
+            ]),
           ),
+        );
+      }).toList(),
+    );
+  }
 
-        // 既存のSliverList（通常の日付ヘッダー + 写真グリッド）
-        SliverList.builder(
-          itemCount: _photoGroups.length,
-          itemBuilder: (context, index) {
-            final group = _photoGroups[index];
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 日付ヘッダー（既存と同じスタイルを保持）
-                Container(
-                  height: 48.0,
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surface.withValues(alpha: 0.95),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      group.displayName,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                ),
-
-                // 写真グリッド表示（既存の実装を保持）
-                _buildPhotoGridForGroup(group, selectedDate),
-
-                const SizedBox(height: AppSpacing.md),
-              ],
-            );
-          },
+  /// スティッキーヘッダーを構築
+  Widget _buildStickyHeader(TimelinePhotoGroup group) {
+    return Container(
+      height: 48.0,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 1.0,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          group.displayName,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.left,
         ),
-      ],
+      ),
     );
   }
 
@@ -468,170 +437,5 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
     // そうでなければ、異なる日付の写真のみ薄くする
     return !_isSameDateAsPhoto(selectedDate, photo);
-  }
-
-  // ======== Phase 6.2: スクロール位置監視とグループ特定システム ========
-
-  /// 各グループの高さとオフセット位置を計算
-  void _calculateGroupBoundaries() {
-    _groupHeights.clear();
-    _groupOffsets.clear();
-
-    double currentOffset = 0.0;
-
-    for (int i = 0; i < _photoGroups.length; i++) {
-      final group = _photoGroups[i];
-
-      // グループの高さを計算
-      final groupHeight = _calculateSingleGroupHeight(group);
-
-      _groupOffsets.add(currentOffset);
-      _groupHeights.add(groupHeight);
-
-      currentOffset += groupHeight;
-    }
-  }
-
-  /// 単一グループの高さを計算
-  double _calculateSingleGroupHeight(TimelinePhotoGroup group) {
-    const double headerHeight = 48.0; // 日付ヘッダーの固定高さ
-    const double bottomSpacing = 16.0; // AppSpacing.md = 16.0
-
-    if (group.photos.isEmpty) {
-      return headerHeight + 100.0 + bottomSpacing; // 空状態表示の高さ
-    }
-
-    // 写真グリッドの高さを計算
-    const int crossAxisCount = 4; // グリッドの列数
-    const double mainAxisSpacing = 2.0;
-    const double childAspectRatio = 1.0; // 正方形
-
-    final int photoCount = group.photos.length;
-    final int rowCount = (photoCount / crossAxisCount).ceil();
-
-    // GridViewの高さ計算（shrinkWrap: trueの場合）
-    // 各行の高さ = セル幅（画面幅に基づく） + mainAxisSpacing
-    // 実際のセル幅は実行時に決まるため、ここでは近似値を使用
-    const double approximateCellWidth = 80.0; // 近似値（実際は画面幅/4）
-    const double cellHeight = approximateCellWidth / childAspectRatio;
-
-    final double gridHeight =
-        rowCount * cellHeight + (rowCount - 1) * mainAxisSpacing;
-
-    return headerHeight + gridHeight + bottomSpacing;
-  }
-
-  /// スクロールイベント処理
-  void _onScrollChanged() {
-    if (_photoGroups.isEmpty || _groupOffsets.isEmpty) return;
-
-    final double scrollOffset = _scrollController.offset;
-    final int newVisibleGroupIndex = _findVisibleGroupIndex(scrollOffset);
-
-    if (newVisibleGroupIndex != _currentVisibleGroupIndex) {
-      if (mounted) {
-        setState(() {
-          _currentVisibleGroupIndex = newVisibleGroupIndex;
-        });
-      }
-    }
-  }
-
-  /// スクロール位置から現在表示中のグループインデックスを特定
-  int _findVisibleGroupIndex(double scrollOffset) {
-    const double headerHeight = 48.0; // 日付ヘッダーの固定高さ
-
-    // 各グループの開始位置と比較して、現在のスクロール位置がどのグループにあるかを判定
-    // スティッキーヘッダーの切り替わりタイミングを調整するため、ヘッダー高さ分のオフセットを追加
-    for (int i = 0; i < _groupOffsets.length; i++) {
-      final groupStart = _groupOffsets[i] + headerHeight;
-      final groupEnd = groupStart + _groupHeights[i];
-
-      // スクロール位置がこのグループの範囲内にある場合
-      if (scrollOffset >= groupStart && scrollOffset < groupEnd) {
-        return i;
-      }
-    }
-
-    // 最下部までスクロールした場合は最後のグループ
-    return (_photoGroups.length - 1).clamp(0, _photoGroups.length - 1);
-  }
-
-  /// 現在表示中のグループを取得（Phase 6.3で使用）
-  TimelinePhotoGroup? get _currentVisibleGroup {
-    if (_photoGroups.isEmpty ||
-        _currentVisibleGroupIndex >= _photoGroups.length) {
-      return null;
-    }
-    return _photoGroups[_currentVisibleGroupIndex];
-  }
-}
-
-// ======== Phase 6.3: スティッキーヘッダーデリゲート実装 ========
-
-/// スティッキー日付ヘッダー用のカスタムデリゲート
-class _StickyDateHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final TimelinePhotoGroup? currentGroup;
-  final BuildContext context;
-
-  const _StickyDateHeaderDelegate({
-    required this.currentGroup,
-    required this.context,
-  });
-
-  @override
-  double get minExtent => 48.0; // 日付ヘッダーの固定高さ
-
-  @override
-  double get maxExtent => 48.0; // 日付ヘッダーの固定高さ
-
-  @override
-  bool shouldRebuild(covariant _StickyDateHeaderDelegate oldDelegate) {
-    // グループが変更された場合のみリビルド
-    return currentGroup != oldDelegate.currentGroup;
-  }
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    // 現在のグループが存在しない場合は空コンテナ
-    if (currentGroup == null) {
-      return const SizedBox.shrink();
-    }
-
-    // 既存の日付ヘッダーと同じスタイルを適用
-    return Container(
-      height: 48.0,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
-        // スティッキーヘッダーとして識別しやすくするため、軽い影を追加
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          currentGroup!.displayName,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
-          textAlign: TextAlign.left,
-        ),
-      ),
-    );
   }
 }
