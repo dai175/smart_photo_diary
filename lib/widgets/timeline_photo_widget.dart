@@ -132,13 +132,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 1.0,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       child: Align(
         alignment: Alignment.centerLeft,
