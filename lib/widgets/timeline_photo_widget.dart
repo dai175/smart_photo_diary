@@ -120,10 +120,25 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.selectedPhotos,
     );
 
-    // Phase 6.1: ListView.builder → CustomScrollView + SliverList に変換
+    // Phase 6.1-6.3: ListView.builder → CustomScrollView + SliverList + スティッキーヘッダー
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
+        // Phase 6.3: スティッキーヘッダーを最初に追加
+        // プルトゥリフレッシュ中（スクロール位置が負の値）の場合は表示しない
+        if (_photoGroups.isNotEmpty &&
+            _currentVisibleGroup != null &&
+            _scrollController.hasClients &&
+            _scrollController.offset >= 0)
+          SliverPersistentHeader(
+            pinned: true, // 画面上部に固定
+            delegate: _StickyDateHeaderDelegate(
+              currentGroup: _currentVisibleGroup,
+              context: context,
+            ),
+          ),
+
+        // 既存のSliverList（通常の日付ヘッダー + 写真グリッド）
         SliverList.builder(
           itemCount: _photoGroups.length,
           itemBuilder: (context, index) {
@@ -539,12 +554,81 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     return (_photoGroups.length - 1).clamp(0, _photoGroups.length - 1);
   }
 
-  /// 現在表示中のグループを取得（Phase 6.3で使用予定）
-  /// 注意：Phase 6.3実装まで未使用のため、analyzer警告回避でコメントアウト
-  // TimelinePhotoGroup? get _currentVisibleGroup {
-  //   if (_photoGroups.isEmpty || _currentVisibleGroupIndex >= _photoGroups.length) {
-  //     return null;
-  //   }
-  //   return _photoGroups[_currentVisibleGroupIndex];
-  // }
+  /// 現在表示中のグループを取得（Phase 6.3で使用）
+  TimelinePhotoGroup? get _currentVisibleGroup {
+    if (_photoGroups.isEmpty ||
+        _currentVisibleGroupIndex >= _photoGroups.length) {
+      return null;
+    }
+    return _photoGroups[_currentVisibleGroupIndex];
+  }
+}
+
+// ======== Phase 6.3: スティッキーヘッダーデリゲート実装 ========
+
+/// スティッキー日付ヘッダー用のカスタムデリゲート
+class _StickyDateHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final TimelinePhotoGroup? currentGroup;
+  final BuildContext context;
+
+  const _StickyDateHeaderDelegate({
+    required this.currentGroup,
+    required this.context,
+  });
+
+  @override
+  double get minExtent => 48.0; // 日付ヘッダーの固定高さ
+
+  @override
+  double get maxExtent => 48.0; // 日付ヘッダーの固定高さ
+
+  @override
+  bool shouldRebuild(covariant _StickyDateHeaderDelegate oldDelegate) {
+    // グループが変更された場合のみリビルド
+    return currentGroup != oldDelegate.currentGroup;
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    // 現在のグループが存在しない場合は空コンテナ
+    if (currentGroup == null) {
+      return const SizedBox.shrink();
+    }
+
+    // 既存の日付ヘッダーと同じスタイルを適用
+    return Container(
+      height: 48.0,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+        // スティッキーヘッダーとして識別しやすくするため、軽い影を追加
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          currentGroup!.displayName,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.left,
+        ),
+      ),
+    );
+  }
 }
