@@ -67,7 +67,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 2,
       actions: [
-        // Phase 1.7.2.3: 使用量カウンター表示ボタン
+        // 使用量カウンター表示ボタン
         Container(
           margin: const EdgeInsets.only(right: AppSpacing.xs),
           child: IconButton(
@@ -124,7 +124,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     );
   }
 
-  /// Phase 1.7.2.3: 使用量状況表示メソッド
+  /// 使用量状況表示メソッド
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
       final subscriptionService =
@@ -195,7 +195,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
   }
 
-  /// Phase 1.7.2.4: プラン変更誘導機能
+  /// プラン変更誘導機能
   void _navigateToUpgrade(BuildContext context) {
     // 共通のアップグレードダイアログを表示
     UpgradeDialogUtils.showUpgradeDialog(context);
