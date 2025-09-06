@@ -20,6 +20,7 @@ class DiaryCreationService {
   Future<void> startDiaryCreation({
     required BuildContext context,
     required List<AssetEntity> selectedPhotos,
+    VoidCallback? onCompleted,
   }) async {
     try {
       final logger = ServiceRegistration.get<LoggingService>();
@@ -39,7 +40,7 @@ class DiaryCreationService {
       }
 
       // プロンプト選択モーダルを表示
-      await _showPromptSelectionModal(context, selectedPhotos);
+      await _showPromptSelectionModal(context, selectedPhotos, onCompleted);
     } catch (e) {
       final logger = ServiceRegistration.get<LoggingService>();
       logger.error(
@@ -54,6 +55,7 @@ class DiaryCreationService {
   Future<void> _showPromptSelectionModal(
     BuildContext context,
     List<AssetEntity> selectedPhotos,
+    VoidCallback? onCompleted,
   ) async {
     await showDialog<void>(
       context: context,
@@ -61,11 +63,11 @@ class DiaryCreationService {
       builder: (context) => PromptSelectionModal(
         onPromptSelected: (prompt) {
           Navigator.of(context).pop();
-          _navigateToDiaryPreview(context, selectedPhotos, prompt);
+          _navigateToDiaryPreview(context, selectedPhotos, prompt, onCompleted);
         },
         onSkip: () {
           Navigator.of(context).pop();
-          _navigateToDiaryPreview(context, selectedPhotos, null);
+          _navigateToDiaryPreview(context, selectedPhotos, null, onCompleted);
         },
       ),
     );
@@ -76,6 +78,7 @@ class DiaryCreationService {
     BuildContext context,
     List<AssetEntity> selectedPhotos,
     WritingPrompt? selectedPrompt,
+    VoidCallback? onCompleted,
   ) {
     final logger = ServiceRegistration.get<LoggingService>();
 
@@ -94,6 +97,9 @@ class DiaryCreationService {
           selectedPrompt: selectedPrompt,
         ),
       ),
-    );
+    ).then((_) {
+      // 日記作成完了後のコールバックを実行
+      onCompleted?.call();
+    });
   }
 }

@@ -248,6 +248,7 @@ class _HomeScreenState extends State<HomeScreen>
         onUsedPhotoSelected: _showUsedPhotoModal,
         onRefresh: _refreshHome,
         onCameraPressed: _capturePhoto,
+        onDiaryCreated: _loadUsedPhotoIds,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,

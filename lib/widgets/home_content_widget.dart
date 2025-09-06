@@ -17,6 +17,7 @@ class HomeContentWidget extends StatefulWidget {
   final VoidCallback onCameraPressed;
   final Function(String) onDiaryTap;
   final Future<void> Function()? onRefresh;
+  final VoidCallback? onDiaryCreated;
 
   const HomeContentWidget({
     super.key,
@@ -27,6 +28,7 @@ class HomeContentWidget extends StatefulWidget {
     required this.onCameraPressed,
     required this.onDiaryTap,
     this.onRefresh,
+    this.onDiaryCreated,
   });
 
   @override
@@ -108,6 +110,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onUsedPhotoSelected: widget.onUsedPhotoSelected,
               onRequestPermission: widget.onRequestPermission,
               onCameraPressed: widget.onCameraPressed,
+              onDiaryCreated: widget.onDiaryCreated,
             ),
           ),
         ],
