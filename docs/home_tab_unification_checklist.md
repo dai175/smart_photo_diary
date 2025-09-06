@@ -199,9 +199,9 @@
 ## Phase 8: リリース準備 (1日)
 
 ### 📝 ドキュメント更新
-- [ ] `CLAUDE.md` の更新（該当する場合）
-- [ ] コード内コメントの更新
-- [ ]変更ログの作成
+- [x] `CLAUDE.md` の更新（ホーム画面アーキテクチャセクション追加）
+- [x] コード内コメントの更新（TimelinePhotoWidget、TimelineGroupingService、HomeContentWidget）
+- [x] 変更ログの作成（CHANGELOG_HOME_TAB_UNIFICATION.md）
 
 ### 🚀 デプロイメント準備
 - [ ] 最終テスト実行 (`fvm flutter test`)

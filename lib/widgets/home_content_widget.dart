@@ -9,6 +9,12 @@ import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
 
+/// ホーム画面のメインコンテンツウィジェット
+///
+/// タブ統合後の統一ホーム画面を提供。
+/// - TimelinePhotoWidget と FAB統合のコンテナ
+/// - プル・トゥ・リフレッシュ機能
+/// - 日記作成フローとの統合
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
   final VoidCallback onRequestPermission;

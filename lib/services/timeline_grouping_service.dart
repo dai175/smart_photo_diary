@@ -2,6 +2,11 @@ import 'package:photo_manager/photo_manager.dart';
 import '../models/timeline_photo_group.dart';
 
 /// タイムライン用の写真グルーピングサービス
+///
+/// ホーム画面タブ統合で実装されたコアサービス。
+/// 写真を日付別にグルーピングし、タイムライン表示用のデータ構造を提供。
+/// - 今日/昨日/月単位の階層グルーピング
+/// - シングルトンパターンでパフォーマンス最適化
 class TimelineGroupingService {
   static const TimelineGroupingService _instance =
       TimelineGroupingService._internal();

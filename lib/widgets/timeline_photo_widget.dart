@@ -9,6 +9,12 @@ import '../ui/design_system/app_spacing.dart';
 import '../constants/app_constants.dart';
 
 /// タイムライン表示用の写真ウィジェット
+///
+/// ホーム画面タブ統合後のメインコンポーネント。
+/// - 日付別グルーピング（今日/昨日/月単位）
+/// - スティッキーヘッダー付きスクロール表示
+/// - 写真選択・薄化表示機能
+/// - パフォーマンス最適化（インデックスキャッシュ・薄化判定キャッシュ）
 class TimelinePhotoWidget extends StatefulWidget {
   /// 写真選択コントローラー
   final PhotoSelectionController controller;
