@@ -7,6 +7,8 @@ import '../services/timeline_grouping_service.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../constants/app_constants.dart';
+import '../services/logging_service.dart';
+import '../core/service_locator.dart';
 
 /// タイムライン表示用の写真ウィジェット
 ///
@@ -64,9 +66,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   final ScrollController _scrollController = ScrollController();
   List<TimelinePhotoGroup> _photoGroups = [];
+  
+  // ログサービス
+  LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   // 無限スクロール用状態（シンプル版）
   bool _isLoadingMore = false;
+  
+  // デバッグ用状態
+  DateTime? _lastPreloadCall;
+  DateTime? _lastLoadMoreCall;
 
   // 無限スクロール用の定数
   static const double _preloadThreshold = 600.0; // 先読み開始位置（px）
@@ -111,15 +120,28 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final maxScrollExtent = position.maxScrollExtent;
 
     if (maxScrollExtent <= 0) return;
+    
+    final now = DateTime.now();
 
     // 段階1: 先読み開始（UIブロッキングなし）
     if (pixels >= maxScrollExtent - _preloadThreshold) {
-      widget.onPreloadMorePhotos?.call();
+      // 短時間の重複呼び出しを防ぐ（1秒間隔）
+      if (_lastPreloadCall == null || 
+          now.difference(_lastPreloadCall!).inMilliseconds > 1000) {
+        _lastPreloadCall = now;
+        _logger.info('先読みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=$_preloadThreshold', 
+          context: 'TimelinePhotoWidget._onScroll');
+        widget.onPreloadMorePhotos?.call();
+      }
     }
 
     // 段階2: 確実な読み込み（UIフィードバックあり）
     if (pixels >= maxScrollExtent - _loadMoreThreshold) {
-      if (!_isLoadingMore) {
+      if (!_isLoadingMore && (_lastLoadMoreCall == null || 
+          now.difference(_lastLoadMoreCall!).inMilliseconds > 1000)) {
+        _lastLoadMoreCall = now;
+        _logger.info('追加読み込みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=$_loadMoreThreshold', 
+          context: 'TimelinePhotoWidget._onScroll');
         _requestMorePhotos();
       }
     }
