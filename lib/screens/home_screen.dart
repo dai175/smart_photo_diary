@@ -40,6 +40,11 @@ class _HomeScreenState extends State<HomeScreen>
   // 権限リクエスト中フラグ
   bool _isRequestingPermission = false;
 
+  // 追加読み込み関連
+  int _currentPhotoOffset = 0;
+  static const int _photosPerPage = 40;
+  bool _hasMorePhotos = true; // 追加読み込み可能フラグ
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +54,8 @@ class _HomeScreenState extends State<HomeScreen>
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);
 
+    _currentPhotoOffset = 0; // オフセットをリセット
+    _hasMorePhotos = true; // フラグをリセット
     _loadTodayPhotos();
     _loadUsedPhotoIds();
   }
@@ -153,6 +160,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
+    _currentPhotoOffset = 0; // オフセットをリセット
+    _hasMorePhotos = true; // フラグをリセット
     await _loadTodayPhotos();
     await _loadUsedPhotoIds();
   }
@@ -231,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen>
       final photos = await photoService.getPhotosInDateRange(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)), // 今日を含む
-        limit: 1000, // タイムライン表示用の上限
+        limit: _photosPerPage, // 初回読み込み分のみ
       );
 
       if (!mounted) return;
@@ -245,6 +254,7 @@ class _HomeScreenState extends State<HomeScreen>
       }
 
       _photoController.setPhotoAssets(photos);
+      _currentPhotoOffset = photos.length; // 次回読み込み用にオフセット更新
       _photoController.setLoading(false);
     } catch (e) {
       if (mounted) {
@@ -253,6 +263,74 @@ class _HomeScreenState extends State<HomeScreen>
       }
     } finally {
       _isRequestingPermission = false;
+    }
+  }
+
+  // 追加写真読み込み（無限スクロール用）
+  Future<void> _loadMorePhotos() async {
+    if (!mounted || _isRequestingPermission || !_hasMorePhotos) return;
+
+    try {
+      final photoService = ServiceRegistration.get<IPhotoService>();
+
+      // プラン制限に応じた過去日数を計算（_loadTodayPhotosと同じロジック）
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+
+      int allowedDays = 1;
+      try {
+        final subscriptionService =
+            await ServiceRegistration.getAsync<ISubscriptionService>();
+        final planResult = await subscriptionService.getCurrentPlanClass();
+        if (planResult.isSuccess) {
+          final plan = planResult.value;
+          allowedDays = plan.displayName.contains('Premium') ? 365 : 1;
+        }
+      } catch (e) {
+        _logger.error(
+          'プラン情報取得エラー（追加読み込み）',
+          error: e,
+          context: 'HomeScreen._loadMorePhotos',
+        );
+      }
+
+      // より大きなlimitで再読み込みして差分を取得
+      final newLimit = _currentPhotoOffset + _photosPerPage;
+      final allPhotos = await photoService.getPhotosInDateRange(
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        endDate: todayStart.add(const Duration(days: 1)),
+        limit: newLimit,
+      );
+
+      if (!mounted) return;
+
+      final currentCount = _photoController.photoAssets.length;
+
+      // 写真が増えた場合のみ更新
+      if (allPhotos.length > currentCount) {
+        _photoController.setPhotoAssets(allPhotos);
+        _currentPhotoOffset = allPhotos.length;
+
+        _logger.info(
+          '追加写真読み込み完了',
+          context: 'HomeScreen._loadMorePhotos',
+          data: '新しい合計: ${allPhotos.length}',
+        );
+      } else {
+        // 写真が増えていない場合は、もう読み込むものがない
+        _hasMorePhotos = false;
+        _logger.info(
+          '追加写真なし - 読み込み終了',
+          context: 'HomeScreen._loadMorePhotos',
+          data: '現在: $currentCount',
+        );
+      }
+    } catch (e) {
+      _logger.error(
+        '追加写真読み込みエラー',
+        context: 'HomeScreen._loadMorePhotos',
+        error: e,
+      );
     }
   }
 
@@ -268,6 +346,7 @@ class _HomeScreenState extends State<HomeScreen>
         onRefresh: _refreshHome,
         onCameraPressed: _capturePhoto,
         onDiaryCreated: _loadUsedPhotoIds,
+        onLoadMorePhotos: _loadMorePhotos,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,

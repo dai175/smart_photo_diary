@@ -37,6 +37,9 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// スマートFAB表示制御
   final bool showFAB;
 
+  /// 追加写真読み込み要求コールバック
+  final VoidCallback? onLoadMorePhotos;
+
   const TimelinePhotoWidget({
     super.key,
     required this.controller,
@@ -45,6 +48,7 @@ class TimelinePhotoWidget extends StatefulWidget {
     this.onRequestPermission,
     this.onDifferentDateSelected,
     this.onCameraPressed,
+    this.onLoadMorePhotos,
     this.showFAB = true,
   });
 
@@ -91,9 +95,14 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// スクロール検知（シンプル版）
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      // 下端近くまでスクロールした時に追加読み込み要求
+    if (!_scrollController.hasClients) return;
+
+    final position = _scrollController.position;
+    final pixels = position.pixels;
+    final maxScrollExtent = position.maxScrollExtent;
+
+    // 下端近く（200px手前）まで来たら追加読み込み
+    if (pixels >= maxScrollExtent - 200 && maxScrollExtent > 0) {
       if (!_isLoadingMore) {
         _requestMorePhotos();
       }
@@ -105,15 +114,33 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     setState(() {
       _isLoadingMore = true;
     });
-    // TODO: HomeScreenに追加読み込み要求を送る仕組みが必要
-    // 現在はシンプルに状態だけ更新
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isLoadingMore = false;
-        });
+    // HomeScreenに追加読み込み要求を送信
+    widget.onLoadMorePhotos?.call();
+  }
+
+  /// 追加読み込み完了時に呼び出される（コントローラー更新時に自動実行）
+  void _onLoadMoreCompleted() {
+    if (_isLoadingMore) {
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  /// スクロール可能でない場合に追加読み込みを要求
+  void _checkIfNeedsMorePhotos() {
+    if (!_scrollController.hasClients || _isLoadingMore) return;
+
+    final position = _scrollController.position;
+    final photoCount = widget.controller.photoAssets.length;
+
+    // スクロール範囲がない、または非常に短い場合で、写真が少ない場合のみ
+    if (position.maxScrollExtent <= 100 && photoCount > 0 && photoCount < 100) {
+      // 追加写真読み込みを要求（但し、最大3回まで）
+      if (widget.onLoadMorePhotos != null && !_isLoadingMore) {
+        _requestMorePhotos();
       }
-    });
+    }
   }
 
   void _onControllerChanged() {
@@ -131,6 +158,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
 
     _updatePhotoGroups();
+
+    // 追加読み込み完了チェック
+    _onLoadMoreCompleted();
   }
 
   void _updatePhotoGroups() {
@@ -144,6 +174,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     if (mounted) {
       setState(() {
         _photoGroups = groups;
+      });
+
+      // 写真更新後、スクロール可能かチェック
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkIfNeedsMorePhotos();
       });
     }
   }
