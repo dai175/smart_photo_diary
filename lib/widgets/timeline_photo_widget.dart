@@ -77,16 +77,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   DateTime? _lastPreloadCall;
   DateTime? _lastLoadMoreCall;
 
-  // 無限スクロール用の定数
-  static const double _preloadThreshold = 600.0; // 先読み開始位置（px）
-  static const double _loadMoreThreshold = 300.0; // 追加読み込み開始位置（px）
+  // 無限スクロール用の定数（実機最適化）
+  static const double _preloadThreshold = 800.0; // 先読み開始位置を拡大（px）
+  static const double _loadMoreThreshold = 400.0; // 追加読み込み開始位置を拡大（px）
   static const double _scrollCheckThreshold = 200.0; // スクロール可能性チェックの閾値（px）
 
   // スクロール判定とタイミング関連の定数
   static const int _scrollCheckIntervalMs = 1000; // スクロール判定の間隔（ミリ秒）
   static const int _layoutCompleteDelayMs = 100; // レイアウト完了待機時間（ミリ秒）
   static const int _initializationCompleteDelayMs = 500; // 初期化完了待機時間（ミリ秒）
-  static const int _maxPhotosForAutoLoad = 80; // 自動追加読み込みする最大写真数
+  static const int _maxPhotosForAutoLoad = 60; // 自動追加読み込みする最大写真数（実機最適化）
 
   // パフォーマンス最適化用の定数
   static const double _crossAxisSpacing = 2.0;
@@ -106,6 +106,19 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   static const double _selectionIndicatorSize = 20.0;
   static const double _selectionIconSize = 19.0;
   static const double _selectionBorderWidth = 2.0;
+
+  // サムネイル関連の定数
+  static const int _thumbnailSize = 120;
+  static const int _thumbnailQuality = 60;
+
+  // レイアウト関連の定数
+  static const double _borderRadius = 4.0;
+  static const double _selectionIndicatorTop = 8.0;
+  static const double _selectionIndicatorRight = 8.0;
+  static const double _usedLabelBottom = 4.0;
+  static const double _usedLabelLeft = 4.0;
+  static const double _usedLabelHorizontalPadding = 4.0;
+  static const double _usedLabelVerticalPadding = 2.0;
 
   // インデックスキャッシュ（メインインデックス検索の最適化）
   final Map<String, int> _photoIndexCache = {};
@@ -280,10 +293,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.photoAssets,
     );
 
-    // インデックスキャッシュを更新
+    // インデックスキャッシュを先に完全に再構築してからUI更新
     _rebuildPhotoIndexCache();
 
     if (mounted) {
+      // キャッシュ再構築完了後に安全にUI更新
       setState(() {
         _photoGroups = groups;
       });
@@ -297,11 +311,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// 写真インデックスキャッシュを再構築（パフォーマンス最適化）
   void _rebuildPhotoIndexCache() {
-    _photoIndexCache.clear();
+    // 新しいキャッシュを作成（既存キャッシュを破壊しない）
+    final newCache = <String, int>{};
     final assets = widget.controller.photoAssets;
     for (int i = 0; i < assets.length; i++) {
-      _photoIndexCache[assets[i].id] = i;
+      newCache[assets[i].id] = i;
     }
+
+    // 原子的操作でキャッシュを置き換え
+    _photoIndexCache.clear();
+    _photoIndexCache.addAll(newCache);
   }
 
   @override
@@ -406,85 +425,93 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       );
     }
 
-    return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (context, child) {
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: _crossAxisCount,
-            crossAxisSpacing: _crossAxisSpacing,
-            mainAxisSpacing: _mainAxisSpacing,
-            childAspectRatio: _childAspectRatio,
-          ),
-          itemCount: group.photos.length,
-          itemBuilder: (context, index) {
-            final photo = group.photos[index];
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _crossAxisCount,
+        crossAxisSpacing: _crossAxisSpacing,
+        mainAxisSpacing: _mainAxisSpacing,
+        childAspectRatio: _childAspectRatio,
+      ),
+      itemCount: group.photos.length,
+      itemBuilder: (context, index) {
+        final photo = group.photos[index];
 
-            // キャッシュを使用してメインインデックスを高速取得
-            final mainIndex = _photoIndexCache[photo.id] ?? -1;
-            final isSelected =
-                mainIndex >= 0 && mainIndex < widget.controller.selected.length
-                ? widget.controller.selected[mainIndex]
-                : false;
-            final isUsed = mainIndex >= 0
-                ? widget.controller.isPhotoUsed(mainIndex)
-                : false;
+        // キャッシュを使用してメインインデックスを高速取得
+        final mainIndex = _photoIndexCache[photo.id] ?? -1;
+        final isSelected =
+            mainIndex >= 0 && mainIndex < widget.controller.selected.length
+            ? widget.controller.selected[mainIndex]
+            : false;
+        final isUsed = mainIndex >= 0
+            ? widget.controller.isPhotoUsed(mainIndex)
+            : false;
 
-            // キャッシュを使用した薄化判定（パフォーマンス最適化）
-            final shouldDimPhoto = _shouldDimPhotoWithCache(
-              photo: photo,
-              selectedDate: selectedDate,
-              isSelected: isSelected,
-            );
+        // キャッシュを使用した薄化判定（パフォーマンス最適化）
+        final shouldDimPhoto = _shouldDimPhotoWithCache(
+          photo: photo,
+          selectedDate: selectedDate,
+          isSelected: isSelected,
+        );
 
-            return GestureDetector(
-              onTap: () => _handlePhotoTap(mainIndex),
-              child: Stack(
-                children: [
-                  // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
-                  AnimatedOpacity(
-                    opacity: shouldDimPhoto ? 0.6 : 1.0,
-                    duration: Duration(milliseconds: _animationDurationMs),
-                    curve: Curves.easeInOut,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE0E0E0), // 固定値でパフォーマンス最適化
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(4),
-                        ),
-                        child: _OptimizedPhotoThumbnail(
-                          photo: photo,
-                          key: ValueKey(photo.id), // キーでWidgetの再利用を促進
-                        ),
-                      ),
+        return GestureDetector(
+          onTap: () => _handlePhotoTap(mainIndex),
+          child: Stack(
+            children: [
+              // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
+              AnimatedOpacity(
+                opacity: shouldDimPhoto ? 0.6 : 1.0,
+                duration: Duration(milliseconds: _animationDurationMs),
+                curve: Curves.easeInOut,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0), // 固定値でパフォーマンス最適化
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(_borderRadius),
                     ),
                   ),
-                  // パフォーマンス最適化された選択インジケーター
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: _OptimizedSelectionIndicator(
-                      isSelected: isSelected,
-                      isUsed: isUsed,
-                      shouldDimPhoto: shouldDimPhoto,
-                      primaryColor: Theme.of(context).colorScheme.primary,
-                      indicatorSize: _selectionIndicatorSize,
-                      iconSize: _selectionIconSize,
-                      borderWidth: _selectionBorderWidth,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(_borderRadius),
+                    ),
+                    child: _OptimizedPhotoThumbnail(
+                      photo: photo,
+                      thumbnailSize: _thumbnailSize,
+                      thumbnailQuality: _thumbnailQuality,
+                      borderRadius: _borderRadius,
+                      strokeWidth: _loadingIndicatorStrokeWidth,
+                      key: ValueKey(photo.id), // キーでWidgetの再利用を促進
                     ),
                   ),
-                  // パフォーマンス最適化された使用済みラベル
-                  if (isUsed) const _OptimizedUsedLabel(),
-                ],
+                ),
               ),
-            );
-          },
+              // パフォーマンス最適化された選択インジケーター
+              Positioned(
+                top: _selectionIndicatorTop,
+                right: _selectionIndicatorRight,
+                child: _OptimizedSelectionIndicator(
+                  isSelected: isSelected,
+                  isUsed: isUsed,
+                  shouldDimPhoto: shouldDimPhoto,
+                  primaryColor: Theme.of(context).colorScheme.primary,
+                  indicatorSize: _selectionIndicatorSize,
+                  iconSize: _selectionIconSize,
+                  borderWidth: _selectionBorderWidth,
+                ),
+              ),
+              // パフォーマンス最適化された使用済みラベル
+              if (isUsed)
+                _OptimizedUsedLabel(
+                  bottom: _usedLabelBottom,
+                  left: _usedLabelLeft,
+                  horizontalPadding: _usedLabelHorizontalPadding,
+                  verticalPadding: _usedLabelVerticalPadding,
+                  borderRadius: _borderRadius,
+                ),
+            ],
+          ),
         );
       },
     );
@@ -637,14 +664,28 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
 /// パフォーマンス最適化された写真サムネイルウィジェット
 class _OptimizedPhotoThumbnail extends StatelessWidget {
-  const _OptimizedPhotoThumbnail({super.key, required this.photo});
+  const _OptimizedPhotoThumbnail({
+    super.key,
+    required this.photo,
+    required this.thumbnailSize,
+    required this.thumbnailQuality,
+    required this.borderRadius,
+    required this.strokeWidth,
+  });
 
   final AssetEntity photo;
+  final int thumbnailSize;
+  final int thumbnailQuality;
+  final double borderRadius;
+  final double strokeWidth;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Uint8List?>(
-      future: photo.thumbnailData,
+      future: photo.thumbnailDataWithSize(
+        ThumbnailSize(thumbnailSize, thumbnailSize),
+        quality: thumbnailQuality,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data != null) {
           return Image.memory(
@@ -658,14 +699,14 @@ class _OptimizedPhotoThumbnail extends StatelessWidget {
           );
         } else {
           return Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFBDBDBD),
-              borderRadius: BorderRadius.all(Radius.circular(4)),
+            decoration: BoxDecoration(
+              color: const Color(0xFFBDBDBD),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
             ),
-            child: const Center(
+            child: Center(
               child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Color(0xFF9E9E9E),
+                strokeWidth: strokeWidth,
+                color: const Color(0xFF9E9E9E),
               ),
             ),
           );
@@ -732,18 +773,33 @@ class _OptimizedSelectionIndicator extends StatelessWidget {
 
 /// パフォーマンス最適化された使用済みラベル
 class _OptimizedUsedLabel extends StatelessWidget {
-  const _OptimizedUsedLabel();
+  const _OptimizedUsedLabel({
+    required this.bottom,
+    required this.left,
+    required this.horizontalPadding,
+    required this.verticalPadding,
+    required this.borderRadius,
+  });
+
+  final double bottom;
+  final double left;
+  final double horizontalPadding;
+  final double verticalPadding;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 4,
-      left: 4,
+      bottom: bottom,
+      left: left,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xE6FF9800), // 固定値でパフォーマンス最適化
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: const Text(
           '使用済み',

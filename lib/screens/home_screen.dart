@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 追加読み込み関連
   int _currentPhotoOffset = 0;
-  static const int _photosPerPage = 40;
+  static const int _photosPerPage = 20; // 実機パフォーマンス最適化
   bool _hasMorePhotos = true; // 追加読み込み可能フラグ
   bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
 
