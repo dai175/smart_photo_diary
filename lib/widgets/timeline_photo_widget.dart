@@ -736,37 +736,52 @@ class _OptimizedSelectionIndicator extends StatelessWidget {
   final double iconSize;
   final double borderWidth;
 
+  // 選択インジケーターの色とスタイル定数
+  static const Color _borderColor = Color(0xB3FFFFFF); // 境界線の色（透明度70%白色）
+  static const Color _shadowColor = Color(0x1A000000); // 影の色（透明度10%黒色）
+  static const double _shadowBlurRadius = 2.0; // 影のぼかし半径
+  static const Offset _shadowOffset = Offset(0, 1); // 影のオフセット
+
   @override
   Widget build(BuildContext context) {
+    if (!isSelected && !isUsed) {
+      // 未選択時は完全透明な境界線のみ
+      return Container(
+        width: indicatorSize,
+        height: indicatorSize,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          shape: BoxShape.circle,
+          border: !shouldDimPhoto
+              ? Border.all(color: _borderColor, width: borderWidth)
+              : null,
+          boxShadow: null, // 未選択時は影なし
+        ),
+      );
+    }
+
+    // 選択済み/使用済み時は白背景とアイコン
     return Container(
       width: indicatorSize,
       height: indicatorSize,
       decoration: BoxDecoration(
-        color: isSelected || isUsed ? Colors.white : Colors.transparent,
+        color: Colors.white,
         shape: BoxShape.circle,
-        border: !isSelected && !isUsed && !shouldDimPhoto
-            ? Border.all(
-                color: const Color(0xB3FFFFFF), // 固定値でパフォーマンス最適化
-                width: borderWidth,
-              )
-            : null,
         boxShadow: shouldDimPhoto
             ? null
-            : const [
+            : [
                 BoxShadow(
-                  color: Color(0x33000000), // 固定値でパフォーマンス最適化
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
+                  color: _shadowColor,
+                  blurRadius: _shadowBlurRadius,
+                  offset: _shadowOffset,
                 ),
               ],
       ),
-      child: (isSelected || isUsed)
-          ? Icon(
-              isUsed ? Icons.done : Icons.check_circle,
-              size: iconSize,
-              color: isUsed ? Colors.orange : primaryColor,
-            )
-          : null,
+      child: Icon(
+        isUsed ? Icons.done : Icons.check_circle,
+        size: iconSize,
+        color: isUsed ? Colors.orange : primaryColor,
+      ),
     );
   }
 }
@@ -787,6 +802,10 @@ class _OptimizedUsedLabel extends StatelessWidget {
   final double verticalPadding;
   final double borderRadius;
 
+  // 使用済みラベルの色とスタイル定数
+  static const Color _backgroundColor = Color(0xE6FF9800); // 背景色（オレンジ、透明度90%）
+  static const double _fontSize = 10.0; // フォントサイズ
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -798,14 +817,14 @@ class _OptimizedUsedLabel extends StatelessWidget {
           vertical: verticalPadding,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xE6FF9800), // 固定値でパフォーマンス最適化
+          color: _backgroundColor,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: const Text(
           '使用済み',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 10,
+            fontSize: _fontSize,
             fontWeight: FontWeight.bold,
           ),
         ),
