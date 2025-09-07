@@ -69,8 +69,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   bool _isLoadingMore = false;
 
   // 無限スクロール用の定数
-  static const double _preloadThreshold = 400.0; // 先読み開始位置（px）
-  static const double _loadMoreThreshold = 200.0; // 追加読み込み開始位置（px）
+  static const double _preloadThreshold = 600.0; // 先読み開始位置（px）
+  static const double _loadMoreThreshold = 300.0; // 追加読み込み開始位置（px）
 
   // パフォーマンス最適化用の定数
   static const double _crossAxisSpacing = 2.0;
