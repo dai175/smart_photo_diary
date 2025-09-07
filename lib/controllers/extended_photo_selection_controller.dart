@@ -12,6 +12,7 @@ class ExtendedPhotoSelectionController extends PhotoSelectionController {
 
   /// 追加読み込みが可能かどうか
   bool _hasMorePhotos = true;
+  @override
   bool get hasMorePhotos => _hasMorePhotos;
 
   /// 月別にグループ化された写真

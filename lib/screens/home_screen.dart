@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     _currentPhotoOffset = 0; // オフセットをリセット
     _hasMorePhotos = true; // フラグをリセット
+    _photoController.setHasMorePhotos(true); // コントローラーにも設定
     _loadTodayPhotos();
     _loadUsedPhotoIds();
   }
@@ -162,6 +163,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _refreshHome() async {
     _currentPhotoOffset = 0; // オフセットをリセット
     _hasMorePhotos = true; // フラグをリセット
+    _photoController.setHasMorePhotos(true); // コントローラーにも設定
     await _loadTodayPhotos();
     await _loadUsedPhotoIds();
   }
@@ -319,6 +321,7 @@ class _HomeScreenState extends State<HomeScreen>
       } else {
         // 写真が増えていない場合は、もう読み込むものがない
         _hasMorePhotos = false;
+        _photoController.setHasMorePhotos(false); // コントローラーにも設定
         _logger.info(
           '追加写真なし - 読み込み終了',
           context: 'HomeScreen._loadMorePhotos',

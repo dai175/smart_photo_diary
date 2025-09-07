@@ -101,8 +101,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final pixels = position.pixels;
     final maxScrollExtent = position.maxScrollExtent;
 
-    // 下端近く（200px手前）まで来たら追加読み込み
-    if (pixels >= maxScrollExtent - 200 && maxScrollExtent > 0) {
+    // 下端近く（200px手前）まで来たら追加読み込み（追加写真がある場合のみ）
+    if (pixels >= maxScrollExtent - 200 &&
+        maxScrollExtent > 0 &&
+        widget.controller.hasMorePhotos) {
       if (!_isLoadingMore) {
         _requestMorePhotos();
       }
@@ -129,14 +131,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// スクロール可能でない場合に追加読み込みを要求
   void _checkIfNeedsMorePhotos() {
-    if (!_scrollController.hasClients || _isLoadingMore) return;
+    if (!_scrollController.hasClients ||
+        _isLoadingMore ||
+        !widget.controller.hasMorePhotos)
+      return;
 
     final position = _scrollController.position;
     final photoCount = widget.controller.photoAssets.length;
 
     // スクロール範囲がない、または非常に短い場合で、写真が少ない場合のみ
     if (position.maxScrollExtent <= 100 && photoCount > 0 && photoCount < 100) {
-      // 追加写真読み込みを要求（但し、最大3回まで）
+      // 追加写真読み込みを要求
       if (widget.onLoadMorePhotos != null && !_isLoadingMore) {
         _requestMorePhotos();
       }
@@ -234,8 +239,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             ),
           );
         }),
-        // 追加読み込みインジケーター
-        if (_isLoadingMore)
+        // 追加読み込みインジケーター（追加写真がある場合のみ）
+        if (_isLoadingMore && widget.controller.hasMorePhotos)
           SliverToBoxAdapter(
             child: const Padding(
               padding: EdgeInsets.all(AppSpacing.md),
