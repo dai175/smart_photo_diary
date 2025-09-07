@@ -365,9 +365,9 @@ class _HomeScreenState extends State<HomeScreen>
         );
       }
 
-      // 写真が増えた場合のみ更新
+      // 写真が増えた場合のみ更新（選択状態を保持）
       if (allPhotos.length > currentCount) {
-        _photoController.setPhotoAssets(allPhotos);
+        _photoController.setPhotoAssetsPreservingSelection(allPhotos);
         _currentPhotoOffset = allPhotos.length;
 
         if (!showLoading) {

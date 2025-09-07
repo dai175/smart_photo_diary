@@ -244,20 +244,32 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   void _onControllerChanged() {
-    // 薄化キャッシュをクリア（選択状態変更時）
+    // 薄化キャッシュをクリア（選択状態変更時のみ）
     final currentSelectedDate = _groupingService.getSelectedDate(
       widget.controller.selectedPhotos,
     );
     final currentSelectedCount = widget.controller.selectedCount;
 
+    // 選択状態の実質的変更をチェック（先読み時の不要なクリアを防ぐ）
+    bool shouldClearCache = false;
     if (_lastSelectedDate != currentSelectedDate ||
         _lastSelectedCount != currentSelectedCount) {
-      _dimPhotoCache.clear();
+      // 日付変更または選択数変更の場合のみクリア
+      shouldClearCache = true;
       _lastSelectedDate = currentSelectedDate;
       _lastSelectedCount = currentSelectedCount;
     }
 
-    _updatePhotoGroups();
+    // UI更新を次のフレームに延期（キャッシュ準備完了を待つ）
+    Future.microtask(() {
+      if (mounted) {
+        // キャッシュクリアもUI更新と同じタイミングで実行
+        if (shouldClearCache) {
+          _dimPhotoCache.clear();
+        }
+        _updatePhotoGroups();
+      }
+    });
 
     // 追加読み込み完了チェック
     _onLoadMoreCompleted();

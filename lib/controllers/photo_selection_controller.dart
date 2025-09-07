@@ -92,10 +92,34 @@ class PhotoSelectionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 写真アセットを設定
+  /// 写真アセットを設定（選択状態をリセット）
   void setPhotoAssets(List<AssetEntity> assets) {
     _photoAssets = assets;
     _selected = List.generate(assets.length, (index) => false);
+    notifyListeners();
+  }
+
+  /// 写真アセットを設定（選択状態を保持）
+  void setPhotoAssetsPreservingSelection(List<AssetEntity> assets) {
+    // 現在の選択状態を保存（写真IDベースで）
+    final selectedIds = <String>{};
+    for (int i = 0; i < _photoAssets.length && i < _selected.length; i++) {
+      if (_selected[i]) {
+        selectedIds.add(_photoAssets[i].id);
+      }
+    }
+
+    // 新しい写真リストを設定
+    _photoAssets = assets;
+    _selected = List.generate(assets.length, (index) => false);
+
+    // 選択状態を復元
+    for (int i = 0; i < _photoAssets.length; i++) {
+      if (selectedIds.contains(_photoAssets[i].id)) {
+        _selected[i] = true;
+      }
+    }
+
     notifyListeners();
   }
 
