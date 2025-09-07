@@ -40,6 +40,16 @@ class _HomeScreenState extends State<HomeScreen>
   // 権限リクエスト中フラグ
   bool _isRequestingPermission = false;
 
+  // 追加読み込み関連
+  int _currentPhotoOffset = 0;
+  static const int _photosPerPage = 20; // 実機パフォーマンス最適化
+  bool _hasMorePhotos = true; // 追加読み込み可能フラグ
+  bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
+
+  // プラン情報のキャッシュ（先読み最適化用）
+  int? _cachedAllowedDays;
+  DateTime? _planCacheExpiry;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +59,10 @@ class _HomeScreenState extends State<HomeScreen>
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);
 
+    _currentPhotoOffset = 0; // オフセットをリセット
+    _hasMorePhotos = true; // フラグをリセット
+    _isPreloading = false; // 先読みフラグをリセット
+    _photoController.setHasMorePhotos(true); // コントローラーにも設定
     _loadTodayPhotos();
     _loadUsedPhotoIds();
   }
@@ -153,6 +167,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
+    _currentPhotoOffset = 0; // オフセットをリセット
+    _hasMorePhotos = true; // フラグをリセット
+    _isPreloading = false; // 先読みフラグをリセット
+    _photoController.setHasMorePhotos(true); // コントローラーにも設定
+    // プランキャッシュもクリア
+    _cachedAllowedDays = null;
+    _planCacheExpiry = null;
     await _loadTodayPhotos();
     await _loadUsedPhotoIds();
   }
@@ -209,29 +230,13 @@ class _HomeScreenState extends State<HomeScreen>
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // プラン制限に応じた過去日数を計算
-      int allowedDays = 1; // デフォルトはBasicプラン（昨日まで）
-      try {
-        final subscriptionService =
-            await ServiceRegistration.getAsync<ISubscriptionService>();
-        final planResult = await subscriptionService.getCurrentPlanClass();
-        if (planResult.isSuccess) {
-          final plan = planResult.value;
-          // Premiumプランの場合は365日、Basicプランの場合は1日
-          allowedDays = plan.displayName.contains('Premium') ? 365 : 1;
-        }
-      } catch (e) {
-        _logger.error(
-          'プラン情報取得エラー、Basicプランとして処理',
-          error: e,
-          context: 'HomeScreen._loadTodayPhotos',
-        );
-      }
+      // プラン制限に応じた過去日数を計算（キャッシュ使用）
+      final allowedDays = await _getCachedAllowedDays();
 
       final photos = await photoService.getPhotosInDateRange(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)), // 今日を含む
-        limit: 1000, // タイムライン表示用の上限
+        limit: _photosPerPage, // 初回読み込み分のみ
       );
 
       if (!mounted) return;
@@ -245,6 +250,7 @@ class _HomeScreenState extends State<HomeScreen>
       }
 
       _photoController.setPhotoAssets(photos);
+      _currentPhotoOffset = photos.length; // 次回読み込み用にオフセット更新
       _photoController.setLoading(false);
     } catch (e) {
       if (mounted) {
@@ -253,6 +259,146 @@ class _HomeScreenState extends State<HomeScreen>
       }
     } finally {
       _isRequestingPermission = false;
+    }
+  }
+
+  // 追加写真読み込み（無限スクロール用）
+  Future<void> _loadMorePhotos() async {
+    // 先読み版を呼び出し（UIブロッキングあり）
+    await _preloadMorePhotos(showLoading: true);
+  }
+
+  // プラン情報を取得（キャッシュ付き）
+  Future<int> _getCachedAllowedDays() async {
+    final now = DateTime.now();
+
+    // キャッシュが有効な場合はそれを使用（5分間キャッシュ）
+    if (_cachedAllowedDays != null &&
+        _planCacheExpiry != null &&
+        now.isBefore(_planCacheExpiry!)) {
+      return _cachedAllowedDays!;
+    }
+
+    // キャッシュが無効な場合は新しく取得
+    int allowedDays = 1; // デフォルトはBasicプラン
+    try {
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+      final planResult = await subscriptionService.getCurrentPlanClass();
+      if (planResult.isSuccess) {
+        final plan = planResult.value;
+        allowedDays = plan.displayName.contains('Premium') ? 365 : 1;
+      }
+    } catch (e) {
+      _logger.error(
+        'プラン情報取得エラー',
+        error: e,
+        context: 'HomeScreen._getCachedAllowedDays',
+      );
+    }
+
+    // キャッシュを更新（5分間有効）
+    _cachedAllowedDays = allowedDays;
+    _planCacheExpiry = now.add(const Duration(minutes: 5));
+
+    return allowedDays;
+  }
+
+  // 先読み機能付き追加写真読み込み（最適化版）
+  Future<void> _preloadMorePhotos({bool showLoading = false}) async {
+    if (!mounted || _isRequestingPermission || !_hasMorePhotos) {
+      if (!showLoading) {
+        _logger.info(
+          '先読みスキップ: mounted=$mounted, requesting=$_isRequestingPermission, hasMore=$_hasMorePhotos',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
+      }
+      return;
+    }
+
+    // 既に先読み中の場合はスキップ
+    if (_isPreloading) {
+      if (!showLoading) {
+        _logger.info(
+          '先読みスキップ: 既に先読み中',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
+      }
+      return;
+    }
+
+    _isPreloading = true;
+
+    if (!showLoading) {
+      _logger.info('先読み開始', context: 'HomeScreen._preloadMorePhotos');
+    }
+
+    // UIにローディング状態を反映（必要な場合のみ）
+    if (showLoading) {
+      _photoController.setLoading(true);
+    }
+
+    try {
+      final photoService = ServiceRegistration.get<IPhotoService>();
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+
+      // キャッシュされたプラン情報を使用
+      final allowedDays = await _getCachedAllowedDays();
+
+      // より大きなlimitで再読み込みして差分を取得
+      final newLimit = _currentPhotoOffset + _photosPerPage;
+      final allPhotos = await photoService.getPhotosInDateRange(
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        endDate: todayStart.add(const Duration(days: 1)),
+        limit: newLimit,
+      );
+
+      if (!mounted) return;
+
+      final currentCount = _photoController.photoAssets.length;
+
+      if (!showLoading) {
+        _logger.info(
+          '先読み結果: 現在=$currentCount, 取得=${allPhotos.length}',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
+      }
+
+      // 写真が増えた場合のみ更新（選択状態を保持）
+      if (allPhotos.length > currentCount) {
+        _photoController.setPhotoAssetsPreservingSelection(allPhotos);
+        _currentPhotoOffset = allPhotos.length;
+
+        if (!showLoading) {
+          _logger.info(
+            '先読み成功: ${allPhotos.length - currentCount}枚追加',
+            context: 'HomeScreen._preloadMorePhotos',
+          );
+        }
+      } else {
+        // 写真が増えていない場合は、もう読み込むものがない
+        _hasMorePhotos = false;
+        _photoController.setHasMorePhotos(false);
+
+        if (!showLoading) {
+          _logger.info(
+            '先読み終了: これ以上写真がありません',
+            context: 'HomeScreen._preloadMorePhotos',
+          );
+        }
+      }
+    } catch (e) {
+      _logger.error(
+        '先読み写真読み込みエラー',
+        context: 'HomeScreen._preloadMorePhotos',
+        error: e,
+      );
+    } finally {
+      _isPreloading = false;
+      if (showLoading) {
+        _photoController.setLoading(false);
+      }
     }
   }
 
@@ -268,6 +414,8 @@ class _HomeScreenState extends State<HomeScreen>
         onRefresh: _refreshHome,
         onCameraPressed: _capturePhoto,
         onDiaryCreated: _loadUsedPhotoIds,
+        onLoadMorePhotos: _loadMorePhotos,
+        onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,

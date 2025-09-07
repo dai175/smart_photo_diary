@@ -9,6 +9,7 @@ class PhotoSelectionController extends ChangeNotifier {
   Set<String> _usedPhotoIds = {};
   bool _isLoading = true;
   bool _hasPermission = false;
+  bool _hasMorePhotos = true; // 追加写真が存在するかのフラグ
   DateTime? _selectedDate; // 選択された写真の日付を保持
 
   // ゲッター
@@ -17,6 +18,7 @@ class PhotoSelectionController extends ChangeNotifier {
   Set<String> get usedPhotoIds => _usedPhotoIds;
   bool get isLoading => _isLoading;
   bool get hasPermission => _hasPermission;
+  bool get hasMorePhotos => _hasMorePhotos;
 
   /// 選択された写真の数を取得
   int get selectedCount => _selected.where((s) => s).length;
@@ -90,10 +92,34 @@ class PhotoSelectionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 写真アセットを設定
+  /// 写真アセットを設定（選択状態をリセット）
   void setPhotoAssets(List<AssetEntity> assets) {
     _photoAssets = assets;
     _selected = List.generate(assets.length, (index) => false);
+    notifyListeners();
+  }
+
+  /// 写真アセットを設定（選択状態を保持）
+  void setPhotoAssetsPreservingSelection(List<AssetEntity> assets) {
+    // 現在の選択状態を保存（写真IDベースで）
+    final selectedIds = <String>{};
+    for (int i = 0; i < _photoAssets.length && i < _selected.length; i++) {
+      if (_selected[i]) {
+        selectedIds.add(_photoAssets[i].id);
+      }
+    }
+
+    // 新しい写真リストを設定
+    _photoAssets = assets;
+    _selected = List.generate(assets.length, (index) => false);
+
+    // 選択状態を復元
+    for (int i = 0; i < _photoAssets.length; i++) {
+      if (selectedIds.contains(_photoAssets[i].id)) {
+        _selected[i] = true;
+      }
+    }
+
     notifyListeners();
   }
 
@@ -112,6 +138,12 @@ class PhotoSelectionController extends ChangeNotifier {
   /// 権限状態を設定
   void setPermission(bool permission) {
     _hasPermission = permission;
+    notifyListeners();
+  }
+
+  /// 追加写真存在フラグを設定
+  void setHasMorePhotos(bool hasMore) {
+    _hasMorePhotos = hasMore;
     notifyListeners();
   }
 
