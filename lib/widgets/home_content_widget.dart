@@ -25,6 +25,7 @@ class HomeContentWidget extends StatefulWidget {
   final Future<void> Function()? onRefresh;
   final VoidCallback? onDiaryCreated;
   final VoidCallback? onLoadMorePhotos;
+  final VoidCallback? onPreloadMorePhotos;
 
   const HomeContentWidget({
     super.key,
@@ -37,6 +38,7 @@ class HomeContentWidget extends StatefulWidget {
     this.onRefresh,
     this.onDiaryCreated,
     this.onLoadMorePhotos,
+    this.onPreloadMorePhotos,
   });
 
   @override
@@ -120,6 +122,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onCameraPressed: widget.onCameraPressed,
               onDiaryCreated: widget.onDiaryCreated,
               onLoadMorePhotos: widget.onLoadMorePhotos,
+              onPreloadMorePhotos: widget.onPreloadMorePhotos,
             ),
           ),
         ],

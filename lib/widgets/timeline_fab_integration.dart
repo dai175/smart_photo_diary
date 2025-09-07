@@ -30,6 +30,9 @@ class TimelineFABIntegration extends StatelessWidget {
   /// 追加写真読み込み要求コールバック
   final VoidCallback? onLoadMorePhotos;
 
+  /// バックグラウンド先読み要求コールバック
+  final VoidCallback? onPreloadMorePhotos;
+
   const TimelineFABIntegration({
     super.key,
     required this.controller,
@@ -40,6 +43,7 @@ class TimelineFABIntegration extends StatelessWidget {
     this.onCameraPressed,
     this.onDiaryCreated,
     this.onLoadMorePhotos,
+    this.onPreloadMorePhotos,
   });
 
   @override
@@ -54,6 +58,7 @@ class TimelineFABIntegration extends StatelessWidget {
           onDifferentDateSelected: onDifferentDateSelected,
           onCameraPressed: onCameraPressed,
           onLoadMorePhotos: onLoadMorePhotos,
+          onPreloadMorePhotos: onPreloadMorePhotos,
           showFAB: false, // FABは別途管理
         ),
         Positioned(

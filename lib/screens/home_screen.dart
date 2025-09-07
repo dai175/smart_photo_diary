@@ -44,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen>
   int _currentPhotoOffset = 0;
   static const int _photosPerPage = 40;
   bool _hasMorePhotos = true; // 追加読み込み可能フラグ
+  bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     _currentPhotoOffset = 0; // オフセットをリセット
     _hasMorePhotos = true; // フラグをリセット
+    _isPreloading = false; // 先読みフラグをリセット
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
     _loadTodayPhotos();
     _loadUsedPhotoIds();
@@ -163,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _refreshHome() async {
     _currentPhotoOffset = 0; // オフセットをリセット
     _hasMorePhotos = true; // フラグをリセット
+    _isPreloading = false; // 先読みフラグをリセット
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
     await _loadTodayPhotos();
     await _loadUsedPhotoIds();
@@ -270,7 +273,23 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 追加写真読み込み（無限スクロール用）
   Future<void> _loadMorePhotos() async {
+    // 先読み版を呼び出し（UIブロッキングあり）
+    await _preloadMorePhotos(showLoading: true);
+  }
+
+  // 先読み機能付き追加写真読み込み
+  Future<void> _preloadMorePhotos({bool showLoading = false}) async {
     if (!mounted || _isRequestingPermission || !_hasMorePhotos) return;
+
+    // 既に先読み中の場合はスキップ
+    if (_isPreloading) return;
+
+    _isPreloading = true;
+
+    // UIにローディング状態を反映（必要な場合のみ）
+    if (showLoading) {
+      _photoController.setLoading(true);
+    }
 
     try {
       final photoService = ServiceRegistration.get<IPhotoService>();
@@ -314,8 +333,8 @@ class _HomeScreenState extends State<HomeScreen>
         _currentPhotoOffset = allPhotos.length;
 
         _logger.info(
-          '追加写真読み込み完了',
-          context: 'HomeScreen._loadMorePhotos',
+          '先読み写真読み込み完了',
+          context: 'HomeScreen._preloadMorePhotos',
           data: '新しい合計: ${allPhotos.length}',
         );
       } else {
@@ -323,17 +342,22 @@ class _HomeScreenState extends State<HomeScreen>
         _hasMorePhotos = false;
         _photoController.setHasMorePhotos(false); // コントローラーにも設定
         _logger.info(
-          '追加写真なし - 読み込み終了',
-          context: 'HomeScreen._loadMorePhotos',
+          '先読み写真なし - 読み込み終了',
+          context: 'HomeScreen._preloadMorePhotos',
           data: '現在: $currentCount',
         );
       }
     } catch (e) {
       _logger.error(
-        '追加写真読み込みエラー',
-        context: 'HomeScreen._loadMorePhotos',
+        '先読み写真読み込みエラー',
+        context: 'HomeScreen._preloadMorePhotos',
         error: e,
       );
+    } finally {
+      _isPreloading = false;
+      if (showLoading) {
+        _photoController.setLoading(false);
+      }
     }
   }
 
@@ -350,6 +374,7 @@ class _HomeScreenState extends State<HomeScreen>
         onCameraPressed: _capturePhoto,
         onDiaryCreated: _loadUsedPhotoIds,
         onLoadMorePhotos: _loadMorePhotos,
+        onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,

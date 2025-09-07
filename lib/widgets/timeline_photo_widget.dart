@@ -40,6 +40,9 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 追加写真読み込み要求コールバック
   final VoidCallback? onLoadMorePhotos;
 
+  /// バックグラウンド先読み要求コールバック
+  final VoidCallback? onPreloadMorePhotos;
+
   const TimelinePhotoWidget({
     super.key,
     required this.controller,
@@ -49,6 +52,7 @@ class TimelinePhotoWidget extends StatefulWidget {
     this.onDifferentDateSelected,
     this.onCameraPressed,
     this.onLoadMorePhotos,
+    this.onPreloadMorePhotos,
     this.showFAB = true,
   });
 
@@ -63,6 +67,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   // 無限スクロール用状態（シンプル版）
   bool _isLoadingMore = false;
+
+  // 無限スクロール用の定数
+  static const double _preloadThreshold = 400.0; // 先読み開始位置（px）
+  static const double _loadMoreThreshold = 200.0; // 追加読み込み開始位置（px）
 
   // パフォーマンス最適化用の定数
   static const double _crossAxisSpacing = 2.0;
@@ -93,18 +101,24 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     super.dispose();
   }
 
-  /// スクロール検知（シンプル版）
+  /// スクロール検知（2段階先読み版）
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
+    if (!_scrollController.hasClients || !widget.controller.hasMorePhotos)
+      return;
 
     final position = _scrollController.position;
     final pixels = position.pixels;
     final maxScrollExtent = position.maxScrollExtent;
 
-    // 下端近く（200px手前）まで来たら追加読み込み（追加写真がある場合のみ）
-    if (pixels >= maxScrollExtent - 200 &&
-        maxScrollExtent > 0 &&
-        widget.controller.hasMorePhotos) {
+    if (maxScrollExtent <= 0) return;
+
+    // 段階1: 先読み開始（UIブロッキングなし）
+    if (pixels >= maxScrollExtent - _preloadThreshold) {
+      widget.onPreloadMorePhotos?.call();
+    }
+
+    // 段階2: 確実な読み込み（UIフィードバックあり）
+    if (pixels >= maxScrollExtent - _loadMoreThreshold) {
       if (!_isLoadingMore) {
         _requestMorePhotos();
       }
