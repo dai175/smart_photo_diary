@@ -54,7 +54,11 @@ class TimelinePhotoWidget extends StatefulWidget {
 
 class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
+  final ScrollController _scrollController = ScrollController();
   List<TimelinePhotoGroup> _photoGroups = [];
+
+  // 無限スクロール用状態（シンプル版）
+  bool _isLoadingMore = false;
 
   // パフォーマンス最適化用の定数
   static const double _crossAxisSpacing = 2.0;
@@ -74,13 +78,42 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
+    _scrollController.addListener(_onScroll);
     _updatePhotoGroups();
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     widget.controller.removeListener(_onControllerChanged);
     super.dispose();
+  }
+
+  /// スクロール検知（シンプル版）
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      // 下端近くまでスクロールした時に追加読み込み要求
+      if (!_isLoadingMore) {
+        _requestMorePhotos();
+      }
+    }
+  }
+
+  /// 追加写真読み込み要求（HomeScreenに委譲）
+  void _requestMorePhotos() {
+    setState(() {
+      _isLoadingMore = true;
+    });
+    // TODO: HomeScreenに追加読み込み要求を送る仕組みが必要
+    // 現在はシンプルに状態だけ更新
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    });
   }
 
   void _onControllerChanged() {
@@ -153,17 +186,34 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
     // flutter_sticky_headerを使ったシンプルな実装
     return CustomScrollView(
-      slivers: _photoGroups.map((group) {
-        return SliverStickyHeader(
-          header: _buildStickyHeader(group),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildPhotoGridForGroup(group, selectedDate),
-              const SizedBox(height: AppSpacing.md),
-            ]),
+      controller: _scrollController,
+      slivers: [
+        ..._photoGroups.map((group) {
+          return SliverStickyHeader(
+            header: _buildStickyHeader(group),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildPhotoGridForGroup(group, selectedDate),
+                const SizedBox(height: AppSpacing.md),
+              ]),
+            ),
+          );
+        }),
+        // 追加読み込みインジケーター
+        if (_isLoadingMore)
+          SliverToBoxAdapter(
+            child: const Padding(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 
