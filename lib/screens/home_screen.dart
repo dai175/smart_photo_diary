@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen>
   static const int _photosPerPage = 40;
   bool _hasMorePhotos = true; // 追加読み込み可能フラグ
   bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
-  
+
   // プラン情報のキャッシュ（先読み最適化用）
   int? _cachedAllowedDays;
   DateTime? _planCacheExpiry;
@@ -271,18 +271,19 @@ class _HomeScreenState extends State<HomeScreen>
   // プラン情報を取得（キャッシュ付き）
   Future<int> _getCachedAllowedDays() async {
     final now = DateTime.now();
-    
+
     // キャッシュが有効な場合はそれを使用（5分間キャッシュ）
-    if (_cachedAllowedDays != null && 
-        _planCacheExpiry != null && 
+    if (_cachedAllowedDays != null &&
+        _planCacheExpiry != null &&
         now.isBefore(_planCacheExpiry!)) {
       return _cachedAllowedDays!;
     }
-    
+
     // キャッシュが無効な場合は新しく取得
     int allowedDays = 1; // デフォルトはBasicプラン
     try {
-      final subscriptionService = await ServiceRegistration.getAsync<ISubscriptionService>();
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
       final planResult = await subscriptionService.getCurrentPlanClass();
       if (planResult.isSuccess) {
         final plan = planResult.value;
@@ -295,11 +296,11 @@ class _HomeScreenState extends State<HomeScreen>
         context: 'HomeScreen._getCachedAllowedDays',
       );
     }
-    
+
     // キャッシュを更新（5分間有効）
     _cachedAllowedDays = allowedDays;
     _planCacheExpiry = now.add(const Duration(minutes: 5));
-    
+
     return allowedDays;
   }
 
@@ -307,8 +308,10 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _preloadMorePhotos({bool showLoading = false}) async {
     if (!mounted || _isRequestingPermission || !_hasMorePhotos) {
       if (!showLoading) {
-        _logger.info('先読みスキップ: mounted=$mounted, requesting=$_isRequestingPermission, hasMore=$_hasMorePhotos', 
-          context: 'HomeScreen._preloadMorePhotos');
+        _logger.info(
+          '先読みスキップ: mounted=$mounted, requesting=$_isRequestingPermission, hasMore=$_hasMorePhotos',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
       }
       return;
     }
@@ -316,13 +319,16 @@ class _HomeScreenState extends State<HomeScreen>
     // 既に先読み中の場合はスキップ
     if (_isPreloading) {
       if (!showLoading) {
-        _logger.info('先読みスキップ: 既に先読み中', context: 'HomeScreen._preloadMorePhotos');
+        _logger.info(
+          '先読みスキップ: 既に先読み中',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
       }
       return;
     }
 
     _isPreloading = true;
-    
+
     if (!showLoading) {
       _logger.info('先読み開始', context: 'HomeScreen._preloadMorePhotos');
     }
@@ -351,29 +357,35 @@ class _HomeScreenState extends State<HomeScreen>
       if (!mounted) return;
 
       final currentCount = _photoController.photoAssets.length;
-      
+
       if (!showLoading) {
-        _logger.info('先読み結果: 現在=$currentCount, 取得=${allPhotos.length}', 
-          context: 'HomeScreen._preloadMorePhotos');
+        _logger.info(
+          '先読み結果: 現在=$currentCount, 取得=${allPhotos.length}',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
       }
 
       // 写真が増えた場合のみ更新
       if (allPhotos.length > currentCount) {
         _photoController.setPhotoAssets(allPhotos);
         _currentPhotoOffset = allPhotos.length;
-        
+
         if (!showLoading) {
-          _logger.info('先読み成功: ${allPhotos.length - currentCount}枚追加', 
-            context: 'HomeScreen._preloadMorePhotos');
+          _logger.info(
+            '先読み成功: ${allPhotos.length - currentCount}枚追加',
+            context: 'HomeScreen._preloadMorePhotos',
+          );
         }
       } else {
         // 写真が増えていない場合は、もう読み込むものがない
         _hasMorePhotos = false;
         _photoController.setHasMorePhotos(false);
-        
+
         if (!showLoading) {
-          _logger.info('先読み終了: これ以上写真がありません', 
-            context: 'HomeScreen._preloadMorePhotos');
+          _logger.info(
+            '先読み終了: これ以上写真がありません',
+            context: 'HomeScreen._preloadMorePhotos',
+          );
         }
       }
     } catch (e) {

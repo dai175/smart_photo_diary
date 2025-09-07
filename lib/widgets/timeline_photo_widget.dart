@@ -66,13 +66,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   final ScrollController _scrollController = ScrollController();
   List<TimelinePhotoGroup> _photoGroups = [];
-  
+
   // ログサービス
   LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   // 無限スクロール用状態（シンプル版）
   bool _isLoadingMore = false;
-  
+
   // デバッグ用状態
   DateTime? _lastPreloadCall;
   DateTime? _lastLoadMoreCall;
@@ -80,12 +80,32 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   // 無限スクロール用の定数
   static const double _preloadThreshold = 600.0; // 先読み開始位置（px）
   static const double _loadMoreThreshold = 300.0; // 追加読み込み開始位置（px）
+  static const double _scrollCheckThreshold = 200.0; // スクロール可能性チェックの閾値（px）
+
+  // スクロール判定とタイミング関連の定数
+  static const int _scrollCheckIntervalMs = 1000; // スクロール判定の間隔（ミリ秒）
+  static const int _layoutCompleteDelayMs = 100; // レイアウト完了待機時間（ミリ秒）
+  static const int _initializationCompleteDelayMs = 500; // 初期化完了待機時間（ミリ秒）
+  static const int _maxPhotosForAutoLoad = 80; // 自動追加読み込みする最大写真数
 
   // パフォーマンス最適化用の定数
   static const double _crossAxisSpacing = 2.0;
   static const double _mainAxisSpacing = 2.0;
   static const int _crossAxisCount = 4;
   static const double _childAspectRatio = 1.0;
+
+  // UI関連の定数
+  static const double _stickyHeaderHeight = 48.0;
+  static const double _emptyStateHeight = 100.0;
+  static const double _emptyStateIconSize = 64.0;
+  static const double _loadingIndicatorSize = 24.0;
+  static const double _loadingIndicatorStrokeWidth = 2.0;
+  static const int _animationDurationMs = 150;
+
+  // 選択インジケーター関連の定数
+  static const double _selectionIndicatorSize = 20.0;
+  static const double _selectionIconSize = 19.0;
+  static const double _selectionBorderWidth = 2.0;
 
   // インデックスキャッシュ（メインインデックス検索の最適化）
   final Map<String, int> _photoIndexCache = {};
@@ -120,28 +140,35 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final maxScrollExtent = position.maxScrollExtent;
 
     if (maxScrollExtent <= 0) return;
-    
+
     final now = DateTime.now();
 
     // 段階1: 先読み開始（UIブロッキングなし）
     if (pixels >= maxScrollExtent - _preloadThreshold) {
-      // 短時間の重複呼び出しを防ぐ（1秒間隔）
-      if (_lastPreloadCall == null || 
-          now.difference(_lastPreloadCall!).inMilliseconds > 1000) {
+      // 短時間の重複呼び出しを防ぐ
+      if (_lastPreloadCall == null ||
+          now.difference(_lastPreloadCall!).inMilliseconds >
+              _scrollCheckIntervalMs) {
         _lastPreloadCall = now;
-        _logger.info('先読みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=$_preloadThreshold', 
-          context: 'TimelinePhotoWidget._onScroll');
+        _logger.info(
+          '先読みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=$_preloadThreshold',
+          context: 'TimelinePhotoWidget._onScroll',
+        );
         widget.onPreloadMorePhotos?.call();
       }
     }
 
     // 段階2: 確実な読み込み（UIフィードバックあり）
     if (pixels >= maxScrollExtent - _loadMoreThreshold) {
-      if (!_isLoadingMore && (_lastLoadMoreCall == null || 
-          now.difference(_lastLoadMoreCall!).inMilliseconds > 1000)) {
+      if (!_isLoadingMore &&
+          (_lastLoadMoreCall == null ||
+              now.difference(_lastLoadMoreCall!).inMilliseconds >
+                  _scrollCheckIntervalMs)) {
         _lastLoadMoreCall = now;
-        _logger.info('追加読み込みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=$_loadMoreThreshold', 
-          context: 'TimelinePhotoWidget._onScroll');
+        _logger.info(
+          '追加読み込みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=$_loadMoreThreshold',
+          context: 'TimelinePhotoWidget._onScroll',
+        );
         _requestMorePhotos();
       }
     }
@@ -165,8 +192,28 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
   }
 
-  /// スクロール可能でない場合に追加読み込みを要求
+  /// スクロール可能でない場合に追加読み込みを要求（改良版）
   void _checkIfNeedsMorePhotos() {
+    // 初回チェック（即座に実行）
+    _performPhotoCheck();
+
+    // 遅延チェック（レイアウト完了を待つ）
+    Future.delayed(Duration(milliseconds: _layoutCompleteDelayMs), () {
+      if (mounted) {
+        _performPhotoCheck();
+      }
+    });
+
+    // さらなる遅延チェック（完全な初期化を待つ）
+    Future.delayed(Duration(milliseconds: _initializationCompleteDelayMs), () {
+      if (mounted) {
+        _performPhotoCheck();
+      }
+    });
+  }
+
+  /// 実際の写真不足チェックロジック
+  void _performPhotoCheck() {
     if (!_scrollController.hasClients ||
         _isLoadingMore ||
         !widget.controller.hasMorePhotos)
@@ -175,9 +222,21 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final position = _scrollController.position;
     final photoCount = widget.controller.photoAssets.length;
 
-    // スクロール範囲がない、または非常に短い場合で、写真が少ない場合のみ
-    if (position.maxScrollExtent <= 100 && photoCount > 0 && photoCount < 100) {
-      // 追加写真読み込みを要求
+    _logger.info(
+      'スクロール可能性チェック: maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(1)}, '
+      'photoCount=$photoCount, hasMorePhotos=${widget.controller.hasMorePhotos}',
+      context: 'TimelinePhotoWidget._performPhotoCheck',
+    );
+
+    // 条件を緩和：スクロール範囲が閾値以下で写真が上限未満の場合
+    if (position.maxScrollExtent <= _scrollCheckThreshold &&
+        photoCount > 0 &&
+        photoCount < _maxPhotosForAutoLoad) {
+      _logger.info(
+        'スクロール不可のため追加読み込み要求: maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(1)}, threshold=$_scrollCheckThreshold',
+        context: 'TimelinePhotoWidget._performPhotoCheck',
+      );
+
       if (widget.onLoadMorePhotos != null && !_isLoadingMore) {
         _requestMorePhotos();
       }
@@ -282,9 +341,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
               padding: EdgeInsets.all(AppSpacing.md),
               child: Center(
                 child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  width: _loadingIndicatorSize,
+                  height: _loadingIndicatorSize,
+                  child: CircularProgressIndicator(
+                    strokeWidth: _loadingIndicatorStrokeWidth,
+                  ),
                 ),
               ),
             ),
@@ -296,7 +357,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   /// スティッキーヘッダーを構築
   Widget _buildStickyHeader(TimelinePhotoGroup group) {
     return Container(
-      height: 48.0,
+      height: _stickyHeaderHeight,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -326,7 +387,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   ) {
     if (group.photos.isEmpty) {
       return SizedBox(
-        height: 100,
+        height: _emptyStateHeight,
         child: Center(
           child: Text('写真がありません', style: TextStyle(color: Colors.grey[600])),
         ),
@@ -374,7 +435,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
                   AnimatedOpacity(
                     opacity: shouldDimPhoto ? 0.6 : 1.0,
-                    duration: const Duration(milliseconds: 150),
+                    duration: Duration(milliseconds: _animationDurationMs),
                     curve: Curves.easeInOut,
                     child: Container(
                       decoration: const BoxDecoration(
@@ -401,6 +462,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                       isUsed: isUsed,
                       shouldDimPhoto: shouldDimPhoto,
                       primaryColor: Theme.of(context).colorScheme.primary,
+                      indicatorSize: _selectionIndicatorSize,
+                      iconSize: _selectionIconSize,
+                      borderWidth: _selectionBorderWidth,
                     ),
                   ),
                   // パフォーマンス最適化された使用済みラベル
@@ -427,7 +491,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         children: [
           Icon(
             Icons.photo_library_outlined,
-            size: 64,
+            size: _emptyStateIconSize,
             color: Theme.of(context).colorScheme.outline,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -455,7 +519,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         children: [
           Icon(
             Icons.photo_outlined,
-            size: 64,
+            size: _emptyStateIconSize,
             color: Theme.of(context).colorScheme.outline,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -606,25 +670,31 @@ class _OptimizedSelectionIndicator extends StatelessWidget {
     required this.isUsed,
     required this.shouldDimPhoto,
     required this.primaryColor,
+    required this.indicatorSize,
+    required this.iconSize,
+    required this.borderWidth,
   });
 
   final bool isSelected;
   final bool isUsed;
   final bool shouldDimPhoto;
   final Color primaryColor;
+  final double indicatorSize;
+  final double iconSize;
+  final double borderWidth;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 20,
-      height: 20,
+      width: indicatorSize,
+      height: indicatorSize,
       decoration: BoxDecoration(
         color: isSelected || isUsed ? Colors.white : Colors.transparent,
         shape: BoxShape.circle,
         border: !isSelected && !isUsed && !shouldDimPhoto
             ? Border.all(
                 color: const Color(0xB3FFFFFF), // 固定値でパフォーマンス最適化
-                width: 2,
+                width: borderWidth,
               )
             : null,
         boxShadow: shouldDimPhoto
@@ -640,7 +710,7 @@ class _OptimizedSelectionIndicator extends StatelessWidget {
       child: (isSelected || isUsed)
           ? Icon(
               isUsed ? Icons.done : Icons.check_circle,
-              size: 19,
+              size: iconSize,
               color: isUsed ? Colors.orange : primaryColor,
             )
           : null,
