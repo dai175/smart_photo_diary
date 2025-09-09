@@ -3,6 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
+import '../constants/app_constants.dart';
 
 /// メモリキャッシュのエントリー
 class _CacheEntry {
@@ -175,6 +176,8 @@ class PhotoCacheService implements IPhotoCacheService {
 
     // 並列処理で効率的にプリロード
     final futures = <Future>[];
+    // 並列数の上限
+    const int maxConcurrent = AppConstants.thumbnailPreloadConcurrency;
     for (final asset in assets) {
       // キャッシュに既に存在する場合はスキップ
       final cacheKey = _generateCacheKey(asset.id, width, height, quality);
@@ -188,7 +191,7 @@ class PhotoCacheService implements IPhotoCacheService {
       );
 
       // 同時実行数を制限（メモリ負荷を抑える）
-      if (futures.length >= 5) {
+      if (futures.length >= maxConcurrent) {
         await Future.wait(futures);
         futures.clear();
       }

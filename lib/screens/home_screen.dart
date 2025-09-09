@@ -42,7 +42,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 追加読み込み関連
   int _currentPhotoOffset = 0;
-  static const int _photosPerPage = 20; // 実機パフォーマンス最適化
+  static const int _photosPerPage =
+      AppConstants.timelinePageSize; // タイムライン用ページサイズ
   bool _hasMorePhotos = true; // 追加読み込み可能フラグ
   bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
 
@@ -347,7 +348,8 @@ class _HomeScreenState extends State<HomeScreen>
       final allowedDays = await _getCachedAllowedDays();
 
       // より大きなlimitで再読み込みして差分を取得
-      final newLimit = _currentPhotoOffset + _photosPerPage;
+      final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
+      final newLimit = _currentPhotoOffset + (_photosPerPage * preloadPages);
       final allPhotos = await photoService.getPhotosInDateRange(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)),

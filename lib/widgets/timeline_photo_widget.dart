@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
@@ -80,12 +81,15 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   DateTime? _lastLoadMoreCall;
 
   // 無限スクロール用の定数（実機最適化）
-  static const double _preloadThreshold = 800.0; // 先読み開始位置を拡大（px）
-  static const double _loadMoreThreshold = 400.0; // 追加読み込み開始位置を拡大（px）
+  static const double _preloadThreshold =
+      AppConstants.timelinePreloadThresholdPx;
+  static const double _loadMoreThreshold =
+      AppConstants.timelineLoadMoreThresholdPx;
   static const double _scrollCheckThreshold = 200.0; // スクロール可能性チェックの閾値（px）
 
   // スクロール判定とタイミング関連の定数
-  static const int _scrollCheckIntervalMs = 1000; // スクロール判定の間隔（ミリ秒）
+  static const int _scrollCheckIntervalMs =
+      AppConstants.timelineScrollCheckIntervalMs; // スクロール判定の間隔（ミリ秒）
   static const int _layoutCompleteDelayMs = 100; // レイアウト完了待機時間（ミリ秒）
   static const int _initializationCompleteDelayMs = 500; // 初期化完了待機時間（ミリ秒）
   static const int _maxPhotosForAutoLoad = 60; // 自動追加読み込みする最大写真数（実機最適化）
@@ -117,6 +121,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   late final IPhotoCacheService _cacheService = PhotoCacheService.getInstance();
   final Map<String, Future<Uint8List?>> _thumbFutureCache = {};
 
+  // ビューポート先読み（高速スクロール対策）
+  Timer? _prefetchDebounce;
+  int _lastPrefetchStartIndex = -1;
+  bool _isViewportPrefetching = false;
+
   // レイアウト関連の定数
   static const double _borderRadius = 4.0;
   static const double _selectionIndicatorTop = 8.0;
@@ -140,6 +149,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     widget.controller.addListener(_onControllerChanged);
     _scrollController.addListener(_onScroll);
     _updatePhotoGroups();
+
+    // 初期ビューポート分を軽くプリフェッチ
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduleViewportPrefetch();
+    });
   }
 
   @override
@@ -176,6 +190,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         widget.onPreloadMorePhotos?.call();
       }
     }
+
+    // ビューポート先読み（サムネイル）
+    _scheduleViewportPrefetch();
 
     // 段階2: 確実な読み込み（UIフィードバックあり）
     if (pixels >= maxScrollExtent - _loadMoreThreshold) {
@@ -321,8 +338,57 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       // 写真更新後、スクロール可能かチェック
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkIfNeedsMorePhotos();
+        _scheduleViewportPrefetch();
       });
     }
+  }
+
+  /// 現在のスクロール位置をもとにサムネイルを先読み
+  void _scheduleViewportPrefetch() {
+    _prefetchDebounce?.cancel();
+    _prefetchDebounce = Timer(const Duration(milliseconds: 220), () async {
+      if (!mounted || _isViewportPrefetching) return;
+      if (_photoGroups.isEmpty || widget.controller.photoAssets.isEmpty) return;
+      if (!_scrollController.hasClients) return;
+
+      final position = _scrollController.position;
+      final max = position.maxScrollExtent;
+      // max==0 のときは上端。端末やレイアウトにより0のこともある
+      final frac = max > 0 ? (position.pixels / max).clamp(0.0, 1.0) : 0.0;
+
+      final total = widget.controller.photoAssets.length;
+      final start = (frac * total).floor();
+      // 先読みウィンドウ
+      final window = AppConstants.timelinePrefetchAheadCount;
+      final batch = AppConstants.timelinePrefetchBatchSize;
+      final end = (start + window).clamp(0, total);
+
+      // 過剰な重複実行を抑制
+      if (_lastPrefetchStartIndex >= 0 &&
+          (start - _lastPrefetchStartIndex).abs() < batch ~/ 2) {
+        return;
+      }
+
+      _lastPrefetchStartIndex = start;
+      _isViewportPrefetching = true;
+
+      try {
+        // バッチ分割してプリロード（キャッシュ済みはスキップされる）
+        for (int i = start; i < end; i += batch) {
+          final j = (i + batch).clamp(0, total);
+          final slice = widget.controller.photoAssets.sublist(i, j);
+          if (slice.isEmpty) break;
+          await _cacheService.preloadThumbnails(
+            slice,
+            width: _thumbnailSize,
+            height: _thumbnailSize,
+            quality: _thumbnailQuality,
+          );
+        }
+      } finally {
+        _isViewportPrefetching = false;
+      }
+    });
   }
 
   /// 指定アセットのサムネイルFutureをサイズ/品質込みのキーでメモ化

@@ -85,6 +85,17 @@ class AppConstants {
   static const int maxPhotoLimit = 100;
   static const int defaultThumbnailWidth = 200;
   static const int defaultThumbnailHeight = 200;
+  // タイムラインの1回あたり取得枚数と先読み倍率
+  static const int timelinePageSize = 60; // 一度に増やす写真枚数
+  static const int timelinePreloadPages = 2; // 先読み時はページ数×この倍率で取得
+
+  // タイムライン先読み・プリフェッチ
+  static const double timelinePreloadThresholdPx = 1200.0; // 先読み開始のスクロール余白
+  static const double timelineLoadMoreThresholdPx = 600.0; // 追加読み込みのスクロール余白
+  static const int timelineScrollCheckIntervalMs = 800; // 連続判定の間隔
+  static const int timelinePrefetchAheadCount = 64; // 先読みするアイテム数（4列×16行）
+  static const int timelinePrefetchBatchSize = 32; // 1バッチのプリロード数
+  static const int thumbnailPreloadConcurrency = 6; // 同時プリロード数の上限
 
   // 影
   static const List<BoxShadow> cardShadow = [
