@@ -9,6 +9,8 @@ import '../ui/design_system/app_spacing.dart';
 import '../constants/app_constants.dart';
 import '../services/logging_service.dart';
 import '../core/service_locator.dart';
+import '../services/interfaces/photo_cache_service_interface.dart';
+import '../services/photo_cache_service.dart';
 
 /// タイムライン表示用の写真ウィジェット
 ///
@@ -107,9 +109,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   static const double _selectionIconSize = 19.0;
   static const double _selectionBorderWidth = 2.0;
 
-  // サムネイル関連の定数
-  static const int _thumbnailSize = 120;
-  static const int _thumbnailQuality = 60;
+  // サムネイル関連（AppConstantsに集約）
+  static const int _thumbnailSize = AppConstants.timelineThumbnailSizePx;
+  static const int _thumbnailQuality = AppConstants.timelineThumbnailQuality;
+
+  // 画像キャッシュ（Service + Futureインスタンスのメモ化で再描画時の再フェッチを防止）
+  late final IPhotoCacheService _cacheService = PhotoCacheService.getInstance();
+  final Map<String, Future<Uint8List?>> _thumbFutureCache = {};
 
   // レイアウト関連の定数
   static const double _borderRadius = 4.0;
@@ -296,6 +302,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     // インデックスキャッシュを先に完全に再構築してからUI更新
     _rebuildPhotoIndexCache();
 
+    // サムネイルFutureキャッシュの簡易クリーンアップ（非表示アセットを間引く）
+    final visibleIds = groups.expand((g) => g.photos).map((a) => a.id).toSet();
+    if (_thumbFutureCache.length >
+        AppConstants.thumbnailFutureCachePruneThreshold) {
+      _thumbFutureCache.removeWhere((key, _) {
+        final id = key.split(':').first;
+        return !visibleIds.contains(id);
+      });
+    }
+
     if (mounted) {
       // キャッシュ再構築完了後に安全にUI更新
       setState(() {
@@ -307,6 +323,21 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         _checkIfNeedsMorePhotos();
       });
     }
+  }
+
+  /// 指定アセットのサムネイルFutureをサイズ/品質込みのキーでメモ化
+  Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
+    final key =
+        '${asset.id}:${_thumbnailSize}x$_thumbnailSize:q$_thumbnailQuality';
+    return _thumbFutureCache.putIfAbsent(
+      key,
+      () => _cacheService.getThumbnail(
+        asset,
+        width: _thumbnailSize,
+        height: _thumbnailSize,
+        quality: _thumbnailQuality,
+      ),
+    );
   }
 
   /// 写真インデックスキャッシュを再構築（パフォーマンス最適化）
@@ -478,6 +509,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     ),
                     child: _OptimizedPhotoThumbnail(
                       photo: photo,
+                      future: _getThumbnailFuture(photo),
                       thumbnailSize: _thumbnailSize,
                       thumbnailQuality: _thumbnailQuality,
                       borderRadius: _borderRadius,
@@ -667,6 +699,7 @@ class _OptimizedPhotoThumbnail extends StatelessWidget {
   const _OptimizedPhotoThumbnail({
     super.key,
     required this.photo,
+    required this.future,
     required this.thumbnailSize,
     required this.thumbnailQuality,
     required this.borderRadius,
@@ -674,6 +707,7 @@ class _OptimizedPhotoThumbnail extends StatelessWidget {
   });
 
   final AssetEntity photo;
+  final Future<Uint8List?> future;
   final int thumbnailSize;
   final int thumbnailQuality;
   final double borderRadius;
@@ -682,20 +716,33 @@ class _OptimizedPhotoThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Uint8List?>(
-      future: photo.thumbnailDataWithSize(
-        ThumbnailSize(thumbnailSize, thumbnailSize),
-        quality: thumbnailQuality,
-      ),
+      // メモ化されたFutureを使用して再描画時の待機→ローディング表示を防止
+      future: future,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data != null) {
-          return Image.memory(
-            snapshot.data!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            // メモリ使用量最適化のためキャッシュを有効化
-            isAntiAlias: false,
-            filterQuality: FilterQuality.low,
+          final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+          return RepaintBoundary(
+            child: Image.memory(
+              snapshot.data!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              // デコードサイズを端末密度に合わせて固定（キャッシュヒット向上）
+              cacheWidth: (thumbnailSize * devicePixelRatio).round(),
+              cacheHeight: (thumbnailSize * devicePixelRatio).round(),
+              gaplessPlayback: true, // 再描画間のちらつきを防止
+              isAntiAlias: false,
+              filterQuality: FilterQuality.low,
+              frameBuilder: (context, child, frame, wasSync) {
+                if (wasSync || frame != null) return child;
+                return AnimatedOpacity(
+                  opacity: frame == null ? 0 : 1,
+                  duration: AppConstants.shortAnimationDuration,
+                  curve: Curves.easeOut,
+                  child: child,
+                );
+              },
+            ),
           );
         } else {
           return Container(
