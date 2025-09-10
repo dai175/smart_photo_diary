@@ -177,6 +177,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
     final now = DateTime.now();
 
+    // これ以上読み込む写真がない場合は、残っているスケルトンを即座に消す
+    if (!widget.controller.hasMorePhotos && _placeholderPages != 0) {
+      setState(() {
+        _placeholderPages = 0;
+      });
+    }
+
     // 段階1: 先読み開始（UIブロッキングなし）
     if (pixels >= maxScrollExtent - _preloadThreshold) {
       // 短時間の重複呼び出しを防ぐ
@@ -346,6 +353,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       // キャッシュ再構築完了後に安全にUI更新
       setState(() {
         _photoGroups = groups;
+        // 取得枚数が増えたらスケルトン行数を最小化
+        final currentCount = widget.controller.photoAssets.length;
+        if (currentCount > _lastAssetsCount) {
+          _placeholderPages = 1;
+        }
+        // これ以上読み込む写真がないならスケルトンを即座に消す
+        if (!widget.controller.hasMorePhotos) {
+          _placeholderPages = 0;
+        }
+        _lastAssetsCount = currentCount;
       });
 
       // 写真更新後、スクロール可能かチェック
