@@ -100,6 +100,10 @@ class AppConstants {
   static const int timelinePrefetchBatchSize = 32; // 1バッチのプリロード数
   static const int thumbnailPreloadConcurrency = 6; // 同時プリロード数の上限
 
+  // タイムライン・プレースホルダー
+  // 追加読み込み中/先読み中に末尾へ表示するスケルトン行数（4列×行）
+  static const int timelinePlaceholderRows = 6; // 4列×6行=24タイル分
+
   // 影
   static const List<BoxShadow> cardShadow = [
     BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),

@@ -455,7 +455,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             header: _buildStickyHeader(group),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                _buildPhotoGridForGroup(group, selectedDate),
+                _buildPhotoGridForGroup(
+                  group,
+                  selectedDate,
+                  isLastGroup: identical(group, _photoGroups.isNotEmpty ? _photoGroups.last : group),
+                ),
                 const SizedBox(height: AppSpacing.md),
               ]),
             ),
@@ -510,8 +514,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   /// グループ用の写真グリッドを構築
   Widget _buildPhotoGridForGroup(
     TimelinePhotoGroup group,
-    DateTime? selectedDate,
-  ) {
+    DateTime? selectedDate, {
+    required bool isLastGroup,
+  }) {
     if (group.photos.isEmpty) {
       return SizedBox(
         height: _emptyStateHeight,
@@ -520,6 +525,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         ),
       );
     }
+
+    // スケルトンを末尾グループにだけ追加してスクロール継続を可能に
+    final bool showPlaceholders =
+        isLastGroup && widget.controller.hasMorePhotos;
+    final int placeholderRows = AppConstants.timelinePlaceholderRows;
+    final int placeholderCount = _crossAxisCount * placeholderRows;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -531,8 +542,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         mainAxisSpacing: _mainAxisSpacing,
         childAspectRatio: _childAspectRatio,
       ),
-      itemCount: group.photos.length,
+      itemCount: group.photos.length + (showPlaceholders ? placeholderCount : 0),
       itemBuilder: (context, index) {
+        // プレースホルダー領域
+        if (index >= group.photos.length) {
+          return _SkeletonTile(
+            borderRadius: _borderRadius,
+            strokeWidth: _loadingIndicatorStrokeWidth,
+            indicatorSize: _loadingIndicatorSize,
+          );
+        }
+
         final photo = group.photos[index];
 
         // キャッシュを使用してメインインデックスを高速取得
@@ -893,6 +913,43 @@ class _OptimizedSelectionIndicator extends StatelessWidget {
         isUsed ? Icons.done : Icons.check_circle,
         size: iconSize,
         color: isUsed ? Colors.orange : primaryColor,
+      ),
+    );
+  }
+}
+
+/// 読み込み中に表示するスケルトンタイル（軽量）
+class _SkeletonTile extends StatelessWidget {
+  const _SkeletonTile({
+    required this.borderRadius,
+    required this.strokeWidth,
+    required this.indicatorSize,
+  });
+
+  final double borderRadius;
+  final double strokeWidth;
+  final double indicatorSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '読み込み中の写真',
+      container: true,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFE6E6E6),
+          borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+        ),
+        child: Center(
+          child: SizedBox(
+            width: indicatorSize,
+            height: indicatorSize,
+            child: CircularProgressIndicator(
+              strokeWidth: strokeWidth,
+              color: const Color(0xFFBDBDBD),
+            ),
+          ),
+        ),
       ),
     );
   }
