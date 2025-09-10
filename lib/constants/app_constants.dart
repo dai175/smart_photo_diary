@@ -11,7 +11,7 @@ class AppConstants {
   static const double photoCornerRadius = 16.0;
   // タイムライン用（内部グリッドと差別化する場合）
   static const int timelineThumbnailSizePx = 120; // 表示安定性優先の固定ピクセル
-  static const int timelineThumbnailQuality = 60; // 品質とメモリのバランス
+  static const int timelineThumbnailQuality = 50; // 品質を下げて負荷を軽減
   static const int thumbnailFutureCachePruneThreshold = 800; // Futureキャッシュの簡易上限
 
   // UI関連
