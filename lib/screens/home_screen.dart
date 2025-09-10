@@ -253,6 +253,12 @@ class _HomeScreenState extends State<HomeScreen>
       _photoController.setPhotoAssets(photos);
       _currentPhotoOffset = photos.length; // 次回読み込み用にオフセット更新
       _photoController.setLoading(false);
+
+      // 初回描画後にバックグラウンド先読みを即時トリガー
+      // ユーザー体感のスクロール待ち時間を低減
+      if (mounted && _hasMorePhotos) {
+        Future.microtask(() => _preloadMorePhotos(showLoading: false));
+      }
     } catch (e) {
       if (mounted) {
         _photoController.setPhotoAssets([]);

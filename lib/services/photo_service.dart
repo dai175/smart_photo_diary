@@ -181,12 +181,15 @@ class PhotoService implements IPhotoService {
 
       // 写真を取得
       final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption()],
+        orders: const [
+          OrderOption(type: OrderOptionType.createDate, asc: false),
+        ],
         createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
       );
 
       // アルバムを取得（最近の写真）
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
         filterOption: filterOption,
       );
 
@@ -296,12 +299,15 @@ class PhotoService implements IPhotoService {
 
       // 写真を取得
       final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption()],
+        orders: const [
+          OrderOption(type: OrderOptionType.createDate, asc: false),
+        ],
         createTimeCond: DateTimeCond(min: localStartDate, max: localEndDate),
       );
 
       // アルバムを取得
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
         filterOption: filterOption,
       );
 
@@ -508,12 +514,15 @@ class PhotoService implements IPhotoService {
 
       // 写真を取得
       final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption()], // 作成日時の降順（新しい順）
+        orders: const [
+          OrderOption(type: OrderOptionType.createDate, asc: false), // 新しい順
+        ],
         createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
       );
 
       // アルバムを取得
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
         filterOption: filterOption,
       );
 
@@ -819,18 +828,25 @@ class PhotoService implements IPhotoService {
       final FilterOptionGroup filterOption;
       if (startDate != null || endDate != null) {
         filterOption = FilterOptionGroup(
-          orders: [const OrderOption()],
+          orders: const [
+            OrderOption(type: OrderOptionType.createDate, asc: false),
+          ],
           createTimeCond: DateTimeCond(
             min: startDate ?? DateTime(1970),
             max: endDate ?? DateTime.now(),
           ),
         );
       } else {
-        filterOption = FilterOptionGroup(orders: [const OrderOption()]);
+        filterOption = FilterOptionGroup(
+          orders: const [
+            OrderOption(type: OrderOptionType.createDate, asc: false),
+          ],
+        );
       }
 
       // アルバムを取得
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
         filterOption: filterOption,
       );
 
