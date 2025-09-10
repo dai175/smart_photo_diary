@@ -8,12 +8,12 @@ import '../shared/active_filters_display.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
-import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../constants/app_constants.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -225,52 +225,30 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Padding(
-        padding: AppSpacing.screenPadding,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: AppSpacing.cardPaddingLarge,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: AppSpacing.cardRadiusLarge,
-              ),
-              child: Icon(
-                _controller.getEmptyStateIcon(),
-                size: AppSpacing.iconXl,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.book_outlined,
+            size: AppConstants.emptyStateIconSize,
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            _controller.getEmptyStateMessage(),
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          if (_controller.currentFilter.isActive &&
+              !_controller.isSearching) ...[
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              _controller.getEmptyStateMessage(),
-              style: AppTypography.headlineSmall.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              textAlign: TextAlign.center,
+            PrimaryButton(
+              onPressed: _controller.clearAllFilters,
+              text: 'フィルタをクリア',
+              icon: Icons.clear_all_rounded,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              _controller.getEmptyStateSubMessage(),
-              style: AppTypography.bodyMedium.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (_controller.currentFilter.isActive &&
-                !_controller.isSearching) ...[
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(
-                onPressed: _controller.clearAllFilters,
-                text: 'フィルタをクリア',
-                icon: Icons.clear_all_rounded,
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }

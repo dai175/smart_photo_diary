@@ -51,6 +51,9 @@ class AppConstants {
   static const double captionFontSize = 14.0;
   static const double smallCaptionFontSize = 10.0;
 
+  // 空状態表示
+  static const double emptyStateIconSize = 64.0;
+
   // メッセージ
   static const String appTitle = 'Smart Photo Diary';
   static const String newPhotosTitle = '新しい写真';

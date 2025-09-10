@@ -170,26 +170,4 @@ class DiaryScreenController extends BaseErrorController {
       return '日記がありません';
     }
   }
-
-  // 空の状態サブメッセージを取得
-  String getEmptyStateSubMessage() {
-    if (_isSearching) {
-      return '別のキーワードで検索してみてください';
-    } else if (_currentFilter.isActive) {
-      return 'フィルタを変更するか、クリアしてみてください';
-    } else {
-      return '写真を選んで最初の日記を作成しましょう';
-    }
-  }
-
-  // 空の状態アイコンを取得
-  IconData getEmptyStateIcon() {
-    if (_isSearching) {
-      return Icons.search_off;
-    } else if (_currentFilter.isActive) {
-      return Icons.filter_list_off;
-    } else {
-      return Icons.book_outlined;
-    }
-  }
 }

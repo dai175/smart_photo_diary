@@ -103,7 +103,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   // UI関連の定数
   static const double _stickyHeaderHeight = 48.0;
   static const double _emptyStateHeight = 100.0;
-  static const double _emptyStateIconSize = 64.0;
   static const double _loadingIndicatorSize = 24.0;
   static const double _loadingIndicatorStrokeWidth = 2.0;
   static const int _animationDurationMs = 150;
@@ -628,7 +627,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         children: [
           Icon(
             Icons.photo_library_outlined,
-            size: _emptyStateIconSize,
+            size: AppConstants.emptyStateIconSize,
             color: Theme.of(context).colorScheme.outline,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -656,7 +655,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         children: [
           Icon(
             Icons.photo_outlined,
-            size: _emptyStateIconSize,
+            size: AppConstants.emptyStateIconSize,
             color: Theme.of(context).colorScheme.outline,
           ),
           const SizedBox(height: AppSpacing.md),
