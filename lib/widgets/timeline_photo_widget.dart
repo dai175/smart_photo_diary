@@ -75,6 +75,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   // 無限スクロール用状態（シンプル版）
   bool _isLoadingMore = false;
+  int _placeholderPages = 1; // スケルトンを段階的に増やす
+  int _lastAssetsCount = 0; // 差分検出用
 
   // デバッグ用状態
   DateTime? _lastPreloadCall;
@@ -187,6 +189,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           context: 'TimelinePhotoWidget._onScroll',
         );
         widget.onPreloadMorePhotos?.call();
+        _increasePlaceholderPages();
       }
     }
 
@@ -216,6 +219,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     });
     // HomeScreenに追加読み込み要求を送信
     widget.onLoadMorePhotos?.call();
+    _increasePlaceholderPages();
   }
 
   /// 追加読み込み完了時に呼び出される（コントローラー更新時に自動実行）
@@ -303,6 +307,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           _dimPhotoCache.clear();
         }
         _updatePhotoGroups();
+        // 取得枚数が増えたらスケルトンは最小に戻す（描画コスト抑制）
+        final currentCount = widget.controller.photoAssets.length;
+        if (currentCount > _lastAssetsCount) {
+          _placeholderPages = 1;
+        }
+        // これ以上の写真がないときはスケルトンを完全に消す
+        if (!widget.controller.hasMorePhotos) {
+          _placeholderPages = 0;
+        }
+        _lastAssetsCount = currentCount;
       }
     });
 
@@ -390,6 +404,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     });
   }
 
+  void _increasePlaceholderPages() {
+    if (_placeholderPages >= AppConstants.timelinePlaceholderMaxPages) return;
+    setState(() {
+      _placeholderPages += 1;
+    });
+  }
+
   /// 指定アセットのサムネイルFutureをサイズ/品質込みのキーでメモ化
   Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
     final key =
@@ -458,7 +479,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 _buildPhotoGridForGroup(
                   group,
                   selectedDate,
-                  isLastGroup: identical(group, _photoGroups.isNotEmpty ? _photoGroups.last : group),
+                  isLastGroup: identical(
+                    group,
+                    _photoGroups.isNotEmpty ? _photoGroups.last : group,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
               ]),
@@ -527,10 +551,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
 
     // スケルトンを末尾グループにだけ追加してスクロール継続を可能に
-    final bool showPlaceholders =
-        isLastGroup && widget.controller.hasMorePhotos;
+    final bool showPlaceholders = isLastGroup;
     final int placeholderRows = AppConstants.timelinePlaceholderRows;
-    final int placeholderCount = _crossAxisCount * placeholderRows;
+    final int placeholderCountPerPage = _crossAxisCount * placeholderRows;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -542,7 +565,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         mainAxisSpacing: _mainAxisSpacing,
         childAspectRatio: _childAspectRatio,
       ),
-      itemCount: group.photos.length + (showPlaceholders ? placeholderCount : 0),
+      itemCount:
+          group.photos.length +
+          (showPlaceholders
+              ? (placeholderCountPerPage * _placeholderPages)
+              : 0),
       itemBuilder: (context, index) {
         // プレースホルダー領域
         if (index >= group.photos.length) {
