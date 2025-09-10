@@ -98,7 +98,7 @@ class AppConstants {
   static const int timelineScrollCheckIntervalMs = 800; // 連続判定の間隔
   static const int timelinePrefetchAheadCount = 64; // 先読みするアイテム数（4列×16行）
   static const int timelinePrefetchBatchSize = 32; // 1バッチのプリロード数
-  static const int thumbnailPreloadConcurrency = 6; // 同時プリロード数の上限
+  static const int thumbnailPreloadConcurrency = 4; // 同時プリロード数の上限（負荷軽減）
 
   // タイムライン・プレースホルダー
   // 追加読み込み中/先読み中に末尾へ表示するスケルトン行数（4列×行）
