@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../models/diary_entry.dart';
@@ -353,13 +354,15 @@ class _HomeScreenState extends State<HomeScreen>
       // キャッシュされたプラン情報を使用
       final allowedDays = await _getCachedAllowedDays();
 
-      // より大きなlimitで再読み込みして差分を取得
+      // 現在の末尾オフセットから必要分だけを追加で取得（ビューポート直下のスケルトンを優先的に埋める）
       final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
-      final newLimit = _currentPhotoOffset + (_photosPerPage * preloadPages);
-      final allPhotos = await photoService.getPhotosInDateRange(
+      final requested = _photosPerPage * preloadPages;
+
+      final newPhotos = await photoService.getPhotosEfficient(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)),
-        limit: newLimit,
+        offset: _currentPhotoOffset,
+        limit: requested,
       );
 
       if (!mounted) return;
@@ -368,24 +371,21 @@ class _HomeScreenState extends State<HomeScreen>
 
       if (!showLoading) {
         _logger.info(
-          '先読み結果: 現在=$currentCount, 取得=${allPhotos.length}',
+          '先読み結果: 現在=$currentCount, 新規=${newPhotos.length}, offset=$_currentPhotoOffset, req=$requested',
           context: 'HomeScreen._preloadMorePhotos',
         );
       }
 
-      // 写真が増えた場合のみ更新（選択状態を保持）
-      if (allPhotos.length > currentCount) {
-        _photoController.setPhotoAssetsPreservingSelection(allPhotos);
-        _currentPhotoOffset = allPhotos.length;
-
-        if (!showLoading) {
-          _logger.info(
-            '先読み成功: ${allPhotos.length - currentCount}枚追加',
-            context: 'HomeScreen._preloadMorePhotos',
-          );
-        }
+      if (newPhotos.isNotEmpty) {
+        final combined = <AssetEntity>[
+          ..._photoController.photoAssets,
+          ...newPhotos,
+        ];
+        _photoController.setPhotoAssetsPreservingSelection(combined);
+        _currentPhotoOffset += newPhotos.length;
+        _photoController.setHasMorePhotos(true);
       } else {
-        // 写真が増えていない場合は、もう読み込むものがない
+        // 追加なし→これ以上は存在しない
         _hasMorePhotos = false;
         _photoController.setHasMorePhotos(false);
 
