@@ -45,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen>
   int _currentPhotoOffset = 0;
   static const int _photosPerPage =
       AppConstants.timelinePageSize; // タイムライン用ページサイズ
-  bool _hasMorePhotos = true; // 追加読み込み可能フラグ
   bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
 
   // プラン情報のキャッシュ（先読み最適化用）
@@ -62,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen>
     _photoController.setDateRestrictionEnabled(true);
 
     _currentPhotoOffset = 0; // オフセットをリセット
-    _hasMorePhotos = true; // フラグをリセット
     _isPreloading = false; // 先読みフラグをリセット
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
     _loadTodayPhotos();
@@ -170,7 +168,6 @@ class _HomeScreenState extends State<HomeScreen>
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
     _currentPhotoOffset = 0; // オフセットをリセット
-    _hasMorePhotos = true; // フラグをリセット
     _isPreloading = false; // 先読みフラグをリセット
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
     // プランキャッシュもクリア
@@ -253,11 +250,17 @@ class _HomeScreenState extends State<HomeScreen>
 
       _photoController.setPhotoAssets(photos);
       _currentPhotoOffset = photos.length; // 次回読み込み用にオフセット更新
+      // 初回読み込み時点で末尾到達か判定
+      if (photos.length < _photosPerPage) {
+        _photoController.setHasMorePhotos(false);
+      } else {
+        _photoController.setHasMorePhotos(true);
+      }
       _photoController.setLoading(false);
 
       // 初回描画後にバックグラウンド先読みを即時トリガー
       // ユーザー体感のスクロール待ち時間を低減
-      if (mounted && _hasMorePhotos) {
+      if (mounted && _photoController.hasMorePhotos) {
         Future.microtask(() => _preloadMorePhotos(showLoading: false));
       }
     } catch (e) {
@@ -314,10 +317,12 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 先読み機能付き追加写真読み込み（最適化版）
   Future<void> _preloadMorePhotos({bool showLoading = false}) async {
-    if (!mounted || _isRequestingPermission || !_hasMorePhotos) {
+    if (!mounted ||
+        _isRequestingPermission ||
+        !_photoController.hasMorePhotos) {
       if (!showLoading) {
         _logger.info(
-          '先読みスキップ: mounted=$mounted, requesting=$_isRequestingPermission, hasMore=$_hasMorePhotos',
+          '先読みスキップ: mounted=$mounted, requesting=$_isRequestingPermission, hasMore=${_photoController.hasMorePhotos}',
           context: 'HomeScreen._preloadMorePhotos',
         );
       }
@@ -383,10 +388,11 @@ class _HomeScreenState extends State<HomeScreen>
         ];
         _photoController.setPhotoAssetsPreservingSelection(combined);
         _currentPhotoOffset += newPhotos.length;
-        _photoController.setHasMorePhotos(true);
+        // 追加分が要求数に満たない場合は末尾まで到達
+        final reachedEnd = newPhotos.length < requested;
+        _photoController.setHasMorePhotos(!reachedEnd);
       } else {
         // 追加なし→これ以上は存在しない
-        _hasMorePhotos = false;
         _photoController.setHasMorePhotos(false);
 
         if (!showLoading) {

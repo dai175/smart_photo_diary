@@ -127,6 +127,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   int _lastPrefetchStartIndex = -1;
   bool _isViewportPrefetching = false;
 
+  // 底付き時の連続先読み（スクロールイベントが発火しない場合の保険）
+  Timer? _progressiveLoadTimer;
+
   // レイアウト関連の定数
   static const double _borderRadius = 4.0;
   static const double _selectionIndicatorTop = 8.0;
@@ -161,13 +164,23 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   void dispose() {
     _scrollController.dispose();
     widget.controller.removeListener(_onControllerChanged);
+    _progressiveLoadTimer?.cancel();
     super.dispose();
   }
 
   /// スクロール検知（2段階先読み版）
   void _onScroll() {
-    if (!_scrollController.hasClients || !widget.controller.hasMorePhotos)
+    if (!_scrollController.hasClients) return;
+
+    // これ以上読み込む写真がない場合は、残っているスケルトンを即座に消す
+    if (!widget.controller.hasMorePhotos) {
+      if (_placeholderPages != 0) {
+        setState(() {
+          _placeholderPages = 0;
+        });
+      }
       return;
+    }
 
     final position = _scrollController.position;
     final pixels = position.pixels;
@@ -176,13 +189,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     if (maxScrollExtent <= 0) return;
 
     final now = DateTime.now();
-
-    // これ以上読み込む写真がない場合は、残っているスケルトンを即座に消す
-    if (!widget.controller.hasMorePhotos && _placeholderPages != 0) {
-      setState(() {
-        _placeholderPages = 0;
-      });
-    }
 
     // 段階1: 先読み開始（UIブロッキングなし）
     if (pixels >= maxScrollExtent - _preloadThreshold) {
@@ -198,6 +204,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         widget.onPreloadMorePhotos?.call();
         _increasePlaceholderPages();
       }
+
+      // 底付き状態なら継続的に先読みを試みる
+      _ensureProgressiveLoadingIfPinned();
     }
 
     // ビューポート先読み（サムネイル）
@@ -217,6 +226,43 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         _requestMorePhotos();
       }
     }
+  }
+
+  /// スクロール末端に張り付いたままでも先読みを進める
+  void _ensureProgressiveLoadingIfPinned() {
+    if (!_scrollController.hasClients) return;
+    if (!widget.controller.hasMorePhotos) {
+      _progressiveLoadTimer?.cancel();
+      return;
+    }
+
+    final pos = _scrollController.position;
+    final isPinned = (pos.maxScrollExtent - pos.pixels).abs() < 4.0;
+    if (!isPinned) {
+      _progressiveLoadTimer?.cancel();
+      return;
+    }
+
+    // 連続トリガー（軽いデバウンス）
+    _progressiveLoadTimer?.cancel();
+    _progressiveLoadTimer = Timer(
+      Duration(milliseconds: _scrollCheckIntervalMs ~/ 2),
+      () {
+        if (!mounted) return;
+        if (!_scrollController.hasClients) return;
+        final againPinned =
+            (_scrollController.position.maxScrollExtent -
+                    _scrollController.position.pixels)
+                .abs() <
+            4.0;
+        if (againPinned && widget.controller.hasMorePhotos) {
+          widget.onPreloadMorePhotos?.call();
+          _increasePlaceholderPages();
+          // 次も必要かもしれないので再スケジュール
+          _ensureProgressiveLoadingIfPinned();
+        }
+      },
+    );
   }
 
   /// 追加写真読み込み要求（HomeScreenに委譲）
@@ -369,6 +415,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkIfNeedsMorePhotos();
         _scheduleViewportPrefetch();
+        // 底付き時の保険をもう一度
+        _ensureProgressiveLoadingIfPinned();
       });
     }
   }
@@ -387,11 +435,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       final frac = max > 0 ? (position.pixels / max).clamp(0.0, 1.0) : 0.0;
 
       final total = widget.controller.photoAssets.length;
-      final start = (frac * total).floor();
+      int start = (frac * total).floor();
       // 先読みウィンドウ
       final window = AppConstants.timelinePrefetchAheadCount;
       final batch = AppConstants.timelinePrefetchBatchSize;
-      final end = (start + window).clamp(0, total);
+      int end = (start + window).clamp(0, total);
+
+      // 下端に張り付いている場合は末尾側からプリフェッチ
+      if (start >= end) {
+        end = total;
+        start = (total - window).clamp(0, total);
+      }
 
       // 過剰な重複実行を抑制
       if (_lastPrefetchStartIndex >= 0 &&
