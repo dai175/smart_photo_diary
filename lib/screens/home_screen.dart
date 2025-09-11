@@ -459,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: screens[_currentIndex],
+      body: IndexedStack(index: _currentIndex, children: screens),
       floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -471,11 +471,8 @@ class _HomeScreenState extends State<HomeScreen>
             _currentIndex = index;
           });
 
-          // ホームタブに戻った時にタイムライン表示を再読み込み
-          if (index == 0) {
-            _loadTodayPhotos();
-            _loadUsedPhotoIds();
-          }
+          // ホームへの復帰時に再取得しない（状態保持）
+          // 必要な場合は別イベントで使用済みのみ更新する
         },
         items: _buildNavigationItems(),
       ),
