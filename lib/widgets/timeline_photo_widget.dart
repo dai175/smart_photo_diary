@@ -734,7 +734,50 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// ローディング状態を構築
   Widget _buildLoadingState() {
-    return const Center(child: CircularProgressIndicator());
+    // ビューポート基準で2画面分のスケルトンを敷き詰める
+    const int screensToFill = 2; // 必要に応じて3に拡張可能
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double availableWidth = constraints.maxWidth;
+        final double availableHeight = constraints.maxHeight;
+
+        // タイル1辺のサイズ（正方形）。4列・スペースは定数を使用
+        final double totalCrossSpacing =
+            (_crossAxisCount - 1) * _crossAxisSpacing;
+        final double tileSize =
+            (availableWidth - totalCrossSpacing) / _crossAxisCount;
+
+        // 行数 = (高さ) / (タイル高さ + 行間)
+        final int rowsPerScreen =
+            (availableHeight + _mainAxisSpacing) ~/
+            (tileSize + _mainAxisSpacing);
+        final int tilesPerScreen =
+            (rowsPerScreen.clamp(1, 50)) * _crossAxisCount;
+
+        // 初期表示スケルトン総数（上限を設けて過剰描画を抑える）
+        final int placeholderCount = (tilesPerScreen * screensToFill).clamp(
+          8,
+          240,
+        );
+
+        return GridView.builder(
+          padding: EdgeInsets.zero,
+          physics: const AlwaysScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: _crossAxisCount,
+            crossAxisSpacing: _crossAxisSpacing,
+            mainAxisSpacing: _mainAxisSpacing,
+            childAspectRatio: _childAspectRatio,
+          ),
+          itemCount: placeholderCount,
+          itemBuilder: (context, index) => const _SkeletonTile(
+            borderRadius: _borderRadius,
+            strokeWidth: _loadingIndicatorStrokeWidth,
+            indicatorSize: _loadingIndicatorSize,
+          ),
+        );
+      },
+    );
   }
 
   /// 権限拒否状態を構築
