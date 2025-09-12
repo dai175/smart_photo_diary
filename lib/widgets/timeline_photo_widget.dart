@@ -13,6 +13,7 @@ import '../core/service_locator.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/photo_cache_service.dart';
 import '../controllers/scroll_signal.dart';
+import '../ui/component_constants.dart';
 
 /// タイムライン表示用の写真ウィジェット
 ///
@@ -126,6 +127,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   // 画像キャッシュ（Service + Futureインスタンスのメモ化で再描画時の再フェッチを防止）
   late final IPhotoCacheService _cacheService = PhotoCacheService.getInstance();
   final Map<String, Future<Uint8List?>> _thumbFutureCache = {};
+  final Map<String, Future<Uint8List?>> _largeFutureCache = {};
 
   // ビューポート先読み（高速スクロール対策）
   Timer? _prefetchDebounce;
@@ -531,6 +533,22 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
   }
 
+  /// 拡大表示用の大きめプレビューを取得（キャッシュ）
+  Future<Uint8List?> _getLargePreviewFuture(AssetEntity asset) {
+    const int size = PhotoPreviewConstants.previewSizePx; // 拡大表示用サイズ
+    const int quality = PhotoPreviewConstants.previewQuality;
+    final key = '${asset.id}:${size}x$size:q$quality';
+    return _largeFutureCache.putIfAbsent(
+      key,
+      () => _cacheService.getThumbnail(
+        asset,
+        width: size,
+        height: size,
+        quality: quality,
+      ),
+    );
+  }
+
   /// 写真インデックスキャッシュを再構築（パフォーマンス最適化）
   void _rebuildPhotoIndexCache() {
     // 新しいキャッシュを作成（既存キャッシュを破壊しない）
@@ -640,6 +658,49 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
   }
 
+  /// 長押しで拡大プレビューを表示
+  void _showPhotoPreview(BuildContext context, AssetEntity asset, String tag) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '閉じる',
+      barrierColor: Colors.black.withValues(alpha: AppConstants.opacityHigh),
+      transitionDuration: AppConstants.defaultAnimationDuration,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return GestureDetector(
+          onTap: () => Navigator.of(context).maybePop(),
+          child: Container(
+            color: Colors.transparent,
+            alignment: Alignment.center,
+            child: Hero(
+              tag: tag,
+              child: FutureBuilder<Uint8List?>(
+                future: _getLargePreviewFuture(asset),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: PhotoPreviewConstants.progressStrokeWidth,
+                      ),
+                    );
+                  }
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return InteractiveViewer(
+                    minScale: ViewerConstants.minScale,
+                    maxScale: ViewerConstants.maxScale,
+                    child: Image.memory(snapshot.data!, fit: BoxFit.contain),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   /// グループ用の写真グリッドを構築
   Widget _buildPhotoGridForGroup(
     TimelinePhotoGroup group,
@@ -705,8 +766,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           isSelected: isSelected,
         );
 
+        final heroTag = 'asset-${photo.id}';
         return GestureDetector(
           onTap: () => _handlePhotoTap(mainIndex),
+          onLongPress: () => _showPhotoPreview(context, photo, heroTag),
           child: Stack(
             children: [
               // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
@@ -725,14 +788,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     borderRadius: BorderRadius.all(
                       Radius.circular(_borderRadius),
                     ),
-                    child: _OptimizedPhotoThumbnail(
-                      photo: photo,
-                      future: _getThumbnailFuture(photo),
-                      thumbnailSize: _thumbnailSize,
-                      thumbnailQuality: _thumbnailQuality,
-                      borderRadius: _borderRadius,
-                      strokeWidth: _loadingIndicatorStrokeWidth,
-                      key: ValueKey(photo.id), // キーでWidgetの再利用を促進
+                    child: Hero(
+                      tag: heroTag,
+                      child: _OptimizedPhotoThumbnail(
+                        photo: photo,
+                        future: _getThumbnailFuture(photo),
+                        thumbnailSize: _thumbnailSize,
+                        thumbnailQuality: _thumbnailQuality,
+                        borderRadius: _borderRadius,
+                        strokeWidth: _loadingIndicatorStrokeWidth,
+                        key: ValueKey(photo.id), // キーでWidgetの再利用を促進
+                      ),
                     ),
                   ),
                 ),

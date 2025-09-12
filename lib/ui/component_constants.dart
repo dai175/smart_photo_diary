@@ -47,3 +47,16 @@ class TileConstants {
 class ButtonConstants {
   static const double borderWidth = 1.5;
 }
+
+/// 拡大ビューワ（画像プレビュー）規格値
+class ViewerConstants {
+  static const double minScale = 1.0;
+  static const double maxScale = 4.0;
+}
+
+/// 写真プレビュー（大サイズ取得）規格値
+class PhotoPreviewConstants {
+  static const int previewSizePx = 1200;
+  static const int previewQuality = 90;
+  static const double progressStrokeWidth = 3.0;
+}
