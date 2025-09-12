@@ -15,6 +15,7 @@ import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
+import '../ui/component_constants.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -145,8 +146,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildMarker(int count) {
     return Builder(
       builder: (context) => Container(
-        width: 22,
-        height: 22,
+        width: CalendarMarkerConstants.size,
+        height: CalendarMarkerConstants.size,
         decoration: BoxDecoration(
           color: count > 1
               ? Theme.of(context).colorScheme.secondary.withValues(
@@ -184,7 +185,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           title: DateFormat('yyyy年MM月dd日').format(selectedDay),
           message: '${diaries.length}件の日記があります',
           content: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 300, maxWidth: 400),
+            constraints: const BoxConstraints(
+              maxHeight: DialogConstants.listMaxHeight,
+              maxWidth: DialogConstants.listMaxWidth,
+            ),
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: diaries.length,
@@ -209,8 +213,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       child: Row(
                         children: [
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: TileConstants.sizeMd,
+                            height: TileConstants.sizeMd,
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.secondary,
                               shape: BoxShape.circle,
@@ -461,7 +465,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: AppSpacing.iconSm),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -598,7 +602,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 shape: BoxShape.circle,
               ),
               markersMaxCount: 3,
-              cellMargin: const EdgeInsets.all(4),
+              cellMargin: const EdgeInsets.all(AppSpacing.xs),
             ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, day, events) {

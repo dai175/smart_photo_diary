@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../component_constants.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 
@@ -333,7 +334,7 @@ class ListItemShimmer extends StatelessWidget {
         child: Row(
           children: [
             if (showAvatar) ...[
-              AvatarShimmer(enabled: false, size: 40),
+              AvatarShimmer(enabled: false, size: TileConstants.sizeMd),
               const SizedBox(width: AppSpacing.lg),
             ],
             Expanded(

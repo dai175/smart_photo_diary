@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/logging_service.dart';
 import '../../core/service_locator.dart';
 import '../design_system/app_spacing.dart';
+import '../component_constants.dart';
 import '../design_system/app_typography.dart';
 
 /// Smart Photo Diary 統一ボタンシステム
@@ -372,7 +373,10 @@ class SecondaryButton extends StatelessWidget {
       backgroundColor: Colors.transparent,
       foregroundColor: theme.colorScheme.primary,
       border: Border.fromBorderSide(
-        BorderSide(color: theme.colorScheme.primary, width: 1.5),
+        BorderSide(
+          color: theme.colorScheme.primary,
+          width: ButtonConstants.borderWidth,
+        ),
       ),
       elevation: 0,
       child: Row(

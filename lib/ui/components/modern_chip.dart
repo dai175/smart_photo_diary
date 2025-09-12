@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
+import '../component_constants.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
@@ -144,14 +145,24 @@ class _ModernChipState extends State<ModernChip>
                   color: _getBackgroundColor(colorData),
                   borderRadius: BorderRadius.circular(chipData.height / 2),
                   border: widget.style == ChipStyle.outlined
-                      ? Border.all(color: colorData.borderColor, width: 1.5)
+                      ? Border.all(
+                          color: colorData.borderColor,
+                          width: ChipConstants.borderWidth,
+                        )
                       : null,
                   boxShadow: widget.style == ChipStyle.elevated
                       ? [
                           BoxShadow(
                             color: AppColors.shadow,
-                            blurRadius: _isHovered ? 4 : 2,
-                            offset: Offset(0, _isHovered ? 2 : 1),
+                            blurRadius: _isHovered
+                                ? ChipConstants.blurRadiusHover
+                                : ChipConstants.blurRadiusNormal,
+                            offset: Offset(
+                              0,
+                              _isHovered
+                                  ? ChipConstants.offsetYHover
+                                  : ChipConstants.offsetYNormal,
+                            ),
                           ),
                         ]
                       : null,
@@ -226,28 +237,28 @@ class _ModernChipState extends State<ModernChip>
     switch (size) {
       case ChipSize.small:
         return _ChipSizeData(
-          height: 24,
+          height: ChipConstants.heightSm,
           horizontalPadding: AppSpacing.sm,
           verticalPadding: AppSpacing.xxs,
-          iconSize: 14,
-          spacing: 4,
+          iconSize: ChipConstants.iconSm,
+          spacing: AppSpacing.xs,
           textStyle: AppTypography.labelSmall,
         );
       case ChipSize.medium:
         return _ChipSizeData(
-          height: 32,
+          height: ChipConstants.heightMd,
           horizontalPadding: AppSpacing.md,
           verticalPadding: AppSpacing.xs,
-          iconSize: 16,
+          iconSize: ChipConstants.iconMd,
           spacing: AppSpacing.xs,
           textStyle: AppTypography.labelMedium,
         );
       case ChipSize.large:
         return _ChipSizeData(
-          height: 40,
+          height: ChipConstants.heightLg,
           horizontalPadding: AppSpacing.lg,
           verticalPadding: AppSpacing.sm,
-          iconSize: 18,
+          iconSize: ChipConstants.iconLg,
           spacing: AppSpacing.sm,
           textStyle: AppTypography.labelLarge,
         );

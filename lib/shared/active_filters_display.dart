@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
 import '../models/diary_filter.dart';
 import '../ui/components/animated_button.dart';
 
@@ -125,13 +127,13 @@ class ActiveFiltersDisplay extends StatelessWidget {
     return Chip(
       avatar: Icon(
         icon,
-        size: 16,
+        size: AppSpacing.iconXs,
         color: Theme.of(
           context,
         ).colorScheme.onSurface.withValues(alpha: AppConstants.opacityMedium),
       ),
-      label: Text(label, style: const TextStyle(fontSize: 12)),
-      deleteIcon: const Icon(Icons.close, size: 16),
+      label: Text(label, style: AppTypography.labelSmall),
+      deleteIcon: Icon(Icons.close, size: AppSpacing.iconXs),
       onDeleted: onRemove,
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer
           .withValues(alpha: AppConstants.opacityLow),
