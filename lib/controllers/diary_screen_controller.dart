@@ -37,7 +37,9 @@ class DiaryScreenController extends BaseErrorController {
   // 日記エントリーを読み込む
   Future<void> loadDiaryEntries() async {
     try {
-      final diaryService = ServiceLocator().get<IDiaryService>();
+      // 初回および再読込時はローディング表示
+      setLoading(true);
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
       final result = await diaryService.getFilteredDiaryEntriesResult(
         _currentFilter,
       );
@@ -126,7 +128,7 @@ class DiaryScreenController extends BaseErrorController {
   // 検索で日記を絞り込み
   Future<void> _searchDiaryEntries(String query) async {
     try {
-      final diaryService = ServiceLocator().get<IDiaryService>();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
 
       final filter = query.isEmpty
           ? _currentFilter

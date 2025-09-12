@@ -49,7 +49,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
-      _diaryService = ServiceLocator().get<IDiaryService>();
+      _diaryService = await ServiceLocator().getAsync<IDiaryService>();
       final result = await _diaryService.getSortedDiaryEntriesResult();
 
       if (result.isSuccess) {

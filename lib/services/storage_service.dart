@@ -51,7 +51,7 @@ class StorageService implements IStorageService {
   @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
-      final diaryService = ServiceLocator().get<IDiaryService>();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
       final result = await diaryService.getSortedDiaryEntriesResult();
 
       if (result.isFailure) {
@@ -205,7 +205,7 @@ class StorageService implements IStorageService {
     Map<String, dynamic> data,
   ) async {
     try {
-      final diaryService = ServiceLocator().get<IDiaryService>();
+      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
       final entries = data['entries'] as List<dynamic>;
 
       int totalEntries = entries.length;
