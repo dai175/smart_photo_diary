@@ -8,6 +8,7 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
+import '../controllers/scroll_signal.dart';
 
 /// ホーム画面のメインコンテンツウィジェット
 ///
@@ -26,6 +27,7 @@ class HomeContentWidget extends StatefulWidget {
   final VoidCallback? onDiaryCreated;
   final VoidCallback? onLoadMorePhotos;
   final VoidCallback? onPreloadMorePhotos;
+  final ScrollSignal? scrollSignal;
 
   const HomeContentWidget({
     super.key,
@@ -39,6 +41,7 @@ class HomeContentWidget extends StatefulWidget {
     this.onDiaryCreated,
     this.onLoadMorePhotos,
     this.onPreloadMorePhotos,
+    this.scrollSignal,
   });
 
   @override
@@ -123,6 +126,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onDiaryCreated: widget.onDiaryCreated,
               onLoadMorePhotos: widget.onLoadMorePhotos,
               onPreloadMorePhotos: widget.onPreloadMorePhotos,
+              scrollSignal: widget.scrollSignal,
             ),
           ),
         ],

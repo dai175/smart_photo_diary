@@ -3,6 +3,7 @@ import '../controllers/photo_selection_controller.dart';
 import '../widgets/smart_fab_widget.dart';
 import '../services/diary_creation_service.dart';
 import '../widgets/timeline_photo_widget.dart';
+import '../controllers/scroll_signal.dart';
 
 /// タイムライン表示とスマートFABを統合したウィジェット
 class TimelineFABIntegration extends StatelessWidget {
@@ -33,6 +34,9 @@ class TimelineFABIntegration extends StatelessWidget {
   /// バックグラウンド先読み要求コールバック
   final VoidCallback? onPreloadMorePhotos;
 
+  /// 外部から先頭へスクロールさせるためのシグナル
+  final ScrollSignal? scrollSignal;
+
   const TimelineFABIntegration({
     super.key,
     required this.controller,
@@ -44,6 +48,7 @@ class TimelineFABIntegration extends StatelessWidget {
     this.onDiaryCreated,
     this.onLoadMorePhotos,
     this.onPreloadMorePhotos,
+    this.scrollSignal,
   });
 
   @override
@@ -60,6 +65,7 @@ class TimelineFABIntegration extends StatelessWidget {
           onLoadMorePhotos: onLoadMorePhotos,
           onPreloadMorePhotos: onPreloadMorePhotos,
           showFAB: false, // FABは別途管理
+          scrollSignal: scrollSignal,
         ),
         Positioned(
           right: 16,

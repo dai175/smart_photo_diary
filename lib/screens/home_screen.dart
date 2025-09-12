@@ -17,6 +17,7 @@ import '../services/logging_service.dart';
 import '../utils/dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
 import '../ui/components/custom_dialog.dart';
+import '../controllers/scroll_signal.dart';
 import '../ui/design_system/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,6 +51,9 @@ class _HomeScreenState extends State<HomeScreen>
   // プラン情報のキャッシュ（先読み最適化用）
   int? _cachedAllowedDays;
   DateTime? _planCacheExpiry;
+
+  // ホームタブ再タップで先頭へスクロールさせるためのシグナル
+  final ScrollSignal _homeScrollSignal = ScrollSignal();
 
   @override
   void initState() {
@@ -430,6 +434,7 @@ class _HomeScreenState extends State<HomeScreen>
         onDiaryCreated: _loadUsedPhotoIds,
         onLoadMorePhotos: _loadMorePhotos,
         onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
+        scrollSignal: _homeScrollSignal,
         onDiaryTap: (diaryId) {
           Navigator.push(
             context,
@@ -467,12 +472,15 @@ class _HomeScreenState extends State<HomeScreen>
         unselectedItemColor: Colors.grey,
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (_currentIndex == index && index == 0) {
+            // 既にホーム選択中にホームを再タップ → 先頭へスクロール
+            _homeScrollSignal.trigger();
+            return;
+          }
+
           setState(() {
             _currentIndex = index;
           });
-
-          // ホームへの復帰時に再取得しない（状態保持）
-          // 必要な場合は別イベントで使用済みのみ更新する
         },
         items: _buildNavigationItems(),
       ),

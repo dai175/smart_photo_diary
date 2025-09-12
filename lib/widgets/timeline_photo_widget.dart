@@ -12,6 +12,7 @@ import '../services/logging_service.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/photo_cache_service.dart';
+import '../controllers/scroll_signal.dart';
 
 /// タイムライン表示用の写真ウィジェット
 ///
@@ -48,6 +49,9 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// バックグラウンド先読み要求コールバック
   final VoidCallback? onPreloadMorePhotos;
 
+  /// 外部から先頭へスクロールさせるためのシグナル
+  final ScrollSignal? scrollSignal;
+
   const TimelinePhotoWidget({
     super.key,
     required this.controller,
@@ -59,6 +63,7 @@ class TimelinePhotoWidget extends StatefulWidget {
     this.onLoadMorePhotos,
     this.onPreloadMorePhotos,
     this.showFAB = true,
+    this.scrollSignal,
   });
 
   @override
@@ -152,6 +157,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
     _scrollController.addListener(_onScroll);
+    // 再タップ等のスクロール指示に対応
+    widget.scrollSignal?.addListener(_scrollToTop);
     _updatePhotoGroups();
 
     // 初期ビューポート分を軽くプリフェッチ
@@ -165,7 +172,34 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _scrollController.dispose();
     widget.controller.removeListener(_onControllerChanged);
     _progressiveLoadTimer?.cancel();
+    widget.scrollSignal?.removeListener(_scrollToTop);
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TimelinePhotoWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollSignal != widget.scrollSignal) {
+      oldWidget.scrollSignal?.removeListener(_scrollToTop);
+      widget.scrollSignal?.addListener(_scrollToTop);
+    }
+  }
+
+  /// 外部指示で先頭へスクロール
+  void _scrollToTop() {
+    // スクロール中に末尾のプレースホルダーが視界に入らないよう一時的に非表示
+    if (_placeholderPages != 0) {
+      setState(() {
+        _placeholderPages = 0;
+      });
+    }
+
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   /// スクロール検知（2段階先読み版）
@@ -621,8 +655,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       );
     }
 
-    // スケルトンを末尾グループにだけ追加してスクロール継続を可能に
-    final bool showPlaceholders = isLastGroup;
+    // スケルトンは「末尾グループ かつ まだ追加がある場合」にのみ表示
+    final bool showPlaceholders =
+        isLastGroup && widget.controller.hasMorePhotos && _placeholderPages > 0;
     final int placeholderRows = AppConstants.timelinePlaceholderRows;
     final int placeholderCountPerPage = _crossAxisCount * placeholderRows;
 
