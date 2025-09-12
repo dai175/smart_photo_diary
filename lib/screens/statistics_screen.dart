@@ -14,6 +14,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../constants/app_constants.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -148,8 +149,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         height: 22,
         decoration: BoxDecoration(
           color: count > 1
-              ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8)
-              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+              ? Theme.of(context).colorScheme.secondary.withValues(
+                  alpha: AppConstants.opacityHigh,
+                )
+              : Theme.of(context).colorScheme.primary.withValues(
+                  alpha: AppConstants.opacityHigh,
+                ),
           shape: BoxShape.circle,
         ),
         child: Center(

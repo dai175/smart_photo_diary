@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_constants.dart';
 
 /// ページ遷移アニメーションの定義
 class PageTransitions {
@@ -7,7 +8,7 @@ class PageTransitions {
   /// フェードトランジション
   static PageRouteBuilder<T> fadeTransition<T>(
     Widget page, {
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
   }) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -21,7 +22,7 @@ class PageTransitions {
   /// スライドトランジション（右から左）
   static PageRouteBuilder<T> slideTransition<T>(
     Widget page, {
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
     Offset begin = const Offset(1.0, 0.0),
     Offset end = Offset.zero,
   }) {
@@ -40,15 +41,19 @@ class PageTransitions {
   /// スケールトランジション
   static PageRouteBuilder<T> scaleTransition<T>(
     Widget page, {
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
   }) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-        );
+        final scaleAnimation =
+            Tween<double>(
+              begin: AppConstants.scaleEntranceStart,
+              end: 1.0,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+            );
 
         final fadeAnimation = Tween<double>(
           begin: 0.0,
@@ -66,7 +71,7 @@ class PageTransitions {
   /// カスタムトランジション（フェード + スライド）
   static PageRouteBuilder<T> customTransition<T>(
     Widget page, {
-    Duration duration = const Duration(milliseconds: 350),
+    Duration duration = AppConstants.mediumAnimationDuration,
   }) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -97,7 +102,7 @@ class PageTransitions {
   /// ボトムシート風のトランジション
   static PageRouteBuilder<T> bottomSheetTransition<T>(
     Widget page, {
-    Duration duration = const Duration(milliseconds: 400),
+    Duration duration = AppConstants.slowAnimationDuration,
   }) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -122,14 +127,14 @@ class PageTransitions {
 extension PageTransitionExtensions on Widget {
   /// フェードトランジションでページ遷移
   PageRouteBuilder<T> fadeRoute<T>({
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
   }) {
     return PageTransitions.fadeTransition<T>(this, duration: duration);
   }
 
   /// スライドトランジションでページ遷移
   PageRouteBuilder<T> slideRoute<T>({
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
     Offset begin = const Offset(1.0, 0.0),
   }) {
     return PageTransitions.slideTransition<T>(
@@ -141,21 +146,21 @@ extension PageTransitionExtensions on Widget {
 
   /// スケールトランジションでページ遷移
   PageRouteBuilder<T> scaleRoute<T>({
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
   }) {
     return PageTransitions.scaleTransition<T>(this, duration: duration);
   }
 
   /// カスタムトランジションでページ遷移
   PageRouteBuilder<T> customRoute<T>({
-    Duration duration = const Duration(milliseconds: 350),
+    Duration duration = AppConstants.mediumAnimationDuration,
   }) {
     return PageTransitions.customTransition<T>(this, duration: duration);
   }
 
   /// ボトムシートトランジションでページ遷移
   PageRouteBuilder<T> bottomSheetRoute<T>({
-    Duration duration = const Duration(milliseconds: 400),
+    Duration duration = AppConstants.slowAnimationDuration,
   }) {
     return PageTransitions.bottomSheetTransition<T>(this, duration: duration);
   }

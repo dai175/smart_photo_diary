@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
 import '../models/diary_filter.dart';
 import '../ui/components/animated_button.dart';
 
@@ -125,14 +126,15 @@ class ActiveFiltersDisplay extends StatelessWidget {
       avatar: Icon(
         icon,
         size: 16,
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+        color: Theme.of(
+          context,
+        ).colorScheme.onSurface.withValues(alpha: AppConstants.opacityMedium),
       ),
       label: Text(label, style: const TextStyle(fontSize: 12)),
       deleteIcon: const Icon(Icons.close, size: 16),
       onDeleted: onRemove,
-      backgroundColor: Theme.of(
-        context,
-      ).colorScheme.secondaryContainer.withValues(alpha: 0.5),
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer
+          .withValues(alpha: AppConstants.opacityLow),
       side: BorderSide.none,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,

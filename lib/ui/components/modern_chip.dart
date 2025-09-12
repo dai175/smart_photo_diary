@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_constants.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
@@ -184,7 +185,7 @@ class _ModernChipState extends State<ModernChip>
                           widget.deleteIcon ?? Icons.close,
                           size: chipData.iconSize,
                           color: colorData.foregroundColor.withValues(
-                            alpha: 0.7,
+                            alpha: AppConstants.opacityMedium,
                           ),
                         ),
                       ),
@@ -201,12 +202,16 @@ class _ModernChipState extends State<ModernChip>
 
   Color _getBackgroundColor(_ChipColorData colorData) {
     if (!widget.enabled) {
-      return colorData.backgroundColor.withValues(alpha: 0.3);
+      return colorData.backgroundColor.withValues(
+        alpha: AppConstants.opacityXLow,
+      );
     }
 
     if (widget.style == ChipStyle.outlined) {
       return _isHovered
-          ? colorData.backgroundColor.withValues(alpha: 0.1)
+          ? colorData.backgroundColor.withValues(
+              alpha: AppConstants.opacityXXLow,
+            )
           : Colors.transparent;
     }
 
@@ -256,7 +261,7 @@ class _ModernChipState extends State<ModernChip>
         foregroundColor: widget.foregroundColor ?? Colors.white,
         borderColor: widget.backgroundColor ?? AppColors.primary,
         hoverColor: (widget.backgroundColor ?? AppColors.primary).withValues(
-          alpha: 0.8,
+          alpha: AppConstants.opacityHigh,
         ),
       );
     }
@@ -267,7 +272,7 @@ class _ModernChipState extends State<ModernChip>
       foregroundColor: widget.foregroundColor ?? AppColors.onPrimaryContainer,
       borderColor: widget.backgroundColor ?? AppColors.primary,
       hoverColor: (widget.backgroundColor ?? AppColors.primaryContainer)
-          .withValues(alpha: 0.8),
+          .withValues(alpha: AppConstants.opacityHigh),
     );
   }
 }
@@ -358,17 +363,23 @@ class CategoryChip extends StatelessWidget {
         );
       case ChipCategory.activity:
         return _CategoryColors(
-          backgroundColor: AppColors.secondary.withValues(alpha: 0.2),
+          backgroundColor: AppColors.secondary.withValues(
+            alpha: AppConstants.opacitySubtle,
+          ),
           foregroundColor: AppColors.secondaryDark,
         );
       case ChipCategory.location:
         return _CategoryColors(
-          backgroundColor: AppColors.success.withValues(alpha: 0.2),
+          backgroundColor: AppColors.success.withValues(
+            alpha: AppConstants.opacitySubtle,
+          ),
           foregroundColor: AppColors.success,
         );
       case ChipCategory.food:
         return _CategoryColors(
-          backgroundColor: AppColors.warning.withValues(alpha: 0.2),
+          backgroundColor: AppColors.warning.withValues(
+            alpha: AppConstants.opacitySubtle,
+          ),
           foregroundColor: AppColors.warning,
         );
     }

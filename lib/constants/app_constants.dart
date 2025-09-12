@@ -80,8 +80,32 @@ class AppConstants {
   static const List<IconData> navigationIcons = AppIcons.navigationIcons;
 
   // アニメーション
-  static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
   static const Duration shortAnimationDuration = Duration(milliseconds: 150);
+  static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
+  static const Duration mediumAnimationDuration = Duration(milliseconds: 350);
+  static const Duration slowAnimationDuration = Duration(milliseconds: 400);
+  static const Duration xSlowAnimationDuration = Duration(milliseconds: 500);
+  static const Duration longAnimationDuration = Duration(milliseconds: 1500);
+  static const Duration xLongAnimationDuration = Duration(milliseconds: 2000);
+  static const Duration microFastAnimationDuration = Duration(milliseconds: 80);
+  static const Duration microBaseAnimationDuration = Duration(
+    milliseconds: 100,
+  );
+  static const Duration microStaggerUnit = Duration(milliseconds: 100);
+  static const Duration quickAnimationDuration = Duration(milliseconds: 200);
+
+  // エフェクト/透明度（withValues(alpha: ...) 用）
+  static const double opacityHigh = 0.8;
+  static const double opacityMedium = 0.7;
+  static const double opacityLow = 0.5;
+  static const double opacityXLow = 0.3;
+  static const double opacityXXLow = 0.1;
+  static const double opacitySubtle = 0.2;
+
+  // スケール（タップ・エントランスなど）
+  static const double scaleTapSmall = 0.96;
+  static const double scalePressed = 0.95;
+  static const double scaleEntranceStart = 0.8;
 
   // 写真サービス関連
   static const int defaultPhotoLimit = 20;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../design_system/app_colors.dart';
+import '../../constants/app_constants.dart';
 import '../design_system/app_spacing.dart';
 
 /// 統一されたデザインのカードコンポーネント
@@ -82,7 +83,7 @@ class _CustomCardState extends State<CustomCard>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 150),
+      duration: AppConstants.shortAnimationDuration,
       vsync: this,
     );
 
@@ -167,7 +168,7 @@ class _CustomCardState extends State<CustomCard>
               child: Transform.scale(
                 scale: widget.enableTapAnimation ? _scaleAnimation.value : 1.0,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: AppConstants.quickAnimationDuration,
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
                     color: widget.gradient == null ? backgroundColor : null,
@@ -305,7 +306,9 @@ class GradientCard extends StatelessWidget {
       onTap: onTap,
       gradient: gradient ?? AppColors.primaryGradient,
       elevation: AppSpacing.elevationMd,
-      shadowColor: AppColors.primary.withValues(alpha: 0.3),
+      shadowColor: AppColors.primary.withValues(
+        alpha: AppConstants.opacityXLow,
+      ),
       child: child,
     );
   }

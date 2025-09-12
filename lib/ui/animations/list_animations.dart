@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../constants/app_constants.dart';
 
 /// リストアニメーションの定義
 class ListAnimations {
@@ -9,8 +10,8 @@ class ListAnimations {
   static Widget staggeredListItem({
     required Widget child,
     required int index,
-    Duration delay = const Duration(milliseconds: 100),
-    Duration duration = const Duration(milliseconds: 500),
+    Duration delay = AppConstants.microStaggerUnit,
+    Duration duration = AppConstants.xSlowAnimationDuration,
   }) {
     // 簡略化のため、基本的なSlideInWidgetとして実装
     return SlideInWidget(
@@ -125,7 +126,7 @@ class FadeInWidget extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
-    this.duration = const Duration(milliseconds: 400),
+    this.duration = AppConstants.slowAnimationDuration,
     this.curve = Curves.easeOutCubic,
   });
 
@@ -181,7 +182,7 @@ class SlideInWidget extends StatefulWidget {
     super.key,
     required this.child,
     this.delay = Duration.zero,
-    this.duration = const Duration(milliseconds: 350),
+    this.duration = AppConstants.mediumAnimationDuration,
     this.curve = Curves.easeOutQuart,
     this.begin = const Offset(0.0, 0.2),
     this.end = Offset.zero,

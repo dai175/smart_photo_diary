@@ -29,8 +29,8 @@ class DiaryDetailScreen extends StatefulWidget {
   Route<T> customRoute<T>() {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => this,
-      transitionDuration: const Duration(milliseconds: 300),
-      reverseTransitionDuration: const Duration(milliseconds: 250),
+      transitionDuration: AppConstants.defaultAnimationDuration,
+      reverseTransitionDuration: AppConstants.shortAnimationDuration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;

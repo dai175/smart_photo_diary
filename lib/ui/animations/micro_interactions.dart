@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../constants/app_constants.dart';
 
 /// マイクロインタラクション用のアニメーション効果
 class MicroInteractions {
@@ -32,8 +33,8 @@ class MicroInteractions {
     required Widget child,
     required VoidCallback onTap,
     bool enableHaptic = true,
-    double scaleFactor = 0.96,
-    Duration duration = const Duration(milliseconds: 80),
+    double scaleFactor = AppConstants.scaleTapSmall,
+    Duration duration = AppConstants.microFastAnimationDuration,
   }) {
     return _BounceWrapper(
       onTap: onTap,
@@ -49,8 +50,8 @@ class MicroInteractions {
     required Widget child,
     required VoidCallback onTap,
     bool enableHaptic = true,
-    double scaleFactor = 0.96,
-    Duration duration = const Duration(milliseconds: 80),
+    double scaleFactor = AppConstants.scaleTapSmall,
+    Duration duration = AppConstants.microFastAnimationDuration,
   }) {
     return bounceOnTap(
       child: child,
@@ -110,7 +111,9 @@ class MicroInteractions {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: glowColor ?? Colors.blue.withValues(alpha: 0.3),
+            color:
+                glowColor ??
+                Colors.blue.withValues(alpha: AppConstants.opacityXLow),
             blurRadius: blurRadius,
             spreadRadius: 2,
           ),
@@ -123,7 +126,7 @@ class MicroInteractions {
   /// スケール遷移効果
   static Widget scaleTransition({
     required Widget child,
-    Duration duration = const Duration(milliseconds: 300),
+    Duration duration = AppConstants.defaultAnimationDuration,
     Curve curve = Curves.easeOutBack,
   }) {
     return TweenAnimationBuilder<double>(
@@ -147,8 +150,8 @@ class _BounceWrapper extends StatefulWidget {
     required this.child,
     required this.onTap,
     this.enableHaptic = true,
-    this.scaleFactor = 0.95,
-    this.duration = const Duration(milliseconds: 100),
+    this.scaleFactor = AppConstants.scalePressed,
+    this.duration = AppConstants.microBaseAnimationDuration,
   });
 
   final Widget child;
@@ -223,8 +226,8 @@ class PulseWidget extends StatefulWidget {
   const PulseWidget({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 1500),
-    this.minScale = 0.95,
+    this.duration = AppConstants.longAnimationDuration,
+    this.minScale = AppConstants.scalePressed,
     this.maxScale = 1.05,
     this.enabled = true,
   });
@@ -301,7 +304,7 @@ class FloatingWidget extends StatefulWidget {
   const FloatingWidget({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 2000),
+    this.duration = AppConstants.xLongAnimationDuration,
     this.offset = 10.0,
     this.enabled = true,
   });
@@ -377,8 +380,8 @@ class BreatheWidget extends StatefulWidget {
   const BreatheWidget({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 2000),
-    this.minOpacity = 0.5,
+    this.duration = AppConstants.xLongAnimationDuration,
+    this.minOpacity = AppConstants.opacityLow,
     this.maxOpacity = 1.0,
     this.enabled = true,
   });

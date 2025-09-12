@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
 
 class DiarySearchWidget extends StatelessWidget {
   final TextEditingController controller;
@@ -31,9 +32,9 @@ class DiarySearchWidget extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'タイトルや本文を検索...',
                 hintStyle: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onPrimary.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onPrimary.withValues(
+                    alpha: AppConstants.opacityMedium,
+                  ),
                 ),
                 border: InputBorder.none,
               ),
