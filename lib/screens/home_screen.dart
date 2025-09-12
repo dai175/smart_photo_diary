@@ -585,28 +585,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 撮影成功のフィードバックを表示
   void _showCaptureSuccessSnackBar() {
-    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              color: theme.colorScheme.onInverseSurface,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '写真を撮影しました',
-              style: TextStyle(color: theme.colorScheme.onInverseSurface),
-            ),
-          ],
-        ),
-        backgroundColor: theme.colorScheme.inverseSurface,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      const SnackBar(
+        content: Text('写真を撮影しました'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
