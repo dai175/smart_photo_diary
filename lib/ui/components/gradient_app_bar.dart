@@ -16,7 +16,7 @@ class GradientAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.foregroundColor,
     this.elevation,
     this.shadowColor,
-    this.centerTitle = true,
+    this.centerTitle = false,
     this.titleSpacing,
     this.leadingWidth,
     this.toolbarHeight,

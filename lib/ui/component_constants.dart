@@ -48,6 +48,23 @@ class ButtonConstants {
   static const double borderWidth = 1.5;
 }
 
+/// 入力フィールドの規格値
+class InputConstants {
+  static const double borderWidth = 1.0;
+  static const double borderWidthFocused = 2.0;
+}
+
+/// タブの規格値
+class TabConstants {
+  static const double indicatorThickness = 2.0;
+}
+
+/// ブラー/半透明背景の規格値
+class BlurConstants {
+  static const double defaultBlur = 10.0;
+  static const double backgroundAlpha = 0.8; // 80% 不透明
+}
+
 /// 拡大ビューワ（画像プレビュー）規格値
 class ViewerConstants {
   static const double minScale = 1.0;

@@ -13,7 +13,7 @@ import 'core/service_locator.dart';
 import 'services/settings_service.dart';
 import 'services/logging_service.dart';
 import 'core/service_registration.dart';
-import 'ui/design_system/app_colors.dart';
+import 'ui/design_system/app_theme.dart';
 
 Future<void> main() async {
   // Flutterの初期化を確実に行う
@@ -106,25 +106,17 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const MaterialApp(
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      return MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
 
     return MaterialApp(
       title: AppConstants.appTitle,
       themeMode: _themeMode,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       // 日本語ロケール設定
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

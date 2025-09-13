@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'app_colors.dart';
 import 'app_typography.dart';
 import 'app_spacing.dart';
+import '../component_constants.dart';
 
 /// Smart Photo Diary アプリケーションのテーマ設定
 /// Material Design 3 に基づいたライト・ダークテーマを提供
 class AppTheme {
   AppTheme._();
 
+  // テスト環境かどうか
+  static bool get _isTestEnv {
+    try {
+      // Flutter test runner sets FLUTTER_TEST=true
+      return !kIsWeb && (Platform.environment['FLUTTER_TEST'] == 'true');
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ============= LIGHT THEME =============
   static ThemeData get lightTheme {
+    if (_isTestEnv) {
+      // テスト環境ではネットワークからフォントを取得しない
+      GoogleFonts.config.allowRuntimeFetching = false;
+    }
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -44,7 +61,7 @@ class AppTheme {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: AppTypography.withColor(
           AppTypography.appTitle,
           Colors.white,
@@ -55,17 +72,22 @@ class AppTheme {
         ),
       ),
 
-      // Text Theme - Google Fonts for Japanese support
-      textTheme: GoogleFonts.notoSansJpTextTheme(ThemeData.light().textTheme)
-          .copyWith(
-            headlineLarge: AppTypography.headlineLarge,
-            headlineMedium: AppTypography.headlineMedium,
-            headlineSmall: AppTypography.headlineSmall,
-            titleLarge: AppTypography.titleLarge,
-            titleMedium: AppTypography.titleMedium,
-            bodyLarge: AppTypography.bodyLarge,
-            bodyMedium: AppTypography.bodyMedium,
-          ),
+      // Text Theme - Google Fonts in production, system font in tests
+      textTheme:
+          (_isTestEnv
+                  ? ThemeData.light().textTheme
+                  : GoogleFonts.notoSansJpTextTheme(
+                      ThemeData.light().textTheme,
+                    ))
+              .copyWith(
+                headlineLarge: AppTypography.headlineLarge,
+                headlineMedium: AppTypography.headlineMedium,
+                headlineSmall: AppTypography.headlineSmall,
+                titleLarge: AppTypography.titleLarge,
+                titleMedium: AppTypography.titleMedium,
+                bodyLarge: AppTypography.bodyLarge,
+                bodyMedium: AppTypography.bodyMedium,
+              ),
 
       // Card Theme
       cardTheme: CardThemeData(
@@ -134,7 +156,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppSpacing.inputRadius,
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.primary,
+            width: InputConstants.borderWidthFocused,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: AppSpacing.inputRadius,
@@ -190,7 +215,10 @@ class AppTheme {
         labelStyle: AppTypography.labelLarge,
         unselectedLabelStyle: AppTypography.labelLarge,
         indicator: const UnderlineTabIndicator(
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(
+            color: AppColors.primary,
+            width: TabConstants.indicatorThickness,
+          ),
         ),
       ),
 
@@ -224,6 +252,9 @@ class AppTheme {
 
   // ============= DARK THEME =============
   static ThemeData get darkTheme {
+    if (_isTestEnv) {
+      GoogleFonts.config.allowRuntimeFetching = false;
+    }
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -254,7 +285,7 @@ class AppTheme {
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.onSurfaceDark,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: AppTypography.withColor(
           AppTypography.appTitle,
           AppColors.onSurfaceDark,
@@ -265,38 +296,41 @@ class AppTheme {
         ),
       ),
 
-      // Text Theme - Google Fonts for Japanese support (Dark)
-      textTheme: GoogleFonts.notoSansJpTextTheme(ThemeData.dark().textTheme)
-          .copyWith(
-            headlineLarge: AppTypography.withColor(
-              AppTypography.headlineLarge,
-              AppColors.onBackgroundDark,
-            ),
-            headlineMedium: AppTypography.withColor(
-              AppTypography.headlineMedium,
-              AppColors.onBackgroundDark,
-            ),
-            headlineSmall: AppTypography.withColor(
-              AppTypography.headlineSmall,
-              AppColors.onBackgroundDark,
-            ),
-            titleLarge: AppTypography.withColor(
-              AppTypography.titleLarge,
-              AppColors.onBackgroundDark,
-            ),
-            titleMedium: AppTypography.withColor(
-              AppTypography.titleMedium,
-              AppColors.onBackgroundDark,
-            ),
-            bodyLarge: AppTypography.withColor(
-              AppTypography.bodyLarge,
-              AppColors.onBackgroundDark,
-            ),
-            bodyMedium: AppTypography.withColor(
-              AppTypography.bodyMedium,
-              AppColors.onBackgroundDark,
-            ),
-          ),
+      // Text Theme - Google Fonts in production, system font in tests (Dark)
+      textTheme:
+          (_isTestEnv
+                  ? ThemeData.dark().textTheme
+                  : GoogleFonts.notoSansJpTextTheme(ThemeData.dark().textTheme))
+              .copyWith(
+                headlineLarge: AppTypography.withColor(
+                  AppTypography.headlineLarge,
+                  AppColors.onBackgroundDark,
+                ),
+                headlineMedium: AppTypography.withColor(
+                  AppTypography.headlineMedium,
+                  AppColors.onBackgroundDark,
+                ),
+                headlineSmall: AppTypography.withColor(
+                  AppTypography.headlineSmall,
+                  AppColors.onBackgroundDark,
+                ),
+                titleLarge: AppTypography.withColor(
+                  AppTypography.titleLarge,
+                  AppColors.onBackgroundDark,
+                ),
+                titleMedium: AppTypography.withColor(
+                  AppTypography.titleMedium,
+                  AppColors.onBackgroundDark,
+                ),
+                bodyLarge: AppTypography.withColor(
+                  AppTypography.bodyLarge,
+                  AppColors.onBackgroundDark,
+                ),
+                bodyMedium: AppTypography.withColor(
+                  AppTypography.bodyMedium,
+                  AppColors.onBackgroundDark,
+                ),
+              ),
 
       // Card Theme
       cardTheme: CardThemeData(
@@ -365,7 +399,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppSpacing.inputRadius,
-          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.primaryLight,
+            width: InputConstants.borderWidthFocused,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: AppSpacing.inputRadius,
@@ -426,7 +463,10 @@ class AppTheme {
         labelStyle: AppTypography.labelLarge,
         unselectedLabelStyle: AppTypography.labelLarge,
         indicator: const UnderlineTabIndicator(
-          borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
+          borderSide: BorderSide(
+            color: AppColors.primaryLight,
+            width: TabConstants.indicatorThickness,
+          ),
         ),
       ),
 
@@ -499,12 +539,14 @@ class AppTheme {
   /// ブラー効果付きコンテナを作成
   static Widget createBlurContainer({
     required Widget child,
-    double blurAmount = 10.0,
+    double blurAmount = BlurConstants.defaultBlur,
     Color? backgroundColor,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surface.withValues(alpha: 0.8),
+        color:
+            backgroundColor ??
+            AppColors.surface.withValues(alpha: BlurConstants.backgroundAlpha),
         borderRadius: AppSpacing.cardRadius,
         boxShadow: AppSpacing.cardShadow,
       ),
