@@ -199,13 +199,17 @@ class AppTheme {
         ),
       ),
 
-      // Bottom Navigation Bar Theme
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      // Bottom Navigation Bar Theme（旧UIを統一）
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.onSurfaceVariant,
+        selectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
+        unselectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
+        selectedLabelStyle: AppTypography.labelMedium,
+        unselectedLabelStyle: AppTypography.labelMedium,
         type: BottomNavigationBarType.fixed,
-        elevation: AppSpacing.elevationSm,
+        elevation: 0,
       ),
 
       // Tab Bar Theme
@@ -448,12 +452,16 @@ class AppTheme {
       ),
 
       // Bottom Navigation Bar Theme (Dark)
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         selectedItemColor: AppColors.primaryLight,
         unselectedItemColor: AppColors.onSurfaceVariant,
+        selectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
+        unselectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
+        selectedLabelStyle: AppTypography.labelMedium,
+        unselectedLabelStyle: AppTypography.labelMedium,
         type: BottomNavigationBarType.fixed,
-        elevation: AppSpacing.elevationSm,
+        elevation: 0,
       ),
 
       // Tab Bar Theme (Dark)

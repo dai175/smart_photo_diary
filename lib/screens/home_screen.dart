@@ -468,8 +468,6 @@ class _HomeScreenState extends State<HomeScreen>
       floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
         currentIndex: _currentIndex,
         onTap: (index) {
           if (_currentIndex == index && index == 0) {
