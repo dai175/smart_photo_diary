@@ -90,8 +90,9 @@ class NavBarConstants {
   static const double iconSize = 24.0;
 }
 
-/// ラベルの微調整用定数
+/// ラベル/アイコンの微調整用定数
 class LabelConstants {
-  /// 未選択ラベルの不透明度（読みやすさを保ちつつ主張を抑える）
+  /// 未選択アイテムの不透明度（ライト/ダーク共通）
+  /// 基準色は Light: onSurfaceVariant / Dark: onSurfaceDark を使用
   static const double unselectedOpacity = 0.65;
 }

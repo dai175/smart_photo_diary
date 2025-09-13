@@ -457,16 +457,14 @@ class AppTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         selectedItemColor: AppColors.primaryLight,
-        unselectedItemColor: AppColors.onSurfaceVariant,
+        // ダークは onSurfaceVariant だと暗すぎるため、基準色を onSurfaceDark に変更
+        unselectedItemColor: AppColors.onSurfaceDark.withValues(
+          alpha: LabelConstants.unselectedOpacity,
+        ),
         selectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
         unselectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
         selectedLabelStyle: AppTypography.labelMedium,
-        unselectedLabelStyle: AppTypography.withColor(
-          AppTypography.labelMedium,
-          AppColors.onSurfaceVariant.withValues(
-            alpha: LabelConstants.unselectedOpacity,
-          ),
-        ),
+        unselectedLabelStyle: AppTypography.labelMedium,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
