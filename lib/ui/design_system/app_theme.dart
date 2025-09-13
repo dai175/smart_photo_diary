@@ -203,7 +203,9 @@ class AppTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.onSurfaceVariant,
+        unselectedItemColor: AppColors.onSurfaceVariant.withValues(
+          alpha: LabelConstants.unselectedOpacity,
+        ),
         selectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
         unselectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
         selectedLabelStyle: AppTypography.labelMedium,
@@ -459,7 +461,12 @@ class AppTheme {
         selectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
         unselectedIconTheme: const IconThemeData(size: AppSpacing.iconMd),
         selectedLabelStyle: AppTypography.labelMedium,
-        unselectedLabelStyle: AppTypography.labelMedium,
+        unselectedLabelStyle: AppTypography.withColor(
+          AppTypography.labelMedium,
+          AppColors.onSurfaceVariant.withValues(
+            alpha: LabelConstants.unselectedOpacity,
+          ),
+        ),
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),

@@ -77,3 +77,21 @@ class PhotoPreviewConstants {
   static const int previewQuality = 90;
   static const double progressStrokeWidth = 3.0;
 }
+
+/// ナビゲーションバーの規格値
+class NavBarConstants {
+  /// コンパクトな高さ（旧BottomNavigationBarに近い）
+  static const double height = 64.0;
+
+  /// 上端ヘアラインの太さ
+  static const double hairlineThickness = 0.5;
+
+  /// アイコンサイズ
+  static const double iconSize = 24.0;
+}
+
+/// ラベルの微調整用定数
+class LabelConstants {
+  /// 未選択ラベルの不透明度（読みやすさを保ちつつ主張を抑える）
+  static const double unselectedOpacity = 0.65;
+}
