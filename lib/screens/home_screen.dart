@@ -19,6 +19,7 @@ import '../widgets/home_content_widget.dart';
 import '../ui/components/custom_dialog.dart';
 import '../controllers/scroll_signal.dart';
 import '../ui/design_system/app_colors.dart';
+import '../ui/component_constants.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -466,21 +467,33 @@ class _HomeScreenState extends State<HomeScreen>
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: IndexedStack(index: _currentIndex, children: screens),
       floatingActionButton: _buildFloatingActionButton(),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (_currentIndex == index && index == 0) {
-            // 既にホーム選択中にホームを再タップ → 先頭へスクロール
-            _homeScrollSignal.trigger();
-            return;
-          }
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: NavBarConstants.hairlineThickness,
+            width: double.infinity,
+            child: ColoredBox(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+          BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              if (_currentIndex == index && index == 0) {
+                // 既にホーム選択中にホームを再タップ → 先頭へスクロール
+                _homeScrollSignal.trigger();
+                return;
+              }
 
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: _buildNavigationItems(),
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            items: _buildNavigationItems(),
+          ),
+        ],
       ),
     );
   }
