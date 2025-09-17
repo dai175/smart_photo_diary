@@ -129,6 +129,24 @@ class PhotoSelectionController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 使用済み写真IDを追加（差分適用）
+  void addUsedPhotoIds(Iterable<String> ids) {
+    var changed = false;
+    for (final id in ids) {
+      if (_usedPhotoIds.add(id)) changed = true;
+    }
+    if (changed) notifyListeners();
+  }
+
+  /// 使用済み写真IDを削除（差分適用）
+  void removeUsedPhotoIds(Iterable<String> ids) {
+    var changed = false;
+    for (final id in ids) {
+      if (_usedPhotoIds.remove(id)) changed = true;
+    }
+    if (changed) notifyListeners();
+  }
+
   /// ローディング状態を設定
   void setLoading(bool loading) {
     _isLoading = loading;

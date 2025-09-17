@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 import '../models/diary_entry.dart';
+import '../models/diary_change.dart';
 import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
@@ -19,6 +21,7 @@ class DiaryService implements IDiaryService {
   final _uuid = const Uuid();
   final IAiService _aiService;
   late final LoggingService _loggingService;
+  final _diaryChangeController = StreamController<DiaryChange>.broadcast();
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService);
@@ -45,6 +48,10 @@ class DiaryService implements IDiaryService {
   Future<void> initialize() async {
     await _init();
   }
+
+  // 変更ストリーム
+  @override
+  Stream<DiaryChange> get changes => _diaryChangeController.stream;
 
   // 初期化処理
   Future<void> _init() async {
@@ -111,6 +118,15 @@ class DiaryService implements IDiaryService {
       await _diaryBox!.put(entry.id, entry);
       _loggingService.info('日記エントリー保存完了: ${entry.id}');
 
+      // 変更イベント（作成）を通知
+      _diaryChangeController.add(
+        DiaryChange(
+          type: DiaryChangeType.created,
+          entryId: entry.id,
+          addedPhotoIds: List<String>.from(photoIds),
+        ),
+      );
+
       // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
       _generateTagsInBackground(entry);
 
@@ -125,14 +141,40 @@ class DiaryService implements IDiaryService {
   @override
   Future<void> updateDiaryEntry(DiaryEntry entry) async {
     if (_diaryBox == null) await _init();
+    // 旧エントリーを取得し、写真IDの差分を計算
+    final old = _diaryBox!.get(entry.id);
     await _diaryBox!.put(entry.id, entry);
+    if (old != null) {
+      final oldIds = Set<String>.from(old.photoIds);
+      final newIds = Set<String>.from(entry.photoIds);
+      final removed = oldIds.difference(newIds).toList();
+      final added = newIds.difference(oldIds).toList();
+      _diaryChangeController.add(
+        DiaryChange(
+          type: DiaryChangeType.updated,
+          entryId: entry.id,
+          addedPhotoIds: added,
+          removedPhotoIds: removed,
+        ),
+      );
+    }
   }
 
   // 日記エントリーを削除
   @override
   Future<void> deleteDiaryEntry(String id) async {
     if (_diaryBox == null) await _init();
+    final existing = _diaryBox!.get(id);
     await _diaryBox!.delete(id);
+    if (existing != null) {
+      _diaryChangeController.add(
+        DiaryChange(
+          type: DiaryChangeType.deleted,
+          entryId: id,
+          removedPhotoIds: List<String>.from(existing.photoIds),
+        ),
+      );
+    }
   }
 
   // すべての日記エントリーを取得
@@ -419,6 +461,15 @@ class DiaryService implements IDiaryService {
       _loggingService.debug('Hiveに保存中...');
       await _diaryBox!.put(entry.id, entry);
       _loggingService.info('過去写真日記の保存完了: ${entry.id}');
+
+      // 変更イベント（作成）を通知
+      _diaryChangeController.add(
+        DiaryChange(
+          type: DiaryChangeType.created,
+          entryId: entry.id,
+          addedPhotoIds: List<String>.from(photoIds),
+        ),
+      );
 
       // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
       _generateTagsInBackgroundForPastPhoto(entry);

@@ -20,6 +20,8 @@ import '../ui/components/custom_dialog.dart';
 import '../controllers/scroll_signal.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/component_constants.dart';
+import '../models/diary_change.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -59,6 +61,9 @@ class _HomeScreenState extends State<HomeScreen>
   // Diaryタブの再構築用キー（作成直後の一覧更新のため）
   Key _diaryScreenKey = UniqueKey();
 
+  // 日記変更イベント購読
+  StreamSubscription<DiaryChange>? _diarySub;
+
   @override
   void initState() {
     super.initState();
@@ -73,13 +78,41 @@ class _HomeScreenState extends State<HomeScreen>
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
     _loadTodayPhotos();
     _loadUsedPhotoIds();
+    _subscribeDiaryChanges();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _diarySub?.cancel();
     _photoController.dispose();
     super.dispose();
+  }
+
+  Future<void> _subscribeDiaryChanges() async {
+    try {
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      _diarySub = diaryService.changes.listen((change) {
+        switch (change.type) {
+          case DiaryChangeType.created:
+            _photoController.addUsedPhotoIds(change.addedPhotoIds);
+            break;
+          case DiaryChangeType.updated:
+            if (change.removedPhotoIds.isNotEmpty) {
+              _photoController.removeUsedPhotoIds(change.removedPhotoIds);
+            }
+            if (change.addedPhotoIds.isNotEmpty) {
+              _photoController.addUsedPhotoIds(change.addedPhotoIds);
+            }
+            break;
+          case DiaryChangeType.deleted:
+            _photoController.removeUsedPhotoIds(change.removedPhotoIds);
+            break;
+        }
+      });
+    } catch (_) {
+      // 失敗時はフォールバックで定期的に再読込してもよいが、ここでは無視
+    }
   }
 
   @override

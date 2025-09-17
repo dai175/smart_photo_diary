@@ -16,6 +16,8 @@ import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
 import '../ui/component_constants.dart';
+import '../models/diary_change.dart';
+import 'dart:async';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -31,6 +33,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   bool _isLoading = true;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  StreamSubscription<DiaryChange>? _diarySub;
+  Timer? _debounce;
 
   // 統計データ
   int _totalEntries = 0;
@@ -43,6 +47,29 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     super.initState();
     _logger = serviceLocator.get<LoggingService>();
     _loadStatistics();
+    _subscribeDiaryChanges();
+  }
+
+  void _subscribeDiaryChanges() async {
+    try {
+      _diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      _diarySub = _diaryService.changes.listen((_) {
+        _debounce?.cancel();
+        _debounce = Timer(const Duration(milliseconds: 350), () {
+          if (!mounted) return;
+          _loadStatistics();
+        });
+      });
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  @override
+  void dispose() {
+    _diarySub?.cancel();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadStatistics() async {

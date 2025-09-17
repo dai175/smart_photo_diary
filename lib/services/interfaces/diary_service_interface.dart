@@ -1,10 +1,14 @@
 import 'package:photo_manager/photo_manager.dart';
 import '../../models/diary_entry.dart';
+import '../../models/diary_change.dart';
 import '../../models/diary_filter.dart';
 import '../../core/result/result.dart';
 
 /// 日記サービスのインターフェース
 abstract class IDiaryService {
+  /// 日記の変更ストリーム（作成/更新/削除）。broadcast。
+  Stream<DiaryChange> get changes;
+
   /// 日記エントリーを保存
   Future<DiaryEntry> saveDiaryEntry({
     required DateTime date,
