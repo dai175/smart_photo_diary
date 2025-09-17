@@ -78,33 +78,33 @@ class _DiaryScreenState extends State<DiaryScreen> {
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
           appBar: _buildAppBar(context),
-          body: Column(
-            children: [
-              // アクティブフィルタ表示
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.sm,
+          body: MicroInteractions.pullToRefresh(
+            onRefresh: _controller.refresh,
+            color: AppColors.primary,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // アクティブフィルタ表示（AppBar直下に固定されないようスリバーとして配置）
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    child: ActiveFiltersDisplay(
+                      filter: _controller.currentFilter,
+                      onClear: _controller.clearAllFilters,
+                      onRemoveTag: _controller.removeTagFilter,
+                      onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
+                      onRemoveDateRange: _controller.removeDateRangeFilter,
+                      onRemoveSearch: _controller.removeSearchFilter,
+                    ),
+                  ),
                 ),
-                child: ActiveFiltersDisplay(
-                  filter: _controller.currentFilter,
-                  onClear: _controller.clearAllFilters,
-                  onRemoveTag: _controller.removeTagFilter,
-                  onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
-                  onRemoveDateRange: _controller.removeDateRangeFilter,
-                  onRemoveSearch: _controller.removeSearchFilter,
-                ),
-              ),
 
-              // 日記一覧
-              Expanded(
-                child: MicroInteractions.pullToRefresh(
-                  onRefresh: _controller.refresh,
-                  color: AppColors.primary,
-                  child: _buildContent(),
-                ),
-              ),
-            ],
+                ..._buildSliverContent(),
+              ],
+            ),
           ),
         );
       },
@@ -183,73 +183,84 @@ class _DiaryScreenState extends State<DiaryScreen> {
     );
   }
 
-  Widget _buildContent() {
+  List<Widget> _buildSliverContent() {
     if (_controller.isLoading) {
-      return ListView.builder(
-        padding: AppSpacing.screenPadding,
-        itemCount: 6,
-        itemBuilder: (context, index) => Padding(
-          padding: EdgeInsets.only(bottom: index < 5 ? AppSpacing.md : 0),
-          child: const DiaryCardShimmer(),
+      return [
+        SliverPadding(
+          padding: AppSpacing.screenPadding,
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => Padding(
+                padding: EdgeInsets.only(bottom: index < 5 ? AppSpacing.md : 0),
+                child: const DiaryCardShimmer(),
+              ),
+              childCount: 6,
+            ),
+          ),
         ),
-      );
+      ];
     }
 
     if (_controller.diaryEntries.isNotEmpty) {
-      return ListView.builder(
-        padding: AppSpacing.screenPadding,
-        itemCount: _controller.diaryEntries.length,
-        itemBuilder: (context, index) {
-          final entry = _controller.diaryEntries[index];
-          return SlideInWidget(
-            delay: Duration(milliseconds: 50 * index),
-            begin: const Offset(0.0, 0.2),
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: index < _controller.diaryEntries.length - 1
-                    ? AppSpacing.lg
-                    : 0,
-              ),
-              child: DiaryCardWidget(
-                entry: entry,
-                onTap: () => _navigateToDiaryDetail(entry.id),
-              ),
-            ),
-          );
-        },
-      );
+      return [
+        SliverPadding(
+          padding: AppSpacing.screenPadding,
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final entry = _controller.diaryEntries[index];
+              return SlideInWidget(
+                delay: Duration(milliseconds: 50 * index),
+                begin: const Offset(0.0, 0.2),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: index < _controller.diaryEntries.length - 1
+                        ? AppSpacing.lg
+                        : 0,
+                  ),
+                  child: DiaryCardWidget(
+                    entry: entry,
+                    onTap: () => _navigateToDiaryDetail(entry.id),
+                  ),
+                ),
+              );
+            }, childCount: _controller.diaryEntries.length),
+          ),
+        ),
+      ];
     }
 
-    return _buildEmptyState();
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.book_outlined,
-            size: AppConstants.emptyStateIconSize,
-            color: Theme.of(context).colorScheme.outline,
+    // 空状態（画面全体中央配置 + 常にスクロール可能）
+    return [
+      SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.book_outlined,
+                size: AppConstants.emptyStateIconSize,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                _controller.getEmptyStateMessage(),
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              if (_controller.currentFilter.isActive &&
+                  !_controller.isSearching) ...[
+                const SizedBox(height: AppSpacing.xl),
+                PrimaryButton(
+                  onPressed: _controller.clearAllFilters,
+                  text: 'フィルタをクリア',
+                  icon: Icons.clear_all_rounded,
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            _controller.getEmptyStateMessage(),
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          if (_controller.currentFilter.isActive &&
-              !_controller.isSearching) ...[
-            const SizedBox(height: AppSpacing.xl),
-            PrimaryButton(
-              onPressed: _controller.clearAllFilters,
-              text: 'フィルタをクリア',
-              icon: Icons.clear_all_rounded,
-            ),
-          ],
-        ],
+        ),
       ),
-    );
+    ];
   }
 }
