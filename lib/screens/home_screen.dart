@@ -60,6 +60,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   // Diaryタブの再構築用キー（作成直後の一覧更新のため）
   Key _diaryScreenKey = UniqueKey();
+  // 統計タブの再構築用キー（フォールバック再読込）
+  Key _statsScreenKey = UniqueKey();
 
   // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
@@ -489,12 +491,18 @@ class _HomeScreenState extends State<HomeScreen>
           ).then((result) {
             if (result == true) {
               _photoController.clearSelection();
+              // フォールバック: 削除直後に使用済みIDを再同期
+              _loadUsedPhotoIds();
+              // 統計タブも次回表示時に最新化
+              setState(() {
+                _statsScreenKey = UniqueKey();
+              });
             }
           });
         },
       ),
       DiaryScreen(key: _diaryScreenKey),
-      const StatisticsScreen(),
+      StatisticsScreen(key: _statsScreenKey),
     ];
 
     // 設定画面を追加
@@ -529,6 +537,17 @@ class _HomeScreenState extends State<HomeScreen>
                 // 既にホーム選択中にホームを再タップ → 先頭へスクロール
                 _homeScrollSignal.trigger();
                 return;
+              }
+
+              // フォールバック: タブ切替時に必要な再同期を実施
+              if (index == 0) {
+                // Home を表示する際に使用済みIDを再同期
+                _loadUsedPhotoIds();
+              } else if (index == 2) {
+                // Statistics を表示する直前に再構築し再計算を促す
+                setState(() {
+                  _statsScreenKey = UniqueKey();
+                });
               }
 
               setState(() {
