@@ -56,6 +56,9 @@ class _HomeScreenState extends State<HomeScreen>
   // ホームタブ再タップで先頭へスクロールさせるためのシグナル
   final ScrollSignal _homeScrollSignal = ScrollSignal();
 
+  // Diaryタブの再構築用キー（作成直後の一覧更新のため）
+  Key _diaryScreenKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -284,6 +287,14 @@ class _HomeScreenState extends State<HomeScreen>
     await _preloadMorePhotos(showLoading: true);
   }
 
+  // 日記作成完了時の処理：使用済み写真更新 + Diary画面を再構築
+  Future<void> _onDiaryCreated() async {
+    setState(() {
+      _diaryScreenKey = UniqueKey();
+    });
+    await _loadUsedPhotoIds();
+  }
+
   // プラン情報を取得（キャッシュ付き）
   Future<int> _getCachedAllowedDays() async {
     final now = DateTime.now();
@@ -432,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen>
         onUsedPhotoSelected: _showUsedPhotoModal,
         onRefresh: _refreshHome,
         onCameraPressed: _capturePhoto,
-        onDiaryCreated: _loadUsedPhotoIds,
+        onDiaryCreated: _onDiaryCreated,
         onLoadMorePhotos: _loadMorePhotos,
         onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
         scrollSignal: _homeScrollSignal,
@@ -449,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen>
           });
         },
       ),
-      const DiaryScreen(),
+      DiaryScreen(key: _diaryScreenKey),
       const StatisticsScreen(),
     ];
 
