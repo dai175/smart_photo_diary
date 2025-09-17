@@ -593,6 +593,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     // flutter_sticky_headerを使ったシンプルな実装
     return CustomScrollView(
       controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         ..._photoGroups.map((group) {
           return SliverStickyHeader(
@@ -883,51 +884,67 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// 権限拒否状態を構築
   Widget _buildPermissionDeniedState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.photo_library_outlined,
-            size: AppConstants.emptyStateIconSize,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            '写真へのアクセス許可が必要です',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          if (widget.onRequestPermission != null)
-            TextButton(
-              onPressed: widget.onRequestPermission,
-              child: const Text('許可する'),
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.photo_library_outlined,
+                  size: AppConstants.emptyStateIconSize,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  '写真へのアクセス許可が必要です',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                if (widget.onRequestPermission != null)
+                  TextButton(
+                    onPressed: widget.onRequestPermission,
+                    child: const Text('許可する'),
+                  ),
+              ],
             ),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 
   /// 空状態を構築
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.photo_outlined,
-            size: AppConstants.emptyStateIconSize,
-            color: Theme.of(context).colorScheme.outline,
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.photo_outlined,
+                  size: AppConstants.emptyStateIconSize,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  '写真がありません',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            '写真がありません',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
