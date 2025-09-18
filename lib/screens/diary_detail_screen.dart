@@ -480,6 +480,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         title: Text(_isEditing ? '日記を編集' : '日記の詳細'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
         elevation: 2,
         actions: [
           // 共有ボタン

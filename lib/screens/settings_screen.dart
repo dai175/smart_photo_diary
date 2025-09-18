@@ -95,6 +95,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
         elevation: 2,
       ),
       body: _isLoading

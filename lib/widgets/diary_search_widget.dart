@@ -23,16 +23,17 @@ class DiarySearchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       title: isSearching
           ? TextField(
               controller: controller,
               autofocus: true,
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              style: TextStyle(color: colorScheme.onPrimary),
               decoration: InputDecoration(
                 hintText: 'タイトルや本文を検索...',
                 hintStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary.withValues(
+                  color: colorScheme.onPrimary.withValues(
                     alpha: AppConstants.opacityMedium,
                   ),
                 ),
@@ -41,7 +42,7 @@ class DiarySearchWidget extends StatelessWidget {
               onChanged: onSearchChanged,
             )
           : const Text('日記一覧'),
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: colorScheme.primary,
       leading: isSearching
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
@@ -62,7 +63,11 @@ class DiarySearchWidget extends StatelessWidget {
                 onPressed: onSearchStart,
               ),
             ],
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      foregroundColor: colorScheme.onPrimary,
+      titleTextStyle: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
+      iconTheme: IconThemeData(color: colorScheme.onPrimary),
       elevation: 0,
     );
   }

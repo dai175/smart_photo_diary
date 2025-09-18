@@ -112,6 +112,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       title: _controller.isSearching
           ? TextField(
@@ -134,15 +135,16 @@ class _DiaryScreenState extends State<DiaryScreen> {
               onChanged: _controller.performSearch,
             )
           : const Text('日記一覧'),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      titleTextStyle: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
+      iconTheme: IconThemeData(color: colorScheme.onPrimary),
       elevation: 2,
       leading: _controller.isSearching
           ? IconButton(
-              icon: Icon(
-                AppIcons.actionBack,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
+              icon: Icon(AppIcons.actionBack, color: colorScheme.onPrimary),
               onPressed: _controller.stopSearch,
             )
           : null,
@@ -152,7 +154,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 IconButton(
                   icon: Icon(
                     AppIcons.searchClear,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: colorScheme.onPrimary,
                   ),
                   onPressed: _controller.clearSearch,
                 ),
@@ -174,7 +176,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         : AppIcons.filter,
                     color: _controller.currentFilter.isActive
                         ? Theme.of(context).colorScheme.inversePrimary
-                        : Theme.of(context).colorScheme.onPrimary,
+                        : colorScheme.onPrimary,
                   ),
                   onPressed: _showFilterBottomSheet,
                 ),
