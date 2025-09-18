@@ -24,6 +24,7 @@ import '../models/writing_prompt.dart';
 import '../core/errors/error_handler.dart';
 import '../utils/prompt_category_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import 'diary_detail_screen.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -50,6 +51,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
   bool _isInitializing = true; // プロンプトサービス初期化中
   bool _isLoading = false; // 日記生成中
+  bool _isSaving = false; // 自動保存中
   bool _hasError = false;
   String _errorMessage = '';
   DateTime _photoDateTime = DateTime.now(); // 写真の撮影日時
@@ -237,6 +239,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _titleController.text = result.title;
         _contentController.text = result.content;
         _isLoading = false;
+        _isSaving = true; // 自動保存開始
         // 写真の撮影日時を保存
         _photoDateTime = photoDateTime;
       });
@@ -255,6 +258,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           );
         }
       }
+
+      // 自動保存を実行
+      await _autoSaveDiary();
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -264,7 +270,83 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     }
   }
 
-  /// 日記を保存する
+  /// 自動保存を実行し、日記詳細画面に遷移する
+  Future<void> _autoSaveDiary() async {
+    // BuildContextを保存
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      _logger.info('自動保存開始', context: 'DiaryPreviewScreen');
+      _logger.info(
+        'タイトル: ${_titleController.text}',
+        context: 'DiaryPreviewScreen',
+      );
+      _logger.info(
+        '本文: ${_contentController.text}',
+        context: 'DiaryPreviewScreen',
+      );
+      _logger.info(
+        '写真数: ${widget.selectedAssets.length}',
+        context: 'DiaryPreviewScreen',
+      );
+
+      // DiaryServiceのインスタンスを取得
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+
+      // 日記を保存
+      final savedDiary = await diaryService.saveDiaryEntryWithPhotos(
+        date: _photoDateTime,
+        title: _titleController.text,
+        content: _contentController.text,
+        photos: widget.selectedAssets,
+      );
+
+      _logger.info('自動保存成功', context: 'DiaryPreviewScreen');
+
+      // ウィジェットがまだマウントされている場合のみ遷移
+      if (mounted) {
+        // 日記詳細画面に遷移（保存完了メッセージ付き）
+        navigator.pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DiaryDetailScreen(diaryId: savedDiary.id),
+          ),
+        );
+
+        // 保存成功メッセージを表示
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('日記を保存しました')),
+        );
+      }
+    } catch (e, stackTrace) {
+      final loggingService = await LoggingService.getInstance();
+      final appError = ErrorHandler.handleError(e, context: '自動保存');
+      loggingService.error(
+        '日記の自動保存に失敗しました',
+        context: 'DiaryPreviewScreen._autoSaveDiary',
+        error: appError,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _hasError = true;
+          _errorMessage = '日記の保存に失敗しました。\n時間を空けてもう一度お試しください。';
+        });
+
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text('エラー: $_errorMessage'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  /// 日記を保存する（手動保存用、後方互換性のため残す）
   Future<void> _saveDiary() async {
     // BuildContextを保存
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -563,8 +645,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                   tooltip: 'プロンプトなしで再生成',
                 ),
               ),
-            // 保存ボタン
-            if (!_isInitializing && !_isLoading && !_hasError)
+            // 手動保存ボタン（自動保存有効時は表示しない）
+            if (!_isInitializing && !_isLoading && !_isSaving && !_hasError)
               Container(
                 margin: const EdgeInsets.only(right: AppSpacing.sm),
                 child: IconButton(
@@ -751,8 +833,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                   ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // ローディング表示（初期化中または日記生成中）
-                if (_isInitializing || _isLoading)
+                // ローディング表示（初期化中、日記生成中、または自動保存中）
+                if (_isInitializing || _isLoading || _isSaving)
                   FadeInWidget(
                     child: CustomCard(
                       child: Padding(
@@ -821,6 +903,21 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 'プロンプト機能の準備をしています',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ] else if (_isSaving) ...[
+                              Text(
+                                '日記を保存中...',
+                                style: AppTypography.titleLarge,
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                '生成された日記を保存しています',
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: Theme.of(
                                     context,
@@ -948,8 +1045,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                       ),
                     ),
                   )
-                // 日記編集フィールド（初期化完了後、日記生成完了後）
-                else if (!_isInitializing && !_isLoading && !_hasError)
+                // 日記編集フィールド（初期化完了後、日記生成完了後、自動保存前）
+                else if (!_isInitializing &&
+                    !_isLoading &&
+                    !_isSaving &&
+                    !_hasError)
                   SlideInWidget(
                     delay: const Duration(milliseconds: 200),
                     child: CustomCard(
@@ -1082,7 +1182,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: !_isLoading && !_hasError
+        bottomNavigationBar: !_isLoading && !_isSaving && !_hasError
             ? SafeArea(
                 child: Container(
                   padding: EdgeInsets.symmetric(
