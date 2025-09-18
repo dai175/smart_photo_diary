@@ -21,6 +21,7 @@ class HomeContentWidget extends StatefulWidget {
   final VoidCallback onRequestPermission;
   final VoidCallback onSelectionLimitReached;
   final VoidCallback onUsedPhotoSelected;
+  final Function(String photoId)? onUsedPhotoDetail;
   final VoidCallback onCameraPressed;
   final Function(String) onDiaryTap;
   final Future<void> Function()? onRefresh;
@@ -35,6 +36,7 @@ class HomeContentWidget extends StatefulWidget {
     required this.onRequestPermission,
     required this.onSelectionLimitReached,
     required this.onUsedPhotoSelected,
+    this.onUsedPhotoDetail,
     required this.onCameraPressed,
     required this.onDiaryTap,
     this.onRefresh,
@@ -124,6 +126,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               controller: widget.photoController,
               onSelectionLimitReached: widget.onSelectionLimitReached,
               onUsedPhotoSelected: widget.onUsedPhotoSelected,
+              onUsedPhotoDetail: widget.onUsedPhotoDetail,
               onRequestPermission: widget.onRequestPermission,
               onCameraPressed: widget.onCameraPressed,
               onDiaryCreated: widget.onDiaryCreated,

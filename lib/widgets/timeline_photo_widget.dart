@@ -32,6 +32,9 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 使用済み写真選択時のコールバック
   final VoidCallback? onUsedPhotoSelected;
 
+  /// 使用済み写真詳細表示コールバック
+  final Function(String photoId)? onUsedPhotoDetail;
+
   /// 権限要求コールバック
   final VoidCallback? onRequestPermission;
 
@@ -58,6 +61,7 @@ class TimelinePhotoWidget extends StatefulWidget {
     required this.controller,
     this.onSelectionLimitReached,
     this.onUsedPhotoSelected,
+    this.onUsedPhotoDetail,
     this.onRequestPermission,
     this.onDifferentDateSelected,
     this.onCameraPressed,
@@ -702,6 +706,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
   }
 
+  /// 写真長押し時の処理（使用済み/未使用で分岐）
+  void _handlePhotoLongPress(AssetEntity photo, String heroTag, bool isUsed) {
+    if (isUsed && widget.onUsedPhotoDetail != null) {
+      // 使用済み写真の場合は日記詳細に遷移
+      widget.onUsedPhotoDetail!(photo.id);
+    } else {
+      // 未使用写真の場合は拡大表示
+      _showPhotoPreview(context, photo, heroTag);
+    }
+  }
+
   /// グループ用の写真グリッドを構築
   Widget _buildPhotoGridForGroup(
     TimelinePhotoGroup group,
@@ -770,7 +785,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         final heroTag = 'asset-${photo.id}';
         return GestureDetector(
           onTap: () => _handlePhotoTap(mainIndex),
-          onLongPress: () => _showPhotoPreview(context, photo, heroTag),
+          onLongPress: () => _handlePhotoLongPress(photo, heroTag, isUsed),
           child: Stack(
             children: [
               // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替

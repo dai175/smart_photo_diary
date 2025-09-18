@@ -16,6 +16,9 @@ class TimelineFABIntegration extends StatelessWidget {
   /// 使用済み写真選択時のコールバック
   final VoidCallback? onUsedPhotoSelected;
 
+  /// 使用済み写真詳細表示コールバック
+  final Function(String photoId)? onUsedPhotoDetail;
+
   /// 権限要求コールバック
   final VoidCallback? onRequestPermission;
 
@@ -42,6 +45,7 @@ class TimelineFABIntegration extends StatelessWidget {
     required this.controller,
     this.onSelectionLimitReached,
     this.onUsedPhotoSelected,
+    this.onUsedPhotoDetail,
     this.onRequestPermission,
     this.onDifferentDateSelected,
     this.onCameraPressed,
@@ -59,6 +63,7 @@ class TimelineFABIntegration extends StatelessWidget {
           controller: controller,
           onSelectionLimitReached: onSelectionLimitReached,
           onUsedPhotoSelected: onUsedPhotoSelected,
+          onUsedPhotoDetail: onUsedPhotoDetail,
           onRequestPermission: onRequestPermission,
           onDifferentDateSelected: onDifferentDateSelected,
           onCameraPressed: onCameraPressed,

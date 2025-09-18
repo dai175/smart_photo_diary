@@ -138,6 +138,12 @@ abstract class IDiaryService {
     DateTime photoDate,
   );
 
+  /// 写真IDから日記エントリーを取得
+  Future<DiaryEntry?> getDiaryEntryByPhotoId(String photoId);
+
+  /// 写真IDから日記エントリーを取得（Result版）
+  Future<Result<DiaryEntry?>> getDiaryEntryByPhotoIdResult(String photoId);
+
   /// データベースの最適化（断片化を解消）
   Future<void> compactDatabase();
 }

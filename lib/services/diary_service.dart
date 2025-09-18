@@ -714,4 +714,39 @@ class DiaryService implements IDiaryService {
       return await getDiaryByPhotoDate(photoDate);
     }, context: 'DiaryService.getDiaryByPhotoDateResult');
   }
+
+  /// 写真IDから日記エントリーを取得
+  @override
+  Future<DiaryEntry?> getDiaryEntryByPhotoId(String photoId) async {
+    try {
+      if (_diaryBox == null) {
+        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
+        await _init();
+      }
+
+      final allEntries = _diaryBox!.values;
+      for (final entry in allEntries) {
+        if (entry.photoIds.contains(photoId)) {
+          _loggingService.info('写真ID: $photoId の日記を発見: ${entry.id}');
+          return entry;
+        }
+      }
+
+      _loggingService.info('写真ID: $photoId に対応する日記は見つかりませんでした');
+      return null;
+    } catch (e) {
+      _loggingService.error('写真IDから日記エントリー取得エラー', error: e);
+      rethrow;
+    }
+  }
+
+  /// 写真IDから日記エントリーを取得（Result版）
+  @override
+  Future<Result<DiaryEntry?>> getDiaryEntryByPhotoIdResult(
+    String photoId,
+  ) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getDiaryEntryByPhotoId(photoId);
+    }, context: 'DiaryService.getDiaryEntryByPhotoIdResult');
+  }
 }

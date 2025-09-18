@@ -135,6 +135,36 @@ class _HomeScreenState extends State<HomeScreen>
     _showSimpleDialog(AppConstants.usedPhotoMessage);
   }
 
+  /// 写真IDから日記詳細画面に遷移
+  Future<void> _navigateToDiaryDetailByPhotoId(String photoId) async {
+    try {
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryEntry = await diaryService.getDiaryEntryByPhotoId(photoId);
+
+      if (diaryEntry != null) {
+        _logger.info('写真ID: $photoId の日記詳細に遷移: ${diaryEntry.id}');
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DiaryDetailScreen(diaryId: diaryEntry.id),
+            ),
+          );
+        }
+      } else {
+        _logger.warning('写真ID: $photoId に対応する日記が見つかりません');
+        if (mounted) {
+          _showSimpleDialog('対応する日記が見つかりませんでした');
+        }
+      }
+    } catch (e) {
+      _logger.error('写真IDから日記取得エラー', error: e);
+      if (mounted) {
+        _showSimpleDialog('日記の取得中にエラーが発生しました');
+      }
+    }
+  }
+
   void _showSimpleDialog(String message) {
     DialogUtils.showSimpleDialog(context, message);
   }
@@ -476,6 +506,7 @@ class _HomeScreenState extends State<HomeScreen>
         onRequestPermission: _loadTodayPhotos,
         onSelectionLimitReached: _showSelectionLimitModal,
         onUsedPhotoSelected: _showUsedPhotoModal,
+        onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,
         onRefresh: _refreshHome,
         onCameraPressed: _capturePhoto,
         onDiaryCreated: _onDiaryCreated,
