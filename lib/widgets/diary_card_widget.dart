@@ -12,6 +12,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/modern_chip.dart';
 import '../ui/components/loading_shimmer.dart';
+import '../services/photo_cache_service.dart';
 
 class DiaryCardWidget extends StatelessWidget {
   final DiaryEntry entry;
@@ -175,8 +176,15 @@ class DiaryCardWidget extends StatelessWidget {
   }
 
   Widget _buildThumbnail(AssetEntity asset) {
+    final cacheService = PhotoCacheService.getInstance();
+    final size = AppConstants.diaryThumbnailSize.toInt();
     return FutureBuilder<Uint8List?>(
-      future: asset.thumbnailData,
+      future: cacheService.getThumbnail(
+        asset,
+        width: size,
+        height: size,
+        quality: AppConstants.diaryThumbnailQuality,
+      ),
       builder: (context, thumbnailSnapshot) {
         if (!thumbnailSnapshot.hasData) {
           return Container(
@@ -192,6 +200,7 @@ class DiaryCardWidget extends StatelessWidget {
           );
         }
 
+        final dpr = MediaQuery.of(context).devicePixelRatio;
         return Container(
           decoration: BoxDecoration(
             borderRadius: AppSpacing.photoRadius,
@@ -210,6 +219,10 @@ class DiaryCardWidget extends StatelessWidget {
               height: AppConstants.diaryThumbnailSize,
               width: AppConstants.diaryThumbnailSize,
               fit: BoxFit.cover,
+              cacheWidth: (AppConstants.diaryThumbnailSize * dpr).round(),
+              cacheHeight: (AppConstants.diaryThumbnailSize * dpr).round(),
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.low,
             ),
           ),
         );

@@ -123,6 +123,7 @@ class AppConstants {
   static const int diaryListAnimationStaggerLimit = 10; // 遅延アニメーションを付与する先頭件数
   static const int diaryListAnimationStaggerMs = 50; // 各アイテムの遅延間隔(ms)
   static const double diaryListFooterSpinnerSize = 24.0; // 追加読込スピナーのサイズ
+  static const int diaryThumbnailQuality = 70; // 日記カードのサムネ品質
 
   // タイムライン先読み・プリフェッチ
   static const double timelinePreloadThresholdPx = 1200.0; // 先読み開始のスクロール余白
