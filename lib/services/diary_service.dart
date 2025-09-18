@@ -227,6 +227,11 @@ class DiaryService implements IDiaryService {
         DateTime(entry.date.year, entry.date.month, entry.date.day),
       );
       _searchTextIndex[entry.id] = _buildSearchableText(entry);
+      _sortedDatesByDayDesc.insert(
+        insertAt,
+        DateTime(entry.date.year, entry.date.month, entry.date.day),
+      );
+      _searchTextIndex[entry.id] = _buildSearchableText(entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
@@ -260,8 +265,12 @@ class DiaryService implements IDiaryService {
         await _ensureIndex();
         final oldIdx = _sortedIdsByDateDesc.indexOf(entry.id);
         if (oldIdx != -1) {
-          _sortedIdsByDateDesc.removeAt(oldIdx);
-          _sortedDatesByDayDesc.removeAt(oldIdx);
+          if (_sortedIdsByDateDesc.length > oldIdx) {
+            _sortedIdsByDateDesc.removeAt(oldIdx);
+          }
+          if (_sortedDatesByDayDesc.length > oldIdx) {
+            _sortedDatesByDayDesc.removeAt(oldIdx);
+          }
         }
         final insertAt = _findInsertIndex(entry.date);
         _sortedIdsByDateDesc.insert(insertAt, entry.id);
@@ -296,8 +305,12 @@ class DiaryService implements IDiaryService {
     if (_indexBuilt) {
       final idx = _sortedIdsByDateDesc.indexOf(id);
       if (idx != -1) {
-        _sortedIdsByDateDesc.removeAt(idx);
-        _sortedDatesByDayDesc.removeAt(idx);
+        if (_sortedIdsByDateDesc.length > idx) {
+          _sortedIdsByDateDesc.removeAt(idx);
+        }
+        if (_sortedDatesByDayDesc.length > idx) {
+          _sortedDatesByDayDesc.removeAt(idx);
+        }
       }
       _searchTextIndex.remove(id);
     }
@@ -764,18 +777,12 @@ class DiaryService implements IDiaryService {
           if (_diaryBox != null && _diaryBox!.isOpen) {
             final latestEntry = _diaryBox!.get(entry.id);
             if (latestEntry != null) {
-              final updatedEntry = DiaryEntry(
-                id: latestEntry.id,
-                date: latestEntry.date,
-                title: latestEntry.title,
-                content: latestEntry.content,
-                photoIds: latestEntry.photoIds,
-                location: latestEntry.location,
-                tags: tagsResult.value,
-                createdAt: latestEntry.createdAt,
-                updatedAt: DateTime.now(),
+              latestEntry.tags = tagsResult.value;
+              latestEntry.updatedAt = DateTime.now();
+              await latestEntry.save();
+              _searchTextIndex[latestEntry.id] = _buildSearchableText(
+                latestEntry,
               );
-              await _diaryBox!.put(entry.id, updatedEntry);
               _loggingService.debug('過去写真日記のタグ生成完了: ${tagsResult.value}');
             }
           }
