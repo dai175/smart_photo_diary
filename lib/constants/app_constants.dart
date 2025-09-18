@@ -124,6 +124,7 @@ class AppConstants {
   static const int diaryListAnimationStaggerMs = 50; // 各アイテムの遅延間隔(ms)
   static const double diaryListFooterSpinnerSize = 24.0; // 追加読込スピナーのサイズ
   static const int diaryThumbnailQuality = 70; // 日記カードのサムネ品質
+  static const int diaryPrefetchAheadCount = 12; // 一覧用の先読み件数（カード数）
 
   // タイムライン先読み・プリフェッチ
   static const double timelinePreloadThresholdPx = 1200.0; // 先読み開始のスクロール余白

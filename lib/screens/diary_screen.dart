@@ -14,6 +14,8 @@ import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
+import 'package:photo_manager/photo_manager.dart';
+import '../services/photo_cache_service.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -26,6 +28,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
   late final LoggingService _logger;
   late final DiaryScreenController _controller;
   late final ScrollController _scrollController;
+  int _lastPrefetchIndex = 0;
+  bool _isPrefetching = false;
 
   @override
   void initState() {
@@ -34,12 +38,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
     _controller = DiaryScreenController();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    _controller.addListener(_onControllerChanged);
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _controller.removeListener(_onControllerChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -53,6 +59,56 @@ class _DiaryScreenState extends State<DiaryScreen> {
             AppConstants.diaryListLoadMoreThresholdRatio) {
       _controller.loadMore();
     }
+  }
+
+  void _onControllerChanged() {
+    // エントリー数が増えたら先読みを試行
+    if (_controller.diaryEntries.length > _lastPrefetchIndex &&
+        !_controller.isLoading) {
+      _prefetchUpcomingThumbnails();
+    }
+  }
+
+  Future<void> _prefetchUpcomingThumbnails() async {
+    if (_isPrefetching) return;
+    _isPrefetching = true;
+    // すでに先読み済みのインデックス以降から一定件数を先読み
+    final start = _lastPrefetchIndex;
+    final endExclusive =
+        (_lastPrefetchIndex + AppConstants.diaryPrefetchAheadCount).clamp(
+          0,
+          _controller.diaryEntries.length,
+        );
+
+    if (start >= endExclusive) return;
+
+    final slice = _controller.diaryEntries.sublist(start, endExclusive);
+    final assets = <AssetEntity>[];
+    for (final entry in slice) {
+      if (entry.photoIds.isEmpty) continue;
+      try {
+        final asset = await AssetEntity.fromId(entry.photoIds.first);
+        if (asset != null) assets.add(asset);
+      } catch (_) {
+        // ignore individual failures
+      }
+    }
+    if (assets.isEmpty) {
+      _lastPrefetchIndex = endExclusive;
+      _isPrefetching = false;
+      return;
+    }
+
+    final cache = PhotoCacheService.getInstance();
+    final size = AppConstants.diaryThumbnailSize.toInt();
+    await cache.preloadThumbnails(
+      assets,
+      width: size,
+      height: size,
+      quality: AppConstants.diaryThumbnailQuality,
+    );
+    _lastPrefetchIndex = endExclusive;
+    _isPrefetching = false;
   }
 
   // 日記エントリーをタップしたときに詳細画面に遷移
