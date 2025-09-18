@@ -330,6 +330,23 @@ class DiaryService implements IDiaryService {
     return allEntries.where((entry) => filter.matches(entry)).toList();
   }
 
+  // フィルタ + ページングで日記エントリーを取得
+  // 現段階ではまず全件を取得してからスライス（後続タスクで最適化予定）
+  @override
+  Future<List<DiaryEntry>> getFilteredDiaryEntriesPage(
+    DiaryFilter filter, {
+    required int offset,
+    required int limit,
+  }) async {
+    final list = await getFilteredDiaryEntries(filter);
+    if (list.isEmpty) return const [];
+
+    final start = offset.clamp(0, list.length);
+    final end = (offset + limit).clamp(0, list.length);
+    if (start >= end) return const [];
+    return list.sublist(start, end);
+  }
+
   // 全ての日記からユニークなタグを取得
   @override
   Future<Set<String>> getAllTags() async {
@@ -612,6 +629,22 @@ class DiaryService implements IDiaryService {
     return ResultHelper.tryExecuteAsync(() async {
       return await getFilteredDiaryEntries(filter);
     }, context: 'DiaryService.getFilteredDiaryEntriesResult');
+  }
+
+  /// フィルタ + ページングで日記エントリーを取得（Result版）
+  @override
+  Future<Result<List<DiaryEntry>>> getFilteredDiaryEntriesPageResult(
+    DiaryFilter filter, {
+    required int offset,
+    required int limit,
+  }) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      return await getFilteredDiaryEntriesPage(
+        filter,
+        offset: offset,
+        limit: limit,
+      );
+    }, context: 'DiaryService.getFilteredDiaryEntriesPageResult');
   }
 
   /// 日記エントリーを更新（Result版）

@@ -28,6 +28,14 @@ abstract class IDiaryService {
   /// フィルタに基づいて日記エントリーを取得
   Future<List<DiaryEntry>> getFilteredDiaryEntries(DiaryFilter filter);
 
+  /// フィルタ + ページングで日記エントリーを取得
+  /// offset は0始まり、limit は取得最大件数。
+  Future<List<DiaryEntry>> getFilteredDiaryEntriesPage(
+    DiaryFilter filter, {
+    required int offset,
+    required int limit,
+  });
+
   /// 日記エントリーを更新
   Future<void> updateDiaryEntry(DiaryEntry entry);
 
@@ -96,6 +104,13 @@ abstract class IDiaryService {
   Future<Result<List<DiaryEntry>>> getFilteredDiaryEntriesResult(
     DiaryFilter filter,
   );
+
+  /// フィルタ + ページングで日記エントリーを取得（Result版）
+  Future<Result<List<DiaryEntry>>> getFilteredDiaryEntriesPageResult(
+    DiaryFilter filter, {
+    required int offset,
+    required int limit,
+  });
 
   /// 日記エントリーを更新（Result版）
   Future<Result<void>> updateDiaryEntryResult(DiaryEntry entry);

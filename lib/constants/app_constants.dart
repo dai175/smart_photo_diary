@@ -116,6 +116,14 @@ class AppConstants {
   static const int timelinePageSize = 60; // 一度に増やす写真枚数
   static const int timelinePreloadPages = 2; // 先読み時はページ数×この倍率で取得
 
+  // 日記一覧（Diary）関連
+  static const int diaryPageSize = 20; // 一度に取得する日記件数
+  static const double diaryListLoadMoreThresholdRatio = 0.85; // 末尾手前での追加読込閾値
+  static const int diaryListInitialShimmerCount = 6; // 初期ローディングのプレースホルダー件数
+  static const int diaryListAnimationStaggerLimit = 10; // 遅延アニメーションを付与する先頭件数
+  static const int diaryListAnimationStaggerMs = 50; // 各アイテムの遅延間隔(ms)
+  static const double diaryListFooterSpinnerSize = 24.0; // 追加読込スピナーのサイズ
+
   // タイムライン先読み・プリフェッチ
   static const double timelinePreloadThresholdPx = 1200.0; // 先読み開始のスクロール余白
   static const double timelineLoadMoreThresholdPx = 600.0; // 追加読み込みのスクロール余白

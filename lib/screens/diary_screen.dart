@@ -25,18 +25,34 @@ class DiaryScreen extends StatefulWidget {
 class _DiaryScreenState extends State<DiaryScreen> {
   late final LoggingService _logger;
   late final DiaryScreenController _controller;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _logger = serviceLocator.get<LoggingService>();
     _controller = DiaryScreenController();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    // 下端の一定割合手前で次ページをプリロード
+    if (position.pixels >=
+        position.maxScrollExtent *
+            AppConstants.diaryListLoadMoreThresholdRatio) {
+      _controller.loadMore();
+    }
   }
 
   // 日記エントリーをタップしたときに詳細画面に遷移
@@ -61,7 +77,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.borderRadiusXl),
+        ),
       ),
       builder: (context) => FilterBottomSheet(
         initialFilter: _controller.currentFilter,
@@ -82,6 +100,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             onRefresh: _controller.refresh,
             color: AppColors.primary,
             child: CustomScrollView(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 // アクティブフィルタ表示（AppBar直下に固定されないようスリバーとして配置）
@@ -103,6 +122,23 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 ),
 
                 ..._buildSliverContent(),
+                // フッター：追加読み込みインジケータ
+                SliverToBoxAdapter(
+                  child: _controller.isLoadingMore
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.lg,
+                          ),
+                          child: const Center(
+                            child: SizedBox(
+                              width: AppConstants.diaryListFooterSpinnerSize,
+                              height: AppConstants.diaryListFooterSpinnerSize,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ],
             ),
           ),
@@ -193,10 +229,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) => Padding(
-                padding: EdgeInsets.only(bottom: index < 5 ? AppSpacing.md : 0),
+                padding: EdgeInsets.only(
+                  bottom: index < AppConstants.diaryListInitialShimmerCount - 1
+                      ? AppSpacing.md
+                      : 0,
+                ),
                 child: const DiaryCardShimmer(),
               ),
-              childCount: 6,
+              childCount: AppConstants.diaryListInitialShimmerCount,
             ),
           ),
         ),
@@ -211,7 +251,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
             delegate: SliverChildBuilderDelegate((context, index) {
               final entry = _controller.diaryEntries[index];
               return SlideInWidget(
-                delay: Duration(milliseconds: 50 * index),
+                // 大量件数でのオーバーヘッドを避けるため先頭数件のみ遅延を付与
+                delay: Duration(
+                  milliseconds:
+                      AppConstants.diaryListAnimationStaggerMs *
+                      (index < AppConstants.diaryListAnimationStaggerLimit
+                          ? index
+                          : 0),
+                ),
                 begin: const Offset(0.0, 0.2),
                 child: Padding(
                   padding: EdgeInsets.only(
