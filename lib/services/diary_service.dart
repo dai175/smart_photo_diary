@@ -27,6 +27,9 @@ class DiaryService implements IDiaryService {
   List<String> _sortedIdsByDateDesc = [];
   bool _indexBuilt = false;
 
+  // 検索用インデックス（id -> 検索対象文字列（小文字化済み））
+  final Map<String, String> _searchTextIndex = {};
+
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService);
 
@@ -88,6 +91,11 @@ class DiaryService implements IDiaryService {
     final entries = _diaryBox!.values.toList();
     entries.sort((a, b) => b.date.compareTo(a.date));
     _sortedIdsByDateDesc = entries.map((e) => e.id).toList(growable: true);
+    // 検索インデックス
+    _searchTextIndex.clear();
+    for (final e in entries) {
+      _searchTextIndex[e.id] = _buildSearchableText(e);
+    }
     _indexBuilt = true;
   }
 
@@ -115,6 +123,14 @@ class DiaryService implements IDiaryService {
       }
     }
     return low;
+  }
+
+  // 検索用テキストを作成
+  String _buildSearchableText(DiaryEntry entry) {
+    final tags = (entry.cachedTags ?? entry.tags ?? const <String>[]).join(' ');
+    final location = entry.location ?? '';
+    final text = '${entry.title} ${entry.content} $tags $location';
+    return text.toLowerCase();
   }
 
   // 日記エントリーを保存
@@ -163,6 +179,7 @@ class DiaryService implements IDiaryService {
       await _ensureIndex();
       final insertAt = _findInsertIndex(entry.date);
       _sortedIdsByDateDesc.insert(insertAt, entry.id);
+      _searchTextIndex[entry.id] = _buildSearchableText(entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
@@ -198,6 +215,8 @@ class DiaryService implements IDiaryService {
         final insertAt = _findInsertIndex(entry.date);
         _sortedIdsByDateDesc.insert(insertAt, entry.id);
       }
+      // 検索インデックス更新
+      _searchTextIndex[entry.id] = _buildSearchableText(entry);
       final oldIds = Set<String>.from(old.photoIds);
       final newIds = Set<String>.from(entry.photoIds);
       final removed = oldIds.difference(newIds).toList();
@@ -221,6 +240,7 @@ class DiaryService implements IDiaryService {
     await _diaryBox!.delete(id);
     if (_indexBuilt) {
       _sortedIdsByDateDesc.remove(id);
+      _searchTextIndex.remove(id);
     }
     if (existing != null) {
       _diaryChangeController.add(
@@ -389,7 +409,16 @@ class DiaryService implements IDiaryService {
       }
       return result;
     }
-    for (final id in _sortedIdsByDateDesc) {
+    // 検索語があれば検索インデックスで候補を絞り込み
+    Iterable<String> idIterable = _sortedIdsByDateDesc;
+    final q = (filter.searchText ?? '').trim().toLowerCase();
+    if (q.isNotEmpty) {
+      idIterable = _sortedIdsByDateDesc.where((id) {
+        final text = _searchTextIndex[id];
+        return text != null && text.contains(q);
+      });
+    }
+    for (final id in idIterable) {
       final e = _diaryBox!.get(id);
       if (e != null && filter.matches(e)) {
         result.add(e);
@@ -424,7 +453,18 @@ class DiaryService implements IDiaryService {
 
     final page = <DiaryEntry>[];
     int skipped = 0;
-    for (final id in _sortedIdsByDateDesc) {
+
+    // 検索語があれば候補を先に絞る
+    Iterable<String> idIterable = _sortedIdsByDateDesc;
+    final q = (filter.searchText ?? '').trim().toLowerCase();
+    if (q.isNotEmpty) {
+      idIterable = _sortedIdsByDateDesc.where((id) {
+        final text = _searchTextIndex[id];
+        return text != null && text.contains(q);
+      });
+    }
+
+    for (final id in idIterable) {
       final e = _diaryBox!.get(id);
       if (e == null) continue;
       if (!filter.matches(e)) continue;
