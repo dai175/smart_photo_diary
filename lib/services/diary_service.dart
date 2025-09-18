@@ -29,6 +29,8 @@ class DiaryService implements IDiaryService {
 
   // 検索用インデックス（id -> 検索対象文字列（小文字化済み））
   final Map<String, String> _searchTextIndex = {};
+  // 日付（年月日）だけを保持した並行配列（_sortedIdsByDateDesc と同じ順）
+  final List<DateTime> _sortedDatesByDayDesc = [];
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService);
@@ -91,6 +93,11 @@ class DiaryService implements IDiaryService {
     final entries = _diaryBox!.values.toList();
     entries.sort((a, b) => b.date.compareTo(a.date));
     _sortedIdsByDateDesc = entries.map((e) => e.id).toList(growable: true);
+    _sortedDatesByDayDesc
+      ..clear()
+      ..addAll(
+        entries.map((e) => DateTime(e.date.year, e.date.month, e.date.day)),
+      );
     // 検索インデックス
     _searchTextIndex.clear();
     for (final e in entries) {
@@ -131,6 +138,42 @@ class DiaryService implements IDiaryService {
     final location = entry.location ?? '';
     final text = '${entry.title} ${entry.content} $tags $location';
     return text.toLowerCase();
+  }
+
+  // 日付範囲に一致するインデックス範囲を二分探索で求める（降順リスト）
+  // 戻り値は [startIndex, endExclusive]
+  List<int> _findRangeByDateRangeInternal(DateTime startDay, DateTime endDay) {
+    final n = _sortedDatesByDayDesc.length;
+    if (n == 0) return const [0, 0];
+
+    // end側（新しい方）の左端: 最初に date <= endDay となる位置
+    int low = 0, high = n;
+    while (low < high) {
+      final mid = (low + high) >> 1;
+      final d = _sortedDatesByDayDesc[mid];
+      if (d.isAfter(endDay)) {
+        // d > endDay → まだ左（新しい）側に進む
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    final startIndex = low.clamp(0, n);
+
+    // start側（古い方）の右端の次: 最初に date < startDay となる位置
+    low = startIndex;
+    high = n;
+    while (low < high) {
+      final mid = (low + high) >> 1;
+      final d = _sortedDatesByDayDesc[mid];
+      if (d.isBefore(startDay)) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+    final endExclusive = low.clamp(startIndex, n);
+    return [startIndex, endExclusive];
   }
 
   // 日記エントリーを保存
@@ -179,6 +222,10 @@ class DiaryService implements IDiaryService {
       await _ensureIndex();
       final insertAt = _findInsertIndex(entry.date);
       _sortedIdsByDateDesc.insert(insertAt, entry.id);
+      _sortedDatesByDayDesc.insert(
+        insertAt,
+        DateTime(entry.date.year, entry.date.month, entry.date.day),
+      );
       _searchTextIndex[entry.id] = _buildSearchableText(entry);
 
       // 変更イベント（作成）を通知
@@ -211,9 +258,17 @@ class DiaryService implements IDiaryService {
       // 日付変更時はインデックスを更新
       if (old.date != entry.date) {
         await _ensureIndex();
-        _sortedIdsByDateDesc.remove(entry.id);
+        final oldIdx = _sortedIdsByDateDesc.indexOf(entry.id);
+        if (oldIdx != -1) {
+          _sortedIdsByDateDesc.removeAt(oldIdx);
+          _sortedDatesByDayDesc.removeAt(oldIdx);
+        }
         final insertAt = _findInsertIndex(entry.date);
         _sortedIdsByDateDesc.insert(insertAt, entry.id);
+        _sortedDatesByDayDesc.insert(
+          insertAt,
+          DateTime(entry.date.year, entry.date.month, entry.date.day),
+        );
       }
       // 検索インデックス更新
       _searchTextIndex[entry.id] = _buildSearchableText(entry);
@@ -239,7 +294,11 @@ class DiaryService implements IDiaryService {
     final existing = _diaryBox!.get(id);
     await _diaryBox!.delete(id);
     if (_indexBuilt) {
-      _sortedIdsByDateDesc.remove(id);
+      final idx = _sortedIdsByDateDesc.indexOf(id);
+      if (idx != -1) {
+        _sortedIdsByDateDesc.removeAt(idx);
+        _sortedDatesByDayDesc.removeAt(idx);
+      }
       _searchTextIndex.remove(id);
     }
     if (existing != null) {
@@ -409,11 +468,19 @@ class DiaryService implements IDiaryService {
       }
       return result;
     }
-    // 検索語があれば検索インデックスで候補を絞り込み
+    // 日付範囲があれば二分探索で範囲を絞る
     Iterable<String> idIterable = _sortedIdsByDateDesc;
+    if (filter.dateRange != null) {
+      final r = filter.dateRange!;
+      final s = DateTime(r.start.year, r.start.month, r.start.day);
+      final e = DateTime(r.end.year, r.end.month, r.end.day);
+      final range = _findRangeByDateRangeInternal(s, e);
+      idIterable = _sortedIdsByDateDesc.sublist(range[0], range[1]);
+    }
+    // 検索語があれば検索インデックスで候補を絞り込み
     final q = (filter.searchText ?? '').trim().toLowerCase();
     if (q.isNotEmpty) {
-      idIterable = _sortedIdsByDateDesc.where((id) {
+      idIterable = idIterable.where((id) {
         final text = _searchTextIndex[id];
         return text != null && text.contains(q);
       });
@@ -454,11 +521,19 @@ class DiaryService implements IDiaryService {
     final page = <DiaryEntry>[];
     int skipped = 0;
 
-    // 検索語があれば候補を先に絞る
+    // 日付範囲があれば先に範囲を絞る
     Iterable<String> idIterable = _sortedIdsByDateDesc;
+    if (filter.dateRange != null) {
+      final r = filter.dateRange!;
+      final s = DateTime(r.start.year, r.start.month, r.start.day);
+      final e = DateTime(r.end.year, r.end.month, r.end.day);
+      final range = _findRangeByDateRangeInternal(s, e);
+      idIterable = _sortedIdsByDateDesc.sublist(range[0], range[1]);
+    }
+    // 検索語があれば候補を先に絞る
     final q = (filter.searchText ?? '').trim().toLowerCase();
     if (q.isNotEmpty) {
-      idIterable = _sortedIdsByDateDesc.where((id) {
+      idIterable = idIterable.where((id) {
         final text = _searchTextIndex[id];
         return text != null && text.contains(q);
       });
