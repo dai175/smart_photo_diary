@@ -23,6 +23,10 @@ class DiaryService implements IDiaryService {
   late final LoggingService _loggingService;
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
 
+  // 日付降順のインメモリインデックス（エントリーIDの配列）
+  List<String> _sortedIdsByDateDesc = [];
+  bool _indexBuilt = false;
+
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService);
 
@@ -61,6 +65,7 @@ class DiaryService implements IDiaryService {
     try {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
       _loggingService.info('Hiveボックス初期化完了: ${_diaryBox?.length ?? 0}件のエントリー');
+      await _buildIndex();
     } catch (e) {
       _loggingService.error('Hiveボックス初期化エラー', error: e);
       // スキーマ変更により既存データが読めない場合はボックスを削除して再作成
@@ -69,11 +74,47 @@ class DiaryService implements IDiaryService {
         _loggingService.warning('古いボックスを削除しました');
         _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
         _loggingService.info('新しいボックスを作成しました');
+        await _buildIndex();
       } catch (deleteError) {
         _loggingService.error('ボックス削除エラー', error: deleteError);
         rethrow;
       }
     }
+  }
+
+  // インデックス構築（起動時/再初期化時）
+  Future<void> _buildIndex() async {
+    if (_diaryBox == null) return;
+    final entries = _diaryBox!.values.toList();
+    entries.sort((a, b) => b.date.compareTo(a.date));
+    _sortedIdsByDateDesc = entries.map((e) => e.id).toList(growable: true);
+    _indexBuilt = true;
+  }
+
+  Future<void> _ensureIndex() async {
+    if (!_indexBuilt) {
+      await _buildIndex();
+    }
+  }
+
+  int _findInsertIndex(DateTime date) {
+    int low = 0;
+    int high = _sortedIdsByDateDesc.length;
+    while (low < high) {
+      final mid = (low + high) >> 1;
+      final midId = _sortedIdsByDateDesc[mid];
+      final midEntry = _diaryBox!.get(midId);
+      if (midEntry == null) {
+        high = mid;
+        continue;
+      }
+      if (date.isAfter(midEntry.date)) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return low;
   }
 
   // 日記エントリーを保存
@@ -118,6 +159,11 @@ class DiaryService implements IDiaryService {
       await _diaryBox!.put(entry.id, entry);
       _loggingService.info('日記エントリー保存完了: ${entry.id}');
 
+      // インデックスに挿入
+      await _ensureIndex();
+      final insertAt = _findInsertIndex(entry.date);
+      _sortedIdsByDateDesc.insert(insertAt, entry.id);
+
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
         DiaryChange(
@@ -145,6 +191,13 @@ class DiaryService implements IDiaryService {
     final old = _diaryBox!.get(entry.id);
     await _diaryBox!.put(entry.id, entry);
     if (old != null) {
+      // 日付変更時はインデックスを更新
+      if (old.date != entry.date) {
+        await _ensureIndex();
+        _sortedIdsByDateDesc.remove(entry.id);
+        final insertAt = _findInsertIndex(entry.date);
+        _sortedIdsByDateDesc.insert(insertAt, entry.id);
+      }
       final oldIds = Set<String>.from(old.photoIds);
       final newIds = Set<String>.from(entry.photoIds);
       final removed = oldIds.difference(newIds).toList();
@@ -166,6 +219,9 @@ class DiaryService implements IDiaryService {
     if (_diaryBox == null) await _init();
     final existing = _diaryBox!.get(id);
     await _diaryBox!.delete(id);
+    if (_indexBuilt) {
+      _sortedIdsByDateDesc.remove(id);
+    }
     if (existing != null) {
       _diaryChangeController.add(
         DiaryChange(
@@ -324,10 +380,22 @@ class DiaryService implements IDiaryService {
   // フィルタを適用して日記エントリーを取得
   @override
   Future<List<DiaryEntry>> getFilteredDiaryEntries(DiaryFilter filter) async {
-    final allEntries = await getSortedDiaryEntries();
-    if (!filter.isActive) return allEntries;
-
-    return allEntries.where((entry) => filter.matches(entry)).toList();
+    await _ensureIndex();
+    final result = <DiaryEntry>[];
+    if (!filter.isActive) {
+      for (final id in _sortedIdsByDateDesc) {
+        final e = _diaryBox!.get(id);
+        if (e != null) result.add(e);
+      }
+      return result;
+    }
+    for (final id in _sortedIdsByDateDesc) {
+      final e = _diaryBox!.get(id);
+      if (e != null && filter.matches(e)) {
+        result.add(e);
+      }
+    }
+    return result;
   }
 
   // フィルタ + ページングで日記エントリーを取得
@@ -338,13 +406,36 @@ class DiaryService implements IDiaryService {
     required int offset,
     required int limit,
   }) async {
-    final list = await getFilteredDiaryEntries(filter);
-    if (list.isEmpty) return const [];
+    await _ensureIndex();
+    if (!filter.isActive) {
+      final total = _sortedIdsByDateDesc.length;
+      if (total == 0) return const [];
+      final start = offset.clamp(0, total);
+      final end = (offset + limit).clamp(0, total);
+      if (start >= end) return const [];
+      final ids = _sortedIdsByDateDesc.sublist(start, end);
+      final entries = <DiaryEntry>[];
+      for (final id in ids) {
+        final e = _diaryBox!.get(id);
+        if (e != null) entries.add(e);
+      }
+      return entries;
+    }
 
-    final start = offset.clamp(0, list.length);
-    final end = (offset + limit).clamp(0, list.length);
-    if (start >= end) return const [];
-    return list.sublist(start, end);
+    final page = <DiaryEntry>[];
+    int skipped = 0;
+    for (final id in _sortedIdsByDateDesc) {
+      final e = _diaryBox!.get(id);
+      if (e == null) continue;
+      if (!filter.matches(e)) continue;
+      if (skipped < offset) {
+        skipped++;
+        continue;
+      }
+      page.add(e);
+      if (page.length >= limit) break;
+    }
+    return page;
   }
 
   // 全ての日記からユニークなタグを取得
@@ -478,6 +569,11 @@ class DiaryService implements IDiaryService {
       _loggingService.debug('Hiveに保存中...');
       await _diaryBox!.put(entry.id, entry);
       _loggingService.info('過去写真日記の保存完了: ${entry.id}');
+
+      // インデックスに挿入
+      await _ensureIndex();
+      final insertAt = _findInsertIndex(entry.date);
+      _sortedIdsByDateDesc.insert(insertAt, entry.id);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
