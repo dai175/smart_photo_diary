@@ -13,6 +13,7 @@ import '../ui/components/custom_card.dart';
 import '../ui/components/modern_chip.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../services/photo_cache_service.dart';
+import '../localization/localization_extensions.dart';
 
 class DiaryCardWidget extends StatelessWidget {
   final DiaryEntry entry;
@@ -46,7 +47,8 @@ class DiaryCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = entry.title.isNotEmpty ? entry.title : '無題';
+    final l10n = context.l10n;
+    final title = entry.title.isNotEmpty ? entry.title : l10n.diaryCardUntitled;
 
     return CustomCard(
       onTap: onTap,
@@ -76,7 +78,7 @@ class DiaryCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.xxs),
                     Text(
-                      DateFormat('MM/dd').format(entry.date),
+                      DateFormat.Md(l10n.localeName).format(entry.date),
                       style: AppTypography.withColor(
                         AppTypography.labelSmall,
                         Theme.of(context).colorScheme.onPrimaryContainer,
@@ -234,6 +236,7 @@ class DiaryCardWidget extends StatelessWidget {
     return FutureBuilder<List<String>>(
       future: _generateTags(),
       builder: (context, snapshot) {
+        final l10n = context.l10n;
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Row(
             children: [
@@ -244,7 +247,7 @@ class DiaryCardWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'タグを生成中...',
+                l10n.diaryCardGeneratingTags,
                 style: AppTypography.withColor(
                   AppTypography.labelSmall,
                   AppColors.onSurfaceVariant,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
 import '../animations/micro_interactions.dart';
 import '../../constants/subscription_constants.dart';
 import '../components/animated_button.dart';
+import '../../localization/localization_extensions.dart';
 
 /// カスタムダイアログウィジェット
 /// Smart Photo Diaryアプリのデザインシステムに合わせたモーダル
@@ -229,57 +231,74 @@ class CustomDialogAction extends StatelessWidget {
 class PresetDialogs {
   /// 成功ダイアログ
   static CustomDialog success({
+    required BuildContext context,
     required String title,
     required String message,
     VoidCallback? onConfirm,
   }) {
+    final l10n = context.l10n;
     return CustomDialog(
       icon: Icons.check_circle_rounded,
       iconColor: AppColors.success,
       title: title,
       message: message,
       actions: [
-        CustomDialogAction(text: 'OK', isPrimary: true, onPressed: onConfirm),
+        CustomDialogAction(
+          text: l10n.commonOk,
+          isPrimary: true,
+          onPressed: onConfirm,
+        ),
       ],
     );
   }
 
   /// エラーダイアログ
   static CustomDialog error({
+    required BuildContext context,
     required String title,
     required String message,
     VoidCallback? onConfirm,
   }) {
+    final l10n = context.l10n;
     return CustomDialog(
       icon: Icons.error_rounded,
       iconColor: AppColors.error,
       title: title,
       message: message,
       actions: [
-        CustomDialogAction(text: 'OK', isPrimary: true, onPressed: onConfirm),
+        CustomDialogAction(
+          text: l10n.commonOk,
+          isPrimary: true,
+          onPressed: onConfirm,
+        ),
       ],
     );
   }
 
   /// 確認ダイアログ
   static CustomDialog confirmation({
+    required BuildContext context,
     required String title,
     required String message,
-    String confirmText = 'OK',
-    String cancelText = 'キャンセル',
+    String? confirmText,
+    String? cancelText,
     bool isDestructive = false,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
   }) {
+    final l10n = context.l10n;
     return CustomDialog(
       icon: Icons.help_rounded,
       iconColor: isDestructive ? AppColors.warning : AppColors.info,
       title: title,
       message: message,
       actions: [
-        CustomDialogAction(text: cancelText, onPressed: onCancel),
         CustomDialogAction(
-          text: confirmText,
+          text: cancelText ?? l10n.commonCancel,
+          onPressed: onCancel,
+        ),
+        CustomDialogAction(
+          text: confirmText ?? l10n.commonConfirm,
           isPrimary: true,
           isDestructive: isDestructive,
           onPressed: onConfirm,
@@ -323,25 +342,45 @@ class PresetDialogs {
     );
   }
 
-  /// Phase 1.7.2.1: 使用量制限エラー専用ダイアログ
+  /// 使用量制限エラー専用ダイアログ
   static CustomDialog usageLimitReached({
+    required BuildContext context,
     required String planName,
-    required int remaining,
     required int limit,
     required DateTime nextResetDate,
     VoidCallback? onUpgrade,
     VoidCallback? onDismiss,
   }) {
+    final l10n = context.l10n;
+    final resetDateText = DateFormat.MMMMd(
+      l10n.localeName,
+    ).format(nextResetDate);
+
+    final actions = <CustomDialogAction>[
+      CustomDialogAction(text: l10n.commonLater, onPressed: onDismiss),
+    ];
+
+    if (onUpgrade != null) {
+      actions.add(
+        CustomDialogAction(
+          text: l10n.commonUpgrade,
+          isPrimary: true,
+          icon: Icons.auto_awesome_rounded,
+          onPressed: onUpgrade,
+        ),
+      );
+    }
+
     return CustomDialog(
       icon: Icons.block_rounded,
       iconColor: AppColors.warning,
-      title: 'AI生成の制限に達しました',
+      title: l10n.usageLimitDialogTitle,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '$planNameプランの月間$limit回制限に達しました。',
+              l10n.usageLimitDialogReachedMessage(planName, limit),
               style: AppTypography.bodyMedium.copyWith(height: 1.4),
               textAlign: TextAlign.left,
             ),
@@ -361,9 +400,12 @@ class PresetDialogs {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('リセット日:', style: AppTypography.labelSmall),
                     Text(
-                      '${nextResetDate.month}月${nextResetDate.day}日',
+                      l10n.usageLimitDialogResetLabel,
+                      style: AppTypography.labelSmall,
+                    ),
+                    Text(
+                      l10n.usageLimitDialogResetValue(resetDateText),
                       style: AppTypography.labelSmall.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -374,7 +416,9 @@ class PresetDialogs {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Premiumプランで月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用可能',
+              l10n.usageLimitDialogPremiumHint(
+                SubscriptionConstants.premiumMonthlyAiLimit,
+              ),
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w500,
@@ -384,20 +428,13 @@ class PresetDialogs {
           ],
         ),
       ),
-      actions: [
-        CustomDialogAction(text: '後で', onPressed: onDismiss),
-        CustomDialogAction(
-          text: 'アップグレード',
-          isPrimary: true,
-          icon: Icons.auto_awesome_rounded,
-          onPressed: onUpgrade,
-        ),
-      ],
+      actions: actions,
     );
   }
 
-  /// Phase 1.7.2.3: 使用量カウンター表示ダイアログ
+  /// 使用量カウンター表示ダイアログ
   static CustomDialog usageStatus({
+    required BuildContext context,
     required String planName,
     required int used,
     required int limit,
@@ -406,27 +443,29 @@ class PresetDialogs {
     VoidCallback? onUpgrade,
     VoidCallback? onDismiss,
   }) {
-    final usagePercentage = used / limit;
+    final l10n = context.l10n;
+    final usagePercentage = limit == 0 ? 0.0 : used / limit;
     final isNearLimit = usagePercentage >= 0.8;
+    final resetDateText = DateFormat.MMMMd(
+      l10n.localeName,
+    ).format(nextResetDate);
 
     return CustomDialog(
       icon: Icons.analytics_rounded,
       iconColor: isNearLimit ? AppColors.warning : AppColors.info,
-      title: 'AI生成の使用状況',
+      title: l10n.usageStatusDialogTitle,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '現在のプラン: $planName',
+              l10n.usageStatusCurrentPlan(planName),
               style: AppTypography.titleMedium.copyWith(
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: AppSpacing.lg),
-
-            // 使用量プログレスバー
             Builder(
               builder: (context) => Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -442,13 +481,13 @@ class PresetDialogs {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '使用量',
+                          l10n.usageStatusUsageLabel,
                           style: AppTypography.labelMedium.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Text(
-                          '$used / $limit回',
+                          l10n.usageStatusUsageValue(used, limit),
                           style: AppTypography.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -457,8 +496,6 @@ class PresetDialogs {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-
-                    // プログレスバー
                     Container(
                       height: 8,
                       decoration: BoxDecoration(
@@ -483,19 +520,18 @@ class PresetDialogs {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '残り回数:',
+                          l10n.usageStatusRemainingLabel,
                           style: AppTypography.labelMedium.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Text(
-                          '$remaining回',
+                          l10n.usageStatusRemainingValue(remaining),
                           style: AppTypography.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
                             color: remaining > 0
@@ -509,10 +545,7 @@ class PresetDialogs {
                 ),
               ),
             ),
-
             const SizedBox(height: AppSpacing.md),
-
-            // リセット情報
             Builder(
               builder: (context) => Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
@@ -532,7 +565,7 @@ class PresetDialogs {
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
-                      '${nextResetDate.month}月${nextResetDate.day}日にリセット',
+                      l10n.usageStatusResetInfo(resetDateText),
                       style: AppTypography.labelSmall.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -541,12 +574,12 @@ class PresetDialogs {
                 ),
               ),
             ),
-
-            // アップグレード案内（Basic プランの場合）
             if (planName == 'Basic') ...[
               const SizedBox(height: AppSpacing.md),
               Text(
-                'Premiumプランなら月間${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用できます',
+                l10n.usageStatusPremiumUpsell(
+                  SubscriptionConstants.premiumMonthlyAiLimit,
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w500,
@@ -558,10 +591,10 @@ class PresetDialogs {
         ),
       ),
       actions: [
-        CustomDialogAction(text: '閉じる', onPressed: onDismiss),
-        if (planName == 'Basic')
+        CustomDialogAction(text: l10n.commonClose, onPressed: onDismiss),
+        if (planName == 'Basic' && onUpgrade != null)
           CustomDialogAction(
-            text: 'アップグレード',
+            text: l10n.commonUpgrade,
             isPrimary: true,
             icon: Icons.auto_awesome_rounded,
             onPressed: onUpgrade,

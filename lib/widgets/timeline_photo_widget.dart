@@ -14,6 +14,7 @@ import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/photo_cache_service.dart';
 import '../controllers/scroll_signal.dart';
 import '../ui/component_constants.dart';
+import '../localization/localization_extensions.dart';
 
 /// タイムライン表示用の写真ウィジェット
 ///
@@ -668,7 +669,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
-      barrierLabel: '閉じる',
+      barrierLabel: context.l10n.commonClose,
       barrierColor: Colors.black.withValues(alpha: AppConstants.opacityHigh),
       transitionDuration: AppConstants.defaultAnimationDuration,
       pageBuilder: (context, animation, secondaryAnimation) {
@@ -727,7 +728,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       return SizedBox(
         height: _emptyStateHeight,
         child: Center(
-          child: Text('写真がありません', style: TextStyle(color: Colors.grey[600])),
+          child: Text(
+            context.l10n.photoNoPhotosMessage,
+            style: TextStyle(color: Colors.grey[600]),
+          ),
         ),
       );
     }
@@ -915,7 +919,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  '写真へのアクセス許可が必要です',
+                  context.l10n.photoPermissionMessage,
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -923,7 +927,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 if (widget.onRequestPermission != null)
                   TextButton(
                     onPressed: widget.onRequestPermission,
-                    child: const Text('許可する'),
+                    child: Text(context.l10n.commonAllow),
                   ),
               ],
             ),
@@ -951,7 +955,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  '写真がありません',
+                  context.l10n.photoNoPhotosMessage,
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -1207,7 +1211,7 @@ class _SkeletonTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '読み込み中の写真',
+      label: context.l10n.timelineLoadingPhotosLabel,
       container: true,
       child: Container(
         decoration: BoxDecoration(
@@ -1263,9 +1267,9 @@ class _OptimizedUsedLabel extends StatelessWidget {
           color: _backgroundColor,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
-        child: const Text(
-          '使用済み',
-          style: TextStyle(
+        child: Text(
+          context.l10n.photoUsedLabel,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: _fontSize,
             fontWeight: FontWeight.bold,

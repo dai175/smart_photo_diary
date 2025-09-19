@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../localization/localization_extensions.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
@@ -8,7 +9,6 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
-import '../localization/localization_extensions.dart';
 
 /// 写真グリッド表示ウィジェット
 class PhotoGridWidget extends StatelessWidget {
@@ -187,15 +187,16 @@ class PhotoGridWidget extends StatelessWidget {
     final isUsed = controller.isPhotoUsed(index);
 
     // アクセシビリティ用のラベル作成
-    String semanticLabel = '写真 ${index + 1}';
+    final l10n = context.l10n;
+    final separator = l10n.localeName.startsWith('ja') ? '、' : ', ';
+    final semanticParts = <String>[l10n.photoSemanticIndex(index + 1)];
     if (isUsed) {
-      semanticLabel += '、使用済み';
+      semanticParts.add(l10n.photoUsedLabel);
     }
-    if (isSelected) {
-      semanticLabel += '、選択中';
-    } else {
-      semanticLabel += '、未選択';
-    }
+    semanticParts.add(
+      isSelected ? l10n.photoSemanticSelected : l10n.photoSemanticNotSelected,
+    );
+    final semanticLabel = semanticParts.join(separator);
 
     return RepaintBoundary(
       child: Semantics(

@@ -220,5 +220,254 @@
   "settingsThemeSystem": "システムに従う",
   "@settingsThemeSystem": {
     "description": "システムテーマの表示名"
+  },
+  "commonRetry": "再試行",
+  "@commonRetry": {
+    "description": "リトライボタン共通文言"
+  },
+  "commonClose": "閉じる",
+  "@commonClose": {
+    "description": "閉じるボタン共通文言"
+  },
+  "errorDetailsLabel": "詳細情報:",
+  "@errorDetailsLabel": {
+    "description": "エラー詳細セクションのラベル"
+  },
+  "errorSeverityInfo": "情報",
+  "@errorSeverityInfo": {
+    "description": "情報レベルのエラー種別ラベル"
+  },
+  "errorSeverityWarning": "警告",
+  "@errorSeverityWarning": {
+    "description": "警告レベルのエラー種別ラベル"
+  },
+  "errorSeverityError": "エラー",
+  "@errorSeverityError": {
+    "description": "エラーレベルのエラー種別ラベル"
+  },
+  "errorSeverityCritical": "重大なエラー",
+  "@errorSeverityCritical": {
+    "description": "重大レベルのエラー種別ラベル"
+  },
+  "commonUpgrade": "アップグレード",
+  "@commonUpgrade": {
+    "description": "アップグレードボタン共通文言"
+  },
+  "commonErrorTitle": "エラー",
+  "@commonErrorTitle": {
+    "description": "汎用的なエラーダイアログのタイトル"
+  },
+  "usageLimitDialogTitle": "AI生成の制限に達しました",
+  "@usageLimitDialogTitle": {
+    "description": "AI利用上限に達した際のダイアログタイトル"
+  },
+  "usageLimitDialogReachedMessage": "{planName}プランの月間{limit}回の制限に達しました。",
+  "@usageLimitDialogReachedMessage": {
+    "description": "プランの上限に達したことを説明する本文",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageLimitDialogResetLabel": "リセット日:",
+  "@usageLimitDialogResetLabel": {
+    "description": "リセット日を示すラベル"
+  },
+  "usageLimitDialogResetValue": "{date}",
+  "@usageLimitDialogResetValue": {
+    "description": "フォーマット済みのリセット日",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageLimitDialogPremiumHint": "Premiumプランなら月間{limit}回まで利用できます",
+  "@usageLimitDialogPremiumHint": {
+    "description": "Premiumプランへのアップグレードを促す一文",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusDialogTitle": "AI生成の使用状況",
+  "@usageStatusDialogTitle": {
+    "description": "AI使用状況ダイアログのタイトル"
+  },
+  "usageStatusCurrentPlan": "現在のプラン: {planName}",
+  "@usageStatusCurrentPlan": {
+    "description": "現在のプラン名を表示する文",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusUsageLabel": "使用量",
+  "@usageStatusUsageLabel": {
+    "description": "使用量セクションのラベル"
+  },
+  "usageStatusUsageValue": "{used} / {limit}回",
+  "@usageStatusUsageValue": {
+    "description": "使用済み回数と上限回数を表示する文",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusRemainingLabel": "残り回数",
+  "@usageStatusRemainingLabel": {
+    "description": "残り回数セクションのラベル"
+  },
+  "usageStatusRemainingValue": "{remaining}回",
+  "@usageStatusRemainingValue": {
+    "description": "残り回数を表示する文",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusResetInfo": "{date}にリセット",
+  "@usageStatusResetInfo": {
+    "description": "次回リセット日を示す文",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusPremiumUpsell": "Premiumプランなら月間{limit}回まで利用可能です",
+  "@usageStatusPremiumUpsell": {
+    "description": "Premiumプランの利用回数を案内する文",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonTryAgainLater": "しばらく時間をおいてから再度お試しください。",
+  "@commonTryAgainLater": {
+    "description": "後ほど再試行を促すメッセージ"
+  },
+  "usageStatusFetchErrorTitle": "使用状況を取得できませんでした",
+  "@usageStatusFetchErrorTitle": {
+    "description": "使用状況の取得に失敗した際のタイトル"
+  },
+  "usageStatusFetchErrorMessage": "使用状況の取得中にエラーが発生しました。",
+  "@usageStatusFetchErrorMessage": {
+    "description": "使用状況の取得エラー時に表示するメッセージ"
+  },
+  "commonAllow": "許可する",
+  "@commonAllow": {
+    "description": "権限付与ボタンの文言"
+  },
+  "timelineLoadingPhotosLabel": "読み込み中の写真",
+  "@timelineLoadingPhotosLabel": {
+    "description": "写真読み込み中のセマンティックラベル"
+  },
+  "photoSemanticIndex": "写真 {index}",
+  "@photoSemanticIndex": {
+    "description": "写真の位置を示すセマンティックラベル",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "photoSemanticSelected": "選択中",
+  "@photoSemanticSelected": {
+    "description": "写真が選択されていることを示すラベル"
+  },
+  "photoSemanticNotSelected": "未選択",
+  "@photoSemanticNotSelected": {
+    "description": "写真が選択されていないことを示すラベル"
+  },
+  "promptSelectionTitle": "プロンプトを選択",
+  "@promptSelectionTitle": {
+    "description": "プロンプト選択ダイアログのタイトル"
+  },
+  "promptCreateRandom": "ランダムで作成",
+  "@promptCreateRandom": {
+    "description": "ランダム選択時の作成ボタンラベル"
+  },
+  "promptCreateWithSelected": "プロンプトで作成",
+  "@promptCreateWithSelected": {
+    "description": "特定のプロンプト選択時の作成ボタンラベル"
+  },
+  "promptCreateWithout": "そのまま作成",
+  "@promptCreateWithout": {
+    "description": "プロンプトを使わずに作成するボタンラベル"
+  },
+  "promptOptionNone": "プロンプトなし",
+  "@promptOptionNone": {
+    "description": "プロンプトを使用しないオプションのラベル"
+  },
+  "promptOptionNoneDescription": "写真のみから日記を生成",
+  "@promptOptionNoneDescription": {
+    "description": "プロンプトなしオプションの説明"
+  },
+  "promptOptionRandom": "ランダム選択",
+  "@promptOptionRandom": {
+    "description": "ランダム選択オプションのラベル"
+  },
+  "promptLoadingMessage": "プロンプトを読み込み中...",
+  "@promptLoadingMessage": {
+    "description": "プロンプト読み込み中に表示するメッセージ"
+  },
+  "promptRandomDescription": "おすすめのプロンプトを自動選択",
+  "@promptRandomDescription": {
+    "description": "ランダム選択オプションの説明"
+  },
+  "promptEmptyTitle": "プロンプトが見つかりません",
+  "@promptEmptyTitle": {
+    "description": "利用可能なプロンプトがない場合のタイトル"
+  },
+  "promptEmptyDescription": "プロンプトデータの読み込みに失敗しました",
+  "@promptEmptyDescription": {
+    "description": "プロンプト読み込み失敗時の説明"
+  },
+  "diaryCardUntitled": "無題",
+  "@diaryCardUntitled": {
+    "description": "タイトル未設定時のフォールバック"
+  },
+  "diaryCardGeneratingTags": "タグを生成中...",
+  "@diaryCardGeneratingTags": {
+    "description": "タグ生成中に表示するメッセージ"
+  },
+  "pastPhotoSelectedDateLabel": "{date}の写真",
+  "@pastPhotoSelectedDateLabel": {
+    "description": "選択された日付の写真を示すラベル",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pastPhotoSelectedCount": "{count}枚",
+  "@pastPhotoSelectedCount": {
+    "description": "選択日付の写真枚数を表示する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diarySearchHint": "タイトルや本文を検索...",
+  "@diarySearchHint": {
+    "description": "日記検索欄のヒントテキスト"
+  },
+  "diaryListTitle": "日記一覧",
+  "@diaryListTitle": {
+    "description": "日記一覧画面のタイトル"
   }
 }

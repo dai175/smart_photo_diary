@@ -89,7 +89,9 @@ class RecentDiariesWidget extends StatelessWidget {
   }
 
   Widget _buildDiaryCard(BuildContext context, DiaryEntry diary) {
-    final title = diary.title.isNotEmpty ? diary.title : '無題';
+    final title = diary.title.isNotEmpty
+        ? diary.title
+        : context.l10n.diaryCardUntitled;
 
     return CustomCard(
       onTap: () => onDiaryTap(diary.id),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/diary_screen_controller.dart';
+import '../localization/localization_extensions.dart';
 import '../widgets/diary_card_widget.dart';
 import '../shared/filter_bottom_sheet.dart';
 import '../core/service_locator.dart';
@@ -212,7 +213,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               autofocus: true,
               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
               decoration: InputDecoration(
-                hintText: 'タイトルや本文を検索...',
+                hintText: context.l10n.diarySearchHint,
                 hintStyle: TextStyle(
                   color: Theme.of(
                     context,
@@ -226,7 +227,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ),
               onChanged: _controller.performSearch,
             )
-          : const Text('日記一覧'),
+          : Text(context.l10n.diaryListTitle),
       backgroundColor: colorScheme.primary,
       foregroundColor: colorScheme.onPrimary,
       titleTextStyle: Theme.of(

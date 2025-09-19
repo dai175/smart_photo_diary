@@ -78,11 +78,13 @@ void main() {
 
     testWidgets('should show retry button when enabled', (tester) async {
       var retryPressed = false;
+      late AppLocalizations l10n;
 
       await tester.pumpWidget(
         _buildTestApp(
           Builder(
             builder: (context) {
+              l10n = AppLocalizations.of(context);
               return ElevatedButton(
                 onPressed: () async {
                   await service.showError(
@@ -105,9 +107,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('もう一度試す'), findsOneWidget);
+      expect(find.text(l10n.commonRetry), findsOneWidget);
 
-      await tester.tap(find.text('もう一度試す'));
+      await tester.tap(find.text(l10n.commonRetry));
       await tester.pump();
 
       expect(retryPressed, isTrue);
@@ -170,8 +172,8 @@ void main() {
       var retryPressed = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
+        _buildTestApp(
+          Scaffold(
             body: ErrorInlineWidget(
               error: error,
               config: ErrorDisplayConfig.inline,
@@ -183,12 +185,16 @@ void main() {
         ),
       );
 
-      expect(find.text('エラー'), findsOneWidget);
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(ErrorInlineWidget)),
+      );
+
+      expect(find.text(l10n.errorSeverityError), findsOneWidget);
       expect(find.text('インラインエラーテスト'), findsOneWidget);
-      expect(find.text('再試行'), findsOneWidget);
+      expect(find.text(l10n.commonRetry), findsOneWidget);
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
 
-      await tester.tap(find.text('再試行'));
+      await tester.tap(find.text(l10n.commonRetry));
       await tester.pump();
 
       expect(retryPressed, isTrue);
@@ -198,8 +204,8 @@ void main() {
       var retryPressed = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
+        _buildTestApp(
+          Scaffold(
             body: SimpleErrorWidget(
               message: 'シンプルエラーテスト',
               onRetry: () {

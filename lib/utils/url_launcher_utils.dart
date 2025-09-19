@@ -53,6 +53,7 @@ class UrlLauncherUtils {
     await showDialog(
       context: context,
       builder: (context) => PresetDialogs.error(
+        context: context,
         title: 'リンクエラー',
         message: message,
         onConfirm: () => Navigator.of(context).pop(),

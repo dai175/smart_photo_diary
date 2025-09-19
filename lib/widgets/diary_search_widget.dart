@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../localization/localization_extensions.dart';
 
 class DiarySearchWidget extends StatelessWidget {
   final TextEditingController controller;
@@ -31,7 +32,7 @@ class DiarySearchWidget extends StatelessWidget {
               autofocus: true,
               style: TextStyle(color: colorScheme.onPrimary),
               decoration: InputDecoration(
-                hintText: 'タイトルや本文を検索...',
+                hintText: context.l10n.diarySearchHint,
                 hintStyle: TextStyle(
                   color: colorScheme.onPrimary.withValues(
                     alpha: AppConstants.opacityMedium,
@@ -41,7 +42,7 @@ class DiarySearchWidget extends StatelessWidget {
               ),
               onChanged: onSearchChanged,
             )
-          : const Text('日記一覧'),
+          : Text(context.l10n.diaryListTitle),
       backgroundColor: colorScheme.primary,
       leading: isSearching
           ? IconButton(

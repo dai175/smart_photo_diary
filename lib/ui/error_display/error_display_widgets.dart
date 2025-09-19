@@ -68,26 +68,27 @@ class ErrorDialogWidget extends StatelessWidget {
         color: _getColorForSeverity(context, config.severity),
         size: 32,
       ),
-      title: Text(_getTitleForSeverity(config.severity)),
+      title: Text(_getTitleForSeverity(context, config.severity)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(error.userMessage),
-          if (_shouldShowDetails(config.severity)) ..._buildErrorDetails(),
+          if (_shouldShowDetails(config.severity))
+            ..._buildErrorDetails(context),
         ],
       ),
       actions: _buildActions(context),
     );
   }
 
-  List<Widget> _buildErrorDetails() {
+  List<Widget> _buildErrorDetails(BuildContext context) {
     return [
       const SizedBox(height: 16),
       const Divider(),
       const SizedBox(height: 8),
       Text(
-        '詳細情報:',
+        context.l10n.errorDetailsLabel,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: AppConstants.captionFontSize,
@@ -115,7 +116,7 @@ class ErrorDialogWidget extends StatelessWidget {
             Navigator.of(context).pop();
             onRetry!();
           },
-          child: Text(retryButtonText ?? '再試行'),
+          child: Text(retryButtonText ?? context.l10n.commonRetry),
         ),
       );
     }
@@ -145,16 +146,16 @@ class ErrorDialogWidget extends StatelessWidget {
     }
   }
 
-  String _getTitleForSeverity(ErrorSeverity severity) {
+  String _getTitleForSeverity(BuildContext context, ErrorSeverity severity) {
     switch (severity) {
       case ErrorSeverity.info:
-        return '情報';
+        return context.l10n.errorSeverityInfo;
       case ErrorSeverity.warning:
-        return '警告';
+        return context.l10n.errorSeverityWarning;
       case ErrorSeverity.error:
-        return 'エラー';
+        return context.l10n.errorSeverityError;
       case ErrorSeverity.critical:
-        return '重大なエラー';
+        return context.l10n.errorSeverityCritical;
     }
   }
 
@@ -228,7 +229,7 @@ class ErrorInlineWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _getTitleForSeverity(config.severity),
+                      _getTitleForSeverity(context, config.severity),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _getColorForSeverity(context, config.severity),
@@ -263,7 +264,11 @@ class ErrorInlineWidget extends StatelessWidget {
         child: TextButton.icon(
           onPressed: onRetry,
           icon: const Icon(Icons.refresh, size: 16),
-          label: Text(retryButtonText ?? config.retryButtonText ?? '再試行'),
+          label: Text(
+            retryButtonText ??
+                config.retryButtonText ??
+                context.l10n.commonRetry,
+          ),
           style: TextButton.styleFrom(
             foregroundColor: _getColorForSeverity(context, config.severity),
           ),
@@ -285,16 +290,16 @@ class ErrorInlineWidget extends StatelessWidget {
     }
   }
 
-  String _getTitleForSeverity(ErrorSeverity severity) {
+  String _getTitleForSeverity(BuildContext context, ErrorSeverity severity) {
     switch (severity) {
       case ErrorSeverity.info:
-        return '情報';
+        return context.l10n.errorSeverityInfo;
       case ErrorSeverity.warning:
-        return '警告';
+        return context.l10n.errorSeverityWarning;
       case ErrorSeverity.error:
-        return 'エラー';
+        return context.l10n.errorSeverityError;
       case ErrorSeverity.critical:
-        return '重大なエラー';
+        return context.l10n.errorSeverityCritical;
     }
   }
 
@@ -332,7 +337,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getTitleForSeverity(config.severity)),
+        title: Text(_getTitleForSeverity(context, config.severity)),
         backgroundColor: _getColorForSeverity(context, config.severity),
         foregroundColor: Colors.white,
       ),
@@ -351,7 +356,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    _getTitleForSeverity(config.severity),
+                    _getTitleForSeverity(context, config.severity),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: _getColorForSeverity(context, config.severity),
                       fontWeight: FontWeight.bold,
@@ -389,7 +394,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '詳細情報:',
+              context.l10n.errorDetailsLabel,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -420,7 +425,11 @@ class ErrorFullScreenWidget extends StatelessWidget {
                 onRetry!();
               },
               icon: const Icon(Icons.refresh),
-              label: Text(retryButtonText ?? config.retryButtonText ?? '再試行'),
+              label: Text(
+                retryButtonText ??
+                    config.retryButtonText ??
+                    context.l10n.commonRetry,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _getColorForSeverity(context, config.severity),
                 foregroundColor: Colors.white,
@@ -435,7 +444,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
             height: AppConstants.buttonHeight,
             child: OutlinedButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('閉じる'),
+              child: Text(context.l10n.commonClose),
             ),
           ),
       ],
@@ -455,16 +464,16 @@ class ErrorFullScreenWidget extends StatelessWidget {
     }
   }
 
-  String _getTitleForSeverity(ErrorSeverity severity) {
+  String _getTitleForSeverity(BuildContext context, ErrorSeverity severity) {
     switch (severity) {
       case ErrorSeverity.info:
-        return '情報';
+        return context.l10n.errorSeverityInfo;
       case ErrorSeverity.warning:
-        return '警告';
+        return context.l10n.errorSeverityWarning;
       case ErrorSeverity.error:
-        return 'エラー';
+        return context.l10n.errorSeverityError;
       case ErrorSeverity.critical:
-        return '重大なエラー';
+        return context.l10n.errorSeverityCritical;
     }
   }
 
@@ -528,7 +537,7 @@ class SimpleErrorWidget extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: Text(retryButtonText ?? '再試行'),
+                label: Text(retryButtonText ?? context.l10n.commonRetry),
               ),
             ],
           ],

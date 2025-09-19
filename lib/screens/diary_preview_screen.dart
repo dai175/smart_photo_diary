@@ -434,12 +434,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       // プラン情報を取得
       final planResult = await subscriptionService.getCurrentPlanClass();
-      final remainingResult = await subscriptionService
-          .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
 
       final plan = planResult.isSuccess ? planResult.value : BasicPlan();
-      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final limit = plan.monthlyAiGenerationLimit;
       final nextResetDate = resetDateResult.isSuccess
           ? resetDateResult.value
@@ -450,8 +447,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           context: context,
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
+            context: context,
             planName: plan.displayName,
-            remaining: remaining,
             limit: limit,
             nextResetDate: nextResetDate,
             onUpgrade: () {
@@ -477,6 +474,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         await showDialog<void>(
           context: context,
           builder: (context) => PresetDialogs.error(
+            context: context,
             title: 'AI生成の制限に達しました',
             message: 'AI生成の月間制限に達したため、来月まで新しい日記を生成できません。',
             onConfirm: () => Navigator.of(context).pop(),
@@ -581,6 +579,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => PresetDialogs.confirmation(
+        context: context,
         title: '日記を破棄しますか？',
         message: 'AI生成回数は既に消費されています。',
         confirmText: '破棄して戻る',

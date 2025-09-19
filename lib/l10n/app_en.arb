@@ -220,5 +220,254 @@
   "settingsThemeSystem": "Follow system",
   "@settingsThemeSystem": {
     "description": "Label for system theme"
+  },
+  "commonRetry": "Retry",
+  "@commonRetry": {
+    "description": "Generic retry button label"
+  },
+  "commonClose": "Close",
+  "@commonClose": {
+    "description": "Generic close button label"
+  },
+  "errorDetailsLabel": "Details:",
+  "@errorDetailsLabel": {
+    "description": "Label shown before error details section"
+  },
+  "errorSeverityInfo": "Info",
+  "@errorSeverityInfo": {
+    "description": "Error severity label for informational issues"
+  },
+  "errorSeverityWarning": "Warning",
+  "@errorSeverityWarning": {
+    "description": "Error severity label for warnings"
+  },
+  "errorSeverityError": "Error",
+  "@errorSeverityError": {
+    "description": "Error severity label for general errors"
+  },
+  "errorSeverityCritical": "Critical error",
+  "@errorSeverityCritical": {
+    "description": "Error severity label for critical errors"
+  },
+  "commonUpgrade": "Upgrade",
+  "@commonUpgrade": {
+    "description": "Generic upgrade button label"
+  },
+  "commonErrorTitle": "Error",
+  "@commonErrorTitle": {
+    "description": "Generic error dialog title"
+  },
+  "usageLimitDialogTitle": "AI generation limit reached",
+  "@usageLimitDialogTitle": {
+    "description": "Title for the dialog shown when AI usage has reached the monthly limit"
+  },
+  "usageLimitDialogReachedMessage": "The {planName} plan has reached its monthly limit of {limit} generations.",
+  "@usageLimitDialogReachedMessage": {
+    "description": "Body text explaining that the plan has reached the limit",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageLimitDialogResetLabel": "Reset date:",
+  "@usageLimitDialogResetLabel": {
+    "description": "Label shown before the plan reset date"
+  },
+  "usageLimitDialogResetValue": "{date}",
+  "@usageLimitDialogResetValue": {
+    "description": "Formatted reset date value",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageLimitDialogPremiumHint": "The Premium plan allows up to {limit} generations per month.",
+  "@usageLimitDialogPremiumHint": {
+    "description": "Hint encouraging upgrade to Premium plan",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusDialogTitle": "AI usage status",
+  "@usageStatusDialogTitle": {
+    "description": "Title for the AI usage status dialog"
+  },
+  "usageStatusCurrentPlan": "Current plan: {planName}",
+  "@usageStatusCurrentPlan": {
+    "description": "Shows the name of the current plan",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusUsageLabel": "Usage",
+  "@usageStatusUsageLabel": {
+    "description": "Label for the usage amount section"
+  },
+  "usageStatusUsageValue": "{used} / {limit} times",
+  "@usageStatusUsageValue": {
+    "description": "Displays how many generations were used versus the limit",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusRemainingLabel": "Remaining",
+  "@usageStatusRemainingLabel": {
+    "description": "Label for remaining counts"
+  },
+  "usageStatusRemainingValue": "{remaining} times",
+  "@usageStatusRemainingValue": {
+    "description": "Displays the remaining generation count",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusResetInfo": "Resets on {date}",
+  "@usageStatusResetInfo": {
+    "description": "Indicates when the plan usage will reset",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusPremiumUpsell": "With the Premium plan you can use up to {limit} generations per month.",
+  "@usageStatusPremiumUpsell": {
+    "description": "Upsell message for the Premium plan",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonTryAgainLater": "Please try again later.",
+  "@commonTryAgainLater": {
+    "description": "Generic instruction asking the user to retry later"
+  },
+  "usageStatusFetchErrorTitle": "Couldn't fetch usage status",
+  "@usageStatusFetchErrorTitle": {
+    "description": "Title shown when fetching usage status fails"
+  },
+  "usageStatusFetchErrorMessage": "An error occurred while fetching usage status.",
+  "@usageStatusFetchErrorMessage": {
+    "description": "Message shown when fetching usage status fails"
+  },
+  "commonAllow": "Allow",
+  "@commonAllow": {
+    "description": "Button label to grant permission"
+  },
+  "timelineLoadingPhotosLabel": "Loading photos",
+  "@timelineLoadingPhotosLabel": {
+    "description": "Semantic label used while photos are loading"
+  },
+  "photoSemanticIndex": "Photo {index}",
+  "@photoSemanticIndex": {
+    "description": "Semantic description identifying the photo position",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "photoSemanticSelected": "Selected",
+  "@photoSemanticSelected": {
+    "description": "Semantic label indicating the photo is selected"
+  },
+  "photoSemanticNotSelected": "Not selected",
+  "@photoSemanticNotSelected": {
+    "description": "Semantic label indicating the photo is not selected"
+  },
+  "promptSelectionTitle": "Choose a prompt",
+  "@promptSelectionTitle": {
+    "description": "Title for the prompt selection dialog"
+  },
+  "promptCreateRandom": "Create with random",
+  "@promptCreateRandom": {
+    "description": "Primary button label when a random prompt is selected"
+  },
+  "promptCreateWithSelected": "Create with prompt",
+  "@promptCreateWithSelected": {
+    "description": "Primary button label when a specific prompt is selected"
+  },
+  "promptCreateWithout": "Create without prompt",
+  "@promptCreateWithout": {
+    "description": "Primary button label when skipping prompts"
+  },
+  "promptOptionNone": "No prompt",
+  "@promptOptionNone": {
+    "description": "List item label for skipping prompts"
+  },
+  "promptOptionNoneDescription": "Generate the diary using photos only",
+  "@promptOptionNoneDescription": {
+    "description": "Description explaining the no prompt option"
+  },
+  "promptOptionRandom": "Random selection",
+  "@promptOptionRandom": {
+    "description": "List item label for choosing a random prompt"
+  },
+  "promptLoadingMessage": "Loading prompts...",
+  "@promptLoadingMessage": {
+    "description": "Status text shown while prompts are loading"
+  },
+  "promptRandomDescription": "Automatically choose a recommended prompt",
+  "@promptRandomDescription": {
+    "description": "Description explaining the random prompt option"
+  },
+  "promptEmptyTitle": "No prompts found",
+  "@promptEmptyTitle": {
+    "description": "Title shown when no prompts are available"
+  },
+  "promptEmptyDescription": "Failed to load prompt data.",
+  "@promptEmptyDescription": {
+    "description": "Description shown when prompt loading fails"
+  },
+  "diaryCardUntitled": "Untitled",
+  "@diaryCardUntitled": {
+    "description": "Fallback title when a diary entry has no title"
+  },
+  "diaryCardGeneratingTags": "Generating tags...",
+  "@diaryCardGeneratingTags": {
+    "description": "Status message shown while diary tags are loading"
+  },
+  "pastPhotoSelectedDateLabel": "Photos from {date}",
+  "@pastPhotoSelectedDateLabel": {
+    "description": "Label showing which date's photos are selected",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pastPhotoSelectedCount": "{count} photos",
+  "@pastPhotoSelectedCount": {
+    "description": "Displays how many photos exist for the selected date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diarySearchHint": "Search titles or body...",
+  "@diarySearchHint": {
+    "description": "Hint text for the diary search field"
+  },
+  "diaryListTitle": "Diaries",
+  "@diaryListTitle": {
+    "description": "App bar title for the diary list screen"
   }
 }
