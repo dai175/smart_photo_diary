@@ -14,6 +14,7 @@ import 'services/settings_service.dart';
 import 'services/logging_service.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_theme.dart';
+import 'l10n/generated/app_localizations.dart';
 
 Future<void> main() async {
   // Flutterの初期化を確実に行う
@@ -67,6 +68,8 @@ class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
   bool _isFirstLaunch = false;
+  Locale? _locale;
+  ValueNotifier<Locale?>? _localeNotifier;
 
   // LoggingServiceアクセス用getter
   LoggingService get _logger => serviceLocator.get<LoggingService>();
@@ -80,9 +83,17 @@ class _MyAppState extends State<MyApp> {
   Future<void> _loadSettings() async {
     try {
       _settingsService = await ServiceLocator().getAsync<SettingsService>();
+      final notifier = _settingsService!.localeNotifier;
+      if (_localeNotifier != notifier) {
+        _localeNotifier?.removeListener(_handleLocaleChanged);
+        _localeNotifier = notifier;
+        _localeNotifier?.addListener(_handleLocaleChanged);
+      }
+
       setState(() {
         _themeMode = _settingsService!.themeMode;
         _isFirstLaunch = _settingsService!.isFirstLaunch;
+        _locale = _localeNotifier?.value ?? _settingsService!.locale;
         _isLoading = false;
       });
     } catch (e) {
@@ -103,6 +114,19 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _handleLocaleChanged() {
+    if (!mounted) return;
+    setState(() {
+      _locale = _localeNotifier?.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    _localeNotifier?.removeListener(_handleLocaleChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -117,17 +141,39 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      // 日本語ロケール設定
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('ja', 'JP'), // 日本語
-        Locale('en', 'US'), // 英語（フォールバック）
-      ],
-      locale: const Locale('ja', 'JP'), // デフォルトロケール
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: _locale,
+      localeResolutionCallback: (locale, supportedLocales) {
+        final preferred = _locale ?? locale;
+        if (preferred == null) {
+          return supportedLocales.first;
+        }
+
+        final exactMatch = supportedLocales.firstWhere(
+          (supported) =>
+              supported.languageCode == preferred.languageCode &&
+              supported.countryCode == preferred.countryCode,
+          orElse: () => supportedLocales.first,
+        );
+
+        if (exactMatch.languageCode == preferred.languageCode &&
+            exactMatch.countryCode == preferred.countryCode) {
+          return exactMatch;
+        }
+
+        final languageMatch = supportedLocales.firstWhere(
+          (supported) => supported.languageCode == preferred.languageCode,
+          orElse: () => supportedLocales.first,
+        );
+
+        return languageMatch;
+      },
       home: _isFirstLaunch
           ? OnboardingScreen(onThemeChanged: _onThemeChanged)
           : HomeScreen(onThemeChanged: _onThemeChanged),

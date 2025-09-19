@@ -11,9 +11,14 @@
 - CI 反映: コマンドをビルド前ステップへ追加し、生成物をコミット対象外に設定
 
 ## フェーズ2: アプリロケール管理
-- [ ] `SettingsService` に言語設定キーを追加し、永続化/取得メソッドを実装する
-- [ ] `MyApp` で `AppLocalizations` を読み込み、`locale` と `localeResolutionCallback` を設定する
-- [ ] 言語変更イベントをアプリ全体に通知する仕組み（例: `ValueNotifier` や `InheritedWidget`）を導入する
+- [x] `SettingsService` に言語設定キーを追加し、永続化/取得メソッドを実装する
+- [x] `MyApp` で `AppLocalizations` を読み込み、`locale` と `localeResolutionCallback` を設定する
+- [x] 言語変更イベントをアプリ全体に通知する仕組み（例: `ValueNotifier` や `InheritedWidget`）を導入する
+
+### フェーズ2手順メモ
+- `SettingsService.localeNotifier` をアプリ全体で監視し、`Locale?` の変更を `MaterialApp` に反映
+- 永続化には `SharedPreferences` の `app_locale` キーを使用（`languageCode_countryCode` 形式）
+- `pubspec.yaml` に `flutter.generate: true` を追加し、`fvm flutter gen-l10n` を実行して `AppLocalizations` を生成
 
 ## フェーズ3: UI言語切替
 - [ ] `SettingsScreen` に言語選択UIを追加し、選択結果を `SettingsService` に反映する

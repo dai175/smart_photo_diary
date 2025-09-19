@@ -22,6 +22,11 @@ class SettingsService {
   // Phase 1.8.1.1: SubscriptionService依存注入
   ISubscriptionService? _subscriptionService;
 
+  static const String _localeKey = 'app_locale';
+  static final ValueNotifier<Locale?> _localeNotifier = ValueNotifier<Locale?>(
+    null,
+  );
+
   SettingsService._();
 
   /// 非同期ファクトリメソッドでサービスインスタンスを取得
@@ -29,6 +34,8 @@ class SettingsService {
     try {
       _instance ??= SettingsService._();
       _preferences ??= await SharedPreferences.getInstance();
+
+      _localeNotifier.value = _instance!._loadStoredLocale();
 
       // Phase 1.8.1.1: SubscriptionService依存注入
       if (_instance!._subscriptionService == null) {
@@ -68,6 +75,8 @@ class SettingsService {
   // 初回起動フラグのキー
   static const String _firstLaunchKey = 'is_first_launch';
 
+  ValueNotifier<Locale?> get localeNotifier => _localeNotifier;
+
   // テーマモード
   ThemeMode get themeMode {
     return ErrorHandler.safeExecuteSync(
@@ -91,6 +100,24 @@ class SettingsService {
     }, context: 'SettingsService.setThemeMode');
   }
 
+  Locale? get locale {
+    return ErrorHandler.safeExecuteSync<Locale?>(() {
+      final rawValue = _preferences?.getString(_localeKey);
+      return _parseLocale(rawValue);
+    }, context: 'SettingsService.locale');
+  }
+
+  Future<Result<void>> setLocale(Locale? locale) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      if (locale == null) {
+        await _preferences?.remove(_localeKey);
+      } else {
+        await _preferences?.setString(_localeKey, _serializeLocale(locale));
+      }
+      _localeNotifier.value = locale;
+    }, context: 'SettingsService.setLocale');
+  }
+
   // 初回起動判定
   bool get isFirstLaunch {
     return ErrorHandler.safeExecuteSync(
@@ -112,6 +139,35 @@ class SettingsService {
 
   // 日記生成モード（常にvision固定）
   static const DiaryGenerationMode generationMode = DiaryGenerationMode.vision;
+
+  Locale? _loadStoredLocale() => locale;
+
+  static Locale? _parseLocale(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    final separator = value.contains('-') ? '-' : '_';
+    final segments = value.split(separator);
+    if (segments.isEmpty) {
+      return null;
+    }
+    if (segments.length == 1) {
+      return Locale(segments.first);
+    }
+    final languageCode = segments[0];
+    final countryCode = segments[1];
+    if (countryCode.isEmpty) {
+      return Locale(languageCode);
+    }
+    return Locale(languageCode, countryCode);
+  }
+
+  static String _serializeLocale(Locale locale) {
+    if (locale.countryCode == null || locale.countryCode!.isEmpty) {
+      return locale.languageCode;
+    }
+    return '${locale.languageCode}_${locale.countryCode}';
+  }
 
   // ========================================
   // Phase 1.8.1: サブスクリプション状態管理API
