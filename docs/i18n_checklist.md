@@ -21,9 +21,14 @@
 - `pubspec.yaml` に `flutter.generate: true` を追加し、`fvm flutter gen-l10n` を実行して `AppLocalizations` を生成
 
 ## フェーズ3: UI言語切替
-- [ ] `SettingsScreen` に言語選択UIを追加し、選択結果を `SettingsService` に反映する
-- [ ] 初回起動/オンボーディング中にシステム言語へのフォールバックを確認する
-- [ ] テーマ切替と同様に言語切替時のリビルドを検証する
+- [x] `SettingsScreen` に言語選択UIを追加し、選択結果を `SettingsService` に反映する
+- [x] 初回起動/オンボーディング中にシステム言語へのフォールバックを確認する
+- [x] テーマ切替と同様に言語切替時のリビルドを検証する
+
+### フェーズ3手順メモ
+- 設定カードに「言語」項目を追加し、ダイアログで `Locale?` を選択可能に（`null` でシステム追従）
+- `SettingsService.setLocale` の結果に合わせて ValueNotifier が更新され、`MaterialApp` が即時リビルドされることを確認
+- ローディング時 MaterialApp でも `AppLocalizations` デリゲートを登録し、初回起動時にシステムロケールへフォールバックする挙動を確認
 
 ## フェーズ4: 文言のローカライズ
 - [ ] `AppConstants` などハードコードされた日本語文字列をローカライズキーへ移行する

@@ -132,6 +132,13 @@ class _MyAppState extends State<MyApp> {
     if (_isLoading) {
       return MaterialApp(
         theme: AppTheme.lightTheme,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: const Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }

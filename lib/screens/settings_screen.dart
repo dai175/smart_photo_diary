@@ -38,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   SubscriptionInfoV2? _subscriptionInfo;
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
+  Locale? _selectedLocale;
 
   @override
   void initState() {
@@ -65,6 +66,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           context: 'SettingsScreen',
         );
       }
+
+      _selectedLocale = _settingsService.locale;
 
       // サブスクリプション情報を取得（V2版）
       final subscriptionResult = await _settingsService.getSubscriptionInfoV2();
@@ -153,6 +156,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         FadeInWidget(child: _buildThemeSelector()),
                         _buildDivider(),
                         SlideInWidget(
+                          delay: const Duration(milliseconds: 40),
+                          child: _buildLanguageSelector(),
+                        ),
+                        _buildDivider(),
+                        SlideInWidget(
                           delay: const Duration(milliseconds: 50),
                           child: _buildSubscriptionStatus(),
                         ),
@@ -200,6 +208,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       color: AppColors.outline.withValues(alpha: 0.1),
+    );
+  }
+
+  Widget _buildLanguageSelector() {
+    final localeLabel = _getLocaleLabel(_selectedLocale);
+    final description = _selectedLocale == null
+        ? '端末の言語に自動追従します'
+        : _selectedLocale?.languageCode == 'ja'
+        ? 'アプリを日本語で表示します'
+        : 'Display the app in English';
+
+    return Semantics(
+      label: '言語設定、現在: $localeLabel',
+      button: true,
+      child: MicroInteractions.bounceOnTap(
+        onTap: () {
+          MicroInteractions.hapticTap();
+          _showLanguageDialog();
+        },
+        child: Container(
+          padding: AppSpacing.cardPadding,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AppColors.info.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppSpacing.sm),
+                ),
+                child: Icon(
+                  AppIcons.settingsLanguage,
+                  color: AppColors.info,
+                  size: AppSpacing.iconSm,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '言語',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      localeLabel,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      description,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                AppIcons.actionForward,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: AppSpacing.iconSm,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -260,6 +340,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  Future<void> _showLanguageDialog() async {
+    Locale? tempSelection = _selectedLocale;
+    final options = _localeChoices;
+
+    final result = await showDialog<Locale?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('言語を選択'),
+          content: StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: options
+                      .map(
+                        (choice) => RadioListTile<Locale?>(
+                          title: Text(choice.title),
+                          subtitle: Text(choice.subtitle),
+                          value: choice.locale,
+                          groupValue: tempSelection,
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              tempSelection = value;
+                            });
+                          },
+                        ),
+                      )
+                      .toList(),
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('キャンセル'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(tempSelection),
+              child: const Text('決定'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || result == null) {
+      return;
+    }
+
+    await _handleLocaleSelection(result);
+  }
+
+  Future<void> _handleLocaleSelection(Locale? locale) async {
+    if (_selectedLocale == locale) {
+      return;
+    }
+
+    setState(() {
+      _selectedLocale = locale;
+    });
+
+    final result = await _settingsService.setLocale(locale);
+    if (result.isFailure) {
+      _logger.error(
+        '言語設定の更新に失敗しました',
+        error: result.error,
+        context: 'SettingsScreen',
+      );
+
+      if (mounted) {
+        setState(() {
+          _selectedLocale = _settingsService.locale;
+        });
+        DialogUtils.showSimpleDialog(
+          context,
+          '言語設定の保存に失敗しました。時間を置いて再度お試しください。',
+        );
+      }
+    }
+  }
+
+  String _getLocaleLabel(Locale? locale) {
+    if (locale == null) {
+      return 'システム設定に従う';
+    }
+    if (locale.languageCode == 'ja') {
+      return '日本語';
+    }
+    if (locale.languageCode == 'en') {
+      return 'English';
+    }
+    return locale.toLanguageTag();
+  }
+
+  List<_LocaleChoice> get _localeChoices => const [
+    _LocaleChoice(locale: null, title: 'システム設定に従う', subtitle: '端末の言語に合わせます'),
+    _LocaleChoice(
+      locale: Locale('ja', 'JP'),
+      title: '日本語',
+      subtitle: 'アプリを日本語で表示します',
+    ),
+    _LocaleChoice(
+      locale: Locale('en', 'US'),
+      title: 'English',
+      subtitle: 'Display the app in English',
+    ),
+  ];
 
   /// Phase 1.8.2.1: サブスクリプション状態表示
   Widget _buildSubscriptionStatus() {
@@ -1448,4 +1639,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+}
+
+class _LocaleChoice {
+  final Locale? locale;
+  final String title;
+  final String subtitle;
+
+  const _LocaleChoice({
+    required this.locale,
+    required this.title,
+    required this.subtitle,
+  });
 }

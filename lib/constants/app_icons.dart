@@ -51,6 +51,7 @@ class AppIcons {
 
   /// 設定画面アイコン
   static const IconData settingsTheme = Icons.palette_rounded;
+  static const IconData settingsLanguage = Icons.language_rounded;
   static const IconData settingsStorage = Icons.storage_rounded;
   static const IconData settingsExport = Icons.file_download_rounded;
   static const IconData settingsImport = Icons.file_upload_rounded;
