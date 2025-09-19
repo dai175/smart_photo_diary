@@ -66,7 +66,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     super.initState();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
-    _loadDiaryEntry();
+    // ローカライズへの依存をinitState完了後に解決するため初回ロードはフレーム後に実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadDiaryEntry();
+      }
+    });
   }
 
   @override
@@ -78,7 +83,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
   /// 日記エントリーを読み込む
   Future<void> _loadDiaryEntry() async {
-    final l10n = context.l10n;
     try {
       setState(() {
         _isLoading = true;
@@ -97,7 +101,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = l10n.diaryNotFoundMessage;
+          _errorMessage = context.l10n.diaryNotFoundMessage;
         });
         return;
       }
@@ -114,6 +118,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       });
     } catch (e) {
       if (!mounted) return;
+      final l10n = context.l10n;
       setState(() {
         _isLoading = false;
         _hasError = true;
