@@ -135,6 +135,34 @@ class _HomeScreenState extends State<HomeScreen>
     _showSimpleDialog(AppConstants.usedPhotoMessage);
   }
 
+  /// 日記詳細画面を開いた結果を共通で処理
+  Future<void> _handleDiaryDetailResult(dynamic result) async {
+    if (result == true) {
+      _photoController.clearSelection();
+      await _loadUsedPhotoIds();
+      if (mounted) {
+        setState(() {
+          _diaryScreenKey = UniqueKey();
+          _statsScreenKey = UniqueKey();
+        });
+      }
+    }
+  }
+
+  /// 日記詳細画面に遷移
+  Future<void> _openDiaryDetail(String diaryId) async {
+    if (!mounted) return;
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DiaryDetailScreen(diaryId: diaryId),
+      ),
+    );
+
+    await _handleDiaryDetailResult(result);
+  }
+
   /// 写真IDから日記詳細画面に遷移
   Future<void> _navigateToDiaryDetailByPhotoId(String photoId) async {
     try {
@@ -143,14 +171,7 @@ class _HomeScreenState extends State<HomeScreen>
 
       if (diaryEntry != null) {
         _logger.info('写真ID: $photoId の日記詳細に遷移: ${diaryEntry.id}');
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DiaryDetailScreen(diaryId: diaryEntry.id),
-            ),
-          );
-        }
+        await _openDiaryDetail(diaryEntry.id);
       } else {
         _logger.warning('写真ID: $photoId に対応する日記が見つかりません');
         if (mounted) {
@@ -513,24 +534,7 @@ class _HomeScreenState extends State<HomeScreen>
         onLoadMorePhotos: _loadMorePhotos,
         onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
         scrollSignal: _homeScrollSignal,
-        onDiaryTap: (diaryId) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DiaryDetailScreen(diaryId: diaryId),
-            ),
-          ).then((result) {
-            if (result == true) {
-              _photoController.clearSelection();
-              // フォールバック: 削除直後に使用済みIDを再同期
-              _loadUsedPhotoIds();
-              // 統計タブも次回表示時に最新化
-              setState(() {
-                _statsScreenKey = UniqueKey();
-              });
-            }
-          });
-        },
+        onDiaryTap: _openDiaryDetail,
       ),
       DiaryScreen(key: _diaryScreenKey),
       StatisticsScreen(key: _statsScreenKey),
