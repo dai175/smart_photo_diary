@@ -3,13 +3,16 @@ import 'dart:ui';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../constants/app_constants.dart';
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
 import '../../../core/service_locator.dart';
+import '../../../core/service_registration.dart';
+import '../../../localization/localization_utils.dart';
+import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
 import '../../logging_service.dart';
 import '../../../utils/x_share_text_builder.dart';
+import '../../settings_service.dart';
 
 /// X（旧Twitter）共有チャネル実装
 class XShareChannel {
@@ -42,10 +45,22 @@ class XShareChannel {
       }
 
       // テキスト生成
+      Locale? locale;
+      try {
+        final settingsService =
+            await ServiceRegistration.getAsync<SettingsService>();
+        locale = settingsService.locale;
+      } catch (_) {
+        locale = null;
+      }
+
+      final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
+      final appName = LocalizationUtils.appTitleFor(resolvedLocale);
+
       final text = XShareTextBuilder.build(
         title: diary.title,
         body: diary.content,
-        appName: AppConstants.appTitle,
+        appName: appName,
       );
 
       await Share.shareXFiles(

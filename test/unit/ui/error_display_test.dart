@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
+import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
 import 'package:smart_photo_diary/ui/error_display/error_display.dart';
+
+Widget _buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: child),
+  );
+}
 
 void main() {
   group('ErrorDisplayService', () {
@@ -13,22 +22,20 @@ void main() {
 
     testWidgets('should show snackbar for warning error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  onPressed: () async {
-                    await service.showError(
-                      context,
-                      const ValidationException('テスト警告メッセージ'),
-                      config: ErrorDisplayConfig.warning,
-                    );
-                  },
-                  child: const Text('エラーを表示'),
-                );
-              },
-            ),
+        _buildTestApp(
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () async {
+                  await service.showError(
+                    context,
+                    const ValidationException('テスト警告メッセージ'),
+                    config: ErrorDisplayConfig.warning,
+                  );
+                },
+                child: const Text('エラーを表示'),
+              );
+            },
           ),
         ),
       );
@@ -43,22 +50,20 @@ void main() {
 
     testWidgets('should show dialog for error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  onPressed: () async {
-                    await service.showError(
-                      context,
-                      const ServiceException('テストエラーメッセージ'),
-                      config: ErrorDisplayConfig.error,
-                    );
-                  },
-                  child: const Text('エラーを表示'),
-                );
-              },
-            ),
+        _buildTestApp(
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () async {
+                  await service.showError(
+                    context,
+                    const ServiceException('テストエラーメッセージ'),
+                    config: ErrorDisplayConfig.error,
+                  );
+                },
+                child: const Text('エラーを表示'),
+              );
+            },
           ),
         ),
       );
@@ -75,25 +80,23 @@ void main() {
       var retryPressed = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  onPressed: () async {
-                    await service.showError(
-                      context,
-                      const NetworkException('ネットワークエラー'),
-                      config: ErrorDisplayConfig.criticalWithRetry,
-                      onRetry: () {
-                        retryPressed = true;
-                      },
-                    );
-                  },
-                  child: const Text('エラーを表示'),
-                );
-              },
-            ),
+        _buildTestApp(
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () async {
+                  await service.showError(
+                    context,
+                    const NetworkException('ネットワークエラー'),
+                    config: ErrorDisplayConfig.criticalWithRetry,
+                    onRetry: () {
+                      retryPressed = true;
+                    },
+                  );
+                },
+                child: const Text('エラーを表示'),
+              );
+            },
           ),
         ),
       );
@@ -112,18 +115,16 @@ void main() {
 
     testWidgets('should show success message', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  onPressed: () {
-                    service.showSuccessMessage(context, '成功メッセージ');
-                  },
-                  child: const Text('成功を表示'),
-                );
-              },
-            ),
+        _buildTestApp(
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () {
+                  service.showSuccessMessage(context, '成功メッセージ');
+                },
+                child: const Text('成功を表示'),
+              );
+            },
           ),
         ),
       );
@@ -139,18 +140,16 @@ void main() {
 
     testWidgets('should show info message', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  onPressed: () {
-                    service.showInfoMessage(context, '情報メッセージ');
-                  },
-                  child: const Text('情報を表示'),
-                );
-              },
-            ),
+        _buildTestApp(
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () {
+                  service.showInfoMessage(context, '情報メッセージ');
+                },
+                child: const Text('情報を表示'),
+              );
+            },
           ),
         ),
       );

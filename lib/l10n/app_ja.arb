@@ -1,3 +1,224 @@
 {
-  "@@locale": "ja"
+  "@@locale": "ja",
+  "appTitle": "Smart Photo Diary",
+  "@appTitle": {
+    "description": "アプリ全体のタイトル"
+  },
+  "navigationHome": "ホーム",
+  "@navigationHome": {
+    "description": "ボトムナビゲーション: ホーム"
+  },
+  "navigationDiary": "日記",
+  "@navigationDiary": {
+    "description": "ボトムナビゲーション: 日記"
+  },
+  "navigationStatistics": "統計",
+  "@navigationStatistics": {
+    "description": "ボトムナビゲーション: 統計"
+  },
+  "navigationSettings": "設定",
+  "@navigationSettings": {
+    "description": "ボトムナビゲーション: 設定"
+  },
+  "homeNewPhotosTitle": "新しい写真",
+  "@homeNewPhotosTitle": {
+    "description": "ホーム画面: 新しい写真セクションタイトル"
+  },
+  "homeRecentDiariesTitle": "最近の日記",
+  "@homeRecentDiariesTitle": {
+    "description": "ホーム画面: 最近の日記セクションタイトル"
+  },
+  "photoNoPhotosMessage": "写真が見つかりませんでした",
+  "@photoNoPhotosMessage": {
+    "description": "写真が存在しない場合のメッセージ"
+  },
+  "diaryNoEntriesMessage": "保存された日記がありません",
+  "@diaryNoEntriesMessage": {
+    "description": "日記が存在しない場合のメッセージ"
+  },
+  "photoPermissionMessage": "写真へのアクセス権限が必要です",
+  "@photoPermissionMessage": {
+    "description": "写真アクセス権限が未許可の場合の説明"
+  },
+  "photoRequestPermission": "権限をリクエスト",
+  "@photoRequestPermission": {
+    "description": "写真アクセス権限リクエストボタン"
+  },
+  "photoSelectionLimitMessage": "一度に選択できる写真は{limit}枚までです",
+  "@photoSelectionLimitMessage": {
+    "description": "写真選択制限のメッセージ",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "photoUsedPhotoMessage": "この写真はすでに日記で使用されています",
+  "@photoUsedPhotoMessage": {
+    "description": "使用済み写真を選択した際のメッセージ"
+  },
+  "photoUsedLabel": "使用済み",
+  "@photoUsedLabel": {
+    "description": "使用済み写真のラベル"
+  },
+  "photoSelectionStatus": "選択された写真: {selected}/{limit}枚",
+  "@photoSelectionStatus": {
+    "description": "選択中の写真枚数表示",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonOk": "OK",
+  "@commonOk": {
+    "description": "OK ボタン"
+  },
+  "diaryNotFoundMessage": "日記が見つかりませんでした",
+  "@diaryNotFoundMessage": {
+    "description": "日記が存在しない場合のエラーメッセージ"
+  },
+  "diaryLoadErrorMessage": "日記の読み込みに失敗しました",
+  "@diaryLoadErrorMessage": {
+    "description": "日記取得に失敗した際のメッセージ"
+  },
+  "diaryUpdateSuccessMessage": "日記を更新しました",
+  "@diaryUpdateSuccessMessage": {
+    "description": "日記更新成功のトースト/スナックバー"
+  },
+  "diaryDeleteSuccessMessage": "日記を削除しました",
+  "@diaryDeleteSuccessMessage": {
+    "description": "日記削除成功のトースト/スナックバー"
+  },
+  "homeLinkedDiaryNotFound": "対応する日記が見つかりませんでした",
+  "@homeLinkedDiaryNotFound": {
+    "description": "写真に紐づく日記が存在しなかった場合のメッセージ"
+  },
+  "homeDiaryLoadError": "日記の取得中にエラーが発生しました",
+  "@homeDiaryLoadError": {
+    "description": "日記取得時に例外が発生した際のメッセージ"
+  },
+  "homePermissionDialogTitle": "写真へのアクセスを許可",
+  "@homePermissionDialogTitle": {
+    "description": "写真アクセス権限を案内するダイアログのタイトル"
+  },
+  "homePermissionDialogMessage": "日記作成のために写真ライブラリへのアクセスが必要です。設定アプリで写真へのアクセスを許可してください。",
+  "@homePermissionDialogMessage": {
+    "description": "写真アクセス権限を案内するダイアログの本文"
+  },
+  "homeLimitedAccessTitle": "写真を追加選択",
+  "@homeLimitedAccessTitle": {
+    "description": "限定的な写真アクセス時に表示するダイアログタイトル"
+  },
+  "homeLimitedAccessMessage": "現在、選択された写真のみアクセス可能です。日記作成に使用したい写真を追加で選択しますか？",
+  "@homeLimitedAccessMessage": {
+    "description": "限定的な写真アクセス時に表示するダイアログ本文"
+  },
+  "commonCancel": "キャンセル",
+  "@commonCancel": {
+    "description": "キャンセルボタン共通文言"
+  },
+  "commonOpenSettings": "設定を開く",
+  "@commonOpenSettings": {
+    "description": "設定アプリを開くボタン"
+  },
+  "commonLater": "後で",
+  "@commonLater": {
+    "description": "後で行うボタン"
+  },
+  "photoSelectAction": "写真を選択",
+  "@photoSelectAction": {
+    "description": "写真を追加で選択するボタン"
+  },
+  "cameraCaptureSuccess": "写真を撮影しました",
+  "@cameraCaptureSuccess": {
+    "description": "カメラ撮影成功時のスナックバー"
+  },
+  "commonConfirm": "決定",
+  "@commonConfirm": {
+    "description": "確認ボタン共通文言"
+  },
+  "settingsAppBarTitle": "設定",
+  "@settingsAppBarTitle": {
+    "description": "設定画面のアプリバータイトル"
+  },
+  "settingsLoadingTitle": "設定を読み込み中...",
+  "@settingsLoadingTitle": {
+    "description": "設定画面ローディングカードのタイトル"
+  },
+  "settingsLoadingSubtitle": "アプリの設定情報を取得しています",
+  "@settingsLoadingSubtitle": {
+    "description": "設定画面ローディングカードのサブタイトル"
+  },
+  "settingsLanguageSectionTitle": "言語設定",
+  "@settingsLanguageSectionTitle": {
+    "description": "言語セクションのタイトル"
+  },
+  "settingsLanguageSectionDescription": "アプリ全体の表示言語を切り替えます",
+  "@settingsLanguageSectionDescription": {
+    "description": "言語セクションの説明テキスト"
+  },
+  "settingsLanguageDialogTitle": "言語を選択",
+  "@settingsLanguageDialogTitle": {
+    "description": "言語選択ダイアログのタイトル"
+  },
+  "settingsLanguageSystem": "システム設定に従う",
+  "@settingsLanguageSystem": {
+    "description": "システム言語に従うオプション"
+  },
+  "settingsLanguageSystemSubtitle": "端末の言語に合わせます",
+  "@settingsLanguageSystemSubtitle": {
+    "description": "システム言語オプションの補足"
+  },
+  "settingsLanguageJapanese": "日本語",
+  "@settingsLanguageJapanese": {
+    "description": "日本語オプション"
+  },
+  "settingsLanguageJapaneseSubtitle": "アプリを日本語で表示します",
+  "@settingsLanguageJapaneseSubtitle": {
+    "description": "日本語オプションの補足"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "英語オプション"
+  },
+  "settingsLanguageEnglishSubtitle": "Display the app in English",
+  "@settingsLanguageEnglishSubtitle": {
+    "description": "英語オプションの補足"
+  },
+  "settingsLanguageUpdateError": "言語設定の保存に失敗しました。時間を置いて再度お試しください。",
+  "@settingsLanguageUpdateError": {
+    "description": "言語設定保存失敗時のメッセージ"
+  },
+  "cameraPermissionDialogTitle": "カメラへのアクセス許可が必要です",
+  "@cameraPermissionDialogTitle": {
+    "description": "カメラ権限ダイアログのタイトル"
+  },
+  "cameraPermissionDialogMessage": "写真を撮影するには、カメラへのアクセスを許可してください。設定アプリからカメラの権限を有効にできます。",
+  "@cameraPermissionDialogMessage": {
+    "description": "カメラ権限ダイアログの本文"
+  },
+  "settingsThemeSectionTitle": "テーマ",
+  "@settingsThemeSectionTitle": {
+    "description": "テーマセクションのタイトル"
+  },
+  "settingsThemeDialogTitle": "テーマを選択",
+  "@settingsThemeDialogTitle": {
+    "description": "テーマ選択ダイアログのタイトル"
+  },
+  "settingsThemeLight": "ライトテーマ",
+  "@settingsThemeLight": {
+    "description": "ライトテーマの表示名"
+  },
+  "settingsThemeDark": "ダークテーマ",
+  "@settingsThemeDark": {
+    "description": "ダークテーマの表示名"
+  },
+  "settingsThemeSystem": "システムに従う",
+  "@settingsThemeSystem": {
+    "description": "システムテーマの表示名"
+  }
 }

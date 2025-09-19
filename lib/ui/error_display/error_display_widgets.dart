@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
+import '../../localization/localization_extensions.dart';
 import 'error_severity.dart';
 
 /// SnackBar用エラーコンテンツ
@@ -123,7 +124,7 @@ class ErrorDialogWidget extends StatelessWidget {
       actions.add(
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(AppConstants.okButton),
+          child: Text(context.l10n.commonOk),
         ),
       );
     }

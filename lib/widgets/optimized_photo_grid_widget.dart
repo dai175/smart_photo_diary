@@ -9,6 +9,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/loading_shimmer.dart';
+import '../localization/localization_extensions.dart';
 import '../utils/performance_monitor.dart';
 
 /// 最適化された写真グリッド表示ウィジェット
@@ -237,7 +238,10 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     }
 
     if (!widget.controller.hasPermission) {
-      return SizedBox(height: gridHeight, child: _buildPermissionRequest());
+      return SizedBox(
+        height: gridHeight,
+        child: _buildPermissionRequest(context),
+      );
     }
 
     if (widget.controller.photoAssets.isEmpty) {
@@ -316,7 +320,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
               children: [
                 _buildPhotoThumbnail(index),
                 _buildSelectionIndicator(index),
-                if (isUsed) _buildUsedLabel(),
+                if (isUsed) _buildUsedLabel(context),
               ],
             ),
           ),
@@ -444,7 +448,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     }
   }
 
-  Widget _buildUsedLabel() {
+  Widget _buildUsedLabel(BuildContext context) {
     return Positioned(
       bottom: AppSpacing.xs,
       left: AppSpacing.xs,
@@ -458,7 +462,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
           borderRadius: BorderRadius.circular(AppSpacing.xs),
         ),
         child: Text(
-          AppConstants.usedPhotoLabel,
+          context.l10n.photoUsedLabel,
           style: AppTypography.withColor(
             AppTypography.labelSmall,
             Colors.white,
@@ -468,7 +472,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
     );
   }
 
-  Widget _buildPermissionRequest() {
+  Widget _buildPermissionRequest(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -486,14 +490,14 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          AppConstants.permissionMessage,
+          context.l10n.photoPermissionMessage,
           style: AppTypography.bodyMedium,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.lg),
         PrimaryButton(
           onPressed: widget.onRequestPermission,
-          text: AppConstants.requestPermissionButton,
+          text: context.l10n.photoRequestPermission,
           icon: Icons.camera_alt,
         ),
       ],
@@ -522,7 +526,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            AppConstants.noPhotosMessage,
+            context.l10n.photoNoPhotosMessage,
             style: AppTypography.bodyMedium.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -557,7 +561,10 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
           ),
           const SizedBox(width: AppSpacing.xs),
           Text(
-            '選択された写真: ${widget.controller.selectedCount}/${AppConstants.maxPhotosSelection}枚',
+            context.l10n.photoSelectionStatus(
+              widget.controller.selectedCount,
+              AppConstants.maxPhotosSelection,
+            ),
             style: AppTypography.withColor(
               AppTypography.labelMedium,
               widget.controller.selectedCount > 0

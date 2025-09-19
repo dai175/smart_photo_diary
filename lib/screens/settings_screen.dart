@@ -20,6 +20,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../localization/localization_extensions.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -94,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('設定'),
+        title: Text(context.l10n.settingsAppBarTitle),
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -125,14 +126,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       Text(
-                        '設定を読み込み中...',
+                        context.l10n.settingsLoadingTitle,
                         style: AppTypography.titleLarge.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'アプリの設定情報を取得しています',
+                        context.l10n.settingsLoadingSubtitle,
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -212,15 +213,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildLanguageSelector() {
-    final localeLabel = _getLocaleLabel(_selectedLocale);
-    final description = _selectedLocale == null
-        ? '端末の言語に自動追従します'
-        : _selectedLocale?.languageCode == 'ja'
-        ? 'アプリを日本語で表示します'
-        : 'Display the app in English';
+    final options = _buildLocaleChoices(context);
+    final currentChoice = options.firstWhere(
+      (choice) => choice.locale == _selectedLocale,
+      orElse: () => options.first,
+    );
 
     return Semantics(
-      label: '言語設定、現在: $localeLabel',
+      label:
+          '${context.l10n.settingsLanguageSectionTitle}、現在: ${currentChoice.title}',
       button: true,
       child: MicroInteractions.bounceOnTap(
         onTap: () {
@@ -249,21 +250,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '言語',
+                      context.l10n.settingsLanguageSectionTitle,
                       style: AppTypography.titleMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      localeLabel,
+                      currentChoice.title,
                       style: AppTypography.bodyMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      description,
+                      context.l10n.settingsLanguageSectionDescription,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      currentChoice.subtitle,
                       style: AppTypography.bodySmall.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -285,7 +293,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildThemeSelector() {
     return Semantics(
-      label: 'テーマ設定、現在: ${_getThemeModeLabel(_settingsService.themeMode)}',
+      label:
+          '${context.l10n.settingsThemeSectionTitle}、現在: ${_getThemeModeLabel(context, _settingsService.themeMode)}',
       button: true,
       child: MicroInteractions.bounceOnTap(
         onTap: () {
@@ -314,14 +323,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'テーマ',
+                      context.l10n.settingsThemeSectionTitle,
                       style: AppTypography.titleMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      _getThemeModeLabel(_settingsService.themeMode),
+                      _getThemeModeLabel(context, _settingsService.themeMode),
                       style: AppTypography.bodyMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -343,16 +352,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _showLanguageDialog() async {
     Locale? tempSelection = _selectedLocale;
-    final options = _localeChoices;
 
     final result = await showDialog<Locale?>(
       context: context,
       barrierDismissible: true,
       builder: (context) {
         return AlertDialog(
-          title: const Text('言語を選択'),
+          title: Text(context.l10n.settingsLanguageDialogTitle),
           content: StatefulBuilder(
             builder: (context, setStateDialog) {
+              final options = _buildLocaleChoices(context);
               return SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -378,11 +387,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('キャンセル'),
+              child: Text(context.l10n.commonCancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(tempSelection),
-              child: const Text('決定'),
+              child: Text(context.l10n.commonConfirm),
             ),
           ],
         );
@@ -419,38 +428,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
         });
         DialogUtils.showSimpleDialog(
           context,
-          '言語設定の保存に失敗しました。時間を置いて再度お試しください。',
+          context.l10n.settingsLanguageUpdateError,
         );
       }
     }
   }
 
-  String _getLocaleLabel(Locale? locale) {
-    if (locale == null) {
-      return 'システム設定に従う';
-    }
-    if (locale.languageCode == 'ja') {
-      return '日本語';
-    }
-    if (locale.languageCode == 'en') {
-      return 'English';
-    }
-    return locale.toLanguageTag();
+  List<_LocaleChoice> _buildLocaleChoices(BuildContext context) {
+    return [
+      _LocaleChoice(
+        locale: null,
+        title: context.l10n.settingsLanguageSystem,
+        subtitle: context.l10n.settingsLanguageSystemSubtitle,
+      ),
+      _LocaleChoice(
+        locale: const Locale('ja', 'JP'),
+        title: context.l10n.settingsLanguageJapanese,
+        subtitle: context.l10n.settingsLanguageJapaneseSubtitle,
+      ),
+      _LocaleChoice(
+        locale: const Locale('en', 'US'),
+        title: context.l10n.settingsLanguageEnglish,
+        subtitle: context.l10n.settingsLanguageEnglishSubtitle,
+      ),
+    ];
   }
-
-  List<_LocaleChoice> get _localeChoices => const [
-    _LocaleChoice(locale: null, title: 'システム設定に従う', subtitle: '端末の言語に合わせます'),
-    _LocaleChoice(
-      locale: Locale('ja', 'JP'),
-      title: '日本語',
-      subtitle: 'アプリを日本語で表示します',
-    ),
-    _LocaleChoice(
-      locale: Locale('en', 'US'),
-      title: 'English',
-      subtitle: 'Display the app in English',
-    ),
-  ];
 
   /// Phase 1.8.2.1: サブスクリプション状態表示
   Widget _buildSubscriptionStatus() {
@@ -1109,24 +1111,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  String _getThemeModeLabel(ThemeMode themeMode) {
+  String _getThemeModeLabel(BuildContext context, ThemeMode themeMode) {
     switch (themeMode) {
       case ThemeMode.light:
-        return 'ライトテーマ';
+        return context.l10n.settingsThemeLight;
       case ThemeMode.dark:
-        return 'ダークテーマ';
+        return context.l10n.settingsThemeDark;
       case ThemeMode.system:
-        return 'システムに従う';
+        return context.l10n.settingsThemeSystem;
     }
   }
 
   void _showThemeDialog() async {
     final selectedTheme = await DialogUtils.showRadioSelectionDialog<ThemeMode>(
       context,
-      'テーマ選択',
+      context.l10n.settingsThemeDialogTitle,
       ThemeMode.values,
       _settingsService.themeMode,
-      _getThemeModeLabel,
+      (mode) => _getThemeModeLabel(context, mode),
     );
 
     if (selectedTheme != null) {

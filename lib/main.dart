@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
-import 'constants/app_constants.dart';
 import 'models/diary_entry.dart';
 import 'models/subscription_status.dart';
 import 'models/writing_prompt.dart';
@@ -14,6 +13,7 @@ import 'services/settings_service.dart';
 import 'services/logging_service.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_theme.dart';
+import 'localization/localization_extensions.dart';
 import 'l10n/generated/app_localizations.dart';
 
 Future<void> main() async {
@@ -144,7 +144,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
-      title: AppConstants.appTitle,
+      onGenerateTitle: (context) => context.l10n.appTitle,
       themeMode: _themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

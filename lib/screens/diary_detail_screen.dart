@@ -6,7 +6,6 @@ import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/social_share_service_interface.dart';
 import '../core/service_registration.dart';
-import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -16,6 +15,8 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../core/service_locator.dart';
+import '../constants/app_constants.dart';
+import '../localization/localization_extensions.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -77,6 +78,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
   /// 日記エントリーを読み込む
   Future<void> _loadDiaryEntry() async {
+    final l10n = context.l10n;
     try {
       setState(() {
         _isLoading = true;
@@ -89,11 +91,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       // 日記エントリーを取得
       final entry = await diaryService.getDiaryEntry(widget.diaryId);
 
+      if (!mounted) return;
+
       if (entry == null) {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = AppConstants.diaryNotFoundMessage;
+          _errorMessage = l10n.diaryNotFoundMessage;
         });
         return;
       }
@@ -109,10 +113,11 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '${AppConstants.diaryLoadErrorMessage}: $e';
+        _errorMessage = '${l10n.diaryLoadErrorMessage}: $e';
       });
     }
   }
@@ -150,7 +155,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
         // 更新成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text(AppConstants.diaryUpdateSuccessMessage)),
+          SnackBar(content: Text(context.l10n.diaryUpdateSuccessMessage)),
         );
       }
     } catch (e) {
@@ -201,7 +206,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       if (mounted) {
         // 削除成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text(AppConstants.diaryDeleteSuccessMessage)),
+          SnackBar(content: Text(context.l10n.diaryDeleteSuccessMessage)),
         );
 
         // 前の画面に戻る（削除成功を示すフラグを返す）
@@ -652,7 +657,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       Text('日記が見つかりません', style: AppTypography.titleLarge),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        AppConstants.diaryNotFoundMessage,
+                        context.l10n.diaryNotFoundMessage,
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

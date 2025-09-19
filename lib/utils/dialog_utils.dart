@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
 import '../ui/components/custom_dialog.dart';
 import '../ui/design_system/app_spacing.dart';
+import '../localization/localization_extensions.dart';
 
 const double _radioDialogMaxWidth = 360;
 const double _radioTileOpacity = 0.12;
@@ -20,7 +20,7 @@ class DialogUtils {
           message: message,
           actions: [
             CustomDialogAction(
-              text: AppConstants.okButton,
+              text: context.l10n.commonOk,
               isPrimary: true,
               onPressed: () => Navigator.of(context).pop(),
             ),

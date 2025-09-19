@@ -1,3 +1,224 @@
 {
-  "@@locale": "en"
+  "@@locale": "en",
+  "appTitle": "Smart Photo Diary",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "navigationHome": "Home",
+  "@navigationHome": {
+    "description": "Bottom navigation: Home"
+  },
+  "navigationDiary": "Diary",
+  "@navigationDiary": {
+    "description": "Bottom navigation: Diary"
+  },
+  "navigationStatistics": "Statistics",
+  "@navigationStatistics": {
+    "description": "Bottom navigation: Statistics"
+  },
+  "navigationSettings": "Settings",
+  "@navigationSettings": {
+    "description": "Bottom navigation: Settings"
+  },
+  "homeNewPhotosTitle": "New photos",
+  "@homeNewPhotosTitle": {
+    "description": "Home screen section title for new photos"
+  },
+  "homeRecentDiariesTitle": "Recent diaries",
+  "@homeRecentDiariesTitle": {
+    "description": "Home screen section title for recent diaries"
+  },
+  "photoNoPhotosMessage": "No photos found",
+  "@photoNoPhotosMessage": {
+    "description": "Message shown when no photos are available"
+  },
+  "diaryNoEntriesMessage": "No saved diaries",
+  "@diaryNoEntriesMessage": {
+    "description": "Message shown when there are no diary entries"
+  },
+  "photoPermissionMessage": "Photo access permission is required",
+  "@photoPermissionMessage": {
+    "description": "Explanation shown when photo access is denied"
+  },
+  "photoRequestPermission": "Request permission",
+  "@photoRequestPermission": {
+    "description": "Button label to request photo access permission"
+  },
+  "photoSelectionLimitMessage": "You can select up to {limit} photos at a time",
+  "@photoSelectionLimitMessage": {
+    "description": "Message indicating the maximum number of photos that can be selected",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "photoUsedPhotoMessage": "This photo is already used in a diary",
+  "@photoUsedPhotoMessage": {
+    "description": "Message shown when a used photo is selected"
+  },
+  "photoUsedLabel": "Used",
+  "@photoUsedLabel": {
+    "description": "Label displayed on photos already used in a diary"
+  },
+  "photoSelectionStatus": "{selected} of {limit} photos selected",
+  "@photoSelectionStatus": {
+    "description": "Displays the number of selected photos",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonOk": "OK",
+  "@commonOk": {
+    "description": "OK button label"
+  },
+  "diaryNotFoundMessage": "Diary not found",
+  "@diaryNotFoundMessage": {
+    "description": "Error message when a diary entry cannot be found"
+  },
+  "diaryLoadErrorMessage": "Failed to load the diary",
+  "@diaryLoadErrorMessage": {
+    "description": "Error message shown when diary loading fails"
+  },
+  "diaryUpdateSuccessMessage": "Diary updated",
+  "@diaryUpdateSuccessMessage": {
+    "description": "Snack bar message when a diary is updated successfully"
+  },
+  "diaryDeleteSuccessMessage": "Diary deleted",
+  "@diaryDeleteSuccessMessage": {
+    "description": "Snack bar message when a diary is deleted successfully"
+  },
+  "homeLinkedDiaryNotFound": "No diary was found for this photo",
+  "@homeLinkedDiaryNotFound": {
+    "description": "Message shown when no diary entry matches a selected photo"
+  },
+  "homeDiaryLoadError": "An error occurred while loading the diary",
+  "@homeDiaryLoadError": {
+    "description": "Message shown when fetching a diary entry fails"
+  },
+  "homePermissionDialogTitle": "Allow photo access",
+  "@homePermissionDialogTitle": {
+    "description": "Dialog title prompting users to allow photo access"
+  },
+  "homePermissionDialogMessage": "Photo library access is required to create diary entries. Please enable photo access from the Settings app.",
+  "@homePermissionDialogMessage": {
+    "description": "Dialog body explaining why photo access is required"
+  },
+  "homeLimitedAccessTitle": "Select additional photos",
+  "@homeLimitedAccessTitle": {
+    "description": "Dialog title shown when only limited photo access is granted"
+  },
+  "homeLimitedAccessMessage": "Only the photos you selected are currently accessible. Would you like to pick more photos for your diary?",
+  "@homeLimitedAccessMessage": {
+    "description": "Dialog body shown when limited photo access is granted"
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Generic cancel button label"
+  },
+  "commonOpenSettings": "Open settings",
+  "@commonOpenSettings": {
+    "description": "Button label to open the system settings app"
+  },
+  "commonLater": "Later",
+  "@commonLater": {
+    "description": "Defer action button label"
+  },
+  "photoSelectAction": "Select photos",
+  "@photoSelectAction": {
+    "description": "Button label to pick additional photos"
+  },
+  "cameraCaptureSuccess": "Photo captured",
+  "@cameraCaptureSuccess": {
+    "description": "Snack bar message when camera capture succeeds"
+  },
+  "commonConfirm": "Confirm",
+  "@commonConfirm": {
+    "description": "Generic confirmation button label"
+  },
+  "settingsAppBarTitle": "Settings",
+  "@settingsAppBarTitle": {
+    "description": "App bar title for the settings screen"
+  },
+  "settingsLoadingTitle": "Loading settings...",
+  "@settingsLoadingTitle": {
+    "description": "Headline shown while settings are loading"
+  },
+  "settingsLoadingSubtitle": "Fetching your app preferences",
+  "@settingsLoadingSubtitle": {
+    "description": "Subtitle shown while settings are loading"
+  },
+  "settingsLanguageSectionTitle": "Language",
+  "@settingsLanguageSectionTitle": {
+    "description": "Title for the language section"
+  },
+  "settingsLanguageSectionDescription": "Switch the display language of the app",
+  "@settingsLanguageSectionDescription": {
+    "description": "Description for the language section"
+  },
+  "settingsLanguageDialogTitle": "Choose language",
+  "@settingsLanguageDialogTitle": {
+    "description": "Title for the language selection dialog"
+  },
+  "settingsLanguageSystem": "Use system language",
+  "@settingsLanguageSystem": {
+    "description": "Option to follow the device language"
+  },
+  "settingsLanguageSystemSubtitle": "Match the language set on your device",
+  "@settingsLanguageSystemSubtitle": {
+    "description": "Subtitle for the system language option"
+  },
+  "settingsLanguageJapanese": "日本語",
+  "@settingsLanguageJapanese": {
+    "description": "Japanese language option"
+  },
+  "settingsLanguageJapaneseSubtitle": "Display the app in Japanese",
+  "@settingsLanguageJapaneseSubtitle": {
+    "description": "Subtitle for the Japanese language option"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "English language option"
+  },
+  "settingsLanguageEnglishSubtitle": "Display the app in English",
+  "@settingsLanguageEnglishSubtitle": {
+    "description": "Subtitle for the English language option"
+  },
+  "settingsLanguageUpdateError": "Couldn't save your language preference. Please try again later.",
+  "@settingsLanguageUpdateError": {
+    "description": "Message shown when updating the language fails"
+  },
+  "cameraPermissionDialogTitle": "Camera access required",
+  "@cameraPermissionDialogTitle": {
+    "description": "Title for the camera permission dialog"
+  },
+  "cameraPermissionDialogMessage": "Please allow camera access to take new photos. You can enable the permission from the Settings app.",
+  "@cameraPermissionDialogMessage": {
+    "description": "Body text for the camera permission dialog"
+  },
+  "settingsThemeSectionTitle": "Theme",
+  "@settingsThemeSectionTitle": {
+    "description": "Title for the theme section"
+  },
+  "settingsThemeDialogTitle": "Choose theme",
+  "@settingsThemeDialogTitle": {
+    "description": "Title for the theme selection dialog"
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Label for light theme"
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Label for dark theme"
+  },
+  "settingsThemeSystem": "Follow system",
+  "@settingsThemeSystem": {
+    "description": "Label for system theme"
+  }
 }
