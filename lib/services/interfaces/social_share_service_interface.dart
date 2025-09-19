@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:ui';
+
 import 'package:photo_manager/photo_manager.dart';
 import '../../models/diary_entry.dart';
 import '../../core/result/result.dart';
@@ -16,6 +18,7 @@ abstract class ISocialShareService {
     required DiaryEntry diary,
     required ShareFormat format,
     List<AssetEntity>? photos,
+    Rect? shareOrigin,
   });
 
   /// X（旧Twitter）に共有する（画像とテキストを別々に渡す）
@@ -24,6 +27,7 @@ abstract class ISocialShareService {
   Future<Result<void>> shareToX({
     required DiaryEntry diary,
     List<AssetEntity>? photos,
+    Rect? shareOrigin,
   });
 
   /// 共有用の画像を生成する

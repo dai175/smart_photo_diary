@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,6 +15,7 @@ import '../../interfaces/social_share_service_interface.dart';
 /// Instagram系（埋め込み画像を生成して共有）チャネル実装
 class InstagramShareChannel {
   static const int _shareTimeoutSeconds = 10;
+  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
 
   LoggingService get _logger => serviceLocator.get<LoggingService>();
   DiaryImageGenerator get _imageGenerator => DiaryImageGenerator.getInstance();
@@ -22,6 +24,7 @@ class InstagramShareChannel {
     required DiaryEntry diary,
     required ShareFormat format,
     List<AssetEntity>? photos,
+    Rect? shareOrigin,
   }) async {
     try {
       _logger.info(
@@ -41,9 +44,11 @@ class InstagramShareChannel {
 
       final File imageFile = imageResult.value;
 
-      await Share.shareXFiles([
-        XFile(imageFile.path),
-      ], text: '${diary.title}\n\n#SmartPhotoDiary で生成').timeout(
+      await Share.shareXFiles(
+        [XFile(imageFile.path)],
+        text: '${diary.title}\n\n#SmartPhotoDiary で生成',
+        sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
+      ).timeout(
         const Duration(seconds: _shareTimeoutSeconds),
         onTimeout: () => throw Exception('共有がタイムアウトしました'),
       );

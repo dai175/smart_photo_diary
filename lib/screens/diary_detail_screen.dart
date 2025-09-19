@@ -285,6 +285,15 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     }
   }
 
+  Rect _resolveShareOrigin() {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox != null && renderBox.hasSize) {
+      final topLeft = renderBox.localToGlobal(Offset.zero);
+      return topLeft & renderBox.size;
+    }
+    return const Rect.fromLTWH(0, 0, 1, 1);
+  }
+
   /// 共有オプションのウィジェットを構築
   Widget _buildShareOption({
     required ShareFormat format,
@@ -356,6 +365,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final shareOrigin = _resolveShareOrigin();
 
     try {
       // ローディングダイアログを表示
@@ -380,7 +390,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       );
 
       final share = serviceLocator.get<ISocialShareService>();
-      final result = await share.shareToX(diary: diary);
+      final result = await share.shareToX(
+        diary: diary,
+        shareOrigin: shareOrigin,
+      );
 
       // ローディングダイアログを閉じる
       if (mounted) navigator.pop();
@@ -409,6 +422,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     if (_diaryEntry == null) return;
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final shareOrigin = _resolveShareOrigin();
 
     try {
       // ローディング表示
@@ -440,6 +454,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         diary: _diaryEntry!,
         format: format,
         photos: _photoAssets,
+        shareOrigin: shareOrigin,
       );
 
       // ローディングダイアログを閉じる

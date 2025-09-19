@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -12,12 +14,14 @@ import '../../../utils/x_share_text_builder.dart';
 /// X（旧Twitter）共有チャネル実装
 class XShareChannel {
   static const int _shareTimeoutSeconds = 10;
+  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
 
   LoggingService get _logger => serviceLocator.get<LoggingService>();
 
   Future<Result<void>> share({
     required DiaryEntry diary,
     List<AssetEntity>? photos,
+    Rect? shareOrigin,
   }) async {
     try {
       _logger.info(
@@ -44,7 +48,11 @@ class XShareChannel {
         appName: AppConstants.appTitle,
       );
 
-      await Share.shareXFiles(files, text: text).timeout(
+      await Share.shareXFiles(
+        files,
+        text: text,
+        sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
+      ).timeout(
         const Duration(seconds: _shareTimeoutSeconds),
         onTimeout: () => throw Exception('共有がタイムアウトしました'),
       );

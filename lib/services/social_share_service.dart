@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../models/diary_entry.dart';
@@ -38,6 +39,7 @@ class SocialShareService implements ISocialShareService {
     required DiaryEntry diary,
     required ShareFormat format,
     List<AssetEntity>? photos,
+    Rect? shareOrigin,
   }) async {
     try {
       _logger.info(
@@ -51,6 +53,7 @@ class SocialShareService implements ISocialShareService {
         diary: diary,
         format: format,
         photos: photos,
+        shareOrigin: shareOrigin,
       );
       return result;
     } catch (e) {
@@ -69,8 +72,13 @@ class SocialShareService implements ISocialShareService {
   Future<Result<void>> shareToX({
     required DiaryEntry diary,
     List<AssetEntity>? photos,
+    Rect? shareOrigin,
   }) async {
-    return _xChannel.share(diary: diary, photos: photos);
+    return _xChannel.share(
+      diary: diary,
+      photos: photos,
+      shareOrigin: shareOrigin,
+    );
   }
 
   @override
