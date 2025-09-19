@@ -1,10 +1,14 @@
 # 多言語対応チェックリスト
 
 ## フェーズ1: ローカリゼーション基盤整備
-- [ ] `l10n.yaml` を作成し `arb-dir`, `template-arb-file`, `output-localization-file` を設定する
-- [ ] `lib/l10n/app_ja.arb` と `lib/l10n/app_en.arb` を初期化し、`@@locale` を指定する
-- [ ] `.gitignore` に `lib/l10n/generated/` を追加し、自動生成ファイルを除外する
-- [ ] `flutter gen-l10n` を CI/ローカル手順に組み込み生成手順をドキュメント化する
+- [x] `l10n.yaml` を作成し `arb-dir`, `template-arb-file`, `output-localization-file` を設定する
+- [x] `lib/l10n/app_ja.arb` と `lib/l10n/app_en.arb` を初期化し、`@@locale` を指定する
+- [x] `.gitignore` に `lib/l10n/generated/` を追加し、自動生成ファイルを除外する
+- [x] `flutter gen-l10n` を CI/ローカル手順に組み込み生成手順をドキュメント化する (`fvm flutter gen-l10n` をベースコマンドとして追記済み)
+
+### フェーズ1手順メモ
+- ローカル生成: `fvm flutter gen-l10n --arb-dir=lib/l10n --output-dir=lib/l10n/generated`
+- CI 反映: コマンドをビルド前ステップへ追加し、生成物をコミット対象外に設定
 
 ## フェーズ2: アプリロケール管理
 - [ ] `SettingsService` に言語設定キーを追加し、永続化/取得メソッドを実装する
