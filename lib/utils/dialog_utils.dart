@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../ui/components/custom_dialog.dart';
+import '../ui/design_system/app_spacing.dart';
+
+const double _radioDialogMaxWidth = 360;
+const double _radioTileOpacity = 0.12;
 
 /// ダイアログ表示のユーティリティクラス
 class DialogUtils {
@@ -137,23 +141,60 @@ class DialogUtils {
         T? selectedValue = currentValue;
         return StatefulBuilder(
           builder: (context, setState) {
+            final theme = Theme.of(context);
             return CustomDialog(
               title: title,
+              maxWidth: _radioDialogMaxWidth,
+              contentPadding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                AppSpacing.sm,
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: options.map((option) {
-                  return RadioListTile<T>(
-                    title: Text(getLabel(option)),
-                    value: option,
-                    groupValue: selectedValue,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedValue = value;
-                      });
-                      Navigator.pop(context, value);
-                    },
+                children: List.generate(options.length, (index) {
+                  final option = options[index];
+                  final isSelected = option == selectedValue;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == options.length - 1 ? 0 : AppSpacing.xs,
+                    ),
+                    child: RadioListTile<T>(
+                      title: Text(
+                        getLabel(option),
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      value: option,
+                      groupValue: selectedValue,
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadiusSm,
+                        ),
+                      ),
+                      tileColor: theme.colorScheme.surfaceVariant.withValues(
+                        alpha: _radioTileOpacity,
+                      ),
+                      selectedTileColor: theme.colorScheme.primary.withValues(
+                        alpha: _radioTileOpacity,
+                      ),
+                      selected: isSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedValue = value;
+                        });
+                        Navigator.pop(context, value);
+                      },
+                    ),
                   );
-                }).toList(),
+                }),
               ),
               actions: [
                 CustomDialogAction(
