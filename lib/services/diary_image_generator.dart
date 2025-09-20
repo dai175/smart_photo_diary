@@ -9,6 +9,8 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/logging_service.dart';
 import '../core/service_locator.dart';
+import '../core/service_registration.dart';
+import '../services/settings_service.dart';
 import 'interfaces/social_share_service_interface.dart';
 
 /// 日記画像生成専用クラス
@@ -588,24 +590,66 @@ class DiaryImageGenerator {
     return (_baseBrandFontSize * scale).round().toDouble();
   }
 
-  /// 日付をフォーマット
+  /// 日付をフォーマット（多言語化対応）
   String _formatDate(DateTime date) {
-    final months = [
-      '1月',
-      '2月',
-      '3月',
-      '4月',
-      '5月',
-      '6月',
-      '7月',
-      '8月',
-      '9月',
-      '10月',
-      '11月',
-      '12月',
-    ];
+    try {
+      // SettingsServiceからロケールを取得
+      final settingsService = ServiceRegistration.get<SettingsService>();
+      final locale = settingsService.locale;
 
-    return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
+      if (locale?.languageCode == 'ja' || locale == null) {
+        // 日本語フォーマット
+        final months = [
+          '1月',
+          '2月',
+          '3月',
+          '4月',
+          '5月',
+          '6月',
+          '7月',
+          '8月',
+          '9月',
+          '10月',
+          '11月',
+          '12月',
+        ];
+        return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
+      } else {
+        // 英語フォーマット
+        final months = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ];
+        return '${months[date.month - 1]} ${date.day}, ${date.year}';
+      }
+    } catch (e) {
+      // フォールバック：設定取得に失敗した場合は日本語
+      final months = [
+        '1月',
+        '2月',
+        '3月',
+        '4月',
+        '5月',
+        '6月',
+        '7月',
+        '8月',
+        '9月',
+        '10月',
+        '11月',
+        '12月',
+      ];
+      return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
+    }
   }
 }
 
