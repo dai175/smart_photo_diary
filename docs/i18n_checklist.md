@@ -47,13 +47,13 @@
 - [x] ロケール別の曜日・月名が適切に表示されるか確認する
 
 ## フェーズ7: テストとQA
-- [ ] 主要画面の Widget テストにロケール変更シナリオを追加する
-- [ ] `flutter analyze` / `flutter test` / `flutter gen-l10n` を含むQA手順を更新する
+- [x] 主要画面の Widget テストにロケール変更シナリオを追加する（`test/widget/locale_switch_widget_test.dart`）
+- [x] `flutter analyze` / `flutter test` / `flutter gen-l10n` を含むQA手順を更新する（`docs/ci_cd_guide.md` 追記済み）
 - [ ] 英語・日本語双方のスクリーンショットを取得しUI崩れを確認する
 
 ## ドキュメント・共有
-- [ ] ローカライズ作業手順と命名規約を `docs/` 配下にまとめる
-- [ ] 翻訳リクエスト用テンプレート（翻訳未完了キー一覧など）を整備する
+- [x] ローカライズ作業手順と命名規約を `docs/` 配下にまとめる（`docs/localization_guide.md`）
+- [x] 翻訳リクエスト用テンプレート（翻訳未完了キー一覧など）を整備する（`docs/translation_request_template.md`）
 
 ## 画面別翻訳差し替え
 - [ ] `OnboardingScreen` のテキストをローカライズキーへ置換

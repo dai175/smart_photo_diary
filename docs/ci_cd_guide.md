@@ -92,6 +92,16 @@ git push origin main
 # → ci.yml が再度実行（mainブランチ用完全ビルド検証）
 ```
 
+### ローカライズQAチェック
+```bash
+# ローカライズ変更時に必ず実施する手順
+fvm flutter gen-l10n      # ARB更新内容を反映
+fvm flutter analyze       # 未使用キーや型不一致の検知
+fvm flutter test          # ロケール切替テストを含む全体テスト
+```
+
+> **Tip**: ロケール切替の自動テストは `test/widget/locale_switch_widget_test.dart` をベースに主要画面へ拡張してください。
+
 ### リリースフロー
 ```bash
 # 1. バージョンタグ作成・プッシュ
