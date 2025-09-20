@@ -1260,5 +1260,31 @@
         "type": "int"
       }
     }
+  },
+  "subscriptionUsageWarningRemaining": "You have {remaining} AI generations remaining.",
+  "@subscriptionUsageWarningRemaining": {
+    "description": "Warning message shown when AI generation usage is near limit",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUsageWarningLimitReached": "AI generation limit reached.",
+  "@subscriptionUsageWarningLimitReached": {
+    "description": "Warning message shown when AI generation limit is reached"
+  },
+  "subscriptionUpgradeRecommendationLimit": "Upgrade to Premium to use up to {limit} generations per month.",
+  "@subscriptionUpgradeRecommendationLimit": {
+    "description": "Upgrade recommendation message with specific limit",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUpgradeRecommendationGeneral": "For more AI generations, we recommend the Premium plan.",
+  "@subscriptionUpgradeRecommendationGeneral": {
+    "description": "General upgrade recommendation message"
   }
 }

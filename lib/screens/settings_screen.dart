@@ -463,6 +463,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ];
   }
 
+  /// 多言語化されたSubscriptionDisplayDataを取得
+  SubscriptionDisplayDataV2 _getLocalizedDisplayData() {
+    return _subscriptionInfo!.getLocalizedDisplayData(
+      usageFormatter: (used, limit) =>
+          context.l10n.usageStatusUsageValue(used, limit),
+      remainingFormatter: (remaining) =>
+          context.l10n.usageStatusRemainingValue(remaining),
+      limitReachedFormatter: () =>
+          context.l10n.subscriptionUsageWarningLimitReached,
+      warningRemainingFormatter: (remaining) =>
+          context.l10n.subscriptionUsageWarningRemaining(remaining),
+      upgradeRecommendationLimitFormatter: (limit) =>
+          context.l10n.subscriptionUpgradeRecommendationLimit(limit),
+      upgradeRecommendationGeneralFormatter: () =>
+          context.l10n.subscriptionUpgradeRecommendationGeneral,
+    );
+  }
+
   /// Phase 1.8.2.1: サブスクリプション状態表示
   Widget _buildSubscriptionStatus() {
     if (_subscriptionInfo == null) {
@@ -595,7 +613,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 _buildSubscriptionItem(
                   context.l10n.settingsSubscriptionUsageLabel,
-                  _subscriptionInfo!.displayData.usageText,
+                  _getLocalizedDisplayData().usageText,
                   _subscriptionInfo!.displayData.isNearLimit
                       ? AppColors.warning
                       : AppColors.primary,
@@ -603,7 +621,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: AppSpacing.md),
                 _buildSubscriptionItem(
                   context.l10n.settingsSubscriptionRemainingLabel,
-                  _subscriptionInfo!.displayData.remainingText,
+                  _getLocalizedDisplayData().remainingText,
                   _subscriptionInfo!.usageStats.remainingCount > 0
                       ? AppColors.success
                       : AppColors.error,
@@ -625,18 +643,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
                 // 警告メッセージの表示
-                if (_subscriptionInfo!.displayData.warningMessage != null) ...[
+                if (_getLocalizedDisplayData().warningMessage != null) ...[
                   const SizedBox(height: AppSpacing.lg),
                   _buildWarningMessage(
-                    _subscriptionInfo!.displayData.warningMessage!,
+                    _getLocalizedDisplayData().warningMessage!,
                   ),
                 ],
                 // 推奨メッセージの表示
-                if (_subscriptionInfo!.displayData.recommendationMessage !=
+                if (_getLocalizedDisplayData().recommendationMessage !=
                     null) ...[
                   const SizedBox(height: AppSpacing.md),
                   _buildRecommendationMessage(
-                    _subscriptionInfo!.displayData.recommendationMessage!,
+                    _getLocalizedDisplayData().recommendationMessage!,
                   ),
                 ],
                 if (!_subscriptionInfo!.isPremium) ...[

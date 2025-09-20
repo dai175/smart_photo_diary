@@ -1260,5 +1260,31 @@
         "type": "int"
       }
     }
+  },
+  "subscriptionUsageWarningRemaining": "AI生成の残り回数が{remaining}回です",
+  "@subscriptionUsageWarningRemaining": {
+    "description": "AI生成使用量が制限に近づいた時の警告メッセージ",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUsageWarningLimitReached": "AI生成の制限に達しました",
+  "@subscriptionUsageWarningLimitReached": {
+    "description": "AI生成制限に達した時の警告メッセージ"
+  },
+  "subscriptionUpgradeRecommendationLimit": "Premiumプランにアップグレードすると月間{limit}回まで利用できます",
+  "@subscriptionUpgradeRecommendationLimit": {
+    "description": "具体的な制限回数を示すアップグレード推奨メッセージ",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUpgradeRecommendationGeneral": "より多くAI生成を利用される場合はPremiumプランがおすすめです",
+  "@subscriptionUpgradeRecommendationGeneral": {
+    "description": "一般的なアップグレード推奨メッセージ"
   }
 }
