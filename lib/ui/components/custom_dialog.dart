@@ -174,23 +174,22 @@ class CustomDialog extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.lg,
       ),
-      child: Row(
-        mainAxisAlignment: actions!.length == 1
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.spaceEvenly,
-        children: actions!
-            .map(
-              (action) => Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: actions!.length > 1 ? AppSpacing.xs : 0,
-                  ),
-                  child: action,
-                ),
-              ),
-            )
-            .toList(),
-      ),
+      child: actions!.length == 1
+          ? actions!.first
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: actions!
+                  .map(
+                    (action) => Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.only(
+                        bottom: action == actions!.last ? 0 : AppSpacing.sm,
+                      ),
+                      child: action,
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 }
