@@ -350,7 +350,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                _controller.getEmptyStateMessage(),
+                _controller.getLocalizedEmptyStateMessage(
+                  noDiariesMessage: () => context.l10n.diaryNoEntriesMessage,
+                  noSearchResultsMessage: (query) => context.l10n.diaryNoSearchResults(query),
+                  noFilterResultsMessage: () => context.l10n.diaryNoFilterResults,
+                ),
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),

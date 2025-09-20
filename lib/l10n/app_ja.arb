@@ -36,6 +36,20 @@
   "@diaryNoEntriesMessage": {
     "description": "日記が存在しない場合のメッセージ"
   },
+  "diaryNoSearchResults": "「{query}」に一致する日記がありません",
+  "@diaryNoSearchResults": {
+    "description": "検索結果が空の場合のメッセージ",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "検索クエリ"
+      }
+    }
+  },
+  "diaryNoFilterResults": "フィルタ条件に一致する日記がありません",
+  "@diaryNoFilterResults": {
+    "description": "フィルタ結果が空の場合のメッセージ"
+  },
   "photoPermissionMessage": "写真へのアクセス権限が必要です",
   "@photoPermissionMessage": {
     "description": "写真アクセス権限が未許可の場合の説明"

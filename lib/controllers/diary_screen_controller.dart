@@ -234,4 +234,19 @@ class DiaryScreenController extends BaseErrorController {
       return '日記がありません';
     }
   }
+
+  // 空の状態メッセージを取得（多言語化対応）
+  String getLocalizedEmptyStateMessage({
+    required String Function() noDiariesMessage,
+    required String Function(String query) noSearchResultsMessage,
+    required String Function() noFilterResultsMessage,
+  }) {
+    if (_isSearching) {
+      return noSearchResultsMessage(_searchQuery);
+    } else if (_currentFilter.isActive) {
+      return noFilterResultsMessage();
+    } else {
+      return noDiariesMessage();
+    }
+  }
 }

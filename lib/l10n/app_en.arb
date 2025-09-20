@@ -36,6 +36,20 @@
   "@diaryNoEntriesMessage": {
     "description": "Message shown when there are no diary entries"
   },
+  "diaryNoSearchResults": "No diaries found matching \"{query}\"",
+  "@diaryNoSearchResults": {
+    "description": "Message shown when search returns no results",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "The search query that returned no results"
+      }
+    }
+  },
+  "diaryNoFilterResults": "No diaries match the filter criteria",
+  "@diaryNoFilterResults": {
+    "description": "Message shown when filter returns no results"
+  },
   "photoPermissionMessage": "Photo access permission is required",
   "@photoPermissionMessage": {
     "description": "Explanation shown when photo access is denied"
