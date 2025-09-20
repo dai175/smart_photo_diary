@@ -1496,8 +1496,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSubscriptionPlanDetail(
             context.l10n.settingsPremiumMonthlyTitle,
             context.l10n.pricingPerMonthShort(
-              context.l10n.formatCurrency(
-                SubscriptionConstants.premiumMonthlyPrice,
+              SubscriptionConstants.formatPriceForPlan(
+                SubscriptionConstants.premiumMonthlyPlanId,
+                context.l10n.localeName,
               ),
             ),
             context.l10n.settingsPremiumPlanFeatures,
@@ -1508,8 +1509,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSubscriptionPlanDetail(
             context.l10n.settingsPremiumYearlyTitle,
             context.l10n.pricingPerYearShort(
-              context.l10n.formatCurrency(
-                SubscriptionConstants.premiumYearlyPrice,
+              SubscriptionConstants.formatPriceForPlan(
+                SubscriptionConstants.premiumYearlyPlanId,
+                context.l10n.localeName,
               ),
             ),
             context.l10n.settingsPremiumPlanFeatures,

@@ -14,6 +14,7 @@ import '../ui/components/custom_card.dart';
 import '../ui/components/custom_dialog.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../localization/localization_extensions.dart';
+import '../constants/subscription_constants.dart';
 
 /// アップグレードダイアログのユーティリティクラス
 ///
@@ -181,10 +182,16 @@ class UpgradeDialogUtils {
                 Text(
                   plan.isMonthly
                       ? dialogContext.l10n.pricingPerMonthShort(
-                          dialogContext.l10n.formatCurrency(plan.price),
+                          SubscriptionConstants.formatPriceForPlan(
+                            plan.id,
+                            dialogContext.l10n.localeName,
+                          ),
                         )
                       : dialogContext.l10n.pricingPerYearShort(
-                          dialogContext.l10n.formatCurrency(plan.price),
+                          SubscriptionConstants.formatPriceForPlan(
+                            plan.id,
+                            dialogContext.l10n.localeName,
+                          ),
                         ),
                   style: AppTypography.titleMedium.copyWith(
                     color: AppColors.primary,
