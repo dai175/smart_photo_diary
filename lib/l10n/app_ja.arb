@@ -743,6 +743,131 @@
   "@diaryPreviewCurrentPromptTitle": {
     "description": "日記プレビュー画面で現在選択中のプロンプトを示すタイトル"
   },
+  "diaryPreviewNoPhotosError": "選択された写真がありません。",
+  "@diaryPreviewNoPhotosError": {
+    "description": "日記生成のための写真が未選択の場合に表示するエラーメッセージ"
+  },
+  "diaryPreviewGenerationError": "日記の生成中にエラーが発生しました。\\n時間を空けてもう一度お試しください。",
+  "@diaryPreviewGenerationError": {
+    "description": "日記生成に失敗した際に表示するメッセージ"
+  },
+  "diaryPreviewSaveSuccess": "日記を保存しました",
+  "@diaryPreviewSaveSuccess": {
+    "description": "日記保存成功時のスナックバー表示"
+  },
+  "diaryPreviewAutoSaveError": "日記の保存に失敗しました。\\n時間を空けてもう一度お試しください。",
+  "@diaryPreviewAutoSaveError": {
+    "description": "日記保存に失敗した際に表示するエラーメッセージ"
+  },
+  "diaryPreviewDateLabel": "日記の日付",
+  "@diaryPreviewDateLabel": {
+    "description": "日記プレビュー画面の日付欄のラベル"
+  },
+  "diaryPreviewSelectedPhotos": "選択された写真 ({count}枚)",
+  "@diaryPreviewSelectedPhotos": {
+    "description": "選択中の写真枚数を表示するヘッダー",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewAnalyzingPhotos": "写真を分析中...",
+  "@diaryPreviewAnalyzingPhotos": {
+    "description": "写真分析中に表示するステータスメッセージ"
+  },
+  "diaryPreviewAnalyzingProgress": "{current}/{total}枚完了",
+  "@diaryPreviewAnalyzingProgress": {
+    "description": "分析済み枚数を表示するメッセージ",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewPromptTag": "プロンプト使用",
+  "@diaryPreviewPromptTag": {
+    "description": "プロンプト利用時に表示するタグ"
+  },
+  "diaryPreviewTitleLabel": "タイトル",
+  "@diaryPreviewTitleLabel": {
+    "description": "日記タイトル入力欄のラベル"
+  },
+  "diaryPreviewTitleHint": "日記のタイトルを入力",
+  "@diaryPreviewTitleHint": {
+    "description": "日記タイトル入力欄のヒント"
+  },
+  "diaryPreviewContentLabel": "本文",
+  "@diaryPreviewContentLabel": {
+    "description": "日記本文入力欄のラベル"
+  },
+  "diaryPreviewContentHint": "日記の内容を編集できます",
+  "@diaryPreviewContentHint": {
+    "description": "日記本文入力欄のヒント"
+  },
+  "diaryPreviewSaveButton": "日記を保存",
+  "@diaryPreviewSaveButton": {
+    "description": "日記プレビュー画面の保存ボタンラベル"
+  },
+  "diaryPreviewUsageLimitTitle": "AI生成の制限に達しました",
+  "@diaryPreviewUsageLimitTitle": {
+    "description": "AI月間制限到達時のフォールバックダイアログタイトル"
+  },
+  "diaryPreviewUsageLimitMessage": "AI生成の月間制限に達したため、次回のリセットまで新しい日記を生成できません。",
+  "@diaryPreviewUsageLimitMessage": {
+    "description": "AI月間制限到達時のフォールバックダイアログ本文"
+  },
+  "diaryPreviewAppBarTitle": "日記プレビュー",
+  "@diaryPreviewAppBarTitle": {
+    "description": "日記プレビュー画面のアプリバータイトル"
+  },
+  "diaryPreviewRegenerateWithoutPromptTooltip": "プロンプトなしで再生成",
+  "@diaryPreviewRegenerateWithoutPromptTooltip": {
+    "description": "プロンプトを解除して再生成するボタンのツールチップ"
+  },
+  "diaryPreviewInitializingPromptsTitle": "プロンプトサービスを初期化中...",
+  "@diaryPreviewInitializingPromptsTitle": {
+    "description": "プロンプトサービス初期化時に表示するタイトル"
+  },
+  "diaryPreviewInitializingPromptsDescription": "プロンプト機能の準備をしています",
+  "@diaryPreviewInitializingPromptsDescription": {
+    "description": "プロンプトサービス初期化時に表示する説明文"
+  },
+  "diaryPreviewSavingDiaryTitle": "日記を保存中...",
+  "@diaryPreviewSavingDiaryTitle": {
+    "description": "日記保存中に表示するタイトル"
+  },
+  "diaryPreviewSavingDiaryDescription": "生成された日記を保存しています",
+  "@diaryPreviewSavingDiaryDescription": {
+    "description": "日記保存中に表示する説明文"
+  },
+  "diaryPreviewGeneratingDiaryTitle": "写真から日記を生成中...",
+  "@diaryPreviewGeneratingDiaryTitle": {
+    "description": "日記生成中に表示するタイトル"
+  },
+  "diaryPreviewGeneratingDiaryDescription": "AIがあなたの写真を分析しています",
+  "@diaryPreviewGeneratingDiaryDescription": {
+    "description": "日記生成中に表示する説明文"
+  },
+  "diaryPreviewContentSectionTitle": "日記の内容",
+  "@diaryPreviewContentSectionTitle": {
+    "description": "日記本文ブロックの見出し"
+  },
+  "diaryPreviewDiscardDialogTitle": "日記を破棄しますか？",
+  "@diaryPreviewDiscardDialogTitle": {
+    "description": "日記を破棄する際の確認ダイアログタイトル"
+  },
+  "diaryPreviewDiscardDialogMessage": "AI生成回数は既に消費されています。",
+  "@diaryPreviewDiscardDialogMessage": {
+    "description": "日記破棄時の注意文"
+  },
+  "diaryPreviewDiscardDialogConfirm": "破棄して戻る",
+  "@diaryPreviewDiscardDialogConfirm": {
+    "description": "日記破棄を確定するボタンラベル"
+  },
   "diaryCardUntitled": "無題",
   "@diaryCardUntitled": {
     "description": "タイトル未設定時のフォールバック"

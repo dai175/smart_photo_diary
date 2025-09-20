@@ -743,6 +743,131 @@
   "@diaryPreviewCurrentPromptTitle": {
     "description": "Header shown in diary preview for the prompt currently in use"
   },
+  "diaryPreviewNoPhotosError": "No photos were selected.",
+  "@diaryPreviewNoPhotosError": {
+    "description": "Error message shown when no photos are selected for diary generation"
+  },
+  "diaryPreviewGenerationError": "We ran into an issue while generating your diary.\\nPlease try again in a moment.",
+  "@diaryPreviewGenerationError": {
+    "description": "Message shown when diary generation fails"
+  },
+  "diaryPreviewSaveSuccess": "Diary saved",
+  "@diaryPreviewSaveSuccess": {
+    "description": "Snack bar message shown after a diary is saved successfully"
+  },
+  "diaryPreviewAutoSaveError": "We couldn't save the diary.\\nPlease try again later.",
+  "@diaryPreviewAutoSaveError": {
+    "description": "Error message shown when diary saving fails"
+  },
+  "diaryPreviewDateLabel": "Diary date",
+  "@diaryPreviewDateLabel": {
+    "description": "Label for the diary date section in the preview screen"
+  },
+  "diaryPreviewSelectedPhotos": "Selected photos ({count})",
+  "@diaryPreviewSelectedPhotos": {
+    "description": "Header showing how many photos are selected for the diary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewAnalyzingPhotos": "Analyzing photos...",
+  "@diaryPreviewAnalyzingPhotos": {
+    "description": "Status text shown while photos are being analyzed"
+  },
+  "diaryPreviewAnalyzingProgress": "Processed {current} of {total} photos",
+  "@diaryPreviewAnalyzingProgress": {
+    "description": "Displays the current and total number of photos processed during analysis",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewPromptTag": "Prompt in use",
+  "@diaryPreviewPromptTag": {
+    "description": "Label shown on the diary preview when a prompt was used"
+  },
+  "diaryPreviewTitleLabel": "Title",
+  "@diaryPreviewTitleLabel": {
+    "description": "Label for the diary title text field"
+  },
+  "diaryPreviewTitleHint": "Enter a diary title",
+  "@diaryPreviewTitleHint": {
+    "description": "Hint text for the diary title field"
+  },
+  "diaryPreviewContentLabel": "Body",
+  "@diaryPreviewContentLabel": {
+    "description": "Label for the diary content text field"
+  },
+  "diaryPreviewContentHint": "You can edit the diary content.",
+  "@diaryPreviewContentHint": {
+    "description": "Hint text for the diary content field"
+  },
+  "diaryPreviewSaveButton": "Save diary",
+  "@diaryPreviewSaveButton": {
+    "description": "Label for the save diary button on the preview screen"
+  },
+  "diaryPreviewUsageLimitTitle": "AI generation limit reached",
+  "@diaryPreviewUsageLimitTitle": {
+    "description": "Fallback dialog title shown when the AI monthly limit is reached"
+  },
+  "diaryPreviewUsageLimitMessage": "You've reached the monthly AI generation limit. Please try again after the cycle resets or upgrade your plan.",
+  "@diaryPreviewUsageLimitMessage": {
+    "description": "Fallback dialog message shown when the AI monthly limit is reached"
+  },
+  "diaryPreviewAppBarTitle": "Diary preview",
+  "@diaryPreviewAppBarTitle": {
+    "description": "Title shown in the diary preview app bar"
+  },
+  "diaryPreviewRegenerateWithoutPromptTooltip": "Regenerate without prompt",
+  "@diaryPreviewRegenerateWithoutPromptTooltip": {
+    "description": "Tooltip for the regenerate button when clearing the prompt"
+  },
+  "diaryPreviewInitializingPromptsTitle": "Preparing prompt services...",
+  "@diaryPreviewInitializingPromptsTitle": {
+    "description": "Title shown while prompt services are initializing"
+  },
+  "diaryPreviewInitializingPromptsDescription": "Setting up prompts for your diary",
+  "@diaryPreviewInitializingPromptsDescription": {
+    "description": "Description shown while prompt services are initializing"
+  },
+  "diaryPreviewSavingDiaryTitle": "Saving diary...",
+  "@diaryPreviewSavingDiaryTitle": {
+    "description": "Title shown while the diary is being saved"
+  },
+  "diaryPreviewSavingDiaryDescription": "Storing the generated diary entry",
+  "@diaryPreviewSavingDiaryDescription": {
+    "description": "Description shown while the diary is being saved"
+  },
+  "diaryPreviewGeneratingDiaryTitle": "Creating your diary...",
+  "@diaryPreviewGeneratingDiaryTitle": {
+    "description": "Title shown while the AI is generating the diary"
+  },
+  "diaryPreviewGeneratingDiaryDescription": "AI is analyzing your photos",
+  "@diaryPreviewGeneratingDiaryDescription": {
+    "description": "Description shown while the AI is generating the diary"
+  },
+  "diaryPreviewContentSectionTitle": "Diary content",
+  "@diaryPreviewContentSectionTitle": {
+    "description": "Headline shown above the diary content fields"
+  },
+  "diaryPreviewDiscardDialogTitle": "Discard this diary?",
+  "@diaryPreviewDiscardDialogTitle": {
+    "description": "Confirmation dialog title shown when leaving the preview"
+  },
+  "diaryPreviewDiscardDialogMessage": "An AI generation credit has already been used.",
+  "@diaryPreviewDiscardDialogMessage": {
+    "description": "Confirmation dialog message explaining the consequence of discarding"
+  },
+  "diaryPreviewDiscardDialogConfirm": "Discard and go back",
+  "@diaryPreviewDiscardDialogConfirm": {
+    "description": "Confirmation button label for discarding the diary"
+  },
   "diaryCardUntitled": "Untitled",
   "@diaryCardUntitled": {
     "description": "Fallback title when a diary entry has no title"
