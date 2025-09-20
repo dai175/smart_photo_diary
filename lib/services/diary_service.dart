@@ -13,6 +13,8 @@ import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
 import 'logging_service.dart';
+import 'settings_service.dart';
+import '../core/service_registration.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 
@@ -1009,17 +1011,24 @@ class DiaryService implements IDiaryService {
   /// 現在のロケールを取得
   Locale? _getCurrentLocale() {
     try {
-      final currentLocale = Intl.getCurrentLocale();
-      if (currentLocale.isNotEmpty) {
-        final parts = currentLocale.split('_');
-        if (parts.length >= 2) {
-          return Locale(parts[0], parts[1]);
-        } else {
-          return Locale(parts[0]);
-        }
-      }
+      final settingsService = ServiceRegistration.get<SettingsService>();
+      return settingsService.locale;
     } catch (e) {
       _loggingService.warning('ロケール取得エラー: $e');
+      // フォールバック: システムロケール
+      try {
+        final currentLocale = Intl.getCurrentLocale();
+        if (currentLocale.isNotEmpty) {
+          final parts = currentLocale.split('_');
+          if (parts.length >= 2) {
+            return Locale(parts[0], parts[1]);
+          } else {
+            return Locale(parts[0]);
+          }
+        }
+      } catch (e2) {
+        _loggingService.warning('システムロケール取得エラー: $e2');
+      }
     }
     return null;
   }
