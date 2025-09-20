@@ -59,7 +59,7 @@
 - [ ] `OnboardingScreen` のテキストをローカライズキーへ置換
 - [ ] `HomeScreen` / `HomeContentWidget` のヘッダー・ダイアログ文言を置換
 - [ ] `Diary*` 系画面（`DiaryScreen`, `DiaryDetailScreen`, `DiaryPreviewScreen`）を置換
-- [ ] `SettingsScreen` と関連ダイアログを置換
+- [x] `SettingsScreen` と関連ダイアログを置換
 - [ ] `StatisticsScreen` と分析メトリクスのラベルを置換
-- [ ] 共通ウィジェット (`CustomDialog`, `PresetDialogs`, `TimelineFABIntegration` 等) を置換
+- [x] 共通ウィジェット (`CustomDialog`, `PresetDialogs`, `TimelineFABIntegration` 等) を置換
 - [ ] テスト用モックやサンプルデータの固定文言を更新

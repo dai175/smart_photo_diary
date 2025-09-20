@@ -252,6 +252,278 @@
   "@settingsThemeSystem": {
     "description": "システムテーマの表示名"
   },
+  "settingsSectionSemanticLabel": "{section}、現在: {value}",
+  "@settingsSectionSemanticLabel": {
+    "description": "設定セクションの現在値を示すセマンティックラベル",
+    "placeholders": {
+      "section": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionSectionTitle": "サブスクリプション",
+  "@settingsSubscriptionSectionTitle": {
+    "description": "設定画面のサブスクリプションセクションタイトル"
+  },
+  "commonLoading": "読み込み中...",
+  "@commonLoading": {
+    "description": "汎用の読み込み中文言"
+  },
+  "settingsCurrentPlanWithStatus": "現在のプラン: {plan}（{status}）",
+  "@settingsCurrentPlanWithStatus": {
+    "description": "現在のサブスクリプションプラン名とステータスを表示",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCurrentPlan": "現在のプラン: {plan}",
+  "@settingsCurrentPlan": {
+    "description": "現在のサブスクリプションプラン名を表示",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionUsageLabel": "AI生成使用量",
+  "@settingsSubscriptionUsageLabel": {
+    "description": "AI利用量のラベル"
+  },
+  "settingsSubscriptionRemainingLabel": "残り回数",
+  "@settingsSubscriptionRemainingLabel": {
+    "description": "残り利用回数のラベル"
+  },
+  "settingsSubscriptionResetLabel": "リセット予定",
+  "@settingsSubscriptionResetLabel": {
+    "description": "リセット予定日のラベル"
+  },
+  "settingsSubscriptionExpiryLabel": "有効期限",
+  "@settingsSubscriptionExpiryLabel": {
+    "description": "サブスクリプションの有効期限ラベル"
+  },
+  "settingsUpgradeToPremium": "Premiumにアップグレード",
+  "@settingsUpgradeToPremium": {
+    "description": "Premiumプランへアップグレードするボタン文言"
+  },
+  "settingsStorageSectionTitle": "ストレージ情報",
+  "@settingsStorageSectionTitle": {
+    "description": "ストレージ情報セクションのタイトル"
+  },
+  "settingsStorageAppDataTitle": "アプリデータ",
+  "@settingsStorageAppDataTitle": {
+    "description": "アプリデータストレージカードのタイトル"
+  },
+  "settingsStorageUsageValue": "使用容量: {size}",
+  "@settingsStorageUsageValue": {
+    "description": "フォーマット済みのストレージ使用量",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupTitle": "バックアップ",
+  "@settingsBackupTitle": {
+    "description": "バックアップアクションのタイトル"
+  },
+  "settingsBackupSubtitle": "日記をファイルに保存",
+  "@settingsBackupSubtitle": {
+    "description": "バックアップアクションの補足"
+  },
+  "settingsRestoreTitle": "リストア",
+  "@settingsRestoreTitle": {
+    "description": "リストアアクションのタイトル"
+  },
+  "settingsRestoreSubtitle": "ファイルから日記を復元",
+  "@settingsRestoreSubtitle": {
+    "description": "リストアアクションの補足"
+  },
+  "settingsCleanupTitle": "データ削除",
+  "@settingsCleanupTitle": {
+    "description": "データクリーンアップアクションのタイトル"
+  },
+  "settingsCleanupSubtitle": "不要なデータを削除",
+  "@settingsCleanupSubtitle": {
+    "description": "データクリーンアップアクションの補足"
+  },
+  "settingsVersionTitle": "アプリバージョン",
+  "@settingsVersionTitle": {
+    "description": "アプリバージョンセクションのタイトル"
+  },
+  "settingsLicenseTitle": "ライセンス",
+  "@settingsLicenseTitle": {
+    "description": "オープンソースライセンスセクションのタイトル"
+  },
+  "settingsLicenseSubtitle": "オープンソースライセンス",
+  "@settingsLicenseSubtitle": {
+    "description": "オープンソースライセンスセクションの補足"
+  },
+  "settingsBackupInProgress": "バックアップ中...",
+  "@settingsBackupInProgress": {
+    "description": "バックアップ実行中に表示するメッセージ"
+  },
+  "settingsBackupSuccessTitle": "バックアップ完了",
+  "@settingsBackupSuccessTitle": {
+    "description": "バックアップ成功時のダイアログタイトル"
+  },
+  "settingsBackupSuccessMessage": "バックアップファイルが正常に保存されました。",
+  "@settingsBackupSuccessMessage": {
+    "description": "バックアップ成功時のメッセージ"
+  },
+  "settingsBackupCancelledMessage": "バックアップがキャンセルされたか、失敗しました。",
+  "@settingsBackupCancelledMessage": {
+    "description": "バックアップがキャンセルまたは失敗した際のメッセージ"
+  },
+  "settingsBackupErrorWithDetails": "バックアップエラー: {details}",
+  "@settingsBackupErrorWithDetails": {
+    "description": "バックアップ失敗時のエラーメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreInProgress": "リストア中...",
+  "@settingsRestoreInProgress": {
+    "description": "リストア実行中に表示するメッセージ"
+  },
+  "settingsRestoreErrorWithDetails": "リストアエラー: {details}",
+  "@settingsRestoreErrorWithDetails": {
+    "description": "リストア失敗時のエラーメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeInProgress": "最適化中...",
+  "@settingsOptimizeInProgress": {
+    "description": "最適化実行中に表示するメッセージ"
+  },
+  "settingsOptimizeSuccessTitle": "最適化完了",
+  "@settingsOptimizeSuccessTitle": {
+    "description": "最適化成功時のダイアログタイトル"
+  },
+  "settingsOptimizeSuccessMessage": "データベースの最適化が完了しました。",
+  "@settingsOptimizeSuccessMessage": {
+    "description": "最適化成功時のメッセージ"
+  },
+  "settingsOptimizeErrorWithDetails": "最適化エラー: {details}",
+  "@settingsOptimizeErrorWithDetails": {
+    "description": "最適化失敗時のエラーメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeFailedMessage": "最適化に失敗しました。",
+  "@settingsOptimizeFailedMessage": {
+    "description": "詳細がない最適化失敗時のメッセージ"
+  },
+  "settingsRestoreResultTitle": "リストア結果",
+  "@settingsRestoreResultTitle": {
+    "description": "リストア結果ダイアログのタイトル"
+  },
+  "settingsRestoreTotalEntriesLabel": "総エントリー数",
+  "@settingsRestoreTotalEntriesLabel": {
+    "description": "取り込んだエントリー総数のラベル"
+  },
+  "settingsRestoreSuccessLabel": "成功",
+  "@settingsRestoreSuccessLabel": {
+    "description": "成功したエントリー数のラベル"
+  },
+  "settingsRestoreSkippedLabel": "スキップ",
+  "@settingsRestoreSkippedLabel": {
+    "description": "スキップしたエントリー数のラベル"
+  },
+  "settingsRestoreFailedLabel": "失敗",
+  "@settingsRestoreFailedLabel": {
+    "description": "失敗したエントリー数のラベル"
+  },
+  "settingsRestoreEntriesCount": "{count}件",
+  "@settingsRestoreEntriesCount": {
+    "description": "エントリー数を表示",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreAdditionalErrors": "...他{count}件のエラー",
+  "@settingsRestoreAdditionalErrors": {
+    "description": "追加のエラー件数を示すメッセージ",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSubscriptionInfoTitle": "サブスクリプション情報",
+  "@settingsSubscriptionInfoTitle": {
+    "description": "サブスクリプション法的情報セクションのタイトル"
+  },
+  "settingsPremiumMonthlyTitle": "プレミアム（月額）",
+  "@settingsPremiumMonthlyTitle": {
+    "description": "月額プレミアムプランのラベル"
+  },
+  "settingsPremiumYearlyTitle": "プレミアム（年額）",
+  "@settingsPremiumYearlyTitle": {
+    "description": "年額プレミアムプランのラベル"
+  },
+  "settingsPremiumPlanFeatures": "月100回のAI日記生成、過去1年の写真、全20種類のライティングプロンプトが利用できます。",
+  "@settingsPremiumPlanFeatures": {
+    "description": "プレミアムプランの特典説明"
+  },
+  "settingsSubscriptionAutoRenewTitle": "自動更新について",
+  "@settingsSubscriptionAutoRenewTitle": {
+    "description": "自動更新情報の見出し"
+  },
+  "settingsSubscriptionAutoRenewDescription": "• サブスクリプションは自動的に更新されます\n• 料金は更新日の24時間前にiTunesアカウントに請求されます\n• 更新の24時間前までにキャンセルしない限り自動更新されます\n• iOS設定 > Apple ID > サブスクリプションで管理できます",
+  "@settingsSubscriptionAutoRenewDescription": {
+    "description": "自動更新に関する案内文"
+  },
+  "commonPrivacyPolicy": "プライバシーポリシー",
+  "@commonPrivacyPolicy": {
+    "description": "プライバシーポリシーリンクのラベル"
+  },
+  "commonTermsOfUse": "利用規約",
+  "@commonTermsOfUse": {
+    "description": "利用規約リンクのラベル"
+  },
+  "urlLauncherErrorTitle": "リンクエラー",
+  "@urlLauncherErrorTitle": {
+    "description": "リンク起動エラーダイアログのタイトル"
+  },
+  "urlLauncherOpenFailed": "リンクを開くことができませんでした。",
+  "@urlLauncherOpenFailed": {
+    "description": "リンクが開けなかった際のメッセージ"
+  },
+  "upgradeDialogTitle": "Premiumプラン",
+  "@upgradeDialogTitle": {
+    "description": "Premiumアップグレードダイアログのタイトル"
+  },
+  "upgradeDialogUnavailableMessage": "Premiumプランが利用できません。しばらく時間をおいて再度お試しください。",
+  "@upgradeDialogUnavailableMessage": {
+    "description": "Premiumプランが取得できない場合のメッセージ"
+  },
+  "upgradeDialogDiscountValue": "{discount}%割引でお得",
+  "@upgradeDialogDiscountValue": {
+    "description": "割引率を表示するラベル",
+    "placeholders": {
+      "discount": {
+        "type": "int"
+      }
+    }
+  },
   "commonRetry": "再試行",
   "@commonRetry": {
     "description": "リトライボタン共通文言"

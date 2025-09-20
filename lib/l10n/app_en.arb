@@ -252,6 +252,278 @@
   "@settingsThemeSystem": {
     "description": "Label for system theme"
   },
+  "settingsSectionSemanticLabel": "{section}, current: {value}",
+  "@settingsSectionSemanticLabel": {
+    "description": "Semantic label describing the current value of a settings section",
+    "placeholders": {
+      "section": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionSectionTitle": "Subscription",
+  "@settingsSubscriptionSectionTitle": {
+    "description": "Title for the subscription section in settings"
+  },
+  "commonLoading": "Loading...",
+  "@commonLoading": {
+    "description": "Generic loading label"
+  },
+  "settingsCurrentPlanWithStatus": "Current plan: {plan} ({status})",
+  "@settingsCurrentPlanWithStatus": {
+    "description": "Displays the current subscription plan name with status",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCurrentPlan": "Current plan: {plan}",
+  "@settingsCurrentPlan": {
+    "description": "Displays the current subscription plan name",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionUsageLabel": "AI usage",
+  "@settingsSubscriptionUsageLabel": {
+    "description": "Label for AI usage amount"
+  },
+  "settingsSubscriptionRemainingLabel": "Remaining",
+  "@settingsSubscriptionRemainingLabel": {
+    "description": "Label for remaining AI usage count"
+  },
+  "settingsSubscriptionResetLabel": "Resets on",
+  "@settingsSubscriptionResetLabel": {
+    "description": "Label for the reset date of AI usage"
+  },
+  "settingsSubscriptionExpiryLabel": "Expires on",
+  "@settingsSubscriptionExpiryLabel": {
+    "description": "Label for subscription expiry date"
+  },
+  "settingsUpgradeToPremium": "Upgrade to Premium",
+  "@settingsUpgradeToPremium": {
+    "description": "Button text for upgrading to the Premium plan"
+  },
+  "settingsStorageSectionTitle": "Storage information",
+  "@settingsStorageSectionTitle": {
+    "description": "Title for the storage information section"
+  },
+  "settingsStorageAppDataTitle": "App data",
+  "@settingsStorageAppDataTitle": {
+    "description": "Title for the app data storage card"
+  },
+  "settingsStorageUsageValue": "Used storage: {size}",
+  "@settingsStorageUsageValue": {
+    "description": "Displays formatted storage usage",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupTitle": "Backup",
+  "@settingsBackupTitle": {
+    "description": "Title for the backup action"
+  },
+  "settingsBackupSubtitle": "Save your diaries to a file",
+  "@settingsBackupSubtitle": {
+    "description": "Subtitle for the backup action"
+  },
+  "settingsRestoreTitle": "Restore",
+  "@settingsRestoreTitle": {
+    "description": "Title for the restore action"
+  },
+  "settingsRestoreSubtitle": "Import diaries from a file",
+  "@settingsRestoreSubtitle": {
+    "description": "Subtitle for the restore action"
+  },
+  "settingsCleanupTitle": "Cleanup data",
+  "@settingsCleanupTitle": {
+    "description": "Title for the cleanup action"
+  },
+  "settingsCleanupSubtitle": "Remove unnecessary data",
+  "@settingsCleanupSubtitle": {
+    "description": "Subtitle for the cleanup action"
+  },
+  "settingsVersionTitle": "App version",
+  "@settingsVersionTitle": {
+    "description": "Title for the app version section"
+  },
+  "settingsLicenseTitle": "Licenses",
+  "@settingsLicenseTitle": {
+    "description": "Title for the open source licenses section"
+  },
+  "settingsLicenseSubtitle": "Open source licenses",
+  "@settingsLicenseSubtitle": {
+    "description": "Subtitle for the licenses section"
+  },
+  "settingsBackupInProgress": "Backing up...",
+  "@settingsBackupInProgress": {
+    "description": "Message shown while backup is running"
+  },
+  "settingsBackupSuccessTitle": "Backup complete",
+  "@settingsBackupSuccessTitle": {
+    "description": "Title shown when backup completed successfully"
+  },
+  "settingsBackupSuccessMessage": "Your backup file was saved successfully.",
+  "@settingsBackupSuccessMessage": {
+    "description": "Message shown when backup completed successfully"
+  },
+  "settingsBackupCancelledMessage": "The backup was cancelled or failed.",
+  "@settingsBackupCancelledMessage": {
+    "description": "Message shown when backup is cancelled or fails"
+  },
+  "settingsBackupErrorWithDetails": "Backup error: {details}",
+  "@settingsBackupErrorWithDetails": {
+    "description": "Error message shown when backup fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreInProgress": "Restoring...",
+  "@settingsRestoreInProgress": {
+    "description": "Message shown while restore is running"
+  },
+  "settingsRestoreErrorWithDetails": "Restore error: {details}",
+  "@settingsRestoreErrorWithDetails": {
+    "description": "Error message shown when restore fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeInProgress": "Optimizing...",
+  "@settingsOptimizeInProgress": {
+    "description": "Message shown while optimization is running"
+  },
+  "settingsOptimizeSuccessTitle": "Optimization complete",
+  "@settingsOptimizeSuccessTitle": {
+    "description": "Title shown when optimization completes"
+  },
+  "settingsOptimizeSuccessMessage": "Your database has been optimized.",
+  "@settingsOptimizeSuccessMessage": {
+    "description": "Message shown when optimization completes"
+  },
+  "settingsOptimizeErrorWithDetails": "Optimization error: {details}",
+  "@settingsOptimizeErrorWithDetails": {
+    "description": "Error message shown when optimization fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeFailedMessage": "Optimization failed.",
+  "@settingsOptimizeFailedMessage": {
+    "description": "Message shown when optimization fails without details"
+  },
+  "settingsRestoreResultTitle": "Restore result",
+  "@settingsRestoreResultTitle": {
+    "description": "Title for the restore result dialog"
+  },
+  "settingsRestoreTotalEntriesLabel": "Total entries",
+  "@settingsRestoreTotalEntriesLabel": {
+    "description": "Label for total imported entries"
+  },
+  "settingsRestoreSuccessLabel": "Imported",
+  "@settingsRestoreSuccessLabel": {
+    "description": "Label for successfully imported entries"
+  },
+  "settingsRestoreSkippedLabel": "Skipped",
+  "@settingsRestoreSkippedLabel": {
+    "description": "Label for skipped entries"
+  },
+  "settingsRestoreFailedLabel": "Failed",
+  "@settingsRestoreFailedLabel": {
+    "description": "Label for failed entries"
+  },
+  "settingsRestoreEntriesCount": "{count} entries",
+  "@settingsRestoreEntriesCount": {
+    "description": "Displays the number of entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreAdditionalErrors": "...and {count} more errors",
+  "@settingsRestoreAdditionalErrors": {
+    "description": "Message indicating additional errors",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSubscriptionInfoTitle": "Subscription details",
+  "@settingsSubscriptionInfoTitle": {
+    "description": "Title for the subscription legal information section"
+  },
+  "settingsPremiumMonthlyTitle": "Premium (monthly)",
+  "@settingsPremiumMonthlyTitle": {
+    "description": "Label for the monthly premium plan"
+  },
+  "settingsPremiumYearlyTitle": "Premium (yearly)",
+  "@settingsPremiumYearlyTitle": {
+    "description": "Label for the yearly premium plan"
+  },
+  "settingsPremiumPlanFeatures": "Includes 100 AI diary generations per month, access to the past year of photos, and all 20 writing prompts.",
+  "@settingsPremiumPlanFeatures": {
+    "description": "Description of premium plan benefits"
+  },
+  "settingsSubscriptionAutoRenewTitle": "About auto-renewal",
+  "@settingsSubscriptionAutoRenewTitle": {
+    "description": "Heading for auto-renewal information"
+  },
+  "settingsSubscriptionAutoRenewDescription": "• Subscriptions renew automatically.\n• Your iTunes account is charged 24 hours before the renewal date.\n• Auto-renewal can be turned off up to 24 hours before renewal.\n• Manage subscriptions in iOS Settings > Apple ID > Subscriptions.",
+  "@settingsSubscriptionAutoRenewDescription": {
+    "description": "Auto-renewal guidance text"
+  },
+  "commonPrivacyPolicy": "Privacy policy",
+  "@commonPrivacyPolicy": {
+    "description": "Label for privacy policy link"
+  },
+  "commonTermsOfUse": "Terms of use",
+  "@commonTermsOfUse": {
+    "description": "Label for terms of use link"
+  },
+  "urlLauncherErrorTitle": "Link error",
+  "@urlLauncherErrorTitle": {
+    "description": "Title for link launch error dialog"
+  },
+  "urlLauncherOpenFailed": "Unable to open the link.",
+  "@urlLauncherOpenFailed": {
+    "description": "Message shown when a link cannot be opened"
+  },
+  "upgradeDialogTitle": "Premium plan",
+  "@upgradeDialogTitle": {
+    "description": "Title for the premium upgrade dialog"
+  },
+  "upgradeDialogUnavailableMessage": "The Premium plan is currently unavailable. Please try again later.",
+  "@upgradeDialogUnavailableMessage": {
+    "description": "Message shown when premium plans cannot be loaded"
+  },
+  "upgradeDialogDiscountValue": "Save {discount}%",
+  "@upgradeDialogDiscountValue": {
+    "description": "Label describing the discount percentage",
+    "placeholders": {
+      "discount": {
+        "type": "int"
+      }
+    }
+  },
   "commonRetry": "Retry",
   "@commonRetry": {
     "description": "Generic retry button label"

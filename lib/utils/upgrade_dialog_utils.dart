@@ -37,7 +37,7 @@ class UpgradeDialogUtils {
         if (!context.mounted) return;
         DialogUtils.showSimpleDialog(
           context,
-          'Premiumプランが利用できません。しばらく時間をおいて再度お試しください。',
+          context.l10n.upgradeDialogUnavailableMessage,
         );
         return;
       }
@@ -45,17 +45,20 @@ class UpgradeDialogUtils {
       // プレミアムプラン選択ダイアログを表示
       if (!context.mounted) return;
       _logger.debug(
-        'プラン選択ダイアログ表示開始',
+        'Opening plan selection dialog',
         context: 'UpgradeDialogUtils.showUpgradeDialog',
       );
       await _showPremiumPlanDialog(context, premiumPlans);
       _logger.debug(
-        'プラン選択ダイアログ完了',
+        'Plan selection dialog completed',
         context: 'UpgradeDialogUtils.showUpgradeDialog',
       );
     } catch (e) {
       if (!context.mounted) return;
-      DialogUtils.showSimpleDialog(context, 'エラーが発生しました: ${e.toString()}');
+      DialogUtils.showSimpleDialog(
+        context,
+        context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
+      );
     }
   }
 
@@ -67,14 +70,14 @@ class UpgradeDialogUtils {
     return showDialog(
       context: parentContext,
       builder: (dialogContext) => CustomDialog(
-        title: 'Premiumプラン',
+        title: dialogContext.l10n.upgradeDialogTitle,
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '月間100回のAI生成、過去1年の写真、全20種類のライティングプロンプトが利用できます。',
+                dialogContext.l10n.settingsPremiumPlanFeatures,
                 style: AppTypography.bodyMedium,
                 textAlign: TextAlign.left,
               ),
@@ -87,7 +90,7 @@ class UpgradeDialogUtils {
         ),
         actions: [
           CustomDialogAction(
-            text: 'キャンセル',
+            text: dialogContext.l10n.commonCancel,
             onPressed: () => Navigator.of(dialogContext).pop(),
           ),
         ],
@@ -106,7 +109,7 @@ class UpgradeDialogUtils {
     if (plan is PremiumYearlyPlan) {
       final discount = plan.discountPercentage;
       if (discount > 0) {
-        description = '$discount%割引でお得';
+        description = dialogContext.l10n.upgradeDialogDiscountValue(discount);
       }
     }
 
@@ -118,7 +121,7 @@ class UpgradeDialogUtils {
             MicroInteractions.hapticTap();
 
             _logger.debug(
-              'プランオプションタップ: ${plan.id}',
+              'Plan option tapped: ${plan.id}',
               context: 'UpgradeDialogUtils._buildPlanOption',
               data:
                   'displayName=${plan.displayName}, productId=${plan.productId}',
@@ -193,7 +196,7 @@ class UpgradeDialogUtils {
   /// コンテキスト不要のシンプルな購入処理
   static Future<void> _startPurchaseWithoutContext(Plan plan) async {
     _logger.info(
-      '購入処理開始: ${plan.id}',
+      'Purchase flow started: ${plan.id}',
       context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
       data: 'productId=${plan.productId}, price=${plan.price}',
     );
@@ -201,7 +204,7 @@ class UpgradeDialogUtils {
     // 二重実行防止チェック
     if (_isPurchasing) {
       _logger.warning(
-        '既に購入処理中のため中断',
+        'Purchase already in progress; skipping',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
       );
       return;
@@ -211,14 +214,14 @@ class UpgradeDialogUtils {
 
     try {
       _logger.debug(
-        'ServiceLocatorからサブスクリプションサービス取得中',
+        'Resolving subscription service via ServiceLocator',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
       );
       final subscriptionService = await ServiceLocator()
           .getAsync<ISubscriptionService>();
 
       _logger.debug(
-        'purchasePlanClassメソッド呼び出し中',
+        'Calling purchasePlanClass method',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
       );
 
@@ -226,7 +229,7 @@ class UpgradeDialogUtils {
       final result = await subscriptionService.purchasePlanClass(plan);
 
       _logger.debug(
-        '購入処理レスポンス受信',
+        'Received purchase response',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
         data: 'isSuccess: ${result.isSuccess}',
       );
@@ -235,7 +238,7 @@ class UpgradeDialogUtils {
       if (result.isSuccess) {
         final purchaseResult = result.value;
         _logger.info(
-          '購入成功',
+          'Purchase succeeded',
           context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
           data:
               'status=${purchaseResult.status}, productId=${purchaseResult.productId}',
@@ -247,13 +250,13 @@ class UpgradeDialogUtils {
         if (error.toString().contains('In-App Purchase not available') ||
             error.toString().contains('Product not found')) {
           _logger.warning(
-            'シミュレーター環境またはTestFlight環境の可能性',
+            'Possibly simulator or TestFlight environment',
             context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
             data: error.toString(),
           );
         } else {
           _logger.error(
-            '購入失敗',
+            'Purchase failed',
             context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
             error: error,
           );
@@ -261,7 +264,7 @@ class UpgradeDialogUtils {
       }
     } catch (e) {
       _logger.error(
-        '予期しないエラー発生',
+        'Unexpected error occurred',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
         error: e,
       );
@@ -271,7 +274,7 @@ class UpgradeDialogUtils {
     } finally {
       _isPurchasing = false;
       _logger.debug(
-        '購入処理完了、フラグをリセット',
+        'Purchase flow finished, resetting flag',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
       );
     }
