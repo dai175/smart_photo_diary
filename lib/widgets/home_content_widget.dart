@@ -8,8 +8,8 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
-import '../controllers/scroll_signal.dart';
 import '../localization/localization_extensions.dart';
+import '../controllers/scroll_signal.dart';
 
 /// ホーム画面のメインコンテンツウィジェット
 ///
@@ -139,6 +139,26 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     );
   }
 
+  /// プランIDに基づいて多言語化されたプラン名を取得
+  String _getLocalizedPlanName(BuildContext context, String planId) {
+    switch (planId) {
+      case 'basic':
+        return context
+            .l10n
+            .onboardingPlanBasicSubtitle; // "Free plan" / "無料プラン"
+      case 'premium_monthly':
+        return context
+            .l10n
+            .settingsPremiumMonthlyTitle; // "Premium (monthly)" / "プレミアム（月額）"
+      case 'premium_yearly':
+        return context
+            .l10n
+            .settingsPremiumYearlyTitle; // "Premium (yearly)" / "プレミアム（年額）"
+      default:
+        return planId; // フォールバック
+    }
+  }
+
   /// 使用量状況表示メソッド
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
@@ -183,12 +203,12 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageStatus(
             context: context,
-            planName: plan.displayName,
+            planName: _getLocalizedPlanName(context, plan.id),
             used: used.clamp(0, limit),
             limit: limit,
             remaining: remaining.clamp(0, limit),
             nextResetDate: nextResetDate,
-            onUpgrade: plan.displayName == 'Basic'
+            onUpgrade: plan.id == 'basic'
                 ? () {
                     Navigator.of(context).pop();
                     _navigateToUpgrade(context);

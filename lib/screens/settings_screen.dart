@@ -414,6 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// 多言語化されたSubscriptionDisplayDataを取得
   SubscriptionDisplayDataV2 _getLocalizedDisplayData() {
     return _subscriptionInfo!.getLocalizedDisplayData(
+      locale: context.l10n.localeName,
       usageFormatter: (used, limit) =>
           context.l10n.usageStatusUsageValue(used, limit),
       remainingFormatter: (remaining) =>
@@ -519,13 +520,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        _subscriptionInfo!.displayData.planStatus != null
+                        _getLocalizedDisplayData().planStatus != null
                             ? context.l10n.settingsCurrentPlanWithStatus(
-                                _subscriptionInfo!.displayData.planName,
-                                _subscriptionInfo!.displayData.planStatus!,
+                                _getLocalizedDisplayData().planName,
+                                _getLocalizedDisplayData().planStatus!,
                               )
                             : context.l10n.settingsCurrentPlan(
-                                _subscriptionInfo!.displayData.planName,
+                                _getLocalizedDisplayData().planName,
                               ),
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -562,7 +563,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSubscriptionItem(
                   context.l10n.settingsSubscriptionUsageLabel,
                   _getLocalizedDisplayData().usageText,
-                  _subscriptionInfo!.displayData.isNearLimit
+                  _getLocalizedDisplayData().isNearLimit
                       ? AppColors.warning
                       : AppColors.primary,
                 ),
@@ -577,15 +578,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: AppSpacing.md),
                 _buildSubscriptionItem(
                   context.l10n.settingsSubscriptionResetLabel,
-                  _subscriptionInfo!.displayData.resetDateText,
+                  _getLocalizedDisplayData().resetDateText,
                   AppColors.info,
                 ),
-                if (_subscriptionInfo!.displayData.expiryText != null) ...[
+                if (_getLocalizedDisplayData().expiryText != null) ...[
                   const SizedBox(height: AppSpacing.md),
                   _buildSubscriptionItem(
                     context.l10n.settingsSubscriptionExpiryLabel,
-                    _subscriptionInfo!.displayData.expiryText!,
-                    _subscriptionInfo!.displayData.isExpiryNear
+                    _getLocalizedDisplayData().expiryText!,
+                    _getLocalizedDisplayData().isExpiryNear
                         ? AppColors.warning
                         : AppColors.success,
                   ),

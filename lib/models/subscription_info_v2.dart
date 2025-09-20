@@ -237,8 +237,24 @@ class SubscriptionInfoV2 {
   /// Premiumプランかどうか
   bool get isPremium => currentPlan.isPremium;
 
-  /// プランの表示名
+  /// プランの表示名（ロケール非対応、廃止予定）
+  @Deprecated('Use getLocalizedPlanDisplayName instead')
   String get planDisplayName => currentPlan.displayName;
+
+  /// プランの表示名（多言語化対応）
+  String getLocalizedPlanDisplayName(String locale) {
+    // PlanFactoryで作られたプランのIDに基づいて適切な表示名を返す
+    switch (currentPlan.id) {
+      case 'basic':
+        return locale == 'ja' ? 'ベーシック' : 'Basic';
+      case 'premium_monthly':
+        return locale == 'ja' ? 'プレミアム（月額）' : 'Premium (monthly)';
+      case 'premium_yearly':
+        return locale == 'ja' ? 'プレミアム（年額）' : 'Premium (yearly)';
+      default:
+        return currentPlan.displayName; // フォールバック
+    }
+  }
 
   /// プランの機能一覧
   List<String> get planFeatures => currentPlan.features;
@@ -366,6 +382,7 @@ class SubscriptionInfoV2 {
 
   /// 設定画面表示用の統合データ（多言語化対応）
   SubscriptionDisplayDataV2 getLocalizedDisplayData({
+    required String locale,
     required String Function(int used, int limit) usageFormatter,
     required String Function(int remaining) remainingFormatter,
     required String Function() limitReachedFormatter,
@@ -373,7 +390,7 @@ class SubscriptionInfoV2 {
     required String Function(int limit) upgradeRecommendationLimitFormatter,
     required String Function() upgradeRecommendationGeneralFormatter,
   }) => SubscriptionDisplayDataV2(
-    planName: planDisplayName,
+    planName: getLocalizedPlanDisplayName(locale),
     planStatus: planStatusDisplay,
     usageText: usageStats.getLocalizedUsageDisplay(usageFormatter),
     remainingText: remainingFormatter(usageStats.remainingCount),
