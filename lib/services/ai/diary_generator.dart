@@ -517,7 +517,7 @@ Write the output using the following format:
 (A concise 3-6 word phrase capturing the emotional tone)
 
 [Body]
-(Approximately 180-220 words in a warm, personal voice that explores the emotions$multiPhotoHint)
+(Approximately 70-90 words in a warm, personal voice that explores the emotions$multiPhotoHint)
 
 $locationLine''';
 
@@ -622,7 +622,7 @@ Write the output using the following format:
 (A concise 3-6 word phrase that captures the day's emotional theme)
 
 [Body]
-(Approximately 200-240 words that follow the flow of the day and emphasise emotional insights and discoveries)
+(Approximately 80-100 words that follow the flow of the day and emphasise emotional insights and discoveries)
 
 Date: $dateLabel
 Time span: $timeRange
