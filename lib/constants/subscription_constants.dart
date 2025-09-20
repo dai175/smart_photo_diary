@@ -187,7 +187,10 @@ class SubscriptionConstants {
   }
 
   /// 言語に応じた価格と通貨コードを取得
-  static (int price, String currencyCode) getPriceForLocale(String planId, String locale) {
+  static (int price, String currencyCode) getPriceForLocale(
+    String planId,
+    String locale,
+  ) {
     final isEnglish = locale.startsWith('en');
 
     switch (planId.toLowerCase()) {
@@ -196,12 +199,12 @@ class SubscriptionConstants {
       case premiumMonthlyPlanId:
         return (
           isEnglish ? premiumMonthlyPriceUSD : premiumMonthlyPriceJPY,
-          isEnglish ? 'USD' : defaultCurrencyCode
+          isEnglish ? 'USD' : defaultCurrencyCode,
         );
       case premiumYearlyPlanId:
         return (
           isEnglish ? premiumYearlyPriceUSD : premiumYearlyPriceJPY,
-          isEnglish ? 'USD' : defaultCurrencyCode
+          isEnglish ? 'USD' : defaultCurrencyCode,
         );
       default:
         throw ArgumentError('Unknown plan ID: $planId');
@@ -209,7 +212,11 @@ class SubscriptionConstants {
   }
 
   /// 価格を表示用文字列に変換（ロケール対応）
-  static String formatPrice(int price, {String locale = 'ja', String? currencyCode}) {
+  static String formatPrice(
+    int price, {
+    String locale = 'ja',
+    String? currencyCode,
+  }) {
     final isEnglish = locale.startsWith('en');
     final currency = currencyCode ?? (isEnglish ? 'USD' : defaultCurrencyCode);
     final decimalDigits = currency == 'USD' ? 2 : 0;
