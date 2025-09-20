@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'dart:ui';
+
 import '../../core/result/result.dart';
 
 /// 日記生成結果を保持するクラス
@@ -25,6 +27,7 @@ abstract class IAiService {
     String? location,
     List<DateTime>? photoTimes,
     String? prompt,
+    Locale? locale,
   });
 
   /// 複数画像から順次日記を生成（Vision API使用）
@@ -35,6 +38,7 @@ abstract class IAiService {
     String? location,
     String? prompt,
     Function(int current, int total)? onProgress,
+    Locale? locale,
   });
 
   /// 日記の内容からタグを自動生成

@@ -161,6 +161,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           imageData: imageData,
           date: photoDateTime,
           prompt: _selectedPrompt?.text,
+          locale: Localizations.localeOf(context),
         );
 
         if (resultFromAi.isFailure) {
@@ -215,6 +216,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               _totalPhotos = total;
             });
           },
+          locale: Localizations.localeOf(context),
         );
 
         if (resultFromAi.isFailure) {
