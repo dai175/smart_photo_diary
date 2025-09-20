@@ -48,6 +48,7 @@ abstract class IAiService {
     required String content,
     required DateTime date,
     required int photoCount,
+    Locale? locale,
   });
 
   // Phase 1.7.3: UI連携準備メソッド追加

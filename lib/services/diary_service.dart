@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_change.dart';
 import '../models/diary_filter.dart';
@@ -383,6 +385,7 @@ class DiaryService implements IDiaryService {
           content: entry.content,
           date: entry.date,
           photoCount: entry.photoIds.length,
+          locale: _getCurrentLocale(),
         );
 
         if (tagsResult.isSuccess) {
@@ -427,6 +430,7 @@ class DiaryService implements IDiaryService {
         content: entry.content,
         date: entry.date,
         photoCount: entry.photoIds.length,
+        locale: _getCurrentLocale(),
       );
 
       if (tagsResult.isSuccess) {
@@ -771,6 +775,7 @@ class DiaryService implements IDiaryService {
           content: '$pastContext: ${entry.content}', // 過去のコンテキストを含める
           date: entry.date,
           photoCount: entry.photoIds.length,
+          locale: _getCurrentLocale(),
         );
 
         if (tagsResult.isSuccess) {
@@ -999,5 +1004,23 @@ class DiaryService implements IDiaryService {
     return ResultHelper.tryExecuteAsync(() async {
       return await getDiaryEntryByPhotoId(photoId);
     }, context: 'DiaryService.getDiaryEntryByPhotoIdResult');
+  }
+
+  /// 現在のロケールを取得
+  Locale? _getCurrentLocale() {
+    try {
+      final currentLocale = Intl.getCurrentLocale();
+      if (currentLocale.isNotEmpty) {
+        final parts = currentLocale.split('_');
+        if (parts.length >= 2) {
+          return Locale(parts[0], parts[1]);
+        } else {
+          return Locale(parts[0]);
+        }
+      }
+    } catch (e) {
+      _loggingService.warning('ロケール取得エラー: $e');
+    }
+    return null;
   }
 }

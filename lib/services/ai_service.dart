@@ -187,6 +187,7 @@ class AiService implements IAiService {
     required String content,
     required DateTime date,
     required int photoCount,
+    Locale? locale,
   }) async {
     try {
       // Phase 1.7.1: タグ生成は使用量にカウントしない
@@ -197,6 +198,7 @@ class AiService implements IAiService {
         date: date,
         photoCount: photoCount,
         isOnline: online,
+        locale: locale,
       );
 
       return Success(result);
