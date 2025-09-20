@@ -1009,27 +1009,33 @@ class DiaryService implements IDiaryService {
   }
 
   /// 現在のロケールを取得
-  Locale? _getCurrentLocale() {
+  Locale _getCurrentLocale() {
     try {
       final settingsService = ServiceRegistration.get<SettingsService>();
-      return settingsService.locale;
+      final locale = settingsService.locale;
+      if (locale != null) {
+        return locale;
+      }
     } catch (e) {
       _loggingService.warning('ロケール取得エラー: $e');
-      // フォールバック: システムロケール
-      try {
-        final currentLocale = Intl.getCurrentLocale();
-        if (currentLocale.isNotEmpty) {
-          final parts = currentLocale.split('_');
-          if (parts.length >= 2) {
-            return Locale(parts[0], parts[1]);
-          } else {
-            return Locale(parts[0]);
-          }
-        }
-      } catch (e2) {
-        _loggingService.warning('システムロケール取得エラー: $e2');
-      }
     }
-    return null;
+
+    // フォールバック: システムロケール
+    try {
+      final currentLocale = Intl.getCurrentLocale();
+      if (currentLocale.isNotEmpty) {
+        final parts = currentLocale.split('_');
+        if (parts.length >= 2) {
+          return Locale(parts[0], parts[1]);
+        } else {
+          return Locale(parts[0]);
+        }
+      }
+    } catch (e2) {
+      _loggingService.warning('システムロケール取得エラー: $e2');
+    }
+
+    // 最終的なフォールバック: 日本語
+    return const Locale('ja');
   }
 }

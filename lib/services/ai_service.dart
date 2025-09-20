@@ -198,7 +198,7 @@ class AiService implements IAiService {
         date: date,
         photoCount: photoCount,
         isOnline: online,
-        locale: locale,
+        locale: locale ?? const Locale('ja'),
       );
 
       return Success(result);
