@@ -48,7 +48,109 @@
   },
   "diaryNoFilterResults": "No diaries match the filter criteria",
   "@diaryNoFilterResults": {
-    "description": "Message shown when filter returns no results"
+    "description": "Message shown when no diaries match the filter criteria"
+  },
+  "filterTitle": "Filter",
+  "@filterTitle": {
+    "description": "Filter screen title"
+  },
+  "filterClearAll": "Clear All",
+  "@filterClearAll": {
+    "description": "Clear filter button text"
+  },
+  "filterDateRange": "Date Range",
+  "@filterDateRange": {
+    "description": "Date range filter title"
+  },
+  "filterSelectPeriod": "Select period",
+  "@filterSelectPeriod": {
+    "description": "Date range selection placeholder"
+  },
+  "filterSelectStartDate": "Select start date",
+  "@filterSelectStartDate": {
+    "description": "Start date selection dialog help text"
+  },
+  "filterSelectEndDate": "Select end date",
+  "@filterSelectEndDate": {
+    "description": "End date selection dialog help text"
+  },
+  "filterTags": "Tags",
+  "@filterTags": {
+    "description": "Tags filter title"
+  },
+  "filterNoTags": "No tags available",
+  "@filterNoTags": {
+    "description": "Message when no tags are available"
+  },
+  "filterTimeOfDay": "Time of Day",
+  "@filterTimeOfDay": {
+    "description": "Time of day filter title"
+  },
+  "filterApply": "Apply Filter",
+  "@filterApply": {
+    "description": "Apply filter button text"
+  },
+  "filterApplyWithCount": "Apply Filter ({count})",
+  "@filterApplyWithCount": {
+    "description": "Apply filter button text with active filter count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of active filters"
+      }
+    }
+  },
+  "filterTimeSlotMorning": "Morning",
+  "@filterTimeSlotMorning": {
+    "description": "Time of day filter: Morning"
+  },
+  "filterTimeSlotNoon": "Noon",
+  "@filterTimeSlotNoon": {
+    "description": "Time of day filter: Noon"
+  },
+  "filterTimeSlotEvening": "Evening",
+  "@filterTimeSlotEvening": {
+    "description": "Time of day filter: Evening"
+  },
+  "filterTimeSlotNight": "Night",
+  "@filterTimeSlotNight": {
+    "description": "Time of day filter: Night"
+  },
+  "filterDateSelectionError": "An error occurred during date selection",
+  "@filterDateSelectionError": {
+    "description": "Error message for date selection failures"
+  },
+  "filterTagLoadError": "Tag loading error",
+  "@filterTagLoadError": {
+    "description": "Log message for tag loading errors"
+  },
+  "filterActiveTitle": "Filters Active ({count})",
+  "@filterActiveTitle": {
+    "description": "Active filters display title",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of active filters"
+      }
+    }
+  },
+  "filterActiveClearAll": "Clear All",
+  "@filterActiveClearAll": {
+    "description": "Active filters clear button"
+  },
+  "filterActiveDateRange": "Date Range",
+  "@filterActiveDateRange": {
+    "description": "Date range filter chip label"
+  },
+  "filterActiveSearch": "Search: {query}",
+  "@filterActiveSearch": {
+    "description": "Search filter chip label",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "Search query"
+      }
+    }
   },
   "photoPermissionMessage": "Photo access permission is required",
   "@photoPermissionMessage": {
@@ -923,6 +1025,10 @@
   "commonNext": "Next",
   "@commonNext": {
     "description": "Generic next button label"
+  },
+  "commonSelect": "Select",
+  "@commonSelect": {
+    "description": "Select button text"
   },
   "onboardingSkip": "Skip",
   "@onboardingSkip": {

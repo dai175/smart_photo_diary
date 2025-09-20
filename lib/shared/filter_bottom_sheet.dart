@@ -52,7 +52,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       setState(() {
         _isLoadingTags = false;
       });
-      _logger.error('タグ読み込みエラー', error: e, context: 'FilterBottomSheet');
+      _logger.error(
+        context.l10n.filterTagLoadError,
+        error: e,
+        context: 'FilterBottomSheet',
+      );
     }
   }
 
@@ -66,9 +70,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             DateTime.now().subtract(const Duration(days: 7)),
         firstDate: DateTime(2020),
         lastDate: DateTime.now(),
-        helpText: '開始日を選択',
-        cancelText: 'キャンセル',
-        confirmText: '次へ',
+        helpText: context.l10n.filterSelectStartDate,
+        cancelText: context.l10n.commonCancel,
+        confirmText: context.l10n.commonNext,
       );
 
       if (startDate == null) return;
@@ -80,9 +84,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         initialDate: _currentFilter.dateRange?.end ?? DateTime.now(),
         firstDate: startDate,
         lastDate: DateTime.now(),
-        helpText: '終了日を選択',
-        cancelText: 'キャンセル',
-        confirmText: '選択',
+        helpText: context.l10n.filterSelectEndDate,
+        cancelText: context.l10n.commonCancel,
+        confirmText: context.l10n.commonSelect,
       );
 
       if (endDate != null) {
@@ -92,11 +96,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         });
       }
     } catch (e) {
-      _logger.error('日付範囲選択エラー', error: e, context: 'FilterBottomSheet');
+      _logger.error(
+        'Date range selection error',
+        error: e,
+        context: 'FilterBottomSheet',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('日付選択でエラーが発生しました'),
+          SnackBar(
+            content: Text(context.l10n.filterDateSelectionError),
             duration: Duration(seconds: 2),
           ),
         );
@@ -178,12 +186,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'フィルタ',
+                  context.l10n.filterTitle,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                TextOnlyButton(onPressed: _clearAllFilters, text: 'すべてクリア'),
+                TextOnlyButton(
+                  onPressed: _clearAllFilters,
+                  text: context.l10n.filterClearAll,
+                ),
               ],
             ),
           ),
@@ -197,7 +208,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               children: [
                 // 日付範囲
                 _buildSection(
-                  title: '日付範囲',
+                  title: context.l10n.filterDateRange,
                   child: Column(
                     children: [
                       Card(
@@ -206,7 +217,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           title: Text(
                             _currentFilter.dateRange != null
                                 ? _formatDateRange(_currentFilter.dateRange!)
-                                : '期間を選択',
+                                : context.l10n.filterSelectPeriod,
                           ),
                           trailing: _currentFilter.dateRange != null
                               ? IconButton(
@@ -223,17 +234,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
                 // タグ
                 _buildSection(
-                  title: 'タグ',
+                  title: context.l10n.filterTags,
                   child: _isLoadingTags
                       ? const Padding(
                           padding: EdgeInsets.all(20),
                           child: Center(child: CircularProgressIndicator()),
                         )
                       : _availableTags.isEmpty
-                      ? const Padding(
+                      ? Padding(
                           padding: EdgeInsets.all(20),
                           child: Text(
-                            'タグがありません',
+                            context.l10n.filterNoTags,
                             style: TextStyle(color: Colors.grey),
                           ),
                         )
@@ -254,20 +265,40 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
                 // 時間帯
                 _buildSection(
-                  title: '時間帯',
+                  title: context.l10n.filterTimeOfDay,
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: ['朝', '昼', '夕方', '夜'].map((time) {
-                      final isSelected = _currentFilter.timeOfDay.contains(
-                        time,
-                      );
-                      return FilterChip(
-                        label: Text(time),
-                        selected: isSelected,
-                        onSelected: (_) => _toggleTimeOfDay(time),
-                      );
-                    }).toList(),
+                    children:
+                        [
+                          {
+                            'key': '朝',
+                            'label': context.l10n.filterTimeSlotMorning,
+                          },
+                          {
+                            'key': '昼',
+                            'label': context.l10n.filterTimeSlotNoon,
+                          },
+                          {
+                            'key': '夕方',
+                            'label': context.l10n.filterTimeSlotEvening,
+                          },
+                          {
+                            'key': '夜',
+                            'label': context.l10n.filterTimeSlotNight,
+                          },
+                        ].map((timeSlot) {
+                          final timeKey = timeSlot['key'] as String;
+                          final timeLabel = timeSlot['label'] as String;
+                          final isSelected = _currentFilter.timeOfDay.contains(
+                            timeKey,
+                          );
+                          return FilterChip(
+                            label: Text(timeLabel),
+                            selected: isSelected,
+                            onSelected: (_) => _toggleTimeOfDay(timeKey),
+                          );
+                        }).toList(),
                   ),
                 ),
 
@@ -286,8 +317,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               },
               width: double.infinity,
               text: _currentFilter.isActive
-                  ? 'フィルタを適用 (${_currentFilter.activeFilterCount})'
-                  : 'フィルタを適用',
+                  ? context.l10n.filterApplyWithCount(
+                      _currentFilter.activeFilterCount,
+                    )
+                  : context.l10n.filterApply,
               icon: Icons.filter_list,
             ),
           ),

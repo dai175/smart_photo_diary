@@ -48,7 +48,109 @@
   },
   "diaryNoFilterResults": "フィルタ条件に一致する日記がありません",
   "@diaryNoFilterResults": {
-    "description": "フィルタ結果が空の場合のメッセージ"
+    "description": "フィルタ条件に合致する日記が存在しない場合のメッセージ"
+  },
+  "filterTitle": "フィルタ",
+  "@filterTitle": {
+    "description": "フィルタ画面のタイトル"
+  },
+  "filterClearAll": "すべてクリア",
+  "@filterClearAll": {
+    "description": "フィルタクリアボタンのテキスト"
+  },
+  "filterDateRange": "日付範囲",
+  "@filterDateRange": {
+    "description": "日付範囲フィルタのタイトル"
+  },
+  "filterSelectPeriod": "期間を選択",
+  "@filterSelectPeriod": {
+    "description": "日付範囲選択のプレースホルダー"
+  },
+  "filterSelectStartDate": "開始日を選択",
+  "@filterSelectStartDate": {
+    "description": "開始日選択ダイアログのヘルプテキスト"
+  },
+  "filterSelectEndDate": "終了日を選択",
+  "@filterSelectEndDate": {
+    "description": "終了日選択ダイアログのヘルプテキスト"
+  },
+  "filterTags": "タグ",
+  "@filterTags": {
+    "description": "タグフィルタのタイトル"
+  },
+  "filterNoTags": "タグがありません",
+  "@filterNoTags": {
+    "description": "利用可能なタグがない場合のメッセージ"
+  },
+  "filterTimeOfDay": "時間帯",
+  "@filterTimeOfDay": {
+    "description": "時間帯フィルタのタイトル"
+  },
+  "filterApply": "フィルタを適用",
+  "@filterApply": {
+    "description": "フィルタ適用ボタンのテキスト"
+  },
+  "filterApplyWithCount": "フィルタを適用 ({count})",
+  "@filterApplyWithCount": {
+    "description": "アクティブなフィルタ数を表示するフィルタ適用ボタンのテキスト",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "アクティブなフィルタの数"
+      }
+    }
+  },
+  "filterTimeSlotMorning": "朝",
+  "@filterTimeSlotMorning": {
+    "description": "時間帯フィルタ: 朝"
+  },
+  "filterTimeSlotNoon": "昼",
+  "@filterTimeSlotNoon": {
+    "description": "時間帯フィルタ: 昼"
+  },
+  "filterTimeSlotEvening": "夕方",
+  "@filterTimeSlotEvening": {
+    "description": "時間帯フィルタ: 夕方"
+  },
+  "filterTimeSlotNight": "夜",
+  "@filterTimeSlotNight": {
+    "description": "時間帯フィルタ: 夜"
+  },
+  "filterDateSelectionError": "日付選択でエラーが発生しました",
+  "@filterDateSelectionError": {
+    "description": "日付選択時のエラーメッセージ"
+  },
+  "filterTagLoadError": "タグ読み込みエラー",
+  "@filterTagLoadError": {
+    "description": "タグ読み込みエラーのログメッセージ"
+  },
+  "filterActiveTitle": "フィルタ適用中 ({count})",
+  "@filterActiveTitle": {
+    "description": "アクティブフィルタの表示タイトル",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "アクティブなフィルタの数"
+      }
+    }
+  },
+  "filterActiveClearAll": "すべてクリア",
+  "@filterActiveClearAll": {
+    "description": "アクティブフィルタのクリアボタン"
+  },
+  "filterActiveDateRange": "期間指定",
+  "@filterActiveDateRange": {
+    "description": "日付範囲フィルタチップのラベル"
+  },
+  "filterActiveSearch": "検索: {query}",
+  "@filterActiveSearch": {
+    "description": "検索フィルタチップのラベル",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "検索クエリ"
+      }
+    }
   },
   "photoPermissionMessage": "写真へのアクセス権限が必要です",
   "@photoPermissionMessage": {
@@ -923,6 +1025,10 @@
   "commonNext": "次へ",
   "@commonNext": {
     "description": "次へボタンの共通ラベル"
+  },
+  "commonSelect": "選択",
+  "@commonSelect": {
+    "description": "選択ボタンのテキスト"
   },
   "onboardingSkip": "スキップ",
   "@onboardingSkip": {
