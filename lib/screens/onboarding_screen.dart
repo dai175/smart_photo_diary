@@ -116,7 +116,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: TextButton(
                     onPressed: _isProcessing ? null : _completeOnboarding,
                     child: Text(
-                      'スキップ',
+                      context.l10n.onboardingSkip,
                       style: AppTypography.bodyMedium.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -178,6 +178,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   List<Widget> _buildWelcomeContent() {
+    final l10n = context.l10n;
+
     return [
       // アプリアイコン
       MicroInteractions.scaleTransition(
@@ -194,7 +196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: AppSpacing.xl),
 
       Text(
-        'Smart Photo Diary\nへようこそ',
+        l10n.onboardingWelcomeTitle,
         style: AppTypography.headlineMedium.copyWith(
           fontWeight: FontWeight.bold,
           height: 1.3,
@@ -204,7 +206,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: AppSpacing.lg),
 
       Text(
-        '毎日の思い出を美しい文章に\n写真を選ぶだけで素敵な日記が完成',
+        l10n.onboardingWelcomeSubtitle,
         style: AppTypography.bodyLarge.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
           height: 1.5,
@@ -235,6 +237,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   List<Widget> _buildFeaturesContent() {
+    final l10n = context.l10n;
+
     return [
       // ステップアイコン
       Container(
@@ -256,7 +260,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         fit: BoxFit.scaleDown,
         alignment: Alignment.center,
         child: Text(
-          '3ステップで簡単日記作成',
+          l10n.onboardingThreeStepsTitle,
           maxLines: 1,
           overflow: TextOverflow.visible,
           style: AppTypography.headlineSmall.copyWith(
@@ -271,8 +275,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _buildFeatureStep(
         icon: Icons.photo_camera_rounded,
         color: AppColors.info,
-        title: 'ステップ1',
-        description: '今日撮った写真を選択',
+        title: l10n.onboardingStepTitle(1),
+        description: l10n.onboardingStep1Description,
       ),
       const SizedBox(height: AppSpacing.lg),
 
@@ -280,8 +284,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _buildFeatureStep(
         icon: Icons.auto_awesome_rounded,
         color: AppColors.primary,
-        title: 'ステップ2',
-        description: 'AIがあなたの写真から心温まる日記を作成',
+        title: l10n.onboardingStepTitle(2),
+        description: l10n.onboardingStep2Description,
       ),
       const SizedBox(height: AppSpacing.lg),
 
@@ -289,8 +293,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _buildFeatureStep(
         icon: Icons.edit_note_rounded,
         color: AppColors.success,
-        title: 'ステップ3',
-        description: '保存・編集・振り返り',
+        title: l10n.onboardingStepTitle(3),
+        description: l10n.onboardingStep3Description,
       ),
     ];
   }
@@ -337,6 +341,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   List<Widget> _buildShareContent() {
+    final l10n = context.l10n;
+
     return [
       // 共有アイコン
       Container(
@@ -354,7 +360,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         fit: BoxFit.scaleDown,
         alignment: Alignment.center,
         child: Text(
-          '写真と日記をすぐ共有',
+          l10n.onboardingShareTitle,
           maxLines: 1,
           overflow: TextOverflow.visible,
           style: AppTypography.headlineSmall.copyWith(
@@ -368,20 +374,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _buildFeatureStep(
         icon: Icons.crop_rounded,
         color: AppColors.primary,
-        title: 'フォーマット選択',
-        description: '縦長/正方形を選択',
+        title: l10n.onboardingShareFormatTitle,
+        description: l10n.onboardingShareFormatDescription,
       ),
       const SizedBox(height: AppSpacing.md),
       _buildFeatureStep(
         icon: Icons.grid_view_rounded,
         color: AppColors.info,
-        title: '複数写真にも対応',
-        description: '複数枚もバランス配置',
+        title: l10n.onboardingShareMultipleTitle,
+        description: l10n.onboardingShareMultipleDescription,
       ),
     ];
   }
 
   List<Widget> _buildPlansContent() {
+    final l10n = context.l10n;
+
     return [
       // プランアイコン
       Container(
@@ -403,7 +411,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         fit: BoxFit.scaleDown,
         alignment: Alignment.center,
         child: Text(
-          '2つのプランをご用意',
+          l10n.onboardingPlansTitle,
           maxLines: 1,
           overflow: TextOverflow.visible,
           style: AppTypography.headlineSmall.copyWith(
@@ -417,13 +425,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       // Basicプラン
       _buildPlanCard(
         title: 'Basic',
-        subtitle: '無料プラン',
+        subtitle: l10n.onboardingPlanBasicSubtitle,
         icon: Icons.photo_rounded,
         color: AppColors.secondary,
         features: [
-          '月${SubscriptionConstants.basicMonthlyAiLimit}回の日記生成',
-          '当日・前日の写真から選択',
-          '基本ライティングプロンプト',
+          l10n.onboardingPlanFeatureMonthlyLimit(
+            SubscriptionConstants.basicMonthlyAiLimit,
+          ),
+          l10n.onboardingPlanFeatureRecentPhotos,
+          l10n.onboardingPlanFeatureBasicPrompts,
         ],
       ),
       const SizedBox(height: AppSpacing.md),
@@ -439,15 +449,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         icon: Icons.star_rounded,
         color: AppColors.primary,
         features: [
-          '月${SubscriptionConstants.premiumMonthlyAiLimit}回の日記生成',
-          '過去365日間の写真から選択',
-          '豊富なライティングプロンプト',
+          l10n.onboardingPlanFeatureMonthlyLimit(
+            SubscriptionConstants.premiumMonthlyAiLimit,
+          ),
+          l10n.onboardingPlanFeaturePastDays(
+            SubscriptionConstants.subscriptionYearDays,
+          ),
+          l10n.onboardingPlanFeatureRichPrompts,
         ],
       ),
       const SizedBox(height: AppSpacing.md),
 
       Text(
-        'まずは無料で始められます',
+        l10n.onboardingPlanStartFree,
         style: AppTypography.titleMedium.copyWith(
           color: AppColors.success,
           fontWeight: FontWeight.w600,
@@ -478,6 +492,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   List<Widget> _buildPermissionContent() {
+    final l10n = context.l10n;
+
     return [
       // 権限アイコン
       Container(
@@ -495,7 +511,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         fit: BoxFit.scaleDown,
         alignment: Alignment.center,
         child: Text(
-          '写真へのアクセス許可',
+          l10n.onboardingPermissionTitle,
           maxLines: 1,
           overflow: TextOverflow.visible,
           style: AppTypography.headlineSmall.copyWith(
@@ -507,7 +523,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: AppSpacing.lg),
 
       Text(
-        '日記を作成するために\n写真ライブラリへのアクセスが必要です',
+        l10n.onboardingPermissionDescription,
         style: AppTypography.bodyLarge.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
           height: 1.5,
@@ -547,7 +563,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    'プライバシー保護',
+                    l10n.onboardingPrivacyTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: AppColors.success,
                       fontWeight: FontWeight.w600,
@@ -558,7 +574,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              '写真は日記生成時にのみ使用され、外部サーバーに保存されることはありません',
+              l10n.onboardingPrivacyDescription,
               style: AppTypography.bodyMedium.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
                 height: 1.4,
@@ -735,7 +751,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           if (_currentPage > 0)
             SecondaryButton(
               onPressed: _isProcessing ? null : _previousPage,
-              text: '戻る',
+              text: context.l10n.commonBack,
             )
           else
             const SizedBox(width: 100),
@@ -744,12 +760,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           if (_currentPage < 4)
             PrimaryButton(
               onPressed: _isProcessing ? null : _nextPage,
-              text: '次へ',
+              text: context.l10n.commonNext,
             )
           else
             PrimaryButton(
               onPressed: _isProcessing ? null : _completeOnboarding,
-              text: _isProcessing ? '準備中...' : '始める',
+              text: _isProcessing
+                  ? context.l10n.onboardingProcessing
+                  : context.l10n.onboardingStart,
             ),
         ],
       ),

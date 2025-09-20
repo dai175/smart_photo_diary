@@ -359,7 +359,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 PrimaryButton(
                   onPressed: _controller.clearAllFilters,
-                  text: 'フィルタをクリア',
+                  text: context.l10n.commonClearFilters,
                   icon: Icons.clear_all_rounded,
                 ),
               ],

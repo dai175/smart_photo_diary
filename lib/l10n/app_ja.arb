@@ -504,5 +504,364 @@
   "diaryListTitle": "日記一覧",
   "@diaryListTitle": {
     "description": "日記一覧画面のタイトル"
+  },
+  "commonBack": "戻る",
+  "@commonBack": {
+    "description": "戻るボタンの共通ラベル"
+  },
+  "commonNext": "次へ",
+  "@commonNext": {
+    "description": "次へボタンの共通ラベル"
+  },
+  "onboardingSkip": "スキップ",
+  "@onboardingSkip": {
+    "description": "オンボーディングで表示するスキップボタン"
+  },
+  "onboardingWelcomeTitle": "Smart Photo Diary\nへようこそ",
+  "@onboardingWelcomeTitle": {
+    "description": "オンボーディング初回ページの見出し"
+  },
+  "onboardingWelcomeSubtitle": "毎日の思い出を美しい文章に。写真を選ぶだけで素敵な日記が完成します。",
+  "@onboardingWelcomeSubtitle": {
+    "description": "アプリ概要を説明するサブヘッダー"
+  },
+  "onboardingThreeStepsTitle": "3ステップで簡単日記作成",
+  "@onboardingThreeStepsTitle": {
+    "description": "3ステップの流れを紹介するタイトル"
+  },
+  "onboardingStepTitle": "ステップ{step}",
+  "@onboardingStepTitle": {
+    "description": "各ステップのラベル",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingStep1Description": "今日撮った写真を選択",
+  "@onboardingStep1Description": {
+    "description": "ステップ1の説明文"
+  },
+  "onboardingStep2Description": "AIが写真から心温まる日記を作成",
+  "@onboardingStep2Description": {
+    "description": "ステップ2の説明文"
+  },
+  "onboardingStep3Description": "保存・編集して思い出を振り返り",
+  "@onboardingStep3Description": {
+    "description": "ステップ3の説明文"
+  },
+  "onboardingShareTitle": "写真と日記をすぐ共有",
+  "@onboardingShareTitle": {
+    "description": "共有紹介ページのタイトル"
+  },
+  "onboardingShareFormatTitle": "フォーマットを選択",
+  "@onboardingShareFormatTitle": {
+    "description": "共有フォーマットのタイトル"
+  },
+  "onboardingShareFormatDescription": "縦長・正方形レイアウトに対応",
+  "@onboardingShareFormatDescription": {
+    "description": "共有フォーマットの説明文"
+  },
+  "onboardingShareMultipleTitle": "複数写真にも対応",
+  "@onboardingShareMultipleTitle": {
+    "description": "複数写真対応を説明するタイトル"
+  },
+  "onboardingShareMultipleDescription": "複数枚でもバランスよく配置",
+  "@onboardingShareMultipleDescription": {
+    "description": "複数写真対応の説明文"
+  },
+  "onboardingPlansTitle": "ライフスタイルに合わせてプランを選択",
+  "@onboardingPlansTitle": {
+    "description": "プラン紹介ページのタイトル"
+  },
+  "onboardingPlanBasicSubtitle": "無料プラン",
+  "@onboardingPlanBasicSubtitle": {
+    "description": "Basicプランカードのサブタイトル"
+  },
+  "onboardingPlanFeatureMonthlyLimit": "月{count}回まで日記を生成",
+  "@onboardingPlanFeatureMonthlyLimit": {
+    "description": "月間AI生成上限を説明する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingPlanFeatureRecentPhotos": "当日・前日の写真から選べる",
+  "@onboardingPlanFeatureRecentPhotos": {
+    "description": "直近写真を選択できることを説明する文"
+  },
+  "onboardingPlanFeatureBasicPrompts": "基本的なライティングプロンプト付き",
+  "@onboardingPlanFeatureBasicPrompts": {
+    "description": "基本プロンプトが利用可能なことを説明する文"
+  },
+  "onboardingPlanFeaturePastDays": "過去{days}日以内の写真から選択可能",
+  "@onboardingPlanFeaturePastDays": {
+    "description": "過去日数の写真から選べることを説明する文",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingPlanFeatureRichPrompts": "豊富なライティングプロンプトを利用",
+  "@onboardingPlanFeatureRichPrompts": {
+    "description": "Premiumで利用できるプロンプトを説明する文"
+  },
+  "onboardingPlanStartFree": "まずは無料で始められます",
+  "@onboardingPlanStartFree": {
+    "description": "無料で始められることを伝えるメッセージ"
+  },
+  "onboardingPermissionTitle": "写真へのアクセス許可",
+  "@onboardingPermissionTitle": {
+    "description": "権限ページのタイトル"
+  },
+  "onboardingPermissionDescription": "日記を作成するために写真ライブラリへのアクセスが必要です。",
+  "@onboardingPermissionDescription": {
+    "description": "写真アクセス権限の必要理由を説明する文"
+  },
+  "onboardingPrivacyTitle": "プライバシーを最優先",
+  "@onboardingPrivacyTitle": {
+    "description": "プライバシー保護を説明するタイトル"
+  },
+  "onboardingPrivacyDescription": "写真は日記生成時にのみ使用され、外部サーバーに保存されることはありません。",
+  "@onboardingPrivacyDescription": {
+    "description": "プライバシー保護方針の説明文"
+  },
+  "onboardingProcessing": "準備中...",
+  "@onboardingProcessing": {
+    "description": "オンボーディング完了処理中の表示文"
+  },
+  "onboardingStart": "始める",
+  "@onboardingStart": {
+    "description": "オンボーディングを完了するボタン"
+  },
+  "commonSave": "保存",
+  "@commonSave": {
+    "description": "保存ボタンの共通ラベル"
+  },
+  "commonShare": "共有",
+  "@commonShare": {
+    "description": "共有ボタンの共通ラベル"
+  },
+  "commonDelete": "削除",
+  "@commonDelete": {
+    "description": "削除ボタンの共通ラベル"
+  },
+  "commonEdit": "編集",
+  "@commonEdit": {
+    "description": "編集ボタンの共通ラベル"
+  },
+  "commonErrorOccurred": "エラーが発生しました",
+  "@commonErrorOccurred": {
+    "description": "エラー発生時の共通タイトル"
+  },
+  "commonErrorWithMessage": "エラー: {message}",
+  "@commonErrorWithMessage": {
+    "description": "エラー文言にメッセージを埋め込む",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPreparing": "準備しています...",
+  "@commonPreparing": {
+    "description": "準備中を示す共通ラベル"
+  },
+  "commonShareFailedWithReason": "共有に失敗しました: {reason}",
+  "@commonShareFailedWithReason": {
+    "description": "共有に失敗した際のメッセージ",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnexpectedErrorWithDetails": "予期しないエラーが発生しました: {details}",
+  "@commonUnexpectedErrorWithDetails": {
+    "description": "予期しないエラー発生時のメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "commonTitleLabel": "タイトル",
+  "@commonTitleLabel": {
+    "description": "タイトル項目のラベル"
+  },
+  "commonBodyLabel": "本文",
+  "@commonBodyLabel": {
+    "description": "本文項目のラベル"
+  },
+  "commonTagsLabel": "タグ: ",
+  "@commonTagsLabel": {
+    "description": "タグ項目のラベル"
+  },
+  "commonClearFilters": "フィルタをクリア",
+  "@commonClearFilters": {
+    "description": "適用中のフィルタをすべて解除するボタンラベル"
+  },
+  "commonCreatedAtLabel": "作成日時",
+  "@commonCreatedAtLabel": {
+    "description": "作成日時のラベル"
+  },
+  "commonUpdatedAtLabel": "更新日時",
+  "@commonUpdatedAtLabel": {
+    "description": "更新日時のラベル"
+  },
+  "diaryDetailViewTitle": "日記の詳細",
+  "@diaryDetailViewTitle": {
+    "description": "日記詳細画面のタイトル"
+  },
+  "diaryDetailEditTitle": "日記を編集",
+  "@diaryDetailEditTitle": {
+    "description": "日記編集時のタイトル"
+  },
+  "diaryDetailContentHeading": "日記の内容",
+  "@diaryDetailContentHeading": {
+    "description": "日記本文セクションの見出し"
+  },
+  "diaryDetailLoadingTitle": "日記を読み込み中...",
+  "@diaryDetailLoadingTitle": {
+    "description": "日記読み込み中に表示するタイトル"
+  },
+  "diaryDetailLoadingSubtitle": "日記の内容と写真を取得しています",
+  "@diaryDetailLoadingSubtitle": {
+    "description": "日記読み込み中に表示する補足文"
+  },
+  "diaryDetailDateLabel": "日記の日付",
+  "@diaryDetailDateLabel": {
+    "description": "日記の日付を示すラベル"
+  },
+  "diaryDetailPhotosSectionTitle": "写真 ({count}枚)",
+  "@diaryDetailPhotosSectionTitle": {
+    "description": "写真セクションのタイトル",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryDetailTagCount": "{count}個のタグ",
+  "@diaryDetailTagCount": {
+    "description": "タグ数を表示する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryDetailTitleHint": "日記のタイトルを入力",
+  "@diaryDetailTitleHint": {
+    "description": "日記タイトル入力欄のヒント"
+  },
+  "diaryDetailContentHint": "日記の内容を入力してください",
+  "@diaryDetailContentHint": {
+    "description": "日記本文入力欄のヒント"
+  },
+  "diaryDetailMetadataTitle": "詳細情報",
+  "@diaryDetailMetadataTitle": {
+    "description": "メタデータセクションの見出し"
+  },
+  "diaryDetailDeleteDialogTitle": "日記の削除",
+  "@diaryDetailDeleteDialogTitle": {
+    "description": "日記削除確認ダイアログのタイトル"
+  },
+  "diaryDetailDeleteDialogMessage": "この日記を削除してもよろしいですか？\nこの操作は元に戻せません。",
+  "@diaryDetailDeleteDialogMessage": {
+    "description": "日記削除時の警告メッセージ"
+  },
+  "diaryDetailUpdateError": "日記の更新に失敗しました: {details}",
+  "@diaryDetailUpdateError": {
+    "description": "日記更新に失敗した際のメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryDetailDeleteError": "日記の削除に失敗しました: {details}",
+  "@diaryDetailDeleteError": {
+    "description": "日記削除に失敗した際のメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryDetailShareDialogMessage": "どの形式で共有しますか？",
+  "@diaryDetailShareDialogMessage": {
+    "description": "共有オプション選択時のメッセージ"
+  },
+  "diaryDetailShareTextOptionTitle": "写真と日記テキスト",
+  "@diaryDetailShareTextOptionTitle": {
+    "description": "テキスト共有オプションのタイトル"
+  },
+  "diaryDetailShareTextOptionSubtitle": "X（旧Twitter）向け",
+  "@diaryDetailShareTextOptionSubtitle": {
+    "description": "テキスト共有オプションのサブタイトル"
+  },
+  "diaryDetailShareImageOptionTitle": "写真と日記を画像に",
+  "@diaryDetailShareImageOptionTitle": {
+    "description": "画像共有オプションのタイトル"
+  },
+  "diaryDetailSharePortraitSubtitle": "Instagram向け（縦長）",
+  "@diaryDetailSharePortraitSubtitle": {
+    "description": "縦長画像を示すサブタイトル"
+  },
+  "diaryDetailShareSquareSubtitle": "Instagram向け（正方形）",
+  "@diaryDetailShareSquareSubtitle": {
+    "description": "正方形画像を示すサブタイトル"
+  },
+  "diaryDetailSharePreparingTitle": "共有準備中",
+  "@diaryDetailSharePreparingTitle": {
+    "description": "共有準備ダイアログのタイトル"
+  },
+  "diaryDetailShareGeneratingBody": "共有用画像を生成しています...",
+  "@diaryDetailShareGeneratingBody": {
+    "description": "共有用画像生成中のメッセージ"
+  },
+  "statisticsLoadingTitle": "統計データを読み込み中...",
+  "@statisticsLoadingTitle": {
+    "description": "統計データ読み込み中に表示するタイトル"
+  },
+  "statisticsLoadingSubtitle": "あなたの日記の記録を分析しています",
+  "@statisticsLoadingSubtitle": {
+    "description": "統計データ読み込み中に表示する補足文"
+  },
+  "statisticsTotalEntriesTitle": "総記録数",
+  "@statisticsTotalEntriesTitle": {
+    "description": "総日記件数を示すラベル"
+  },
+  "statisticsCurrentStreakTitle": "連続記録数",
+  "@statisticsCurrentStreakTitle": {
+    "description": "現在の連続記録日数ラベル"
+  },
+  "statisticsLongestStreakTitle": "最長連続記録",
+  "@statisticsLongestStreakTitle": {
+    "description": "最長連続記録日数ラベル"
+  },
+  "statisticsMonthlyCountTitle": "今月の記録",
+  "@statisticsMonthlyCountTitle": {
+    "description": "今月の記録日数ラベル"
+  },
+  "statisticsUnitDiary": "日記",
+  "@statisticsUnitDiary": {
+    "description": "日記件数の単位"
+  },
+  "statisticsUnitDay": "日",
+  "@statisticsUnitDay": {
+    "description": "日数の単位"
+  },
+  "statisticsDiaryCountMessage": "{count}件の日記があります",
+  "@statisticsDiaryCountMessage": {
+    "description": "選択した日に存在する日記数を案内する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

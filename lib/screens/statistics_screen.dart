@@ -206,11 +206,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final l10n = context.l10n;
         return CustomDialog(
           icon: AppIcons.calendarToday,
           iconColor: Theme.of(context).colorScheme.primary,
-          title: context.l10n.formatFullDate(selectedDay),
-          message: '${diaries.length}件の日記があります',
+          title: l10n.formatFullDate(selectedDay),
+          message: l10n.statisticsDiaryCountMessage(diaries.length),
           content: ConstrainedBox(
             constraints: const BoxConstraints(
               maxHeight: DialogConstants.listMaxHeight,
@@ -221,7 +222,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               itemCount: diaries.length,
               itemBuilder: (context, index) {
                 final diary = diaries[index];
-                final title = diary.title.isNotEmpty ? diary.title : '無題';
+                final title = diary.title.isNotEmpty
+                    ? diary.title
+                    : l10n.diaryCardUntitled;
 
                 return SlideInWidget(
                   delay: Duration(milliseconds: 100 * index),
@@ -324,7 +327,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
           actions: [
             CustomDialogAction(
-              text: '閉じる',
+              text: l10n.commonClose,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -335,10 +338,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('統計'),
+        title: Text(l10n.navigationStatistics),
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -369,14 +373,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       Text(
-                        '統計データを読み込み中...',
+                        l10n.statisticsLoadingTitle,
                         style: AppTypography.titleLarge.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'あなたの日記の記録を分析しています',
+                        l10n.statisticsLoadingSubtitle,
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -415,6 +419,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildStatisticsCards() {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -424,9 +429,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SlideInWidget(
                 delay: const Duration(milliseconds: 100),
                 child: _buildStatCard(
-                  '総記録数',
+                  l10n.statisticsTotalEntriesTitle,
                   '$_totalEntries',
-                  '日記',
+                  l10n.statisticsUnitDiary,
                   AppIcons.statisticsTotal,
                   AppColors.primary,
                 ),
@@ -437,9 +442,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SlideInWidget(
                 delay: const Duration(milliseconds: 150),
                 child: _buildStatCard(
-                  '連続記録数',
+                  l10n.statisticsCurrentStreakTitle,
                   '$_currentStreak',
-                  '日',
+                  l10n.statisticsUnitDay,
                   AppIcons.statisticsStreak,
                   AppColors.error,
                 ),
@@ -454,9 +459,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SlideInWidget(
                 delay: const Duration(milliseconds: 200),
                 child: _buildStatCard(
-                  '最長連続記録',
+                  l10n.statisticsLongestStreakTitle,
                   '$_longestStreak',
-                  '日',
+                  l10n.statisticsUnitDay,
                   AppIcons.statisticsRecord,
                   AppColors.warning,
                 ),
@@ -467,9 +472,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: SlideInWidget(
                 delay: const Duration(milliseconds: 250),
                 child: _buildStatCard(
-                  '今月の記録',
+                  l10n.statisticsMonthlyCountTitle,
                   '${_getMonthlyCount()}',
-                  '日記',
+                  l10n.statisticsUnitDiary,
                   AppIcons.statisticsMonth,
                   AppColors.success,
                 ),
