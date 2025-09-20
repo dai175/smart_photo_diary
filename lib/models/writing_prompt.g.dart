@@ -26,13 +26,19 @@ class WritingPromptAdapter extends TypeAdapter<WritingPrompt> {
       priority: fields[6] as int,
       createdAt: fields[7] as DateTime?,
       isActive: fields[8] as bool,
+      localizedTexts: (fields[9] as Map?)?.cast<String, String>(),
+      localizedDescriptions: (fields[10] as Map?)?.cast<String, String>(),
+      localizedTags: (fields[11] as Map?)?.map(
+        (dynamic k, dynamic v) =>
+            MapEntry(k as String, (v as List).cast<String>()),
+      ),
     );
   }
 
   @override
   void write(BinaryWriter writer, WritingPrompt obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +56,13 @@ class WritingPromptAdapter extends TypeAdapter<WritingPrompt> {
       ..writeByte(7)
       ..write(obj.createdAt)
       ..writeByte(8)
-      ..write(obj.isActive);
+      ..write(obj.isActive)
+      ..writeByte(9)
+      ..write(obj.localizedTexts)
+      ..writeByte(10)
+      ..write(obj.localizedDescriptions)
+      ..writeByte(11)
+      ..write(obj.localizedTags);
   }
 
   @override

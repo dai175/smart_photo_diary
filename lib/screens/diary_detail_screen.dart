@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:typed_data';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/social_share_service_interface.dart';
 import '../core/service_registration.dart';
-import '../constants/app_constants.dart';
 import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -16,6 +14,8 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../core/service_locator.dart';
+import '../constants/app_constants.dart';
+import '../localization/localization_extensions.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -65,7 +65,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     super.initState();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
-    _loadDiaryEntry();
+    // ローカライズへの依存をinitState完了後に解決するため初回ロードはフレーム後に実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadDiaryEntry();
+      }
+    });
   }
 
   @override
@@ -89,11 +94,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       // 日記エントリーを取得
       final entry = await diaryService.getDiaryEntry(widget.diaryId);
 
+      if (!mounted) return;
+
       if (entry == null) {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = AppConstants.diaryNotFoundMessage;
+          _errorMessage = context.l10n.diaryNotFoundMessage;
         });
         return;
       }
@@ -109,10 +116,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+      final l10n = context.l10n;
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '${AppConstants.diaryLoadErrorMessage}: $e';
+        _errorMessage = '${l10n.diaryLoadErrorMessage}: $e';
       });
     }
   }
@@ -150,19 +159,20 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
         // 更新成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text(AppConstants.diaryUpdateSuccessMessage)),
+          SnackBar(content: Text(context.l10n.diaryUpdateSuccessMessage)),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = context.l10n;
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = '日記の更新に失敗しました: $e';
+          _errorMessage = l10n.diaryDetailUpdateError('$e');
         });
 
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('エラー: $_errorMessage')),
+          SnackBar(content: Text(l10n.commonErrorWithMessage(_errorMessage))),
         );
       }
     }
@@ -173,15 +183,16 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     // BuildContextを保存
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final l10n = context.l10n;
 
     if (_diaryEntry == null) return;
 
     // 確認ダイアログを表示
     final confirmed = await DialogUtils.showConfirmationDialog(
       context,
-      '日記の削除',
-      'この日記を削除してもよろしいですか？\nこの操作は元に戻せません。',
-      confirmText: '削除',
+      l10n.diaryDetailDeleteDialogTitle,
+      l10n.diaryDetailDeleteDialogMessage,
+      confirmText: l10n.commonDelete,
       isDestructive: true,
     );
 
@@ -201,7 +212,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       if (mounted) {
         // 削除成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text(AppConstants.diaryDeleteSuccessMessage)),
+          SnackBar(content: Text(context.l10n.diaryDeleteSuccessMessage)),
         );
 
         // 前の画面に戻る（削除成功を示すフラグを返す）
@@ -212,11 +223,11 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = '日記の削除に失敗しました: $e';
+          _errorMessage = l10n.diaryDetailDeleteError('$e');
         });
 
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('エラー: $_errorMessage')),
+          SnackBar(content: Text(l10n.commonErrorWithMessage(_errorMessage))),
         );
       }
     }
@@ -228,56 +239,59 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
     final result = await showDialog<ShareFormat>(
       context: context,
-      builder: (context) => CustomDialog(
-        title: '共有',
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('どの形式で共有しますか？', style: AppTypography.bodyLarge),
-            const SizedBox(height: AppSpacing.lg),
-            // X（旧Twitter）へ直接共有
-            _buildShareOption(
-              format: ShareFormat.square,
-              title: '写真と日記テキスト',
-              subtitle: 'X（旧Twitter）向け',
-              icon: Icons.share_rounded,
-              onTap: () async {
-                Navigator.of(context).pop();
-                await _shareToX();
-              },
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            // 縦長オプション
-            _buildShareOption(
-              format: ShareFormat.portrait,
-              title: '写真と日記を画像に',
-              subtitle: 'Instagram向け（縦長）',
-              icon: Icons.crop_portrait_rounded,
-              onTap: () {
-                Navigator.of(context).pop(ShareFormat.portrait);
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // 正方形オプション
-            _buildShareOption(
-              format: ShareFormat.square,
-              title: '写真と日記を画像に',
-              subtitle: 'Instagram向け（正方形）',
-              icon: Icons.crop_din_rounded,
-              onTap: () {
-                Navigator.of(context).pop(ShareFormat.square);
-              },
+      builder: (dialogContext) {
+        final l10n = dialogContext.l10n;
+        return CustomDialog(
+          title: l10n.commonShare,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.diaryDetailShareDialogMessage,
+                style: AppTypography.bodyLarge,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _buildShareOption(
+                format: ShareFormat.square,
+                title: l10n.diaryDetailShareTextOptionTitle,
+                subtitle: l10n.diaryDetailShareTextOptionSubtitle,
+                icon: Icons.share_rounded,
+                onTap: () async {
+                  Navigator.of(dialogContext).pop();
+                  await _shareToX();
+                },
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _buildShareOption(
+                format: ShareFormat.portrait,
+                title: l10n.diaryDetailShareImageOptionTitle,
+                subtitle: l10n.diaryDetailSharePortraitSubtitle,
+                icon: Icons.crop_portrait_rounded,
+                onTap: () {
+                  Navigator.of(dialogContext).pop(ShareFormat.portrait);
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildShareOption(
+                format: ShareFormat.square,
+                title: l10n.diaryDetailShareImageOptionTitle,
+                subtitle: l10n.diaryDetailShareSquareSubtitle,
+                icon: Icons.crop_din_rounded,
+                onTap: () {
+                  Navigator.of(dialogContext).pop(ShareFormat.square);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            CustomDialogAction(
+              text: l10n.commonCancel,
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
           ],
-        ),
-        actions: [
-          CustomDialogAction(
-            text: 'キャンセル',
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
+        );
+      },
     );
 
     if (result != null) {
@@ -366,20 +380,25 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final shareOrigin = _resolveShareOrigin();
+    final l10n = context.l10n;
 
     try {
       // ローディングダイアログを表示
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) {
+        builder: (dialogContext) {
+          final dialogL10n = dialogContext.l10n;
           return CustomDialog(
-            title: '共有準備中',
+            title: dialogL10n.diaryDetailSharePreparingTitle,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: AppSpacing.md),
-                Text('準備しています...', style: AppTypography.bodyLarge),
+                Text(
+                  dialogL10n.commonPreparing,
+                  style: AppTypography.bodyLarge,
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 const Center(child: CircularProgressIndicator(strokeWidth: 3)),
               ],
@@ -404,7 +423,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         },
         (error) {
           scaffoldMessenger.showSnackBar(
-            SnackBar(content: Text('共有に失敗しました: ${error.message}')),
+            SnackBar(
+              content: Text(l10n.commonShareFailedWithReason(error.message)),
+            ),
           );
         },
       );
@@ -412,7 +433,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       // ローディングダイアログを閉じる
       if (mounted) navigator.pop();
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('予期しないエラーが発生しました: $e')),
+        SnackBar(content: Text(l10n.commonUnexpectedErrorWithDetails('$e'))),
       );
     }
   }
@@ -423,21 +444,22 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final shareOrigin = _resolveShareOrigin();
+    final l10n = context.l10n;
 
     try {
       // ローディング表示
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => CustomDialog(
-          title: '共有準備中',
+        builder: (dialogContext) => CustomDialog(
+          title: dialogContext.l10n.diaryDetailSharePreparingTitle,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const CircularProgressIndicator(),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                '共有用画像を生成しています...',
+                dialogContext.l10n.diaryDetailShareGeneratingBody,
                 style: AppTypography.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -468,7 +490,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           // エラーメッセージ
           scaffoldMessenger.showSnackBar(
             SnackBar(
-              content: Text('共有に失敗しました: ${error.message}'),
+              content: Text(l10n.commonShareFailedWithReason(error.message)),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -480,7 +502,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('予期しないエラーが発生しました: $e'),
+          content: Text(l10n.commonUnexpectedErrorWithDetails('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -489,10 +511,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(_isEditing ? '日記を編集' : '日記の詳細'),
+        title: Text(
+          _isEditing ? l10n.diaryDetailEditTitle : l10n.diaryDetailViewTitle,
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -514,7 +539,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 Icons.share_rounded,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
-              tooltip: '共有',
+              tooltip: l10n.commonShare,
             ),
           // 編集モード切替ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)
@@ -533,7 +558,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 _isEditing ? Icons.check_rounded : Icons.edit_rounded,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
-              tooltip: _isEditing ? '保存' : '編集',
+              tooltip: _isEditing ? l10n.commonSave : l10n.commonEdit,
             ),
           // 削除ボタン
           if (!_isLoading && !_hasError && _diaryEntry != null)
@@ -548,7 +573,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 Icons.delete_rounded,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
-              tooltip: '削除',
+              tooltip: l10n.commonDelete,
             ),
         ],
       ),
@@ -570,10 +595,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         child: const CircularProgressIndicator(strokeWidth: 3),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text('日記を読み込み中...', style: AppTypography.titleLarge),
+                      Text(
+                        l10n.diaryDetailLoadingTitle,
+                        style: AppTypography.titleLarge,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        '日記の内容と写真を取得しています',
+                        l10n.diaryDetailLoadingSubtitle,
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -606,7 +634,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text('エラーが発生しました', style: AppTypography.titleLarge),
+                      Text(
+                        l10n.commonErrorOccurred,
+                        style: AppTypography.titleLarge,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         _errorMessage,
@@ -618,7 +649,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       PrimaryButton(
                         onPressed: () => Navigator.pop(context),
-                        text: '戻る',
+                        text: l10n.commonBack,
                         icon: Icons.arrow_back_rounded,
                       ),
                     ],
@@ -649,10 +680,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text('日記が見つかりません', style: AppTypography.titleLarge),
+                      Text(
+                        l10n.diaryNotFoundMessage,
+                        style: AppTypography.titleLarge,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        AppConstants.diaryNotFoundMessage,
+                        context.l10n.diaryNotFoundMessage,
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -661,7 +695,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       PrimaryButton(
                         onPressed: () => Navigator.pop(context),
-                        text: '戻る',
+                        text: l10n.commonBack,
                         icon: Icons.arrow_back_rounded,
                       ),
                     ],
@@ -700,7 +734,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                             _contentController.text = _diaryEntry!.content;
                           });
                         },
-                        text: 'キャンセル',
+                        text: l10n.commonCancel,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
@@ -708,7 +742,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       flex: 1,
                       child: PrimaryButton(
                         onPressed: _updateDiary,
-                        text: '保存',
+                        text: l10n.commonSave,
                         icon: Icons.save_rounded,
                       ),
                     ),
@@ -721,6 +755,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   Widget _buildDiaryDetail() {
+    final l10n = context.l10n;
     return SingleChildScrollView(
       padding: AppSpacing.screenPadding,
       child: Column(
@@ -756,14 +791,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '日記の日付',
+                          l10n.diaryDetailDateLabel,
                           style: AppTypography.withColor(
                             AppTypography.labelMedium,
                             Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                         ),
                         Text(
-                          DateFormat('yyyy年MM月dd日').format(_diaryEntry!.date),
+                          context.l10n.formatFullDate(_diaryEntry!.date),
                           style: AppTypography.withColor(
                             AppTypography.titleLarge,
                             Theme.of(context).colorScheme.onPrimaryContainer,
@@ -792,7 +827,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Text(
-                            '${(_diaryEntry!.tags?.length ?? 0)}個のタグ',
+                            l10n.diaryDetailTagCount(
+                              _diaryEntry!.tags?.length ?? 0,
+                            ),
                             style: AppTypography.labelSmall.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
@@ -824,7 +861,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
-                          '写真 (${_photoAssets.length}枚)',
+                          l10n.diaryDetailPhotosSectionTitle(
+                            _photoAssets.length,
+                          ),
                           style: AppTypography.titleLarge,
                         ),
                       ],
@@ -870,7 +909,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
-                        _isEditing ? '日記を編集' : '日記の内容',
+                        _isEditing
+                            ? l10n.diaryDetailEditTitle
+                            : l10n.diaryDetailContentHeading,
                         style: AppTypography.titleLarge,
                       ),
                     ],
@@ -895,9 +936,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                             decoration: InputDecoration(
-                              labelText: 'タイトル',
+                              labelText: l10n.commonTitleLabel,
                               border: InputBorder.none,
-                              hintText: '日記のタイトルを入力',
+                              hintText: l10n.diaryDetailTitleHint,
                               contentPadding: AppSpacing.inputPadding,
                               labelStyle: AppTypography.labelMedium,
                               hintStyle: AppTypography.bodyMedium.copyWith(
@@ -912,7 +953,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'タイトル',
+                              l10n.commonTitleLabel,
                               style: AppTypography.labelMedium.copyWith(
                                 color: Theme.of(
                                   context,
@@ -923,7 +964,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                             Text(
                               _diaryEntry!.title.isNotEmpty
                                   ? _diaryEntry!.title
-                                  : '無題',
+                                  : l10n.diaryCardUntitled,
                               style: AppTypography.titleMedium.copyWith(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
@@ -954,9 +995,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                             decoration: InputDecoration(
-                              labelText: '本文',
+                              labelText: l10n.commonBodyLabel,
                               border: InputBorder.none,
-                              hintText: '日記の内容を入力してください',
+                              hintText: l10n.diaryDetailContentHint,
                               contentPadding: AppSpacing.inputPadding,
                               labelStyle: AppTypography.labelMedium,
                               hintStyle: AppTypography.bodyMedium.copyWith(
@@ -972,7 +1013,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '本文',
+                              l10n.commonBodyLabel,
                               style: AppTypography.labelMedium.copyWith(
                                 color: Theme.of(
                                   context,
@@ -1011,7 +1052,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
-                        '詳細情報',
+                        l10n.diaryDetailMetadataTitle,
                         style: AppTypography.titleMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -1020,18 +1061,14 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _buildMetadataRow(
-                    '作成日時',
-                    DateFormat(
-                      'yyyy年MM月dd日 HH:mm',
-                    ).format(_diaryEntry!.createdAt),
+                    l10n.commonCreatedAtLabel,
+                    context.l10n.formatFullDateTime(_diaryEntry!.createdAt),
                     Icons.access_time_rounded,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _buildMetadataRow(
-                    '更新日時',
-                    DateFormat(
-                      'yyyy年MM月dd日 HH:mm',
-                    ).format(_diaryEntry!.updatedAt),
+                    l10n.commonUpdatedAtLabel,
+                    context.l10n.formatFullDateTime(_diaryEntry!.updatedAt),
                     Icons.update_rounded,
                   ),
                   if ((_diaryEntry!.tags?.isNotEmpty ?? false)) ...[
@@ -1141,6 +1178,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   Widget _buildTagsRow() {
+    final l10n = context.l10n;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1151,7 +1189,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
-          'タグ: ',
+          l10n.commonTagsLabel,
           style: AppTypography.labelMedium.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),

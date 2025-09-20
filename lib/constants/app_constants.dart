@@ -54,28 +54,6 @@ class AppConstants {
   // 空状態表示
   static const double emptyStateIconSize = 64.0;
 
-  // メッセージ
-  static const String appTitle = 'Smart Photo Diary';
-  static const String newPhotosTitle = '新しい写真';
-  static const String recentDiariesTitle = '最近の日記';
-  static const String noPhotosMessage = '写真が見つかりませんでした';
-  static const String noDiariesMessage = '保存された日記がありません';
-  static const String permissionMessage = '写真へのアクセス権限が必要です';
-  static const String requestPermissionButton = '権限をリクエスト';
-  static const String selectionLimitMessage = '一度に選択できる写真は3枚までです';
-  static const String usedPhotoMessage = 'この写真はすでに日記で使用されています';
-  static const String usedPhotoLabel = '使用済み';
-  static const String okButton = 'OK';
-
-  // エラーメッセージ
-  static const String diaryNotFoundMessage = '日記が見つかりませんでした';
-  static const String diaryLoadErrorMessage = '日記の読み込みに失敗しました';
-  static const String diaryUpdateSuccessMessage = '日記を更新しました';
-  static const String diaryDeleteSuccessMessage = '日記を削除しました';
-
-  // ナビゲーション
-  static const List<String> navigationLabels = ['ホーム', '日記', '統計', '設定'];
-
   // アイコン（AppIconsから参照）
   static const List<IconData> navigationIcons = AppIcons.navigationIcons;
 

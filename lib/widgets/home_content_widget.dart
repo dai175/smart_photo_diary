@@ -9,6 +9,7 @@ import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
 import '../controllers/scroll_signal.dart';
+import '../localization/localization_extensions.dart';
 
 /// ホーム画面のメインコンテンツウィジェット
 ///
@@ -69,9 +70,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Text(
-        '${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
-      ),
+      title: Text(context.l10n.formatFullDate(DateTime.now())),
       centerTitle: false,
       // ダークテーマ時は primary が淡色のため、タイトル/アイコンは onPrimary を明示
       backgroundColor: colorScheme.primary,
@@ -88,7 +87,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           child: IconButton(
             icon: Icon(Icons.analytics_rounded, color: colorScheme.onPrimary),
             onPressed: () => _showUsageStatus(context),
-            tooltip: 'AI生成の使用状況',
+            tooltip: context.l10n.usageStatusDialogTitle,
           ),
         ),
       ],
@@ -159,8 +158,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           await showDialog<void>(
             context: context,
             builder: (context) => PresetDialogs.error(
-              title: '使用状況を取得できませんでした',
-              message: 'しばらく時間をおいてから再度お試しください。',
+              context: context,
+              title: context.l10n.usageStatusFetchErrorTitle,
+              message: context.l10n.commonTryAgainLater,
               onConfirm: () => Navigator.of(context).pop(),
             ),
           );
@@ -182,6 +182,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           context: context,
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageStatus(
+            context: context,
             planName: plan.displayName,
             used: used.clamp(0, limit),
             limit: limit,
@@ -202,8 +203,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         await showDialog<void>(
           context: context,
           builder: (context) => PresetDialogs.error(
-            title: 'エラーが発生しました',
-            message: '使用状況の取得中にエラーが発生しました。',
+            context: context,
+            title: context.l10n.commonErrorTitle,
+            message: context.l10n.usageStatusFetchErrorMessage,
             onConfirm: () => Navigator.of(context).pop(),
           ),
         );

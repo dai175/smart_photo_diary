@@ -9,6 +9,18 @@ import '../ui/design_system/app_colors.dart';
 
 /// プロンプトカテゴリユーティリティ
 class PromptCategoryUtils {
+  static const Map<PromptCategory, String> _englishCategoryNames = {
+    PromptCategory.emotion: 'Emotion',
+    PromptCategory.emotionDepth: 'Deep Emotion',
+    PromptCategory.sensoryEmotion: 'Sensory Emotion',
+    PromptCategory.emotionGrowth: 'Emotional Growth',
+    PromptCategory.emotionConnection: 'Emotional Connection',
+    PromptCategory.emotionDiscovery: 'Emotional Discovery',
+    PromptCategory.emotionFantasy: 'Emotional Imagination',
+    PromptCategory.emotionHealing: 'Emotional Healing',
+    PromptCategory.emotionEnergy: 'Emotional Energy',
+  };
+
   /// プラン別に利用可能なカテゴリを取得（感情深掘り型対応）
   ///
   /// [isPremium] Premium プランかどうか
@@ -268,8 +280,18 @@ class PromptCategoryUtils {
   /// カテゴリの表示名を取得
   ///
   /// [category] 対象カテゴリ
-  /// 戻り値: カテゴリの日本語表示名
-  static String getCategoryDisplayName(PromptCategory category) {
+  /// [locale] 対象ロケール（省略時は日本語）
+  /// 戻り値: カテゴリのローカライズ済み表示名
+  static String getCategoryDisplayName(
+    PromptCategory category, {
+    Locale? locale,
+  }) {
+    final languageCode = locale?.languageCode.toLowerCase();
+
+    if (languageCode == 'en') {
+      return _englishCategoryNames[category] ?? category.displayName;
+    }
+
     return category.displayName;
   }
 

@@ -144,7 +144,7 @@ void main() {
       test('価格フォーマット関数が正しく動作する', () {
         // 日本円のフォーマット
         expect(InAppPurchaseConfig.formatPrice(300, 'JPY'), equals('¥300'));
-        expect(InAppPurchaseConfig.formatPrice(2800, 'JPY'), equals('¥2800'));
+        expect(InAppPurchaseConfig.formatPrice(2800, 'JPY'), equals('¥2,800'));
 
         // USドルのフォーマット
         expect(InAppPurchaseConfig.formatPrice(2.99, 'USD'), equals('\$2.99'));

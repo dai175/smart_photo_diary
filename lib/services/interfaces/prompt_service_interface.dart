@@ -3,6 +3,8 @@
 // ライティングプロンプト管理の抽象化レイヤー
 // テスト容易性とモックサポートを提供
 
+import 'dart:ui';
+
 import '../../models/writing_prompt.dart';
 import '../analytics/prompt_usage_analytics.dart';
 import '../analytics/category_popularity_reporter.dart';
@@ -20,13 +22,16 @@ abstract class IPromptService {
   /// 全プロンプトを取得
   ///
   /// 戻り値: 全プロンプトのリスト
-  List<WritingPrompt> getAllPrompts();
+  List<WritingPrompt> getAllPrompts({Locale? locale});
 
   /// プラン別にフィルタリングしたプロンプトを取得
   ///
   /// [isPremium] Premiumプランかどうか
   /// 戻り値: プラン別にフィルタリングされたプロンプト
-  List<WritingPrompt> getPromptsForPlan({required bool isPremium});
+  List<WritingPrompt> getPromptsForPlan({
+    required bool isPremium,
+    Locale? locale,
+  });
 
   /// カテゴリ別プロンプトを取得
   ///
@@ -36,6 +41,7 @@ abstract class IPromptService {
   List<WritingPrompt> getPromptsByCategory(
     PromptCategory category, {
     required bool isPremium,
+    Locale? locale,
   });
 
   /// ランダムプロンプトを取得
@@ -48,6 +54,7 @@ abstract class IPromptService {
     required bool isPremium,
     PromptCategory? category,
     List<String>? excludeIds,
+    Locale? locale,
   });
 
   /// プロンプトを検索
@@ -55,13 +62,17 @@ abstract class IPromptService {
   /// [query] 検索クエリ（テキスト、タグ、説明を対象）
   /// [isPremium] Premiumプランかどうか
   /// 戻り値: 検索にマッチしたプロンプトリスト
-  List<WritingPrompt> searchPrompts(String query, {required bool isPremium});
+  List<WritingPrompt> searchPrompts(
+    String query, {
+    required bool isPremium,
+    Locale? locale,
+  });
 
   /// 特定のプロンプトをIDで取得
   ///
   /// [id] プロンプトID
   /// 戻り値: 該当するプロンプト（なければnull）
-  WritingPrompt? getPromptById(String id);
+  WritingPrompt? getPromptById(String id, {Locale? locale});
 
   /// プロンプトの統計情報を取得
   ///
@@ -95,6 +106,7 @@ abstract class IPromptService {
     required int count,
     required bool isPremium,
     PromptCategory? category,
+    Locale? locale,
   });
 
   /// プロンプト使用履歴を記録

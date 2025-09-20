@@ -11,6 +11,7 @@ import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../services/logging_service.dart';
 import '../core/errors/error_handler.dart';
+import '../localization/localization_extensions.dart';
 
 /// 過去の写真カレンダーウィジェット
 class PastPhotoCalendarWidget extends StatefulWidget {
@@ -249,6 +250,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         // カレンダー（固定高さで上部位置を完全固定）
@@ -491,7 +493,9 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      '${_selectedDay!.year}年${_selectedDay!.month}月${_selectedDay!.day}日の写真',
+                      l10n.pastPhotoSelectedDateLabel(
+                        l10n.formatFullDate(_selectedDay!),
+                      ),
                       style: AppTypography.labelLarge.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -499,7 +503,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                     ),
                   ),
                   Text(
-                    '${_getPhotoCount(_selectedDay!)}枚',
+                    l10n.pastPhotoSelectedCount(_getPhotoCount(_selectedDay!)),
                     style: AppTypography.labelLarge.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),

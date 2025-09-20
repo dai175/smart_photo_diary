@@ -1,5 +1,4 @@
 import 'package:characters/characters.dart';
-import '../constants/app_constants.dart';
 
 /// X（旧Twitter）向けの共有テキストを構築するビルダー。
 /// 仕様:
@@ -12,11 +11,11 @@ class XShareTextBuilder {
   /// 共有テキストを生成する。
   /// [title] タイトル（省略可）
   /// [body] 本文
-  /// [appName] 末尾に表示するアプリ名（既定: AppConstants.appTitle）
+  /// [appName] 末尾に表示するアプリ名
   static String build({
     String? title,
     required String body,
-    String appName = AppConstants.appTitle,
+    required String appName,
   }) {
     String safeTitle = (title ?? '').trim();
     String safeBody = body.trim();

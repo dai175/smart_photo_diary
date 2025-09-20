@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../constants/app_constants.dart';
 import '../models/diary_entry.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/loading_shimmer.dart';
+import '../localization/localization_extensions.dart';
 
 /// 最近の日記表示ウィジェット
 class RecentDiariesWidget extends StatelessWidget {
@@ -59,7 +58,7 @@ class RecentDiariesWidget extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              AppConstants.noDiariesMessage,
+              context.l10n.diaryNoEntriesMessage,
               style: AppTypography.bodyMedium.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -89,7 +88,9 @@ class RecentDiariesWidget extends StatelessWidget {
   }
 
   Widget _buildDiaryCard(BuildContext context, DiaryEntry diary) {
-    final title = diary.title.isNotEmpty ? diary.title : '無題';
+    final title = diary.title.isNotEmpty
+        ? diary.title
+        : context.l10n.diaryCardUntitled;
 
     return CustomCard(
       onTap: () => onDiaryTap(diary.id),
@@ -131,7 +132,7 @@ class RecentDiariesWidget extends StatelessWidget {
         borderRadius: AppSpacing.chipRadius,
       ),
       child: Text(
-        DateFormat('MM/dd').format(date),
+        context.l10n.formatMonthDay(date),
         style: AppTypography.labelSmall.copyWith(
           color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),

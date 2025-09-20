@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai/diary_generator.dart';
@@ -41,6 +42,7 @@ class AiService implements IAiService {
     String? location,
     List<DateTime>? photoTimes,
     String? prompt,
+    Locale? locale,
   }) async {
     try {
       // Phase 1.7.1.2: generateDiary前の制限チェック実装
@@ -86,6 +88,7 @@ class AiService implements IAiService {
         photoTimes: photoTimes,
         prompt: prompt,
         isOnline: online,
+        locale: locale ?? const Locale('ja'),
       );
 
       // Phase 1.7.1.3: 使用量カウント統合
@@ -112,6 +115,7 @@ class AiService implements IAiService {
     String? location,
     String? prompt,
     Function(int current, int total)? onProgress,
+    Locale? locale,
   }) async {
     try {
       // Phase 1.7.1.2: generateDiary前の制限チェック実装
@@ -156,6 +160,7 @@ class AiService implements IAiService {
         prompt: prompt,
         onProgress: onProgress,
         isOnline: online,
+        locale: locale ?? const Locale('ja'),
       );
 
       // Phase 1.7.1.3: 使用量カウント統合
@@ -182,6 +187,7 @@ class AiService implements IAiService {
     required String content,
     required DateTime date,
     required int photoCount,
+    Locale? locale,
   }) async {
     try {
       // Phase 1.7.1: タグ生成は使用量にカウントしない
@@ -192,6 +198,7 @@ class AiService implements IAiService {
         date: date,
         photoCount: photoCount,
         isOnline: online,
+        locale: locale,
       );
 
       return Success(result);

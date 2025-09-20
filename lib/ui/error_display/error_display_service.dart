@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
+import '../../localization/localization_extensions.dart';
 import '../../services/logging_service.dart';
 import '../../core/service_locator.dart';
 import 'error_severity.dart';
@@ -134,7 +135,10 @@ class ErrorDisplayService {
       backgroundColor: _getColorForSeverity(context, config.severity),
       action: config.showRetryButton && onRetry != null
           ? SnackBarAction(
-              label: retryButtonText ?? config.retryButtonText ?? '再試行',
+              label:
+                  retryButtonText ??
+                  config.retryButtonText ??
+                  context.l10n.commonRetry,
               onPressed: onRetry,
               textColor: Colors.white,
             )

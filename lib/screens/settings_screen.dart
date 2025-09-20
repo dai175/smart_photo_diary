@@ -20,6 +20,8 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../constants/subscription_constants.dart';
+import '../localization/localization_extensions.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -38,6 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   SubscriptionInfoV2? _subscriptionInfo;
   bool _isLoading = true;
   bool _subscriptionExpanded = false;
+  Locale? _selectedLocale;
 
   @override
   void initState() {
@@ -60,11 +63,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _storageInfo = storageResult.value;
       } else {
         _logger.error(
-          'ストレージ情報の取得エラー',
+          'Failed to fetch storage info',
           error: storageResult.error,
           context: 'SettingsScreen',
         );
       }
+
+      _selectedLocale = _settingsService.locale;
 
       // サブスクリプション情報を取得（V2版）
       final subscriptionResult = await _settingsService.getSubscriptionInfoV2();
@@ -72,13 +77,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _subscriptionInfo = subscriptionResult.value;
       } else {
         _logger.error(
-          'サブスクリプション情報の取得エラー',
+          'Failed to fetch subscription info',
           error: subscriptionResult.error,
           context: 'SettingsScreen',
         );
       }
     } catch (e) {
-      _logger.error('設定の読み込みエラー', error: e, context: 'SettingsScreen');
+      _logger.error(
+        'Failed to load settings',
+        error: e,
+        context: 'SettingsScreen',
+      );
     }
 
     setState(() {
@@ -91,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('設定'),
+        title: Text(context.l10n.settingsAppBarTitle),
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -122,14 +131,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       Text(
-                        '設定を読み込み中...',
+                        context.l10n.settingsLoadingTitle,
                         style: AppTypography.titleLarge.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'アプリの設定情報を取得しています',
+                        context.l10n.settingsLoadingSubtitle,
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -151,6 +160,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Column(
                       children: [
                         FadeInWidget(child: _buildThemeSelector()),
+                        _buildDivider(),
+                        SlideInWidget(
+                          delay: const Duration(milliseconds: 40),
+                          child: _buildLanguageSelector(),
+                        ),
                         _buildDivider(),
                         SlideInWidget(
                           delay: const Duration(milliseconds: 50),
@@ -203,9 +217,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildLanguageSelector() {
+    final options = _buildLocaleChoices(context);
+    final currentChoice = options.firstWhere(
+      (choice) => choice.locale == _selectedLocale,
+      orElse: () => options.first,
+    );
+
+    return Semantics(
+      label: context.l10n.settingsSectionSemanticLabel(
+        context.l10n.settingsLanguageSectionTitle,
+        currentChoice.title,
+      ),
+      button: true,
+      child: MicroInteractions.bounceOnTap(
+        onTap: () {
+          MicroInteractions.hapticTap();
+          _showLanguageDialog();
+        },
+        child: Container(
+          padding: AppSpacing.cardPadding,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AppColors.info.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppSpacing.sm),
+                ),
+                child: Icon(
+                  AppIcons.settingsLanguage,
+                  color: AppColors.info,
+                  size: AppSpacing.iconSm,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.settingsLanguageSectionTitle,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      currentChoice.title,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                AppIcons.actionForward,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: AppSpacing.iconSm,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildThemeSelector() {
     return Semantics(
-      label: 'テーマ設定、現在: ${_getThemeModeLabel(_settingsService.themeMode)}',
+      label: context.l10n.settingsSectionSemanticLabel(
+        context.l10n.settingsThemeSectionTitle,
+        _getThemeModeLabel(context, _settingsService.themeMode),
+      ),
       button: true,
       child: MicroInteractions.bounceOnTap(
         onTap: () {
@@ -234,14 +318,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'テーマ',
+                      context.l10n.settingsThemeSectionTitle,
                       style: AppTypography.titleMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      _getThemeModeLabel(_settingsService.themeMode),
+                      _getThemeModeLabel(context, _settingsService.themeMode),
                       style: AppTypography.bodyMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -258,6 +342,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showLanguageDialog() async {
+    final options = _buildLocaleChoices(context);
+    final result = await DialogUtils.showRadioSelectionDialog<Locale?>(
+      context,
+      context.l10n.settingsLanguageDialogTitle,
+      options.map((choice) => choice.locale).toList(),
+      _selectedLocale,
+      (locale) {
+        final choice = options.firstWhere(
+          (c) => c.locale == locale,
+          orElse: () => options.first,
+        );
+        return choice.title;
+      },
+    );
+
+    if (!mounted || result == null) {
+      return;
+    }
+
+    await _handleLocaleSelection(result);
+  }
+
+  Future<void> _handleLocaleSelection(Locale? locale) async {
+    if (_selectedLocale == locale) {
+      return;
+    }
+
+    setState(() {
+      _selectedLocale = locale;
+    });
+
+    final result = await _settingsService.setLocale(locale);
+    if (result.isFailure) {
+      _logger.error(
+        'Failed to update language preference',
+        error: result.error,
+        context: 'SettingsScreen',
+      );
+
+      if (mounted) {
+        setState(() {
+          _selectedLocale = _settingsService.locale;
+        });
+        DialogUtils.showSimpleDialog(
+          context,
+          context.l10n.settingsLanguageUpdateError,
+        );
+      }
+    }
+  }
+
+  List<_LocaleChoice> _buildLocaleChoices(BuildContext context) {
+    return [
+      _LocaleChoice(locale: null, title: context.l10n.settingsLanguageSystem),
+      _LocaleChoice(
+        locale: const Locale('ja', 'JP'),
+        title: context.l10n.settingsLanguageJapanese,
+      ),
+      _LocaleChoice(
+        locale: const Locale('en', 'US'),
+        title: context.l10n.settingsLanguageEnglish,
+      ),
+    ];
+  }
+
+  /// 多言語化されたSubscriptionDisplayDataを取得
+  SubscriptionDisplayDataV2 _getLocalizedDisplayData() {
+    return _subscriptionInfo!.getLocalizedDisplayData(
+      usageFormatter: (used, limit) =>
+          context.l10n.usageStatusUsageValue(used, limit),
+      remainingFormatter: (remaining) =>
+          context.l10n.usageStatusRemainingValue(remaining),
+      limitReachedFormatter: () =>
+          context.l10n.subscriptionUsageWarningLimitReached,
+      warningRemainingFormatter: (remaining) =>
+          context.l10n.subscriptionUsageWarningRemaining(remaining),
+      upgradeRecommendationLimitFormatter: (limit) =>
+          context.l10n.subscriptionUpgradeRecommendationLimit(limit),
+      upgradeRecommendationGeneralFormatter: () =>
+          context.l10n.subscriptionUpgradeRecommendationGeneral,
     );
   }
 
@@ -288,14 +456,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'サブスクリプション',
+                    context.l10n.settingsSubscriptionSectionTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '読み込み中...',
+                    context.l10n.commonLoading,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -344,7 +512,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'サブスクリプション',
+                        context.l10n.settingsSubscriptionSectionTitle,
                         style: AppTypography.titleMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -352,8 +520,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
                         _subscriptionInfo!.displayData.planStatus != null
-                            ? '現在のプラン: ${_subscriptionInfo!.displayData.planName} (${_subscriptionInfo!.displayData.planStatus})'
-                            : '現在のプラン: ${_subscriptionInfo!.displayData.planName}',
+                            ? context.l10n.settingsCurrentPlanWithStatus(
+                                _subscriptionInfo!.displayData.planName,
+                                _subscriptionInfo!.displayData.planStatus!,
+                              )
+                            : context.l10n.settingsCurrentPlan(
+                                _subscriptionInfo!.displayData.planName,
+                              ),
                         style: AppTypography.bodyMedium.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -387,30 +560,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 _buildSubscriptionItem(
-                  'AI生成使用量',
-                  _subscriptionInfo!.displayData.usageText,
+                  context.l10n.settingsSubscriptionUsageLabel,
+                  _getLocalizedDisplayData().usageText,
                   _subscriptionInfo!.displayData.isNearLimit
                       ? AppColors.warning
                       : AppColors.primary,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _buildSubscriptionItem(
-                  '残り回数',
-                  _subscriptionInfo!.displayData.remainingText,
+                  context.l10n.settingsSubscriptionRemainingLabel,
+                  _getLocalizedDisplayData().remainingText,
                   _subscriptionInfo!.usageStats.remainingCount > 0
                       ? AppColors.success
                       : AppColors.error,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _buildSubscriptionItem(
-                  'リセット予定',
+                  context.l10n.settingsSubscriptionResetLabel,
                   _subscriptionInfo!.displayData.resetDateText,
                   AppColors.info,
                 ),
                 if (_subscriptionInfo!.displayData.expiryText != null) ...[
                   const SizedBox(height: AppSpacing.md),
                   _buildSubscriptionItem(
-                    '有効期限',
+                    context.l10n.settingsSubscriptionExpiryLabel,
                     _subscriptionInfo!.displayData.expiryText!,
                     _subscriptionInfo!.displayData.isExpiryNear
                         ? AppColors.warning
@@ -418,18 +591,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
                 // 警告メッセージの表示
-                if (_subscriptionInfo!.displayData.warningMessage != null) ...[
+                if (_getLocalizedDisplayData().warningMessage != null) ...[
                   const SizedBox(height: AppSpacing.lg),
                   _buildWarningMessage(
-                    _subscriptionInfo!.displayData.warningMessage!,
+                    _getLocalizedDisplayData().warningMessage!,
                   ),
                 ],
                 // 推奨メッセージの表示
-                if (_subscriptionInfo!.displayData.recommendationMessage !=
+                if (_getLocalizedDisplayData().recommendationMessage !=
                     null) ...[
                   const SizedBox(height: AppSpacing.md),
                   _buildRecommendationMessage(
-                    _subscriptionInfo!.displayData.recommendationMessage!,
+                    _getLocalizedDisplayData().recommendationMessage!,
                   ),
                 ],
                 if (!_subscriptionInfo!.isPremium) ...[
@@ -558,7 +731,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         MicroInteractions.hapticTap();
         _showUpgradeDialog();
       },
-      text: 'Premiumにアップグレード',
+      text: context.l10n.settingsUpgradeToPremium,
       icon: Icons.auto_awesome_rounded,
       width: double.infinity,
     );
@@ -588,14 +761,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ストレージ情報',
+                    context.l10n.settingsStorageSectionTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '読み込み中...',
+                    context.l10n.commonLoading,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -630,14 +803,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'アプリデータ',
+                  context.l10n.settingsStorageAppDataTitle,
                   style: AppTypography.titleMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  '使用容量: ${_storageInfo!.formattedTotalSize}',
+                  context.l10n.settingsStorageUsageValue(
+                    _storageInfo!.formattedTotalSize,
+                  ),
                   style: AppTypography.bodyMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -678,14 +853,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'バックアップ',
+                    context.l10n.settingsBackupTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '日記をファイルに保存',
+                    context.l10n.settingsBackupSubtitle,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -732,14 +907,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'リストア',
+                    context.l10n.settingsRestoreTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'ファイルから日記を復元',
+                    context.l10n.settingsRestoreSubtitle,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -786,14 +961,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'データ削除',
+                    context.l10n.settingsCleanupTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '不要なデータを削除',
+                    context.l10n.settingsCleanupSubtitle,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -835,7 +1010,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'アプリバージョン',
+                  context.l10n.settingsVersionTitle,
                   style: AppTypography.titleMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -844,7 +1019,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   _packageInfo != null
                       ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
-                      : '読み込み中...',
+                      : context.l10n.commonLoading,
                   style: AppTypography.bodyMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -892,14 +1067,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ライセンス',
+                    context.l10n.settingsLicenseTitle,
                     style: AppTypography.titleMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'オープンソースライセンス',
+                    context.l10n.settingsLicenseSubtitle,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -918,24 +1093,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  String _getThemeModeLabel(ThemeMode themeMode) {
+  String _getThemeModeLabel(BuildContext context, ThemeMode themeMode) {
     switch (themeMode) {
       case ThemeMode.light:
-        return 'ライトテーマ';
+        return context.l10n.settingsThemeLight;
       case ThemeMode.dark:
-        return 'ダークテーマ';
+        return context.l10n.settingsThemeDark;
       case ThemeMode.system:
-        return 'システムに従う';
+        return context.l10n.settingsThemeSystem;
     }
   }
 
   void _showThemeDialog() async {
     final selectedTheme = await DialogUtils.showRadioSelectionDialog<ThemeMode>(
       context,
-      'テーマ選択',
+      context.l10n.settingsThemeDialogTitle,
       ThemeMode.values,
       _settingsService.themeMode,
-      _getThemeModeLabel,
+      (mode) => _getThemeModeLabel(context, mode),
     );
 
     if (selectedTheme != null) {
@@ -955,7 +1130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _exportData() async {
     try {
-      _showLoadingDialog('バックアップ中...');
+      _showLoadingDialog(context.l10n.settingsBackupInProgress);
 
       final storageService = ServiceRegistration.get<IStorageService>();
       final exportResult = await storageService.exportDataResult();
@@ -966,25 +1141,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (exportResult.isSuccess) {
           final filePath = exportResult.value;
           if (filePath != null) {
-            _showSuccessDialog('バックアップ完了', 'バックアップファイルが正常に保存されました');
+            _showSuccessDialog(
+              context.l10n.settingsBackupSuccessTitle,
+              context.l10n.settingsBackupSuccessMessage,
+            );
           } else {
-            _showErrorDialog('バックアップがキャンセルされたか、失敗しました');
+            _showErrorDialog(context.l10n.settingsBackupCancelledMessage);
           }
         } else {
-          _showErrorDialog('バックアップエラー: ${exportResult.error.message}');
+          _showErrorDialog(
+            context.l10n.settingsBackupErrorWithDetails(
+              exportResult.error.message,
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context);
-        _showErrorDialog('エラーが発生しました: $e');
+        _showErrorDialog(
+          context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
+        );
       }
     }
   }
 
   Future<void> _restoreData() async {
     try {
-      _showLoadingDialog('リストア中...');
+      _showLoadingDialog(context.l10n.settingsRestoreInProgress);
 
       final storageService = ServiceRegistration.get<IStorageService>();
       final result = await storageService.importData();
@@ -997,21 +1181,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _showImportResultDialog(importResult);
           },
           (error) {
-            _showErrorDialog(error.message);
+            _showErrorDialog(
+              context.l10n.commonErrorWithMessage(error.message),
+            );
           },
         );
       }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context);
-        _showErrorDialog('エラーが発生しました: $e');
+        _showErrorDialog(
+          context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
+        );
       }
     }
   }
 
   Future<void> _optimizeDatabase() async {
     try {
-      _showLoadingDialog('最適化中...');
+      _showLoadingDialog(context.l10n.settingsOptimizeInProgress);
 
       final storageService = ServiceRegistration.get<IStorageService>();
       final optimizeResult = await storageService.optimizeDatabaseResult();
@@ -1021,18 +1209,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         if (optimizeResult.isSuccess && optimizeResult.value) {
           await _loadSettings(); // ストレージ情報を再読み込み
-          _showSuccessDialog('最適化完了', 'データベースの最適化が完了しました');
+          _showSuccessDialog(
+            context.l10n.settingsOptimizeSuccessTitle,
+            context.l10n.settingsOptimizeSuccessMessage,
+          );
         } else {
           final errorMessage = optimizeResult.isFailure
-              ? '最適化エラー: ${optimizeResult.error.message}'
-              : '最適化に失敗しました';
+              ? context.l10n.settingsOptimizeErrorWithDetails(
+                  optimizeResult.error.message,
+                )
+              : context.l10n.settingsOptimizeFailedMessage;
           _showErrorDialog(errorMessage);
         }
       }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context);
-        _showErrorDialog('エラーが発生しました: $e');
+        _showErrorDialog(
+          context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
+        );
       }
     }
   }
@@ -1063,7 +1258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             : result.hasErrors
             ? AppColors.warning
             : AppColors.info,
-        title: 'リストア結果',
+        title: context.l10n.settingsRestoreResultTitle,
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1089,12 +1284,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildResultItem('総エントリー数', '${result.totalEntries}件'),
-                      _buildResultItem('成功', '${result.successfulImports}件'),
+                      _buildResultItem(
+                        context.l10n.settingsRestoreTotalEntriesLabel,
+                        context.l10n.settingsRestoreEntriesCount(
+                          result.totalEntries,
+                        ),
+                      ),
+                      _buildResultItem(
+                        context.l10n.settingsRestoreSuccessLabel,
+                        context.l10n.settingsRestoreEntriesCount(
+                          result.successfulImports,
+                        ),
+                      ),
                       if (result.skippedEntries > 0)
-                        _buildResultItem('スキップ', '${result.skippedEntries}件'),
+                        _buildResultItem(
+                          context.l10n.settingsRestoreSkippedLabel,
+                          context.l10n.settingsRestoreEntriesCount(
+                            result.skippedEntries,
+                          ),
+                        ),
                       if (result.failedImports > 0)
-                        _buildResultItem('失敗', '${result.failedImports}件'),
+                        _buildResultItem(
+                          context.l10n.settingsRestoreFailedLabel,
+                          context.l10n.settingsRestoreEntriesCount(
+                            result.failedImports,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -1121,7 +1336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Text(
-                            '警告',
+                            context.l10n.errorSeverityWarning,
                             style: AppTypography.labelMedium.copyWith(
                               color: AppColors.warning,
                               fontWeight: FontWeight.w600,
@@ -1167,7 +1382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Text(
-                            'エラー',
+                            context.l10n.errorSeverityError,
                             style: AppTypography.labelMedium.copyWith(
                               color: AppColors.error,
                               fontWeight: FontWeight.w600,
@@ -1197,7 +1412,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.xxs),
                           child: Text(
-                            '...他${result.errors.length - 3}件のエラー',
+                            context.l10n.settingsRestoreAdditionalErrors(
+                              result.errors.length - 3,
+                            ),
                             style: AppTypography.bodySmall.copyWith(
                               color: Theme.of(
                                 context,
@@ -1215,7 +1432,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         actions: [
           CustomDialogAction(
-            text: 'OK',
+            text: context.l10n.commonOk,
             isPrimary: true,
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -1267,7 +1484,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           // サブスクリプション詳細情報
           Text(
-            'サブスクリプション情報',
+            context.l10n.settingsSubscriptionInfoTitle,
             style: AppTypography.titleSmall.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w600,
@@ -1277,17 +1494,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Premium Monthly詳細
           _buildSubscriptionPlanDetail(
-            'プレミアム（月額）',
-            '¥300/月',
-            '月100回のAI日記生成、20個のライティングプロンプト',
+            context.l10n.settingsPremiumMonthlyTitle,
+            context.l10n.pricingPerMonthShort(
+              SubscriptionConstants.formatPriceForPlan(
+                SubscriptionConstants.premiumMonthlyPlanId,
+                context.l10n.localeName,
+              ),
+            ),
+            context.l10n.settingsPremiumPlanFeatures,
           ),
           const SizedBox(height: AppSpacing.xs),
 
           // Premium Yearly詳細
           _buildSubscriptionPlanDetail(
-            'プレミアム（年額）',
-            '¥2,800/年',
-            '月100回のAI日記生成、20個のライティングプロンプト',
+            context.l10n.settingsPremiumYearlyTitle,
+            context.l10n.pricingPerYearShort(
+              SubscriptionConstants.formatPriceForPlan(
+                SubscriptionConstants.premiumYearlyPlanId,
+                context.l10n.localeName,
+              ),
+            ),
+            context.l10n.settingsPremiumPlanFeatures,
           ),
 
           const SizedBox(height: AppSpacing.md),
@@ -1311,7 +1538,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
-                      '自動更新について',
+                      context.l10n.settingsSubscriptionAutoRenewTitle,
                       style: AppTypography.labelMedium.copyWith(
                         color: AppColors.info,
                         fontWeight: FontWeight.w600,
@@ -1321,10 +1548,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '• サブスクリプションは自動的に更新されます\n'
-                  '• 料金は更新日の24時間前にiTunesアカウントに請求されます\n'
-                  '• 更新の24時間前までにキャンセルしない限り自動更新されます\n'
-                  '• iOS設定 > Apple ID > サブスクリプションで管理できます',
+                  context.l10n.settingsSubscriptionAutoRenewDescription,
                   style: AppTypography.bodySmall.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                     height: 1.4,
@@ -1341,7 +1565,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Expanded(
                 child: _buildLegalLinkButton(
-                  'プライバシーポリシー',
+                  context.l10n.commonPrivacyPolicy,
                   Icons.privacy_tip_outlined,
                   () => UrlLauncherUtils.launchPrivacyPolicy(context: context),
                 ),
@@ -1349,7 +1573,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: _buildLegalLinkButton(
-                  '利用規約',
+                  context.l10n.commonTermsOfUse,
                   Icons.article_outlined,
                   () => UrlLauncherUtils.launchTermsOfUse(context: context),
                 ),
@@ -1448,4 +1672,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+}
+
+class _LocaleChoice {
+  final Locale? locale;
+  final String title;
+
+  const _LocaleChoice({required this.locale, required this.title});
 }

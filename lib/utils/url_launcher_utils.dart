@@ -1,6 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import '../ui/components/custom_dialog.dart';
+import '../localization/localization_extensions.dart';
 
 /// URL起動用のユーティリティクラス
 class UrlLauncherUtils {
@@ -21,12 +22,15 @@ class UrlLauncherUtils {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         if (context != null && context.mounted) {
-          _showErrorDialog(context, 'リンクを開くことができませんでした');
+          _showErrorDialog(context, context.l10n.urlLauncherOpenFailed);
         }
       }
     } catch (e) {
       if (context != null && context.mounted) {
-        _showErrorDialog(context, 'エラーが発生しました: $e');
+        _showErrorDialog(
+          context,
+          context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
+        );
       }
     }
   }
@@ -52,10 +56,11 @@ class UrlLauncherUtils {
   ) async {
     await showDialog(
       context: context,
-      builder: (context) => PresetDialogs.error(
-        title: 'リンクエラー',
+      builder: (dialogContext) => PresetDialogs.error(
+        context: dialogContext,
+        title: dialogContext.l10n.urlLauncherErrorTitle,
         message: message,
-        onConfirm: () => Navigator.of(context).pop(),
+        onConfirm: () => Navigator.of(dialogContext).pop(),
       ),
     );
   }

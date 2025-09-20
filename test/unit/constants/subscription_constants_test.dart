@@ -98,8 +98,8 @@ void main() {
 
     group('UI表示設定テスト', () {
       test('通貨設定が正しく設定されている', () {
-        expect(SubscriptionConstants.currencySymbol, equals('¥'));
-        expect(SubscriptionConstants.currencyCode, equals('JPY'));
+        expect(SubscriptionConstants.defaultCurrencySymbol, equals('¥'));
+        expect(SubscriptionConstants.defaultCurrencyCode, equals('JPY'));
       });
 
       test('年額割引率の表示値が正しい', () {
@@ -159,11 +159,28 @@ void main() {
 
     group('ヘルパーメソッドテスト', () {
       test('価格フォーマットが正しく動作する', () {
-        expect(SubscriptionConstants.formatPrice(0), equals('無料'));
+        // 日本語ロケール（デフォルト）での円表示
+        expect(SubscriptionConstants.formatPrice(0), equals('¥0'));
         expect(SubscriptionConstants.formatPrice(300), equals('¥300'));
         expect(SubscriptionConstants.formatPrice(2800), equals('¥2,800'));
         expect(SubscriptionConstants.formatPrice(10000), equals('¥10,000'));
         expect(SubscriptionConstants.formatPrice(100000), equals('¥100,000'));
+
+        // 英語ロケールでの自動USD変換
+        expect(
+          SubscriptionConstants.formatPrice(2800, locale: 'en'),
+          equals('\$28.00'),
+        );
+
+        // 通貨コード明示指定での強制円表示
+        expect(
+          SubscriptionConstants.formatPrice(
+            2800,
+            locale: 'en',
+            currencyCode: 'JPY',
+          ),
+          equals('¥2,800'),
+        );
       });
 
       test('プランIDから価格を取得できる', () {
@@ -219,6 +236,57 @@ void main() {
         expect(
           () => SubscriptionConstants.getLimitByPlanId('invalid'),
           throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('言語に応じた価格取得が正しく動作する', () {
+        // 日本語での価格取得
+        final (priceJA, currencyJA) = SubscriptionConstants.getPriceForLocale(
+          'premium_monthly',
+          'ja',
+        );
+        expect(priceJA, equals(300));
+        expect(currencyJA, equals('JPY'));
+
+        // 英語での価格取得
+        final (priceEN, currencyEN) = SubscriptionConstants.getPriceForLocale(
+          'premium_monthly',
+          'en',
+        );
+        expect(priceEN, equals(199)); // $1.99 in cents
+        expect(currencyEN, equals('USD'));
+
+        // 年額プランのテスト
+        final (yearlyPriceJA, yearlyCurrencyJA) =
+            SubscriptionConstants.getPriceForLocale('premium_yearly', 'ja');
+        expect(yearlyPriceJA, equals(2800));
+        expect(yearlyCurrencyJA, equals('JPY'));
+
+        final (yearlyPriceEN, yearlyCurrencyEN) =
+            SubscriptionConstants.getPriceForLocale('premium_yearly', 'en');
+        expect(yearlyPriceEN, equals(1799)); // $17.99 in cents
+        expect(yearlyCurrencyEN, equals('USD'));
+      });
+
+      test('プラン用価格表示が正しく動作する', () {
+        // 日本語での表示
+        expect(
+          SubscriptionConstants.formatPriceForPlan('premium_monthly', 'ja'),
+          equals('¥300'),
+        );
+        expect(
+          SubscriptionConstants.formatPriceForPlan('premium_yearly', 'ja'),
+          equals('¥2,800'),
+        );
+
+        // 英語での表示
+        expect(
+          SubscriptionConstants.formatPriceForPlan('premium_monthly', 'en'),
+          equals('\$1.99'),
+        );
+        expect(
+          SubscriptionConstants.formatPriceForPlan('premium_yearly', 'en'),
+          equals('\$17.99'),
         );
       });
     });

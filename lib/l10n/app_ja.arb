@@ -1,0 +1,1418 @@
+{
+  "@@locale": "ja",
+  "appTitle": "Smart Photo Diary",
+  "@appTitle": {
+    "description": "アプリ全体のタイトル"
+  },
+  "navigationHome": "ホーム",
+  "@navigationHome": {
+    "description": "ボトムナビゲーション: ホーム"
+  },
+  "navigationDiary": "日記",
+  "@navigationDiary": {
+    "description": "ボトムナビゲーション: 日記"
+  },
+  "navigationStatistics": "統計",
+  "@navigationStatistics": {
+    "description": "ボトムナビゲーション: 統計"
+  },
+  "navigationSettings": "設定",
+  "@navigationSettings": {
+    "description": "ボトムナビゲーション: 設定"
+  },
+  "homeNewPhotosTitle": "新しい写真",
+  "@homeNewPhotosTitle": {
+    "description": "ホーム画面: 新しい写真セクションタイトル"
+  },
+  "homeRecentDiariesTitle": "最近の日記",
+  "@homeRecentDiariesTitle": {
+    "description": "ホーム画面: 最近の日記セクションタイトル"
+  },
+  "photoNoPhotosMessage": "写真が見つかりませんでした",
+  "@photoNoPhotosMessage": {
+    "description": "写真が存在しない場合のメッセージ"
+  },
+  "diaryNoEntriesMessage": "保存された日記がありません",
+  "@diaryNoEntriesMessage": {
+    "description": "日記が存在しない場合のメッセージ"
+  },
+  "diaryNoSearchResults": "「{query}」に一致する日記がありません",
+  "@diaryNoSearchResults": {
+    "description": "検索結果が空の場合のメッセージ",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "検索クエリ"
+      }
+    }
+  },
+  "diaryNoFilterResults": "フィルタ条件に一致する日記がありません",
+  "@diaryNoFilterResults": {
+    "description": "フィルタ条件に合致する日記が存在しない場合のメッセージ"
+  },
+  "filterTitle": "フィルタ",
+  "@filterTitle": {
+    "description": "フィルタ画面のタイトル"
+  },
+  "filterClearAll": "すべてクリア",
+  "@filterClearAll": {
+    "description": "フィルタクリアボタンのテキスト"
+  },
+  "filterDateRange": "日付範囲",
+  "@filterDateRange": {
+    "description": "日付範囲フィルタのタイトル"
+  },
+  "filterSelectPeriod": "期間を選択",
+  "@filterSelectPeriod": {
+    "description": "日付範囲選択のプレースホルダー"
+  },
+  "filterSelectStartDate": "開始日を選択",
+  "@filterSelectStartDate": {
+    "description": "開始日選択ダイアログのヘルプテキスト"
+  },
+  "filterSelectEndDate": "終了日を選択",
+  "@filterSelectEndDate": {
+    "description": "終了日選択ダイアログのヘルプテキスト"
+  },
+  "filterTags": "タグ",
+  "@filterTags": {
+    "description": "タグフィルタのタイトル"
+  },
+  "filterNoTags": "タグがありません",
+  "@filterNoTags": {
+    "description": "利用可能なタグがない場合のメッセージ"
+  },
+  "filterTimeOfDay": "時間帯",
+  "@filterTimeOfDay": {
+    "description": "時間帯フィルタのタイトル"
+  },
+  "filterApply": "フィルタを適用",
+  "@filterApply": {
+    "description": "フィルタ適用ボタンのテキスト"
+  },
+  "filterApplyWithCount": "フィルタを適用 ({count})",
+  "@filterApplyWithCount": {
+    "description": "アクティブなフィルタ数を表示するフィルタ適用ボタンのテキスト",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "アクティブなフィルタの数"
+      }
+    }
+  },
+  "filterTimeSlotMorning": "朝",
+  "@filterTimeSlotMorning": {
+    "description": "時間帯フィルタ: 朝"
+  },
+  "filterTimeSlotNoon": "昼",
+  "@filterTimeSlotNoon": {
+    "description": "時間帯フィルタ: 昼"
+  },
+  "filterTimeSlotEvening": "夕方",
+  "@filterTimeSlotEvening": {
+    "description": "時間帯フィルタ: 夕方"
+  },
+  "filterTimeSlotNight": "夜",
+  "@filterTimeSlotNight": {
+    "description": "時間帯フィルタ: 夜"
+  },
+  "filterDateSelectionError": "日付選択でエラーが発生しました",
+  "@filterDateSelectionError": {
+    "description": "日付選択時のエラーメッセージ"
+  },
+  "filterTagLoadError": "タグ読み込みエラー",
+  "@filterTagLoadError": {
+    "description": "タグ読み込みエラーのログメッセージ"
+  },
+  "filterActiveTitle": "フィルタ適用中 ({count})",
+  "@filterActiveTitle": {
+    "description": "アクティブフィルタの表示タイトル",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "アクティブなフィルタの数"
+      }
+    }
+  },
+  "filterActiveClearAll": "すべてクリア",
+  "@filterActiveClearAll": {
+    "description": "アクティブフィルタのクリアボタン"
+  },
+  "filterActiveDateRange": "期間指定",
+  "@filterActiveDateRange": {
+    "description": "日付範囲フィルタチップのラベル"
+  },
+  "filterActiveSearch": "検索: {query}",
+  "@filterActiveSearch": {
+    "description": "検索フィルタチップのラベル",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "検索クエリ"
+      }
+    }
+  },
+  "photoPermissionMessage": "写真へのアクセス権限が必要です",
+  "@photoPermissionMessage": {
+    "description": "写真アクセス権限が未許可の場合の説明"
+  },
+  "photoRequestPermission": "権限をリクエスト",
+  "@photoRequestPermission": {
+    "description": "写真アクセス権限リクエストボタン"
+  },
+  "photoSelectionLimitMessage": "一度に選択できる写真は{limit}枚までです",
+  "@photoSelectionLimitMessage": {
+    "description": "写真選択制限のメッセージ",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "photoUsedPhotoMessage": "この写真はすでに日記で使用されています",
+  "@photoUsedPhotoMessage": {
+    "description": "使用済み写真を選択した際のメッセージ"
+  },
+  "photoUsedLabel": "使用済み",
+  "@photoUsedLabel": {
+    "description": "使用済み写真のラベル"
+  },
+  "photoSelectionStatus": "選択された写真: {selected}/{limit}枚",
+  "@photoSelectionStatus": {
+    "description": "選択中の写真枚数表示",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonOk": "OK",
+  "@commonOk": {
+    "description": "OK ボタン"
+  },
+  "diaryNotFoundMessage": "日記が見つかりませんでした",
+  "@diaryNotFoundMessage": {
+    "description": "日記が存在しない場合のエラーメッセージ"
+  },
+  "diaryLoadErrorMessage": "日記の読み込みに失敗しました",
+  "@diaryLoadErrorMessage": {
+    "description": "日記取得に失敗した際のメッセージ"
+  },
+  "diaryUpdateSuccessMessage": "日記を更新しました",
+  "@diaryUpdateSuccessMessage": {
+    "description": "日記更新成功のトースト/スナックバー"
+  },
+  "diaryDeleteSuccessMessage": "日記を削除しました",
+  "@diaryDeleteSuccessMessage": {
+    "description": "日記削除成功のトースト/スナックバー"
+  },
+  "homeLinkedDiaryNotFound": "対応する日記が見つかりませんでした",
+  "@homeLinkedDiaryNotFound": {
+    "description": "写真に紐づく日記が存在しなかった場合のメッセージ"
+  },
+  "homeDiaryLoadError": "日記の取得中にエラーが発生しました",
+  "@homeDiaryLoadError": {
+    "description": "日記取得時に例外が発生した際のメッセージ"
+  },
+  "homePermissionDialogTitle": "写真へのアクセスを許可",
+  "@homePermissionDialogTitle": {
+    "description": "写真アクセス権限を案内するダイアログのタイトル"
+  },
+  "homePermissionDialogMessage": "日記作成のために写真ライブラリへのアクセスが必要です。設定アプリで写真へのアクセスを許可してください。",
+  "@homePermissionDialogMessage": {
+    "description": "写真アクセス権限を案内するダイアログの本文"
+  },
+  "homeLimitedAccessTitle": "写真を追加選択",
+  "@homeLimitedAccessTitle": {
+    "description": "限定的な写真アクセス時に表示するダイアログタイトル"
+  },
+  "homeLimitedAccessMessage": "現在、選択された写真のみアクセス可能です。日記作成に使用したい写真を追加で選択しますか？",
+  "@homeLimitedAccessMessage": {
+    "description": "限定的な写真アクセス時に表示するダイアログ本文"
+  },
+  "commonCancel": "キャンセル",
+  "@commonCancel": {
+    "description": "キャンセルボタン共通文言"
+  },
+  "commonOpenSettings": "設定を開く",
+  "@commonOpenSettings": {
+    "description": "設定アプリを開くボタン"
+  },
+  "pricingFree": "無料",
+  "@pricingFree": {
+    "description": "価格表示：無料の場合に使用するラベル"
+  },
+  "pricingPerMonthShort": "{price}/月",
+  "@pricingPerMonthShort": {
+    "description": "短い月額価格表示",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingPerYearShort": "{price}/年",
+  "@pricingPerYearShort": {
+    "description": "短い年額価格表示",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingMonthlyEquivalent": "月額換算 {price}",
+  "@pricingMonthlyEquivalent": {
+    "description": "年額料金の月額換算表示",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "commonLater": "後で",
+  "@commonLater": {
+    "description": "後で行うボタン"
+  },
+  "photoSelectAction": "写真を選択",
+  "@photoSelectAction": {
+    "description": "写真を追加で選択するボタン"
+  },
+  "cameraCaptureSuccess": "写真を撮影しました",
+  "@cameraCaptureSuccess": {
+    "description": "カメラ撮影成功時のスナックバー"
+  },
+  "commonConfirm": "決定",
+  "@commonConfirm": {
+    "description": "確認ボタン共通文言"
+  },
+  "settingsAppBarTitle": "設定",
+  "@settingsAppBarTitle": {
+    "description": "設定画面のアプリバータイトル"
+  },
+  "settingsLoadingTitle": "設定を読み込み中...",
+  "@settingsLoadingTitle": {
+    "description": "設定画面ローディングカードのタイトル"
+  },
+  "settingsLoadingSubtitle": "アプリの設定情報を取得しています",
+  "@settingsLoadingSubtitle": {
+    "description": "設定画面ローディングカードのサブタイトル"
+  },
+  "settingsLanguageSectionTitle": "言語設定",
+  "@settingsLanguageSectionTitle": {
+    "description": "言語セクションのタイトル"
+  },
+  "settingsLanguageSectionDescription": "日本語",
+  "@settingsLanguageSectionDescription": {
+    "description": "言語セクションの説明テキスト"
+  },
+  "settingsLanguageDialogTitle": "言語を選択",
+  "@settingsLanguageDialogTitle": {
+    "description": "言語選択ダイアログのタイトル"
+  },
+  "settingsLanguageSystem": "システム設定に従う",
+  "@settingsLanguageSystem": {
+    "description": "システム言語に従うオプション"
+  },
+  "settingsLanguageJapanese": "日本語",
+  "@settingsLanguageJapanese": {
+    "description": "日本語オプション"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "英語オプション"
+  },
+  "settingsLanguageUpdateError": "言語設定の保存に失敗しました。時間を置いて再度お試しください。",
+  "@settingsLanguageUpdateError": {
+    "description": "言語設定保存失敗時のメッセージ"
+  },
+  "cameraPermissionDialogTitle": "カメラへのアクセス許可が必要です",
+  "@cameraPermissionDialogTitle": {
+    "description": "カメラ権限ダイアログのタイトル"
+  },
+  "cameraPermissionDialogMessage": "写真を撮影するには、カメラへのアクセスを許可してください。設定アプリからカメラの権限を有効にできます。",
+  "@cameraPermissionDialogMessage": {
+    "description": "カメラ権限ダイアログの本文"
+  },
+  "settingsThemeSectionTitle": "テーマ",
+  "@settingsThemeSectionTitle": {
+    "description": "テーマセクションのタイトル"
+  },
+  "settingsThemeDialogTitle": "テーマを選択",
+  "@settingsThemeDialogTitle": {
+    "description": "テーマ選択ダイアログのタイトル"
+  },
+  "settingsThemeLight": "ライトテーマ",
+  "@settingsThemeLight": {
+    "description": "ライトテーマの表示名"
+  },
+  "settingsThemeDark": "ダークテーマ",
+  "@settingsThemeDark": {
+    "description": "ダークテーマの表示名"
+  },
+  "settingsThemeSystem": "システムに従う",
+  "@settingsThemeSystem": {
+    "description": "システムテーマの表示名"
+  },
+  "settingsSectionSemanticLabel": "{section}、現在: {value}",
+  "@settingsSectionSemanticLabel": {
+    "description": "設定セクションの現在値を示すセマンティックラベル",
+    "placeholders": {
+      "section": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionSectionTitle": "サブスクリプション",
+  "@settingsSubscriptionSectionTitle": {
+    "description": "設定画面のサブスクリプションセクションタイトル"
+  },
+  "commonLoading": "読み込み中...",
+  "@commonLoading": {
+    "description": "汎用の読み込み中文言"
+  },
+  "settingsCurrentPlanWithStatus": "現在のプラン: {plan}（{status}）",
+  "@settingsCurrentPlanWithStatus": {
+    "description": "現在のサブスクリプションプラン名とステータスを表示",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCurrentPlan": "現在のプラン: {plan}",
+  "@settingsCurrentPlan": {
+    "description": "現在のサブスクリプションプラン名を表示",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionUsageLabel": "AI生成使用量",
+  "@settingsSubscriptionUsageLabel": {
+    "description": "AI利用量のラベル"
+  },
+  "settingsSubscriptionRemainingLabel": "残り回数",
+  "@settingsSubscriptionRemainingLabel": {
+    "description": "残り利用回数のラベル"
+  },
+  "settingsSubscriptionResetLabel": "リセット予定",
+  "@settingsSubscriptionResetLabel": {
+    "description": "リセット予定日のラベル"
+  },
+  "settingsSubscriptionExpiryLabel": "有効期限",
+  "@settingsSubscriptionExpiryLabel": {
+    "description": "サブスクリプションの有効期限ラベル"
+  },
+  "settingsUpgradeToPremium": "Premiumにアップグレード",
+  "@settingsUpgradeToPremium": {
+    "description": "Premiumプランへアップグレードするボタン文言"
+  },
+  "settingsStorageSectionTitle": "ストレージ情報",
+  "@settingsStorageSectionTitle": {
+    "description": "ストレージ情報セクションのタイトル"
+  },
+  "settingsStorageAppDataTitle": "アプリデータ",
+  "@settingsStorageAppDataTitle": {
+    "description": "アプリデータストレージカードのタイトル"
+  },
+  "settingsStorageUsageValue": "使用容量: {size}",
+  "@settingsStorageUsageValue": {
+    "description": "フォーマット済みのストレージ使用量",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupTitle": "バックアップ",
+  "@settingsBackupTitle": {
+    "description": "バックアップアクションのタイトル"
+  },
+  "settingsBackupSubtitle": "日記をファイルに保存",
+  "@settingsBackupSubtitle": {
+    "description": "バックアップアクションの補足"
+  },
+  "settingsRestoreTitle": "リストア",
+  "@settingsRestoreTitle": {
+    "description": "リストアアクションのタイトル"
+  },
+  "settingsRestoreSubtitle": "ファイルから日記を復元",
+  "@settingsRestoreSubtitle": {
+    "description": "リストアアクションの補足"
+  },
+  "settingsCleanupTitle": "データ削除",
+  "@settingsCleanupTitle": {
+    "description": "データクリーンアップアクションのタイトル"
+  },
+  "settingsCleanupSubtitle": "不要なデータを削除",
+  "@settingsCleanupSubtitle": {
+    "description": "データクリーンアップアクションの補足"
+  },
+  "settingsVersionTitle": "アプリバージョン",
+  "@settingsVersionTitle": {
+    "description": "アプリバージョンセクションのタイトル"
+  },
+  "settingsLicenseTitle": "ライセンス",
+  "@settingsLicenseTitle": {
+    "description": "オープンソースライセンスセクションのタイトル"
+  },
+  "settingsLicenseSubtitle": "オープンソースライセンス",
+  "@settingsLicenseSubtitle": {
+    "description": "オープンソースライセンスセクションの補足"
+  },
+  "settingsBackupInProgress": "バックアップ中...",
+  "@settingsBackupInProgress": {
+    "description": "バックアップ実行中に表示するメッセージ"
+  },
+  "settingsBackupSuccessTitle": "バックアップ完了",
+  "@settingsBackupSuccessTitle": {
+    "description": "バックアップ成功時のダイアログタイトル"
+  },
+  "settingsBackupSuccessMessage": "バックアップファイルが正常に保存されました。",
+  "@settingsBackupSuccessMessage": {
+    "description": "バックアップ成功時のメッセージ"
+  },
+  "settingsBackupCancelledMessage": "バックアップがキャンセルされたか、失敗しました。",
+  "@settingsBackupCancelledMessage": {
+    "description": "バックアップがキャンセルまたは失敗した際のメッセージ"
+  },
+  "settingsBackupErrorWithDetails": "バックアップエラー: {details}",
+  "@settingsBackupErrorWithDetails": {
+    "description": "バックアップ失敗時のエラーメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreInProgress": "リストア中...",
+  "@settingsRestoreInProgress": {
+    "description": "リストア実行中に表示するメッセージ"
+  },
+  "settingsRestoreErrorWithDetails": "リストアエラー: {details}",
+  "@settingsRestoreErrorWithDetails": {
+    "description": "リストア失敗時のエラーメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeInProgress": "最適化中...",
+  "@settingsOptimizeInProgress": {
+    "description": "最適化実行中に表示するメッセージ"
+  },
+  "settingsOptimizeSuccessTitle": "最適化完了",
+  "@settingsOptimizeSuccessTitle": {
+    "description": "最適化成功時のダイアログタイトル"
+  },
+  "settingsOptimizeSuccessMessage": "データベースの最適化が完了しました。",
+  "@settingsOptimizeSuccessMessage": {
+    "description": "最適化成功時のメッセージ"
+  },
+  "settingsOptimizeErrorWithDetails": "最適化エラー: {details}",
+  "@settingsOptimizeErrorWithDetails": {
+    "description": "最適化失敗時のエラーメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeFailedMessage": "最適化に失敗しました。",
+  "@settingsOptimizeFailedMessage": {
+    "description": "詳細がない最適化失敗時のメッセージ"
+  },
+  "settingsRestoreResultTitle": "リストア結果",
+  "@settingsRestoreResultTitle": {
+    "description": "リストア結果ダイアログのタイトル"
+  },
+  "settingsRestoreTotalEntriesLabel": "総エントリー数",
+  "@settingsRestoreTotalEntriesLabel": {
+    "description": "取り込んだエントリー総数のラベル"
+  },
+  "settingsRestoreSuccessLabel": "成功",
+  "@settingsRestoreSuccessLabel": {
+    "description": "成功したエントリー数のラベル"
+  },
+  "settingsRestoreSkippedLabel": "スキップ",
+  "@settingsRestoreSkippedLabel": {
+    "description": "スキップしたエントリー数のラベル"
+  },
+  "settingsRestoreFailedLabel": "失敗",
+  "@settingsRestoreFailedLabel": {
+    "description": "失敗したエントリー数のラベル"
+  },
+  "settingsRestoreEntriesCount": "{count}件",
+  "@settingsRestoreEntriesCount": {
+    "description": "エントリー数を表示",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreAdditionalErrors": "...他{count}件のエラー",
+  "@settingsRestoreAdditionalErrors": {
+    "description": "追加のエラー件数を示すメッセージ",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSubscriptionInfoTitle": "サブスクリプション情報",
+  "@settingsSubscriptionInfoTitle": {
+    "description": "サブスクリプション法的情報セクションのタイトル"
+  },
+  "settingsPremiumMonthlyTitle": "プレミアム（月額）",
+  "@settingsPremiumMonthlyTitle": {
+    "description": "月額プレミアムプランのラベル"
+  },
+  "settingsPremiumYearlyTitle": "プレミアム（年額）",
+  "@settingsPremiumYearlyTitle": {
+    "description": "年額プレミアムプランのラベル"
+  },
+  "settingsPremiumPlanFeatures": "月100回のAI日記生成、過去1年の写真、全20種類のライティングプロンプトが利用できます。",
+  "@settingsPremiumPlanFeatures": {
+    "description": "プレミアムプランの特典説明"
+  },
+  "settingsSubscriptionAutoRenewTitle": "自動更新について",
+  "@settingsSubscriptionAutoRenewTitle": {
+    "description": "自動更新情報の見出し"
+  },
+  "settingsSubscriptionAutoRenewDescription": "• サブスクリプションは自動的に更新されます\n• 料金は更新日の24時間前にiTunesアカウントに請求されます\n• 更新の24時間前までにキャンセルしない限り自動更新されます\n• iOS設定 > Apple ID > サブスクリプションで管理できます",
+  "@settingsSubscriptionAutoRenewDescription": {
+    "description": "自動更新に関する案内文"
+  },
+  "commonPrivacyPolicy": "プライバシーポリシー",
+  "@commonPrivacyPolicy": {
+    "description": "プライバシーポリシーリンクのラベル"
+  },
+  "commonTermsOfUse": "利用規約",
+  "@commonTermsOfUse": {
+    "description": "利用規約リンクのラベル"
+  },
+  "urlLauncherErrorTitle": "リンクエラー",
+  "@urlLauncherErrorTitle": {
+    "description": "リンク起動エラーダイアログのタイトル"
+  },
+  "urlLauncherOpenFailed": "リンクを開くことができませんでした。",
+  "@urlLauncherOpenFailed": {
+    "description": "リンクが開けなかった際のメッセージ"
+  },
+  "upgradeDialogTitle": "Premiumプラン",
+  "@upgradeDialogTitle": {
+    "description": "Premiumアップグレードダイアログのタイトル"
+  },
+  "upgradeDialogUnavailableMessage": "Premiumプランが利用できません。しばらく時間をおいて再度お試しください。",
+  "@upgradeDialogUnavailableMessage": {
+    "description": "Premiumプランが取得できない場合のメッセージ"
+  },
+  "upgradeDialogDiscountValue": "{discount}%割引でお得",
+  "@upgradeDialogDiscountValue": {
+    "description": "割引率を表示するラベル",
+    "placeholders": {
+      "discount": {
+        "type": "int"
+      }
+    }
+  },
+  "commonRetry": "再試行",
+  "@commonRetry": {
+    "description": "リトライボタン共通文言"
+  },
+  "commonClose": "閉じる",
+  "@commonClose": {
+    "description": "閉じるボタン共通文言"
+  },
+  "errorDetailsLabel": "詳細情報:",
+  "@errorDetailsLabel": {
+    "description": "エラー詳細セクションのラベル"
+  },
+  "errorSeverityInfo": "情報",
+  "@errorSeverityInfo": {
+    "description": "情報レベルのエラー種別ラベル"
+  },
+  "errorSeverityWarning": "警告",
+  "@errorSeverityWarning": {
+    "description": "警告レベルのエラー種別ラベル"
+  },
+  "errorSeverityError": "エラー",
+  "@errorSeverityError": {
+    "description": "エラーレベルのエラー種別ラベル"
+  },
+  "errorSeverityCritical": "重大なエラー",
+  "@errorSeverityCritical": {
+    "description": "重大レベルのエラー種別ラベル"
+  },
+  "commonUpgrade": "アップグレード",
+  "@commonUpgrade": {
+    "description": "アップグレードボタン共通文言"
+  },
+  "commonErrorTitle": "エラー",
+  "@commonErrorTitle": {
+    "description": "汎用的なエラーダイアログのタイトル"
+  },
+  "usageLimitDialogTitle": "AI生成の制限に達しました",
+  "@usageLimitDialogTitle": {
+    "description": "AI利用上限に達した際のダイアログタイトル"
+  },
+  "usageLimitDialogReachedMessage": "{planName}プランの月間{limit}回の制限に達しました。",
+  "@usageLimitDialogReachedMessage": {
+    "description": "プランの上限に達したことを説明する本文",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageLimitDialogResetLabel": "リセット日:",
+  "@usageLimitDialogResetLabel": {
+    "description": "リセット日を示すラベル"
+  },
+  "usageLimitDialogResetValue": "{date}",
+  "@usageLimitDialogResetValue": {
+    "description": "フォーマット済みのリセット日",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageLimitDialogPremiumHint": "Premiumプランなら月間{limit}回まで利用できます",
+  "@usageLimitDialogPremiumHint": {
+    "description": "Premiumプランへのアップグレードを促す一文",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusDialogTitle": "AI生成の使用状況",
+  "@usageStatusDialogTitle": {
+    "description": "AI使用状況ダイアログのタイトル"
+  },
+  "usageStatusCurrentPlan": "現在のプラン: {planName}",
+  "@usageStatusCurrentPlan": {
+    "description": "現在のプラン名を表示する文",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusUsageLabel": "使用量",
+  "@usageStatusUsageLabel": {
+    "description": "使用量セクションのラベル"
+  },
+  "usageStatusUsageValue": "{used} / {limit}回",
+  "@usageStatusUsageValue": {
+    "description": "使用済み回数と上限回数を表示する文",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusRemainingLabel": "残り回数",
+  "@usageStatusRemainingLabel": {
+    "description": "残り回数セクションのラベル"
+  },
+  "usageStatusRemainingValue": "{remaining}回",
+  "@usageStatusRemainingValue": {
+    "description": "残り回数を表示する文",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusResetInfo": "{date}にリセット",
+  "@usageStatusResetInfo": {
+    "description": "次回リセット日を示す文",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusPremiumUpsell": "Premiumプランなら月間{limit}回まで利用可能です",
+  "@usageStatusPremiumUpsell": {
+    "description": "Premiumプランの利用回数を案内する文",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonTryAgainLater": "しばらく時間をおいてから再度お試しください。",
+  "@commonTryAgainLater": {
+    "description": "後ほど再試行を促すメッセージ"
+  },
+  "usageStatusFetchErrorTitle": "使用状況を取得できませんでした",
+  "@usageStatusFetchErrorTitle": {
+    "description": "使用状況の取得に失敗した際のタイトル"
+  },
+  "usageStatusFetchErrorMessage": "使用状況の取得中にエラーが発生しました。",
+  "@usageStatusFetchErrorMessage": {
+    "description": "使用状況の取得エラー時に表示するメッセージ"
+  },
+  "commonAllow": "許可する",
+  "@commonAllow": {
+    "description": "権限付与ボタンの文言"
+  },
+  "timelineLoadingPhotosLabel": "読み込み中の写真",
+  "@timelineLoadingPhotosLabel": {
+    "description": "写真読み込み中のセマンティックラベル"
+  },
+  "photoSemanticIndex": "写真 {index}",
+  "@photoSemanticIndex": {
+    "description": "写真の位置を示すセマンティックラベル",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "photoSemanticSelected": "選択中",
+  "@photoSemanticSelected": {
+    "description": "写真が選択されていることを示すラベル"
+  },
+  "photoSemanticNotSelected": "未選択",
+  "@photoSemanticNotSelected": {
+    "description": "写真が選択されていないことを示すラベル"
+  },
+  "promptSelectionTitle": "プロンプトを選択",
+  "@promptSelectionTitle": {
+    "description": "プロンプト選択ダイアログのタイトル"
+  },
+  "promptCreateRandom": "ランダムで作成",
+  "@promptCreateRandom": {
+    "description": "ランダム選択時の作成ボタンラベル"
+  },
+  "promptCreateWithSelected": "プロンプトで作成",
+  "@promptCreateWithSelected": {
+    "description": "特定のプロンプト選択時の作成ボタンラベル"
+  },
+  "promptCreateWithout": "そのまま作成",
+  "@promptCreateWithout": {
+    "description": "プロンプトを使わずに作成するボタンラベル"
+  },
+  "promptOptionNone": "プロンプトなし",
+  "@promptOptionNone": {
+    "description": "プロンプトを使用しないオプションのラベル"
+  },
+  "promptOptionNoneDescription": "写真のみから日記を生成",
+  "@promptOptionNoneDescription": {
+    "description": "プロンプトなしオプションの説明"
+  },
+  "promptOptionRandom": "ランダム選択",
+  "@promptOptionRandom": {
+    "description": "ランダム選択オプションのラベル"
+  },
+  "promptLoadingMessage": "プロンプトを読み込み中...",
+  "@promptLoadingMessage": {
+    "description": "プロンプト読み込み中に表示するメッセージ"
+  },
+  "promptRandomDescription": "おすすめのプロンプトを自動選択",
+  "@promptRandomDescription": {
+    "description": "ランダム選択オプションの説明"
+  },
+  "promptEmptyTitle": "プロンプトが見つかりません",
+  "@promptEmptyTitle": {
+    "description": "利用可能なプロンプトがない場合のタイトル"
+  },
+  "promptEmptyDescription": "プロンプトデータの読み込みに失敗しました",
+  "@promptEmptyDescription": {
+    "description": "プロンプト読み込み失敗時の説明"
+  },
+  "diaryPreviewCurrentPromptTitle": "使用中のプロンプト",
+  "@diaryPreviewCurrentPromptTitle": {
+    "description": "日記プレビュー画面で現在選択中のプロンプトを示すタイトル"
+  },
+  "diaryPreviewNoPhotosError": "選択された写真がありません。",
+  "@diaryPreviewNoPhotosError": {
+    "description": "日記生成のための写真が未選択の場合に表示するエラーメッセージ"
+  },
+  "diaryPreviewGenerationError": "日記の生成中にエラーが発生しました。\\n時間を空けてもう一度お試しください。",
+  "@diaryPreviewGenerationError": {
+    "description": "日記生成に失敗した際に表示するメッセージ"
+  },
+  "diaryPreviewSaveSuccess": "日記を保存しました",
+  "@diaryPreviewSaveSuccess": {
+    "description": "日記保存成功時のスナックバー表示"
+  },
+  "diaryPreviewAutoSaveError": "日記の保存に失敗しました。\\n時間を空けてもう一度お試しください。",
+  "@diaryPreviewAutoSaveError": {
+    "description": "日記保存に失敗した際に表示するエラーメッセージ"
+  },
+  "diaryPreviewDateLabel": "日記の日付",
+  "@diaryPreviewDateLabel": {
+    "description": "日記プレビュー画面の日付欄のラベル"
+  },
+  "diaryPreviewSelectedPhotos": "選択された写真 ({count}枚)",
+  "@diaryPreviewSelectedPhotos": {
+    "description": "選択中の写真枚数を表示するヘッダー",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewAnalyzingPhotos": "写真を分析中...",
+  "@diaryPreviewAnalyzingPhotos": {
+    "description": "写真分析中に表示するステータスメッセージ"
+  },
+  "diaryPreviewAnalyzingProgress": "{current}/{total}枚完了",
+  "@diaryPreviewAnalyzingProgress": {
+    "description": "分析済み枚数を表示するメッセージ",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewPromptTag": "プロンプト使用",
+  "@diaryPreviewPromptTag": {
+    "description": "プロンプト利用時に表示するタグ"
+  },
+  "diaryPreviewTitleLabel": "タイトル",
+  "@diaryPreviewTitleLabel": {
+    "description": "日記タイトル入力欄のラベル"
+  },
+  "diaryPreviewTitleHint": "日記のタイトルを入力",
+  "@diaryPreviewTitleHint": {
+    "description": "日記タイトル入力欄のヒント"
+  },
+  "diaryPreviewContentLabel": "本文",
+  "@diaryPreviewContentLabel": {
+    "description": "日記本文入力欄のラベル"
+  },
+  "diaryPreviewContentHint": "日記の内容を編集できます",
+  "@diaryPreviewContentHint": {
+    "description": "日記本文入力欄のヒント"
+  },
+  "diaryPreviewSaveButton": "日記を保存",
+  "@diaryPreviewSaveButton": {
+    "description": "日記プレビュー画面の保存ボタンラベル"
+  },
+  "diaryPreviewUsageLimitTitle": "AI生成の制限に達しました",
+  "@diaryPreviewUsageLimitTitle": {
+    "description": "AI月間制限到達時のフォールバックダイアログタイトル"
+  },
+  "diaryPreviewUsageLimitMessage": "AI生成の月間制限に達したため、次回のリセットまで新しい日記を生成できません。",
+  "@diaryPreviewUsageLimitMessage": {
+    "description": "AI月間制限到達時のフォールバックダイアログ本文"
+  },
+  "diaryPreviewAppBarTitle": "日記プレビュー",
+  "@diaryPreviewAppBarTitle": {
+    "description": "日記プレビュー画面のアプリバータイトル"
+  },
+  "diaryPreviewRegenerateWithoutPromptTooltip": "プロンプトなしで再生成",
+  "@diaryPreviewRegenerateWithoutPromptTooltip": {
+    "description": "プロンプトを解除して再生成するボタンのツールチップ"
+  },
+  "diaryPreviewInitializingPromptsTitle": "プロンプトサービスを初期化中...",
+  "@diaryPreviewInitializingPromptsTitle": {
+    "description": "プロンプトサービス初期化時に表示するタイトル"
+  },
+  "diaryPreviewInitializingPromptsDescription": "プロンプト機能の準備をしています",
+  "@diaryPreviewInitializingPromptsDescription": {
+    "description": "プロンプトサービス初期化時に表示する説明文"
+  },
+  "diaryPreviewSavingDiaryTitle": "日記を保存中...",
+  "@diaryPreviewSavingDiaryTitle": {
+    "description": "日記保存中に表示するタイトル"
+  },
+  "diaryPreviewSavingDiaryDescription": "生成された日記を保存しています",
+  "@diaryPreviewSavingDiaryDescription": {
+    "description": "日記保存中に表示する説明文"
+  },
+  "diaryPreviewGeneratingDiaryTitle": "写真から日記を生成中...",
+  "@diaryPreviewGeneratingDiaryTitle": {
+    "description": "日記生成中に表示するタイトル"
+  },
+  "diaryPreviewGeneratingDiaryDescription": "AIがあなたの写真を分析しています",
+  "@diaryPreviewGeneratingDiaryDescription": {
+    "description": "日記生成中に表示する説明文"
+  },
+  "diaryPreviewContentSectionTitle": "日記の内容",
+  "@diaryPreviewContentSectionTitle": {
+    "description": "日記本文ブロックの見出し"
+  },
+  "diaryPreviewDiscardDialogTitle": "日記を破棄しますか？",
+  "@diaryPreviewDiscardDialogTitle": {
+    "description": "日記を破棄する際の確認ダイアログタイトル"
+  },
+  "diaryPreviewDiscardDialogMessage": "AI生成回数は既に消費されています。",
+  "@diaryPreviewDiscardDialogMessage": {
+    "description": "日記破棄時の注意文"
+  },
+  "diaryPreviewDiscardDialogConfirm": "破棄して戻る",
+  "@diaryPreviewDiscardDialogConfirm": {
+    "description": "日記破棄を確定するボタンラベル"
+  },
+  "diaryCardUntitled": "無題",
+  "@diaryCardUntitled": {
+    "description": "タイトル未設定時のフォールバック"
+  },
+  "diaryCardGeneratingTags": "タグを生成中...",
+  "@diaryCardGeneratingTags": {
+    "description": "タグ生成中に表示するメッセージ"
+  },
+  "pastPhotoSelectedDateLabel": "{date}の写真",
+  "@pastPhotoSelectedDateLabel": {
+    "description": "選択された日付の写真を示すラベル",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pastPhotoSelectedCount": "{count}枚",
+  "@pastPhotoSelectedCount": {
+    "description": "選択日付の写真枚数を表示する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diarySearchHint": "タイトルや本文を検索...",
+  "@diarySearchHint": {
+    "description": "日記検索欄のヒントテキスト"
+  },
+  "diaryListTitle": "日記一覧",
+  "@diaryListTitle": {
+    "description": "日記一覧画面のタイトル"
+  },
+  "commonBack": "戻る",
+  "@commonBack": {
+    "description": "戻るボタンの共通ラベル"
+  },
+  "commonNext": "次へ",
+  "@commonNext": {
+    "description": "次へボタンの共通ラベル"
+  },
+  "commonSelect": "選択",
+  "@commonSelect": {
+    "description": "選択ボタンのテキスト"
+  },
+  "onboardingSkip": "スキップ",
+  "@onboardingSkip": {
+    "description": "オンボーディングで表示するスキップボタン"
+  },
+  "onboardingWelcomeTitle": "Smart Photo Diary\nへようこそ",
+  "@onboardingWelcomeTitle": {
+    "description": "オンボーディング初回ページの見出し"
+  },
+  "onboardingWelcomeSubtitle": "毎日の思い出を美しい文章に。写真を選ぶだけで素敵な日記が完成します。",
+  "@onboardingWelcomeSubtitle": {
+    "description": "アプリ概要を説明するサブヘッダー"
+  },
+  "onboardingThreeStepsTitle": "3ステップで簡単日記作成",
+  "@onboardingThreeStepsTitle": {
+    "description": "3ステップの流れを紹介するタイトル"
+  },
+  "onboardingStepTitle": "ステップ{step}",
+  "@onboardingStepTitle": {
+    "description": "各ステップのラベル",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingStep1Description": "今日撮った写真を選択",
+  "@onboardingStep1Description": {
+    "description": "ステップ1の説明文"
+  },
+  "onboardingStep2Description": "AIが写真から心温まる日記を作成",
+  "@onboardingStep2Description": {
+    "description": "ステップ2の説明文"
+  },
+  "onboardingStep3Description": "保存・編集して思い出を振り返り",
+  "@onboardingStep3Description": {
+    "description": "ステップ3の説明文"
+  },
+  "onboardingShareTitle": "写真と日記をすぐ共有",
+  "@onboardingShareTitle": {
+    "description": "共有紹介ページのタイトル"
+  },
+  "onboardingShareFormatTitle": "フォーマットを選択",
+  "@onboardingShareFormatTitle": {
+    "description": "共有フォーマットのタイトル"
+  },
+  "onboardingShareFormatDescription": "縦長・正方形レイアウトに対応",
+  "@onboardingShareFormatDescription": {
+    "description": "共有フォーマットの説明文"
+  },
+  "onboardingShareMultipleTitle": "複数写真にも対応",
+  "@onboardingShareMultipleTitle": {
+    "description": "複数写真対応を説明するタイトル"
+  },
+  "onboardingShareMultipleDescription": "複数枚でもバランスよく配置",
+  "@onboardingShareMultipleDescription": {
+    "description": "複数写真対応の説明文"
+  },
+  "onboardingPlansTitle": "ライフスタイルに合わせてプランを選択",
+  "@onboardingPlansTitle": {
+    "description": "プラン紹介ページのタイトル"
+  },
+  "onboardingPlanBasicSubtitle": "無料プラン",
+  "@onboardingPlanBasicSubtitle": {
+    "description": "Basicプランカードのサブタイトル"
+  },
+  "onboardingPlanFeatureMonthlyLimit": "月{count}回まで日記を生成",
+  "@onboardingPlanFeatureMonthlyLimit": {
+    "description": "月間AI生成上限を説明する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingPlanFeatureRecentPhotos": "当日・前日の写真から選べる",
+  "@onboardingPlanFeatureRecentPhotos": {
+    "description": "直近写真を選択できることを説明する文"
+  },
+  "onboardingPlanFeatureBasicPrompts": "基本的なライティングプロンプト付き",
+  "@onboardingPlanFeatureBasicPrompts": {
+    "description": "基本プロンプトが利用可能なことを説明する文"
+  },
+  "onboardingPlanFeaturePastDays": "過去{days}日以内の写真から選択可能",
+  "@onboardingPlanFeaturePastDays": {
+    "description": "過去日数の写真から選べることを説明する文",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingPlanFeatureRichPrompts": "豊富なライティングプロンプトを利用",
+  "@onboardingPlanFeatureRichPrompts": {
+    "description": "Premiumで利用できるプロンプトを説明する文"
+  },
+  "onboardingPlanStartFree": "まずは無料で始められます",
+  "@onboardingPlanStartFree": {
+    "description": "無料で始められることを伝えるメッセージ"
+  },
+  "onboardingPermissionTitle": "写真へのアクセス許可",
+  "@onboardingPermissionTitle": {
+    "description": "権限ページのタイトル"
+  },
+  "onboardingPermissionDescription": "日記を作成するために写真ライブラリへのアクセスが必要です。",
+  "@onboardingPermissionDescription": {
+    "description": "写真アクセス権限の必要理由を説明する文"
+  },
+  "onboardingPrivacyTitle": "プライバシーを最優先",
+  "@onboardingPrivacyTitle": {
+    "description": "プライバシー保護を説明するタイトル"
+  },
+  "onboardingPrivacyDescription": "写真は日記生成時にのみ使用され、外部サーバーに保存されることはありません。",
+  "@onboardingPrivacyDescription": {
+    "description": "プライバシー保護方針の説明文"
+  },
+  "onboardingProcessing": "準備中...",
+  "@onboardingProcessing": {
+    "description": "オンボーディング完了処理中の表示文"
+  },
+  "onboardingStart": "始める",
+  "@onboardingStart": {
+    "description": "オンボーディングを完了するボタン"
+  },
+  "commonSave": "保存",
+  "@commonSave": {
+    "description": "保存ボタンの共通ラベル"
+  },
+  "commonShare": "共有",
+  "@commonShare": {
+    "description": "共有ボタンの共通ラベル"
+  },
+  "commonDelete": "削除",
+  "@commonDelete": {
+    "description": "削除ボタンの共通ラベル"
+  },
+  "commonEdit": "編集",
+  "@commonEdit": {
+    "description": "編集ボタンの共通ラベル"
+  },
+  "commonErrorOccurred": "エラーが発生しました",
+  "@commonErrorOccurred": {
+    "description": "エラー発生時の共通タイトル"
+  },
+  "commonErrorWithMessage": "エラー: {message}",
+  "@commonErrorWithMessage": {
+    "description": "エラー文言にメッセージを埋め込む",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPreparing": "準備しています...",
+  "@commonPreparing": {
+    "description": "準備中を示す共通ラベル"
+  },
+  "commonShareFailedWithReason": "共有に失敗しました: {reason}",
+  "@commonShareFailedWithReason": {
+    "description": "共有に失敗した際のメッセージ",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnexpectedErrorWithDetails": "予期しないエラーが発生しました: {details}",
+  "@commonUnexpectedErrorWithDetails": {
+    "description": "予期しないエラー発生時のメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "commonTitleLabel": "タイトル",
+  "@commonTitleLabel": {
+    "description": "タイトル項目のラベル"
+  },
+  "commonBodyLabel": "本文",
+  "@commonBodyLabel": {
+    "description": "本文項目のラベル"
+  },
+  "commonTagsLabel": "タグ: ",
+  "@commonTagsLabel": {
+    "description": "タグ項目のラベル"
+  },
+  "commonClearFilters": "フィルタをクリア",
+  "@commonClearFilters": {
+    "description": "適用中のフィルタをすべて解除するボタンラベル"
+  },
+  "commonCreatedAtLabel": "作成日時",
+  "@commonCreatedAtLabel": {
+    "description": "作成日時のラベル"
+  },
+  "commonUpdatedAtLabel": "更新日時",
+  "@commonUpdatedAtLabel": {
+    "description": "更新日時のラベル"
+  },
+  "diaryDetailViewTitle": "日記の詳細",
+  "@diaryDetailViewTitle": {
+    "description": "日記詳細画面のタイトル"
+  },
+  "diaryDetailEditTitle": "日記を編集",
+  "@diaryDetailEditTitle": {
+    "description": "日記編集時のタイトル"
+  },
+  "diaryDetailContentHeading": "日記の内容",
+  "@diaryDetailContentHeading": {
+    "description": "日記本文セクションの見出し"
+  },
+  "diaryDetailLoadingTitle": "日記を読み込み中...",
+  "@diaryDetailLoadingTitle": {
+    "description": "日記読み込み中に表示するタイトル"
+  },
+  "diaryDetailLoadingSubtitle": "日記の内容と写真を取得しています",
+  "@diaryDetailLoadingSubtitle": {
+    "description": "日記読み込み中に表示する補足文"
+  },
+  "diaryDetailDateLabel": "日記の日付",
+  "@diaryDetailDateLabel": {
+    "description": "日記の日付を示すラベル"
+  },
+  "diaryDetailPhotosSectionTitle": "写真 ({count}枚)",
+  "@diaryDetailPhotosSectionTitle": {
+    "description": "写真セクションのタイトル",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryDetailTagCount": "{count}個のタグ",
+  "@diaryDetailTagCount": {
+    "description": "タグ数を表示する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryDetailTitleHint": "日記のタイトルを入力",
+  "@diaryDetailTitleHint": {
+    "description": "日記タイトル入力欄のヒント"
+  },
+  "diaryDetailContentHint": "日記の内容を入力してください",
+  "@diaryDetailContentHint": {
+    "description": "日記本文入力欄のヒント"
+  },
+  "diaryDetailMetadataTitle": "詳細情報",
+  "@diaryDetailMetadataTitle": {
+    "description": "メタデータセクションの見出し"
+  },
+  "diaryDetailDeleteDialogTitle": "日記の削除",
+  "@diaryDetailDeleteDialogTitle": {
+    "description": "日記削除確認ダイアログのタイトル"
+  },
+  "diaryDetailDeleteDialogMessage": "この日記を削除してもよろしいですか？\nこの操作は元に戻せません。",
+  "@diaryDetailDeleteDialogMessage": {
+    "description": "日記削除時の警告メッセージ"
+  },
+  "diaryDetailUpdateError": "日記の更新に失敗しました: {details}",
+  "@diaryDetailUpdateError": {
+    "description": "日記更新に失敗した際のメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryDetailDeleteError": "日記の削除に失敗しました: {details}",
+  "@diaryDetailDeleteError": {
+    "description": "日記削除に失敗した際のメッセージ",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryDetailShareDialogMessage": "どの形式で共有しますか？",
+  "@diaryDetailShareDialogMessage": {
+    "description": "共有オプション選択時のメッセージ"
+  },
+  "diaryDetailShareTextOptionTitle": "写真と日記テキスト",
+  "@diaryDetailShareTextOptionTitle": {
+    "description": "テキスト共有オプションのタイトル"
+  },
+  "diaryDetailShareTextOptionSubtitle": "X（旧Twitter）向け",
+  "@diaryDetailShareTextOptionSubtitle": {
+    "description": "テキスト共有オプションのサブタイトル"
+  },
+  "diaryDetailShareImageOptionTitle": "写真と日記を画像に",
+  "@diaryDetailShareImageOptionTitle": {
+    "description": "画像共有オプションのタイトル"
+  },
+  "diaryDetailSharePortraitSubtitle": "Instagram向け（縦長）",
+  "@diaryDetailSharePortraitSubtitle": {
+    "description": "縦長画像を示すサブタイトル"
+  },
+  "diaryDetailShareSquareSubtitle": "Instagram向け（正方形）",
+  "@diaryDetailShareSquareSubtitle": {
+    "description": "正方形画像を示すサブタイトル"
+  },
+  "diaryDetailSharePreparingTitle": "共有準備中",
+  "@diaryDetailSharePreparingTitle": {
+    "description": "共有準備ダイアログのタイトル"
+  },
+  "diaryDetailShareGeneratingBody": "共有用画像を生成しています...",
+  "@diaryDetailShareGeneratingBody": {
+    "description": "共有用画像生成中のメッセージ"
+  },
+  "statisticsLoadingTitle": "統計データを読み込み中...",
+  "@statisticsLoadingTitle": {
+    "description": "統計データ読み込み中に表示するタイトル"
+  },
+  "statisticsLoadingSubtitle": "あなたの日記の記録を分析しています",
+  "@statisticsLoadingSubtitle": {
+    "description": "統計データ読み込み中に表示する補足文"
+  },
+  "statisticsTotalEntriesTitle": "総記録数",
+  "@statisticsTotalEntriesTitle": {
+    "description": "総日記件数を示すラベル"
+  },
+  "statisticsCurrentStreakTitle": "連続記録数",
+  "@statisticsCurrentStreakTitle": {
+    "description": "現在の連続記録日数ラベル"
+  },
+  "statisticsLongestStreakTitle": "最長連続記録",
+  "@statisticsLongestStreakTitle": {
+    "description": "最長連続記録日数ラベル"
+  },
+  "statisticsMonthlyCountTitle": "今月の記録",
+  "@statisticsMonthlyCountTitle": {
+    "description": "今月の記録日数ラベル"
+  },
+  "statisticsUnitDiary": "日記",
+  "@statisticsUnitDiary": {
+    "description": "日記件数の単位"
+  },
+  "statisticsUnitDay": "日",
+  "@statisticsUnitDay": {
+    "description": "日数の単位"
+  },
+  "statisticsDiaryCountMessage": "{count}件の日記があります",
+  "@statisticsDiaryCountMessage": {
+    "description": "選択した日に存在する日記数を案内する文",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUsageWarningRemaining": "AI生成の残り回数が{remaining}回です",
+  "@subscriptionUsageWarningRemaining": {
+    "description": "AI生成使用量が制限に近づいた時の警告メッセージ",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUsageWarningLimitReached": "AI生成の制限に達しました",
+  "@subscriptionUsageWarningLimitReached": {
+    "description": "AI生成制限に達した時の警告メッセージ"
+  },
+  "subscriptionUpgradeRecommendationLimit": "Premiumプランにアップグレードすると月間{limit}回まで利用できます",
+  "@subscriptionUpgradeRecommendationLimit": {
+    "description": "具体的な制限回数を示すアップグレード推奨メッセージ",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUpgradeRecommendationGeneral": "より多くAI生成を利用される場合はPremiumプランがおすすめです",
+  "@subscriptionUpgradeRecommendationGeneral": {
+    "description": "一般的なアップグレード推奨メッセージ"
+  },
+  "timelineToday": "今日",
+  "@timelineToday": {
+    "description": "タイムライン見出し：今日の写真"
+  },
+  "timelineYesterday": "昨日",
+  "@timelineYesterday": {
+    "description": "タイムライン見出し：昨日の写真"
+  },
+  "timelineMonthYear": "{year}年{month}月",
+  "@timelineMonthYear": {
+    "description": "タイムライン見出し：月単位のグループ",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  }
+}

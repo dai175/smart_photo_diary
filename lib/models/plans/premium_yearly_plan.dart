@@ -1,5 +1,8 @@
+import 'package:intl/intl.dart';
+
 import 'plan.dart';
 import '../../constants/subscription_constants.dart';
+import '../../utils/locale_format_utils.dart';
 
 /// Premium年額プランの実装クラス
 ///
@@ -66,9 +69,26 @@ class PremiumYearlyPlan extends Plan {
   String getValueProposition() {
     final savings = yearlySavings;
     final monthlyEquiv = monthlyEquivalentPrice.round();
+    final locale = Intl.getCurrentLocale().isEmpty
+        ? 'ja'
+        : Intl.getCurrentLocale();
+    final monthlyEquivText = LocaleFormatUtils.formatCurrency(
+      monthlyEquiv,
+      locale: locale,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
+      decimalDigits: 0,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
+    );
+    final savingsText = LocaleFormatUtils.formatCurrency(
+      savings,
+      locale: locale,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
+      decimalDigits: 0,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
+    );
 
-    return '年額プランなら、実質月額¥$monthlyEquivで全機能をご利用いただけます。'
-        '月額プランと比べて年間¥${savings.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}（$discountPercentage%）お得です。';
+    return '年額プランなら、実質月額$monthlyEquivTextで全機能をご利用いただけます。'
+        '月額プランと比べて年間$savingsText（$discountPercentage%）お得です。';
   }
 
   /// 利用状況に基づくメッセージ
@@ -86,9 +106,20 @@ class PremiumYearlyPlan extends Plan {
 
   /// 年額プランの特徴リスト
   List<String> getYearlyBenefits() {
+    final locale = Intl.getCurrentLocale().isEmpty
+        ? 'ja'
+        : Intl.getCurrentLocale();
+    final savingsText = LocaleFormatUtils.formatCurrency(
+      yearlySavings,
+      locale: locale,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
+      decimalDigits: 0,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
+    );
+
     return [
       '月額プランより$discountPercentage%お得',
-      '年間¥${yearlySavings.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}の節約',
+      '年間$savingsTextの節約',
       '1年間の安心サポート',
       '支払い手続きは年1回のみ',
       '全機能を存分に活用可能',

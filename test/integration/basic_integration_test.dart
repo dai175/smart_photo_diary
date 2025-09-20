@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_photo_diary/main.dart';
+import 'package:intl/intl.dart';
 import 'package:smart_photo_diary/constants/app_icons.dart';
+import 'package:smart_photo_diary/main.dart';
 import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
 
@@ -32,7 +33,12 @@ void main() {
 
       // Assert - 日付タイトルが表示されることを確認
       final now = DateTime.now();
-      final expectedTitle = '${now.year}年${now.month}月${now.day}日';
+      final scaffoldContext = tester.element(find.byType(Scaffold).first);
+      final locale = Localizations.localeOf(scaffoldContext);
+      final localeName = locale.countryCode != null
+          ? '${locale.languageCode}_${locale.countryCode}'
+          : locale.languageCode;
+      final expectedTitle = DateFormat.yMMMMd(localeName).format(now);
       expect(find.text(expectedTitle), findsOneWidget);
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
@@ -49,7 +55,12 @@ void main() {
 
       // Assert - 日付タイトルが表示されることを確認
       final now = DateTime.now();
-      final expectedTitle = '${now.year}年${now.month}月${now.day}日';
+      final scaffoldContext = tester.element(find.byType(Scaffold).first);
+      final locale = Localizations.localeOf(scaffoldContext);
+      final localeName = locale.countryCode != null
+          ? '${locale.languageCode}_${locale.countryCode}'
+          : locale.languageCode;
+      final expectedTitle = DateFormat.yMMMMd(localeName).format(now);
       expect(find.text(expectedTitle), findsOneWidget);
 
       // 権限が拒否されている場合の確認（メッセージやボタンが表示される）

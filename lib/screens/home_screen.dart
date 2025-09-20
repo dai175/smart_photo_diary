@@ -21,6 +21,7 @@ import '../controllers/scroll_signal.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/component_constants.dart';
 import '../models/diary_change.dart';
+import '../localization/localization_extensions.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -128,11 +129,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   // モーダル表示メソッド
   void _showSelectionLimitModal() {
-    _showSimpleDialog(AppConstants.selectionLimitMessage);
+    _showSimpleDialog(
+      context.l10n.photoSelectionLimitMessage(AppConstants.maxPhotosSelection),
+    );
   }
 
   void _showUsedPhotoModal() {
-    _showSimpleDialog(AppConstants.usedPhotoMessage);
+    _showSimpleDialog(context.l10n.photoUsedPhotoMessage);
   }
 
   /// 日記詳細画面を開いた結果を共通で処理
@@ -175,13 +178,13 @@ class _HomeScreenState extends State<HomeScreen>
       } else {
         _logger.warning('写真ID: $photoId に対応する日記が見つかりません');
         if (mounted) {
-          _showSimpleDialog('対応する日記が見つかりませんでした');
+          _showSimpleDialog(context.l10n.homeLinkedDiaryNotFound);
         }
       }
     } catch (e) {
       _logger.error('写真IDから日記取得エラー', error: e);
       if (mounted) {
-        _showSimpleDialog('日記の取得中にエラーが発生しました');
+        _showSimpleDialog('${context.l10n.homeDiaryLoadError}\n$e');
       }
     }
   }
@@ -201,15 +204,15 @@ class _HomeScreenState extends State<HomeScreen>
         return CustomDialog(
           icon: Icons.photo_library_outlined,
           iconColor: AppColors.warning,
-          title: '写真へのアクセスを許可',
-          message: '日記作成のために写真ライブラリへのアクセスが必要です。設定アプリで写真へのアクセスを許可してください。',
+          title: context.l10n.homePermissionDialogTitle,
+          message: context.l10n.homePermissionDialogMessage,
           actions: [
             CustomDialogAction(
-              text: 'キャンセル',
+              text: context.l10n.commonCancel,
               onPressed: () => Navigator.of(context).pop(),
             ),
             CustomDialogAction(
-              text: '設定を開く',
+              text: context.l10n.commonOpenSettings,
               isPrimary: true,
               icon: Icons.settings_rounded,
               onPressed: () async {
@@ -234,15 +237,15 @@ class _HomeScreenState extends State<HomeScreen>
         return CustomDialog(
           icon: Icons.photo_library_outlined,
           iconColor: AppColors.info,
-          title: '写真を追加選択',
-          message: '現在、選択された写真のみアクセス可能です。日記作成に使用したい写真を追加で選択しますか？',
+          title: context.l10n.homeLimitedAccessTitle,
+          message: context.l10n.homeLimitedAccessMessage,
           actions: [
             CustomDialogAction(
-              text: '後で',
+              text: context.l10n.commonLater,
               onPressed: () => Navigator.of(context).pop(),
             ),
             CustomDialogAction(
-              text: '写真を選択',
+              text: context.l10n.photoSelectAction,
               isPrimary: true,
               icon: Icons.add_photo_alternate_rounded,
               onPressed: () async {
@@ -672,15 +675,15 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context) => CustomDialog(
         icon: Icons.camera_alt_outlined,
         iconColor: Theme.of(context).colorScheme.primary,
-        title: 'カメラへのアクセス許可が必要です',
-        message: '写真を撮影するには、カメラへのアクセスを許可してください。設定アプリからカメラの権限を有効にできます。',
+        title: context.l10n.cameraPermissionDialogTitle,
+        message: context.l10n.cameraPermissionDialogMessage,
         actions: [
           CustomDialogAction(
-            text: 'キャンセル',
+            text: context.l10n.commonCancel,
             onPressed: () => Navigator.of(context).pop(),
           ),
           CustomDialogAction(
-            text: '設定を開く',
+            text: context.l10n.commonOpenSettings,
             isPrimary: true,
             onPressed: () async {
               Navigator.of(context).pop();
@@ -695,9 +698,9 @@ class _HomeScreenState extends State<HomeScreen>
   // 撮影成功のフィードバックを表示
   void _showCaptureSuccessSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('写真を撮影しました'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(context.l10n.cameraCaptureSuccess),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -705,17 +708,27 @@ class _HomeScreenState extends State<HomeScreen>
   // ナビゲーションアイテムを構築
   List<BottomNavigationBarItem> _buildNavigationItems() {
     final items = <BottomNavigationBarItem>[];
+    final labels = _navigationLabels(context);
 
     // 全アイテムを追加
     for (int i = 0; i < AppConstants.navigationIcons.length; i++) {
       items.add(
         BottomNavigationBarItem(
           icon: Icon(AppConstants.navigationIcons[i]),
-          label: AppConstants.navigationLabels[i],
+          label: labels[i],
         ),
       );
     }
 
     return items;
+  }
+
+  List<String> _navigationLabels(BuildContext context) {
+    return [
+      context.l10n.navigationHome,
+      context.l10n.navigationDiary,
+      context.l10n.navigationStatistics,
+      context.l10n.navigationSettings,
+    ];
   }
 }

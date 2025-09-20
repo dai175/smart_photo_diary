@@ -4,6 +4,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../models/diary_filter.dart';
 import '../ui/components/animated_button.dart';
+import '../localization/localization_extensions.dart';
 
 class ActiveFiltersDisplay extends StatelessWidget {
   final DiaryFilter filter;
@@ -45,7 +46,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'フィルタ適用中 (${filter.activeFilterCount})',
+                context.l10n.filterActiveTitle(filter.activeFilterCount),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
@@ -53,7 +54,10 @@ class ActiveFiltersDisplay extends StatelessWidget {
               ),
               SmallButton(
                 onPressed: onClear,
-                child: const Text('すべてクリア', style: TextStyle(fontSize: 12)),
+                child: Text(
+                  context.l10n.filterActiveClearAll,
+                  style: TextStyle(fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -72,7 +76,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
       chips.add(
         _buildChip(
           context: context,
-          label: '期間指定',
+          label: context.l10n.filterActiveDateRange,
           icon: Icons.calendar_today,
           onRemove: onRemoveDateRange,
         ),
@@ -96,7 +100,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
       chips.add(
         _buildChip(
           context: context,
-          label: time,
+          label: _getLocalizedTimeLabel(context, time),
           icon: _getTimeIcon(time),
           onRemove: () => onRemoveTimeOfDay?.call(time),
         ),
@@ -108,7 +112,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
       chips.add(
         _buildChip(
           context: context,
-          label: '検索: ${filter.searchText!}',
+          label: context.l10n.filterActiveSearch(filter.searchText!),
           icon: Icons.search,
           onRemove: onRemoveSearch,
         ),
@@ -141,6 +145,21 @@ class ActiveFiltersDisplay extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
     );
+  }
+
+  String _getLocalizedTimeLabel(BuildContext context, String timeKey) {
+    switch (timeKey) {
+      case '朝':
+        return context.l10n.filterTimeSlotMorning;
+      case '昼':
+        return context.l10n.filterTimeSlotNoon;
+      case '夕方':
+        return context.l10n.filterTimeSlotEvening;
+      case '夜':
+        return context.l10n.filterTimeSlotNight;
+      default:
+        return timeKey;
+    }
   }
 
   IconData _getTimeIcon(String time) {

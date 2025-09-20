@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../localization/localization_extensions.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
@@ -66,7 +67,10 @@ class PhotoGridWidget extends StatelessWidget {
     }
 
     if (!controller.hasPermission) {
-      return SizedBox(height: gridHeight, child: _buildPermissionRequest());
+      return SizedBox(
+        height: gridHeight,
+        child: _buildPermissionRequest(context),
+      );
     }
 
     if (controller.photoAssets.isEmpty) {
@@ -76,7 +80,7 @@ class PhotoGridWidget extends StatelessWidget {
     return SizedBox(height: gridHeight, child: _buildGrid(context));
   }
 
-  Widget _buildPermissionRequest() {
+  Widget _buildPermissionRequest(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -94,14 +98,14 @@ class PhotoGridWidget extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          AppConstants.permissionMessage,
+          context.l10n.photoPermissionMessage,
           style: AppTypography.bodyMedium,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.lg),
         PrimaryButton(
           onPressed: onRequestPermission,
-          text: AppConstants.requestPermissionButton,
+          text: context.l10n.photoRequestPermission,
           icon: Icons.camera_alt,
         ),
       ],
@@ -130,7 +134,7 @@ class PhotoGridWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            AppConstants.noPhotosMessage,
+            context.l10n.photoNoPhotosMessage,
             style: AppTypography.bodyMedium.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -158,7 +162,7 @@ class PhotoGridWidget extends StatelessWidget {
             childAspectRatio: 1.0,
           ),
           itemCount: controller.photoAssets.length,
-          itemBuilder: (context, index) => _buildPhotoItem(index),
+          itemBuilder: (context, index) => _buildPhotoItem(context, index),
         ),
       ),
     );
@@ -178,20 +182,21 @@ class PhotoGridWidget extends StatelessWidget {
     return screenWidth;
   }
 
-  Widget _buildPhotoItem(int index) {
+  Widget _buildPhotoItem(BuildContext context, int index) {
     final isSelected = controller.selected[index];
     final isUsed = controller.isPhotoUsed(index);
 
     // アクセシビリティ用のラベル作成
-    String semanticLabel = '写真 ${index + 1}';
+    final l10n = context.l10n;
+    final separator = l10n.localeName.startsWith('ja') ? '、' : ', ';
+    final semanticParts = <String>[l10n.photoSemanticIndex(index + 1)];
     if (isUsed) {
-      semanticLabel += '、使用済み';
+      semanticParts.add(l10n.photoUsedLabel);
     }
-    if (isSelected) {
-      semanticLabel += '、選択中';
-    } else {
-      semanticLabel += '、未選択';
-    }
+    semanticParts.add(
+      isSelected ? l10n.photoSemanticSelected : l10n.photoSemanticNotSelected,
+    );
+    final semanticLabel = semanticParts.join(separator);
 
     return RepaintBoundary(
       child: Semantics(
@@ -214,7 +219,7 @@ class PhotoGridWidget extends StatelessWidget {
               children: [
                 _buildPhotoThumbnail(index),
                 _buildSelectionIndicator(index),
-                if (isUsed) _buildUsedLabel(),
+                if (isUsed) _buildUsedLabel(context),
               ],
             ),
           ),
@@ -317,7 +322,7 @@ class PhotoGridWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildUsedLabel() {
+  Widget _buildUsedLabel(BuildContext context) {
     return Positioned(
       bottom: AppSpacing.xs,
       left: AppSpacing.xs,
@@ -331,7 +336,7 @@ class PhotoGridWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.xs),
         ),
         child: Text(
-          AppConstants.usedPhotoLabel,
+          context.l10n.photoUsedLabel,
           style: AppTypography.withColor(
             AppTypography.labelSmall,
             Colors.white,
@@ -365,7 +370,10 @@ class PhotoGridWidget extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.xs),
           Text(
-            '選択された写真: ${controller.selectedCount}/${AppConstants.maxPhotosSelection}枚',
+            context.l10n.photoSelectionStatus(
+              controller.selectedCount,
+              AppConstants.maxPhotosSelection,
+            ),
             style: AppTypography.withColor(
               AppTypography.labelMedium,
               controller.selectedCount > 0

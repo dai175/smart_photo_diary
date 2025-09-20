@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
@@ -159,6 +160,7 @@ class TestServiceSetup {
         date: any(named: 'date'),
         location: any(named: 'location'),
         photoTimes: any(named: 'photoTimes'),
+        locale: any(named: 'locale'),
       ),
     ).thenAnswer(
       (_) async => Success(
@@ -174,6 +176,7 @@ class TestServiceSetup {
         imagesWithTimes: any(named: 'imagesWithTimes'),
         location: any(named: 'location'),
         onProgress: any(named: 'onProgress'),
+        locale: any(named: 'locale'),
       ),
     ).thenAnswer(
       (_) async => Success(
@@ -437,6 +440,7 @@ void registerMockFallbacks() {
   registerFallbackValue(<DateTime>[]);
   registerFallbackValue(Uint8List(0));
   registerFallbackValue(<({Uint8List imageData, DateTime time})>[]);
+  registerFallbackValue(const Locale('ja'));
   registerFallbackValue(const DiaryFilter());
   registerFallbackValue(
     DiaryEntry(

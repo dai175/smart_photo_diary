@@ -162,6 +162,7 @@ class IntegrationTestHelpers {
         date: any(named: 'date'),
         location: any(named: 'location'),
         photoTimes: any(named: 'photoTimes'),
+        locale: any(named: 'locale'),
       ),
     ).thenAnswer((_) async => _createMockDiaryResult());
 
@@ -170,6 +171,7 @@ class IntegrationTestHelpers {
         imagesWithTimes: any(named: 'imagesWithTimes'),
         location: any(named: 'location'),
         onProgress: any(named: 'onProgress'),
+        locale: any(named: 'locale'),
       ),
     ).thenAnswer((_) async => _createMockDiaryResult());
 
@@ -249,6 +251,7 @@ class IntegrationTestHelpers {
         date: any(named: 'date'),
         location: any(named: 'location'),
         photoTimes: any(named: 'photoTimes'),
+        locale: any(named: 'locale'),
       ),
     ).thenAnswer((_) async => result);
 
@@ -257,6 +260,7 @@ class IntegrationTestHelpers {
         imagesWithTimes: any(named: 'imagesWithTimes'),
         location: any(named: 'location'),
         onProgress: any(named: 'onProgress'),
+        locale: any(named: 'locale'),
       ),
     ).thenAnswer((_) async => result);
   }

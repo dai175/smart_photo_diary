@@ -97,8 +97,8 @@ void main() {
         expect(plan.yearlyPrice, 0);
       });
 
-      test('formattedPriceが「無料」を返す', () {
-        expect(plan.formattedPrice, '無料');
+      test('formattedPriceがロケール対応の値を返す', () {
+        expect(plan.formattedPrice, '¥0');
       });
 
       test('dailyAverageGenerationsが正しく計算される', () {
@@ -135,7 +135,7 @@ void main() {
         expect(debugString, contains('Plan('));
         expect(debugString, contains('id: basic'));
         expect(debugString, contains('displayName: Basic'));
-        expect(debugString, contains('price: 無料'));
+        expect(debugString, contains('price: ¥0'));
         expect(debugString, contains('monthlyLimit: 10'));
         expect(debugString, contains('isPremium: false'));
       });

@@ -9,6 +9,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_dialog.dart';
 import '../utils/prompt_category_utils.dart';
+import '../localization/localization_extensions.dart';
 
 /// プロンプト選択モーダル
 class PromptSelectionModal extends StatefulWidget {
@@ -56,9 +57,16 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         _isPremium = accessResult.value;
       }
 
+      if (!mounted) {
+        return;
+      }
+
+      final locale = Localizations.localeOf(context);
+
       // 利用可能なプロンプトを読み込み
       _availablePrompts = _promptService.getPromptsForPlan(
         isPremium: _isPremium,
+        locale: locale,
       );
       _logger.info(
         'プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium',
@@ -87,7 +95,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      title: 'プロンプト選択',
+      title: context.l10n.promptSelectionTitle,
       icon: Icons.edit_note_rounded,
       iconColor: Theme.of(context).colorScheme.primary,
       maxWidth: 420,
@@ -100,15 +108,20 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   }
 
   List<CustomDialogAction> _buildActions() {
+    final l10n = context.l10n;
+    final primaryText = _isRandomSelected
+        ? l10n.promptCreateRandom
+        : (_selectedPrompt != null
+              ? l10n.promptCreateWithSelected
+              : l10n.promptCreateWithout);
+
     return [
       CustomDialogAction(
-        text: 'キャンセル',
+        text: l10n.commonCancel,
         onPressed: () => Navigator.of(context).pop(),
       ),
       CustomDialogAction(
-        text: _isRandomSelected
-            ? 'ランダムで作成'
-            : (_selectedPrompt != null ? 'プロンプトで作成' : 'そのまま作成'),
+        text: primaryText,
         icon: _isRandomSelected
             ? Icons.shuffle_rounded
             : (_selectedPrompt != null
@@ -120,6 +133,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             // ランダム選択の場合は実際のプロンプトを取得して渡す
             final randomPrompt = _promptService.getRandomPrompt(
               isPremium: _isPremium,
+              locale: Localizations.localeOf(context),
             );
             widget.onPromptSelected(randomPrompt);
           } else if (_selectedPrompt != null) {
@@ -169,6 +183,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   Widget _buildNoPromptOption() {
     final isSelected = _selectedPrompt == null && !_isRandomSelected;
+    final l10n = context.l10n;
 
     return InkWell(
       onTap: () => setState(() {
@@ -214,7 +229,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'プロンプトなし',
+                    l10n.promptOptionNone,
                     style: AppTypography.titleSmall.copyWith(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
@@ -226,7 +241,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '写真のみから日記を生成',
+                    l10n.promptOptionNoneDescription,
                     style: AppTypography.bodySmall.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -248,6 +263,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   Widget _buildRandomButton() {
     final isSelected = _isRandomSelected;
+    final l10n = context.l10n;
 
     return InkWell(
       onTap: _isLoading
@@ -295,7 +311,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ランダム選択',
+                    l10n.promptOptionRandom,
                     style: AppTypography.titleSmall.copyWith(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
@@ -305,7 +321,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    _isLoading ? 'プロンプトを読み込み中...' : 'おすすめのプロンプトを自動選択',
+                    _isLoading
+                        ? l10n.promptLoadingMessage
+                        : l10n.promptRandomDescription,
                     style: AppTypography.bodySmall.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -376,7 +394,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                     borderRadius: BorderRadius.circular(AppSpacing.xs),
                   ),
                   child: Text(
-                    PromptCategoryUtils.getCategoryDisplayName(prompt.category),
+                    PromptCategoryUtils.getCategoryDisplayName(
+                      prompt.category,
+                      locale: Localizations.localeOf(context),
+                    ),
                     style: AppTypography.labelSmall.copyWith(
                       color: isSelected
                           ? Colors.white
@@ -424,6 +445,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: AppSpacing.cardPadding,
@@ -436,10 +458,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
               size: 48,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('プロンプトが見つかりません', style: AppTypography.titleMedium),
+            Text(l10n.promptEmptyTitle, style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'プロンプトデータの読み込みに失敗しました',
+              l10n.promptEmptyDescription,
               style: AppTypography.bodySmall.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),

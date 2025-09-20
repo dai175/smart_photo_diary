@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -24,6 +26,7 @@ void main() {
       TestWidgetsFlutterBinding.ensureInitialized();
       MockPlatformChannels.setupMocks();
       registerFallbackValue(MockAssetEntity());
+      registerFallbackValue(const Locale('ja'));
     });
 
     tearDownAll(() {

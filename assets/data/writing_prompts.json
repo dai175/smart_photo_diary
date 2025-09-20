@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "lastUpdated": "2025-06-18T00:00:00.000Z",
+  "lastUpdated": "2025-09-19T00:00:00.000Z",
   "description": "Smart Photo Diary - 感情深掘り型Writing Prompts",
   "totalPrompts": 20,
   "basicPrompts": 5,
@@ -14,7 +14,19 @@
       "tags": ["感情", "第一印象", "直感", "気持ち"],
       "description": "体験した瞬間の素直な感情を記録する",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この瞬間に最初に感じた気持ち",
+        "en": "What was the very first feeling that surfaced in this moment?"
+      },
+      "localizedDescriptions": {
+        "ja": "体験した瞬間の素直な感情を記録する",
+        "en": "Capture the raw emotion you noticed the moment the experience began."
+      },
+      "localizedTags": {
+        "ja": ["感情", "第一印象", "直感", "気持ち"],
+        "en": ["emotion", "first impression", "intuition", "feeling"]
+      }
     },
     {
       "id": "basic_emotion_002",
@@ -24,7 +36,19 @@
       "tags": ["感情", "理由", "心", "動機"],
       "description": "なぜその瞬間に心が動いたのかを探る",
       "priority": 85,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この場面で心が動いた理由",
+        "en": "What stirred your heart in this scene?"
+      },
+      "localizedDescriptions": {
+        "ja": "なぜその瞬間に心が動いたのかを探る",
+        "en": "Explore why your heart reacted the way it did in that instant."
+      },
+      "localizedTags": {
+        "ja": ["感情", "理由", "心", "動機"],
+        "en": ["emotion", "reason", "heart", "motivation"]
+      }
     },
     {
       "id": "basic_emotion_003",
@@ -34,7 +58,19 @@
       "tags": ["感情", "温かい", "ポジティブ", "癒し"],
       "description": "体験の中で心地よさや温かさを感じた要素を記録",
       "priority": 80,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で心が温かくなった部分",
+        "en": "Which part of this experience warmed your heart?"
+      },
+      "localizedDescriptions": {
+        "ja": "体験の中で心地よさや温かさを感じた要素を記録",
+        "en": "Record the comforting or heartwarming element you felt."
+      },
+      "localizedTags": {
+        "ja": ["感情", "温かい", "ポジティブ", "癒し"],
+        "en": ["emotion", "warmth", "positive", "comfort"]
+      }
     },
     {
       "id": "basic_emotion_004",
@@ -44,7 +80,19 @@
       "tags": ["感情", "感謝", "ありがたい", "幸せ"],
       "description": "この瞬間に感じる感謝の気持ちを言葉にする",
       "priority": 88,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で「ありがたい」と感じること",
+        "en": "What makes you feel grateful in this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "この瞬間に感じる感謝の気持ちを言葉にする",
+        "en": "Put into words the sense of gratitude you feel in this moment."
+      },
+      "localizedTags": {
+        "ja": ["感情", "感謝", "ありがたい", "幸せ"],
+        "en": ["emotion", "gratitude", "thankful", "happiness"]
+      }
     },
     {
       "id": "basic_emotion_005",
@@ -54,7 +102,19 @@
       "tags": ["感情", "自分らしさ", "アイデンティティ", "自然"],
       "description": "この体験で自分らしくいられた瞬間や要素を発見",
       "priority": 82,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この瞬間に自分らしさを感じた部分",
+        "en": "Where did you feel most like yourself in this moment?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験で自分らしくいられた瞬間や要素を発見",
+        "en": "Discover the element of the experience where you could be your authentic self."
+      },
+      "localizedTags": {
+        "ja": ["感情", "自分らしさ", "アイデンティティ", "自然"],
+        "en": ["emotion", "authenticity", "identity", "natural"]
+      }
     },
     {
       "id": "premium_emotion_depth_001",
@@ -64,7 +124,19 @@
       "tags": ["感情深掘り", "背景", "キッカケ", "原因"],
       "description": "感情の根本的な原因や背景を深く探る",
       "priority": 95,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この感情が生まれた背景やキッカケ",
+        "en": "What background or trigger gave rise to this feeling?"
+      },
+      "localizedDescriptions": {
+        "ja": "感情の根本的な原因や背景を深く探る",
+        "en": "Dig into the root causes and context that created this emotion."
+      },
+      "localizedTags": {
+        "ja": ["感情深掘り", "背景", "キッカケ", "原因"],
+        "en": ["deep emotion", "background", "trigger", "cause"]
+      }
     },
     {
       "id": "premium_emotion_depth_002",
@@ -74,7 +146,19 @@
       "tags": ["感情深掘り", "変化", "時間", "進化"],
       "description": "感情の時間的変化や深まりを追跡する",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この感情が時間とともにどう変化したか",
+        "en": "How has this emotion shifted over time?"
+      },
+      "localizedDescriptions": {
+        "ja": "感情の時間的変化や深まりを追跡する",
+        "en": "Trace how the feeling has evolved or deepened across time."
+      },
+      "localizedTags": {
+        "ja": ["感情深掘り", "変化", "時間", "進化"],
+        "en": ["deep emotion", "change", "time", "evolution"]
+      }
     },
     {
       "id": "premium_sensory_emotion_001",
@@ -84,7 +168,19 @@
       "tags": ["感情五感", "音", "におい", "思い出", "呼び起こし"],
       "description": "五感の記憶が呼び起こす感情や雰囲気を記録",
       "priority": 92,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で思い出す音やにおいが呼び起こす感情",
+        "en": "What emotions do the sounds or scents you recall from this moment awaken?"
+      },
+      "localizedDescriptions": {
+        "ja": "五感の記憶が呼び起こす感情や雰囲気を記録",
+        "en": "Document the feelings and atmosphere revived by sensory memories."
+      },
+      "localizedTags": {
+        "ja": ["感情五感", "音", "におい", "思い出", "呼び起こし"],
+        "en": ["sensory emotion", "sound", "scent", "memory", "evoke"]
+      }
     },
     {
       "id": "premium_sensory_emotion_002",
@@ -94,7 +190,19 @@
       "tags": ["感情五感", "空気感", "雰囲気", "心の影響"],
       "description": "場所の雰囲気や空気感が心にもたらした影響を探る",
       "priority": 88,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この場所の空気感が心に与えた影響",
+        "en": "How did the atmosphere of this place affect your heart?"
+      },
+      "localizedDescriptions": {
+        "ja": "場所の雰囲気や空気感が心にもたらした影響を探る",
+        "en": "Explore how the air and ambience of the location shaped your feelings."
+      },
+      "localizedTags": {
+        "ja": ["感情五感", "空気感", "雰囲気", "心の影響"],
+        "en": ["sensory emotion", "ambience", "mood", "impact"]
+      }
     },
     {
       "id": "premium_emotion_growth_001",
@@ -104,7 +212,19 @@
       "tags": ["感情成長", "変化", "成長", "発見", "自己認識"],
       "description": "この瞬間に感じる自分の成長や内面の変化を記録",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この瞬間に感じた成長や変化",
+        "en": "What growth or change did you feel in this moment?"
+      },
+      "localizedDescriptions": {
+        "ja": "この瞬間に感じる自分の成長や内面の変化を記録",
+        "en": "Capture the sense of personal growth or inner shift you noticed."
+      },
+      "localizedTags": {
+        "ja": ["感情成長", "変化", "成長", "発見", "自己認識"],
+        "en": ["emotional growth", "change", "growth", "discovery", "self-awareness"]
+      }
     },
     {
       "id": "premium_emotion_growth_002",
@@ -114,7 +234,19 @@
       "tags": ["感情成長", "過去", "比較", "進歩", "変化"],
       "description": "時間の経過による内面的な成長や変化を振り返る",
       "priority": 85,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で過去の自分との違いを感じる部分",
+        "en": "Where do you notice a difference from your past self in this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "時間の経過による内面的な成長や変化を振り返る",
+        "en": "Reflect on how time has transformed you internally."
+      },
+      "localizedTags": {
+        "ja": ["感情成長", "過去", "比較", "進歩", "変化"],
+        "en": ["emotional growth", "past", "comparison", "progress", "change"]
+      }
     },
     {
       "id": "premium_emotion_connection_001",
@@ -124,7 +256,19 @@
       "tags": ["感情つながり", "絆", "関係性", "愛情", "コミュニティ"],
       "description": "この体験を通して感じる人との深いつながりや関係性を探る",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で感じる人とのつながりや絆",
+        "en": "What connection or bond with others do you feel in this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験を通して感じる人との深いつながりや関係性を探る",
+        "en": "Explore the deep ties and relationships you sensed through this moment."
+      },
+      "localizedTags": {
+        "ja": ["感情つながり", "絆", "関係性", "愛情", "コミュニティ"],
+        "en": ["emotional connection", "bond", "relationships", "love", "community"]
+      }
     },
     {
       "id": "premium_emotion_connection_002",
@@ -134,7 +278,19 @@
       "tags": ["感情つながり", "安心感", "居心地", "安全", "所属感"],
       "description": "この場面で感じる心の安らぎや所属感を記録",
       "priority": 85,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この場面で感じた安心感や居心地の良さ",
+        "en": "What brought you comfort or a sense of ease here?"
+      },
+      "localizedDescriptions": {
+        "ja": "この場面で感じる心の安らぎや所属感を記録",
+        "en": "Record the serenity or sense of belonging you felt in the scene."
+      },
+      "localizedTags": {
+        "ja": ["感情つながり", "安心感", "居心地", "安全", "所属感"],
+        "en": ["emotional connection", "comfort", "belonging", "safety", "ease"]
+      }
     },
     {
       "id": "premium_emotion_discovery_001",
@@ -144,7 +300,19 @@
       "tags": ["感情発見", "新発見", "気づき", "自己理解", "内省"],
       "description": "この体験で初めて認識する感情や内面の発見を記録",
       "priority": 95,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で新しく気づいた自分の感情",
+        "en": "What new emotion about yourself did you discover in this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験で初めて認識する感情や内面の発見を記録",
+        "en": "Capture any feeling you recognized for the first time."
+      },
+      "localizedTags": {
+        "ja": ["感情発見", "新発見", "気づき", "自己理解", "内省"],
+        "en": ["emotional discovery", "new insight", "awareness", "self-understanding", "reflection"]
+      }
     },
     {
       "id": "premium_emotion_discovery_002",
@@ -154,7 +322,19 @@
       "tags": ["感情発見", "意外", "反応", "予想外", "驚き"],
       "description": "予想と異なる感情的反応から自分を深く知る",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で意外だった自分の反応や気持ち",
+        "en": "Which reaction or feeling surprised you in this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "予想と異なる感情的反応から自分を深く知る",
+        "en": "Learn from the emotional responses that differed from your expectations."
+      },
+      "localizedTags": {
+        "ja": ["感情発見", "意外", "反応", "予想外", "驚き"],
+        "en": ["emotional discovery", "unexpected", "reaction", "surprise", "insight"]
+      }
     },
     {
       "id": "premium_emotion_fantasy_001",
@@ -164,7 +344,19 @@
       "tags": ["感情幻想", "懐かしさ", "憧れ", "ノスタルジア", "憧憬"],
       "description": "この体験が呼び起こす懐かしさや憧れの感情を探る",
       "priority": 85,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で感じる懐かしさや憧れの感情",
+        "en": "What nostalgia or longing did this experience evoke?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験が呼び起こす懐かしさや憧れの感情を探る",
+        "en": "Explore the wistful or aspirational feelings surfaced here."
+      },
+      "localizedTags": {
+        "ja": ["感情幻想", "懐かしさ", "憧れ", "ノスタルジア", "憧憬"],
+        "en": ["emotional fantasy", "nostalgia", "longing", "dream", "yearning"]
+      }
     },
     {
       "id": "premium_emotion_healing_001",
@@ -174,7 +366,19 @@
       "tags": ["感情癒し", "癒し", "理由", "感覚", "回復"],
       "description": "この体験が与える心の癒しの効果とその理由を探る",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で心が癒された理由や感覚",
+        "en": "Why did this experience heal your heart, and how did it feel?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験が与える心の癒しの効果とその理由を探る",
+        "en": "Examine the soothing effects and reasons behind the healing."
+      },
+      "localizedTags": {
+        "ja": ["感情癒し", "癒し", "理由", "感覚", "回復"],
+        "en": ["emotional healing", "healing", "reason", "sensation", "recovery"]
+      }
     },
     {
       "id": "premium_emotion_healing_002",
@@ -184,7 +388,19 @@
       "tags": ["感情癒し", "平和", "安らぎ", "静寂", "穏やか"],
       "description": "この体験から感じる心の平安や安らぎの質を記録",
       "priority": 85,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で感じる平和や安らぎの感情",
+        "en": "What peace or calm did you feel through this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験から感じる心の平安や安らぎの質を記録",
+        "en": "Record the quality of serenity and tranquility you noticed."
+      },
+      "localizedTags": {
+        "ja": ["感情癒し", "平和", "安らぎ", "静寂", "穏やか"],
+        "en": ["emotional healing", "peace", "calm", "stillness", "gentle"]
+      }
     },
     {
       "id": "premium_emotion_energy_001",
@@ -194,7 +410,19 @@
       "tags": ["感情エネルギー", "活力", "エネルギー", "源", "力"],
       "description": "この体験から感じる生命力やエネルギーの源泉を探る",
       "priority": 90,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で感じるエネルギーや活力の源",
+        "en": "What source of energy or vitality did you feel here?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験から感じる生命力やエネルギーの源泉を探る",
+        "en": "Discover the wellspring of life force sparked by the experience."
+      },
+      "localizedTags": {
+        "ja": ["感情エネルギー", "活力", "エネルギー", "源", "力"],
+        "en": ["emotional energy", "vitality", "energy", "source", "strength"]
+      }
     },
     {
       "id": "premium_emotion_energy_002",
@@ -204,7 +432,19 @@
       "tags": ["感情エネルギー", "強い感情", "動かされた", "インパクト", "印象"],
       "description": "この体験が与える最も強い感情的インパクトを記録",
       "priority": 85,
-      "isActive": true
+      "isActive": true,
+      "localizedTexts": {
+        "ja": "この体験で心が動かされた最も強い感情",
+        "en": "What was the strongest emotion that moved you in this experience?"
+      },
+      "localizedDescriptions": {
+        "ja": "この体験が与える最も強い感情的インパクトを記録",
+        "en": "Capture the most powerful emotional impact the experience delivered."
+      },
+      "localizedTags": {
+        "ja": ["感情エネルギー", "強い感情", "動かされた", "インパクト", "印象"],
+        "en": ["emotional energy", "intense emotion", "moved", "impact", "impression"]
+      }
     }
   ]
 }

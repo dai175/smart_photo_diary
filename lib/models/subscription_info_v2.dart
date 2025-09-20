@@ -39,6 +39,13 @@ class UsageStatisticsV2 {
   /// 使用状況の表示文字列
   String get usageDisplay => '$monthlyUsageCount / $monthlyLimit回';
 
+  /// 使用状況の表示文字列（多言語化対応）
+  String getLocalizedUsageDisplay(
+    String Function(int used, int limit) formatter,
+  ) {
+    return formatter(monthlyUsageCount, monthlyLimit);
+  }
+
   /// SubscriptionStatusとPlanから構築
   factory UsageStatisticsV2.fromStatusAndPlan(
     SubscriptionStatus status,
@@ -282,6 +289,19 @@ class SubscriptionInfoV2 {
     return null;
   }
 
+  /// 設定画面用の使用量警告メッセージ（多言語化対応）
+  String? getLocalizedUsageWarningMessage(
+    String Function() limitReachedFormatter,
+    String Function(int remaining) remainingFormatter,
+  ) {
+    if (usageStats.isNearLimit) {
+      final remaining = usageStats.remainingCount;
+      if (remaining == 0) return limitReachedFormatter();
+      return remainingFormatter(remaining);
+    }
+    return null;
+  }
+
   /// 設定画面用のプラン推奨メッセージ
   String? get planRecommendationMessage {
     if (isPremium) return null;
@@ -292,6 +312,23 @@ class SubscriptionInfoV2 {
     }
     if (usageRate >= 0.5) {
       return 'より多くAI生成を利用される場合はPremiumプランがおすすめです';
+    }
+    return null;
+  }
+
+  /// 設定画面用のプラン推奨メッセージ（多言語化対応）
+  String? getLocalizedPlanRecommendationMessage(
+    String Function(int limit) limitFormatter,
+    String Function() generalFormatter,
+  ) {
+    if (isPremium) return null;
+
+    final usageRate = usageStats.usageRate;
+    if (usageRate >= 0.8) {
+      return limitFormatter(currentPlan.monthlyAiGenerationLimit);
+    }
+    if (usageRate >= 0.5) {
+      return generalFormatter();
     }
     return null;
   }
@@ -321,6 +358,36 @@ class SubscriptionInfoV2 {
     autoRenewalText: autoRenewalDisplayText,
     warningMessage: usageWarningMessage,
     recommendationMessage: planRecommendationMessage,
+    showUpgradeButton: !isPremium,
+    usageProgressValue: usageStats.usageRate,
+    isNearLimit: usageStats.isNearLimit,
+    isExpiryNear: periodInfo.isExpiryNear,
+  );
+
+  /// 設定画面表示用の統合データ（多言語化対応）
+  SubscriptionDisplayDataV2 getLocalizedDisplayData({
+    required String Function(int used, int limit) usageFormatter,
+    required String Function(int remaining) remainingFormatter,
+    required String Function() limitReachedFormatter,
+    required String Function(int remaining) warningRemainingFormatter,
+    required String Function(int limit) upgradeRecommendationLimitFormatter,
+    required String Function() upgradeRecommendationGeneralFormatter,
+  }) => SubscriptionDisplayDataV2(
+    planName: planDisplayName,
+    planStatus: planStatusDisplay,
+    usageText: usageStats.getLocalizedUsageDisplay(usageFormatter),
+    remainingText: remainingFormatter(usageStats.remainingCount),
+    resetDateText: resetDateDisplayText,
+    expiryText: expiryDisplayText,
+    autoRenewalText: autoRenewalDisplayText,
+    warningMessage: getLocalizedUsageWarningMessage(
+      limitReachedFormatter,
+      warningRemainingFormatter,
+    ),
+    recommendationMessage: getLocalizedPlanRecommendationMessage(
+      upgradeRecommendationLimitFormatter,
+      upgradeRecommendationGeneralFormatter,
+    ),
     showUpgradeButton: !isPremium,
     usageProgressValue: usageStats.usageRate,
     isNearLimit: usageStats.isNearLimit,

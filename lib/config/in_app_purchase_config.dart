@@ -1,7 +1,10 @@
+import 'package:intl/intl.dart';
+
 import '../constants/subscription_constants.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
+import '../utils/locale_format_utils.dart';
 
 /// In-App Purchase設定管理クラス
 ///
@@ -253,18 +256,23 @@ class InAppPurchaseConfig {
 
   /// 価格を表示用文字列に変換
   static String formatPrice(double price, String currencyCode) {
+    final locale = Intl.getCurrentLocale().isEmpty
+        ? 'ja'
+        : Intl.getCurrentLocale();
+    final decimalDigits = currencyCode == 'JPY' ? 0 : 2;
     final pricing = regionalPricing.values.firstWhere(
       (region) => region['currency'] == currencyCode,
       orElse: () => defaultPricing,
     );
+    final symbol = pricing['symbol'] as String?;
 
-    final symbol = pricing['symbol'] as String;
-
-    if (currencyCode == 'JPY') {
-      return '$symbol${price.toInt()}';
-    } else {
-      return '$symbol${price.toStringAsFixed(2)}';
-    }
+    return LocaleFormatUtils.formatCurrency(
+      price,
+      locale: locale,
+      currencyCode: currencyCode,
+      decimalDigits: decimalDigits,
+      fallbackSymbol: symbol,
+    );
   }
 
   /// 商品IDの妥当性をチェック

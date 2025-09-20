@@ -75,7 +75,6 @@ class ErrorDisplayConfig {
     method: ErrorDisplayMethod.dialog,
     dismissible: false,
     showRetryButton: true,
-    retryButtonText: 'もう一度試す',
   );
 
   /// インラインエラー設定
@@ -83,6 +82,5 @@ class ErrorDisplayConfig {
     severity: ErrorSeverity.error,
     method: ErrorDisplayMethod.inline,
     showRetryButton: true,
-    retryButtonText: '再試行',
   );
 }

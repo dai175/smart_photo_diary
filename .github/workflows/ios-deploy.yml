@@ -28,10 +28,12 @@ jobs:
           
       - name: Get dependencies
         run: flutter pub get
-        
+
       - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-        
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          dart format .
+
       - name: Create test .env file
         run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
         
@@ -75,10 +77,12 @@ jobs:
           
       - name: Get dependencies
         run: flutter pub get
-        
+
       - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-        
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          dart format .
+
       - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

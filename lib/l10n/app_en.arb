@@ -1,0 +1,1418 @@
+{
+  "@@locale": "en",
+  "appTitle": "Smart Photo Diary",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "navigationHome": "Home",
+  "@navigationHome": {
+    "description": "Bottom navigation: Home"
+  },
+  "navigationDiary": "Diary",
+  "@navigationDiary": {
+    "description": "Bottom navigation: Diary"
+  },
+  "navigationStatistics": "Statistics",
+  "@navigationStatistics": {
+    "description": "Bottom navigation: Statistics"
+  },
+  "navigationSettings": "Settings",
+  "@navigationSettings": {
+    "description": "Bottom navigation: Settings"
+  },
+  "homeNewPhotosTitle": "New photos",
+  "@homeNewPhotosTitle": {
+    "description": "Home screen section title for new photos"
+  },
+  "homeRecentDiariesTitle": "Recent diaries",
+  "@homeRecentDiariesTitle": {
+    "description": "Home screen section title for recent diaries"
+  },
+  "photoNoPhotosMessage": "No photos found",
+  "@photoNoPhotosMessage": {
+    "description": "Message shown when no photos are available"
+  },
+  "diaryNoEntriesMessage": "No saved diaries",
+  "@diaryNoEntriesMessage": {
+    "description": "Message shown when there are no diary entries"
+  },
+  "diaryNoSearchResults": "No diaries found matching \"{query}\"",
+  "@diaryNoSearchResults": {
+    "description": "Message shown when search returns no results",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "The search query that returned no results"
+      }
+    }
+  },
+  "diaryNoFilterResults": "No diaries match the filter criteria",
+  "@diaryNoFilterResults": {
+    "description": "Message shown when no diaries match the filter criteria"
+  },
+  "filterTitle": "Filter",
+  "@filterTitle": {
+    "description": "Filter screen title"
+  },
+  "filterClearAll": "Clear All",
+  "@filterClearAll": {
+    "description": "Clear filter button text"
+  },
+  "filterDateRange": "Date Range",
+  "@filterDateRange": {
+    "description": "Date range filter title"
+  },
+  "filterSelectPeriod": "Select period",
+  "@filterSelectPeriod": {
+    "description": "Date range selection placeholder"
+  },
+  "filterSelectStartDate": "Select start date",
+  "@filterSelectStartDate": {
+    "description": "Start date selection dialog help text"
+  },
+  "filterSelectEndDate": "Select end date",
+  "@filterSelectEndDate": {
+    "description": "End date selection dialog help text"
+  },
+  "filterTags": "Tags",
+  "@filterTags": {
+    "description": "Tags filter title"
+  },
+  "filterNoTags": "No tags available",
+  "@filterNoTags": {
+    "description": "Message when no tags are available"
+  },
+  "filterTimeOfDay": "Time of Day",
+  "@filterTimeOfDay": {
+    "description": "Time of day filter title"
+  },
+  "filterApply": "Apply Filter",
+  "@filterApply": {
+    "description": "Apply filter button text"
+  },
+  "filterApplyWithCount": "Apply Filter ({count})",
+  "@filterApplyWithCount": {
+    "description": "Apply filter button text with active filter count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of active filters"
+      }
+    }
+  },
+  "filterTimeSlotMorning": "Morning",
+  "@filterTimeSlotMorning": {
+    "description": "Time of day filter: Morning"
+  },
+  "filterTimeSlotNoon": "Noon",
+  "@filterTimeSlotNoon": {
+    "description": "Time of day filter: Noon"
+  },
+  "filterTimeSlotEvening": "Evening",
+  "@filterTimeSlotEvening": {
+    "description": "Time of day filter: Evening"
+  },
+  "filterTimeSlotNight": "Night",
+  "@filterTimeSlotNight": {
+    "description": "Time of day filter: Night"
+  },
+  "filterDateSelectionError": "An error occurred during date selection",
+  "@filterDateSelectionError": {
+    "description": "Error message for date selection failures"
+  },
+  "filterTagLoadError": "Tag loading error",
+  "@filterTagLoadError": {
+    "description": "Log message for tag loading errors"
+  },
+  "filterActiveTitle": "Filters Active ({count})",
+  "@filterActiveTitle": {
+    "description": "Active filters display title",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of active filters"
+      }
+    }
+  },
+  "filterActiveClearAll": "Clear All",
+  "@filterActiveClearAll": {
+    "description": "Active filters clear button"
+  },
+  "filterActiveDateRange": "Date Range",
+  "@filterActiveDateRange": {
+    "description": "Date range filter chip label"
+  },
+  "filterActiveSearch": "Search: {query}",
+  "@filterActiveSearch": {
+    "description": "Search filter chip label",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "Search query"
+      }
+    }
+  },
+  "photoPermissionMessage": "Photo access permission is required",
+  "@photoPermissionMessage": {
+    "description": "Explanation shown when photo access is denied"
+  },
+  "photoRequestPermission": "Request permission",
+  "@photoRequestPermission": {
+    "description": "Button label to request photo access permission"
+  },
+  "photoSelectionLimitMessage": "You can select up to {limit} photos at a time",
+  "@photoSelectionLimitMessage": {
+    "description": "Message indicating the maximum number of photos that can be selected",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "photoUsedPhotoMessage": "This photo is already used in a diary",
+  "@photoUsedPhotoMessage": {
+    "description": "Message shown when a used photo is selected"
+  },
+  "photoUsedLabel": "Used",
+  "@photoUsedLabel": {
+    "description": "Label displayed on photos already used in a diary"
+  },
+  "photoSelectionStatus": "{selected} of {limit} photos selected",
+  "@photoSelectionStatus": {
+    "description": "Displays the number of selected photos",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonOk": "OK",
+  "@commonOk": {
+    "description": "OK button label"
+  },
+  "diaryNotFoundMessage": "Diary not found",
+  "@diaryNotFoundMessage": {
+    "description": "Error message when a diary entry cannot be found"
+  },
+  "diaryLoadErrorMessage": "Failed to load the diary",
+  "@diaryLoadErrorMessage": {
+    "description": "Error message shown when diary loading fails"
+  },
+  "diaryUpdateSuccessMessage": "Diary updated",
+  "@diaryUpdateSuccessMessage": {
+    "description": "Snack bar message when a diary is updated successfully"
+  },
+  "diaryDeleteSuccessMessage": "Diary deleted",
+  "@diaryDeleteSuccessMessage": {
+    "description": "Snack bar message when a diary is deleted successfully"
+  },
+  "homeLinkedDiaryNotFound": "No diary was found for this photo",
+  "@homeLinkedDiaryNotFound": {
+    "description": "Message shown when no diary entry matches a selected photo"
+  },
+  "homeDiaryLoadError": "An error occurred while loading the diary",
+  "@homeDiaryLoadError": {
+    "description": "Message shown when fetching a diary entry fails"
+  },
+  "homePermissionDialogTitle": "Allow photo access",
+  "@homePermissionDialogTitle": {
+    "description": "Dialog title prompting users to allow photo access"
+  },
+  "homePermissionDialogMessage": "Photo library access is required to create diary entries. Please enable photo access from the Settings app.",
+  "@homePermissionDialogMessage": {
+    "description": "Dialog body explaining why photo access is required"
+  },
+  "homeLimitedAccessTitle": "Select additional photos",
+  "@homeLimitedAccessTitle": {
+    "description": "Dialog title shown when only limited photo access is granted"
+  },
+  "homeLimitedAccessMessage": "Only the photos you selected are currently accessible. Would you like to pick more photos for your diary?",
+  "@homeLimitedAccessMessage": {
+    "description": "Dialog body shown when limited photo access is granted"
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Generic cancel button label"
+  },
+  "commonOpenSettings": "Open settings",
+  "@commonOpenSettings": {
+    "description": "Button label to open the system settings app"
+  },
+  "pricingFree": "Free",
+  "@pricingFree": {
+    "description": "Label used when a plan is free of charge"
+  },
+  "pricingPerMonthShort": "{price}/month",
+  "@pricingPerMonthShort": {
+    "description": "Short monthly price label",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingPerYearShort": "{price}/year",
+  "@pricingPerYearShort": {
+    "description": "Short yearly price label",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingMonthlyEquivalent": "Monthly equivalent {price}",
+  "@pricingMonthlyEquivalent": {
+    "description": "Display for yearly plans showing the monthly equivalent",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "commonLater": "Later",
+  "@commonLater": {
+    "description": "Defer action button label"
+  },
+  "photoSelectAction": "Select photos",
+  "@photoSelectAction": {
+    "description": "Button label to pick additional photos"
+  },
+  "cameraCaptureSuccess": "Photo captured",
+  "@cameraCaptureSuccess": {
+    "description": "Snack bar message when camera capture succeeds"
+  },
+  "commonConfirm": "Confirm",
+  "@commonConfirm": {
+    "description": "Generic confirmation button label"
+  },
+  "settingsAppBarTitle": "Settings",
+  "@settingsAppBarTitle": {
+    "description": "App bar title for the settings screen"
+  },
+  "settingsLoadingTitle": "Loading settings...",
+  "@settingsLoadingTitle": {
+    "description": "Headline shown while settings are loading"
+  },
+  "settingsLoadingSubtitle": "Fetching your app preferences",
+  "@settingsLoadingSubtitle": {
+    "description": "Subtitle shown while settings are loading"
+  },
+  "settingsLanguageSectionTitle": "Language",
+  "@settingsLanguageSectionTitle": {
+    "description": "Title for the language section"
+  },
+  "settingsLanguageSectionDescription": "English",
+  "@settingsLanguageSectionDescription": {
+    "description": "Description for the language section"
+  },
+  "settingsLanguageDialogTitle": "Choose language",
+  "@settingsLanguageDialogTitle": {
+    "description": "Title for the language selection dialog"
+  },
+  "settingsLanguageSystem": "Use system language",
+  "@settingsLanguageSystem": {
+    "description": "Option to follow the device language"
+  },
+  "settingsLanguageJapanese": "日本語",
+  "@settingsLanguageJapanese": {
+    "description": "Japanese language option"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "English language option"
+  },
+  "settingsLanguageUpdateError": "Couldn't save your language preference. Please try again later.",
+  "@settingsLanguageUpdateError": {
+    "description": "Message shown when updating the language fails"
+  },
+  "cameraPermissionDialogTitle": "Camera access required",
+  "@cameraPermissionDialogTitle": {
+    "description": "Title for the camera permission dialog"
+  },
+  "cameraPermissionDialogMessage": "Please allow camera access to take new photos. You can enable the permission from the Settings app.",
+  "@cameraPermissionDialogMessage": {
+    "description": "Body text for the camera permission dialog"
+  },
+  "settingsThemeSectionTitle": "Theme",
+  "@settingsThemeSectionTitle": {
+    "description": "Title for the theme section"
+  },
+  "settingsThemeDialogTitle": "Choose theme",
+  "@settingsThemeDialogTitle": {
+    "description": "Title for the theme selection dialog"
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Label for light theme"
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Label for dark theme"
+  },
+  "settingsThemeSystem": "Follow system",
+  "@settingsThemeSystem": {
+    "description": "Label for system theme"
+  },
+  "settingsSectionSemanticLabel": "{section}, current: {value}",
+  "@settingsSectionSemanticLabel": {
+    "description": "Semantic label describing the current value of a settings section",
+    "placeholders": {
+      "section": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionSectionTitle": "Subscription",
+  "@settingsSubscriptionSectionTitle": {
+    "description": "Title for the subscription section in settings"
+  },
+  "commonLoading": "Loading...",
+  "@commonLoading": {
+    "description": "Generic loading label"
+  },
+  "settingsCurrentPlanWithStatus": "Current plan: {plan} ({status})",
+  "@settingsCurrentPlanWithStatus": {
+    "description": "Displays the current subscription plan name with status",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCurrentPlan": "Current plan: {plan}",
+  "@settingsCurrentPlan": {
+    "description": "Displays the current subscription plan name",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSubscriptionUsageLabel": "AI usage",
+  "@settingsSubscriptionUsageLabel": {
+    "description": "Label for AI usage amount"
+  },
+  "settingsSubscriptionRemainingLabel": "Remaining",
+  "@settingsSubscriptionRemainingLabel": {
+    "description": "Label for remaining AI usage count"
+  },
+  "settingsSubscriptionResetLabel": "Resets on",
+  "@settingsSubscriptionResetLabel": {
+    "description": "Label for the reset date of AI usage"
+  },
+  "settingsSubscriptionExpiryLabel": "Expires on",
+  "@settingsSubscriptionExpiryLabel": {
+    "description": "Label for subscription expiry date"
+  },
+  "settingsUpgradeToPremium": "Upgrade to Premium",
+  "@settingsUpgradeToPremium": {
+    "description": "Button text for upgrading to the Premium plan"
+  },
+  "settingsStorageSectionTitle": "Storage information",
+  "@settingsStorageSectionTitle": {
+    "description": "Title for the storage information section"
+  },
+  "settingsStorageAppDataTitle": "App data",
+  "@settingsStorageAppDataTitle": {
+    "description": "Title for the app data storage card"
+  },
+  "settingsStorageUsageValue": "Used storage: {size}",
+  "@settingsStorageUsageValue": {
+    "description": "Displays formatted storage usage",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupTitle": "Backup",
+  "@settingsBackupTitle": {
+    "description": "Title for the backup action"
+  },
+  "settingsBackupSubtitle": "Save your diaries to a file",
+  "@settingsBackupSubtitle": {
+    "description": "Subtitle for the backup action"
+  },
+  "settingsRestoreTitle": "Restore",
+  "@settingsRestoreTitle": {
+    "description": "Title for the restore action"
+  },
+  "settingsRestoreSubtitle": "Import diaries from a file",
+  "@settingsRestoreSubtitle": {
+    "description": "Subtitle for the restore action"
+  },
+  "settingsCleanupTitle": "Cleanup data",
+  "@settingsCleanupTitle": {
+    "description": "Title for the cleanup action"
+  },
+  "settingsCleanupSubtitle": "Remove unnecessary data",
+  "@settingsCleanupSubtitle": {
+    "description": "Subtitle for the cleanup action"
+  },
+  "settingsVersionTitle": "App version",
+  "@settingsVersionTitle": {
+    "description": "Title for the app version section"
+  },
+  "settingsLicenseTitle": "Licenses",
+  "@settingsLicenseTitle": {
+    "description": "Title for the open source licenses section"
+  },
+  "settingsLicenseSubtitle": "Open source licenses",
+  "@settingsLicenseSubtitle": {
+    "description": "Subtitle for the licenses section"
+  },
+  "settingsBackupInProgress": "Backing up...",
+  "@settingsBackupInProgress": {
+    "description": "Message shown while backup is running"
+  },
+  "settingsBackupSuccessTitle": "Backup complete",
+  "@settingsBackupSuccessTitle": {
+    "description": "Title shown when backup completed successfully"
+  },
+  "settingsBackupSuccessMessage": "Your backup file was saved successfully.",
+  "@settingsBackupSuccessMessage": {
+    "description": "Message shown when backup completed successfully"
+  },
+  "settingsBackupCancelledMessage": "The backup was cancelled or failed.",
+  "@settingsBackupCancelledMessage": {
+    "description": "Message shown when backup is cancelled or fails"
+  },
+  "settingsBackupErrorWithDetails": "Backup error: {details}",
+  "@settingsBackupErrorWithDetails": {
+    "description": "Error message shown when backup fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreInProgress": "Restoring...",
+  "@settingsRestoreInProgress": {
+    "description": "Message shown while restore is running"
+  },
+  "settingsRestoreErrorWithDetails": "Restore error: {details}",
+  "@settingsRestoreErrorWithDetails": {
+    "description": "Error message shown when restore fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeInProgress": "Optimizing...",
+  "@settingsOptimizeInProgress": {
+    "description": "Message shown while optimization is running"
+  },
+  "settingsOptimizeSuccessTitle": "Optimization complete",
+  "@settingsOptimizeSuccessTitle": {
+    "description": "Title shown when optimization completes"
+  },
+  "settingsOptimizeSuccessMessage": "Your database has been optimized.",
+  "@settingsOptimizeSuccessMessage": {
+    "description": "Message shown when optimization completes"
+  },
+  "settingsOptimizeErrorWithDetails": "Optimization error: {details}",
+  "@settingsOptimizeErrorWithDetails": {
+    "description": "Error message shown when optimization fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOptimizeFailedMessage": "Optimization failed.",
+  "@settingsOptimizeFailedMessage": {
+    "description": "Message shown when optimization fails without details"
+  },
+  "settingsRestoreResultTitle": "Restore result",
+  "@settingsRestoreResultTitle": {
+    "description": "Title for the restore result dialog"
+  },
+  "settingsRestoreTotalEntriesLabel": "Total entries",
+  "@settingsRestoreTotalEntriesLabel": {
+    "description": "Label for total imported entries"
+  },
+  "settingsRestoreSuccessLabel": "Imported",
+  "@settingsRestoreSuccessLabel": {
+    "description": "Label for successfully imported entries"
+  },
+  "settingsRestoreSkippedLabel": "Skipped",
+  "@settingsRestoreSkippedLabel": {
+    "description": "Label for skipped entries"
+  },
+  "settingsRestoreFailedLabel": "Failed",
+  "@settingsRestoreFailedLabel": {
+    "description": "Label for failed entries"
+  },
+  "settingsRestoreEntriesCount": "{count} entries",
+  "@settingsRestoreEntriesCount": {
+    "description": "Displays the number of entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreAdditionalErrors": "...and {count} more errors",
+  "@settingsRestoreAdditionalErrors": {
+    "description": "Message indicating additional errors",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSubscriptionInfoTitle": "Subscription details",
+  "@settingsSubscriptionInfoTitle": {
+    "description": "Title for the subscription legal information section"
+  },
+  "settingsPremiumMonthlyTitle": "Premium (monthly)",
+  "@settingsPremiumMonthlyTitle": {
+    "description": "Label for the monthly premium plan"
+  },
+  "settingsPremiumYearlyTitle": "Premium (yearly)",
+  "@settingsPremiumYearlyTitle": {
+    "description": "Label for the yearly premium plan"
+  },
+  "settingsPremiumPlanFeatures": "Includes 100 AI diary generations per month, access to the past year of photos, and all 20 writing prompts.",
+  "@settingsPremiumPlanFeatures": {
+    "description": "Description of premium plan benefits"
+  },
+  "settingsSubscriptionAutoRenewTitle": "About auto-renewal",
+  "@settingsSubscriptionAutoRenewTitle": {
+    "description": "Heading for auto-renewal information"
+  },
+  "settingsSubscriptionAutoRenewDescription": "• Subscriptions renew automatically.\n• Your iTunes account is charged 24 hours before the renewal date.\n• Auto-renewal can be turned off up to 24 hours before renewal.\n• Manage subscriptions in iOS Settings > Apple ID > Subscriptions.",
+  "@settingsSubscriptionAutoRenewDescription": {
+    "description": "Auto-renewal guidance text"
+  },
+  "commonPrivacyPolicy": "Privacy policy",
+  "@commonPrivacyPolicy": {
+    "description": "Label for privacy policy link"
+  },
+  "commonTermsOfUse": "Terms of use",
+  "@commonTermsOfUse": {
+    "description": "Label for terms of use link"
+  },
+  "urlLauncherErrorTitle": "Link error",
+  "@urlLauncherErrorTitle": {
+    "description": "Title for link launch error dialog"
+  },
+  "urlLauncherOpenFailed": "Unable to open the link.",
+  "@urlLauncherOpenFailed": {
+    "description": "Message shown when a link cannot be opened"
+  },
+  "upgradeDialogTitle": "Premium plan",
+  "@upgradeDialogTitle": {
+    "description": "Title for the premium upgrade dialog"
+  },
+  "upgradeDialogUnavailableMessage": "The Premium plan is currently unavailable. Please try again later.",
+  "@upgradeDialogUnavailableMessage": {
+    "description": "Message shown when premium plans cannot be loaded"
+  },
+  "upgradeDialogDiscountValue": "Save {discount}%",
+  "@upgradeDialogDiscountValue": {
+    "description": "Label describing the discount percentage",
+    "placeholders": {
+      "discount": {
+        "type": "int"
+      }
+    }
+  },
+  "commonRetry": "Retry",
+  "@commonRetry": {
+    "description": "Generic retry button label"
+  },
+  "commonClose": "Close",
+  "@commonClose": {
+    "description": "Generic close button label"
+  },
+  "errorDetailsLabel": "Details:",
+  "@errorDetailsLabel": {
+    "description": "Label shown before error details section"
+  },
+  "errorSeverityInfo": "Info",
+  "@errorSeverityInfo": {
+    "description": "Error severity label for informational issues"
+  },
+  "errorSeverityWarning": "Warning",
+  "@errorSeverityWarning": {
+    "description": "Error severity label for warnings"
+  },
+  "errorSeverityError": "Error",
+  "@errorSeverityError": {
+    "description": "Error severity label for general errors"
+  },
+  "errorSeverityCritical": "Critical error",
+  "@errorSeverityCritical": {
+    "description": "Error severity label for critical errors"
+  },
+  "commonUpgrade": "Upgrade",
+  "@commonUpgrade": {
+    "description": "Generic upgrade button label"
+  },
+  "commonErrorTitle": "Error",
+  "@commonErrorTitle": {
+    "description": "Generic error dialog title"
+  },
+  "usageLimitDialogTitle": "AI generation limit reached",
+  "@usageLimitDialogTitle": {
+    "description": "Title for the dialog shown when AI usage has reached the monthly limit"
+  },
+  "usageLimitDialogReachedMessage": "The {planName} plan has reached its monthly limit of {limit} generations.",
+  "@usageLimitDialogReachedMessage": {
+    "description": "Body text explaining that the plan has reached the limit",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageLimitDialogResetLabel": "Reset date:",
+  "@usageLimitDialogResetLabel": {
+    "description": "Label shown before the plan reset date"
+  },
+  "usageLimitDialogResetValue": "{date}",
+  "@usageLimitDialogResetValue": {
+    "description": "Formatted reset date value",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageLimitDialogPremiumHint": "The Premium plan allows up to {limit} generations per month.",
+  "@usageLimitDialogPremiumHint": {
+    "description": "Hint encouraging upgrade to Premium plan",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusDialogTitle": "AI usage status",
+  "@usageStatusDialogTitle": {
+    "description": "Title for the AI usage status dialog"
+  },
+  "usageStatusCurrentPlan": "Current plan: {planName}",
+  "@usageStatusCurrentPlan": {
+    "description": "Shows the name of the current plan",
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusUsageLabel": "Usage",
+  "@usageStatusUsageLabel": {
+    "description": "Label for the usage amount section"
+  },
+  "usageStatusUsageValue": "{used} / {limit} times",
+  "@usageStatusUsageValue": {
+    "description": "Displays how many generations were used versus the limit",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusRemainingLabel": "Remaining",
+  "@usageStatusRemainingLabel": {
+    "description": "Label for remaining counts"
+  },
+  "usageStatusRemainingValue": "{remaining} times",
+  "@usageStatusRemainingValue": {
+    "description": "Displays the remaining generation count",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "usageStatusResetInfo": "Resets on {date}",
+  "@usageStatusResetInfo": {
+    "description": "Indicates when the plan usage will reset",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "usageStatusPremiumUpsell": "With the Premium plan you can use up to {limit} generations per month.",
+  "@usageStatusPremiumUpsell": {
+    "description": "Upsell message for the Premium plan",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "commonTryAgainLater": "Please try again later.",
+  "@commonTryAgainLater": {
+    "description": "Generic instruction asking the user to retry later"
+  },
+  "usageStatusFetchErrorTitle": "Couldn't fetch usage status",
+  "@usageStatusFetchErrorTitle": {
+    "description": "Title shown when fetching usage status fails"
+  },
+  "usageStatusFetchErrorMessage": "An error occurred while fetching usage status.",
+  "@usageStatusFetchErrorMessage": {
+    "description": "Message shown when fetching usage status fails"
+  },
+  "commonAllow": "Allow",
+  "@commonAllow": {
+    "description": "Button label to grant permission"
+  },
+  "timelineLoadingPhotosLabel": "Loading photos",
+  "@timelineLoadingPhotosLabel": {
+    "description": "Semantic label used while photos are loading"
+  },
+  "photoSemanticIndex": "Photo {index}",
+  "@photoSemanticIndex": {
+    "description": "Semantic description identifying the photo position",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "photoSemanticSelected": "Selected",
+  "@photoSemanticSelected": {
+    "description": "Semantic label indicating the photo is selected"
+  },
+  "photoSemanticNotSelected": "Not selected",
+  "@photoSemanticNotSelected": {
+    "description": "Semantic label indicating the photo is not selected"
+  },
+  "promptSelectionTitle": "Choose a prompt",
+  "@promptSelectionTitle": {
+    "description": "Title for the prompt selection dialog"
+  },
+  "promptCreateRandom": "Create with random",
+  "@promptCreateRandom": {
+    "description": "Primary button label when a random prompt is selected"
+  },
+  "promptCreateWithSelected": "Create with prompt",
+  "@promptCreateWithSelected": {
+    "description": "Primary button label when a specific prompt is selected"
+  },
+  "promptCreateWithout": "Create without prompt",
+  "@promptCreateWithout": {
+    "description": "Primary button label when skipping prompts"
+  },
+  "promptOptionNone": "No prompt",
+  "@promptOptionNone": {
+    "description": "List item label for skipping prompts"
+  },
+  "promptOptionNoneDescription": "Generate the diary using photos only",
+  "@promptOptionNoneDescription": {
+    "description": "Description explaining the no prompt option"
+  },
+  "promptOptionRandom": "Random selection",
+  "@promptOptionRandom": {
+    "description": "List item label for choosing a random prompt"
+  },
+  "promptLoadingMessage": "Loading prompts...",
+  "@promptLoadingMessage": {
+    "description": "Status text shown while prompts are loading"
+  },
+  "promptRandomDescription": "Automatically choose a recommended prompt",
+  "@promptRandomDescription": {
+    "description": "Description explaining the random prompt option"
+  },
+  "promptEmptyTitle": "No prompts found",
+  "@promptEmptyTitle": {
+    "description": "Title shown when no prompts are available"
+  },
+  "promptEmptyDescription": "Failed to load prompt data.",
+  "@promptEmptyDescription": {
+    "description": "Description shown when prompt loading fails"
+  },
+  "diaryPreviewCurrentPromptTitle": "Current Prompt",
+  "@diaryPreviewCurrentPromptTitle": {
+    "description": "Header shown in diary preview for the prompt currently in use"
+  },
+  "diaryPreviewNoPhotosError": "No photos were selected.",
+  "@diaryPreviewNoPhotosError": {
+    "description": "Error message shown when no photos are selected for diary generation"
+  },
+  "diaryPreviewGenerationError": "We ran into an issue while generating your diary.\\nPlease try again in a moment.",
+  "@diaryPreviewGenerationError": {
+    "description": "Message shown when diary generation fails"
+  },
+  "diaryPreviewSaveSuccess": "Diary saved",
+  "@diaryPreviewSaveSuccess": {
+    "description": "Snack bar message shown after a diary is saved successfully"
+  },
+  "diaryPreviewAutoSaveError": "We couldn't save the diary.\\nPlease try again later.",
+  "@diaryPreviewAutoSaveError": {
+    "description": "Error message shown when diary saving fails"
+  },
+  "diaryPreviewDateLabel": "Diary date",
+  "@diaryPreviewDateLabel": {
+    "description": "Label for the diary date section in the preview screen"
+  },
+  "diaryPreviewSelectedPhotos": "Selected photos ({count})",
+  "@diaryPreviewSelectedPhotos": {
+    "description": "Header showing how many photos are selected for the diary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewAnalyzingPhotos": "Analyzing photos...",
+  "@diaryPreviewAnalyzingPhotos": {
+    "description": "Status text shown while photos are being analyzed"
+  },
+  "diaryPreviewAnalyzingProgress": "Processed {current} of {total} photos",
+  "@diaryPreviewAnalyzingProgress": {
+    "description": "Displays the current and total number of photos processed during analysis",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryPreviewPromptTag": "Prompt in use",
+  "@diaryPreviewPromptTag": {
+    "description": "Label shown on the diary preview when a prompt was used"
+  },
+  "diaryPreviewTitleLabel": "Title",
+  "@diaryPreviewTitleLabel": {
+    "description": "Label for the diary title text field"
+  },
+  "diaryPreviewTitleHint": "Enter a diary title",
+  "@diaryPreviewTitleHint": {
+    "description": "Hint text for the diary title field"
+  },
+  "diaryPreviewContentLabel": "Body",
+  "@diaryPreviewContentLabel": {
+    "description": "Label for the diary content text field"
+  },
+  "diaryPreviewContentHint": "You can edit the diary content.",
+  "@diaryPreviewContentHint": {
+    "description": "Hint text for the diary content field"
+  },
+  "diaryPreviewSaveButton": "Save diary",
+  "@diaryPreviewSaveButton": {
+    "description": "Label for the save diary button on the preview screen"
+  },
+  "diaryPreviewUsageLimitTitle": "AI generation limit reached",
+  "@diaryPreviewUsageLimitTitle": {
+    "description": "Fallback dialog title shown when the AI monthly limit is reached"
+  },
+  "diaryPreviewUsageLimitMessage": "You've reached the monthly AI generation limit. Please try again after the cycle resets or upgrade your plan.",
+  "@diaryPreviewUsageLimitMessage": {
+    "description": "Fallback dialog message shown when the AI monthly limit is reached"
+  },
+  "diaryPreviewAppBarTitle": "Diary preview",
+  "@diaryPreviewAppBarTitle": {
+    "description": "Title shown in the diary preview app bar"
+  },
+  "diaryPreviewRegenerateWithoutPromptTooltip": "Regenerate without prompt",
+  "@diaryPreviewRegenerateWithoutPromptTooltip": {
+    "description": "Tooltip for the regenerate button when clearing the prompt"
+  },
+  "diaryPreviewInitializingPromptsTitle": "Preparing prompt services...",
+  "@diaryPreviewInitializingPromptsTitle": {
+    "description": "Title shown while prompt services are initializing"
+  },
+  "diaryPreviewInitializingPromptsDescription": "Setting up prompts for your diary",
+  "@diaryPreviewInitializingPromptsDescription": {
+    "description": "Description shown while prompt services are initializing"
+  },
+  "diaryPreviewSavingDiaryTitle": "Saving diary...",
+  "@diaryPreviewSavingDiaryTitle": {
+    "description": "Title shown while the diary is being saved"
+  },
+  "diaryPreviewSavingDiaryDescription": "Storing the generated diary entry",
+  "@diaryPreviewSavingDiaryDescription": {
+    "description": "Description shown while the diary is being saved"
+  },
+  "diaryPreviewGeneratingDiaryTitle": "Creating your diary...",
+  "@diaryPreviewGeneratingDiaryTitle": {
+    "description": "Title shown while the AI is generating the diary"
+  },
+  "diaryPreviewGeneratingDiaryDescription": "AI is analyzing your photos",
+  "@diaryPreviewGeneratingDiaryDescription": {
+    "description": "Description shown while the AI is generating the diary"
+  },
+  "diaryPreviewContentSectionTitle": "Diary content",
+  "@diaryPreviewContentSectionTitle": {
+    "description": "Headline shown above the diary content fields"
+  },
+  "diaryPreviewDiscardDialogTitle": "Discard this diary?",
+  "@diaryPreviewDiscardDialogTitle": {
+    "description": "Confirmation dialog title shown when leaving the preview"
+  },
+  "diaryPreviewDiscardDialogMessage": "An AI generation credit has already been used.",
+  "@diaryPreviewDiscardDialogMessage": {
+    "description": "Confirmation dialog message explaining the consequence of discarding"
+  },
+  "diaryPreviewDiscardDialogConfirm": "Discard and go back",
+  "@diaryPreviewDiscardDialogConfirm": {
+    "description": "Confirmation button label for discarding the diary"
+  },
+  "diaryCardUntitled": "Untitled",
+  "@diaryCardUntitled": {
+    "description": "Fallback title when a diary entry has no title"
+  },
+  "diaryCardGeneratingTags": "Generating tags...",
+  "@diaryCardGeneratingTags": {
+    "description": "Status message shown while diary tags are loading"
+  },
+  "pastPhotoSelectedDateLabel": "Photos from {date}",
+  "@pastPhotoSelectedDateLabel": {
+    "description": "Label showing which date's photos are selected",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pastPhotoSelectedCount": "{count} photos",
+  "@pastPhotoSelectedCount": {
+    "description": "Displays how many photos exist for the selected date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diarySearchHint": "Search titles or body...",
+  "@diarySearchHint": {
+    "description": "Hint text for the diary search field"
+  },
+  "diaryListTitle": "Diaries",
+  "@diaryListTitle": {
+    "description": "App bar title for the diary list screen"
+  },
+  "commonBack": "Back",
+  "@commonBack": {
+    "description": "Generic back button label"
+  },
+  "commonNext": "Next",
+  "@commonNext": {
+    "description": "Generic next button label"
+  },
+  "commonSelect": "Select",
+  "@commonSelect": {
+    "description": "Select button text"
+  },
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": {
+    "description": "Skip button shown on onboarding pages"
+  },
+  "onboardingWelcomeTitle": "Welcome to\nSmart Photo Diary",
+  "@onboardingWelcomeTitle": {
+    "description": "Headline shown on the first onboarding page"
+  },
+  "onboardingWelcomeSubtitle": "Turn each day into a beautiful story. Simply pick your photos and let the diary come to life.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subheading explaining the app concept"
+  },
+  "onboardingThreeStepsTitle": "Create your diary in three steps",
+  "@onboardingThreeStepsTitle": {
+    "description": "Title introducing the three-step process"
+  },
+  "onboardingStepTitle": "Step {step}",
+  "@onboardingStepTitle": {
+    "description": "Label for each onboarding step",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingStep1Description": "Pick the photos you took today",
+  "@onboardingStep1Description": {
+    "description": "Description for step 1 on the onboarding flow"
+  },
+  "onboardingStep2Description": "AI crafts a heartwarming diary from your photos",
+  "@onboardingStep2Description": {
+    "description": "Description for step 2 on the onboarding flow"
+  },
+  "onboardingStep3Description": "Save, edit, and reflect on your memories",
+  "@onboardingStep3Description": {
+    "description": "Description for step 3 on the onboarding flow"
+  },
+  "onboardingShareTitle": "Share your diary instantly",
+  "@onboardingShareTitle": {
+    "description": "Title for the sharing onboarding page"
+  },
+  "onboardingShareFormatTitle": "Choose your format",
+  "@onboardingShareFormatTitle": {
+    "description": "Title describing sharing format choices"
+  },
+  "onboardingShareFormatDescription": "Select vertical or square layouts",
+  "@onboardingShareFormatDescription": {
+    "description": "Description for selecting share formats"
+  },
+  "onboardingShareMultipleTitle": "Made for multiple photos",
+  "@onboardingShareMultipleTitle": {
+    "description": "Title for multi-photo support on onboarding"
+  },
+  "onboardingShareMultipleDescription": "Balanced layouts even with several images",
+  "@onboardingShareMultipleDescription": {
+    "description": "Description for multi-photo layouts"
+  },
+  "onboardingPlansTitle": "Choose the plan that fits",
+  "@onboardingPlansTitle": {
+    "description": "Title introducing subscription plans on onboarding"
+  },
+  "onboardingPlanBasicSubtitle": "Free plan",
+  "@onboardingPlanBasicSubtitle": {
+    "description": "Subtitle for the Basic plan card"
+  },
+  "onboardingPlanFeatureMonthlyLimit": "Generate up to {count} diaries per month",
+  "@onboardingPlanFeatureMonthlyLimit": {
+    "description": "Feature text describing the monthly AI generation limit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingPlanFeatureRecentPhotos": "Select from photos taken today or yesterday",
+  "@onboardingPlanFeatureRecentPhotos": {
+    "description": "Feature text for recent photo access"
+  },
+  "onboardingPlanFeatureBasicPrompts": "Includes essential writing prompts",
+  "@onboardingPlanFeatureBasicPrompts": {
+    "description": "Feature text for basic prompt availability"
+  },
+  "onboardingPlanFeaturePastDays": "Pick from photos taken within the last {days} days",
+  "@onboardingPlanFeaturePastDays": {
+    "description": "Feature text for historical photo access",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingPlanFeatureRichPrompts": "Unlock an expanded prompt library",
+  "@onboardingPlanFeatureRichPrompts": {
+    "description": "Feature text for rich prompt availability"
+  },
+  "onboardingPlanStartFree": "Start for free",
+  "@onboardingPlanStartFree": {
+    "description": "Message indicating the app can be started for free"
+  },
+  "onboardingPermissionTitle": "Allow photo access",
+  "@onboardingPermissionTitle": {
+    "description": "Title for the permission onboarding page"
+  },
+  "onboardingPermissionDescription": "We need access to your photo library to craft your diary entries.",
+  "@onboardingPermissionDescription": {
+    "description": "Description explaining why photo access is required"
+  },
+  "onboardingPrivacyTitle": "Privacy first",
+  "@onboardingPrivacyTitle": {
+    "description": "Title highlighting privacy guidance"
+  },
+  "onboardingPrivacyDescription": "Your photos are used only when generating diaries and never stored on external servers.",
+  "@onboardingPrivacyDescription": {
+    "description": "Description assuring users about privacy"
+  },
+  "onboardingProcessing": "Preparing...",
+  "@onboardingProcessing": {
+    "description": "Label shown while onboarding completion is processing"
+  },
+  "onboardingStart": "Get started",
+  "@onboardingStart": {
+    "description": "Button label to finish onboarding"
+  },
+  "commonSave": "Save",
+  "@commonSave": {
+    "description": "Generic save button label"
+  },
+  "commonShare": "Share",
+  "@commonShare": {
+    "description": "Generic share action label"
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "Generic delete action label"
+  },
+  "commonEdit": "Edit",
+  "@commonEdit": {
+    "description": "Generic edit action label"
+  },
+  "commonErrorOccurred": "An error occurred",
+  "@commonErrorOccurred": {
+    "description": "Generic error title"
+  },
+  "commonErrorWithMessage": "Error: {message}",
+  "@commonErrorWithMessage": {
+    "description": "Error label with message placeholder",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPreparing": "Preparing...",
+  "@commonPreparing": {
+    "description": "Generic preparing/loading label"
+  },
+  "commonShareFailedWithReason": "Sharing failed: {reason}",
+  "@commonShareFailedWithReason": {
+    "description": "Message shown when sharing fails",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnexpectedErrorWithDetails": "An unexpected error occurred: {details}",
+  "@commonUnexpectedErrorWithDetails": {
+    "description": "Message shown when an unexpected error occurs",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "commonTitleLabel": "Title",
+  "@commonTitleLabel": {
+    "description": "Label for title fields"
+  },
+  "commonBodyLabel": "Body",
+  "@commonBodyLabel": {
+    "description": "Label for body/content fields"
+  },
+  "commonTagsLabel": "Tags: ",
+  "@commonTagsLabel": {
+    "description": "Label prefix for tag lists"
+  },
+  "commonClearFilters": "Clear filters",
+  "@commonClearFilters": {
+    "description": "Button label to remove all active filters"
+  },
+  "commonCreatedAtLabel": "Created",
+  "@commonCreatedAtLabel": {
+    "description": "Label for created timestamp"
+  },
+  "commonUpdatedAtLabel": "Updated",
+  "@commonUpdatedAtLabel": {
+    "description": "Label for updated timestamp"
+  },
+  "diaryDetailViewTitle": "Diary details",
+  "@diaryDetailViewTitle": {
+    "description": "App bar title when viewing a diary"
+  },
+  "diaryDetailEditTitle": "Edit diary",
+  "@diaryDetailEditTitle": {
+    "description": "App bar title when editing a diary"
+  },
+  "diaryDetailContentHeading": "Diary content",
+  "@diaryDetailContentHeading": {
+    "description": "Heading for the diary content section"
+  },
+  "diaryDetailLoadingTitle": "Loading diary...",
+  "@diaryDetailLoadingTitle": {
+    "description": "Title shown while the diary is loading"
+  },
+  "diaryDetailLoadingSubtitle": "Fetching diary text and photos",
+  "@diaryDetailLoadingSubtitle": {
+    "description": "Subtitle shown while the diary is loading"
+  },
+  "diaryDetailDateLabel": "Diary date",
+  "@diaryDetailDateLabel": {
+    "description": "Label for the diary date"
+  },
+  "diaryDetailPhotosSectionTitle": "Photos ({count})",
+  "@diaryDetailPhotosSectionTitle": {
+    "description": "Heading for the photos section with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryDetailTagCount": "{count} tags",
+  "@diaryDetailTagCount": {
+    "description": "Number of tags associated with the diary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryDetailTitleHint": "Enter diary title",
+  "@diaryDetailTitleHint": {
+    "description": "Hint text for the diary title field"
+  },
+  "diaryDetailContentHint": "Please enter the diary content",
+  "@diaryDetailContentHint": {
+    "description": "Hint text for the diary content field"
+  },
+  "diaryDetailMetadataTitle": "Details",
+  "@diaryDetailMetadataTitle": {
+    "description": "Heading for the metadata section"
+  },
+  "diaryDetailDeleteDialogTitle": "Delete diary",
+  "@diaryDetailDeleteDialogTitle": {
+    "description": "Title for the delete diary confirmation dialog"
+  },
+  "diaryDetailDeleteDialogMessage": "Are you sure you want to delete this diary? This action cannot be undone.",
+  "@diaryDetailDeleteDialogMessage": {
+    "description": "Message explaining the consequences of deleting a diary"
+  },
+  "diaryDetailUpdateError": "Failed to update diary: {details}",
+  "@diaryDetailUpdateError": {
+    "description": "Error shown when updating a diary fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryDetailDeleteError": "Failed to delete diary: {details}",
+  "@diaryDetailDeleteError": {
+    "description": "Error shown when deleting a diary fails",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryDetailShareDialogMessage": "How would you like to share?",
+  "@diaryDetailShareDialogMessage": {
+    "description": "Prompt shown above sharing options"
+  },
+  "diaryDetailShareTextOptionTitle": "Photo & diary text",
+  "@diaryDetailShareTextOptionTitle": {
+    "description": "Share option title for text-based sharing"
+  },
+  "diaryDetailShareTextOptionSubtitle": "Best for X (formerly Twitter)",
+  "@diaryDetailShareTextOptionSubtitle": {
+    "description": "Share option subtitle describing X platform"
+  },
+  "diaryDetailShareImageOptionTitle": "Photo & diary as image",
+  "@diaryDetailShareImageOptionTitle": {
+    "description": "Share option title for image export"
+  },
+  "diaryDetailSharePortraitSubtitle": "Ideal for Instagram (portrait)",
+  "@diaryDetailSharePortraitSubtitle": {
+    "description": "Subtitle describing portrait export"
+  },
+  "diaryDetailShareSquareSubtitle": "Ideal for Instagram (square)",
+  "@diaryDetailShareSquareSubtitle": {
+    "description": "Subtitle describing square export"
+  },
+  "diaryDetailSharePreparingTitle": "Preparing to share",
+  "@diaryDetailSharePreparingTitle": {
+    "description": "Dialog title shown while preparing share content"
+  },
+  "diaryDetailShareGeneratingBody": "Generating shareable images...",
+  "@diaryDetailShareGeneratingBody": {
+    "description": "Dialog body shown while generating images for sharing"
+  },
+  "statisticsLoadingTitle": "Loading statistics...",
+  "@statisticsLoadingTitle": {
+    "description": "Title shown while statistics data is loading"
+  },
+  "statisticsLoadingSubtitle": "Analyzing your diary activity",
+  "@statisticsLoadingSubtitle": {
+    "description": "Subtitle shown while statistics data is loading"
+  },
+  "statisticsTotalEntriesTitle": "Total entries",
+  "@statisticsTotalEntriesTitle": {
+    "description": "Label for the total diary entries stat"
+  },
+  "statisticsCurrentStreakTitle": "Current streak",
+  "@statisticsCurrentStreakTitle": {
+    "description": "Label for the current streak stat"
+  },
+  "statisticsLongestStreakTitle": "Longest streak",
+  "@statisticsLongestStreakTitle": {
+    "description": "Label for the longest streak stat"
+  },
+  "statisticsMonthlyCountTitle": "This month",
+  "@statisticsMonthlyCountTitle": {
+    "description": "Label for the monthly diary count stat"
+  },
+  "statisticsUnitDiary": "diaries",
+  "@statisticsUnitDiary": {
+    "description": "Unit label for diary counts"
+  },
+  "statisticsUnitDay": "days",
+  "@statisticsUnitDay": {
+    "description": "Unit label for day counts"
+  },
+  "statisticsDiaryCountMessage": "There are {count} diaries.",
+  "@statisticsDiaryCountMessage": {
+    "description": "Message indicating how many diaries exist on a given day",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUsageWarningRemaining": "You have {remaining} AI generations remaining.",
+  "@subscriptionUsageWarningRemaining": {
+    "description": "Warning message shown when AI generation usage is near limit",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUsageWarningLimitReached": "AI generation limit reached.",
+  "@subscriptionUsageWarningLimitReached": {
+    "description": "Warning message shown when AI generation limit is reached"
+  },
+  "subscriptionUpgradeRecommendationLimit": "Upgrade to Premium to use up to {limit} generations per month.",
+  "@subscriptionUpgradeRecommendationLimit": {
+    "description": "Upgrade recommendation message with specific limit",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionUpgradeRecommendationGeneral": "For more AI generations, we recommend the Premium plan.",
+  "@subscriptionUpgradeRecommendationGeneral": {
+    "description": "General upgrade recommendation message"
+  },
+  "timelineToday": "Today",
+  "@timelineToday": {
+    "description": "Timeline section header for today's photos"
+  },
+  "timelineYesterday": "Yesterday",
+  "@timelineYesterday": {
+    "description": "Timeline section header for yesterday's photos"
+  },
+  "timelineMonthYear": "{year}-{month}",
+  "@timelineMonthYear": {
+    "description": "Timeline section header for monthly groups",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  }
+}

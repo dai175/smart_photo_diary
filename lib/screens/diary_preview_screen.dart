@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../services/ai/ai_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
@@ -24,6 +23,7 @@ import '../models/writing_prompt.dart';
 import '../core/errors/error_handler.dart';
 import '../utils/prompt_category_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../localization/localization_extensions.dart';
 import 'diary_detail_screen.dart';
 
 /// 生成された日記のプレビュー画面
@@ -113,7 +113,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '選択された写真がありません';
+        _errorMessage = context.l10n.diaryPreviewNoPhotosError;
       });
       return;
     }
@@ -161,6 +161,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           imageData: imageData,
           date: photoDateTime,
           prompt: _selectedPrompt?.text,
+          locale: Localizations.localeOf(context),
         );
 
         if (resultFromAi.isFailure) {
@@ -215,6 +216,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               _totalPhotos = total;
             });
           },
+          locale: Localizations.localeOf(context),
         );
 
         if (resultFromAi.isFailure) {
@@ -265,7 +267,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = '日記の生成中にエラーが発生しました。\n時間を空けてもう一度お試しください。';
+        _errorMessage = context.l10n.diaryPreviewGenerationError;
       });
     }
   }
@@ -315,7 +317,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
         // 保存成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('日記を保存しました')),
+          SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
         );
       }
     } catch (e, stackTrace) {
@@ -332,12 +334,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isSaving = false;
           _hasError = true;
-          _errorMessage = '日記の保存に失敗しました。\n時間を空けてもう一度お試しください。';
+          _errorMessage = context.l10n.diaryPreviewAutoSaveError;
         });
 
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('エラー: $_errorMessage'),
+            content: Text(context.l10n.commonErrorWithMessage(_errorMessage)),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -392,7 +394,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
         // 保存成功メッセージを表示
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('日記を保存しました')),
+          SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
         );
 
         // 前の画面に戻る
@@ -412,12 +414,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = '日記の保存に失敗しました。\n時間を空けてもう一度お試しください。';
+          _errorMessage = context.l10n.diaryPreviewAutoSaveError;
         });
 
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('エラー: $_errorMessage'),
+            content: Text(context.l10n.commonErrorWithMessage(_errorMessage)),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -434,12 +436,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       // プラン情報を取得
       final planResult = await subscriptionService.getCurrentPlanClass();
-      final remainingResult = await subscriptionService
-          .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
 
       final plan = planResult.isSuccess ? planResult.value : BasicPlan();
-      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final limit = plan.monthlyAiGenerationLimit;
       final nextResetDate = resetDateResult.isSuccess
           ? resetDateResult.value
@@ -450,8 +449,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           context: context,
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
+            context: context,
             planName: plan.displayName,
-            remaining: remaining,
             limit: limit,
             nextResetDate: nextResetDate,
             onUpgrade: () {
@@ -477,8 +476,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         await showDialog<void>(
           context: context,
           builder: (context) => PresetDialogs.error(
-            title: 'AI生成の制限に達しました',
-            message: 'AI生成の月間制限に達したため、来月まで新しい日記を生成できません。',
+            context: context,
+            title: context.l10n.diaryPreviewUsageLimitTitle,
+            message: context.l10n.diaryPreviewUsageLimitMessage,
             onConfirm: () => Navigator.of(context).pop(),
           ),
         );
@@ -528,7 +528,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text('使用中のプロンプト', style: AppTypography.titleMedium),
+                  child: Text(
+                    context.l10n.diaryPreviewCurrentPromptTitle,
+                    style: AppTypography.titleMedium,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -544,6 +547,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                   child: Text(
                     PromptCategoryUtils.getCategoryDisplayName(
                       _selectedPrompt!.category,
+                      locale: Localizations.localeOf(context),
                     ),
                     style: AppTypography.labelSmall.copyWith(
                       color: Colors.white,
@@ -581,10 +585,11 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => PresetDialogs.confirmation(
-        title: '日記を破棄しますか？',
-        message: 'AI生成回数は既に消費されています。',
-        confirmText: '破棄して戻る',
-        cancelText: 'キャンセル',
+        context: context,
+        title: context.l10n.diaryPreviewDiscardDialogTitle,
+        message: context.l10n.diaryPreviewDiscardDialogMessage,
+        confirmText: context.l10n.diaryPreviewDiscardDialogConfirm,
+        cancelText: context.l10n.commonCancel,
         isDestructive: true,
         onConfirm: () => Navigator.of(context).pop(true),
         onCancel: () => Navigator.of(context).pop(false),
@@ -614,7 +619,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('日記プレビュー'),
+          title: Text(context.l10n.diaryPreviewAppBarTitle),
           centerTitle: false,
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -642,7 +647,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                     _clearPrompt();
                     _loadModelAndGenerateDiary();
                   },
-                  tooltip: 'プロンプトなしで再生成',
+                  tooltip:
+                      context.l10n.diaryPreviewRegenerateWithoutPromptTooltip,
                 ),
               ),
             // 手動保存ボタン（自動保存有効時は表示しない）
@@ -655,7 +661,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                   onPressed: _saveDiary,
-                  tooltip: '日記を保存',
+                  tooltip: context.l10n.diaryPreviewSaveButton,
                 ),
               ),
           ],
@@ -694,7 +700,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '日記の日付',
+                              context.l10n.diaryPreviewDateLabel,
                               style: AppTypography.withColor(
                                 AppTypography.labelMedium,
                                 Theme.of(
@@ -703,7 +709,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ),
                             Text(
-                              DateFormat('yyyy年MM月dd日').format(_photoDateTime),
+                              context.l10n.formatFullDate(_photoDateTime),
                               style: AppTypography.withColor(
                                 AppTypography.titleLarge,
                                 Theme.of(
@@ -742,7 +748,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               Text(
-                                '選択された写真 (${widget.selectedAssets.length}枚)',
+                                context.l10n.diaryPreviewSelectedPhotos(
+                                  widget.selectedAssets.length,
+                                ),
                                 style: AppTypography.titleMedium,
                               ),
                             ],
@@ -860,12 +868,15 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             const SizedBox(height: AppSpacing.xl),
                             if (_isAnalyzingPhotos && _totalPhotos > 1) ...[
                               Text(
-                                '写真を分析中...',
+                                context.l10n.diaryPreviewAnalyzingPhotos,
                                 style: AppTypography.titleLarge,
                               ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
-                                '$_currentPhotoIndex/$_totalPhotos枚完了',
+                                context.l10n.diaryPreviewAnalyzingProgress(
+                                  _currentPhotoIndex,
+                                  _totalPhotos,
+                                ),
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: Theme.of(
                                     context,
@@ -897,12 +908,16 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ] else if (_isInitializing) ...[
                               Text(
-                                'プロンプトサービスを初期化中...',
+                                context
+                                    .l10n
+                                    .diaryPreviewInitializingPromptsTitle,
                                 style: AppTypography.titleLarge,
                               ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
-                                'プロンプト機能の準備をしています',
+                                context
+                                    .l10n
+                                    .diaryPreviewInitializingPromptsDescription,
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: Theme.of(
                                     context,
@@ -912,12 +927,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ] else if (_isSaving) ...[
                               Text(
-                                '日記を保存中...',
+                                context.l10n.diaryPreviewSavingDiaryTitle,
                                 style: AppTypography.titleLarge,
                               ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
-                                '生成された日記を保存しています',
+                                context.l10n.diaryPreviewSavingDiaryDescription,
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: Theme.of(
                                     context,
@@ -927,12 +942,14 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ] else ...[
                               Text(
-                                '写真から日記を生成中...',
+                                context.l10n.diaryPreviewGeneratingDiaryTitle,
                                 style: AppTypography.titleLarge,
                               ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
-                                'AIがあなたの写真を分析しています',
+                                context
+                                    .l10n
+                                    .diaryPreviewGeneratingDiaryDescription,
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: Theme.of(
                                     context,
@@ -1023,7 +1040,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             ),
                             const SizedBox(height: AppSpacing.xl),
                             Text(
-                              'エラーが発生しました',
+                              context.l10n.commonErrorOccurred,
                               style: AppTypography.headlineSmall,
                             ),
                             const SizedBox(height: AppSpacing.sm),
@@ -1037,7 +1054,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                             const SizedBox(height: AppSpacing.xl),
                             PrimaryButton(
                               onPressed: () => Navigator.pop(context),
-                              text: '戻る',
+                              text: context.l10n.commonBack,
                               icon: Icons.arrow_back_rounded,
                             ),
                           ],
@@ -1066,7 +1083,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               const SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Text(
-                                  '日記の内容',
+                                  context.l10n.diaryPreviewContentSectionTitle,
                                   style: AppTypography.titleLarge,
                                 ),
                               ),
@@ -1097,7 +1114,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                       ),
                                       const SizedBox(width: 2),
                                       Text(
-                                        'プロンプト使用',
+                                        context.l10n.diaryPreviewPromptTag,
                                         style: AppTypography.labelSmall.copyWith(
                                           color:
                                               PromptCategoryUtils.getCategoryColor(
@@ -1127,9 +1144,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                               decoration: InputDecoration(
-                                labelText: 'タイトル',
+                                labelText: context.l10n.diaryPreviewTitleLabel,
                                 border: InputBorder.none,
-                                hintText: '日記のタイトルを入力',
+                                hintText: context.l10n.diaryPreviewTitleHint,
                                 contentPadding: AppSpacing.inputPadding,
                                 labelStyle: AppTypography.labelMedium,
                                 hintStyle: AppTypography.bodyMedium.copyWith(
@@ -1158,8 +1175,9 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                               decoration: InputDecoration(
-                                labelText: '本文',
-                                hintText: '日記の内容を編集できます',
+                                labelText:
+                                    context.l10n.diaryPreviewContentLabel,
+                                hintText: context.l10n.diaryPreviewContentHint,
                                 border: InputBorder.none,
                                 contentPadding: AppSpacing.inputPadding,
                                 labelStyle: AppTypography.labelMedium,
@@ -1204,7 +1222,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                     begin: const Offset(0, 1),
                     child: PrimaryButton(
                       onPressed: _saveDiary,
-                      text: '日記を保存',
+                      text: context.l10n.diaryPreviewSaveButton,
                       icon: Icons.save_rounded,
                       width: double.infinity,
                     ),

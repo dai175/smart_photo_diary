@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
@@ -64,6 +66,8 @@ enum PromptCategory {
 /// Premium機能として日記生成時の創作支援を提供します
 @HiveType(typeId: 4)
 class WritingPrompt extends HiveObject {
+  static const String defaultLocaleCode = 'ja';
+
   @HiveField(0)
   final String id;
 
@@ -91,6 +95,15 @@ class WritingPrompt extends HiveObject {
   @HiveField(8)
   final bool isActive;
 
+  @HiveField(9)
+  final Map<String, String> localizedTexts;
+
+  @HiveField(10)
+  final Map<String, String>? localizedDescriptions;
+
+  @HiveField(11)
+  final Map<String, List<String>>? localizedTags;
+
   WritingPrompt({
     required this.id,
     required this.text,
@@ -101,7 +114,16 @@ class WritingPrompt extends HiveObject {
     this.priority = 0,
     DateTime? createdAt,
     this.isActive = true,
-  }) : createdAt = createdAt ?? DateTime.now();
+    Map<String, String>? localizedTexts,
+    Map<String, String>? localizedDescriptions,
+    Map<String, List<String>>? localizedTags,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       localizedTexts = _mergeLocalizedTexts(localizedTexts, text),
+       localizedDescriptions = _mergeLocalizedDescriptions(
+         localizedDescriptions,
+         description,
+       ),
+       localizedTags = _mergeLocalizedTags(localizedTags, tags);
 
   /// JSONからWritingPromptを作成
   factory WritingPrompt.fromJson(Map<String, dynamic> json) {
@@ -117,6 +139,13 @@ class WritingPrompt extends HiveObject {
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       isActive: json['isActive'] as bool? ?? true,
+      localizedTexts:
+          _parseLocalizedStringMap(json['localizedTexts']) ??
+          _parseDualLocaleDeprecated(json, 'texts'),
+      localizedDescriptions: _parseLocalizedStringMap(
+        json['localizedDescriptions'],
+      ),
+      localizedTags: _parseLocalizedTags(json['localizedTags']),
     );
   }
 
@@ -132,6 +161,9 @@ class WritingPrompt extends HiveObject {
       'priority': priority,
       'createdAt': createdAt.toIso8601String(),
       'isActive': isActive,
+      'localizedTexts': localizedTexts,
+      'localizedDescriptions': localizedDescriptions,
+      'localizedTags': localizedTags,
     };
   }
 
@@ -146,9 +178,39 @@ class WritingPrompt extends HiveObject {
   /// プロンプトがキーワードにマッチするかどうか
   bool matchesKeyword(String keyword) {
     final lowerKeyword = keyword.toLowerCase();
-    return text.toLowerCase().contains(lowerKeyword) ||
-        tags.any((tag) => tag.toLowerCase().contains(lowerKeyword)) ||
-        (description?.toLowerCase().contains(lowerKeyword) ?? false);
+    if (text.toLowerCase().contains(lowerKeyword)) {
+      return true;
+    }
+
+    if (localizedTexts.values.any(
+      (value) => value.toLowerCase().contains(lowerKeyword),
+    )) {
+      return true;
+    }
+
+    if (tags.any((tag) => tag.toLowerCase().contains(lowerKeyword))) {
+      return true;
+    }
+
+    if (localizedTags != null &&
+        localizedTags!.values.any(
+          (tags) => tags.any((tag) => tag.toLowerCase().contains(lowerKeyword)),
+        )) {
+      return true;
+    }
+
+    if ((description?.toLowerCase().contains(lowerKeyword) ?? false)) {
+      return true;
+    }
+
+    if (localizedDescriptions != null &&
+        localizedDescriptions!.values.any(
+          (value) => value.toLowerCase().contains(lowerKeyword),
+        )) {
+      return true;
+    }
+
+    return false;
   }
 
   /// カテゴリの表示名を取得
@@ -171,6 +233,49 @@ class WritingPrompt extends HiveObject {
     if (priority >= 80) return '高';
     if (priority >= 50) return '中';
     return '低';
+  }
+
+  /// 指定ロケールに適したテキストを取得
+  String textForLocale(Locale? locale) {
+    return _resolveLocalizedString(localizedTexts, locale) ?? text;
+  }
+
+  /// 指定ロケールに適した説明を取得
+  String? descriptionForLocale(Locale? locale) {
+    return _resolveLocalizedString(localizedDescriptions, locale) ??
+        description;
+  }
+
+  /// 指定ロケールに適したタグリストを取得
+  List<String> tagsForLocale(Locale? locale) {
+    final localized = _resolveLocalizedList(localizedTags, locale);
+    if (localized != null && localized.isNotEmpty) {
+      return localized;
+    }
+    return tags;
+  }
+
+  /// 指定ロケール向けにローカライズしたコピーを生成
+  WritingPrompt localizedCopy(Locale? locale) {
+    if (locale == null) {
+      return this;
+    }
+
+    final localizedText = textForLocale(locale);
+    final localizedDescription = descriptionForLocale(locale);
+    final localizedTags = tagsForLocale(locale);
+
+    if (localizedText == text &&
+        localizedDescription == description &&
+        listEquals(localizedTags, tags)) {
+      return this;
+    }
+
+    return copyWith(
+      text: localizedText,
+      description: localizedDescription,
+      tags: localizedTags,
+    );
   }
 
   @override
@@ -212,6 +317,9 @@ class WritingPrompt extends HiveObject {
     int? priority,
     DateTime? createdAt,
     bool? isActive,
+    Map<String, String>? localizedTexts,
+    Map<String, String>? localizedDescriptions,
+    Map<String, List<String>>? localizedTags,
   }) {
     return WritingPrompt(
       id: id ?? this.id,
@@ -223,7 +331,164 @@ class WritingPrompt extends HiveObject {
       priority: priority ?? this.priority,
       createdAt: createdAt ?? this.createdAt,
       isActive: isActive ?? this.isActive,
+      localizedTexts: localizedTexts ?? this.localizedTexts,
+      localizedDescriptions:
+          localizedDescriptions ?? this.localizedDescriptions,
+      localizedTags: localizedTags ?? this.localizedTags,
     );
+  }
+
+  static Map<String, String> _mergeLocalizedTexts(
+    Map<String, String>? provided,
+    String baseText,
+  ) {
+    final map = <String, String>{if (provided != null) ...provided};
+    map.putIfAbsent(defaultLocaleCode, () => baseText);
+    return Map.unmodifiable(map);
+  }
+
+  static Map<String, String>? _mergeLocalizedDescriptions(
+    Map<String, String>? provided,
+    String? baseDescription,
+  ) {
+    if (provided == null && baseDescription == null) {
+      return null;
+    }
+
+    final map = <String, String>{if (provided != null) ...provided};
+
+    if (baseDescription != null && baseDescription.isNotEmpty) {
+      map.putIfAbsent(defaultLocaleCode, () => baseDescription);
+    }
+
+    return map.isEmpty ? null : Map.unmodifiable(map);
+  }
+
+  static Map<String, List<String>>? _mergeLocalizedTags(
+    Map<String, List<String>>? provided,
+    List<String> baseTags,
+  ) {
+    if ((provided == null || provided.isEmpty) && baseTags.isEmpty) {
+      return null;
+    }
+
+    final map = <String, List<String>>{};
+    if (provided != null) {
+      for (final entry in provided.entries) {
+        map[entry.key] = List.unmodifiable(entry.value);
+      }
+    }
+
+    if (baseTags.isNotEmpty) {
+      map.putIfAbsent(defaultLocaleCode, () => List.unmodifiable(baseTags));
+    }
+
+    return map.isEmpty ? null : Map.unmodifiable(map);
+  }
+
+  static Map<String, String>? _parseLocalizedStringMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value.map((key, dynamic v) => MapEntry(key, v as String));
+    }
+    if (value is Map) {
+      return value.map((key, v) => MapEntry(key as String, v as String));
+    }
+    return null;
+  }
+
+  static Map<String, String>? _parseDualLocaleDeprecated(
+    Map<String, dynamic> json,
+    String key,
+  ) {
+    if (!json.containsKey(key)) {
+      return null;
+    }
+    final value = json[key];
+    if (value is Map<String, dynamic>) {
+      return value.map((k, dynamic v) => MapEntry(k, v as String));
+    }
+    return null;
+  }
+
+  static Map<String, List<String>>? _parseLocalizedTags(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value.map(
+        (key, dynamic v) => MapEntry(
+          key,
+          (v as List<dynamic>).map((e) => e as String).toList(),
+        ),
+      );
+    }
+    if (value is Map) {
+      return value.map(
+        (key, v) => MapEntry(
+          key as String,
+          (v as List).map((item) => item as String).toList(),
+        ),
+      );
+    }
+    return null;
+  }
+
+  static String? _resolveLocalizedString(
+    Map<String, String>? values,
+    Locale? locale,
+  ) {
+    if (values == null || values.isEmpty) {
+      return null;
+    }
+
+    if (locale == null) {
+      return values[defaultLocaleCode] ?? values.values.first;
+    }
+
+    final searchOrder = _candidateLocaleKeys(locale);
+    for (final key in searchOrder) {
+      final value = values[key];
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+
+    return values[defaultLocaleCode] ?? values.values.first;
+  }
+
+  static List<String>? _resolveLocalizedList(
+    Map<String, List<String>>? values,
+    Locale? locale,
+  ) {
+    if (values == null || values.isEmpty) {
+      return null;
+    }
+
+    if (locale == null) {
+      final defaultList = values[defaultLocaleCode];
+      return defaultList ?? values.values.first;
+    }
+
+    final searchOrder = _candidateLocaleKeys(locale);
+    for (final key in searchOrder) {
+      final value = values[key];
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+
+    return values[defaultLocaleCode] ?? values.values.first;
+  }
+
+  static List<String> _candidateLocaleKeys(Locale locale) {
+    final candidates = <String>[];
+    final languageCode = locale.languageCode.toLowerCase();
+    final countryCode = locale.countryCode?.toLowerCase();
+
+    if (countryCode != null && countryCode.isNotEmpty) {
+      candidates.add('$languageCode-$countryCode');
+      candidates.add('${languageCode}_$countryCode');
+    }
+
+    candidates.add(languageCode);
+    return candidates;
   }
 }
 

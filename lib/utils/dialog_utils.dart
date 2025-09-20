@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
 import '../ui/components/custom_dialog.dart';
 import '../ui/design_system/app_spacing.dart';
+import '../localization/localization_extensions.dart';
 
 const double _radioDialogMaxWidth = 360;
 const double _radioTileOpacity = 0.12;
@@ -20,7 +20,7 @@ class DialogUtils {
           message: message,
           actions: [
             CustomDialogAction(
-              text: AppConstants.okButton,
+              text: context.l10n.commonOk,
               isPrimary: true,
               onPressed: () => Navigator.of(context).pop(),
             ),
@@ -44,6 +44,7 @@ class DialogUtils {
       context: context,
       builder: (context) {
         return PresetDialogs.success(
+          context: context,
           title: title,
           message: message,
           onConfirm: () => Navigator.pop(context),
@@ -60,13 +61,15 @@ class DialogUtils {
   static Future<void> showErrorDialog(
     BuildContext context,
     String message, {
-    String title = 'エラー',
+    String? title,
   }) {
     return showDialog<void>(
       context: context,
       builder: (context) {
+        final resolvedTitle = title ?? context.l10n.commonErrorTitle;
         return PresetDialogs.error(
-          title: title,
+          context: context,
+          title: resolvedTitle,
           message: message,
           onConfirm: () => Navigator.pop(context),
         );
@@ -87,13 +90,14 @@ class DialogUtils {
     BuildContext context,
     String title,
     String message, {
-    String confirmText = 'OK',
-    String cancelText = 'キャンセル',
+    String? confirmText,
+    String? cancelText,
     bool isDestructive = false,
   }) {
     return showDialog<bool>(
       context: context,
       builder: (context) => PresetDialogs.confirmation(
+        context: context,
         title: title,
         message: message,
         confirmText: confirmText,
@@ -198,7 +202,7 @@ class DialogUtils {
               ),
               actions: [
                 CustomDialogAction(
-                  text: 'キャンセル',
+                  text: context.l10n.commonCancel,
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

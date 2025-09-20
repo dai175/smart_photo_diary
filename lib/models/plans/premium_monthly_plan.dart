@@ -1,5 +1,8 @@
+import 'package:intl/intl.dart';
+
 import 'plan.dart';
 import '../../constants/subscription_constants.dart';
+import '../../utils/locale_format_utils.dart';
 
 /// Premium月額プランの実装クラス
 ///
@@ -61,8 +64,18 @@ class PremiumMonthlyPlan extends Plan {
   String getYearlyUpgradeMessage() {
     final savings = calculateYearlySavings();
     final savingsPercentage = SubscriptionConstants.yearlyDiscountPercentage;
+    final locale = Intl.getCurrentLocale().isEmpty
+        ? 'ja'
+        : Intl.getCurrentLocale();
+    final savingsText = LocaleFormatUtils.formatCurrency(
+      savings,
+      locale: locale,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
+      decimalDigits: 0,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
+    );
 
-    return '年額プランに切り替えると、年間¥${savings.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}（$savingsPercentage%OFF）お得になります。';
+    return '年額プランに切り替えると、年間$savingsText（$savingsPercentage%OFF）お得になります。';
   }
 
   /// 利用状況に基づくメッセージ

@@ -76,3 +76,5 @@ web/build/
 
 # --- テストカバレッジ ---
 coverage/
+# --- l10n generated files ---
+lib/l10n/generated/
