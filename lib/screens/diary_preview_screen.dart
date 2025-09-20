@@ -450,7 +450,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
             context: context,
-            planName: plan.displayName,
+            planName: _getLocalizedPlanName(plan.id),
             limit: limit,
             nextResetDate: nextResetDate,
             onUpgrade: () {
@@ -490,6 +490,26 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   }
 
   /// Phase 1.7.2.4: プラン変更誘導機能
+  /// プランIDに基づいて多言語化されたプラン名を取得
+  String _getLocalizedPlanName(String planId) {
+    switch (planId) {
+      case 'basic':
+        return context
+            .l10n
+            .onboardingPlanBasicSubtitle; // "Free plan" / "無料プラン"
+      case 'premium_monthly':
+        return context
+            .l10n
+            .settingsPremiumMonthlyTitle; // "Premium (monthly)" / "プレミアム（月額）"
+      case 'premium_yearly':
+        return context
+            .l10n
+            .settingsPremiumYearlyTitle; // "Premium (yearly)" / "プレミアム（年額）"
+      default:
+        return planId; // フォールバック
+    }
+  }
+
   void _navigateToUpgrade() async {
     // アップグレードダイアログを表示
     await UpgradeDialogUtils.showUpgradeDialog(context);

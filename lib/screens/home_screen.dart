@@ -403,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen>
       final planResult = await subscriptionService.getCurrentPlanClass();
       if (planResult.isSuccess) {
         final plan = planResult.value;
-        allowedDays = plan.displayName.contains('Premium') ? 365 : 1;
+        allowedDays = plan.isPremium ? 365 : 1;
       }
     } catch (e) {
       _logger.error(
