@@ -269,20 +269,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      context.l10n.settingsLanguageSectionDescription,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      currentChoice.subtitle,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -360,50 +346,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showLanguageDialog() async {
-    Locale? tempSelection = _selectedLocale;
-
-    final result = await showDialog<Locale?>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(context.l10n.settingsLanguageDialogTitle),
-          content: StatefulBuilder(
-            builder: (context, setStateDialog) {
-              final options = _buildLocaleChoices(context);
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: options
-                      .map(
-                        (choice) => RadioListTile<Locale?>(
-                          title: Text(choice.title),
-                          subtitle: Text(choice.subtitle),
-                          value: choice.locale,
-                          groupValue: tempSelection,
-                          onChanged: (value) {
-                            setStateDialog(() {
-                              tempSelection = value;
-                            });
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.commonCancel),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(tempSelection),
-              child: Text(context.l10n.commonConfirm),
-            ),
-          ],
+    final options = _buildLocaleChoices(context);
+    final result = await DialogUtils.showRadioSelectionDialog<Locale?>(
+      context,
+      context.l10n.settingsLanguageDialogTitle,
+      options.map((choice) => choice.locale).toList(),
+      _selectedLocale,
+      (locale) {
+        final choice = options.firstWhere(
+          (c) => c.locale == locale,
+          orElse: () => options.first,
         );
+        return choice.title;
       },
     );
 
@@ -445,20 +399,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   List<_LocaleChoice> _buildLocaleChoices(BuildContext context) {
     return [
-      _LocaleChoice(
-        locale: null,
-        title: context.l10n.settingsLanguageSystem,
-        subtitle: context.l10n.settingsLanguageSystemSubtitle,
-      ),
+      _LocaleChoice(locale: null, title: context.l10n.settingsLanguageSystem),
       _LocaleChoice(
         locale: const Locale('ja', 'JP'),
         title: context.l10n.settingsLanguageJapanese,
-        subtitle: context.l10n.settingsLanguageJapaneseSubtitle,
       ),
       _LocaleChoice(
         locale: const Locale('en', 'US'),
         title: context.l10n.settingsLanguageEnglish,
-        subtitle: context.l10n.settingsLanguageEnglishSubtitle,
       ),
     ];
   }
@@ -1727,11 +1675,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 class _LocaleChoice {
   final Locale? locale;
   final String title;
-  final String subtitle;
 
-  const _LocaleChoice({
-    required this.locale,
-    required this.title,
-    required this.subtitle,
-  });
+  const _LocaleChoice({required this.locale, required this.title});
 }

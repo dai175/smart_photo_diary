@@ -304,7 +304,7 @@
   "@settingsLanguageSectionTitle": {
     "description": "言語セクションのタイトル"
   },
-  "settingsLanguageSectionDescription": "アプリ全体の表示言語を切り替えます",
+  "settingsLanguageSectionDescription": "日本語",
   "@settingsLanguageSectionDescription": {
     "description": "言語セクションの説明テキスト"
   },
@@ -316,25 +316,13 @@
   "@settingsLanguageSystem": {
     "description": "システム言語に従うオプション"
   },
-  "settingsLanguageSystemSubtitle": "端末の言語に合わせます",
-  "@settingsLanguageSystemSubtitle": {
-    "description": "システム言語オプションの補足"
-  },
   "settingsLanguageJapanese": "日本語",
   "@settingsLanguageJapanese": {
     "description": "日本語オプション"
   },
-  "settingsLanguageJapaneseSubtitle": "アプリを日本語で表示します",
-  "@settingsLanguageJapaneseSubtitle": {
-    "description": "日本語オプションの補足"
-  },
   "settingsLanguageEnglish": "English",
   "@settingsLanguageEnglish": {
     "description": "英語オプション"
-  },
-  "settingsLanguageEnglishSubtitle": "Display the app in English",
-  "@settingsLanguageEnglishSubtitle": {
-    "description": "英語オプションの補足"
   },
   "settingsLanguageUpdateError": "言語設定の保存に失敗しました。時間を置いて再度お試しください。",
   "@settingsLanguageUpdateError": {

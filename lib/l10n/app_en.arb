@@ -304,7 +304,7 @@
   "@settingsLanguageSectionTitle": {
     "description": "Title for the language section"
   },
-  "settingsLanguageSectionDescription": "Switch the display language of the app",
+  "settingsLanguageSectionDescription": "English",
   "@settingsLanguageSectionDescription": {
     "description": "Description for the language section"
   },
@@ -316,25 +316,13 @@
   "@settingsLanguageSystem": {
     "description": "Option to follow the device language"
   },
-  "settingsLanguageSystemSubtitle": "Match the language set on your device",
-  "@settingsLanguageSystemSubtitle": {
-    "description": "Subtitle for the system language option"
-  },
   "settingsLanguageJapanese": "日本語",
   "@settingsLanguageJapanese": {
     "description": "Japanese language option"
   },
-  "settingsLanguageJapaneseSubtitle": "Display the app in Japanese",
-  "@settingsLanguageJapaneseSubtitle": {
-    "description": "Subtitle for the Japanese language option"
-  },
   "settingsLanguageEnglish": "English",
   "@settingsLanguageEnglish": {
     "description": "English language option"
-  },
-  "settingsLanguageEnglishSubtitle": "Display the app in English",
-  "@settingsLanguageEnglishSubtitle": {
-    "description": "Subtitle for the English language option"
   },
   "settingsLanguageUpdateError": "Couldn't save your language preference. Please try again later.",
   "@settingsLanguageUpdateError": {
