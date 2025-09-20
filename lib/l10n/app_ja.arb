@@ -1286,5 +1286,25 @@
   "subscriptionUpgradeRecommendationGeneral": "より多くAI生成を利用される場合はPremiumプランがおすすめです",
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "一般的なアップグレード推奨メッセージ"
+  },
+  "timelineToday": "今日",
+  "@timelineToday": {
+    "description": "タイムライン見出し：今日の写真"
+  },
+  "timelineYesterday": "昨日",
+  "@timelineYesterday": {
+    "description": "タイムライン見出し：昨日の写真"
+  },
+  "timelineMonthYear": "{year}年{month}月",
+  "@timelineMonthYear": {
+    "description": "タイムライン見出し：月単位のグループ",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
   }
 }

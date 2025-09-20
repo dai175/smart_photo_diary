@@ -1286,5 +1286,25 @@
   "subscriptionUpgradeRecommendationGeneral": "For more AI generations, we recommend the Premium plan.",
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "General upgrade recommendation message"
+  },
+  "timelineToday": "Today",
+  "@timelineToday": {
+    "description": "Timeline section header for today's photos"
+  },
+  "timelineYesterday": "Yesterday",
+  "@timelineYesterday": {
+    "description": "Timeline section header for yesterday's photos"
+  },
+  "timelineMonthYear": "{year}-{month}",
+  "@timelineMonthYear": {
+    "description": "Timeline section header for monthly groups",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
   }
 }

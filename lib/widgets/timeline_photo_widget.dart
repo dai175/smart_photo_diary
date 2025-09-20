@@ -419,6 +419,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   void _updatePhotoGroups() {
+    // initState時は基本的なグルーピングのみ実行（多言語化なし）
     final groups = _groupingService.groupPhotosForTimeline(
       widget.controller.photoAssets,
     );
@@ -460,6 +461,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         _ensureProgressiveLoadingIfPinned();
       });
     }
+  }
+
+  /// 多言語化対応のフォトグルーピング（buildメソッドで使用）
+  List<TimelinePhotoGroup> _getLocalizedPhotoGroups(BuildContext context) {
+    return _groupingService.groupPhotosForTimelineLocalized(
+      widget.controller.photoAssets,
+      todayLabel: context.l10n.timelineToday,
+      yesterdayLabel: context.l10n.timelineYesterday,
+      monthYearFormatter: (year, month) =>
+          context.l10n.timelineMonthYear(year, month),
+    );
   }
 
   /// 現在のスクロール位置をもとにサムネイルを先読み
@@ -595,12 +607,15 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.selectedPhotos,
     );
 
+    // 多言語化されたグループを取得
+    final localizedGroups = _getLocalizedPhotoGroups(context);
+
     // flutter_sticky_headerを使ったシンプルな実装
     return CustomScrollView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        ..._photoGroups.map((group) {
+        ...localizedGroups.map((group) {
           return SliverStickyHeader(
             header: _buildStickyHeader(group),
             sliver: SliverList(
