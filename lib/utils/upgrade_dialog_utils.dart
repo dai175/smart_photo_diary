@@ -27,6 +27,18 @@ class UpgradeDialogUtils {
   // LoggingServiceのゲッター
   static LoggingService get _logger => serviceLocator.get<LoggingService>();
 
+  /// プランの多言語化対応名称を取得
+  static String _getLocalizedPlanName(BuildContext context, Plan plan) {
+    if (plan.isMonthly) {
+      return context.l10n.settingsPremiumMonthlyTitle;
+    } else if (plan.isYearly) {
+      return context.l10n.settingsPremiumYearlyTitle;
+    } else {
+      // BasicPlanなど、予期しないケース
+      return plan.displayName;
+    }
+  }
+
   /// プレミアムプラン選択ダイアログを表示
   static Future<void> showUpgradeDialog(BuildContext context) async {
     try {
@@ -147,7 +159,7 @@ class UpgradeDialogUtils {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        plan.displayName,
+                        _getLocalizedPlanName(dialogContext, plan),
                         style: AppTypography.titleMedium.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
