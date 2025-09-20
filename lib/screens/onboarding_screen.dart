@@ -10,6 +10,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/subscription_constants.dart';
+import '../localization/localization_extensions.dart';
 import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -430,8 +431,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       // Premiumプラン
       _buildPlanCard(
         title: 'Premium',
-        subtitle:
-            '月額${SubscriptionConstants.formatPrice(SubscriptionConstants.premiumMonthlyPrice)}',
+        subtitle: context.l10n.pricingPerMonthShort(
+          context.l10n.formatCurrency(
+            SubscriptionConstants.premiumMonthlyPrice,
+          ),
+        ),
         icon: Icons.star_rounded,
         color: AppColors.primary,
         features: [

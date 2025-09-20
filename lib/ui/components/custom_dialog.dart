@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
@@ -352,9 +351,7 @@ class PresetDialogs {
     VoidCallback? onDismiss,
   }) {
     final l10n = context.l10n;
-    final resetDateText = DateFormat.MMMMd(
-      l10n.localeName,
-    ).format(nextResetDate);
+    final resetDateText = l10n.formatMonthDayLong(nextResetDate);
 
     final actions = <CustomDialogAction>[
       CustomDialogAction(text: l10n.commonLater, onPressed: onDismiss),
@@ -446,9 +443,7 @@ class PresetDialogs {
     final l10n = context.l10n;
     final usagePercentage = limit == 0 ? 0.0 : used / limit;
     final isNearLimit = usagePercentage >= 0.8;
-    final resetDateText = DateFormat.MMMMd(
-      l10n.localeName,
-    ).format(nextResetDate);
+    final resetDateText = l10n.formatMonthDayLong(nextResetDate);
 
     return CustomDialog(
       icon: Icons.analytics_rounded,

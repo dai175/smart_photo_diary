@@ -1,4 +1,7 @@
+import 'package:intl/intl.dart';
+
 import '../services/interfaces/subscription_service_interface.dart';
+import '../utils/locale_format_utils.dart';
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
 
@@ -69,7 +72,16 @@ class PurchaseProductV2 {
     if (plan.id == 'premium_yearly') {
       // 年額プランの場合、月額換算も表示
       final monthlyEquivalent = (priceAmount / 12).round();
-      return '$price（月額換算 ¥$monthlyEquivalent）';
+      final locale = Intl.getCurrentLocale().isEmpty
+          ? 'ja'
+          : Intl.getCurrentLocale();
+      final monthlyEquivalentText = LocaleFormatUtils.formatCurrency(
+        monthlyEquivalent,
+        locale: locale,
+        currencyCode: currencyCode,
+        decimalDigits: 0,
+      );
+      return '$price（月額換算 $monthlyEquivalentText）';
     }
     return price;
   }

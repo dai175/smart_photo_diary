@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -133,7 +132,7 @@ class RecentDiariesWidget extends StatelessWidget {
         borderRadius: AppSpacing.chipRadius,
       ),
       child: Text(
-        DateFormat('MM/dd').format(date),
+        context.l10n.formatMonthDay(date),
         style: AppTypography.labelSmall.copyWith(
           color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),

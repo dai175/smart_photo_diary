@@ -1,3 +1,8 @@
+import 'package:intl/intl.dart';
+
+import '../../constants/subscription_constants.dart';
+import '../../utils/locale_format_utils.dart';
+
 /// サブスクリプションプランの抽象基底クラス
 ///
 /// Smart Photo Diaryで利用可能なサブスクリプションプランの
@@ -82,10 +87,17 @@ abstract class Plan {
 
   /// 価格を表示用文字列に変換
   String get formattedPrice {
-    if (price == 0) {
-      return '無料';
-    }
-    return '¥${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
+    final currentLocale = Intl.getCurrentLocale().isEmpty
+        ? 'ja'
+        : Intl.getCurrentLocale();
+
+    return LocaleFormatUtils.formatCurrency(
+      price,
+      locale: currentLocale,
+      currencyCode: SubscriptionConstants.currencyCode,
+      decimalDigits: 0,
+      fallbackSymbol: SubscriptionConstants.currencySymbol,
+    );
   }
 
   /// プランの期間タイプを判定

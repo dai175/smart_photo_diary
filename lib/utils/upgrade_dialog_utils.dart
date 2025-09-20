@@ -13,6 +13,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/custom_dialog.dart';
 import '../ui/animations/micro_interactions.dart';
+import '../localization/localization_extensions.dart';
 
 /// アップグレードダイアログのユーティリティクラス
 ///
@@ -163,7 +164,13 @@ class UpgradeDialogUtils {
                   ),
                 ),
                 Text(
-                  plan.formattedPrice + (plan.isMonthly ? '/月' : '/年'),
+                  plan.isMonthly
+                      ? dialogContext.l10n.pricingPerMonthShort(
+                          dialogContext.l10n.formatCurrency(plan.price),
+                        )
+                      : dialogContext.l10n.pricingPerYearShort(
+                          dialogContext.l10n.formatCurrency(plan.price),
+                        ),
                   style: AppTypography.titleMedium.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,

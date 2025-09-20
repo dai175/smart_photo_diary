@@ -20,6 +20,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../constants/subscription_constants.dart';
 import '../localization/localization_extensions.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -1471,7 +1472,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Premium Monthly詳細
           _buildSubscriptionPlanDetail(
             'プレミアム（月額）',
-            '¥300/月',
+            context.l10n.pricingPerMonthShort(
+              context.l10n.formatCurrency(
+                SubscriptionConstants.premiumMonthlyPrice,
+              ),
+            ),
             '月100回のAI日記生成、20個のライティングプロンプト',
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -1479,7 +1484,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Premium Yearly詳細
           _buildSubscriptionPlanDetail(
             'プレミアム（年額）',
-            '¥2,800/年',
+            context.l10n.pricingPerYearShort(
+              context.l10n.formatCurrency(
+                SubscriptionConstants.premiumYearlyPrice,
+              ),
+            ),
             '月100回のAI日記生成、20個のライティングプロンプト',
           ),
 

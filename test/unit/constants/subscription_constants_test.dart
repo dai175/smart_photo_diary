@@ -159,11 +159,15 @@ void main() {
 
     group('ヘルパーメソッドテスト', () {
       test('価格フォーマットが正しく動作する', () {
-        expect(SubscriptionConstants.formatPrice(0), equals('無料'));
+        expect(SubscriptionConstants.formatPrice(0), equals('¥0'));
         expect(SubscriptionConstants.formatPrice(300), equals('¥300'));
         expect(SubscriptionConstants.formatPrice(2800), equals('¥2,800'));
         expect(SubscriptionConstants.formatPrice(10000), equals('¥10,000'));
         expect(SubscriptionConstants.formatPrice(100000), equals('¥100,000'));
+        expect(
+          SubscriptionConstants.formatPrice(2800, locale: 'en'),
+          equals('¥2,800'),
+        );
       });
 
       test('プランIDから価格を取得できる', () {

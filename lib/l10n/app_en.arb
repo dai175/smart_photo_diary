@@ -125,6 +125,37 @@
   "@commonOpenSettings": {
     "description": "Button label to open the system settings app"
   },
+  "pricingFree": "Free",
+  "@pricingFree": {
+    "description": "Label used when a plan is free of charge"
+  },
+  "pricingPerMonthShort": "{price}/month",
+  "@pricingPerMonthShort": {
+    "description": "Short monthly price label",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingPerYearShort": "{price}/year",
+  "@pricingPerYearShort": {
+    "description": "Short yearly price label",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingMonthlyEquivalent": "Monthly equivalent {price}",
+  "@pricingMonthlyEquivalent": {
+    "description": "Display for yearly plans showing the monthly equivalent",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "commonLater": "Later",
   "@commonLater": {
     "description": "Defer action button label"

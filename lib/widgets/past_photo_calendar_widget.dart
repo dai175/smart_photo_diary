@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:intl/intl.dart';
 import '../models/plans/plan.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
@@ -495,9 +494,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                   Expanded(
                     child: Text(
                       l10n.pastPhotoSelectedDateLabel(
-                        DateFormat.yMMMMd(
-                          l10n.localeName,
-                        ).format(_selectedDay!),
+                        l10n.formatFullDate(_selectedDay!),
                       ),
                       style: AppTypography.labelLarge.copyWith(
                         color: Theme.of(context).colorScheme.primary,

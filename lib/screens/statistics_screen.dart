@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/logging_service.dart';
@@ -18,6 +17,7 @@ import '../constants/app_constants.dart';
 import '../ui/component_constants.dart';
 import '../models/diary_change.dart';
 import 'dart:async';
+import '../localization/localization_extensions.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -209,7 +209,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         return CustomDialog(
           icon: AppIcons.calendarToday,
           iconColor: Theme.of(context).colorScheme.primary,
-          title: DateFormat('yyyy年MM月dd日').format(selectedDay),
+          title: context.l10n.formatFullDate(selectedDay),
           message: '${diaries.length}件の日記があります',
           content: ConstrainedBox(
             constraints: const BoxConstraints(

@@ -1,3 +1,5 @@
+import '../utils/locale_format_utils.dart';
+
 /// サブスクリプション関連の定数定義
 ///
 /// 価格、制限値、商品IDなどのサブスクリプション関連の
@@ -174,12 +176,15 @@ class SubscriptionConstants {
     return ((yearlyTotal - premiumYearlyPrice) / yearlyTotal) * 100;
   }
 
-  /// 価格を表示用文字列に変換
-  static String formatPrice(int price) {
-    if (price == 0) {
-      return '無料';
-    }
-    return '$currencySymbol${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
+  /// 価格を表示用文字列に変換（ロケール対応）
+  static String formatPrice(int price, {String locale = 'ja'}) {
+    return LocaleFormatUtils.formatCurrency(
+      price,
+      locale: locale,
+      currencyCode: currencyCode,
+      decimalDigits: 0,
+      fallbackSymbol: currencySymbol,
+    );
   }
 
   /// プランIDから価格を取得

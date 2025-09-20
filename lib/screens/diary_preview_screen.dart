@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../services/ai/ai_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
@@ -707,7 +706,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                               ),
                             ),
                             Text(
-                              DateFormat('yyyy年MM月dd日').format(_photoDateTime),
+                              context.l10n.formatFullDate(_photoDateTime),
                               style: AppTypography.withColor(
                                 AppTypography.titleLarge,
                                 Theme.of(

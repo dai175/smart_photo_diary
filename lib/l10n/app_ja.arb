@@ -125,6 +125,37 @@
   "@commonOpenSettings": {
     "description": "設定アプリを開くボタン"
   },
+  "pricingFree": "無料",
+  "@pricingFree": {
+    "description": "価格表示：無料の場合に使用するラベル"
+  },
+  "pricingPerMonthShort": "{price}/月",
+  "@pricingPerMonthShort": {
+    "description": "短い月額価格表示",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingPerYearShort": "{price}/年",
+  "@pricingPerYearShort": {
+    "description": "短い年額価格表示",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "pricingMonthlyEquivalent": "月額換算 {price}",
+  "@pricingMonthlyEquivalent": {
+    "description": "年額料金の月額換算表示",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "commonLater": "後で",
   "@commonLater": {
     "description": "後で行うボタン"

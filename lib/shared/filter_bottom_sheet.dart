@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/diary_filter.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/logging_service.dart';
 import '../constants/app_constants.dart';
 import '../ui/components/animated_button.dart';
+import '../localization/localization_extensions.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
@@ -143,8 +143,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   String _formatDateRange(DateTimeRange dateRange) {
-    final formatter = DateFormat('M/d');
-    return '${formatter.format(dateRange.start)} - ${formatter.format(dateRange.end)}';
+    final l10n = context.l10n;
+    final start = l10n.formatMonthDay(dateRange.start);
+    final end = l10n.formatMonthDay(dateRange.end);
+    return '$start - $end';
   }
 
   @override

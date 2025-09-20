@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -71,9 +70,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       automaticallyImplyLeading: false,
-      title: Text(
-        DateFormat.yMMMMd(context.l10n.localeName).format(DateTime.now()),
-      ),
+      title: Text(context.l10n.formatFullDate(DateTime.now())),
       centerTitle: false,
       // ダークテーマ時は primary が淡色のため、タイトル/アイコンは onPrimary を明示
       backgroundColor: colorScheme.primary,

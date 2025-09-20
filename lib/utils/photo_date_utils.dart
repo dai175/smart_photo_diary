@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 /// 写真の日付管理に関するユーティリティクラス
@@ -118,13 +119,15 @@ class PhotoDateUtils {
   }
 
   /// 日付を読みやすい形式でフォーマット
-  static String formatDateForDisplay(DateTime date) {
-    return '${date.year}年${date.month}月${date.day}日';
+  static String formatDateForDisplay(DateTime date, {String? locale}) {
+    final resolvedLocale = locale ?? Intl.getCurrentLocale();
+    return DateFormat.yMMMMd(resolvedLocale).format(date);
   }
 
   /// 月を読みやすい形式でフォーマット
-  static String formatMonthForDisplay(DateTime month) {
-    return '${month.year}年${month.month}月';
+  static String formatMonthForDisplay(DateTime month, {String? locale}) {
+    final resolvedLocale = locale ?? Intl.getCurrentLocale();
+    return DateFormat.yMMMM(resolvedLocale).format(month);
   }
 
   /// 相対的な日付表現を取得

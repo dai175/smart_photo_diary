@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:typed_data';
 import '../models/diary_entry.dart';
@@ -773,7 +772,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           ),
                         ),
                         Text(
-                          DateFormat('yyyy年MM月dd日').format(_diaryEntry!.date),
+                          context.l10n.formatFullDate(_diaryEntry!.date),
                           style: AppTypography.withColor(
                             AppTypography.titleLarge,
                             Theme.of(context).colorScheme.onPrimaryContainer,
@@ -1031,17 +1030,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   const SizedBox(height: AppSpacing.md),
                   _buildMetadataRow(
                     '作成日時',
-                    DateFormat(
-                      'yyyy年MM月dd日 HH:mm',
-                    ).format(_diaryEntry!.createdAt),
+                    context.l10n.formatFullDateTime(_diaryEntry!.createdAt),
                     Icons.access_time_rounded,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _buildMetadataRow(
                     '更新日時',
-                    DateFormat(
-                      'yyyy年MM月dd日 HH:mm',
-                    ).format(_diaryEntry!.updatedAt),
+                    context.l10n.formatFullDateTime(_diaryEntry!.updatedAt),
                     Icons.update_rounded,
                   ),
                   if ((_diaryEntry!.tags?.isNotEmpty ?? false)) ...[

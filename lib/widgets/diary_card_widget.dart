@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
@@ -78,7 +77,7 @@ class DiaryCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.xxs),
                     Text(
-                      DateFormat.Md(l10n.localeName).format(entry.date),
+                      l10n.formatMonthDay(entry.date),
                       style: AppTypography.withColor(
                         AppTypography.labelSmall,
                         Theme.of(context).colorScheme.onPrimaryContainer,
