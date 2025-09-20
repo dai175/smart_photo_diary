@@ -56,10 +56,10 @@
 - [x] 翻訳リクエスト用テンプレート（翻訳未完了キー一覧など）を整備する（`docs/translation_request_template.md`）
 
 ## 画面別翻訳差し替え
-- [ ] `OnboardingScreen` のテキストをローカライズキーへ置換
-- [ ] `HomeScreen` / `HomeContentWidget` のヘッダー・ダイアログ文言を置換
-- [ ] `Diary*` 系画面（`DiaryScreen`, `DiaryDetailScreen`, `DiaryPreviewScreen`）を置換
+- [x] `OnboardingScreen` のテキストをローカライズキーへ置換
+- [x] `HomeScreen` / `HomeContentWidget` のヘッダー・ダイアログ文言を置換
+- [x] `Diary*` 系画面（`DiaryScreen`, `DiaryDetailScreen`, `DiaryPreviewScreen`）を置換
 - [x] `SettingsScreen` と関連ダイアログを置換
-- [ ] `StatisticsScreen` と分析メトリクスのラベルを置換
+- [x] `StatisticsScreen` と分析メトリクスのラベルを置換
 - [x] 共通ウィジェット (`CustomDialog`, `PresetDialogs`, `TimelineFABIntegration` 等) を置換
 - [ ] テスト用モックやサンプルデータの固定文言を更新
