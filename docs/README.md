@@ -58,18 +58,6 @@ Quality assurance checklist for major architectural changes and refactoring.
 **Use when**: Performing large-scale code refactoring or architectural updates
 **Key sections**: Code quality checks, testing requirements, migration procedures
 
-### Legacy Documentation
-
-#### 📚 Historical Implementation Records
-- [home_tab_unification_plan.md](home_tab_unification_plan.md) - Home screen refactoring plan
-- [home_tab_unification_checklist.md](home_tab_unification_checklist.md) - Implementation checklist
-- [CHANGELOG_HOME_TAB_UNIFICATION.md](CHANGELOG_HOME_TAB_UNIFICATION.md) - Change log
-- [phase1_analysis_results.md](phase1_analysis_results.md) - Analysis phase results
-- [phase2_implementation_results.md](phase2_implementation_results.md) - Implementation results
-- [instagram-share-implementation-plan.md](instagram-share-implementation-plan.md) - Social sharing implementation
-
-**Note**: These files document completed features and serve as historical reference for understanding architectural decisions.
-
 ## Main Documentation
 
 The primary development documentation is located in the project root:
@@ -111,9 +99,6 @@ The primary development documentation is located in the project root:
 - **ci_cd_guide.md**: Reflects current workflow configurations
 - **sandbox_testing_guide.md**: Stable testing procedures, rarely changes
 - **translation_request_template.md**: Stable template, rarely changes
-
-### Historical Reference
-- **Legacy documentation**: Kept for architectural decision context, not actively maintained
 
 ## Contributing
 
