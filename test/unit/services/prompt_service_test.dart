@@ -3,6 +3,7 @@
 // PromptServiceの全機能をモックを使って包括的にテスト
 // JSON読み込み、キャッシュ、フィルタリング、検索機能を検証
 
+import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/services/prompt_service.dart';
@@ -173,6 +174,17 @@ void main() {
         expect(categories.length, greaterThan(0)); // カテゴリが存在する
       });
 
+      test('プラン取得もローカライズされる', () {
+        const english = Locale('en');
+        final prompts = promptService.getPromptsForPlan(
+          isPremium: false,
+          locale: english,
+        );
+
+        expect(prompts, isNotEmpty);
+        expect(prompts.first.text, isNot(contains('感情')));
+      });
+
       test('カテゴリ別プロンプトを取得できる（Basic）', () {
         final emotionPrompts = promptService.getPromptsByCategory(
           PromptCategory.emotion,
@@ -215,6 +227,22 @@ void main() {
         expect(retrievedPrompt, isNotNull);
         expect(retrievedPrompt!.id, firstPrompt.id);
         expect(retrievedPrompt.text, firstPrompt.text);
+      });
+
+      test('ロケール指定で英語テキストを取得できる', () {
+        const english = Locale('en');
+        final prompt = promptService.getPromptById(
+          'basic_emotion_001',
+          locale: english,
+        );
+
+        expect(prompt, isNotNull);
+        expect(
+          prompt!.text,
+          'What was the very first feeling that surfaced in this moment?',
+        );
+        expect(prompt.tags, contains('emotion'));
+        expect(prompt.tags, contains('first impression'));
       });
 
       test('存在しないIDの場合nullが返される', () {
@@ -393,6 +421,27 @@ void main() {
           ),
           true,
         );
+      });
+
+      test('英語キーワードでも検索できる', () {
+        const english = Locale('en');
+        final results = promptService.searchPrompts(
+          'gratitude',
+          isPremium: true,
+          locale: english,
+        );
+
+        expect(results, isNotEmpty);
+        expect(
+          results.every(
+            (p) =>
+                p.text.toLowerCase().contains('gratitude') ||
+                p.tags.any((tag) => tag.toLowerCase().contains('gratitude')),
+          ),
+          true,
+        );
+
+        expect(results.first.text, isNot(contains('感謝')));
       });
 
       test('空のクエリで全プロンプトが返される', () {

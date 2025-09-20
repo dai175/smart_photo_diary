@@ -436,6 +436,10 @@
   "@promptEmptyDescription": {
     "description": "Description shown when prompt loading fails"
   },
+  "diaryPreviewCurrentPromptTitle": "Current Prompt",
+  "@diaryPreviewCurrentPromptTitle": {
+    "description": "Header shown in diary preview for the prompt currently in use"
+  },
   "diaryCardUntitled": "Untitled",
   "@diaryCardUntitled": {
     "description": "Fallback title when a diary entry has no title"

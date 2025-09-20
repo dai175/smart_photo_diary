@@ -57,9 +57,16 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         _isPremium = accessResult.value;
       }
 
+      if (!mounted) {
+        return;
+      }
+
+      final locale = Localizations.localeOf(context);
+
       // 利用可能なプロンプトを読み込み
       _availablePrompts = _promptService.getPromptsForPlan(
         isPremium: _isPremium,
+        locale: locale,
       );
       _logger.info(
         'プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium',
@@ -126,6 +133,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             // ランダム選択の場合は実際のプロンプトを取得して渡す
             final randomPrompt = _promptService.getRandomPrompt(
               isPremium: _isPremium,
+              locale: Localizations.localeOf(context),
             );
             widget.onPromptSelected(randomPrompt);
           } else if (_selectedPrompt != null) {
@@ -386,7 +394,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                     borderRadius: BorderRadius.circular(AppSpacing.xs),
                   ),
                   child: Text(
-                    PromptCategoryUtils.getCategoryDisplayName(prompt.category),
+                    PromptCategoryUtils.getCategoryDisplayName(
+                      prompt.category,
+                      locale: Localizations.localeOf(context),
+                    ),
                     style: AppTypography.labelSmall.copyWith(
                       color: isSelected
                           ? Colors.white

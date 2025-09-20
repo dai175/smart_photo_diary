@@ -3,6 +3,8 @@
 // PromptServiceのモック実装とテストユーティリティ
 // 他のサービスやUIテスト時の依存関係モックに使用
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
@@ -101,28 +103,34 @@ class MockPromptService implements IPromptService {
   }
 
   @override
-  List<WritingPrompt> getAllPrompts() {
+  List<WritingPrompt> getAllPrompts({Locale? locale}) {
     _ensureInitialized();
-    return List.unmodifiable(_mockPrompts.where((p) => p.isActive));
+    final prompts = _mockPrompts.where((p) => p.isActive).toList();
+    return _localizePrompts(prompts, locale);
   }
 
   @override
-  List<WritingPrompt> getPromptsForPlan({required bool isPremium}) {
+  List<WritingPrompt> getPromptsForPlan({
+    required bool isPremium,
+    Locale? locale,
+  }) {
     _ensureInitialized();
 
-    return _mockPrompts
+    final prompts = _mockPrompts
         .where((p) => p.isActive && p.isAvailableForPlan(isPremium: isPremium))
         .toList();
+    return _localizePrompts(prompts, locale);
   }
 
   @override
   List<WritingPrompt> getPromptsByCategory(
     PromptCategory category, {
     required bool isPremium,
+    Locale? locale,
   }) {
     _ensureInitialized();
 
-    return _mockPrompts
+    final prompts = _mockPrompts
         .where(
           (p) =>
               p.isActive &&
@@ -130,6 +138,7 @@ class MockPromptService implements IPromptService {
               p.isAvailableForPlan(isPremium: isPremium),
         )
         .toList();
+    return _localizePrompts(prompts, locale);
   }
 
   @override
@@ -137,12 +146,13 @@ class MockPromptService implements IPromptService {
     required bool isPremium,
     PromptCategory? category,
     List<String>? excludeIds,
+    Locale? locale,
   }) {
     _ensureInitialized();
 
     List<WritingPrompt> candidates = category != null
-        ? getPromptsByCategory(category, isPremium: isPremium)
-        : getPromptsForPlan(isPremium: isPremium);
+        ? getPromptsByCategory(category, isPremium: isPremium, locale: null)
+        : getPromptsForPlan(isPremium: isPremium, locale: null);
 
     // 除外IDを適用
     if (excludeIds != null && excludeIds.isNotEmpty) {
@@ -154,33 +164,41 @@ class MockPromptService implements IPromptService {
     if (candidates.isEmpty) return null;
 
     // テスト用シンプルな選択：最初の要素を返す
-    return candidates.first;
+    return _localizePrompt(candidates.first, locale);
   }
 
   @override
-  List<WritingPrompt> searchPrompts(String query, {required bool isPremium}) {
+  List<WritingPrompt> searchPrompts(
+    String query, {
+    required bool isPremium,
+    Locale? locale,
+  }) {
     _ensureInitialized();
 
     if (query.trim().isEmpty) {
-      return getPromptsForPlan(isPremium: isPremium);
+      return getPromptsForPlan(isPremium: isPremium, locale: locale);
     }
 
     final lowerQuery = query.toLowerCase();
-    final availablePrompts = getPromptsForPlan(isPremium: isPremium);
+    final availablePrompts = getPromptsForPlan(
+      isPremium: isPremium,
+      locale: null,
+    );
 
-    return availablePrompts.where((prompt) {
-      return prompt.text.toLowerCase().contains(lowerQuery) ||
-          prompt.tags.any((tag) => tag.toLowerCase().contains(lowerQuery)) ||
-          (prompt.description?.toLowerCase().contains(lowerQuery) ?? false);
-    }).toList();
+    final results = availablePrompts
+        .where((prompt) => prompt.matchesKeyword(lowerQuery))
+        .toList();
+
+    return _localizePrompts(results, locale);
   }
 
   @override
-  WritingPrompt? getPromptById(String id) {
+  WritingPrompt? getPromptById(String id, {Locale? locale}) {
     _ensureInitialized();
 
     try {
-      return _mockPrompts.firstWhere((p) => p.id == id);
+      final prompt = _mockPrompts.firstWhere((p) => p.id == id);
+      return _localizePrompt(prompt, locale);
     } catch (e) {
       return null;
     }
@@ -219,6 +237,7 @@ class MockPromptService implements IPromptService {
     required int count,
     required bool isPremium,
     PromptCategory? category,
+    Locale? locale,
   }) {
     _ensureInitialized();
 
@@ -227,8 +246,8 @@ class MockPromptService implements IPromptService {
     }
 
     List<WritingPrompt> candidates = category != null
-        ? getPromptsByCategory(category, isPremium: isPremium)
-        : getPromptsForPlan(isPremium: isPremium);
+        ? getPromptsByCategory(category, isPremium: isPremium, locale: null)
+        : getPromptsForPlan(isPremium: isPremium, locale: null);
 
     if (candidates.isEmpty) {
       return [];
@@ -236,7 +255,26 @@ class MockPromptService implements IPromptService {
 
     // テスト用シンプルな実装：要求数か利用可能数の小さい方を返す
     final actualCount = count > candidates.length ? candidates.length : count;
-    return candidates.take(actualCount).toList();
+    return _localizePrompts(candidates.take(actualCount).toList(), locale);
+  }
+
+  List<WritingPrompt> _localizePrompts(
+    List<WritingPrompt> prompts,
+    Locale? locale,
+  ) {
+    if (locale == null) {
+      return List.unmodifiable(prompts);
+    }
+    return List.unmodifiable(
+      prompts.map((prompt) => prompt.localizedCopy(locale)).toList(),
+    );
+  }
+
+  WritingPrompt _localizePrompt(WritingPrompt prompt, Locale? locale) {
+    if (locale == null) {
+      return prompt;
+    }
+    return prompt.localizedCopy(locale);
   }
 
   @override

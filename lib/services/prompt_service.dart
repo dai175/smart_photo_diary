@@ -6,6 +6,7 @@
 
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -253,21 +254,35 @@ class PromptService implements IPromptService {
   }
 
   @override
-  List<WritingPrompt> getAllPrompts() {
+  List<WritingPrompt> getAllPrompts({Locale? locale}) {
     _ensureInitialized();
-    return List.unmodifiable(_allPrompts.where((p) => p.isActive));
+    final activePrompts = _allPrompts.where((p) => p.isActive).toList();
+    return _localizePrompts(activePrompts, locale);
   }
 
   @override
-  List<WritingPrompt> getPromptsForPlan({required bool isPremium}) {
+  List<WritingPrompt> getPromptsForPlan({
+    required bool isPremium,
+    Locale? locale,
+  }) {
     _ensureInitialized();
-    return List.unmodifiable(_planFilterCache[isPremium] ?? []);
+
+    if (!_planFilterCache.containsKey(isPremium)) {
+      _planFilterCache[isPremium] = PromptCategoryUtils.filterPromptsByPlan(
+        _allPrompts,
+        isPremium: isPremium,
+      );
+    }
+
+    final cached = _planFilterCache[isPremium] ?? [];
+    return _localizePrompts(cached, locale);
   }
 
   @override
   List<WritingPrompt> getPromptsByCategory(
     PromptCategory category, {
     required bool isPremium,
+    Locale? locale,
   }) {
     _ensureInitialized();
 
@@ -275,9 +290,10 @@ class PromptService implements IPromptService {
     final categoryPrompts = _categoryCache[category] ?? [];
 
     // プラン制限を適用
-    return categoryPrompts
+    final filtered = categoryPrompts
         .where((prompt) => prompt.isAvailableForPlan(isPremium: isPremium))
         .toList();
+    return _localizePrompts(filtered, locale);
   }
 
   @override
@@ -285,6 +301,7 @@ class PromptService implements IPromptService {
     required bool isPremium,
     PromptCategory? category,
     List<String>? excludeIds,
+    Locale? locale,
   }) {
     _ensureInitialized();
 
@@ -292,10 +309,14 @@ class PromptService implements IPromptService {
 
     if (category != null) {
       // 特定カテゴリから選択
-      candidates = getPromptsByCategory(category, isPremium: isPremium);
+      candidates = getPromptsByCategory(
+        category,
+        isPremium: isPremium,
+        locale: null,
+      );
     } else {
       // 全プロンプトから選択
-      candidates = getPromptsForPlan(isPremium: isPremium);
+      candidates = getPromptsForPlan(isPremium: isPremium, locale: null);
     }
 
     // 手動除外IDを適用
@@ -316,7 +337,8 @@ class PromptService implements IPromptService {
     }
 
     // 優先度による重み付けランダム選択
-    return _selectWeightedRandom(candidates);
+    final selected = _selectWeightedRandom(candidates);
+    return _localizePrompt(selected, locale);
   }
 
   /// 優先度による重み付けランダム選択
@@ -344,41 +366,60 @@ class PromptService implements IPromptService {
     return prompts.last;
   }
 
-  @override
-  List<WritingPrompt> searchPrompts(String query, {required bool isPremium}) {
-    _ensureInitialized();
-
-    if (query.trim().isEmpty) {
-      return getPromptsForPlan(isPremium: isPremium);
+  List<WritingPrompt> _localizePrompts(
+    List<WritingPrompt> prompts,
+    Locale? locale,
+  ) {
+    if (locale == null) {
+      return List.unmodifiable(prompts);
     }
 
-    final lowerQuery = query.toLowerCase();
-    final availablePrompts = getPromptsForPlan(isPremium: isPremium);
+    final localized = prompts
+        .map((prompt) => prompt.localizedCopy(locale))
+        .toList(growable: false);
+    return List.unmodifiable(localized);
+  }
 
-    return availablePrompts.where((prompt) {
-      // テキスト内検索
-      if (prompt.text.toLowerCase().contains(lowerQuery)) {
-        return true;
-      }
-
-      // タグ検索
-      if (prompt.tags.any((tag) => tag.toLowerCase().contains(lowerQuery))) {
-        return true;
-      }
-
-      // 説明文検索
-      if (prompt.description?.toLowerCase().contains(lowerQuery) == true) {
-        return true;
-      }
-
-      return false;
-    }).toList();
+  WritingPrompt? _localizePrompt(WritingPrompt? prompt, Locale? locale) {
+    if (prompt == null) {
+      return null;
+    }
+    if (locale == null) {
+      return prompt;
+    }
+    return prompt.localizedCopy(locale);
   }
 
   @override
-  WritingPrompt? getPromptById(String id) {
+  List<WritingPrompt> searchPrompts(
+    String query, {
+    required bool isPremium,
+    Locale? locale,
+  }) {
     _ensureInitialized();
-    return _idCache[id];
+
+    if (query.trim().isEmpty) {
+      return getPromptsForPlan(isPremium: isPremium, locale: locale);
+    }
+
+    final lowerQuery = query.toLowerCase();
+    final availablePrompts = getPromptsForPlan(
+      isPremium: isPremium,
+      locale: null,
+    );
+
+    final results = availablePrompts
+        .where((prompt) => prompt.matchesKeyword(lowerQuery))
+        .toList();
+
+    return _localizePrompts(results, locale);
+  }
+
+  @override
+  WritingPrompt? getPromptById(String id, {Locale? locale}) {
+    _ensureInitialized();
+    final prompt = _idCache[id];
+    return _localizePrompt(prompt, locale);
   }
 
   @override
@@ -421,6 +462,7 @@ class PromptService implements IPromptService {
     required int count,
     required bool isPremium,
     PromptCategory? category,
+    Locale? locale,
   }) {
     _ensureInitialized();
 
@@ -432,10 +474,14 @@ class PromptService implements IPromptService {
 
     if (category != null) {
       // 特定カテゴリから選択
-      candidates = getPromptsByCategory(category, isPremium: isPremium);
+      candidates = getPromptsByCategory(
+        category,
+        isPremium: isPremium,
+        locale: null,
+      );
     } else {
       // 全プロンプトから選択
-      candidates = getPromptsForPlan(isPremium: isPremium);
+      candidates = getPromptsForPlan(isPremium: isPremium, locale: null);
     }
 
     if (candidates.isEmpty) {
@@ -454,6 +500,7 @@ class PromptService implements IPromptService {
         isPremium: isPremium,
         category: category,
         excludeIds: excludeIds,
+        locale: null,
       );
 
       if (prompt != null) {
@@ -465,7 +512,7 @@ class PromptService implements IPromptService {
       }
     }
 
-    return selectedPrompts;
+    return _localizePrompts(selectedPrompts, locale);
   }
 
   @override

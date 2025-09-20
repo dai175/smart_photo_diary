@@ -436,6 +436,10 @@
   "@promptEmptyDescription": {
     "description": "プロンプト読み込み失敗時の説明"
   },
+  "diaryPreviewCurrentPromptTitle": "使用中のプロンプト",
+  "@diaryPreviewCurrentPromptTitle": {
+    "description": "日記プレビュー画面で現在選択中のプロンプトを示すタイトル"
+  },
   "diaryCardUntitled": "無題",
   "@diaryCardUntitled": {
     "description": "タイトル未設定時のフォールバック"

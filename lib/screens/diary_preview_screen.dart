@@ -24,6 +24,7 @@ import '../models/writing_prompt.dart';
 import '../core/errors/error_handler.dart';
 import '../utils/prompt_category_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../localization/localization_extensions.dart';
 import 'diary_detail_screen.dart';
 
 /// 生成された日記のプレビュー画面
@@ -526,7 +527,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text('使用中のプロンプト', style: AppTypography.titleMedium),
+                  child: Text(
+                    context.l10n.diaryPreviewCurrentPromptTitle,
+                    style: AppTypography.titleMedium,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -542,6 +546,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                   child: Text(
                     PromptCategoryUtils.getCategoryDisplayName(
                       _selectedPrompt!.category,
+                      locale: Localizations.localeOf(context),
                     ),
                     style: AppTypography.labelSmall.copyWith(
                       color: Colors.white,
