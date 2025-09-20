@@ -94,9 +94,9 @@ abstract class Plan {
     return LocaleFormatUtils.formatCurrency(
       price,
       locale: currentLocale,
-      currencyCode: SubscriptionConstants.currencyCode,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
       decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.currencySymbol,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
   }
 

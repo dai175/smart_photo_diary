@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 class LocaleFormatUtils {
   LocaleFormatUtils._();
 
-  static const Map<String, String> _currencySymbolOverrides = {'JPY': '¥'};
+  static const Map<String, String> _currencySymbolOverrides = {
+    'JPY': '¥',
+    'USD': '\$',
+  };
 
   static String formatCurrency(
     num amount, {

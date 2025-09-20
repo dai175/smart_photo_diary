@@ -37,7 +37,7 @@ extension LocalizationFormattingX on AppLocalizations {
   /// 例: 無料 / Free
   String formatCurrency(
     num amount, {
-    String currencyCode = SubscriptionConstants.currencyCode,
+    String currencyCode = SubscriptionConstants.defaultCurrencyCode,
     bool showFreeLabel = true,
     int decimalDigits = 0,
   }) {
@@ -50,7 +50,7 @@ extension LocalizationFormattingX on AppLocalizations {
       locale: localeName,
       currencyCode: currencyCode,
       decimalDigits: decimalDigits,
-      fallbackSymbol: SubscriptionConstants.currencySymbol,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
   }
 

@@ -75,16 +75,16 @@ class PremiumYearlyPlan extends Plan {
     final monthlyEquivText = LocaleFormatUtils.formatCurrency(
       monthlyEquiv,
       locale: locale,
-      currencyCode: SubscriptionConstants.currencyCode,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
       decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.currencySymbol,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
     final savingsText = LocaleFormatUtils.formatCurrency(
       savings,
       locale: locale,
-      currencyCode: SubscriptionConstants.currencyCode,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
       decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.currencySymbol,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
 
     return '年額プランなら、実質月額$monthlyEquivTextで全機能をご利用いただけます。'
@@ -112,9 +112,9 @@ class PremiumYearlyPlan extends Plan {
     final savingsText = LocaleFormatUtils.formatCurrency(
       yearlySavings,
       locale: locale,
-      currencyCode: SubscriptionConstants.currencyCode,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
       decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.currencySymbol,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
 
     return [

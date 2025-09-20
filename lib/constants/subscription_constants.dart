@@ -16,10 +16,20 @@ class SubscriptionConstants {
   static const int basicYearlyPrice = 0;
 
   /// Premium プランの年額料金（円）
-  static const int premiumYearlyPrice = 2800;
+  static const int premiumYearlyPriceJPY = 2800;
 
   /// Premium プランの月額料金（円）
-  static const int premiumMonthlyPrice = 300;
+  static const int premiumMonthlyPriceJPY = 300;
+
+  /// Premium プランの年額料金（USD）
+  static const int premiumYearlyPriceUSD = 1799; // $17.99 (cents)
+
+  /// Premium プランの月額料金（USD）
+  static const int premiumMonthlyPriceUSD = 199; // $1.99 (cents)
+
+  // 後方互換性のため
+  static const int premiumYearlyPrice = premiumYearlyPriceJPY;
+  static const int premiumMonthlyPrice = premiumMonthlyPriceJPY;
 
   // ========================================
   // AI生成制限
@@ -56,8 +66,8 @@ class SubscriptionConstants {
   /// サブスクリプション状態のキー
   static const String statusKey = 'subscription_status';
 
-  /// 通貨設定
-  static const String currency = 'JPY';
+  /// デフォルト通貨設定
+  static const String defaultCurrency = 'JPY';
 
   // ========================================
   // プラン識別子
@@ -103,11 +113,11 @@ class SubscriptionConstants {
   static const int yearlyDiscountPercentage =
       22; // (300*12 - 2800) / (300*12) * 100
 
-  /// 通貨記号
-  static const String currencySymbol = '¥';
+  /// デフォルト通貨記号
+  static const String defaultCurrencySymbol = '¥';
 
-  /// 通貨コード
-  static const String currencyCode = 'JPY';
+  /// デフォルト通貨コード
+  static const String defaultCurrencyCode = 'JPY';
 
   // ========================================
   // プラン表示名
@@ -176,15 +186,48 @@ class SubscriptionConstants {
     return ((yearlyTotal - premiumYearlyPrice) / yearlyTotal) * 100;
   }
 
+  /// 言語に応じた価格と通貨コードを取得
+  static (int price, String currencyCode) getPriceForLocale(String planId, String locale) {
+    final isEnglish = locale.startsWith('en');
+
+    switch (planId.toLowerCase()) {
+      case basicPlanId:
+        return (basicYearlyPrice, isEnglish ? 'USD' : defaultCurrencyCode);
+      case premiumMonthlyPlanId:
+        return (
+          isEnglish ? premiumMonthlyPriceUSD : premiumMonthlyPriceJPY,
+          isEnglish ? 'USD' : defaultCurrencyCode
+        );
+      case premiumYearlyPlanId:
+        return (
+          isEnglish ? premiumYearlyPriceUSD : premiumYearlyPriceJPY,
+          isEnglish ? 'USD' : defaultCurrencyCode
+        );
+      default:
+        throw ArgumentError('Unknown plan ID: $planId');
+    }
+  }
+
   /// 価格を表示用文字列に変換（ロケール対応）
-  static String formatPrice(int price, {String locale = 'ja'}) {
+  static String formatPrice(int price, {String locale = 'ja', String? currencyCode}) {
+    final isEnglish = locale.startsWith('en');
+    final currency = currencyCode ?? (isEnglish ? 'USD' : defaultCurrencyCode);
+    final decimalDigits = currency == 'USD' ? 2 : 0;
+    final actualPrice = currency == 'USD' ? price / 100.0 : price.toDouble();
+
     return LocaleFormatUtils.formatCurrency(
-      price,
+      actualPrice,
       locale: locale,
-      currencyCode: currencyCode,
-      decimalDigits: 0,
-      fallbackSymbol: currencySymbol,
+      currencyCode: currency,
+      decimalDigits: decimalDigits,
+      fallbackSymbol: isEnglish ? '\$' : defaultCurrencySymbol,
     );
+  }
+
+  /// プラン用の価格表示文字列を取得
+  static String formatPriceForPlan(String planId, String locale) {
+    final (price, currencyCode) = getPriceForLocale(planId, locale);
+    return formatPrice(price, locale: locale, currencyCode: currencyCode);
   }
 
   /// プランIDから価格を取得

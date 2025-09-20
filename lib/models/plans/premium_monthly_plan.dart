@@ -70,9 +70,9 @@ class PremiumMonthlyPlan extends Plan {
     final savingsText = LocaleFormatUtils.formatCurrency(
       savings,
       locale: locale,
-      currencyCode: SubscriptionConstants.currencyCode,
+      currencyCode: SubscriptionConstants.defaultCurrencyCode,
       decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.currencySymbol,
+      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
 
     return '年額プランに切り替えると、年間$savingsText（$savingsPercentage%OFF）お得になります。';

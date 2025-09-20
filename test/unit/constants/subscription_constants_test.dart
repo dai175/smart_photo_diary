@@ -98,8 +98,8 @@ void main() {
 
     group('UI表示設定テスト', () {
       test('通貨設定が正しく設定されている', () {
-        expect(SubscriptionConstants.currencySymbol, equals('¥'));
-        expect(SubscriptionConstants.currencyCode, equals('JPY'));
+        expect(SubscriptionConstants.defaultCurrencySymbol, equals('¥'));
+        expect(SubscriptionConstants.defaultCurrencyCode, equals('JPY'));
       });
 
       test('年額割引率の表示値が正しい', () {
