@@ -16,6 +16,7 @@ import '../ui/animations/micro_interactions.dart';
 import '../core/service_locator.dart';
 import '../constants/app_constants.dart';
 import '../localization/localization_extensions.dart';
+import '../services/social_share/channels/x_share_channel.dart';
 
 class DiaryDetailScreen extends StatefulWidget {
   final String diaryId;
@@ -372,7 +373,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
   }
 
-  /// X（旧Twitter）へ共有
+  /// テキストで共有
   Future<void> _shareToX() async {
     final diary = _diaryEntry;
     if (diary == null) return;
@@ -422,11 +423,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           // 成功時は特に何もしない（システム共有シートで完結）
         },
         (error) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(l10n.commonShareFailedWithReason(error.message)),
-            ),
-          );
+          final message = error is XShareException
+              ? l10n.commonShareFailedWithReason(
+                  l10n.diaryDetailShareTextOptionTitle,
+                ) // テキスト共有失敗時はローカライズされたメッセージ
+              : l10n.commonShareFailedWithReason(error.message);
+          scaffoldMessenger.showSnackBar(SnackBar(content: Text(message)));
         },
       );
     } catch (e) {

@@ -1304,7 +1304,7 @@
   "@diaryDetailShareTextOptionTitle": {
     "description": "テキスト共有オプションのタイトル"
   },
-  "diaryDetailShareTextOptionSubtitle": "X（旧Twitter）向け",
+  "diaryDetailShareTextOptionSubtitle": "テキストとしてアプリに共有",
   "@diaryDetailShareTextOptionSubtitle": {
     "description": "テキスト共有オプションのサブタイトル"
   },

@@ -11,10 +11,9 @@ import '../../../localization/localization_utils.dart';
 import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
 import '../../logging_service.dart';
-import '../../../utils/x_share_text_builder.dart';
 import '../../settings_service.dart';
 
-/// X（旧Twitter）共有チャネル実装
+/// テキスト共有チャネル実装（各プラットフォームで利用可能）
 class XShareChannel {
   static const int _shareTimeoutSeconds = 10;
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
@@ -28,7 +27,7 @@ class XShareChannel {
   }) async {
     try {
       _logger.info(
-        'X共有開始',
+        'テキスト共有開始',
         context: 'XShareChannel.share',
         data: 'diary_id: ${diary.id}',
       );
@@ -57,11 +56,17 @@ class XShareChannel {
       final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
       final appName = LocalizationUtils.appTitleFor(resolvedLocale);
 
-      final text = XShareTextBuilder.build(
-        title: diary.title,
-        body: diary.content,
-        appName: appName,
-      );
+      // シンプルなテキスト生成（文字数制限なし）
+      final parts = <String>[];
+      if (diary.title.isNotEmpty) {
+        parts.add(diary.title);
+      }
+      if (diary.content.isNotEmpty) {
+        parts.add(diary.content);
+      }
+      parts.add(appName);
+
+      final text = parts.join('\n\n');
 
       await Share.shareXFiles(
         files,
@@ -72,17 +77,21 @@ class XShareChannel {
         onTimeout: () => throw Exception('共有がタイムアウトしました'),
       );
 
-      _logger.info('X共有成功', context: 'XShareChannel.share');
+      _logger.info('テキスト共有成功', context: 'XShareChannel.share');
       return const Success<void>(null);
     } catch (e, st) {
       _logger.error(
-        'X共有エラー',
+        'テキスト共有エラー',
         context: 'XShareChannel.share',
         error: e,
         stackTrace: st,
       );
       return Failure<void>(
-        XShareException('Xへの共有に失敗しました', originalError: e, stackTrace: st),
+        XShareException(
+          'Text sharing failed',
+          originalError: e,
+          stackTrace: st,
+        ),
       );
     }
   }
@@ -95,7 +104,4 @@ class XShareException extends AppException {
     super.originalError,
     super.stackTrace,
   });
-
-  @override
-  String get userMessage => 'X共有でエラーが発生しました: $message';
 }

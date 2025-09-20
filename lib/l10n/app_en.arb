@@ -1304,9 +1304,9 @@
   "@diaryDetailShareTextOptionTitle": {
     "description": "Share option title for text-based sharing"
   },
-  "diaryDetailShareTextOptionSubtitle": "Best for X (formerly Twitter)",
+  "diaryDetailShareTextOptionSubtitle": "Share as text to any app",
   "@diaryDetailShareTextOptionSubtitle": {
-    "description": "Share option subtitle describing X platform"
+    "description": "Share option subtitle describing text sharing to any platform"
   },
   "diaryDetailShareImageOptionTitle": "Photo & diary as image",
   "@diaryDetailShareImageOptionTitle": {
