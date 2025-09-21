@@ -88,6 +88,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   bool _isLoadingMore = false;
   int _placeholderPages = 1; // スケルトンを段階的に増やす
   int _lastAssetsCount = 0; // 差分検出用
+  bool _isInitialLoad = true; // 初回読み込み判定用
+  DateTime? _lastPlaceholderIncrease; // 最後にスケルトンを増やした時刻
 
   // デバッグ用状態
   DateTime? _lastPreloadCall;
@@ -106,6 +108,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   static const int _layoutCompleteDelayMs = 100; // レイアウト完了待機時間（ミリ秒）
   static const int _initializationCompleteDelayMs = 500; // 初期化完了待機時間（ミリ秒）
   static const int _maxPhotosForAutoLoad = 60; // 自動追加読み込みする最大写真数（実機最適化）
+
+  // スケルトン表示制御関連の定数
+  static const int _placeholderIncreaseDebounceMs =
+      500; // スケルトン増加時のデバウンス間隔（ミリ秒）
+  static const int _initialLoadPlaceholderLimit = 2; // 初回読み込み完了時のスケルトン上限
+  static const int _bulkLoadThreshold = 20; // 大量読み込み判定の閾値（枚数）
+  static const int _scrollTopPlaceholderLimit = 1; // 先頭スクロール時のスケルトン上限
 
   // パフォーマンス最適化用の定数
   static const double _crossAxisSpacing = 2.0;
@@ -194,10 +203,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// 外部指示で先頭へスクロール
   void _scrollToTop() {
-    // スクロール中に末尾のプレースホルダーが視界に入らないよう一時的に非表示
-    if (_placeholderPages != 0) {
+    // スクロール中にスケルトンが視界に入らないよう一時的に最小化
+    if (_placeholderPages > _scrollTopPlaceholderLimit) {
       setState(() {
-        _placeholderPages = 0;
+        _placeholderPages = _scrollTopPlaceholderLimit;
       });
     }
 
@@ -213,13 +222,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   void _onScroll() {
     if (!_scrollController.hasClients) return;
 
-    // これ以上読み込む写真がない場合は、残っているスケルトンを即座に消す
+    // これ以上読み込む写真がない場合は、段階的にスケルトンを減らす
     if (!widget.controller.hasMorePhotos) {
-      if (_placeholderPages != 0) {
-        setState(() {
-          _placeholderPages = 0;
-        });
-      }
+      _decreasePlaceholderPages();
       return;
     }
 
@@ -401,14 +406,14 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
           _dimPhotoCache.clear();
         }
         _updatePhotoGroups();
-        // 取得枚数が増えたらスケルトンは最小に戻す（描画コスト抑制）
+        // 取得枚数が増えた場合の処理を改善
         final currentCount = widget.controller.photoAssets.length;
         if (currentCount > _lastAssetsCount) {
-          _placeholderPages = 1;
+          _handlePhotoCountIncrease(currentCount);
         }
-        // これ以上の写真がないときはスケルトンを完全に消す
+        // これ以上の写真がないときは段階的にスケルトンを減らす
         if (!widget.controller.hasMorePhotos) {
-          _placeholderPages = 0;
+          _decreasePlaceholderPages();
         }
         _lastAssetsCount = currentCount;
       }
@@ -441,14 +446,14 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       // キャッシュ再構築完了後に安全にUI更新
       setState(() {
         _photoGroups = groups;
-        // 取得枚数が増えたらスケルトン行数を最小化
+        // 取得枚数が増えた場合の処理を改善
         final currentCount = widget.controller.photoAssets.length;
         if (currentCount > _lastAssetsCount) {
-          _placeholderPages = 1;
+          _handlePhotoCountIncrease(currentCount);
         }
-        // これ以上読み込む写真がないならスケルトンを即座に消す
+        // これ以上読み込む写真がないなら段階的にスケルトンを減らす
         if (!widget.controller.hasMorePhotos) {
-          _placeholderPages = 0;
+          _decreasePlaceholderPages();
         }
         _lastAssetsCount = currentCount;
       });
@@ -530,9 +535,64 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   void _increasePlaceholderPages() {
     if (_placeholderPages >= AppConstants.timelinePlaceholderMaxPages) return;
+
+    // 短時間での連続増加を防ぐ（スムーズなUX）
+    final now = DateTime.now();
+    if (_lastPlaceholderIncrease != null &&
+        now.difference(_lastPlaceholderIncrease!).inMilliseconds <
+            _placeholderIncreaseDebounceMs) {
+      return;
+    }
+
     setState(() {
       _placeholderPages += 1;
     });
+    _lastPlaceholderIncrease = now;
+  }
+
+  /// スケルトンページ数を段階的に減らす
+  void _decreasePlaceholderPages() {
+    if (_placeholderPages <= 0) return;
+
+    setState(() {
+      _placeholderPages = (_placeholderPages - 1).clamp(
+        0,
+        AppConstants.timelinePlaceholderMaxPages,
+      );
+    });
+
+    _logger.info(
+      'スケルトンページ数を減少: $_placeholderPages',
+      context: 'TimelinePhotoWidget._decreasePlaceholderPages',
+    );
+  }
+
+  /// 写真数増加時の処理
+  void _handlePhotoCountIncrease(int currentCount) {
+    // 初回読み込み完了時
+    if (_isInitialLoad) {
+      _isInitialLoad = false;
+      // 初回はスケルトンを段階的に減らす（急激な変化を避ける）
+      if (_placeholderPages > _initialLoadPlaceholderLimit) {
+        _placeholderPages = _initialLoadPlaceholderLimit;
+      }
+      return;
+    }
+
+    // 継続的な先読み時は、大幅な増加時のみスケルトンを調整
+    final increaseAmount = currentCount - _lastAssetsCount;
+
+    // 大量の写真が一度に読み込まれた場合のみスケルトンを減らす
+    if (increaseAmount >= _bulkLoadThreshold) {
+      _placeholderPages = (_placeholderPages - 1).clamp(
+        1,
+        AppConstants.timelinePlaceholderMaxPages,
+      );
+      _logger.info(
+        '大量読み込み完了でスケルトン調整: 増加数=$increaseAmount, 新スケルトン数=$_placeholderPages',
+        context: 'TimelinePhotoWidget._handlePhotoCountIncrease',
+      );
+    }
   }
 
   /// 指定アセットのサムネイルFutureをサイズ/品質込みのキーでメモ化
