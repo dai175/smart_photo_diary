@@ -86,7 +86,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   // 無限スクロール用状態（シンプル版）
   bool _isLoadingMore = false;
-  int _placeholderPages = 1; // スケルトンを段階的に増やす
+  int _placeholderPages = 0; // スケルトンを段階的に増やす（初期は非表示）
   int _lastAssetsCount = 0; // 差分検出用
   bool _isInitialLoad = true; // 初回読み込み判定用
   DateTime? _lastPlaceholderIncrease; // 最後にスケルトンを増やした時刻
@@ -297,12 +297,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// 追加写真読み込み要求（HomeScreenに委譲）
   void _requestMorePhotos() {
+    // スケルトンを先に表示してから読み込み開始
+    _increasePlaceholderPages();
     setState(() {
       _isLoadingMore = true;
     });
     // HomeScreenに追加読み込み要求を送信
     widget.onLoadMorePhotos?.call();
-    _increasePlaceholderPages();
   }
 
   /// 追加読み込み完了時に呼び出される（コントローラー更新時に自動実行）
@@ -502,7 +503,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
 
     setState(() {
-      _placeholderPages += 1;
+      // 最低でも1ページは表示する
+      if (_placeholderPages == 0) {
+        _placeholderPages = 1;
+      } else {
+        _placeholderPages += 1;
+      }
     });
     _lastPlaceholderIncrease = now;
   }
@@ -598,12 +604,13 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        if (widget.controller.isLoading) {
-          return _buildLoadingState();
-        }
-
         if (!widget.controller.hasPermission) {
           return _buildPermissionDeniedState();
+        }
+
+        // 初回ロード中で写真がまだない場合は、シンプルなローディング表示
+        if (widget.controller.isLoading && _photoGroups.isEmpty) {
+          return _buildSimpleLoadingState();
         }
 
         if (_photoGroups.isEmpty) {
@@ -881,52 +888,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
   }
 
-  /// ローディング状態を構築
-  Widget _buildLoadingState() {
-    // ビューポート基準で2画面分のスケルトンを敷き詰める
-    const int screensToFill = 2; // 必要に応じて3に拡張可能
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double availableWidth = constraints.maxWidth;
-        final double availableHeight = constraints.maxHeight;
-
-        // タイル1辺のサイズ（正方形）。4列・スペースは定数を使用
-        final double totalCrossSpacing =
-            (_crossAxisCount - 1) * _crossAxisSpacing;
-        final double tileSize =
-            (availableWidth - totalCrossSpacing) / _crossAxisCount;
-
-        // 行数 = (高さ) / (タイル高さ + 行間)
-        final int rowsPerScreen =
-            (availableHeight + _mainAxisSpacing) ~/
-            (tileSize + _mainAxisSpacing);
-        final int tilesPerScreen =
-            (rowsPerScreen.clamp(1, 50)) * _crossAxisCount;
-
-        // 初期表示スケルトン総数（上限を設けて過剰描画を抑える）
-        final int placeholderCount = (tilesPerScreen * screensToFill).clamp(
-          8,
-          240,
-        );
-
-        return GridView.builder(
-          padding: EdgeInsets.zero,
-          physics: const AlwaysScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: _crossAxisCount,
-            crossAxisSpacing: _crossAxisSpacing,
-            mainAxisSpacing: _mainAxisSpacing,
-            childAspectRatio: _childAspectRatio,
-          ),
-          itemCount: placeholderCount,
-          itemBuilder: (context, index) => const _SkeletonTile(
-            borderRadius: _borderRadius,
-            strokeWidth: _loadingIndicatorStrokeWidth,
-            indicatorSize: _loadingIndicatorSize,
-          ),
-        );
-      },
-    );
+  /// シンプルなローディング状態を構築（スケルトンなし）
+  Widget _buildSimpleLoadingState() {
+    return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
   }
 
   /// 権限拒否状態を構築
