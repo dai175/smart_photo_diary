@@ -123,50 +123,6 @@ class PhotoSelectionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 特定のIDの写真を優先的に保持しながら写真アセットを設定
-  void setPhotoAssetsPreservingSelectionWithPriority(
-    List<AssetEntity> assets,
-    String? priorityPhotoId,
-  ) {
-    // 現在の選択状態を保存（写真IDベースで）
-    final selectedIds = <String>{};
-    for (int i = 0; i < _photoAssets.length && i < _selected.length; i++) {
-      if (_selected[i]) {
-        selectedIds.add(_photoAssets[i].id);
-      }
-    }
-
-    // 優先写真IDも選択状態に含める
-    if (priorityPhotoId != null) {
-      selectedIds.add(priorityPhotoId);
-    }
-
-    // 新しい写真リストを設定
-    _photoAssets = assets;
-    _selected = List.generate(assets.length, (index) => false);
-
-    // 選択状態を復元
-    for (int i = 0; i < _photoAssets.length; i++) {
-      if (selectedIds.contains(_photoAssets[i].id)) {
-        _selected[i] = true;
-      }
-    }
-
-    // 優先写真IDが最初の選択である場合、その日付を設定
-    if (priorityPhotoId != null &&
-        _enableDateRestriction &&
-        _selectedDate == null) {
-      for (int i = 0; i < _photoAssets.length; i++) {
-        if (_photoAssets[i].id == priorityPhotoId) {
-          _selectedDate = _photoAssets[i].createDateTime;
-          break;
-        }
-      }
-    }
-
-    notifyListeners();
-  }
-
   /// 使用済み写真IDを設定
   void setUsedPhotoIds(Set<String> usedIds) {
     _usedPhotoIds = Set.from(usedIds);
@@ -311,30 +267,6 @@ class PhotoSelectionController extends ChangeNotifier {
       // 初回選択の場合は、その写真の日付を記録
       if (_enableDateRestriction && _selectedDate == null) {
         _selectedDate = _photoAssets[capturedIndex].createDateTime;
-      }
-    }
-
-    notifyListeners();
-  }
-
-  /// 写真アセットと選択状態を同時に設定
-  void setPhotoAssetsWithSelection(
-    List<AssetEntity> assets,
-    List<bool> selection,
-  ) {
-    _photoAssets = assets;
-    _selected = selection.length == assets.length
-        ? List<bool>.from(selection)
-        : List.generate(assets.length, (index) => false);
-
-    // 選択されている写真の日付を確認し、selectedDateを設定
-    if (_enableDateRestriction) {
-      _selectedDate = null;
-      for (int i = 0; i < _photoAssets.length && i < _selected.length; i++) {
-        if (_selected[i]) {
-          _selectedDate = _photoAssets[i].createDateTime;
-          break;
-        }
       }
     }
 

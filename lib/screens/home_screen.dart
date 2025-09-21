@@ -66,9 +66,6 @@ class _HomeScreenState extends State<HomeScreen>
   // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
 
-  // 撮影した写真のIDを保持（消えないように）
-  String? _recentlyCapturedPhotoId;
-
   @override
   void initState() {
     super.initState();
@@ -266,7 +263,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
-    _recentlyCapturedPhotoId = null; // 撮影写真IDをクリア
     _currentPhotoOffset = 0; // オフセットをリセット
     _isPreloading = false; // 先読みフラグをリセット
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
@@ -326,93 +322,29 @@ class _HomeScreenState extends State<HomeScreen>
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // 撮影した写真がある場合は、その写真を確実に含めるため範囲を調整
-      DateTime startDate = todayStart;
-      DateTime endDate = todayStart.add(const Duration(days: 1));
-      int adjustedLimit = _photosPerPage;
-
       // プラン制限に応じた過去日数を計算
       final allowedDays = await _getAllowedDays();
 
-      if (_recentlyCapturedPhotoId != null) {
-        // 撮影した写真がある場合は、確実に含めるためlimitを増やす
-        adjustedLimit = _photosPerPage + 50; // 余裕を持って増やす
-        _logger.info(
-          '撮影した写真を確実に含めるためlimitを調整: $_photosPerPage -> $adjustedLimit',
-          context: 'HomeScreen._loadTodayPhotos',
-          data: 'capturedPhotoId: $_recentlyCapturedPhotoId',
-        );
-      }
-
-      startDate = todayStart.subtract(Duration(days: allowedDays));
-
       final photos = await photoService.getPhotosInDateRange(
-        startDate: startDate,
-        endDate: endDate,
-        limit: adjustedLimit,
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        endDate: todayStart.add(const Duration(days: 1)), // 今日を含む
+        limit: _photosPerPage, // 初回読み込み分のみ
       );
 
       if (!mounted) return;
 
-      // 撮影した写真が取得されたかチェック
-      List<AssetEntity> finalPhotos = photos;
-      if (_recentlyCapturedPhotoId != null) {
-        final capturedPhotoExists = photos.any(
-          (photo) => photo.id == _recentlyCapturedPhotoId,
-        );
-
-        if (!capturedPhotoExists) {
-          _logger.warning(
-            '撮影した写真が取得されませんでした。個別に追加します。',
-            context: 'HomeScreen._loadTodayPhotos',
-            data:
-                'capturedPhotoId: $_recentlyCapturedPhotoId, photoCount: ${photos.length}',
-          );
-
-          // 撮影した写真を個別に取得して先頭に追加
-          try {
-            final capturedAsset = await AssetEntity.fromId(
-              _recentlyCapturedPhotoId!,
-            );
-            if (capturedAsset != null) {
-              finalPhotos = [capturedAsset, ...photos];
-              _logger.info(
-                '撮影した写真を個別に追加しました',
-                context: 'HomeScreen._loadTodayPhotos',
-                data: 'capturedPhotoId: $_recentlyCapturedPhotoId',
-              );
-            }
-          } catch (e) {
-            _logger.error(
-              '撮影した写真の個別取得に失敗',
-              context: 'HomeScreen._loadTodayPhotos',
-              error: e,
-            );
-          }
-        } else {
-          _logger.info(
-            '撮影した写真が正常に含まれています',
-            context: 'HomeScreen._loadTodayPhotos',
-            data: 'capturedPhotoId: $_recentlyCapturedPhotoId',
-          );
-        }
-      }
-
       // Limited Access で写真が少ない場合は追加選択を提案
-      if (finalPhotos.isEmpty) {
+      if (photos.isEmpty) {
         final isLimited = await photoService.isLimitedAccess();
         if (isLimited) {
           await _showLimitedAccessDialog();
         }
       }
 
-      _photoController.setPhotoAssetsPreservingSelectionWithPriority(
-        finalPhotos,
-        _recentlyCapturedPhotoId,
-      );
-      _currentPhotoOffset = finalPhotos.length; // 次回読み込み用にオフセット更新
+      _photoController.setPhotoAssets(photos);
+      _currentPhotoOffset = photos.length; // 次回読み込み用にオフセット更新
       // 初回読み込み時点で末尾到達か判定
-      if (finalPhotos.length < _photosPerPage) {
+      if (photos.length < _photosPerPage) {
         _photoController.setHasMorePhotos(false);
       } else {
         _photoController.setHasMorePhotos(true);
@@ -426,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen>
       }
     } catch (e) {
       if (mounted) {
-        _photoController.setPhotoAssetsPreservingSelection([]);
+        _photoController.setPhotoAssets([]);
         _photoController.setLoading(false);
       }
     } finally {
@@ -442,8 +374,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 日記作成完了時の処理：使用済み写真更新 + Diary画面を再構築
   Future<void> _onDiaryCreated() async {
-    // 日記作成完了時に撮影写真IDをクリア
-    _recentlyCapturedPhotoId = null;
     setState(() {
       _diaryScreenKey = UniqueKey();
     });
@@ -709,77 +639,14 @@ class _HomeScreenState extends State<HomeScreen>
           data: 'Asset ID: ${capturedPhoto.id}',
         );
 
-        // 撮影した写真のIDを保存（消えないように）
-        _recentlyCapturedPhotoId = capturedPhoto.id;
+        // 今日の写真リストを再読み込みして新しい写真を含める
+        await _loadTodayPhotos();
 
-        // フォトライブラリのキャッシュをクリアしてから少し待機
-        await PhotoManager.clearFileCache();
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        // 撮影した写真を既存リストの先頭に直接追加
-        final currentPhotos = List<AssetEntity>.from(
-          _photoController.photoAssets,
-        );
-        currentPhotos.insert(0, capturedPhoto);
-
-        // 撮影した写真を自動選択状態で更新
+        // 撮影した写真を自動選択状態で追加
         _photoController.refreshPhotosWithNewCapture(
-          currentPhotos,
+          _photoController.photoAssets,
           capturedPhoto.id,
         );
-
-        // バックグラウンドで写真リストの完全な再読み込みを実行
-        // 撮影した写真が確実に含まれるように、十分待機してから実行
-        Future.delayed(const Duration(milliseconds: 3000), () async {
-          if (!mounted) return;
-
-          // 現在の選択状態を保存
-          final currentSelectedIds = <String>{};
-          final currentAssets = _photoController.photoAssets;
-          final currentSelected = _photoController.selected;
-
-          for (
-            int i = 0;
-            i < currentAssets.length && i < currentSelected.length;
-            i++
-          ) {
-            if (currentSelected[i]) {
-              currentSelectedIds.add(currentAssets[i].id);
-            }
-          }
-
-          // 完全な再読み込みを実行
-          await _loadTodayPhotos();
-
-          // 撮影した写真の選択状態を復元
-          if (currentSelectedIds.isNotEmpty ||
-              _recentlyCapturedPhotoId != null) {
-            final assets = _photoController.photoAssets;
-
-            // 撮影した写真も含めて選択状態を復元
-            if (_recentlyCapturedPhotoId != null) {
-              currentSelectedIds.add(_recentlyCapturedPhotoId!);
-            }
-
-            final selected = List<bool>.filled(assets.length, false);
-
-            for (int i = 0; i < assets.length; i++) {
-              if (currentSelectedIds.contains(assets[i].id)) {
-                selected[i] = true;
-              }
-            }
-
-            // 選択状態を手動で復元
-            _photoController.setPhotoAssetsWithSelection(assets, selected);
-
-            _logger.info(
-              'バックグラウンド更新後に選択状態を復元',
-              context: 'HomeScreen._capturePhoto',
-              data:
-                  'selectedIds: $currentSelectedIds, capturedPhotoId: $_recentlyCapturedPhotoId',
-            );
-          }
-        });
 
         // 撮影成功のフィードバックを表示
         if (mounted) {
