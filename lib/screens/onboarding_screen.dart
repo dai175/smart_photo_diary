@@ -442,8 +442,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _buildPlanCard(
         title: 'Premium',
         subtitle: context.l10n.pricingPerMonthShort(
-          context.l10n.formatCurrency(
-            SubscriptionConstants.premiumMonthlyPrice,
+          SubscriptionConstants.formatPriceForPlan(
+            SubscriptionConstants.premiumMonthlyPlanId,
+            context.l10n.localeName,
           ),
         ),
         icon: Icons.star_rounded,

@@ -347,25 +347,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _showLanguageDialog() async {
     final options = _buildLocaleChoices(context);
-    final result = await DialogUtils.showRadioSelectionDialog<Locale?>(
+    final currentChoice = options.firstWhere(
+      (choice) => choice.locale == _selectedLocale,
+      orElse: () => options.first,
+    );
+
+    final result = await DialogUtils.showRadioSelectionDialog<_LocaleChoice>(
       context,
       context.l10n.settingsLanguageDialogTitle,
-      options.map((choice) => choice.locale).toList(),
-      _selectedLocale,
-      (locale) {
-        final choice = options.firstWhere(
-          (c) => c.locale == locale,
-          orElse: () => options.first,
-        );
-        return choice.title;
-      },
+      options,
+      currentChoice,
+      (choice) => choice.title,
     );
 
     if (!mounted || result == null) {
       return;
     }
 
-    await _handleLocaleSelection(result);
+    await _handleLocaleSelection(result.locale);
   }
 
   Future<void> _handleLocaleSelection(Locale? locale) async {
@@ -1680,4 +1679,15 @@ class _LocaleChoice {
   final String title;
 
   const _LocaleChoice({required this.locale, required this.title});
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is _LocaleChoice &&
+        locale == other.locale &&
+        title == other.title;
+  }
+
+  @override
+  int get hashCode => Object.hash(locale, title);
 }

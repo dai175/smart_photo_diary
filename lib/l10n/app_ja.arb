@@ -312,7 +312,7 @@
   "@settingsLanguageDialogTitle": {
     "description": "言語選択ダイアログのタイトル"
   },
-  "settingsLanguageSystem": "システム設定に従う",
+  "settingsLanguageSystem": "システムに従う",
   "@settingsLanguageSystem": {
     "description": "システム言語に従うオプション"
   },
