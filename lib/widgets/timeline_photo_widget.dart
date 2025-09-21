@@ -141,15 +141,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   // 画像キャッシュ（Service + Futureインスタンスのメモ化で再描画時の再フェッチを防止）
   late final IPhotoCacheService _cacheService = PhotoCacheService.getInstance();
   final Map<String, Future<Uint8List?>> _thumbFutureCache = {};
-  final Map<String, Future<Uint8List?>> _largeFutureCache = {};
 
   // ビューポート先読み（高速スクロール対策）
   Timer? _prefetchDebounce;
   int _lastPrefetchStartIndex = -1;
   bool _isViewportPrefetching = false;
-
-  // 底付き時の連続先読み（スクロールイベントが発火しない場合の保険）
-  Timer? _progressiveLoadTimer;
 
   // レイアウト関連の定数
   static const double _borderRadius = 4.0;
@@ -162,11 +158,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   // インデックスキャッシュ（メインインデックス検索の最適化）
   final Map<String, int> _photoIndexCache = {};
-
-  // 薄化計算結果のキャッシュ
-  final Map<String, bool> _dimPhotoCache = {};
-  DateTime? _lastSelectedDate;
-  int _lastSelectedCount = 0;
 
   @override
   void initState() {
@@ -187,7 +178,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   void dispose() {
     _scrollController.dispose();
     widget.controller.removeListener(_onControllerChanged);
-    _progressiveLoadTimer?.cancel();
     widget.scrollSignal?.removeListener(_scrollToTop);
     super.dispose();
   }
@@ -278,37 +268,31 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   void _ensureProgressiveLoadingIfPinned() {
     if (!_scrollController.hasClients) return;
     if (!widget.controller.hasMorePhotos) {
-      _progressiveLoadTimer?.cancel();
       return;
     }
 
     final pos = _scrollController.position;
     final isPinned = (pos.maxScrollExtent - pos.pixels).abs() < 4.0;
     if (!isPinned) {
-      _progressiveLoadTimer?.cancel();
       return;
     }
 
     // 連続トリガー（軽いデバウンス）
-    _progressiveLoadTimer?.cancel();
-    _progressiveLoadTimer = Timer(
-      Duration(milliseconds: _scrollCheckIntervalMs ~/ 2),
-      () {
-        if (!mounted) return;
-        if (!_scrollController.hasClients) return;
-        final againPinned =
-            (_scrollController.position.maxScrollExtent -
-                    _scrollController.position.pixels)
-                .abs() <
-            4.0;
-        if (againPinned && widget.controller.hasMorePhotos) {
-          widget.onPreloadMorePhotos?.call();
-          _increasePlaceholderPages();
-          // 次も必要かもしれないので再スケジュール
-          _ensureProgressiveLoadingIfPinned();
-        }
-      },
-    );
+    Timer(Duration(milliseconds: _scrollCheckIntervalMs ~/ 2), () {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      final againPinned =
+          (_scrollController.position.maxScrollExtent -
+                  _scrollController.position.pixels)
+              .abs() <
+          4.0;
+      if (againPinned && widget.controller.hasMorePhotos) {
+        widget.onPreloadMorePhotos?.call();
+        _increasePlaceholderPages();
+        // 次も必要かもしれないので再スケジュール
+        _ensureProgressiveLoadingIfPinned();
+      }
+    });
   }
 
   /// 追加写真読み込み要求（HomeScreenに委譲）
@@ -382,29 +366,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   void _onControllerChanged() {
-    // 薄化キャッシュをクリア（選択状態変更時のみ）
-    final currentSelectedDate = _groupingService.getSelectedDate(
-      widget.controller.selectedPhotos,
-    );
-    final currentSelectedCount = widget.controller.selectedCount;
-
-    // 選択状態の実質的変更をチェック（先読み時の不要なクリアを防ぐ）
-    bool shouldClearCache = false;
-    if (_lastSelectedDate != currentSelectedDate ||
-        _lastSelectedCount != currentSelectedCount) {
-      // 日付変更または選択数変更の場合のみクリア
-      shouldClearCache = true;
-      _lastSelectedDate = currentSelectedDate;
-      _lastSelectedCount = currentSelectedCount;
-    }
-
     // UI更新を次のフレームに延期（キャッシュ準備完了を待つ）
     Future.microtask(() {
       if (mounted) {
-        // キャッシュクリアもUI更新と同じタイミングで実行
-        if (shouldClearCache) {
-          _dimPhotoCache.clear();
-        }
         _updatePhotoGroups();
         // 取得枚数が増えた場合の処理を改善
         final currentCount = widget.controller.photoAssets.length;
@@ -482,28 +446,20 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   /// 現在のスクロール位置をもとにサムネイルを先読み
   void _scheduleViewportPrefetch() {
     _prefetchDebounce?.cancel();
-    _prefetchDebounce = Timer(const Duration(milliseconds: 220), () async {
+    _prefetchDebounce = Timer(const Duration(milliseconds: 200), () async {
       if (!mounted || _isViewportPrefetching) return;
       if (_photoGroups.isEmpty || widget.controller.photoAssets.isEmpty) return;
       if (!_scrollController.hasClients) return;
 
       final position = _scrollController.position;
       final max = position.maxScrollExtent;
-      // max==0 のときは上端。端末やレイアウトにより0のこともある
       final frac = max > 0 ? (position.pixels / max).clamp(0.0, 1.0) : 0.0;
 
       final total = widget.controller.photoAssets.length;
       int start = (frac * total).floor();
-      // 先読みウィンドウ
       final window = AppConstants.timelinePrefetchAheadCount;
       final batch = AppConstants.timelinePrefetchBatchSize;
       int end = (start + window).clamp(0, total);
-
-      // 下端に張り付いている場合は末尾側からプリフェッチ
-      if (start >= end) {
-        end = total;
-        start = (total - window).clamp(0, total);
-      }
 
       // 過剰な重複実行を抑制
       if (_lastPrefetchStartIndex >= 0 &&
@@ -515,11 +471,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       _isViewportPrefetching = true;
 
       try {
-        // バッチ分割してプリロード（キャッシュ済みはスキップされる）
+        // シンプルなバッチプリロード
         for (int i = start; i < end; i += batch) {
           final j = (i + batch).clamp(0, total);
           final slice = widget.controller.photoAssets.sublist(i, j);
           if (slice.isEmpty) break;
+
           await _cacheService.preloadThumbnails(
             slice,
             width: _thumbnailSize,
@@ -610,19 +567,15 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     );
   }
 
-  /// 拡大表示用の大きめプレビューを取得（キャッシュ）
+  /// 拡大表示用の大きめプレビューを取得
   Future<Uint8List?> _getLargePreviewFuture(AssetEntity asset) {
     const int size = PhotoPreviewConstants.previewSizePx; // 拡大表示用サイズ
     const int quality = PhotoPreviewConstants.previewQuality;
-    final key = '${asset.id}:${size}x$size:q$quality';
-    return _largeFutureCache.putIfAbsent(
-      key,
-      () => _cacheService.getThumbnail(
-        asset,
-        width: size,
-        height: size,
-        quality: quality,
-      ),
+    return _cacheService.getThumbnail(
+      asset,
+      width: size,
+      height: size,
+      quality: quality,
     );
   }
 
@@ -1094,22 +1047,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     // 選択済みの写真は薄くしない
     if (isSelected) return false;
 
-    // キャッシュから取得を試行
-    final cacheKey =
-        '${photo.id}_${selectedDate?.millisecondsSinceEpoch}_${widget.controller.selectedCount}';
-    if (_dimPhotoCache.containsKey(cacheKey)) {
-      return _dimPhotoCache[cacheKey]!;
-    }
-
-    // 計算して結果をキャッシュ
-    final result = _calculateShouldDimPhoto(
+    // 計算結果を直接返す
+    return _calculateShouldDimPhoto(
       photo: photo,
       selectedDate: selectedDate,
       isSelected: isSelected,
     );
-    _dimPhotoCache[cacheKey] = result;
-
-    return result;
   }
 
   /// 写真を薄く表示するかどうかを判定（実際の計算ロジック）

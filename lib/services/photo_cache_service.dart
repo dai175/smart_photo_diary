@@ -5,17 +5,22 @@ import 'logging_service.dart';
 import '../core/errors/error_handler.dart';
 import '../constants/app_constants.dart';
 
-/// メモリキャッシュのエントリー
-class _CacheEntry {
+/// LRUキャッシュのエントリー
+class _LRUCacheEntry {
   final Uint8List data;
   final DateTime timestamp;
   final int size;
+  DateTime lastAccessed;
 
-  _CacheEntry({
+  _LRUCacheEntry({
     required this.data,
     required this.timestamp,
     required this.size,
-  });
+  }) : lastAccessed = DateTime.now();
+
+  void updateAccess() {
+    lastAccessed = DateTime.now();
+  }
 }
 
 /// 写真のサムネイルキャッシュを管理するサービス
@@ -37,8 +42,8 @@ class PhotoCacheService implements IPhotoCacheService {
     return _logger!;
   }
 
-  // メモリキャッシュ
-  final Map<String, _CacheEntry> _memoryCache = {};
+  // LRUメモリキャッシュ
+  final Map<String, _LRUCacheEntry> _memoryCache = {};
 
   // キャッシュ設定
   static const int _maxMemoryCacheSizeInBytes = 100 * 1024 * 1024; // 100MB
@@ -74,6 +79,9 @@ class PhotoCacheService implements IPhotoCacheService {
         // キャッシュの有効期限チェック
         if (DateTime.now().difference(cachedEntry.timestamp) <
             _cacheExpiration) {
+          // アクセス時刻を更新（LRU）
+          cachedEntry.updateAccess();
+
           loggingService.debug(
             'サムネイルをキャッシュから取得',
             context: 'PhotoCacheService.getThumbnail',
@@ -227,7 +235,7 @@ class PhotoCacheService implements IPhotoCacheService {
       _evictOldestEntries();
     }
 
-    final entry = _CacheEntry(
+    final entry = _LRUCacheEntry(
       data: data,
       timestamp: DateTime.now(),
       size: data.length,
@@ -253,9 +261,9 @@ class PhotoCacheService implements IPhotoCacheService {
 
   /// 最も古いエントリーを削除（LRU）
   void _evictOldestEntries() {
-    // タイムスタンプでソート
+    // 最後にアクセスされた時刻でソート（LRU）
     final sortedEntries = _memoryCache.entries.toList()
-      ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
+      ..sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
 
     // 削除するエントリー数を計算（全体の20%または最低10エントリー）
     final entriesToRemove = (_memoryCache.length * 0.2).ceil().clamp(10, 50);
@@ -266,7 +274,7 @@ class PhotoCacheService implements IPhotoCacheService {
 
     _getLogger().then(
       (logger) => logger.info(
-        'キャッシュエビクション実行 - $entriesToRemove エントリーを削除',
+        'LRUキャッシュエビクション実行 - $entriesToRemove エントリーを削除',
         context: 'PhotoCacheService._evictOldestEntries',
       ),
     );
@@ -318,9 +326,9 @@ class PhotoCacheService implements IPhotoCacheService {
           '現在のサイズ: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
     );
 
-    // タイムスタンプでソート
+    // 最後にアクセスされた時刻でソート（LRU）
     final sortedEntries = _memoryCache.entries.toList()
-      ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
+      ..sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
 
     // 50%のエントリーを削除
     final entriesToRemove = (_memoryCache.length * 0.5).ceil();

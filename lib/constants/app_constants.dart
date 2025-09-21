@@ -113,7 +113,7 @@ class AppConstants {
   static const int diaryThumbnailQuality = 70; // 日記カードのサムネ品質
   static const int diaryPrefetchAheadCount = 12; // 一覧用の先読み件数（カード数）
 
-  // タイムライン先読み・プリフェッチ
+  // タイムライン先読み・プリフェッチ（基本設定）
   static const double timelinePreloadThresholdPx = 1200.0; // 先読み開始のスクロール余白
   static const double timelineLoadMoreThresholdPx = 600.0; // 追加読み込みのスクロール余白
   static const int timelineScrollCheckIntervalMs = 800; // 連続判定の間隔

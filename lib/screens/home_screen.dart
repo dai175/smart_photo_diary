@@ -52,10 +52,6 @@ class _HomeScreenState extends State<HomeScreen>
       AppConstants.timelinePageSize; // タイムライン用ページサイズ
   bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
 
-  // プラン情報のキャッシュ（先読み最適化用）
-  int? _cachedAllowedDays;
-  DateTime? _planCacheExpiry;
-
   // ホームタブ再タップで先頭へスクロールさせるためのシグナル
   final ScrollSignal _homeScrollSignal = ScrollSignal();
   // 日記タブ・設定タブ再タップで先頭へスクロールさせるためのシグナル
@@ -270,9 +266,6 @@ class _HomeScreenState extends State<HomeScreen>
     _currentPhotoOffset = 0; // オフセットをリセット
     _isPreloading = false; // 先読みフラグをリセット
     _photoController.setHasMorePhotos(true); // コントローラーにも設定
-    // プランキャッシュもクリア
-    _cachedAllowedDays = null;
-    _planCacheExpiry = null;
     await _loadTodayPhotos();
     await _loadUsedPhotoIds();
   }
@@ -329,8 +322,8 @@ class _HomeScreenState extends State<HomeScreen>
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // プラン制限に応じた過去日数を計算（キャッシュ使用）
-      final allowedDays = await _getCachedAllowedDays();
+      // プラン制限に応じた過去日数を計算
+      final allowedDays = await _getAllowedDays();
 
       final photos = await photoService.getPhotosInDateRange(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
@@ -387,18 +380,8 @@ class _HomeScreenState extends State<HomeScreen>
     await _loadUsedPhotoIds();
   }
 
-  // プラン情報を取得（キャッシュ付き）
-  Future<int> _getCachedAllowedDays() async {
-    final now = DateTime.now();
-
-    // キャッシュが有効な場合はそれを使用（5分間キャッシュ）
-    if (_cachedAllowedDays != null &&
-        _planCacheExpiry != null &&
-        now.isBefore(_planCacheExpiry!)) {
-      return _cachedAllowedDays!;
-    }
-
-    // キャッシュが無効な場合は新しく取得
+  // プラン情報を取得
+  Future<int> _getAllowedDays() async {
     int allowedDays = 1; // デフォルトはBasicプラン
     try {
       final subscriptionService =
@@ -415,10 +398,6 @@ class _HomeScreenState extends State<HomeScreen>
         context: 'HomeScreen._getCachedAllowedDays',
       );
     }
-
-    // キャッシュを更新（5分間有効）
-    _cachedAllowedDays = allowedDays;
-    _planCacheExpiry = now.add(const Duration(minutes: 5));
 
     return allowedDays;
   }
@@ -464,10 +443,10 @@ class _HomeScreenState extends State<HomeScreen>
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // キャッシュされたプラン情報を使用
-      final allowedDays = await _getCachedAllowedDays();
+      // プラン情報を取得
+      final allowedDays = await _getAllowedDays();
 
-      // 現在の末尾オフセットから必要分だけを追加で取得（ビューポート直下のスケルトンを優先的に埋める）
+      // シンプルな先読み戦略
       final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
       final requested = _photosPerPage * preloadPages;
 
