@@ -1418,5 +1418,9 @@
         "type": "int"
       }
     }
+  },
+  "shareCreatedWith": "#SmartPhotoDiary で生成",
+  "@shareCreatedWith": {
+    "description": "共有時に使用するクレジットテキスト"
   }
 }

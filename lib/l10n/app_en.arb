@@ -1418,5 +1418,9 @@
         "type": "int"
       }
     }
+  },
+  "shareCreatedWith": "Created with #SmartPhotoDiary",
+  "@shareCreatedWith": {
+    "description": "Credit text used when sharing"
   }
 }

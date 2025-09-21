@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -48,9 +49,24 @@ class InstagramShareChannel {
 
       final File imageFile = imageResult.value;
 
+      // Get current locale for share text
+      Locale? locale;
+      try {
+        final settingsService = ServiceRegistration.get<SettingsService>();
+        locale = settingsService.locale;
+      } catch (_) {
+        locale = null;
+      }
+      final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
+      final shareText = _getLocalizedMessage(
+        resolvedLocale,
+        (l10n) => l10n.shareCreatedWith,
+        '#SmartPhotoDiary で生成',
+      );
+
       await Share.shareXFiles(
         [XFile(imageFile.path)],
-        text: '${diary.title}\n\n#SmartPhotoDiary で生成',
+        text: '${diary.title}\n\n$shareText',
         sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
       ).timeout(
         const Duration(seconds: _shareTimeoutSeconds),
@@ -63,7 +79,8 @@ class InstagramShareChannel {
           } catch (_) {
             locale = null;
           }
-          final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
+          final resolvedLocale =
+              locale ?? ui.PlatformDispatcher.instance.locale;
           final timeoutMessage = _getLocalizedMessage(
             resolvedLocale,
             (l10n) => l10n.commonShareTimeout,
@@ -90,7 +107,7 @@ class InstagramShareChannel {
       } catch (_) {
         locale = null;
       }
-      final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
+      final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
       final errorMessage = _getLocalizedMessage(
         resolvedLocale,
         (l10n) => l10n.commonShareFailedWithReason('Image sharing failed'),

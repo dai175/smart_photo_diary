@@ -594,10 +594,16 @@ class DiaryImageGenerator {
   String _formatDate(DateTime date) {
     try {
       // SettingsServiceからロケールを取得
-      final settingsService = ServiceRegistration.get<SettingsService>();
-      final locale = settingsService.locale;
+      Locale? locale;
+      try {
+        final settingsService = ServiceRegistration.get<SettingsService>();
+        locale = settingsService.locale;
+      } catch (_) {
+        locale = null;
+      }
+      final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
 
-      if (locale?.languageCode == 'ja' || locale == null) {
+      if (resolvedLocale.languageCode == 'ja') {
         // 日本語フォーマット
         final months = [
           '1月',
@@ -633,22 +639,41 @@ class DiaryImageGenerator {
         return '${months[date.month - 1]} ${date.day}, ${date.year}';
       }
     } catch (e) {
-      // フォールバック：設定取得に失敗した場合は日本語
-      final months = [
-        '1月',
-        '2月',
-        '3月',
-        '4月',
-        '5月',
-        '6月',
-        '7月',
-        '8月',
-        '9月',
-        '10月',
-        '11月',
-        '12月',
-      ];
-      return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
+      // フォールバック：設定取得に失敗した場合はプラットフォームロケールを使用
+      final platformLocale = ui.PlatformDispatcher.instance.locale;
+      if (platformLocale.languageCode == 'ja') {
+        final months = [
+          '1月',
+          '2月',
+          '3月',
+          '4月',
+          '5月',
+          '6月',
+          '7月',
+          '8月',
+          '9月',
+          '10月',
+          '11月',
+          '12月',
+        ];
+        return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
+      } else {
+        final months = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ];
+        return '${months[date.month - 1]} ${date.day}, ${date.year}';
+      }
     }
   }
 }
