@@ -714,23 +714,11 @@ class _HomeScreenState extends State<HomeScreen>
 
         // フォトライブラリのキャッシュをクリアしてから少し待機
         await PhotoManager.clearFileCache();
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 800));
 
-        // 撮影した写真を既存リストの先頭に直接追加
-        final currentPhotos = List<AssetEntity>.from(
-          _photoController.photoAssets,
-        );
-        currentPhotos.insert(0, capturedPhoto);
-
-        // 撮影した写真を自動選択状態で更新
-        _photoController.refreshPhotosWithNewCapture(
-          currentPhotos,
-          capturedPhoto.id,
-        );
-
-        // バックグラウンドで写真リストの完全な再読み込みを実行
-        // 撮影した写真が確実に含まれるように、十分待機してから実行
-        Future.delayed(const Duration(milliseconds: 3000), () async {
+        // 撮影した写真を含めて写真リストを再読み込み
+        // 手動追加は行わず、ライブラリから直接取得して重複を防ぐ
+        Future.delayed(const Duration(milliseconds: 200), () async {
           if (!mounted) return;
 
           // 現在の選択状態を保存
