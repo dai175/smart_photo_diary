@@ -72,11 +72,20 @@ class AppConstants {
   static const Duration microStaggerUnit = Duration(milliseconds: 100);
   static const Duration quickAnimationDuration = Duration(milliseconds: 200);
 
+  // ナビゲーションタブインデックス
+  static const int homeTabIndex = 0;
+  static const int diaryTabIndex = 1;
+  static const int statisticsTabIndex = 2;
+  static const int settingsTabIndex = 3;
+
   // エフェクト/透明度（withValues(alpha: ...) 用）
   static const double opacityHigh = 0.8;
   static const double opacityMedium = 0.7;
   static const double opacityLow = 0.5;
   static const double opacityXLow = 0.3;
+
+  // レイアウト比率
+  static const double loadingCenterHeightRatio = 0.3;
   static const double opacityXXLow = 0.1;
   static const double opacitySubtle = 0.2;
 

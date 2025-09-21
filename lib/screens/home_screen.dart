@@ -58,6 +58,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ホームタブ再タップで先頭へスクロールさせるためのシグナル
   final ScrollSignal _homeScrollSignal = ScrollSignal();
+  // 日記タブ・設定タブ再タップで先頭へスクロールさせるためのシグナル
+  final ScrollSignal _diaryScrollSignal = ScrollSignal();
+  final ScrollSignal _settingsScrollSignal = ScrollSignal();
 
   // Diaryタブの再構築用キー（作成直後の一覧更新のため）
   Key _diaryScreenKey = UniqueKey();
@@ -539,12 +542,17 @@ class _HomeScreenState extends State<HomeScreen>
         scrollSignal: _homeScrollSignal,
         onDiaryTap: _openDiaryDetail,
       ),
-      DiaryScreen(key: _diaryScreenKey),
+      DiaryScreen(key: _diaryScreenKey, scrollSignal: _diaryScrollSignal),
       StatisticsScreen(key: _statsScreenKey),
     ];
 
     // 設定画面を追加
-    screens.add(SettingsScreen(onThemeChanged: widget.onThemeChanged));
+    screens.add(
+      SettingsScreen(
+        onThemeChanged: widget.onThemeChanged,
+        scrollSignal: _settingsScrollSignal,
+      ),
+    );
 
     return screens;
   }
@@ -571,17 +579,27 @@ class _HomeScreenState extends State<HomeScreen>
             type: BottomNavigationBarType.fixed,
             currentIndex: _currentIndex,
             onTap: (index) {
-              if (_currentIndex == index && index == 0) {
-                // 既にホーム選択中にホームを再タップ → 先頭へスクロール
-                _homeScrollSignal.trigger();
+              if (_currentIndex == index) {
+                // 同じタブを再タップした場合、先頭へスクロール
+                switch (index) {
+                  case AppConstants.homeTabIndex:
+                    _homeScrollSignal.trigger();
+                    break;
+                  case AppConstants.diaryTabIndex:
+                    _diaryScrollSignal.trigger();
+                    break;
+                  case AppConstants.settingsTabIndex:
+                    _settingsScrollSignal.trigger();
+                    break;
+                }
                 return;
               }
 
               // フォールバック: タブ切替時に必要な再同期を実施
-              if (index == 0) {
+              if (index == AppConstants.homeTabIndex) {
                 // Home を表示する際に使用済みIDを再同期
                 _loadUsedPhotoIds();
-              } else if (index == 2) {
+              } else if (index == AppConstants.statisticsTabIndex) {
                 // Statistics を表示する直前に再構築し再計算を促す
                 setState(() {
                   _statsScreenKey = UniqueKey();

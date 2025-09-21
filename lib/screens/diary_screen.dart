@@ -17,9 +17,12 @@ import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../services/photo_cache_service.dart';
+import '../controllers/scroll_signal.dart';
 
 class DiaryScreen extends StatefulWidget {
-  const DiaryScreen({super.key});
+  final ScrollSignal? scrollSignal;
+
+  const DiaryScreen({super.key, this.scrollSignal});
 
   @override
   State<DiaryScreen> createState() => _DiaryScreenState();
@@ -40,6 +43,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     _controller.addListener(_onControllerChanged);
+    widget.scrollSignal?.addListener(_onScrollToTop);
   }
 
   @override
@@ -48,6 +52,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     _scrollController.dispose();
     _controller.removeListener(_onControllerChanged);
     _controller.dispose();
+    widget.scrollSignal?.removeListener(_onScrollToTop);
     super.dispose();
   }
 
@@ -60,6 +65,16 @@ class _DiaryScreenState extends State<DiaryScreen> {
             AppConstants.diaryListLoadMoreThresholdRatio) {
       _controller.loadMore();
     }
+  }
+
+  void _onScrollToTop() {
+    if (!_scrollController.hasClients) return;
+
+    _scrollController.animateTo(
+      0,
+      duration: AppConstants.defaultAnimationDuration,
+      curve: Curves.easeOut,
+    );
   }
 
   void _onControllerChanged() {

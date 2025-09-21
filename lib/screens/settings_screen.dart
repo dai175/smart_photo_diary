@@ -20,13 +20,16 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
+import '../constants/app_constants.dart';
 import '../constants/subscription_constants.dart';
 import '../localization/localization_extensions.dart';
+import '../controllers/scroll_signal.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
+  final ScrollSignal? scrollSignal;
 
-  const SettingsScreen({super.key, this.onThemeChanged});
+  const SettingsScreen({super.key, this.onThemeChanged, this.scrollSignal});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -35,6 +38,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late final LoggingService _logger;
   late SettingsService _settingsService;
+  late final ScrollController _scrollController;
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
   SubscriptionInfoV2? _subscriptionInfo;
@@ -46,7 +50,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _logger = serviceLocator.get<LoggingService>();
+    _scrollController = ScrollController();
+    widget.scrollSignal?.addListener(_onScrollToTop);
     _loadSettings();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    widget.scrollSignal?.removeListener(_onScrollToTop);
+    super.dispose();
+  }
+
+  void _onScrollToTop() {
+    if (!_scrollController.hasClients) return;
+
+    _scrollController.animateTo(
+      0,
+      duration: AppConstants.defaultAnimationDuration,
+      curve: Curves.easeOut,
+    );
   }
 
   Future<void> _loadSettings() async {
@@ -112,49 +135,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         elevation: 2,
       ),
-      body: _isLoading
-          ? Center(
-              child: FadeInWidget(
-                child: CustomCard(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: AppSpacing.cardPadding,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryContainer.withValues(
-                            alpha: 0.3,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const CircularProgressIndicator(strokeWidth: 3),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        context.l10n.settingsLoadingTitle,
-                        style: AppTypography.titleLarge.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        context.l10n.settingsLoadingSubtitle,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+      body: MicroInteractions.pullToRefresh(
+        onRefresh: _loadSettings,
+        color: AppColors.primary,
+        child: ListView(
+          controller: _scrollController,
+          padding: AppSpacing.screenPadding,
+          children: _isLoading
+              ? [
+                  SizedBox(
+                    height:
+                        MediaQuery.of(context).size.height *
+                        AppConstants.loadingCenterHeightRatio,
                   ),
-                ),
-              ),
-            )
-          : MicroInteractions.pullToRefresh(
-              onRefresh: _loadSettings,
-              color: AppColors.primary,
-              child: ListView(
-                padding: AppSpacing.screenPadding,
-                children: [
+                  Center(
+                    child: FadeInWidget(
+                      child: CustomCard(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: AppSpacing.cardPadding,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryContainer.withValues(
+                                  alpha: AppConstants.opacityXLow,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            Text(
+                              context.l10n.settingsLoadingTitle,
+                              style: AppTypography.titleLarge.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              context.l10n.settingsLoadingSubtitle,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ]
+              : [
                   CustomCard(
                     elevation: AppSpacing.elevationMd,
                     child: Column(
@@ -204,8 +239,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
                 ],
-              ),
-            ),
+        ),
+      ),
     );
   }
 
