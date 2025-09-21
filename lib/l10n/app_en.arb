@@ -1183,6 +1183,10 @@
       }
     }
   },
+  "commonShareTimeout": "Sharing timed out",
+  "@commonShareTimeout": {
+    "description": "Message when sharing times out"
+  },
   "commonUnexpectedErrorWithDetails": "An unexpected error occurred: {details}",
   "@commonUnexpectedErrorWithDetails": {
     "description": "Message shown when an unexpected error occurs",

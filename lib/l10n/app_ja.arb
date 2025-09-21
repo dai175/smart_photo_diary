@@ -1183,6 +1183,10 @@
       }
     }
   },
+  "commonShareTimeout": "共有がタイムアウトしました",
+  "@commonShareTimeout": {
+    "description": "共有がタイムアウトした際のメッセージ"
+  },
   "commonUnexpectedErrorWithDetails": "予期しないエラーが発生しました: {details}",
   "@commonUnexpectedErrorWithDetails": {
     "description": "予期しないエラー発生時のメッセージ",

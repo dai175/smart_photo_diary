@@ -8,6 +8,7 @@ import '../../../core/result/result.dart';
 import '../../../core/service_locator.dart';
 import '../../../core/service_registration.dart';
 import '../../../localization/localization_utils.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
 import '../../logging_service.dart';
@@ -15,7 +16,7 @@ import '../../settings_service.dart';
 
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
 class XShareChannel {
-  static const int _shareTimeoutSeconds = 10;
+  static const int _shareTimeoutSeconds = 60;
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
 
   LoggingService get _logger => serviceLocator.get<LoggingService>();
@@ -74,7 +75,14 @@ class XShareChannel {
         sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
       ).timeout(
         const Duration(seconds: _shareTimeoutSeconds),
-        onTimeout: () => throw Exception('共有がタイムアウトしました'),
+        onTimeout: () {
+          final timeoutMessage = _getLocalizedMessage(
+            resolvedLocale,
+            (l10n) => l10n.commonShareTimeout,
+            'Sharing timed out',
+          );
+          throw Exception(timeoutMessage);
+        },
       );
 
       _logger.info('テキスト共有成功', context: 'XShareChannel.share');
@@ -86,13 +94,39 @@ class XShareChannel {
         error: e,
         stackTrace: st,
       );
-      return Failure<void>(
-        XShareException(
-          'Text sharing failed',
-          originalError: e,
-          stackTrace: st,
-        ),
+
+      // Get current locale for error message
+      Locale? locale;
+      try {
+        final settingsService =
+            await ServiceRegistration.getAsync<SettingsService>();
+        locale = settingsService.locale;
+      } catch (_) {
+        locale = null;
+      }
+      final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
+
+      final errorMessage = _getLocalizedMessage(
+        resolvedLocale,
+        (l10n) => l10n.commonShareFailedWithReason('Text sharing failed'),
+        'Text sharing failed',
       );
+      return Failure<void>(
+        XShareException(errorMessage, originalError: e, stackTrace: st),
+      );
+    }
+  }
+
+  String _getLocalizedMessage(
+    Locale locale,
+    String Function(AppLocalizations) getMessage,
+    String fallback,
+  ) {
+    try {
+      final l10n = LocalizationUtils.resolveFor(locale);
+      return getMessage(l10n);
+    } catch (_) {
+      return fallback;
     }
   }
 }
