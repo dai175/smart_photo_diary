@@ -511,13 +511,13 @@ $emphasis、個人的で心に響く日記を作成してください。''';
 You are an empathetic journaling companion. Using the scene details, craft a reflective diary entry in natural English that centres on the writer's emotions.
 The photo represents a real lived experience—explore the personal meaning behind it.
 
-Write the output using the following format:
+Write the output using the following format. Do not include any explanatory text in parentheses:
 
 [Title]
-(A concise 3-6 word phrase capturing the emotional tone)
+A concise 3-6 word phrase capturing the emotional tone
 
 [Body]
-(Approximately 70-90 words in a warm, personal voice that explores the emotions$multiPhotoHint)
+Approximately 70-90 words in a warm, personal voice that explores the emotions$multiPhotoHint
 
 $locationLine''';
 
@@ -534,7 +534,7 @@ When writing the diary, reflect on:
 - Details or discoveries that felt especially meaningful
 - Insights or lessons gained from the experience
 
-Use a tone that $emphasis and keep the entry personal and heartfelt.''';
+Use a tone that $emphasis and keep the entry personal and heartfelt. Do not include parenthetical explanations or meta-commentary in the title or body.''';
     }
 
     return '''$basePrompt
@@ -544,7 +544,7 @@ Consider the scene carefully and describe:
 - Any thoughts or memories the scene evoked
 - A personal insight or takeaway from the experience
 
-Use a tone that $emphasis and keep the diary intimate and emotionally resonant.''';
+Use a tone that $emphasis and keep the diary intimate and emotionally resonant. Do not include parenthetical explanations or meta-commentary in the title or body.''';
   }
 
   String _buildMultiImagePrompt({
@@ -616,13 +616,13 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
         '''Using the scene analyses below, craft a reflective diary entry in natural English that traces how the writer's emotions evolved throughout the day.
 Do not simply list events—explore the inner experience and personal meaning behind each moment.
 
-Write the output using the following format:
+Write the output using the following format. Do not include any explanatory text in parentheses:
 
 [Title]
-(A concise 3-6 word phrase that captures the day's emotional theme)
+A concise 3-6 word phrase that captures the day's emotional theme
 
 [Body]
-(Approximately 80-100 words that follow the flow of the day and emphasise emotional insights and discoveries)
+Approximately 80-100 words that follow the flow of the day and emphasise emotional insights and discoveries
 
 Date: $dateLabel
 Time span: $timeRange
@@ -644,7 +644,7 @@ When crafting the diary, be sure to cover:
 - Insights or lessons that emerged from the experience
 - The impact the day had on your perspective or mood
 
-Use a tone that $emphasis and keep the writing personal and genuine.''';
+Use a tone that $emphasis and keep the writing personal and genuine. Do not include parenthetical explanations or meta-commentary in the title or body.''';
     }
 
     return '''$basePrompt
@@ -655,7 +655,7 @@ Reflect on the day by describing:
 - Key moments that stayed with you
 - Any conclusions or insights you reached by the end of the day
 
-Use a tone that $emphasis and ensure the diary feels intimate and emotionally resonant.''';
+Use a tone that $emphasis and ensure the diary feels intimate and emotionally resonant. Do not include parenthetical explanations or meta-commentary in the title or body.''';
   }
 
   String _analysisFailureMessage(Locale locale) =>
