@@ -60,7 +60,8 @@ class DynamicPricingUtils {
         _logger.debug(
           'Successfully using dynamic price for $planId',
           context: 'DynamicPricingUtils.getPlanPrice',
-          data: 'price=$formattedPrice, currency=${product.currencyCode}',
+          data:
+              'price=$formattedPrice, currency=${product.currencyCode}, rawAmount=${product.priceAmount}',
         );
 
         return formattedPrice;

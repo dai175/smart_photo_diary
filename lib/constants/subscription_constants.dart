@@ -219,15 +219,12 @@ class SubscriptionConstants {
   }) {
     final isEnglish = locale.startsWith('en');
     final currency = currencyCode ?? (isEnglish ? 'USD' : defaultCurrencyCode);
-    final decimalDigits = currency == 'USD' ? 2 : 0;
-    final actualPrice = currency == 'USD' ? price / 100.0 : price.toDouble();
+    final actualPrice = price.toDouble();
 
     return LocaleFormatUtils.formatCurrency(
       actualPrice,
       locale: locale,
       currencyCode: currency,
-      decimalDigits: decimalDigits,
-      fallbackSymbol: isEnglish ? '\$' : defaultCurrencySymbol,
     );
   }
 

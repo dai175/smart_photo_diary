@@ -79,7 +79,6 @@ class PurchaseProductV2 {
         monthlyEquivalent,
         locale: locale,
         currencyCode: currencyCode,
-        decimalDigits: 0,
       );
       return '$price（月額換算 $monthlyEquivalentText）';
     }

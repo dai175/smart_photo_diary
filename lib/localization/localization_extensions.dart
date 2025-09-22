@@ -49,8 +49,6 @@ extension LocalizationFormattingX on AppLocalizations {
       amount,
       locale: localeName,
       currencyCode: currencyCode,
-      decimalDigits: decimalDigits,
-      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
   }
 

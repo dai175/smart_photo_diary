@@ -95,8 +95,6 @@ abstract class Plan {
       price,
       locale: currentLocale,
       currencyCode: SubscriptionConstants.defaultCurrencyCode,
-      decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
   }
 
@@ -110,15 +108,10 @@ abstract class Plan {
         locale ??
         (Intl.getCurrentLocale().isEmpty ? 'ja' : Intl.getCurrentLocale());
 
-    final decimalDigits = currencyCode == 'USD' ? 2 : 0;
-    final fallbackSymbol = currencyCode == 'USD' ? '\$' : '¥';
-
     return LocaleFormatUtils.formatCurrency(
       amount,
       locale: currentLocale,
       currencyCode: currencyCode,
-      decimalDigits: decimalDigits,
-      fallbackSymbol: fallbackSymbol,
     );
   }
 

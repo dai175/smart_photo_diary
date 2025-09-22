@@ -4,31 +4,25 @@ import 'package:intl/intl.dart';
 class LocaleFormatUtils {
   LocaleFormatUtils._();
 
-  static const Map<String, String> _currencySymbolOverrides = {
-    'JPY': '¥',
-    'USD': '\$',
-  };
-
   static String formatCurrency(
     num amount, {
     required String locale,
     String currencyCode = 'JPY',
-    int decimalDigits = 0,
-    String? fallbackSymbol,
   }) {
-    final symbol =
-        _currencySymbolOverrides[currencyCode] ??
-        fallbackSymbol ??
-        NumberFormat.simpleCurrency(name: currencyCode).currencySymbol;
-
-    final formatter = NumberFormat.currency(
-      locale: locale,
-      name: currencyCode,
-      symbol: symbol,
-      decimalDigits: decimalDigits,
-    );
-
-    return formatter.format(amount);
+    try {
+      final formatter = NumberFormat.simpleCurrency(
+        locale: locale,
+        name: currencyCode,
+      );
+      return formatter.format(amount);
+    } catch (e) {
+      // フォールバック: 標準的な通貨フォーマット
+      final formatter = NumberFormat.currency(
+        locale: locale,
+        name: currencyCode,
+      );
+      return formatter.format(amount);
+    }
   }
 
   static String formatDecimal(

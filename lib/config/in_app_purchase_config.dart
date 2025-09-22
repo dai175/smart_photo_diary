@@ -259,19 +259,11 @@ class InAppPurchaseConfig {
     final locale = Intl.getCurrentLocale().isEmpty
         ? 'ja'
         : Intl.getCurrentLocale();
-    final decimalDigits = currencyCode == 'JPY' ? 0 : 2;
-    final pricing = regionalPricing.values.firstWhere(
-      (region) => region['currency'] == currencyCode,
-      orElse: () => defaultPricing,
-    );
-    final symbol = pricing['symbol'] as String?;
 
     return LocaleFormatUtils.formatCurrency(
       price,
       locale: locale,
       currencyCode: currencyCode,
-      decimalDigits: decimalDigits,
-      fallbackSymbol: symbol,
     );
   }
 

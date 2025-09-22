@@ -1752,8 +1752,14 @@ class SubscriptionService implements ISubscriptionService {
       );
 
       _log(
-        'Successfully fetched price: ${product.price} ${product.currencyCode}',
+        'Successfully fetched price from App Store API',
         level: LogLevel.info,
+        data: {
+          'productId': productDetail.id,
+          'formattedPrice': product.price,
+          'currencyCode': product.currencyCode,
+          'rawAmount': product.priceAmount,
+        },
       );
 
       return Success(product);
