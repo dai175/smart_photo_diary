@@ -89,56 +89,14 @@ class InAppPurchaseConfig {
       SubscriptionConstants.calculateDiscountPercentage();
 
   // ========================================
-  // 地域別価格設定
+  // 地域別価格設定（削除済み）
   // ========================================
 
-  /// 地域別価格マップ
-  static const Map<String, Map<String, dynamic>> regionalPricing = {
-    'JP': {
-      'currency': 'JPY',
-      'symbol': '¥',
-      'monthlyPrice': 300,
-      'yearlyPrice': 2800,
-    },
-    'US': {
-      'currency': 'USD',
-      'symbol': '\$',
-      'monthlyPrice': 2.99,
-      'yearlyPrice': 28.99,
-    },
-    'GB': {
-      'currency': 'GBP',
-      'symbol': '£',
-      'monthlyPrice': 2.99,
-      'yearlyPrice': 28.99,
-    },
-    'EU': {
-      'currency': 'EUR',
-      'symbol': '€',
-      'monthlyPrice': 2.99,
-      'yearlyPrice': 28.99,
-    },
-    'CA': {
-      'currency': 'CAD',
-      'symbol': 'CAD\$',
-      'monthlyPrice': 3.99,
-      'yearlyPrice': 38.99,
-    },
-    'AU': {
-      'currency': 'AUD',
-      'symbol': 'AUD\$',
-      'monthlyPrice': 4.49,
-      'yearlyPrice': 44.99,
-    },
-  };
-
-  /// 指定地域の価格情報を取得
-  static Map<String, dynamic>? getPricingForRegion(String regionCode) {
-    return regionalPricing[regionCode.toUpperCase()];
-  }
-
-  /// デフォルト地域（日本）の価格情報を取得
-  static Map<String, dynamic> get defaultPricing => regionalPricing['JP']!;
+  /// 注意: 地域別の固定価格設定は削除されました。
+  /// App Storeの動的価格取得（DynamicPricingUtils）を使用してください。
+  ///
+  /// 各地域での価格と通貨は、App Store ConnectまたはGoogle Play Console
+  /// で設定された価格階層に基づいて自動的に決定されます。
 
   // ========================================
   // 商品メタデータ
@@ -282,10 +240,10 @@ class InAppPurchaseConfig {
     return {
       'platform': isIOS ? 'iOS' : 'Android',
       'productIds': allProductIds,
-      'pricing': defaultPricing,
       'sandboxMode': isSandboxEnvironment,
       'freeTrialDays': freeTrialDays,
       'serverValidation': serverSideValidationEnabled,
+      'note': '価格情報は動的価格取得システム（DynamicPricingUtils）から取得されます',
     };
   }
 
@@ -347,10 +305,7 @@ class InAppPurchaseConfigValidator {
       errors.add('Invalid yearly price');
     }
 
-    // 地域価格検証
-    if (InAppPurchaseConfig.regionalPricing.isEmpty) {
-      errors.add('No regional pricing configured');
-    }
+    // 地域価格検証は削除（動的価格取得システムを使用）
 
     return errors;
   }

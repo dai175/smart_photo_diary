@@ -166,13 +166,13 @@ void main() {
         expect(SubscriptionConstants.formatPrice(10000), equals('¥10,000'));
         expect(SubscriptionConstants.formatPrice(100000), equals('¥100,000'));
 
-        // 英語ロケールでの自動USD変換
+        // 英語ロケールでもJPY（動的価格取得システムによる実際の通貨使用を推奨）
         expect(
           SubscriptionConstants.formatPrice(2800, locale: 'en'),
-          equals('\$28.00'),
+          equals('¥2,800'),
         );
 
-        // 通貨コード明示指定での強制円表示
+        // 通貨コード明示指定での円表示
         expect(
           SubscriptionConstants.formatPrice(
             2800,
@@ -239,7 +239,7 @@ void main() {
         );
       });
 
-      test('言語に応じた価格取得が正しく動作する', () {
+      test('言語に応じた価格取得が正しく動作する（フォールバック）', () {
         // 日本語での価格取得
         final (priceJA, currencyJA) = SubscriptionConstants.getPriceForLocale(
           'premium_monthly',
@@ -248,13 +248,13 @@ void main() {
         expect(priceJA, equals(300));
         expect(currencyJA, equals('JPY'));
 
-        // 英語での価格取得
+        // 英語でも同じJPY価格（動的価格取得システムでは実際の地域価格を使用）
         final (priceEN, currencyEN) = SubscriptionConstants.getPriceForLocale(
           'premium_monthly',
           'en',
         );
-        expect(priceEN, equals(199)); // $1.99 in cents
-        expect(currencyEN, equals('USD'));
+        expect(priceEN, equals(300)); // フォールバック価格
+        expect(currencyEN, equals('JPY'));
 
         // 年額プランのテスト
         final (yearlyPriceJA, yearlyCurrencyJA) =
@@ -264,11 +264,11 @@ void main() {
 
         final (yearlyPriceEN, yearlyCurrencyEN) =
             SubscriptionConstants.getPriceForLocale('premium_yearly', 'en');
-        expect(yearlyPriceEN, equals(1799)); // $17.99 in cents
-        expect(yearlyCurrencyEN, equals('USD'));
+        expect(yearlyPriceEN, equals(2800)); // フォールバック価格
+        expect(yearlyCurrencyEN, equals('JPY'));
       });
 
-      test('プラン用価格表示が正しく動作する', () {
+      test('プラン用価格表示が正しく動作する（フォールバック）', () {
         // 日本語での表示
         expect(
           SubscriptionConstants.formatPriceForPlan('premium_monthly', 'ja'),
@@ -279,14 +279,14 @@ void main() {
           equals('¥2,800'),
         );
 
-        // 英語での表示
+        // 英語でもJPY表示（フォールバック価格）
         expect(
           SubscriptionConstants.formatPriceForPlan('premium_monthly', 'en'),
-          equals('\$1.99'),
+          equals('¥300'),
         );
         expect(
           SubscriptionConstants.formatPriceForPlan('premium_yearly', 'en'),
-          equals('\$17.99'),
+          equals('¥2,800'),
         );
       });
     });

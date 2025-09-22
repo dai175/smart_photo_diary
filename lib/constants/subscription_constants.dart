@@ -21,11 +21,7 @@ class SubscriptionConstants {
   /// Premium プランの月額料金（円）
   static const int premiumMonthlyPriceJPY = 300;
 
-  /// Premium プランの年額料金（USD）
-  static const int premiumYearlyPriceUSD = 1799; // $17.99 (cents)
-
-  /// Premium プランの月額料金（USD）
-  static const int premiumMonthlyPriceUSD = 199; // $1.99 (cents)
+  // USD価格定数は削除（動的価格取得を使用）
 
   // 後方互換性のため
   static const int premiumYearlyPrice = premiumYearlyPriceJPY;
@@ -187,38 +183,35 @@ class SubscriptionConstants {
   }
 
   /// 言語に応じた価格と通貨コードを取得
+  /// 注意: このメソッドは後方互換性のために残していますが、
+  /// 動的価格取得（DynamicPricingUtils）の使用を推奨します
   static (int price, String currencyCode) getPriceForLocale(
     String planId,
     String locale,
   ) {
-    final isEnglish = locale.startsWith('en');
-
+    // 動的価格取得システムでは、すべての地域でフォールバック価格として
+    // 日本の価格設定を使用し、通貨はJPYを返します
     switch (planId.toLowerCase()) {
       case basicPlanId:
-        return (basicYearlyPrice, isEnglish ? 'USD' : defaultCurrencyCode);
+        return (basicYearlyPrice, defaultCurrencyCode);
       case premiumMonthlyPlanId:
-        return (
-          isEnglish ? premiumMonthlyPriceUSD : premiumMonthlyPriceJPY,
-          isEnglish ? 'USD' : defaultCurrencyCode,
-        );
+        return (premiumMonthlyPriceJPY, defaultCurrencyCode);
       case premiumYearlyPlanId:
-        return (
-          isEnglish ? premiumYearlyPriceUSD : premiumYearlyPriceJPY,
-          isEnglish ? 'USD' : defaultCurrencyCode,
-        );
+        return (premiumYearlyPriceJPY, defaultCurrencyCode);
       default:
         throw ArgumentError('Unknown plan ID: $planId');
     }
   }
 
   /// 価格を表示用文字列に変換（ロケール対応）
+  /// 注意: このメソッドは後方互換性のために残していますが、
+  /// 動的価格取得（DynamicPricingUtils）の使用を推奨します
   static String formatPrice(
     int price, {
     String locale = 'ja',
     String? currencyCode,
   }) {
-    final isEnglish = locale.startsWith('en');
-    final currency = currencyCode ?? (isEnglish ? 'USD' : defaultCurrencyCode);
+    final currency = currencyCode ?? defaultCurrencyCode;
     final actualPrice = price.toDouble();
 
     return LocaleFormatUtils.formatCurrency(

@@ -124,21 +124,15 @@ void main() {
     // 地域別価格設定テスト
     // =================================================================
 
-    group('Regional Pricing Tests', () {
-      test('地域別価格が正しく設定されている', () {
-        // 日本の価格設定
-        final jpPricing = InAppPurchaseConfig.getPricingForRegion('JP');
-        expect(jpPricing, isNotNull);
-        expect(jpPricing!['currency'], equals('JPY'));
-        expect(jpPricing['monthlyPrice'], equals(300));
-        expect(jpPricing['yearlyPrice'], equals(2800));
+    group('Dynamic Pricing Tests', () {
+      test('動的価格取得システムが利用可能', () {
+        // 動的価格取得システムの基本設定確認
+        expect(InAppPurchaseConfig.inAppPurchaseEnabled, isTrue);
+        expect(InAppPurchaseConfig.allProductIds, isNotEmpty);
 
-        // アメリカの価格設定
-        final usPricing = InAppPurchaseConfig.getPricingForRegion('US');
-        expect(usPricing, isNotNull);
-        expect(usPricing!['currency'], equals('USD'));
-        expect(usPricing['monthlyPrice'], equals(2.99));
-        expect(usPricing['yearlyPrice'], equals(28.99));
+        // フォールバック価格の確認（SubscriptionConstants経由）
+        expect(SubscriptionConstants.premiumMonthlyPrice, isPositive);
+        expect(SubscriptionConstants.premiumYearlyPrice, isPositive);
       });
 
       test('価格フォーマット関数が正しく動作する', () {
@@ -154,27 +148,25 @@ void main() {
         );
       });
 
-      test('デフォルト地域設定が日本になっている', () {
-        final defaultPricing = InAppPurchaseConfig.defaultPricing;
-        expect(defaultPricing['currency'], equals('JPY'));
-        expect(defaultPricing['symbol'], equals('¥'));
+      test('デフォルト設定が適切に構成されている', () {
+        // デフォルト通貨設定の確認
+        expect(SubscriptionConstants.defaultCurrencyCode, equals('JPY'));
+        expect(SubscriptionConstants.defaultCurrencySymbol, equals('¥'));
       });
 
-      test('地域別価格が適切に設定されている', () {
-        for (final region in InAppPurchaseConfig.regionalPricing.values) {
-          final monthlyPrice = region['monthlyPrice'] as num;
-          final yearlyPrice = region['yearlyPrice'] as num;
-          final expectedYearlyPrice = monthlyPrice * 12;
-          final discountPercentage =
-              ((expectedYearlyPrice - yearlyPrice) / expectedYearlyPrice) * 100;
+      test('価格設定が適切に構成されている', () {
+        // 年額プランが月額プランより安価であることを確認
+        final monthlyPrice = SubscriptionConstants.premiumMonthlyPrice;
+        final yearlyPrice = SubscriptionConstants.premiumYearlyPrice;
+        final expectedYearlyPrice = monthlyPrice * 12;
 
-          // 各地域で年額プランが月額プランより安価であることを確認
-          expect(yearlyPrice, lessThan(expectedYearlyPrice));
+        expect(yearlyPrice, lessThan(expectedYearlyPrice));
 
-          // 割引率が最低10%以上であることを確認（プラットフォーム推奨価格に応じて変動）
-          expect(discountPercentage, greaterThan(10.0));
-          expect(discountPercentage, lessThan(30.0));
-        }
+        // 割引率が適切な範囲内であることを確認
+        final discountPercentage =
+            ((expectedYearlyPrice - yearlyPrice) / expectedYearlyPrice) * 100;
+        expect(discountPercentage, greaterThan(10.0));
+        expect(discountPercentage, lessThan(30.0));
       });
     });
 
@@ -340,15 +332,15 @@ void main() {
         // 基本情報が含まれている
         expect(debugInfo['platform'], isNotNull);
         expect(debugInfo['productIds'], isNotNull);
-        expect(debugInfo['pricing'], isNotNull);
+        expect(debugInfo['note'], isNotNull); // 価格情報の代わりに説明が含まれる
         expect(debugInfo['freeTrialDays'], equals(7));
 
         // 商品ID情報
         expect(debugInfo['productIds'], isA<List<String>>());
         expect((debugInfo['productIds'] as List).length, equals(2));
 
-        // 価格情報
-        expect(debugInfo['pricing'], isA<Map<String, dynamic>>());
+        // 動的価格取得システムに関する説明
+        expect(debugInfo['note'], contains('動的価格取得システム'));
       });
 
       test('テスト用商品IDが生成される', () {
@@ -443,14 +435,13 @@ void main() {
           expect(InAppPurchaseConfig.getDescriptionFromPlan(plan), isNotEmpty);
         }
 
-        // 地域別価格の一貫性確認
-        expect(InAppPurchaseConfig.regionalPricing, isNotEmpty);
-        for (final pricing in InAppPurchaseConfig.regionalPricing.values) {
-          expect(pricing['currency'], isNotNull);
-          expect(pricing['symbol'], isNotNull);
-          expect(pricing['monthlyPrice'], greaterThan(0));
-          expect(pricing['yearlyPrice'], greaterThan(0));
-        }
+        // 動的価格取得システムの基本設定確認
+        expect(InAppPurchaseConfig.inAppPurchaseEnabled, isTrue);
+        expect(InAppPurchaseConfig.allProductIds, isNotEmpty);
+
+        // フォールバック価格の一貫性確認
+        expect(SubscriptionConstants.premiumMonthlyPrice, greaterThan(0));
+        expect(SubscriptionConstants.premiumYearlyPrice, greaterThan(0));
       });
     });
   });

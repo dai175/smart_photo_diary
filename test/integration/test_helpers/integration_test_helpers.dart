@@ -445,6 +445,10 @@ class IntegrationTestHelpers {
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
     when(() => mockSettingsService.isFirstLaunch).thenReturn(false);
 
+    // Setup locale notifier properly
+    final localeNotifier = ValueNotifier<Locale?>(const Locale('ja'));
+    when(() => mockSettingsService.localeNotifier).thenReturn(localeNotifier);
+
     // Storage service defaults - basic mock setup
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
     when(
