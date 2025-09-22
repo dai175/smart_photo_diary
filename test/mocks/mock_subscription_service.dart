@@ -529,6 +529,23 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
+  Future<Result<PurchaseProduct?>> getProductPrice(String planId) async {
+    if (!_isInitialized) {
+      return Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
+    }
+
+    // プランIDに対応する商品を検索
+    final product = _availableProducts.firstWhere(
+      (p) => p.plan.id == planId,
+      orElse: () => throw StateError('Product not found'),
+    );
+
+    return Success(product);
+  }
+
+  @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     if (!_isInitialized) {
       return Failure(

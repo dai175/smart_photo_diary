@@ -130,6 +130,24 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
+  Future<Result<PurchaseProduct?>> getProductPrice(String planId) async {
+    if (planId == 'premium_yearly') {
+      return Success(
+        PurchaseProduct(
+          id: 'smart_photo_diary_premium_yearly',
+          title: 'Premium Plan',
+          description: 'Smart Photo Diary Premium',
+          price: '¥2,800',
+          priceAmount: 2800.0,
+          currencyCode: 'JPY',
+          plan: PremiumYearlyPlan(),
+        ),
+      );
+    }
+    return Success(null);
+  }
+
+  @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     return const Success([]);
   }

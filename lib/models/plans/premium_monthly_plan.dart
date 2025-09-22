@@ -2,7 +2,6 @@ import 'package:intl/intl.dart';
 
 import 'plan.dart';
 import '../../constants/subscription_constants.dart';
-import '../../utils/locale_format_utils.dart';
 
 /// Premium月額プランの実装クラス
 ///
@@ -54,25 +53,56 @@ class PremiumMonthlyPlan extends Plan {
   // ========================================
 
   /// 年額プランへの切り替えによる節約額を計算
-  int calculateYearlySavings() {
-    final yearlyTotal = price * 12;
-    final yearlyPlanPrice = SubscriptionConstants.premiumYearlyPrice;
-    return yearlyTotal - yearlyPlanPrice;
+  ///
+  /// [monthlyPriceAmount] 実際の月額価格
+  /// [yearlyPriceAmount] 実際の年額価格
+  /// [currencyCode] 通貨コード
+  double calculateYearlySavings({
+    double? monthlyPriceAmount,
+    double? yearlyPriceAmount,
+  }) {
+    final actualMonthlyPrice = monthlyPriceAmount ?? price.toDouble();
+    final actualYearlyPrice =
+        yearlyPriceAmount ??
+        SubscriptionConstants.premiumYearlyPrice.toDouble();
+
+    final yearlyTotal = actualMonthlyPrice * 12;
+    return yearlyTotal - actualYearlyPrice;
   }
 
   /// 年額プランへの切り替え推奨メッセージ
-  String getYearlyUpgradeMessage() {
-    final savings = calculateYearlySavings();
-    final savingsPercentage = SubscriptionConstants.yearlyDiscountPercentage;
+  ///
+  /// [monthlyPriceAmount] 実際の月額価格
+  /// [yearlyPriceAmount] 実際の年額価格
+  /// [currencyCode] 通貨コード
+  String getYearlyUpgradeMessage({
+    double? monthlyPriceAmount,
+    double? yearlyPriceAmount,
+    String? currencyCode,
+  }) {
+    final savings = calculateYearlySavings(
+      monthlyPriceAmount: monthlyPriceAmount,
+      yearlyPriceAmount: yearlyPriceAmount,
+    );
+    final actualMonthlyPrice = monthlyPriceAmount ?? price.toDouble();
+    final actualYearlyPrice =
+        yearlyPriceAmount ??
+        SubscriptionConstants.premiumYearlyPrice.toDouble();
+    final savingsPercentage =
+        ((actualMonthlyPrice * 12 - actualYearlyPrice) /
+                (actualMonthlyPrice * 12) *
+                100)
+            .round();
+
     final locale = Intl.getCurrentLocale().isEmpty
         ? 'ja'
         : Intl.getCurrentLocale();
-    final savingsText = LocaleFormatUtils.formatCurrency(
+    final currency = currencyCode ?? SubscriptionConstants.defaultCurrencyCode;
+
+    final savingsText = formatPriceWithAmount(
       savings,
+      currency,
       locale: locale,
-      currencyCode: SubscriptionConstants.defaultCurrencyCode,
-      decimalDigits: 0,
-      fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
     );
 
     return '年額プランに切り替えると、年間$savingsText（$savingsPercentage%OFF）お得になります。';

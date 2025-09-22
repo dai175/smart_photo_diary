@@ -15,6 +15,7 @@ import '../ui/components/custom_dialog.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../localization/localization_extensions.dart';
 import '../constants/subscription_constants.dart';
+import 'dynamic_pricing_utils.dart';
 
 /// アップグレードダイアログのユーティリティクラス
 ///
@@ -55,17 +56,48 @@ class UpgradeDialogUtils {
         return;
       }
 
-      // プレミアムプラン選択ダイアログを表示
-      if (!context.mounted) return;
-      _logger.debug(
-        'Opening plan selection dialog',
-        context: 'UpgradeDialogUtils.showUpgradeDialog',
-      );
-      await _showPremiumPlanDialog(context, premiumPlans);
-      _logger.debug(
-        'Plan selection dialog completed',
-        context: 'UpgradeDialogUtils.showUpgradeDialog',
-      );
+      // ローディング表示用のコントローラー
+      OverlayEntry? loadingOverlay;
+
+      try {
+        // 価格取得中のローディング表示
+        if (context.mounted) {
+          loadingOverlay = _showLoadingOverlay(context);
+        }
+
+        // 共通ユーティリティを使用して複数プランの価格を取得
+        final planIds = premiumPlans.map((plan) => plan.id).toList();
+        final priceStrings = await DynamicPricingUtils.getMultiplePlanPrices(
+          planIds,
+          locale: context.l10n.localeName,
+          timeout: const Duration(seconds: 10),
+        );
+
+        _logger.debug(
+          'Fetched multiple plan prices via DynamicPricingUtils',
+          context: 'UpgradeDialogUtils.showUpgradeDialog',
+          data: 'prices=${priceStrings.toString()}',
+        );
+
+        // ローディング非表示
+        loadingOverlay?.remove();
+        loadingOverlay = null;
+
+        // プレミアムプラン選択ダイアログを表示
+        if (!context.mounted) return;
+        _logger.debug(
+          'Opening plan selection dialog with dynamic pricing',
+          context: 'UpgradeDialogUtils.showUpgradeDialog',
+        );
+        await _showPremiumPlanDialog(context, premiumPlans, priceStrings);
+        _logger.debug(
+          'Plan selection dialog completed',
+          context: 'UpgradeDialogUtils.showUpgradeDialog',
+        );
+      } finally {
+        // 確実にローディングを非表示
+        loadingOverlay?.remove();
+      }
     } catch (e) {
       if (!context.mounted) return;
       DialogUtils.showSimpleDialog(
@@ -79,6 +111,7 @@ class UpgradeDialogUtils {
   static Future<void> _showPremiumPlanDialog(
     BuildContext parentContext,
     List<Plan> plans,
+    Map<String, String> priceStrings,
   ) async {
     return showDialog(
       context: parentContext,
@@ -96,7 +129,12 @@ class UpgradeDialogUtils {
               ),
               const SizedBox(height: AppSpacing.md),
               ...plans.map(
-                (plan) => _buildPlanOption(dialogContext, parentContext, plan),
+                (plan) => _buildPlanOption(
+                  dialogContext,
+                  parentContext,
+                  plan,
+                  priceStrings[plan.id],
+                ),
               ),
             ],
           ),
@@ -116,6 +154,7 @@ class UpgradeDialogUtils {
     BuildContext dialogContext,
     BuildContext parentContext,
     Plan plan,
+    String? priceString,
   ) {
     // 割引情報の取得や表示価格の計算
     String description = '';
@@ -179,25 +218,7 @@ class UpgradeDialogUtils {
                     ],
                   ),
                 ),
-                Text(
-                  plan.isMonthly
-                      ? dialogContext.l10n.pricingPerMonthShort(
-                          SubscriptionConstants.formatPriceForPlan(
-                            plan.id,
-                            dialogContext.l10n.localeName,
-                          ),
-                        )
-                      : dialogContext.l10n.pricingPerYearShort(
-                          SubscriptionConstants.formatPriceForPlan(
-                            plan.id,
-                            dialogContext.l10n.localeName,
-                          ),
-                        ),
-                  style: AppTypography.titleMedium.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                _buildPriceDisplay(dialogContext, plan, priceString),
                 const SizedBox(width: AppSpacing.sm),
                 Icon(
                   Icons.arrow_forward_ios_rounded,
@@ -208,6 +229,77 @@ class UpgradeDialogUtils {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// ローディングオーバーレイを表示
+  static OverlayEntry _showLoadingOverlay(BuildContext context) {
+    final overlay = OverlayEntry(
+      builder: (context) => Material(
+        color: Colors.black54,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.md),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: AppSpacing.md),
+                Text('Loading prices...', style: AppTypography.bodyMedium),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlay);
+    return overlay;
+  }
+
+  /// 価格表示ウィジェット（共通ユーティリティ対応）
+  static Widget _buildPriceDisplay(
+    BuildContext context,
+    Plan plan,
+    String? priceString,
+  ) {
+    // 共通ユーティリティから取得した価格を使用（既にフォーマット済み）
+    final priceText = priceString != null
+        ? (plan.isMonthly
+              ? context.l10n.pricingPerMonthShort(priceString)
+              : context.l10n.pricingPerYearShort(priceString))
+        : (plan.isMonthly
+              ? context.l10n.pricingPerMonthShort(
+                  SubscriptionConstants.formatPriceForPlan(
+                    plan.id,
+                    context.l10n.localeName,
+                  ),
+                )
+              : context.l10n.pricingPerYearShort(
+                  SubscriptionConstants.formatPriceForPlan(
+                    plan.id,
+                    context.l10n.localeName,
+                  ),
+                ));
+
+    _logger.debug(
+      priceString != null
+          ? 'Using dynamic price from DynamicPricingUtils for ${plan.id}'
+          : 'Using fallback price for ${plan.id}',
+      context: 'UpgradeDialogUtils._buildPriceDisplay',
+      data: 'price_text=$priceText',
+    );
+
+    return Text(
+      priceText,
+      style: AppTypography.titleMedium.copyWith(
+        fontWeight: FontWeight.w700,
+        color: AppColors.primary,
       ),
     );
   }

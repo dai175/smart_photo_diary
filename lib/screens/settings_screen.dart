@@ -11,6 +11,7 @@ import '../models/import_result.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../utils/url_launcher_utils.dart';
+import '../utils/dynamic_pricing_utils.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -1528,27 +1529,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: AppSpacing.sm),
 
           // Premium Monthly詳細
-          _buildSubscriptionPlanDetail(
+          _buildDynamicSubscriptionPlanDetail(
             context.l10n.settingsPremiumMonthlyTitle,
-            context.l10n.pricingPerMonthShort(
-              SubscriptionConstants.formatPriceForPlan(
-                SubscriptionConstants.premiumMonthlyPlanId,
-                context.l10n.localeName,
-              ),
-            ),
+            SubscriptionConstants.premiumMonthlyPlanId,
+            (price) => context.l10n.pricingPerMonthShort(price),
             context.l10n.settingsPremiumPlanFeatures,
           ),
           const SizedBox(height: AppSpacing.xs),
 
           // Premium Yearly詳細
-          _buildSubscriptionPlanDetail(
+          _buildDynamicSubscriptionPlanDetail(
             context.l10n.settingsPremiumYearlyTitle,
-            context.l10n.pricingPerYearShort(
-              SubscriptionConstants.formatPriceForPlan(
-                SubscriptionConstants.premiumYearlyPlanId,
-                context.l10n.localeName,
-              ),
-            ),
+            SubscriptionConstants.premiumYearlyPlanId,
+            (price) => context.l10n.pricingPerYearShort(price),
             context.l10n.settingsPremiumPlanFeatures,
           ),
 
@@ -1620,10 +1613,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  /// サブスクリプションプラン詳細表示
-  Widget _buildSubscriptionPlanDetail(
+  /// 動的価格対応のサブスクリプションプラン詳細表示
+  Widget _buildDynamicSubscriptionPlanDetail(
     String title,
-    String price,
+    String planId,
+    String Function(String) formatter,
     String features,
   ) {
     return Row(
@@ -1652,12 +1646,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    price,
-                    style: AppTypography.labelLarge.copyWith(
+                  const SizedBox(width: AppSpacing.xs),
+                  // 動的価格表示
+                  DynamicPriceText(
+                    planId: planId,
+                    locale: context.l10n.localeName,
+                    formatter: formatter,
+                    style: AppTypography.labelMedium.copyWith(
                       color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    loadingWidget: Container(
+                      width: 60,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
                   ),
                 ],

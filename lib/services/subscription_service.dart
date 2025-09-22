@@ -1700,6 +1700,68 @@ class SubscriptionService implements ISubscriptionService {
   // Phase 1.6.2.1: 商品情報取得実装
   // =================================================================
 
+  /// 指定プランの実際の価格情報を取得
+  @override
+  Future<Result<PurchaseProduct?>> getProductPrice(String planId) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      if (_inAppPurchase == null) {
+        return Failure(ServiceException('In-App Purchase not available'));
+      }
+
+      // プランからproductIdを取得
+      final plan = PlanFactory.createPlan(planId);
+      final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
+
+      _log(
+        'Fetching price for plan: $planId (productId: $productId)',
+        level: LogLevel.info,
+      );
+
+      // ストアから商品情報を取得
+      final ProductDetailsResponse response = await _inAppPurchase!
+          .queryProductDetails({productId});
+
+      if (response.error != null) {
+        return Failure(
+          ServiceException(
+            'Failed to fetch product price',
+            details: response.error.toString(),
+          ),
+        );
+      }
+
+      if (response.productDetails.isEmpty) {
+        return Success(null); // 商品が見つからない場合
+      }
+
+      final productDetail = response.productDetails.first;
+      final product = PurchaseProduct(
+        id: productDetail.id,
+        title: productDetail.title,
+        description: productDetail.description,
+        price: productDetail.price,
+        priceAmount: double.tryParse(productDetail.rawPrice.toString()) ?? 0.0,
+        currencyCode: productDetail.currencyCode,
+        plan: plan,
+      );
+
+      _log(
+        'Successfully fetched price: ${product.price} ${product.currencyCode}',
+        level: LogLevel.info,
+      );
+
+      return Success(product);
+    } catch (e) {
+      return _handleError(e, 'getProductPrice', details: planId);
+    }
+  }
+
   @override
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     try {

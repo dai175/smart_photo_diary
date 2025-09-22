@@ -27,7 +27,7 @@ abstract class Plan {
   /// プラン説明文
   final String description;
 
-  /// プラン価格（円）
+  /// プラン価格（円）- デフォルト価格（ストア価格で上書き可能）
   final int price;
 
   /// 月間AI生成制限回数
@@ -85,7 +85,7 @@ abstract class Plan {
   /// 日平均生成回数目安
   double get dailyAverageGenerations => monthlyAiGenerationLimit / 30.0;
 
-  /// 価格を表示用文字列に変換
+  /// 価格を表示用文字列に変換（デフォルト価格）
   String get formattedPrice {
     final currentLocale = Intl.getCurrentLocale().isEmpty
         ? 'ja'
@@ -97,6 +97,28 @@ abstract class Plan {
       currencyCode: SubscriptionConstants.defaultCurrencyCode,
       decimalDigits: 0,
       fallbackSymbol: SubscriptionConstants.defaultCurrencySymbol,
+    );
+  }
+
+  /// 指定した価格とロケールで表示用文字列に変換
+  String formatPriceWithAmount(
+    double amount,
+    String currencyCode, {
+    String? locale,
+  }) {
+    final currentLocale =
+        locale ??
+        (Intl.getCurrentLocale().isEmpty ? 'ja' : Intl.getCurrentLocale());
+
+    final decimalDigits = currencyCode == 'USD' ? 2 : 0;
+    final fallbackSymbol = currencyCode == 'USD' ? '\$' : '¥';
+
+    return LocaleFormatUtils.formatCurrency(
+      amount,
+      locale: currentLocale,
+      currencyCode: currencyCode,
+      decimalDigits: decimalDigits,
+      fallbackSymbol: fallbackSymbol,
     );
   }
 

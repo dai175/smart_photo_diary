@@ -10,6 +10,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/subscription_constants.dart';
+import '../utils/dynamic_pricing_utils.dart';
 import '../localization/localization_extensions.dart';
 import 'home_screen.dart';
 
@@ -438,15 +439,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       const SizedBox(height: AppSpacing.md),
 
-      // Premiumプラン
-      _buildPlanCard(
+      // Premiumプラン（動的価格対応）
+      _buildDynamicPlanCard(
         title: 'Premium',
-        subtitle: context.l10n.pricingPerMonthShort(
-          SubscriptionConstants.formatPriceForPlan(
-            SubscriptionConstants.premiumMonthlyPlanId,
-            context.l10n.localeName,
-          ),
-        ),
+        planId: SubscriptionConstants.premiumMonthlyPlanId,
+        formatter: (price) => context.l10n.pricingPerMonthShort(price),
         icon: Icons.star_rounded,
         color: AppColors.primary,
         features: [
@@ -699,6 +696,96 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     size: 18,
                     color: color,
                   ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 動的価格対応のプランカード
+  Widget _buildDynamicPlanCard({
+    required String title,
+    required String planId,
+    required String Function(String) formatter,
+    required IconData icon,
+    required Color color,
+    required List<String> features,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppSpacing.md),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 20, color: color),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                  // 動的価格表示
+                  DynamicPriceText(
+                    planId: planId,
+                    locale: context.l10n.localeName,
+                    formatter: formatter,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    loadingWidget: SizedBox(
+                      width: 80,
+                      height: 16,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ...features.map(
+            (feature) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle_rounded, size: 16, color: color),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(

@@ -86,6 +86,9 @@ abstract class ISubscriptionService {
   /// In-App Purchase商品情報を取得
   Future<Result<List<PurchaseProduct>>> getProducts();
 
+  /// 指定プランの実際の価格情報を取得
+  Future<Result<PurchaseProduct?>> getProductPrice(String planId);
+
   /// プランを購入（新Planクラス）
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan);
 
