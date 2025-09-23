@@ -119,17 +119,4 @@ class PremiumYearlyPlan extends Plan {
       '全機能を存分に活用可能',
     ];
   }
-
-  /// 更新時期の通知メッセージ
-  String getRenewalReminder(int daysUntilRenewal) {
-    if (daysUntilRenewal <= 0) {
-      return '本日が更新日です。';
-    } else if (daysUntilRenewal <= 7) {
-      return 'あと$daysUntilRenewal日で更新日です。';
-    } else if (daysUntilRenewal <= 30) {
-      return '更新日まであと$daysUntilRenewal日です。';
-    }
-
-    return '';
-  }
 }

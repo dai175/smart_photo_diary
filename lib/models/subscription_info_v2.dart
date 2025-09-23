@@ -279,7 +279,6 @@ class SubscriptionInfoV2 {
     final now = DateTime.now();
 
     if (daysUntil <= 0) return '期限切れ';
-    if (daysUntil <= 7) return '${expiry.month}/${expiry.day} (あと$daysUntil日)';
 
     // 年が異なる場合は年も表示
     if (expiry.year != now.year) {
@@ -357,9 +356,12 @@ class SubscriptionInfoV2 {
 
     if (daysUntilReset <= 0) return '今日';
     if (daysUntilReset == 1) return '明日';
-    if (daysUntilReset <= 7) {
-      return '${resetDate.month}/${resetDate.day} (あと$daysUntilReset日)';
+
+    // 年が異なる場合は年も表示
+    if (resetDate.year != today.year) {
+      return '${resetDate.year}/${resetDate.month}/${resetDate.day}';
     }
+
     return '${resetDate.month}/${resetDate.day}';
   }
 
