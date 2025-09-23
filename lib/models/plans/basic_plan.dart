@@ -49,30 +49,4 @@ class BasicPlan extends Plan {
   // ========================================
   // Basicプラン固有のメソッド
   // ========================================
-
-  /// アップグレード推奨メッセージを生成
-  String getUpgradeMessage(int currentUsage) {
-    final usageRate = currentUsage / monthlyAiGenerationLimit;
-
-    if (usageRate >= 1.0) {
-      return '今月のAI生成回数の上限に達しました。Premiumプランにアップグレードすると、月${SubscriptionConstants.premiumMonthlyAiLimit}回まで利用できます。';
-    } else if (usageRate >= 0.8) {
-      return 'AI生成の残り回数が少なくなっています。Premiumプランでより多く利用できます。';
-    } else if (usageRate >= 0.5) {
-      return 'より多くの機能をお楽しみいただくには、Premiumプランがおすすめです。';
-    }
-
-    return '';
-  }
-
-  /// プレミアムプランとの差分機能リストを取得
-  List<String> getMissingFeatures() {
-    return [
-      'ライティングプロンプト機能',
-      '高度なフィルタ・検索機能',
-      '統計・分析ダッシュボード',
-      '月${SubscriptionConstants.premiumMonthlyAiLimit}回のAI生成',
-      '優先カスタマーサポート',
-    ];
-  }
 }

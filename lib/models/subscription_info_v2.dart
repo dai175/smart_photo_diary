@@ -237,10 +237,6 @@ class SubscriptionInfoV2 {
   /// Premiumプランかどうか
   bool get isPremium => currentPlan.isPremium;
 
-  /// プランの表示名（ロケール非対応、廃止予定）
-  @Deprecated('Use getLocalizedPlanDisplayName instead')
-  String get planDisplayName => currentPlan.displayName;
-
   /// プランの表示名（多言語化対応）
   String getLocalizedPlanDisplayName(String locale) {
     // PlanFactoryで作られたプランのIDに基づいて適切な表示名を返す
@@ -364,23 +360,6 @@ class SubscriptionInfoV2 {
 
     return '${resetDate.month}/${resetDate.day}';
   }
-
-  /// 設定画面表示用の統合データ
-  SubscriptionDisplayDataV2 get displayData => SubscriptionDisplayDataV2(
-    planName: planDisplayName,
-    planStatus: planStatusDisplay,
-    usageText: usageStats.usageDisplay,
-    remainingText: '${usageStats.remainingCount}回',
-    resetDateText: resetDateDisplayText,
-    expiryText: expiryDisplayText,
-    autoRenewalText: autoRenewalDisplayText,
-    warningMessage: usageWarningMessage,
-    recommendationMessage: planRecommendationMessage,
-    showUpgradeButton: !isPremium,
-    usageProgressValue: usageStats.usageRate,
-    isNearLimit: usageStats.isNearLimit,
-    isExpiryNear: periodInfo.isExpiryNear,
-  );
 
   /// 設定画面表示用の統合データ（多言語化対応）
   SubscriptionDisplayDataV2 getLocalizedDisplayData({
