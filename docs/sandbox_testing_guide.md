@@ -145,7 +145,3 @@ Smart Photo DiaryのIn-App Purchase機能をサンドボックス環境でテス
 - 本番APIエンドポイントへの切り替え
 - エラーハンドリングの最終確認
 
----
-
-**更新**: 2024年12月現在  
-**対象バージョン**: Smart Photo Diary v1.0以降

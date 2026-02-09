@@ -7,7 +7,7 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 ## ワークフロー構成
 
 ### 1. CI Pipeline (`ci.yml`)
-**トリガー**: main/developブランチpush、PR作成時、手動実行
+**トリガー**: mainブランチpush、PR作成時、手動実行
 
 ```yaml
 ✅ コード品質チェック（フォーマット、静的解析）
@@ -27,17 +27,7 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 ✅ GitHub Release作成・アップロード
 ```
 
-### 3. Android Deploy (`android-deploy.yml`)
-**トリガー**: バージョンタグ(`v*`)push、手動実行
-
-```yaml
-✅ 品質チェック・テスト実行
-✅ 本番環境でのAABビルド
-✅ Google Play Console自動アップロード
-✅ リリーストラック選択（internal/alpha/beta/production）
-```
-
-### 4. iOS Deploy (`ios-deploy.yml`)
+### 3. iOS Deploy (`ios-deploy.yml`)
 **トリガー**: バージョンタグ(`v*`)push、手動実行
 
 ```yaml
@@ -110,22 +100,14 @@ git push origin v1.2.0
 
 # → 自動実行される内容:
 #   ✅ release.yml: GitHub Release作成
-#   ✅ android-deploy.yml: Play Store（手動実行可）
 #   ✅ ios-deploy.yml: App Store（手動実行可）
 ```
 
 ### 手動デプロイ実行
 ```bash
 # GitHub Actions画面での手動実行
-1. Actions タブ → Android Deploy 選択
-2. "Run workflow" → リリーストラック選択
-   - internal: 内部テスト
-   - alpha: クローズドテスト
-   - beta: オープンテスト
-   - production: 本番リリース
-
-3. Actions タブ → iOS Deploy 選択
-4. "Run workflow" → 環境選択
+1. Actions タブ → iOS Deploy 選択
+2. "Run workflow" → 環境選択
    - testflight: TestFlight配布
    - appstore: App Store提出
 ```
@@ -245,7 +227,3 @@ Smart Photo DiaryのCI/CDシステムは、以下の特徴を持つ自動化パ�
 - **ワンクリック配布**: 手動トリガー対応
 - **監視・通知**: 失敗時の自動通知
 
----
-
-**更新**: 2024年12月現在  
-**対象バージョン**: Smart Photo Diary v1.0以降
