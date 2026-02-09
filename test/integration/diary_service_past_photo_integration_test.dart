@@ -22,6 +22,7 @@ void main() {
 
       // Clear any existing entries
       final entriesResult = await diaryService.getSortedDiaryEntries();
+      expect(entriesResult.isSuccess, isTrue);
       for (final entry in entriesResult.value) {
         await diaryService.deleteDiaryEntry(entry.id);
       }
@@ -56,6 +57,7 @@ void main() {
             location: location,
             tags: tags,
           );
+          expect(createResult.isSuccess, isTrue);
           final result = createResult.value;
 
           // Assert
@@ -78,6 +80,7 @@ void main() {
 
           // DBに保存されていることを確認
           final getResult = await diaryService.getDiaryEntry(result.id);
+          expect(getResult.isSuccess, isTrue);
           final savedEntry = getResult.value;
           expect(savedEntry, isNotNull);
           expect(savedEntry!.id, equals(result.id));
@@ -97,6 +100,7 @@ void main() {
             content: '朝の写真から作成',
             photoIds: ['morning-photo'],
           );
+          expect(result1.isSuccess, isTrue);
           final entry1 = result1.value;
 
           final result2 = await diaryService.createDiaryForPastPhoto(
@@ -105,6 +109,7 @@ void main() {
             content: '夕方の写真から作成',
             photoIds: ['evening-photo'],
           );
+          expect(result2.isSuccess, isTrue);
           final entry2 = result2.value;
 
           // Assert
@@ -113,6 +118,7 @@ void main() {
 
           // 両方の日記が保存されていることを確認
           final dateResult = await diaryService.getDiaryByPhotoDate(photoDate);
+          expect(dateResult.isSuccess, isTrue);
           final diariesForDate = dateResult.value;
           expect(diariesForDate.length, greaterThanOrEqualTo(2));
 
@@ -138,6 +144,7 @@ void main() {
           content: '昨年の今日の出来事',
           photoIds: ['old-photo'],
         );
+        expect(createResult.isSuccess, isTrue);
         final result = createResult.value;
 
         // Assert
@@ -146,6 +153,7 @@ void main() {
 
         // 日付が正しく保存されていることを確認
         final getResult = await diaryService.getDiaryEntry(result.id);
+        expect(getResult.isSuccess, isTrue);
         final retrieved = getResult.value;
         expect(retrieved!.date, equals(photoDate));
       });
@@ -161,6 +169,7 @@ void main() {
           content: '4年に1度の特別な日',
           photoIds: ['leap-photo'],
         );
+        expect(createResult.isSuccess, isTrue);
         final leapYearEntry = createResult.value;
 
         // Assert
@@ -183,6 +192,7 @@ void main() {
           content: '朝の内容',
           photoIds: ['photo1'],
         );
+        expect(result1.isSuccess, isTrue);
         final entry1 = result1.value;
 
         final result2 = await diaryService.createDiaryForPastPhoto(
@@ -191,6 +201,7 @@ void main() {
           content: '午後の内容',
           photoIds: ['photo2'],
         );
+        expect(result2.isSuccess, isTrue);
         final entry2 = result2.value;
 
         // 異なる日付で1つの日記を作成
@@ -200,10 +211,12 @@ void main() {
           content: '別の日の内容',
           photoIds: ['photo3'],
         );
+        expect(result3.isSuccess, isTrue);
         final entry3 = result3.value;
 
         // Act
         final dateResult = await diaryService.getDiaryByPhotoDate(targetDate);
+        expect(dateResult.isSuccess, isTrue);
         final diaries = dateResult.value;
 
         // Assert
@@ -241,6 +254,7 @@ void main() {
         final dateResult = await diaryService.getDiaryByPhotoDate(targetDate);
 
         // Assert
+        expect(dateResult.isSuccess, isTrue);
         expect(dateResult.value, isEmpty);
       });
 
@@ -255,6 +269,7 @@ void main() {
           content: '内容',
           photoIds: ['photo1'],
         );
+        expect(result1.isSuccess, isTrue);
         final entry1 = result1.value;
 
         final result2 = await diaryService.saveDiaryEntry(
@@ -263,10 +278,12 @@ void main() {
           content: '内容',
           photoIds: ['photo2'],
         );
+        expect(result2.isSuccess, isTrue);
         final entry2 = result2.value;
 
         // Act
         final dateResult = await diaryService.getDiaryByPhotoDate(targetDate);
+        expect(dateResult.isSuccess, isTrue);
         final diaries = dateResult.value;
 
         // Assert
@@ -296,6 +313,7 @@ void main() {
 
         // Act
         final dateResult = await diaryService.getDiaryByPhotoDate(targetDate);
+        expect(dateResult.isSuccess, isTrue);
         final diaries = dateResult.value;
 
         // Assert
@@ -319,10 +337,12 @@ void main() {
             content: '内容',
             photoIds: ['photo1'],
           );
+          expect(createResult.isSuccess, isTrue);
           final createdEntry = createResult.value;
 
           // 作成した日記を日付で検索
           final dateResult = await diaryService.getDiaryByPhotoDate(photoDate);
+          expect(dateResult.isSuccess, isTrue);
           final retrievedEntries = dateResult.value;
 
           // Assert
@@ -358,9 +378,11 @@ void main() {
               location: testData['location'] as String,
               tags: testData['tags'] as List<String>,
             );
+            expect(createResult.isSuccess, isTrue);
             final created = createResult.value;
 
             final dateResult = await diaryService.getDiaryByPhotoDate(testDate);
+            expect(dateResult.isSuccess, isTrue);
             final retrieved = dateResult.value;
             final found = retrieved.firstWhere((e) => e.id == created.id);
 

@@ -49,10 +49,12 @@ void main() {
           content: content,
           photoIds: photoIds,
         );
+        expect(saveResult.isSuccess, isTrue);
         final savedEntry = saveResult.value;
 
         // Retrieve the entry
         final getResult = await diaryService.getDiaryEntry(savedEntry.id);
+        expect(getResult.isSuccess, isTrue);
         final retrievedEntry = getResult.value;
 
         // Assert
@@ -71,6 +73,7 @@ void main() {
           content: 'Original Content',
           photoIds: ['photo1'],
         );
+        expect(saveResult.isSuccess, isTrue);
         final originalEntry = saveResult.value;
 
         final updatedEntry = originalEntry.copyWith(
@@ -82,6 +85,7 @@ void main() {
         // Act
         await diaryService.updateDiaryEntry(updatedEntry);
         final getResult = await diaryService.getDiaryEntry(originalEntry.id);
+        expect(getResult.isSuccess, isTrue);
         final retrievedEntry = getResult.value;
 
         // Assert
@@ -98,6 +102,7 @@ void main() {
           content: 'This will be deleted',
           photoIds: [],
         );
+        expect(saveResult.isSuccess, isTrue);
         final entry = saveResult.value;
 
         // Act
@@ -113,6 +118,7 @@ void main() {
       test('should return total diary count', () async {
         // Arrange - Clear existing entries
         final allResult = await diaryService.getSortedDiaryEntries();
+        expect(allResult.isSuccess, isTrue);
         for (final entry in allResult.value) {
           await diaryService.deleteDiaryEntry(entry.id);
         }
@@ -135,6 +141,7 @@ void main() {
         final countResult = await diaryService.getTotalDiaryCount();
 
         // Assert
+        expect(countResult.isSuccess, isTrue);
         expect(countResult.value, equals(2));
       });
 
@@ -145,6 +152,7 @@ void main() {
 
         // Clear existing entries
         final allResult = await diaryService.getSortedDiaryEntries();
+        expect(allResult.isSuccess, isTrue);
         for (final entry in allResult.value) {
           await diaryService.deleteDiaryEntry(entry.id);
         }
@@ -172,6 +180,7 @@ void main() {
         );
 
         // Assert
+        expect(countResult.isSuccess, isTrue);
         expect(countResult.value, equals(1));
       });
     });
@@ -196,10 +205,12 @@ void main() {
             content: 'Testing asset conversion',
             photos: assets,
           );
+          expect(saveResult.isSuccess, isTrue);
           final result = saveResult.value;
 
           // Retrieve to verify
           final getResult = await diaryService.getDiaryEntry(result.id);
+          expect(getResult.isSuccess, isTrue);
           final retrievedEntry = getResult.value;
 
           // Assert
@@ -230,6 +241,7 @@ void main() {
           content: 'Test Content',
           photoIds: [],
         );
+        expect(saveResult.isSuccess, isTrue);
         final entry = saveResult.value;
 
         // Act - Delete twice

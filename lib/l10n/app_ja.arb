@@ -1422,5 +1422,21 @@
   "shareCreatedWith": "#SmartPhotoDiary で生成",
   "@shareCreatedWith": {
     "description": "共有時に使用するクレジットテキスト"
+  },
+  "tagMorning": "朝",
+  "@tagMorning": {
+    "description": "フォールバックタグ: 朝の時間帯"
+  },
+  "tagAfternoon": "昼",
+  "@tagAfternoon": {
+    "description": "フォールバックタグ: 昼の時間帯"
+  },
+  "tagEvening": "夕方",
+  "@tagEvening": {
+    "description": "フォールバックタグ: 夕方の時間帯"
+  },
+  "tagNight": "夜",
+  "@tagNight": {
+    "description": "フォールバックタグ: 夜の時間帯"
   }
 }
