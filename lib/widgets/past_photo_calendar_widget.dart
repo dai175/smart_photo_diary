@@ -5,6 +5,7 @@ import '../models/plans/plan.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/result/result.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
@@ -223,20 +224,28 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final result = await diaryService.getSortedDiaryEntries();
 
-      if (result.isSuccess) {
-        final dates = <DateTime>{};
-        for (final diary in result.value) {
-          final date = DateTime(
-            diary.date.year,
-            diary.date.month,
-            diary.date.day,
-          );
-          dates.add(date);
-        }
+      switch (result) {
+        case Success(data: final diaries):
+          final dates = <DateTime>{};
+          for (final diary in diaries) {
+            final date = DateTime(
+              diary.date.year,
+              diary.date.month,
+              diary.date.day,
+            );
+            dates.add(date);
+          }
 
-        setState(() {
-          _diaryDates = dates;
-        });
+          setState(() {
+            _diaryDates = dates;
+          });
+        case Failure(exception: final e):
+          final loggingService = await LoggingService.getInstance();
+          loggingService.warning(
+            '日記日付の読み込みに失敗しましたが、機能は継続します',
+            context: 'PastPhotoCalendarWidget._loadDiaryDates',
+            data: e.message,
+          );
       }
     } catch (e) {
       final loggingService = await LoggingService.getInstance();

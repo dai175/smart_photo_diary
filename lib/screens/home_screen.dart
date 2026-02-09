@@ -286,8 +286,11 @@ class _HomeScreenState extends State<HomeScreen>
     try {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final result = await diaryService.getSortedDiaryEntries();
-      if (result.isSuccess) {
-        _collectUsedPhotoIds(result.value);
+      switch (result) {
+        case Success(data: final entries):
+          _collectUsedPhotoIds(entries);
+        case Failure(exception: final e):
+          _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
       }
     } catch (e) {
       _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
