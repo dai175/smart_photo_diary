@@ -112,6 +112,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           // 写真アセットを取得
           final assets = await entry.getPhotoAssets();
 
+          if (!mounted) return;
+
           setState(() {
             _diaryEntry = entry;
             _titleController.text = entry.title;
