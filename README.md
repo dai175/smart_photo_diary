@@ -65,7 +65,8 @@
 ### 前提条件
 - Flutter SDK (3.32.0)
 - FVM (Flutter Version Management) - 推奨
-- Xcode
+- Xcode（iOSビルド用）
+- Android Studio（Androidビルド用）
 - Google Gemini API キー
 
 ### セットアップ
