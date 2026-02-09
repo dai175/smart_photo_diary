@@ -855,7 +855,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         : row;
 
     if (semanticLabel != null) {
-      result = Semantics(label: semanticLabel, button: true, child: result);
+      result = Semantics(
+        label: semanticLabel,
+        button: onTap != null,
+        child: result,
+      );
     }
 
     return result;

@@ -83,7 +83,8 @@ void main() {
         );
 
         // Act
-        await diaryService.updateDiaryEntry(updatedEntry);
+        final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
+        expect(updateResult.isSuccess, isTrue);
         final getResult = await diaryService.getDiaryEntry(originalEntry.id);
         expect(getResult.isSuccess, isTrue);
         final retrievedEntry = getResult.value;

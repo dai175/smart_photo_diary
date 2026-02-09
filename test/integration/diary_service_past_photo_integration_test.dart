@@ -31,6 +31,7 @@ void main() {
     tearDown(() async {
       // Clean up after each test
       final entriesResult = await diaryService.getSortedDiaryEntries();
+      expect(entriesResult.isSuccess, isTrue);
       for (final entry in entriesResult.value) {
         await diaryService.deleteDiaryEntry(entry.id);
       }

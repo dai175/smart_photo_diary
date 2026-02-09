@@ -223,6 +223,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
     try {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
       final result = await diaryService.getSortedDiaryEntries();
+      if (!mounted) return;
 
       switch (result) {
         case Success(data: final diaries):

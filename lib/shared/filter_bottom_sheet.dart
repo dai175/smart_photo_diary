@@ -44,6 +44,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           widget.diaryService ??
           await ServiceLocator().getAsync<IDiaryService>();
       final result = await diaryService.getPopularTags(limit: 20);
+      if (!mounted) return;
       if (result.isSuccess) {
         setState(() {
           _availableTags = result.value;
