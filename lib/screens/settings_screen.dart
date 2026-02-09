@@ -832,6 +832,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
+          // ignore: use_null_aware_elements, build_runner analyzer does not yet support this syntax
           if (trailing != null) trailing,
           if (trailing == null && onTap != null)
             Icon(
