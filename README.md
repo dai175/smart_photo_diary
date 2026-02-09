@@ -17,7 +17,7 @@
 ### 収益化システム（フリーミアムモデル）
 - **Basic（無料）**: 月10回のAI生成、基本プロンプト5種類
 - **Premium（月額/年額）**: 月100回のAI生成、全20種類のプロンプト、高度な分析機能
-  - 地域別動的価格対応（DynamicPricingUtils）
+  - ストアの地域・通貨に応じた動的価格対応
 
 ### ライティングプロンプト機能
 - **20種類の厳選プロンプト**: 9カテゴリ（感情、感覚、成長、つながり、発見、空想、癒し、エネルギー等）
@@ -63,7 +63,7 @@
 ## 開発環境構築
 
 ### 前提条件
-- Flutter SDK (3.8.0+)
+- Flutter SDK (3.32.0)
 - FVM (Flutter Version Management) - 推奨
 - Xcode
 - Google Gemini API キー
@@ -119,7 +119,7 @@ fvm dart format .
 ## CI/CD
 
 ### GitHub Actions ワークフロー
-- **ci.yml**: コード品質・テスト自動実行（プッシュ時）
+- **ci.yml**: コード品質・テスト自動実行（push + PR + 手動実行時）
 - **release.yml**: GitHub Releases自動作成（バージョンタグ時）
 - **ios-deploy.yml**: App Store/TestFlight手動デプロイ
 

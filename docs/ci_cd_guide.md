@@ -13,8 +13,7 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 ✅ コード品質チェック（フォーマット、静的解析）
 ✅ 全テスト実行（100%成功率）
 ✅ カバレッジ生成・Codecovアップロード
-✅ Android/iOSビルド検証
-✅ アーティファクト保存（30日間）
+✅ Android/iOSビルド検証（mainブランチpush時のみ、Releaseビルド）
 ```
 
 ### 2. Release (`release.yml`)
@@ -74,12 +73,12 @@ GEMINI_API_KEY              # Google Gemini API キー
 ```bash
 # 1. 機能開発・プルリクエスト
 git push origin feature/new-feature
-# → ci.yml が自動実行（品質チェック・テスト・ビルド検証）
+# → ci.yml が自動実行（品質チェック・テストのみ）
 
 # 2. レビュー・マージ
 git checkout main && git merge feature/new-feature
 git push origin main
-# → ci.yml が再度実行（mainブランチ用完全ビルド検証）
+# → ci.yml が再度実行（品質チェック・テスト + Android/iOSビルド検証）
 ```
 
 ### ローカライズQAチェック
