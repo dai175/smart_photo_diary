@@ -746,6 +746,53 @@ class SubscriptionService implements ISubscriptionService {
     return DateTime.now().isBefore(status.expiryDate!);
   }
 
+  /// Premium専用機能へのアクセスチェック共通ヘルパー
+  ///
+  /// BasicPlan -> false、PremiumPlanは有効期限をチェックする
+  /// 共通パターンを一箇所にまとめることで重複を排除
+  Future<Result<bool>> _checkFeatureAccess(String featureName) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+
+      final status = statusResult.value;
+      final currentPlan = PlanFactory.createPlan(status.planId);
+
+      if (currentPlan is BasicPlan) {
+        return const Success(false);
+      }
+
+      final isPremiumValid = _isSubscriptionValid(status);
+      _log(
+        '$featureName access check',
+        level: LogLevel.debug,
+        data: {'plan': currentPlan.id, 'valid': isPremiumValid},
+      );
+
+      return Success(isPremiumValid);
+    } catch (e) {
+      _log(
+        'Error checking $featureName access',
+        level: LogLevel.error,
+        error: e,
+      );
+      return Failure(
+        ServiceException(
+          'Failed to check $featureName access',
+          details: e.toString(),
+        ),
+      );
+    }
+  }
+
   /// 月次使用量リセットが必要かチェックしてリセット（内部用）
   Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
     final now = DateTime.now();
@@ -819,69 +866,28 @@ class SubscriptionService implements ISubscriptionService {
   /// プレミアム機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      // デバッグモードでプラン強制設定をチェック
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        _log(
-          'デバッグモードチェック',
-          level: LogLevel.debug,
-          data: {'forcePlan': forcePlan},
-        );
-        if (forcePlan != null) {
-          final forceResult = forcePlan.startsWith('premium');
-          _log(
-            'プラン強制設定により Premium アクセス',
-            level: LogLevel.debug,
-            data: {'access': forceResult, 'plan': forcePlan},
-          );
-          return Success(forceResult);
-        } else {
-          _log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
-        }
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // Basicプランは基本機能のみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      // Premiumプランは有効期限をチェック
-      final isPremiumValid = _isSubscriptionValid(status);
+    // デバッグモードでプラン強制設定をチェック
+    if (kDebugMode) {
+      final forcePlan = EnvironmentConfig.forcePlan;
       _log(
-        'Premium features access check',
+        'デバッグモードチェック',
         level: LogLevel.debug,
-        data: {'plan': currentPlan.id, 'valid': isPremiumValid},
+        data: {'forcePlan': forcePlan},
       );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking premium features access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check premium features access',
-          details: e.toString(),
-        ),
-      );
+      if (forcePlan != null) {
+        final forceResult = forcePlan.startsWith('premium');
+        _log(
+          'プラン強制設定により Premium アクセス',
+          level: LogLevel.debug,
+          data: {'access': forceResult, 'plan': forcePlan},
+        );
+        return Success(forceResult);
+      } else {
+        _log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
+      }
     }
+
+    return _checkFeatureAccess('Premium features');
   }
 
   /// ライティングプロンプト機能にアクセスできるかどうか
@@ -960,47 +966,7 @@ class SubscriptionService implements ISubscriptionService {
   /// 高度なフィルタ機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedFilters() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 高度なフィルタはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Advanced filters access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking advanced filters access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check advanced filters access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Advanced filters');
   }
 
   /// データエクスポート機能にアクセスできるかどうか
@@ -1055,47 +1021,7 @@ class SubscriptionService implements ISubscriptionService {
 
   /// 統計ダッシュボード機能にアクセスできるかどうか
   Future<Result<bool>> canAccessStatsDashboard() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 統計ダッシュボードはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Stats dashboard access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking stats dashboard access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check stats dashboard access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Stats dashboard');
   }
 
   /// プラン別の機能制限情報を取得
@@ -1144,93 +1070,13 @@ class SubscriptionService implements ISubscriptionService {
   /// 高度な分析にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedAnalytics() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 高度な分析はPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Advanced analytics access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking advanced analytics access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check advanced analytics access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Advanced analytics');
   }
 
   /// 優先サポートにアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPrioritySupport() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 優先サポートはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Priority support access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking priority support access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check priority support access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Priority support');
   }
 
   // =================================================================
