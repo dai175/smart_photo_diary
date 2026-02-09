@@ -231,11 +231,6 @@ class DiaryService implements IDiaryService {
         DateTime(entry.date.year, entry.date.month, entry.date.day),
       );
       _searchTextIndex[entry.id] = _buildSearchableText(entry);
-      _sortedDatesByDayDesc.insert(
-        insertAt,
-        DateTime(entry.date.year, entry.date.month, entry.date.day),
-      );
-      _searchTextIndex[entry.id] = _buildSearchableText(entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(

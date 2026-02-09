@@ -224,17 +224,6 @@ class DiaryScreenController extends BaseErrorController {
     await loadDiaryEntries();
   }
 
-  // 空の状態メッセージを取得
-  String getEmptyStateMessage() {
-    if (_isSearching) {
-      return '「$_searchQuery」に一致する日記がありません';
-    } else if (_currentFilter.isActive) {
-      return 'フィルタ条件に一致する日記がありません';
-    } else {
-      return '日記がありません';
-    }
-  }
-
   // 空の状態メッセージを取得（多言語化対応）
   String getLocalizedEmptyStateMessage({
     required String Function() noDiariesMessage,

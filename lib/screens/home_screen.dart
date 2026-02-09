@@ -543,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: IndexedStack(index: _currentIndex, children: screens),
-      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButton: null,
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -595,14 +595,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
-  // FloatingActionButtonを構築（統合後は非表示、TimelineFABIntegrationで管理）
-  Widget? _buildFloatingActionButton() {
-    // 統合後はFABをTimelineFABIntegrationで管理するため、ここでは非表示
-    return _currentIndex == 0 ? null : null;
-  }
-
-  // 統合後：カメラ撮影処理（TimelineFABIntegrationから呼び出される）
 
   // カメラ撮影処理
   Future<void> _capturePhoto() async {
