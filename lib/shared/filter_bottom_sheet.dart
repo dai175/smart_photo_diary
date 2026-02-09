@@ -43,11 +43,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       final diaryService =
           widget.diaryService ??
           await ServiceLocator().getAsync<IDiaryService>();
-      final popularTags = await diaryService.getPopularTags(limit: 20);
-      setState(() {
-        _availableTags = popularTags;
-        _isLoadingTags = false;
-      });
+      final result = await diaryService.getPopularTags(limit: 20);
+      if (result.isSuccess) {
+        setState(() {
+          _availableTags = result.value;
+          _isLoadingTags = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingTags = false;
+        });
+        _logger.error(
+          context.l10n.filterTagLoadError,
+          error: result.error,
+          context: 'FilterBottomSheet',
+        );
+      }
     } catch (e) {
       setState(() {
         _isLoadingTags = false;

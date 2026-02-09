@@ -221,21 +221,23 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   Future<void> _loadDiaryDates() async {
     try {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final diaries = await diaryService.getSortedDiaryEntries();
+      final result = await diaryService.getSortedDiaryEntries();
 
-      final dates = <DateTime>{};
-      for (final diary in diaries) {
-        final date = DateTime(
-          diary.date.year,
-          diary.date.month,
-          diary.date.day,
-        );
-        dates.add(date);
+      if (result.isSuccess) {
+        final dates = <DateTime>{};
+        for (final diary in result.value) {
+          final date = DateTime(
+            diary.date.year,
+            diary.date.month,
+            diary.date.day,
+          );
+          dates.add(date);
+        }
+
+        setState(() {
+          _diaryDates = dates;
+        });
       }
-
-      setState(() {
-        _diaryDates = dates;
-      });
     } catch (e) {
       final loggingService = await LoggingService.getInstance();
       final appError = ErrorHandler.handleError(e, context: '日記日付読み込み');

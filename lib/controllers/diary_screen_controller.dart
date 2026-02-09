@@ -50,7 +50,7 @@ class DiaryScreenController extends BaseErrorController {
       setLoading(true);
       _resetPaging();
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getFilteredDiaryEntriesPageResult(
+      final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
         limit: _pageSize,
@@ -86,7 +86,7 @@ class DiaryScreenController extends BaseErrorController {
 
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getFilteredDiaryEntriesPageResult(
+      final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
         limit: _pageSize,
@@ -190,7 +190,7 @@ class DiaryScreenController extends BaseErrorController {
           : _currentFilter.copyWith(searchText: query);
 
       _resetPaging();
-      final result = await diaryService.getFilteredDiaryEntriesPageResult(
+      final result = await diaryService.getFilteredDiaryEntriesPage(
         filter,
         offset: _offset,
         limit: _pageSize,

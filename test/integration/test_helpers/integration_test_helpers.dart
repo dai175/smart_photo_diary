@@ -381,28 +381,49 @@ class IntegrationTestHelpers {
     MockSettingsService mockSettingsService,
     MockStorageService mockStorageService,
   ) {
-    // Diary service defaults - using correct interface methods
+    // Diary service defaults - using Result pattern
     when(
-      () => mockDiaryService.getSortedDiaryEntries(),
-    ).thenAnswer((_) async => []);
+      () => mockDiaryService.getSortedDiaryEntries(
+        descending: any(named: 'descending'),
+      ),
+    ).thenAnswer((_) async => const Success([]));
     when(
       () => mockDiaryService.getFilteredDiaryEntries(any()),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success([]));
+    when(
+      () => mockDiaryService.getFilteredDiaryEntriesPage(
+        any(),
+        offset: any(named: 'offset'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => const Success([]));
     when(
       () => mockDiaryService.getAllTags(),
-    ).thenAnswer((_) async => <String>{});
+    ).thenAnswer((_) async => Success(<String>{}));
     when(
       () => mockDiaryService.getTotalDiaryCount(),
-    ).thenAnswer((_) async => 0);
+    ).thenAnswer((_) async => const Success(0));
     when(
       () => mockDiaryService.getDiaryCountInPeriod(any(), any()),
-    ).thenAnswer((_) async => 0);
+    ).thenAnswer((_) async => const Success(0));
     when(
       () => mockDiaryService.getDiaryEntry(any()),
-    ).thenAnswer((_) async => null);
+    ).thenAnswer((_) async => const Success(null));
     when(
       () => mockDiaryService.getTagsForEntry(any()),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success([]));
+    when(
+      () => mockDiaryService.getPopularTags(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => const Success([]));
+    when(
+      () => mockDiaryService.getDiaryEntryByPhotoId(any()),
+    ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mockDiaryService.updateDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mockDiaryService.deleteDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success(null));
 
     // Subscription service defaults - basic mock setup
     when(() => mockSubscriptionService.isInitialized).thenReturn(true);

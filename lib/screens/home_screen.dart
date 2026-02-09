@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../core/result/result.dart';
 import '../models/diary_entry.dart';
 import '../screens/diary_screen.dart';
 import '../screens/diary_detail_screen.dart';
@@ -169,16 +170,26 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _navigateToDiaryDetailByPhotoId(String photoId) async {
     try {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final diaryEntry = await diaryService.getDiaryEntryByPhotoId(photoId);
+      final result = await diaryService.getDiaryEntryByPhotoId(photoId);
 
-      if (diaryEntry != null) {
-        _logger.info('写真ID: $photoId の日記詳細に遷移: ${diaryEntry.id}');
-        await _openDiaryDetail(diaryEntry.id);
-      } else {
-        _logger.warning('写真ID: $photoId に対応する日記が見つかりません');
-        if (mounted) {
-          _showSimpleDialog(context.l10n.homeLinkedDiaryNotFound);
-        }
+      switch (result) {
+        case Success(data: final diaryEntry):
+          if (diaryEntry != null) {
+            _logger.info('写真ID: $photoId の日記詳細に遷移: ${diaryEntry.id}');
+            await _openDiaryDetail(diaryEntry.id);
+          } else {
+            _logger.warning('写真ID: $photoId に対応する日記が見つかりません');
+            if (mounted) {
+              _showSimpleDialog(context.l10n.homeLinkedDiaryNotFound);
+            }
+          }
+        case Failure(exception: final e):
+          _logger.error('写真IDから日記取得エラー', error: e);
+          if (mounted) {
+            _showSimpleDialog(
+              '${context.l10n.homeDiaryLoadError}\n${e.message}',
+            );
+          }
       }
     } catch (e) {
       _logger.error('写真IDから日記取得エラー', error: e);
@@ -274,8 +285,10 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _loadUsedPhotoIds() async {
     try {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final allEntries = await diaryService.getSortedDiaryEntries();
-      _collectUsedPhotoIds(allEntries);
+      final result = await diaryService.getSortedDiaryEntries();
+      if (result.isSuccess) {
+        _collectUsedPhotoIds(result.value);
+      }
     } catch (e) {
       _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
     }

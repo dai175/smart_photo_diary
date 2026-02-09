@@ -24,24 +24,23 @@ class DiaryCardWidget extends StatelessWidget {
   Future<List<String>> _generateTags() async {
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      return await diaryService.getTagsForEntry(entry);
-    } catch (e) {
-      // エラー時はフォールバックタグを返す（時間帯のみ）
-      final fallbackTags = <String>[];
-
-      final hour = entry.date.hour;
-      if (hour >= 5 && hour < 12) {
-        fallbackTags.add('朝');
-      } else if (hour >= 12 && hour < 18) {
-        fallbackTags.add('昼');
-      } else if (hour >= 18 && hour < 22) {
-        fallbackTags.add('夕方');
-      } else {
-        fallbackTags.add('夜');
+      final result = await diaryService.getTagsForEntry(entry);
+      if (result.isSuccess) {
+        return result.value;
       }
-
-      return fallbackTags;
+      return _fallbackTags();
+    } catch (e) {
+      return _fallbackTags();
     }
+  }
+
+  // エラー時のフォールバックタグ（時間帯のみ）
+  List<String> _fallbackTags() {
+    final hour = entry.date.hour;
+    if (hour >= 5 && hour < 12) return ['朝'];
+    if (hour >= 12 && hour < 18) return ['昼'];
+    if (hour >= 18 && hour < 22) return ['夕方'];
+    return ['夜'];
   }
 
   @override

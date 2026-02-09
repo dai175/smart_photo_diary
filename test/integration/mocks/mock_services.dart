@@ -202,20 +202,38 @@ class TestServiceSetup {
   static MockIDiaryService _createDiaryServiceMock() {
     final mock = MockIDiaryService();
 
-    // Default mock behavior for DiaryService
-    when(() => mock.getSortedDiaryEntries()).thenAnswer((_) async => []);
-    when(() => mock.getDiaryEntry(any())).thenAnswer((_) async => null);
-    when(() => mock.getTotalDiaryCount()).thenAnswer((_) async => 0);
+    // Default mock behavior for DiaryService (all methods return Result)
+    when(
+      () => mock.getSortedDiaryEntries(descending: any(named: 'descending')),
+    ).thenAnswer((_) async => const Success([]));
+    when(
+      () => mock.getDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.getTotalDiaryCount(),
+    ).thenAnswer((_) async => const Success(0));
     when(
       () => mock.getAllTags(),
-    ).thenAnswer((_) async => {'mock', 'test', 'tags'});
+    ).thenAnswer((_) async => Success({'mock', 'test', 'tags'}));
     when(
       () => mock.getDiaryCountInPeriod(any(), any()),
-    ).thenAnswer((_) async => 0);
-    when(() => mock.getFilteredDiaryEntries(any())).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success(0));
+    when(
+      () => mock.getFilteredDiaryEntries(any()),
+    ).thenAnswer((_) async => const Success([]));
+    when(
+      () => mock.getFilteredDiaryEntriesPage(
+        any(),
+        offset: any(named: 'offset'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => const Success([]));
     when(
       () => mock.getTagsForEntry(any()),
-    ).thenAnswer((_) async => ['mock', 'test']);
+    ).thenAnswer((_) async => Success(['mock', 'test']));
+    when(
+      () => mock.getPopularTags(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => Success(['mock', 'test']));
     when(
       () => mock.saveDiaryEntry(
         date: any(named: 'date'),
@@ -226,18 +244,27 @@ class TestServiceSetup {
         tags: any(named: 'tags'),
       ),
     ).thenAnswer(
-      (_) async => DiaryEntry(
-        id: 'mock-id',
-        date: DateTime.now(),
-        title: 'Mock Title',
-        content: 'Mock Content',
-        photoIds: [],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+      (_) async => Success(
+        DiaryEntry(
+          id: 'mock-id',
+          date: DateTime.now(),
+          title: 'Mock Title',
+          content: 'Mock Content',
+          photoIds: [],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
       ),
     );
-    when(() => mock.updateDiaryEntry(any())).thenAnswer((_) async {});
-    when(() => mock.deleteDiaryEntry(any())).thenAnswer((_) async {});
+    when(
+      () => mock.updateDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.deleteDiaryEntry(any()),
+    ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.getDiaryEntryByPhotoId(any()),
+    ).thenAnswer((_) async => const Success(null));
 
     return mock;
   }
