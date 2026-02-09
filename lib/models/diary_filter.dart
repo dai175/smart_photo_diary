@@ -47,7 +47,7 @@ class DiaryFilter {
 
     // タグフィルタ
     if (selectedTags.isNotEmpty) {
-      final entryTags = entry.cachedTags ?? [];
+      final entryTags = entry.effectiveTags;
       if (!selectedTags.any((tag) => entryTags.contains(tag))) {
         return false;
       }

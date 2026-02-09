@@ -82,7 +82,7 @@ class StorageService implements IStorageService {
                 'content': entry.content,
                 'date': entry.date.toIso8601String(),
                 'photoIds': entry.photoIds,
-                'tags': entry.tags, // タグも含める
+                'tags': entry.effectiveTags, // タグも含める
                 'createdAt': entry.createdAt.toIso8601String(),
                 'updatedAt': entry.updatedAt.toIso8601String(),
               },

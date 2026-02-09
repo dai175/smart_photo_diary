@@ -138,7 +138,7 @@ class DiaryService implements IDiaryService {
 
   // 検索用テキストを作成
   String _buildSearchableText(DiaryEntry entry) {
-    final tags = (entry.cachedTags ?? entry.tags ?? const <String>[]).join(' ');
+    final tags = entry.effectiveTags.join(' ');
     final location = entry.location ?? '';
     final text = '${entry.title} ${entry.content} $tags $location';
     return text.toLowerCase();
@@ -559,9 +559,7 @@ class DiaryService implements IDiaryService {
       final allTags = <String>{};
 
       for (final entry in _diaryBox!.values) {
-        if (entry.cachedTags != null) {
-          allTags.addAll(entry.cachedTags!);
-        }
+        allTags.addAll(entry.effectiveTags);
       }
 
       return Success(allTags);
@@ -579,10 +577,8 @@ class DiaryService implements IDiaryService {
       final tagCounts = <String, int>{};
 
       for (final entry in _diaryBox!.values) {
-        if (entry.cachedTags != null) {
-          for (final tag in entry.cachedTags!) {
-            tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
-          }
+        for (final tag in entry.effectiveTags) {
+          tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
         }
       }
 
