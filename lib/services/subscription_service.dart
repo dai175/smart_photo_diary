@@ -274,20 +274,11 @@ class SubscriptionService implements ISubscriptionService {
               ? const Duration(days: 365)
               : const Duration(days: 30);
 
-          final forcedStatus = SubscriptionStatus(
+          final forcedStatus = status.copyWith(
             planId: forcedPlanId,
             isActive: true,
             startDate: status.startDate ?? DateTime.now(),
             expiryDate: DateTime.now().add(expiryDuration),
-            monthlyUsageCount: status.monthlyUsageCount, // 実際の使用量を保持
-            usageMonth: status.usageMonth,
-            lastResetDate: status.lastResetDate,
-            autoRenewal: status.autoRenewal,
-            transactionId: status.transactionId,
-            lastPurchaseDate: status.lastPurchaseDate,
-            cancelDate: status.cancelDate,
-            planChangeDate: status.planChangeDate,
-            pendingPlanId: status.pendingPlanId,
           );
 
           return Success(forcedStatus);
@@ -483,16 +474,9 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final resetStatus = SubscriptionStatus(
-        planId: status.planId,
-        isActive: status.isActive,
-        startDate: status.startDate,
-        expiryDate: status.expiryDate,
-        autoRenewal: status.autoRenewal,
-        monthlyUsageCount: 0, // リセット
+      final resetStatus = status.copyWith(
+        monthlyUsageCount: 0,
         lastResetDate: DateTime.now(),
-        transactionId: status.transactionId,
-        lastPurchaseDate: status.lastPurchaseDate,
       );
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
@@ -618,16 +602,8 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       // 使用量をインクリメント
-      final updatedStatus = SubscriptionStatus(
-        planId: latestStatus.planId,
-        isActive: latestStatus.isActive,
-        startDate: latestStatus.startDate,
-        expiryDate: latestStatus.expiryDate,
-        autoRenewal: latestStatus.autoRenewal,
+      final updatedStatus = latestStatus.copyWith(
         monthlyUsageCount: latestStatus.monthlyUsageCount + 1,
-        lastResetDate: latestStatus.lastResetDate,
-        transactionId: latestStatus.transactionId,
-        lastPurchaseDate: latestStatus.lastPurchaseDate,
       );
 
       await _subscriptionBox?.put(
@@ -783,16 +759,9 @@ class SubscriptionService implements ISubscriptionService {
         data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
       );
 
-      final resetStatus = SubscriptionStatus(
-        planId: status.planId,
-        isActive: status.isActive,
-        startDate: status.startDate,
-        expiryDate: status.expiryDate,
-        autoRenewal: status.autoRenewal,
-        monthlyUsageCount: 0, // リセット
+      final resetStatus = status.copyWith(
+        monthlyUsageCount: 0,
         lastResetDate: now,
-        transactionId: status.transactionId,
-        lastPurchaseDate: status.lastPurchaseDate,
       );
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
@@ -2152,17 +2121,7 @@ class SubscriptionService implements ISubscriptionService {
       final currentStatus = statusResult.value;
 
       // 自動更新フラグを無効化
-      final updatedStatus = SubscriptionStatus(
-        planId: currentStatus.planId,
-        isActive: currentStatus.isActive,
-        startDate: currentStatus.startDate,
-        expiryDate: currentStatus.expiryDate,
-        autoRenewal: false, // 自動更新を無効化
-        monthlyUsageCount: currentStatus.monthlyUsageCount,
-        lastResetDate: currentStatus.lastResetDate,
-        transactionId: currentStatus.transactionId,
-        lastPurchaseDate: currentStatus.lastPurchaseDate,
-      );
+      final updatedStatus = currentStatus.copyWith(autoRenewal: false);
 
       const statusKey = SubscriptionConstants.statusKey;
       await _subscriptionBox!.put(statusKey, updatedStatus);

@@ -250,20 +250,36 @@ class SubscriptionStatus extends HiveObject {
     return expiryDate!.difference(now).inDays;
   }
 
-  /// Planクラスベースの新しいステータスを作成
-  /// 将来的にplanIdの代わりにPlanクラスを直接保持する際の移行用
-  SubscriptionStatus copyWithPlan(Plan plan) {
+  /// 一部のフィールドを変更した新しいインスタンスを作成
+  SubscriptionStatus copyWith({
+    String? planId,
+    bool? isActive,
+    DateTime? startDate,
+    DateTime? expiryDate,
+    int? monthlyUsageCount,
+    String? usageMonth,
+    DateTime? lastResetDate,
+    bool? autoRenewal,
+    String? transactionId,
+    DateTime? lastPurchaseDate,
+    DateTime? cancelDate,
+    DateTime? planChangeDate,
+    String? pendingPlanId,
+  }) {
     return SubscriptionStatus(
-      planId: plan.id,
-      isActive: isActive,
-      startDate: startDate,
-      expiryDate: expiryDate,
-      monthlyUsageCount: monthlyUsageCount,
-      lastResetDate: lastResetDate,
-      autoRenewal: autoRenewal,
-      cancelDate: cancelDate,
-      transactionId: transactionId,
-      lastPurchaseDate: lastPurchaseDate,
+      planId: planId ?? this.planId,
+      isActive: isActive ?? this.isActive,
+      startDate: startDate ?? this.startDate,
+      expiryDate: expiryDate ?? this.expiryDate,
+      monthlyUsageCount: monthlyUsageCount ?? this.monthlyUsageCount,
+      usageMonth: usageMonth ?? this.usageMonth,
+      lastResetDate: lastResetDate ?? this.lastResetDate,
+      autoRenewal: autoRenewal ?? this.autoRenewal,
+      transactionId: transactionId ?? this.transactionId,
+      lastPurchaseDate: lastPurchaseDate ?? this.lastPurchaseDate,
+      cancelDate: cancelDate ?? this.cancelDate,
+      planChangeDate: planChangeDate ?? this.planChangeDate,
+      pendingPlanId: pendingPlanId ?? this.pendingPlanId,
     );
   }
 

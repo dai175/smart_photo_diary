@@ -21,7 +21,7 @@ void main() {
         );
 
         final newPlan = PremiumMonthlyPlan();
-        final newStatus = originalStatus.copyWithPlan(newPlan);
+        final newStatus = originalStatus.copyWith(planId: newPlan.id);
 
         // Plan IDが変更されていることを確認
         expect(newStatus.planId, 'premium_monthly');
@@ -43,7 +43,7 @@ void main() {
         final plans = [BasicPlan(), PremiumMonthlyPlan(), PremiumYearlyPlan()];
 
         for (final plan in plans) {
-          final newStatus = status.copyWithPlan(plan);
+          final newStatus = status.copyWith(planId: plan.id);
           expect(newStatus.planId, plan.id);
           // currentPlanのenumプロパティは削除されたため、Planクラスで検証
           final planClass = newStatus.getCurrentPlanClass();
