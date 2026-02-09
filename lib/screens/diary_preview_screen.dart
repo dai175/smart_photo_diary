@@ -297,13 +297,18 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を保存
-      final savedDiary = await diaryService.saveDiaryEntryWithPhotos(
+      final saveResult = await diaryService.saveDiaryEntryWithPhotos(
         date: _photoDateTime,
         title: _titleController.text,
         content: _contentController.text,
         photos: widget.selectedAssets,
       );
 
+      if (saveResult.isFailure) {
+        throw saveResult.error;
+      }
+
+      final savedDiary = saveResult.value;
       _logger.info('自動保存成功', context: 'DiaryPreviewScreen');
 
       // ウィジェットがまだマウントされている場合のみ遷移
@@ -334,7 +339,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isSaving = false;
           _hasError = true;
-          _errorMessage = context.l10n.diaryPreviewAutoSaveError;
+          _errorMessage = context.l10n.diaryPreviewSaveError;
         });
 
         scaffoldMessenger.showSnackBar(
@@ -377,12 +382,16 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を保存
-      await diaryService.saveDiaryEntryWithPhotos(
+      final manualSaveResult = await diaryService.saveDiaryEntryWithPhotos(
         date: _photoDateTime,
         title: _titleController.text,
         content: _contentController.text,
         photos: widget.selectedAssets,
       );
+
+      if (manualSaveResult.isFailure) {
+        throw manualSaveResult.error;
+      }
 
       _logger.info('日記保存成功', context: 'DiaryPreviewScreen');
 
@@ -414,7 +423,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = context.l10n.diaryPreviewAutoSaveError;
+          _errorMessage = context.l10n.diaryPreviewSaveError;
         });
 
         scaffoldMessenger.showSnackBar(

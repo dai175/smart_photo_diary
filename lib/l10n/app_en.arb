@@ -859,8 +859,8 @@
   "@diaryPreviewSaveSuccess": {
     "description": "Snack bar message shown after a diary is saved successfully"
   },
-  "diaryPreviewAutoSaveError": "We couldn't save the diary.\\nPlease try again later.",
-  "@diaryPreviewAutoSaveError": {
+  "diaryPreviewSaveError": "We couldn't save the diary.\\nPlease try again later.",
+  "@diaryPreviewSaveError": {
     "description": "Error message shown when diary saving fails"
   },
   "diaryPreviewDateLabel": "Diary date",
@@ -1422,5 +1422,21 @@
   "shareCreatedWith": "Created with #SmartPhotoDiary",
   "@shareCreatedWith": {
     "description": "Credit text used when sharing"
+  },
+  "tagMorning": "Morning",
+  "@tagMorning": {
+    "description": "Fallback tag: morning time period"
+  },
+  "tagAfternoon": "Afternoon",
+  "@tagAfternoon": {
+    "description": "Fallback tag: afternoon time period"
+  },
+  "tagEvening": "Evening",
+  "@tagEvening": {
+    "description": "Fallback tag: evening time period"
+  },
+  "tagNight": "Night",
+  "@tagNight": {
+    "description": "Fallback tag: night time period"
   }
 }

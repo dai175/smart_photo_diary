@@ -14,5 +14,4 @@ export '../design_system/app_theme.dart';
 export 'custom_card.dart';
 export 'animated_button.dart';
 export 'modern_chip.dart';
-export 'gradient_app_bar.dart';
 export 'loading_shimmer.dart';

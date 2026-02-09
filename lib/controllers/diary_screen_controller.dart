@@ -50,7 +50,7 @@ class DiaryScreenController extends BaseErrorController {
       setLoading(true);
       _resetPaging();
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getFilteredDiaryEntriesPageResult(
+      final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
         limit: _pageSize,
@@ -86,7 +86,7 @@ class DiaryScreenController extends BaseErrorController {
 
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getFilteredDiaryEntriesPageResult(
+      final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
         limit: _pageSize,
@@ -190,7 +190,7 @@ class DiaryScreenController extends BaseErrorController {
           : _currentFilter.copyWith(searchText: query);
 
       _resetPaging();
-      final result = await diaryService.getFilteredDiaryEntriesPageResult(
+      final result = await diaryService.getFilteredDiaryEntriesPage(
         filter,
         offset: _offset,
         limit: _pageSize,
@@ -222,17 +222,6 @@ class DiaryScreenController extends BaseErrorController {
   Future<void> refresh() async {
     setLoading(true);
     await loadDiaryEntries();
-  }
-
-  // 空の状態メッセージを取得
-  String getEmptyStateMessage() {
-    if (_isSearching) {
-      return '「$_searchQuery」に一致する日記がありません';
-    } else if (_currentFilter.isActive) {
-      return 'フィルタ条件に一致する日記がありません';
-    } else {
-      return '日記がありません';
-    }
   }
 
   // 空の状態メッセージを取得（多言語化対応）

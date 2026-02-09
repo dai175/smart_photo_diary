@@ -52,7 +52,7 @@ class StorageService implements IStorageService {
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getSortedDiaryEntriesResult();
+      final result = await diaryService.getSortedDiaryEntries();
 
       if (result.isFailure) {
         throw StorageException('日記データの取得に失敗しました: ${result.error.message}');
@@ -216,7 +216,7 @@ class StorageService implements IStorageService {
       final List<String> warnings = [];
 
       // パフォーマンス最適化: 既存エントリーを一度だけ取得
-      final existingResult = await diaryService.getSortedDiaryEntriesResult();
+      final existingResult = await diaryService.getSortedDiaryEntries();
       if (existingResult.isFailure) {
         throw StorageException(
           '既存日記データの取得に失敗しました: ${existingResult.error.message}',
@@ -331,7 +331,7 @@ class StorageService implements IStorageService {
       }
 
       // エントリーを保存
-      final saveResult = await diaryService.saveDiaryEntryResult(
+      final saveResult = await diaryService.saveDiaryEntry(
         date: date,
         title: entryData['title'] as String,
         content: entryData['content'] as String,

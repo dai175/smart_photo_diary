@@ -260,123 +260,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
       orElse: () => options.first,
     );
 
-    return Semantics(
-      label: context.l10n.settingsSectionSemanticLabel(
+    return _buildSettingsRow(
+      icon: AppIcons.settingsLanguage,
+      iconColor: AppColors.info,
+      title: context.l10n.settingsLanguageSectionTitle,
+      subtitle: currentChoice.title,
+      onTap: _showLanguageDialog,
+      semanticLabel: context.l10n.settingsSectionSemanticLabel(
         context.l10n.settingsLanguageSectionTitle,
         currentChoice.title,
-      ),
-      button: true,
-      child: MicroInteractions.bounceOnTap(
-        onTap: () {
-          MicroInteractions.hapticTap();
-          _showLanguageDialog();
-        },
-        child: Container(
-          padding: AppSpacing.cardPadding,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.info.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppSpacing.sm),
-                ),
-                child: Icon(
-                  AppIcons.settingsLanguage,
-                  color: AppColors.info,
-                  size: AppSpacing.iconSm,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.settingsLanguageSectionTitle,
-                      style: AppTypography.titleMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      currentChoice.title,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                AppIcons.actionForward,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: AppSpacing.iconSm,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 
   Widget _buildThemeSelector() {
-    return Semantics(
-      label: context.l10n.settingsSectionSemanticLabel(
+    return _buildSettingsRow(
+      icon: AppIcons.settingsTheme,
+      iconColor: AppColors.warning,
+      title: context.l10n.settingsThemeSectionTitle,
+      subtitle: _getThemeModeLabel(context, _settingsService.themeMode),
+      onTap: _showThemeDialog,
+      semanticLabel: context.l10n.settingsSectionSemanticLabel(
         context.l10n.settingsThemeSectionTitle,
         _getThemeModeLabel(context, _settingsService.themeMode),
-      ),
-      button: true,
-      child: MicroInteractions.bounceOnTap(
-        onTap: () {
-          MicroInteractions.hapticTap();
-          _showThemeDialog();
-        },
-        child: Container(
-          padding: AppSpacing.cardPadding,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppSpacing.sm),
-                ),
-                child: Icon(
-                  AppIcons.settingsTheme,
-                  color: AppColors.warning,
-                  size: AppSpacing.iconSm,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.settingsThemeSectionTitle,
-                      style: AppTypography.titleMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      _getThemeModeLabel(context, _settingsService.themeMode),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                AppIcons.actionForward,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: AppSpacing.iconSm,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -817,228 +723,93 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
 
-    return Container(
-      padding: AppSpacing.cardPadding,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
-            child: Icon(
-              AppIcons.settingsStorage,
-              color: AppColors.info,
-              size: AppSpacing.iconSm,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.settingsStorageAppDataTitle,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  context.l10n.settingsStorageUsageValue(
-                    _storageInfo!.formattedTotalSize,
-                  ),
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return _buildSettingsRow(
+      icon: AppIcons.settingsStorage,
+      iconColor: AppColors.info,
+      title: context.l10n.settingsStorageAppDataTitle,
+      subtitle: context.l10n.settingsStorageUsageValue(
+        _storageInfo!.formattedTotalSize,
       ),
     );
   }
 
   Widget _buildBackupAction() {
-    return MicroInteractions.bounceOnTap(
-      onTap: () {
-        MicroInteractions.hapticTap();
-        _exportData();
-      },
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                AppIcons.settingsExport,
-                color: AppColors.success,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.settingsBackupTitle,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    context.l10n.settingsBackupSubtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              AppIcons.actionForward,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: AppSpacing.iconSm,
-            ),
-          ],
-        ),
-      ),
+    return _buildSettingsRow(
+      icon: AppIcons.settingsExport,
+      iconColor: AppColors.success,
+      title: context.l10n.settingsBackupTitle,
+      subtitle: context.l10n.settingsBackupSubtitle,
+      onTap: _exportData,
     );
   }
 
   Widget _buildRestoreAction() {
-    return MicroInteractions.bounceOnTap(
-      onTap: () {
-        MicroInteractions.hapticTap();
-        _restoreData();
-      },
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                AppIcons.settingsImport,
-                color: AppColors.primary,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.settingsRestoreTitle,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    context.l10n.settingsRestoreSubtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              AppIcons.actionForward,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: AppSpacing.iconSm,
-            ),
-          ],
-        ),
-      ),
+    return _buildSettingsRow(
+      icon: AppIcons.settingsImport,
+      iconColor: AppColors.primary,
+      title: context.l10n.settingsRestoreTitle,
+      subtitle: context.l10n.settingsRestoreSubtitle,
+      onTap: _restoreData,
     );
   }
 
   Widget _buildOptimizeAction() {
-    return MicroInteractions.bounceOnTap(
-      onTap: () {
-        MicroInteractions.hapticTap();
-        _optimizeDatabase();
-      },
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                AppIcons.settingsCleanup,
-                color: AppColors.error,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.settingsCleanupTitle,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    context.l10n.settingsCleanupSubtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              AppIcons.actionForward,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: AppSpacing.iconSm,
-            ),
-          ],
-        ),
-      ),
+    return _buildSettingsRow(
+      icon: AppIcons.settingsCleanup,
+      iconColor: AppColors.error,
+      title: context.l10n.settingsCleanupTitle,
+      subtitle: context.l10n.settingsCleanupSubtitle,
+      onTap: _optimizeDatabase,
     );
   }
 
   Widget _buildVersionInfo() {
-    return Container(
+    return _buildSettingsRow(
+      icon: AppIcons.settingsInfo,
+      iconColor: AppColors.primary,
+      title: context.l10n.settingsVersionTitle,
+      subtitle: _packageInfo != null
+          ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
+          : context.l10n.commonLoading,
+    );
+  }
+
+  Widget _buildLicenseInfo() {
+    return _buildSettingsRow(
+      icon: Icons.article_outlined,
+      iconColor: Theme.of(context).colorScheme.secondary,
+      title: context.l10n.settingsLicenseTitle,
+      subtitle: context.l10n.settingsLicenseSubtitle,
+      onTap: () => showLicensePage(
+        context: context,
+        applicationName: 'Smart Photo Diary',
+        applicationVersion: _packageInfo?.version ?? '1.0.0',
+        applicationLegalese: '© 2024 Smart Photo Diary',
+      ),
+    );
+  }
+
+  /// 設定行の共通ウィジェット
+  Widget _buildSettingsRow({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    VoidCallback? onTap,
+    Widget? trailing,
+    String? semanticLabel,
+  }) {
+    final row = Container(
       padding: AppSpacing.cardPadding,
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.2),
+              color: iconColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
-            child: Icon(
-              AppIcons.settingsInfo,
-              color: AppColors.primary,
-              size: AppSpacing.iconSm,
-            ),
+            child: Icon(icon, color: iconColor, size: AppSpacing.iconSm),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -1046,16 +817,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.l10n.settingsVersionTitle,
+                  title,
                   style: AppTypography.titleMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  _packageInfo != null
-                      ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
-                      : context.l10n.commonLoading,
+                  subtitle,
                   style: AppTypography.bodyMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -1063,70 +832,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLicenseInfo() {
-    return MicroInteractions.bounceOnTap(
-      onTap: () {
-        MicroInteractions.hapticTap();
-        showLicensePage(
-          context: context,
-          applicationName: 'Smart Photo Diary',
-          applicationVersion: _packageInfo?.version ?? '1.0.0',
-          applicationLegalese: '© 2024 Smart Photo Diary',
-        );
-      },
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.secondary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                Icons.article_outlined,
-                color: Theme.of(context).colorScheme.secondary,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.settingsLicenseTitle,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    context.l10n.settingsLicenseSubtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // ignore: use_null_aware_elements, build_runner analyzer does not yet support this syntax
+          if (trailing != null) trailing,
+          if (trailing == null && onTap != null)
             Icon(
               AppIcons.actionForward,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: AppSpacing.iconSm,
             ),
-          ],
-        ),
+        ],
       ),
     );
+
+    Widget result = onTap != null
+        ? MicroInteractions.bounceOnTap(
+            onTap: () {
+              MicroInteractions.hapticTap();
+              onTap();
+            },
+            child: row,
+          )
+        : row;
+
+    if (semanticLabel != null) {
+      result = Semantics(
+        label: semanticLabel,
+        button: onTap != null,
+        child: result,
+      );
+    }
+
+    return result;
   }
 
   String _getThemeModeLabel(BuildContext context, ThemeMode themeMode) {

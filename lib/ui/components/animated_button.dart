@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../services/logging_service.dart';
-import '../../core/service_locator.dart';
 import '../design_system/app_spacing.dart';
 import '../component_constants.dart';
 import '../design_system/app_typography.dart';
@@ -71,7 +69,6 @@ class AnimatedButton extends StatefulWidget {
     required this.child,
     this.backgroundColor,
     this.foregroundColor,
-    this.gradient,
     this.borderRadius,
     this.padding,
     this.elevation,
@@ -90,15 +87,11 @@ class AnimatedButton extends StatefulWidget {
   /// ボタン内のコンテンツ
   final Widget child;
 
-  /// 背景色（グラデーションが設定されている場合は無視）
+  /// 背景色
   final Color? backgroundColor;
 
   /// 前景色（テキスト・アイコンの色）
   final Color? foregroundColor;
-
-  /// グラデーション背景（廃止予定 - 使用非推奨）
-  @Deprecated('グラデーションは廃止予定です。代わりにbackgroundColorを使用してください')
-  final Gradient? gradient;
 
   /// 角丸の半径
   final BorderRadius? borderRadius;
@@ -140,11 +133,6 @@ class _AnimatedButtonState extends State<AnimatedButton>
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
 
-  // LoggingServiceのゲッター
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
-
-  // bool _isPressed = false; // 将来的に使用予定
-
   @override
   void initState() {
     super.initState();
@@ -176,10 +164,6 @@ class _AnimatedButtonState extends State<AnimatedButton>
   }
 
   void _handleTapDown(TapDownDetails details) {
-    _logger.debug(
-      '_handleTapDown が呼び出されました',
-      context: 'AnimatedButton._handleTapDown',
-    );
     if (widget.enableScaleAnimation) {
       // setState(() => _isPressed = true);
       _animationController.forward();
@@ -250,15 +234,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTapDown: widget.onPressed != null ? _handleTapDown : null,
                 onTapUp: widget.onPressed != null ? _handleTapUp : null,
                 onTapCancel: widget.onPressed != null ? _handleTapCancel : null,
-                onTap: widget.onPressed != null
-                    ? () {
-                        _logger.debug(
-                          'onTap が呼び出されました',
-                          context: 'AnimatedButton.onTap',
-                        );
-                        widget.onPressed!();
-                      }
-                    : null, // メインのタップイベント
+                onTap: widget.onPressed, // メインのタップイベント
                 borderRadius: borderRadius,
                 splashColor: widget.enableSplashEffect
                     ? foregroundColor.withValues(alpha: 0.2)

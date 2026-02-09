@@ -43,15 +43,19 @@ void main() {
         const photoIds = ['photo1', 'photo2'];
 
         // Act
-        final savedEntry = await diaryService.saveDiaryEntry(
+        final saveResult = await diaryService.saveDiaryEntry(
           date: testDate,
           title: title,
           content: content,
           photoIds: photoIds,
         );
+        expect(saveResult.isSuccess, isTrue);
+        final savedEntry = saveResult.value;
 
         // Retrieve the entry
-        final retrievedEntry = await diaryService.getDiaryEntry(savedEntry.id);
+        final getResult = await diaryService.getDiaryEntry(savedEntry.id);
+        expect(getResult.isSuccess, isTrue);
+        final retrievedEntry = getResult.value;
 
         // Assert
         expect(retrievedEntry, isNotNull);
@@ -63,12 +67,14 @@ void main() {
 
       test('should update diary entry', () async {
         // Arrange
-        final originalEntry = await diaryService.saveDiaryEntry(
+        final saveResult = await diaryService.saveDiaryEntry(
           date: DateTime(2024, 1, 15),
           title: 'Original Title',
           content: 'Original Content',
           photoIds: ['photo1'],
         );
+        expect(saveResult.isSuccess, isTrue);
+        final originalEntry = saveResult.value;
 
         final updatedEntry = originalEntry.copyWith(
           title: 'Updated Title',
@@ -77,10 +83,11 @@ void main() {
         );
 
         // Act
-        await diaryService.updateDiaryEntry(updatedEntry);
-        final retrievedEntry = await diaryService.getDiaryEntry(
-          originalEntry.id,
-        );
+        final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
+        expect(updateResult.isSuccess, isTrue);
+        final getResult = await diaryService.getDiaryEntry(originalEntry.id);
+        expect(getResult.isSuccess, isTrue);
+        final retrievedEntry = getResult.value;
 
         // Assert
         expect(retrievedEntry, isNotNull);
@@ -90,27 +97,30 @@ void main() {
 
       test('should delete diary entry', () async {
         // Arrange
-        final entry = await diaryService.saveDiaryEntry(
+        final saveResult = await diaryService.saveDiaryEntry(
           date: DateTime(2024, 1, 15),
           title: 'To Delete',
           content: 'This will be deleted',
           photoIds: [],
         );
+        expect(saveResult.isSuccess, isTrue);
+        final entry = saveResult.value;
 
         // Act
         await diaryService.deleteDiaryEntry(entry.id);
-        final retrievedEntry = await diaryService.getDiaryEntry(entry.id);
+        final getResult = await diaryService.getDiaryEntry(entry.id);
 
         // Assert
-        expect(retrievedEntry, isNull);
+        expect(getResult.value, isNull);
       });
     });
 
     group('Statistics Operations', () {
       test('should return total diary count', () async {
         // Arrange - Clear existing entries
-        final allEntries = await diaryService.getAllDiaryEntries();
-        for (final entry in allEntries) {
+        final allResult = await diaryService.getSortedDiaryEntries();
+        expect(allResult.isSuccess, isTrue);
+        for (final entry in allResult.value) {
           await diaryService.deleteDiaryEntry(entry.id);
         }
 
@@ -129,10 +139,11 @@ void main() {
         );
 
         // Act
-        final count = await diaryService.getTotalDiaryCount();
+        final countResult = await diaryService.getTotalDiaryCount();
 
         // Assert
-        expect(count, equals(2));
+        expect(countResult.isSuccess, isTrue);
+        expect(countResult.value, equals(2));
       });
 
       test('should return diary count in period', () async {
@@ -141,8 +152,9 @@ void main() {
         final end = DateTime(2024, 1, 31);
 
         // Clear existing entries
-        final allEntries = await diaryService.getAllDiaryEntries();
-        for (final entry in allEntries) {
+        final allResult = await diaryService.getSortedDiaryEntries();
+        expect(allResult.isSuccess, isTrue);
+        for (final entry in allResult.value) {
           await diaryService.deleteDiaryEntry(entry.id);
         }
 
@@ -163,10 +175,14 @@ void main() {
         );
 
         // Act
-        final count = await diaryService.getDiaryCountInPeriod(start, end);
+        final countResult = await diaryService.getDiaryCountInPeriod(
+          start,
+          end,
+        );
 
         // Assert
-        expect(count, equals(1));
+        expect(countResult.isSuccess, isTrue);
+        expect(countResult.value, equals(1));
       });
     });
 
@@ -184,15 +200,19 @@ void main() {
           final assets = [mockAsset1, mockAsset2];
 
           // Act
-          final result = await diaryService.saveDiaryEntryWithPhotos(
+          final saveResult = await diaryService.saveDiaryEntryWithPhotos(
             date: testDate,
             title: 'Asset Test',
             content: 'Testing asset conversion',
             photos: assets,
           );
+          expect(saveResult.isSuccess, isTrue);
+          final result = saveResult.value;
 
           // Retrieve to verify
-          final retrievedEntry = await diaryService.getDiaryEntry(result.id);
+          final getResult = await diaryService.getDiaryEntry(result.id);
+          expect(getResult.isSuccess, isTrue);
+          final retrievedEntry = getResult.value;
 
           // Assert
           expect(retrievedEntry, isNotNull);
@@ -210,23 +230,27 @@ void main() {
         final result = await diaryService.getDiaryEntry('non_existent_id');
 
         // Assert
-        expect(result, isNull);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isNull);
       });
 
       test('should handle duplicate deletion gracefully', () async {
         // Arrange
-        final entry = await diaryService.saveDiaryEntry(
+        final saveResult = await diaryService.saveDiaryEntry(
           date: DateTime(2024, 1, 15),
           title: 'Test Entry',
           content: 'Test Content',
           photoIds: [],
         );
+        expect(saveResult.isSuccess, isTrue);
+        final entry = saveResult.value;
 
         // Act - Delete twice
         await diaryService.deleteDiaryEntry(entry.id);
 
         // Should not throw error on second deletion
-        expect(() => diaryService.deleteDiaryEntry(entry.id), returnsNormally);
+        final secondDelete = await diaryService.deleteDiaryEntry(entry.id);
+        expect(secondDelete.isSuccess, isTrue);
       });
     });
   });

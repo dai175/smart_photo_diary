@@ -12,6 +12,7 @@ import '../ui/components/custom_card.dart';
 import '../ui/components/modern_chip.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../services/photo_cache_service.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../localization/localization_extensions.dart';
 
 class DiaryCardWidget extends StatelessWidget {
@@ -21,27 +22,26 @@ class DiaryCardWidget extends StatelessWidget {
   const DiaryCardWidget({super.key, required this.entry, required this.onTap});
 
   // タグを取得（永続化キャッシュ優先）
-  Future<List<String>> _generateTags() async {
+  Future<List<String>> _generateTags(AppLocalizations l10n) async {
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      return await diaryService.getTagsForEntry(entry);
-    } catch (e) {
-      // エラー時はフォールバックタグを返す（時間帯のみ）
-      final fallbackTags = <String>[];
-
-      final hour = entry.date.hour;
-      if (hour >= 5 && hour < 12) {
-        fallbackTags.add('朝');
-      } else if (hour >= 12 && hour < 18) {
-        fallbackTags.add('昼');
-      } else if (hour >= 18 && hour < 22) {
-        fallbackTags.add('夕方');
-      } else {
-        fallbackTags.add('夜');
+      final result = await diaryService.getTagsForEntry(entry);
+      if (result.isSuccess) {
+        return result.value;
       }
-
-      return fallbackTags;
+      return _fallbackTags(l10n);
+    } catch (e) {
+      return _fallbackTags(l10n);
     }
+  }
+
+  // エラー時のフォールバックタグ（時間帯のみ）
+  List<String> _fallbackTags(AppLocalizations l10n) {
+    final hour = entry.date.hour;
+    if (hour >= 5 && hour < 12) return [l10n.tagMorning];
+    if (hour >= 12 && hour < 18) return [l10n.tagAfternoon];
+    if (hour >= 18 && hour < 22) return [l10n.tagEvening];
+    return [l10n.tagNight];
   }
 
   @override
@@ -232,10 +232,10 @@ class DiaryCardWidget extends StatelessWidget {
   }
 
   Widget _buildTags(BuildContext context) {
+    final l10n = context.l10n;
     return FutureBuilder<List<String>>(
-      future: _generateTags(),
+      future: _generateTags(l10n),
       builder: (context, snapshot) {
-        final l10n = context.l10n;
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Row(
             children: [

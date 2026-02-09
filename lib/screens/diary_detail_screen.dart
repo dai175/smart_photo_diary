@@ -5,6 +5,7 @@ import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/social_share_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/result/result.dart';
 import '../utils/dialog_utils.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -93,29 +94,41 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記エントリーを取得
-      final entry = await diaryService.getDiaryEntry(widget.diaryId);
+      final result = await diaryService.getDiaryEntry(widget.diaryId);
 
       if (!mounted) return;
 
-      if (entry == null) {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-          _errorMessage = context.l10n.diaryNotFoundMessage;
-        });
-        return;
+      switch (result) {
+        case Success(data: final entry):
+          if (entry == null) {
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+              _errorMessage = context.l10n.diaryNotFoundMessage;
+            });
+            return;
+          }
+
+          // 写真アセットを取得
+          final assets = await entry.getPhotoAssets();
+
+          if (!mounted) return;
+
+          setState(() {
+            _diaryEntry = entry;
+            _titleController.text = entry.title;
+            _contentController.text = entry.content;
+            _photoAssets = assets;
+            _isLoading = false;
+          });
+        case Failure(exception: final e):
+          setState(() {
+            _isLoading = false;
+            _hasError = true;
+            _errorMessage =
+                '${context.l10n.diaryLoadErrorMessage}: ${e.message}';
+          });
       }
-
-      // 写真アセットを取得
-      final assets = await entry.getPhotoAssets();
-
-      setState(() {
-        _diaryEntry = entry;
-        _titleController.text = entry.title;
-        _contentController.text = entry.content;
-        _photoAssets = assets;
-        _isLoading = false;
-      });
     } catch (e) {
       if (!mounted) return;
       final l10n = context.l10n;
@@ -148,20 +161,38 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         content: _contentController.text,
         updatedAt: DateTime.now(),
       );
-      await diaryService.updateDiaryEntry(updatedEntry);
+      final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
 
-      // 日記エントリーを再読み込み
-      await _loadDiaryEntry();
+      switch (updateResult) {
+        case Success():
+          // 日記エントリーを再読み込み
+          await _loadDiaryEntry();
 
-      if (mounted) {
-        setState(() {
-          _isEditing = false;
-        });
+          if (mounted) {
+            setState(() {
+              _isEditing = false;
+            });
 
-        // 更新成功メッセージを表示
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(context.l10n.diaryUpdateSuccessMessage)),
-        );
+            // 更新成功メッセージを表示
+            scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text(context.l10n.diaryUpdateSuccessMessage)),
+            );
+          }
+        case Failure(exception: final e):
+          if (mounted) {
+            final l10n = context.l10n;
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+              _errorMessage = l10n.diaryDetailUpdateError(e.message);
+            });
+
+            scaffoldMessenger.showSnackBar(
+              SnackBar(
+                content: Text(l10n.commonErrorWithMessage(_errorMessage)),
+              ),
+            );
+          }
       }
     } catch (e) {
       if (mounted) {
@@ -208,16 +239,33 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
 
       // 日記を削除
-      await diaryService.deleteDiaryEntry(_diaryEntry!.id);
+      final deleteResult = await diaryService.deleteDiaryEntry(_diaryEntry!.id);
 
-      if (mounted) {
-        // 削除成功メッセージを表示
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(context.l10n.diaryDeleteSuccessMessage)),
-        );
+      switch (deleteResult) {
+        case Success():
+          if (mounted) {
+            // 削除成功メッセージを表示
+            scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text(context.l10n.diaryDeleteSuccessMessage)),
+            );
 
-        // 前の画面に戻る（削除成功を示すフラグを返す）
-        navigator.pop(true);
+            // 前の画面に戻る（削除成功を示すフラグを返す）
+            navigator.pop(true);
+          }
+        case Failure(exception: final e):
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+              _errorMessage = l10n.diaryDetailDeleteError(e.message);
+            });
+
+            scaffoldMessenger.showSnackBar(
+              SnackBar(
+                content: Text(l10n.commonErrorWithMessage(_errorMessage)),
+              ),
+            );
+          }
       }
     } catch (e) {
       if (mounted) {
