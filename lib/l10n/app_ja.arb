@@ -859,8 +859,8 @@
   "@diaryPreviewSaveSuccess": {
     "description": "日記保存成功時のスナックバー表示"
   },
-  "diaryPreviewAutoSaveError": "日記の保存に失敗しました。\\n時間を空けてもう一度お試しください。",
-  "@diaryPreviewAutoSaveError": {
+  "diaryPreviewSaveError": "日記の保存に失敗しました。\\n時間を空けてもう一度お試しください。",
+  "@diaryPreviewSaveError": {
     "description": "日記保存に失敗した際に表示するエラーメッセージ"
   },
   "diaryPreviewDateLabel": "日記の日付",

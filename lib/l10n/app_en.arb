@@ -859,8 +859,8 @@
   "@diaryPreviewSaveSuccess": {
     "description": "Snack bar message shown after a diary is saved successfully"
   },
-  "diaryPreviewAutoSaveError": "We couldn't save the diary.\\nPlease try again later.",
-  "@diaryPreviewAutoSaveError": {
+  "diaryPreviewSaveError": "We couldn't save the diary.\\nPlease try again later.",
+  "@diaryPreviewSaveError": {
     "description": "Error message shown when diary saving fails"
   },
   "diaryPreviewDateLabel": "Diary date",

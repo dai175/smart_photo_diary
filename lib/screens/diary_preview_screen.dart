@@ -339,7 +339,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isSaving = false;
           _hasError = true;
-          _errorMessage = context.l10n.diaryPreviewAutoSaveError;
+          _errorMessage = context.l10n.diaryPreviewSaveError;
         });
 
         scaffoldMessenger.showSnackBar(
@@ -423,7 +423,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = context.l10n.diaryPreviewAutoSaveError;
+          _errorMessage = context.l10n.diaryPreviewSaveError;
         });
 
         scaffoldMessenger.showSnackBar(
