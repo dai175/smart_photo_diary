@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -15,24 +15,24 @@ jobs:
     name: Code Quality & Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
-          
+
       - name: Get dependencies
         run: flutter pub get
 
@@ -43,23 +43,23 @@ jobs:
 
       - name: Create test .env file
         run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
-        
+
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
-        
+
       - name: Analyze code
         run: flutter analyze --fatal-warnings --fatal-infos
-        
+
       - name: Run tests
         run: flutter test --coverage --reporter=expanded
-        
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/lcov.info
           fail_ci_if_error: false
-          
+
       - name: Check test results
         run: |
           if [ -f coverage/lcov.info ]; then
@@ -72,19 +72,20 @@ jobs:
   build-android:
     name: Build Android
     needs: quality-check
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -104,62 +105,41 @@ jobs:
         run: |
           echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
           echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
-        
-      - name: Build debug APK
-        run: flutter build apk --debug
-        
-      - name: Build release APK (unsigned)
-        run: flutter build apk --release
-        
-      - name: Build release AAB (unsigned)
+
+      - name: Build release AAB
         run: flutter build appbundle --release
-        
+
       - name: Verify Android build success
         run: |
-          echo "✅ Verifying Android build outputs..."
-          if [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
-            echo "✅ Debug APK built successfully"
-          else
-            echo "❌ Debug APK not found"
-            exit 1
-          fi
-          
-          if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-            echo "✅ Release APK built successfully"
-          else
-            echo "❌ Release APK not found"
-            exit 1
-          fi
-          
           if [ -f "build/app/outputs/bundle/release/app-release.aab" ]; then
             echo "✅ Release AAB built successfully"
           else
             echo "❌ Release AAB not found"
             exit 1
           fi
-          
-          echo "🎉 All Android builds completed successfully (CI verification only)"
+          echo "🎉 Android build completed successfully (CI verification only)"
 
   build-ios:
     name: Build iOS
     needs: quality-check
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: macos-14
     timeout-minutes: 45
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
-          
+
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-        
+
       - name: Verify Xcode and install iOS platform if needed
         run: |
           echo "Xcode version:"
@@ -168,42 +148,37 @@ jobs:
           xcrun simctl list runtimes
           echo "Installing iOS platform if missing..."
           xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
-          
+
       - name: Get dependencies
         run: flutter pub get
-        
+
       - name: Generate code
         run: |
           dart run build_runner build --delete-conflicting-outputs
           dart format .
-        
+
       - name: Create .env file for CI build
         run: |
           echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
           echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
-        
+
       - name: Install CocoaPods dependencies
         run: |
           cd ios
           pod install
-          
-      - name: Build iOS (debug, no codesign)
-        run: flutter build ios --debug --no-codesign
-        
-      - name: Build iOS (release, no codesign)  
+
+      - name: Build iOS (release, no codesign)
         run: flutter build ios --release --no-codesign
-        
+
       - name: Verify iOS build success
         run: |
-          echo "✅ Verifying iOS build outputs..."
           if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            echo "✅ iOS device build completed successfully"
+            echo "✅ iOS release build completed successfully"
           else
-            echo "❌ iOS device build not found"
+            echo "❌ iOS release build not found"
             exit 1
           fi
-          
-          echo "🎉 iOS builds completed successfully (CI verification only)"
+          echo "🎉 iOS build completed successfully (CI verification only)"
           echo "ℹ️ Note: CI builds use dummy API keys and no code signing"
 
   ci-summary:
@@ -211,7 +186,7 @@ jobs:
     needs: [quality-check, build-android, build-ios]
     runs-on: ubuntu-latest
     if: always()
-    
+
     steps:
       - name: Create CI summary
         run: |
@@ -219,15 +194,23 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Completed Steps" >> $GITHUB_STEP_SUMMARY
           echo "- **Code Quality**: Tests, analysis, and formatting checks" >> $GITHUB_STEP_SUMMARY
-          echo "- **Android Build**: APK and AAB compilation verified" >> $GITHUB_STEP_SUMMARY  
-          echo "- **iOS Build**: Debug and release compilation verified" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.build-android.result }}" = "success" ]; then
+            echo "- **Android Build**: AAB compilation verified ✅" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-android.result }}" = "skipped" ]; then
+            echo "- **Android Build**: Skipped (PR only — runs on main push or manual dispatch)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Android Build**: Failed ❌" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.build-ios.result }}" = "success" ]; then
+            echo "- **iOS Build**: Release compilation verified ✅" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-ios.result }}" = "skipped" ]; then
+            echo "- **iOS Build**: Skipped (PR only — runs on main push or manual dispatch)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **iOS Build**: Failed ❌" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ℹ️ Important Notes" >> $GITHUB_STEP_SUMMARY
           echo "- CI builds use dummy API keys for testing purposes" >> $GITHUB_STEP_SUMMARY
           echo "- iOS builds are unsigned (--no-codesign)" >> $GITHUB_STEP_SUMMARY
+          echo "- Platform builds run on push to main or manual dispatch" >> $GITHUB_STEP_SUMMARY
           echo "- For production builds, use release workflows with proper secrets" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🚀 Next Steps for Release" >> $GITHUB_STEP_SUMMARY
-          echo "1. Create version tag to trigger release workflows" >> $GITHUB_STEP_SUMMARY
-          echo "2. Configure GitHub Secrets for production API keys" >> $GITHUB_STEP_SUMMARY
-          echo "3. Set up store credentials for deployment workflows" >> $GITHUB_STEP_SUMMARY

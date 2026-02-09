@@ -7,14 +7,13 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 ## ワークフロー構成
 
 ### 1. CI Pipeline (`ci.yml`)
-**トリガー**: main/developブランチpush、PR作成時、手動実行
+**トリガー**: mainブランチpush、PR作成時、手動実行
 
 ```yaml
 ✅ コード品質チェック（フォーマット、静的解析）
 ✅ 全テスト実行（100%成功率）
 ✅ カバレッジ生成・Codecovアップロード
-✅ Android/iOSビルド検証
-✅ アーティファクト保存（30日間）
+✅ Android/iOSビルド検証（mainブランチpush時のみ、Releaseビルド）
 ```
 
 ### 2. Release (`release.yml`)
@@ -27,17 +26,7 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 ✅ GitHub Release作成・アップロード
 ```
 
-### 3. Android Deploy (`android-deploy.yml`)
-**トリガー**: バージョンタグ(`v*`)push、手動実行
-
-```yaml
-✅ 品質チェック・テスト実行
-✅ 本番環境でのAABビルド
-✅ Google Play Console自動アップロード
-✅ リリーストラック選択（internal/alpha/beta/production）
-```
-
-### 4. iOS Deploy (`ios-deploy.yml`)
+### 3. iOS Deploy (`ios-deploy.yml`)
 **トリガー**: バージョンタグ(`v*`)push、手動実行
 
 ```yaml
@@ -84,12 +73,12 @@ GEMINI_API_KEY              # Google Gemini API キー
 ```bash
 # 1. 機能開発・プルリクエスト
 git push origin feature/new-feature
-# → ci.yml が自動実行（品質チェック・テスト・ビルド検証）
+# → ci.yml が自動実行（品質チェック・テストのみ）
 
 # 2. レビュー・マージ
 git checkout main && git merge feature/new-feature
 git push origin main
-# → ci.yml が再度実行（mainブランチ用完全ビルド検証）
+# → ci.yml が再度実行（品質チェック・テスト + Android/iOSビルド検証）
 ```
 
 ### ローカライズQAチェック
@@ -110,22 +99,14 @@ git push origin v1.2.0
 
 # → 自動実行される内容:
 #   ✅ release.yml: GitHub Release作成
-#   ✅ android-deploy.yml: Play Store（手動実行可）
 #   ✅ ios-deploy.yml: App Store（手動実行可）
 ```
 
 ### 手動デプロイ実行
 ```bash
 # GitHub Actions画面での手動実行
-1. Actions タブ → Android Deploy 選択
-2. "Run workflow" → リリーストラック選択
-   - internal: 内部テスト
-   - alpha: クローズドテスト
-   - beta: オープンテスト
-   - production: 本番リリース
-
-3. Actions タブ → iOS Deploy 選択
-4. "Run workflow" → 環境選択
+1. Actions タブ → iOS Deploy 選択
+2. "Run workflow" → 環境選択
    - testflight: TestFlight配布
    - appstore: App Store提出
 ```
@@ -245,7 +226,3 @@ Smart Photo DiaryのCI/CDシステムは、以下の特徴を持つ自動化パ�
 - **ワンクリック配布**: 手動トリガー対応
 - **監視・通知**: 失敗時の自動通知
 
----
-
-**更新**: 2024年12月現在  
-**対象バージョン**: Smart Photo Diary v1.0以降
