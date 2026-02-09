@@ -28,10 +28,8 @@ class WritingPromptAdapter extends TypeAdapter<WritingPrompt> {
       isActive: fields[8] as bool,
       localizedTexts: (fields[9] as Map?)?.cast<String, String>(),
       localizedDescriptions: (fields[10] as Map?)?.cast<String, String>(),
-      localizedTags: (fields[11] as Map?)?.map(
-        (dynamic k, dynamic v) =>
-            MapEntry(k as String, (v as List).cast<String>()),
-      ),
+      localizedTags: (fields[11] as Map?)?.map((dynamic k, dynamic v) =>
+          MapEntry(k as String, (v as List).cast<String>())),
     );
   }
 
