@@ -204,7 +204,7 @@ void main() {
 
         // Assert
         expect(entry.location, equals(location));
-        expect(entry.tags, equals(tags));
+        expect(entry.effectiveTags, equals(tags));
       });
 
       test('should handle empty photo IDs', () {

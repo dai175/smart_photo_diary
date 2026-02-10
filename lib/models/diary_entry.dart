@@ -41,6 +41,9 @@ class DiaryEntry extends HiveObject {
   @HiveField(10)
   List<String>? tags; // 初期タグ（キャッシュとは別）
 
+  /// タグを統一的に取得（cachedTagsを優先、なければtagsにフォールバック）
+  List<String> get effectiveTags => cachedTags ?? tags ?? const [];
+
   DiaryEntry({
     required this.id,
     required this.date,

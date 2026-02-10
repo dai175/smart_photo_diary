@@ -72,8 +72,8 @@ void main() {
           expect(result.content, equals(content));
           expect(result.photoIds, equals(photoIds));
           expect(result.location, equals(location));
-          expect(result.tags, contains('思い出'));
-          expect(result.tags, contains('観光'));
+          expect(result.effectiveTags, contains('思い出'));
+          expect(result.effectiveTags, contains('観光'));
 
           // 作成日時は現在時刻に近いはず
           final now = DateTime.now();
@@ -392,7 +392,10 @@ void main() {
             expect(found.content, equals(testData['content']));
             expect(found.location, equals(testData['location']));
             expect(found.photoIds, equals(testData['photoIds']));
-            expect(found.tags, containsAll(testData['tags'] as List<String>));
+            expect(
+              found.effectiveTags,
+              containsAll(testData['tags'] as List<String>),
+            );
           },
         );
       },

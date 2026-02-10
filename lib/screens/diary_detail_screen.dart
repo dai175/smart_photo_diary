@@ -857,7 +857,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       ],
                     ),
                   ),
-                  if ((_diaryEntry!.tags?.isNotEmpty ?? false)) ...[
+                  if (_diaryEntry!.effectiveTags.isNotEmpty) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
@@ -878,7 +878,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           const SizedBox(width: AppSpacing.xs),
                           Text(
                             l10n.diaryDetailTagCount(
-                              _diaryEntry!.tags?.length ?? 0,
+                              _diaryEntry!.effectiveTags.length,
                             ),
                             style: AppTypography.labelSmall.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
@@ -1121,7 +1121,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     context.l10n.formatFullDateTime(_diaryEntry!.updatedAt),
                     Icons.update_rounded,
                   ),
-                  if ((_diaryEntry!.tags?.isNotEmpty ?? false)) ...[
+                  if (_diaryEntry!.effectiveTags.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.sm),
                     _buildTagsRow(),
                   ],
@@ -1248,7 +1248,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           child: Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
-            children: (_diaryEntry!.tags ?? [])
+            children: _diaryEntry!.effectiveTags
                 .map(
                   (tag) => Container(
                     padding: const EdgeInsets.symmetric(

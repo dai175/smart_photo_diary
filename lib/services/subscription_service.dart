@@ -274,20 +274,11 @@ class SubscriptionService implements ISubscriptionService {
               ? const Duration(days: 365)
               : const Duration(days: 30);
 
-          final forcedStatus = SubscriptionStatus(
+          final forcedStatus = status.copyWith(
             planId: forcedPlanId,
             isActive: true,
             startDate: status.startDate ?? DateTime.now(),
             expiryDate: DateTime.now().add(expiryDuration),
-            monthlyUsageCount: status.monthlyUsageCount, // 実際の使用量を保持
-            usageMonth: status.usageMonth,
-            lastResetDate: status.lastResetDate,
-            autoRenewal: status.autoRenewal,
-            transactionId: status.transactionId,
-            lastPurchaseDate: status.lastPurchaseDate,
-            cancelDate: status.cancelDate,
-            planChangeDate: status.planChangeDate,
-            pendingPlanId: status.pendingPlanId,
           );
 
           return Success(forcedStatus);
@@ -483,16 +474,10 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       final status = statusResult.value;
-      final resetStatus = SubscriptionStatus(
-        planId: status.planId,
-        isActive: status.isActive,
-        startDate: status.startDate,
-        expiryDate: status.expiryDate,
-        autoRenewal: status.autoRenewal,
-        monthlyUsageCount: 0, // リセット
+      final resetStatus = status.copyWith(
+        monthlyUsageCount: 0,
         lastResetDate: DateTime.now(),
-        transactionId: status.transactionId,
-        lastPurchaseDate: status.lastPurchaseDate,
+        usageMonth: _getCurrentMonth(),
       );
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
@@ -618,16 +603,8 @@ class SubscriptionService implements ISubscriptionService {
       }
 
       // 使用量をインクリメント
-      final updatedStatus = SubscriptionStatus(
-        planId: latestStatus.planId,
-        isActive: latestStatus.isActive,
-        startDate: latestStatus.startDate,
-        expiryDate: latestStatus.expiryDate,
-        autoRenewal: latestStatus.autoRenewal,
+      final updatedStatus = latestStatus.copyWith(
         monthlyUsageCount: latestStatus.monthlyUsageCount + 1,
-        lastResetDate: latestStatus.lastResetDate,
-        transactionId: latestStatus.transactionId,
-        lastPurchaseDate: latestStatus.lastPurchaseDate,
       );
 
       await _subscriptionBox?.put(
@@ -770,6 +747,53 @@ class SubscriptionService implements ISubscriptionService {
     return DateTime.now().isBefore(status.expiryDate!);
   }
 
+  /// Premium専用機能へのアクセスチェック共通ヘルパー
+  ///
+  /// BasicPlan -> false、PremiumPlanは有効期限をチェックする
+  /// 共通パターンを一箇所にまとめることで重複を排除
+  Future<Result<bool>> _checkFeatureAccess(String featureName) async {
+    try {
+      if (!_isInitialized) {
+        return Failure(
+          ServiceException('SubscriptionService is not initialized'),
+        );
+      }
+
+      final statusResult = await getCurrentStatus();
+      if (statusResult.isFailure) {
+        return Failure(statusResult.error);
+      }
+
+      final status = statusResult.value;
+      final currentPlan = PlanFactory.createPlan(status.planId);
+
+      if (currentPlan is BasicPlan) {
+        return const Success(false);
+      }
+
+      final isPremiumValid = _isSubscriptionValid(status);
+      _log(
+        '$featureName access check',
+        level: LogLevel.debug,
+        data: {'plan': currentPlan.id, 'valid': isPremiumValid},
+      );
+
+      return Success(isPremiumValid);
+    } catch (e) {
+      _log(
+        'Error checking $featureName access',
+        level: LogLevel.error,
+        error: e,
+      );
+      return Failure(
+        ServiceException(
+          'Failed to check $featureName access',
+          details: e.toString(),
+        ),
+      );
+    }
+  }
+
   /// 月次使用量リセットが必要かチェックしてリセット（内部用）
   Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
     final now = DateTime.now();
@@ -783,16 +807,10 @@ class SubscriptionService implements ISubscriptionService {
         data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
       );
 
-      final resetStatus = SubscriptionStatus(
-        planId: status.planId,
-        isActive: status.isActive,
-        startDate: status.startDate,
-        expiryDate: status.expiryDate,
-        autoRenewal: status.autoRenewal,
-        monthlyUsageCount: 0, // リセット
+      final resetStatus = status.copyWith(
+        monthlyUsageCount: 0,
         lastResetDate: now,
-        transactionId: status.transactionId,
-        lastPurchaseDate: status.lastPurchaseDate,
+        usageMonth: currentMonth,
       );
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
@@ -850,69 +868,28 @@ class SubscriptionService implements ISubscriptionService {
   /// プレミアム機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      // デバッグモードでプラン強制設定をチェック
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        _log(
-          'デバッグモードチェック',
-          level: LogLevel.debug,
-          data: {'forcePlan': forcePlan},
-        );
-        if (forcePlan != null) {
-          final forceResult = forcePlan.startsWith('premium');
-          _log(
-            'プラン強制設定により Premium アクセス',
-            level: LogLevel.debug,
-            data: {'access': forceResult, 'plan': forcePlan},
-          );
-          return Success(forceResult);
-        } else {
-          _log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
-        }
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // Basicプランは基本機能のみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      // Premiumプランは有効期限をチェック
-      final isPremiumValid = _isSubscriptionValid(status);
+    // デバッグモードでプラン強制設定をチェック
+    if (kDebugMode) {
+      final forcePlan = EnvironmentConfig.forcePlan;
       _log(
-        'Premium features access check',
+        'デバッグモードチェック',
         level: LogLevel.debug,
-        data: {'plan': currentPlan.id, 'valid': isPremiumValid},
+        data: {'forcePlan': forcePlan},
       );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking premium features access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check premium features access',
-          details: e.toString(),
-        ),
-      );
+      if (forcePlan != null) {
+        final forceResult = forcePlan.toLowerCase().startsWith('premium');
+        _log(
+          'プラン強制設定により Premium アクセス',
+          level: LogLevel.debug,
+          data: {'access': forceResult, 'plan': forcePlan},
+        );
+        return Success(forceResult);
+      } else {
+        _log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
+      }
     }
+
+    return _checkFeatureAccess('Premium features');
   }
 
   /// ライティングプロンプト機能にアクセスできるかどうか
@@ -991,47 +968,7 @@ class SubscriptionService implements ISubscriptionService {
   /// 高度なフィルタ機能にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedFilters() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 高度なフィルタはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Advanced filters access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking advanced filters access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check advanced filters access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Advanced filters');
   }
 
   /// データエクスポート機能にアクセスできるかどうか
@@ -1086,47 +1023,7 @@ class SubscriptionService implements ISubscriptionService {
 
   /// 統計ダッシュボード機能にアクセスできるかどうか
   Future<Result<bool>> canAccessStatsDashboard() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 統計ダッシュボードはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Stats dashboard access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking stats dashboard access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check stats dashboard access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Stats dashboard');
   }
 
   /// プラン別の機能制限情報を取得
@@ -1175,93 +1072,13 @@ class SubscriptionService implements ISubscriptionService {
   /// 高度な分析にアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessAdvancedAnalytics() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 高度な分析はPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Advanced analytics access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking advanced analytics access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check advanced analytics access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Advanced analytics');
   }
 
   /// 優先サポートにアクセスできるかどうか
   @override
   Future<Result<bool>> canAccessPrioritySupport() async {
-    try {
-      if (!_isInitialized) {
-        return Failure(
-          ServiceException('SubscriptionService is not initialized'),
-        );
-      }
-
-      final statusResult = await getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      // 優先サポートはPremiumプランのみ
-      if (currentPlan is BasicPlan) {
-        return const Success(false);
-      }
-
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
-        'Priority support access check',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      _log(
-        'Error checking priority support access',
-        level: LogLevel.error,
-        error: e,
-      );
-      return Failure(
-        ServiceException(
-          'Failed to check priority support access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Priority support');
   }
 
   // =================================================================
@@ -2152,17 +1969,7 @@ class SubscriptionService implements ISubscriptionService {
       final currentStatus = statusResult.value;
 
       // 自動更新フラグを無効化
-      final updatedStatus = SubscriptionStatus(
-        planId: currentStatus.planId,
-        isActive: currentStatus.isActive,
-        startDate: currentStatus.startDate,
-        expiryDate: currentStatus.expiryDate,
-        autoRenewal: false, // 自動更新を無効化
-        monthlyUsageCount: currentStatus.monthlyUsageCount,
-        lastResetDate: currentStatus.lastResetDate,
-        transactionId: currentStatus.transactionId,
-        lastPurchaseDate: currentStatus.lastPurchaseDate,
-      );
+      final updatedStatus = currentStatus.copyWith(autoRenewal: false);
 
       const statusKey = SubscriptionConstants.statusKey;
       await _subscriptionBox!.put(statusKey, updatedStatus);

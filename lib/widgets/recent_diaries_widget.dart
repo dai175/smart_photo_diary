@@ -112,9 +112,9 @@ class RecentDiariesWidget extends StatelessWidget {
           _buildTitle(context, title),
           const SizedBox(height: AppSpacing.xs),
           _buildDiaryContent(context, diary.content),
-          if (diary.tags?.isNotEmpty == true) ...[
+          if (diary.effectiveTags.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            _buildTags(context, diary.tags!),
+            _buildTags(context, diary.effectiveTags),
           ],
         ],
       ),

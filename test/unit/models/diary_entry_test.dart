@@ -162,6 +162,53 @@ void main() {
       });
     });
 
+    group('effectiveTags', () {
+      test('should return cachedTags when both cachedTags and tags exist', () {
+        final entry = DiaryEntry(
+          id: 'test-id',
+          date: testDate,
+          title: 'Test',
+          content: 'Test',
+          photoIds: ['photo1'],
+          createdAt: testCreatedAt,
+          updatedAt: testUpdatedAt,
+          cachedTags: ['cached1', 'cached2'],
+          tags: ['initial1'],
+        );
+
+        expect(entry.effectiveTags, equals(['cached1', 'cached2']));
+      });
+
+      test('should return tags when cachedTags is null', () {
+        final entry = DiaryEntry(
+          id: 'test-id',
+          date: testDate,
+          title: 'Test',
+          content: 'Test',
+          photoIds: ['photo1'],
+          createdAt: testCreatedAt,
+          updatedAt: testUpdatedAt,
+          tags: ['initial1', 'initial2'],
+        );
+
+        expect(entry.effectiveTags, equals(['initial1', 'initial2']));
+      });
+
+      test('should return empty list when both are null', () {
+        final entry = DiaryEntry(
+          id: 'test-id',
+          date: testDate,
+          title: 'Test',
+          content: 'Test',
+          photoIds: ['photo1'],
+          createdAt: testCreatedAt,
+          updatedAt: testUpdatedAt,
+        );
+
+        expect(entry.effectiveTags, isEmpty);
+      });
+    });
+
     group('copyWith', () {
       late DiaryEntry originalEntry;
 

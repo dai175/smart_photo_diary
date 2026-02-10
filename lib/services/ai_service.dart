@@ -5,8 +5,10 @@ import 'ai/ai_service_interface.dart';
 import 'ai/diary_generator.dart';
 import 'ai/tag_generator.dart';
 import 'interfaces/subscription_service_interface.dart';
+import 'logging_service.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import '../core/service_locator.dart';
 
 /// AIを使用して日記文を生成するサービスクラス（リファクタリング済み）
 ///
@@ -35,6 +37,62 @@ class AiService implements IAiService {
     );
   }
 
+  /// AI生成前の使用量チェック・月次リセット処理
+  Future<Result<void>> _checkAiGenerationAllowed() async {
+    if (_subscriptionService == null) return const Success(null);
+
+    await _subscriptionService.resetMonthlyUsageIfNeeded();
+
+    final canUseResult = await _subscriptionService.canUseAiGeneration();
+    if (canUseResult.isFailure) {
+      return Failure(canUseResult.error);
+    }
+
+    if (!canUseResult.value) {
+      final currentPlanResult = await _subscriptionService
+          .getCurrentPlanClass();
+      final planName = currentPlanResult.isSuccess
+          ? currentPlanResult.value.displayName
+          : 'Basic';
+      final remainingResult = await _subscriptionService
+          .getRemainingGenerations();
+      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
+
+      return Failure(
+        AiProcessingException(
+          'AI生成の月間制限に達しました。'
+          '現在のプラン（$planName）では今月の残り使用回数は$remaining回です。'
+          'より多くの生成を行うにはPremiumプランにアップグレードしてください。',
+          details: 'Usage limit exceeded for current plan',
+        ),
+      );
+    }
+
+    return const Success(null);
+  }
+
+  /// AI生成成功後の使用量記録
+  Future<void> _recordAiUsage() async {
+    if (_subscriptionService == null) return;
+
+    try {
+      final result = await _subscriptionService.incrementAiUsage();
+      if (result.isFailure) {
+        serviceLocator.get<LoggingService>().warning(
+          'AI使用量の記録に失敗しました',
+          context: 'AiService._recordAiUsage',
+          data: result.error.toString(),
+        );
+      }
+    } catch (e) {
+      serviceLocator.get<LoggingService>().warning(
+        'AI使用量の記録中に例外が発生しました',
+        context: 'AiService._recordAiUsage',
+        data: e.toString(),
+      );
+    }
+  }
+
   @override
   Future<Result<DiaryGenerationResult>> generateDiaryFromImage({
     required Uint8List imageData,
@@ -45,40 +103,8 @@ class AiService implements IAiService {
     Locale? locale,
   }) async {
     try {
-      // Phase 1.7.1.2: generateDiary前の制限チェック実装
-      if (_subscriptionService != null) {
-        // 月次リセット処理統合 (Phase 1.7.1.4)
-        await _subscriptionService.resetMonthlyUsageIfNeeded();
-
-        // プラン別制限チェック（制限値はSubscriptionConstantsで管理）
-        final canUseResult = await _subscriptionService.canUseAiGeneration();
-        if (canUseResult.isFailure) {
-          return Failure(canUseResult.error);
-        }
-
-        if (!canUseResult.value) {
-          // Phase 1.7.2.2: 制限超過時の適切なエラーメッセージ
-          final currentPlanResult = await _subscriptionService
-              .getCurrentPlanClass();
-          final planName = currentPlanResult.isSuccess
-              ? currentPlanResult.value.displayName
-              : 'Basic';
-          final remainingResult = await _subscriptionService
-              .getRemainingGenerations();
-          final remaining = remainingResult.isSuccess
-              ? remainingResult.value
-              : 0;
-
-          return Failure(
-            AiProcessingException(
-              'AI生成の月間制限に達しました。'
-              '現在のプラン（$planName）では今月の残り使用回数は$remaining回です。'
-              'より多くの生成を行うにはPremiumプランにアップグレードしてください。',
-              details: 'Usage limit exceeded for current plan',
-            ),
-          );
-        }
-      }
+      final checkResult = await _checkAiGenerationAllowed();
+      if (checkResult.isFailure) return Failure(checkResult.error);
 
       final online = await isOnline();
       final result = await _diaryGenerator.generateFromImage(
@@ -91,11 +117,7 @@ class AiService implements IAiService {
         locale: locale ?? const Locale('ja'),
       );
 
-      // Phase 1.7.1.3: 使用量カウント統合
-      // AI生成が成功した場合のみクレジットを消費する
-      if (_subscriptionService != null) {
-        await _subscriptionService.incrementAiUsage();
-      }
+      await _recordAiUsage();
 
       return Success(result);
     } catch (e) {
@@ -118,40 +140,8 @@ class AiService implements IAiService {
     Locale? locale,
   }) async {
     try {
-      // Phase 1.7.1.2: generateDiary前の制限チェック実装
-      if (_subscriptionService != null) {
-        // 月次リセット処理統合 (Phase 1.7.1.4)
-        await _subscriptionService.resetMonthlyUsageIfNeeded();
-
-        // プラン別制限チェック（制限値はSubscriptionConstantsで管理）
-        final canUseResult = await _subscriptionService.canUseAiGeneration();
-        if (canUseResult.isFailure) {
-          return Failure(canUseResult.error);
-        }
-
-        if (!canUseResult.value) {
-          // Phase 1.7.2.2: 制限超過時の適切なエラーメッセージ
-          final currentPlanResult = await _subscriptionService
-              .getCurrentPlanClass();
-          final planName = currentPlanResult.isSuccess
-              ? currentPlanResult.value.displayName
-              : 'Basic';
-          final remainingResult = await _subscriptionService
-              .getRemainingGenerations();
-          final remaining = remainingResult.isSuccess
-              ? remainingResult.value
-              : 0;
-
-          return Failure(
-            AiProcessingException(
-              'AI生成の月間制限に達しました。'
-              '現在のプラン（$planName）では今月の残り使用回数は$remaining回です。'
-              'より多くの生成を行うにはPremiumプランにアップグレードしてください。',
-              details: 'Usage limit exceeded for current plan',
-            ),
-          );
-        }
-      }
+      final checkResult = await _checkAiGenerationAllowed();
+      if (checkResult.isFailure) return Failure(checkResult.error);
 
       final online = await isOnline();
       final result = await _diaryGenerator.generateFromMultipleImages(
@@ -163,11 +153,7 @@ class AiService implements IAiService {
         locale: locale ?? const Locale('ja'),
       );
 
-      // Phase 1.7.1.3: 使用量カウント統合
-      // AI生成が成功した場合のみクレジットを消費する
-      if (_subscriptionService != null) {
-        await _subscriptionService.incrementAiUsage();
-      }
+      await _recordAiUsage();
 
       return Success(result);
     } catch (e) {

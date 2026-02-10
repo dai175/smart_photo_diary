@@ -138,7 +138,7 @@ class DiaryService implements IDiaryService {
 
   // 検索用テキストを作成
   String _buildSearchableText(DiaryEntry entry) {
-    final tags = (entry.cachedTags ?? entry.tags ?? const <String>[]).join(' ');
+    final tags = entry.effectiveTags.join(' ');
     final location = entry.location ?? '';
     final text = '${entry.title} ${entry.content} $tags $location';
     return text.toLowerCase();
@@ -374,42 +374,15 @@ class DiaryService implements IDiaryService {
 
   // バックグラウンドでタグを生成
   void _generateTagsInBackground(DiaryEntry entry) {
-    // 非同期でタグ生成を実行（UI をブロックしない）
-    Future.delayed(Duration.zero, () async {
-      try {
-        _loggingService.debug('バックグラウンドでタグ生成開始: ${entry.id}');
-        final tagsResult = await _aiService.generateTagsFromContent(
-          title: entry.title,
-          content: entry.content,
-          date: entry.date,
-          photoCount: entry.photoIds.length,
-          locale: _getCurrentLocale(),
-        );
-
-        if (tagsResult.isSuccess) {
-          // Hiveボックスから最新のエントリーを取得して更新
-          if (_diaryBox != null && _diaryBox!.isOpen) {
-            final latestEntry = _diaryBox!.get(entry.id);
-            if (latestEntry != null) {
-              await latestEntry.updateTags(tagsResult.value);
-              _loggingService.debug(
-                'タグ生成完了: ${entry.id} -> ${tagsResult.value}',
-              );
-            } else {
-              _loggingService.warning(
-                'バックグラウンドタグ生成: エントリーが見つかりません: ${entry.id}',
-              );
-            }
-          } else {
-            _loggingService.warning('バックグラウンドタグ生成: Hiveボックスが利用できません');
-          }
-        } else {
-          _loggingService.error('バックグラウンドタグ生成エラー', error: tagsResult.error);
-        }
-      } catch (e) {
-        _loggingService.error('バックグラウンドタグ生成エラー', error: e);
-      }
-    });
+    _generateTagsInBackgroundCore(
+      entry: entry,
+      content: entry.content,
+      logLabel: 'バックグラウンド',
+      onTagsGenerated: (latestEntry, tags) async {
+        await latestEntry.updateTags(tags);
+        _searchTextIndex[latestEntry.id] = _buildSearchableText(latestEntry);
+      },
+    );
   }
 
   // 日記エントリーのタグを取得（キャッシュ優先）
@@ -587,9 +560,7 @@ class DiaryService implements IDiaryService {
       final allTags = <String>{};
 
       for (final entry in _diaryBox!.values) {
-        if (entry.cachedTags != null) {
-          allTags.addAll(entry.cachedTags!);
-        }
+        allTags.addAll(entry.effectiveTags);
       }
 
       return Success(allTags);
@@ -607,10 +578,8 @@ class DiaryService implements IDiaryService {
       final tagCounts = <String, int>{};
 
       for (final entry in _diaryBox!.values) {
-        if (entry.cachedTags != null) {
-          for (final tag in entry.cachedTags!) {
-            tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
-          }
+        for (final tag in entry.effectiveTags) {
+          tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
         }
       }
 
@@ -733,6 +702,11 @@ class DiaryService implements IDiaryService {
       await _ensureIndex();
       final insertAt = _findInsertIndex(entry.date);
       _sortedIdsByDateDesc.insert(insertAt, entry.id);
+      _sortedDatesByDayDesc.insert(
+        insertAt,
+        DateTime(entry.date.year, entry.date.month, entry.date.day),
+      );
+      _searchTextIndex[entry.id] = _buildSearchableText(entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
@@ -784,29 +758,51 @@ class DiaryService implements IDiaryService {
 
   /// 過去の写真用のバックグラウンドタグ生成
   void _generateTagsInBackgroundForPastPhoto(DiaryEntry entry) {
+    // 過去の日付であることを示すコンテキストを生成
+    final daysDifference = DateTime.now().difference(entry.date).inDays;
+    String pastContext;
+
+    if (daysDifference <= 0) {
+      pastContext = '今日の思い出';
+    } else if (daysDifference == 1) {
+      pastContext = '昨日の思い出';
+    } else if (daysDifference <= 7) {
+      pastContext = '$daysDifference日前の思い出';
+    } else if (daysDifference <= 30) {
+      pastContext = '約${(daysDifference / 7).round()}週間前の思い出';
+    } else if (daysDifference <= 365) {
+      pastContext = '約${(daysDifference / 30).round()}ヶ月前の思い出';
+    } else {
+      pastContext = '約${(daysDifference / 365).round()}年前の思い出';
+    }
+
+    _generateTagsInBackgroundCore(
+      entry: entry,
+      content: '$pastContext: ${entry.content}',
+      logLabel: '過去写真日記',
+      onTagsGenerated: (latestEntry, tags) async {
+        latestEntry.tags = tags;
+        latestEntry.updatedAt = DateTime.now();
+        await latestEntry.save();
+        _searchTextIndex[latestEntry.id] = _buildSearchableText(latestEntry);
+      },
+    );
+  }
+
+  /// バックグラウンドタグ生成の共通処理
+  void _generateTagsInBackgroundCore({
+    required DiaryEntry entry,
+    required String content,
+    required String logLabel,
+    required Future<void> Function(DiaryEntry latestEntry, List<String> tags)
+    onTagsGenerated,
+  }) {
     Future.delayed(Duration.zero, () async {
       try {
-        _loggingService.debug('過去写真日記のバックグラウンドタグ生成開始: ${entry.id}');
-
-        // 過去の日付であることを示すメタデータを追加
-        final daysDifference = DateTime.now().difference(entry.date).inDays;
-        String pastContext = '';
-
-        if (daysDifference == 1) {
-          pastContext = '昨日の思い出';
-        } else if (daysDifference <= 7) {
-          pastContext = '$daysDifference日前の思い出';
-        } else if (daysDifference <= 30) {
-          pastContext = '約${(daysDifference / 7).round()}週間前の思い出';
-        } else if (daysDifference <= 365) {
-          pastContext = '約${(daysDifference / 30).round()}ヶ月前の思い出';
-        } else {
-          pastContext = '約${(daysDifference / 365).round()}年前の思い出';
-        }
-
+        _loggingService.debug('$logLabelのタグ生成開始: ${entry.id}');
         final tagsResult = await _aiService.generateTagsFromContent(
           title: entry.title,
-          content: '$pastContext: ${entry.content}',
+          content: content,
           date: entry.date,
           photoCount: entry.photoIds.length,
           locale: _getCurrentLocale(),
@@ -816,20 +812,23 @@ class DiaryService implements IDiaryService {
           if (_diaryBox != null && _diaryBox!.isOpen) {
             final latestEntry = _diaryBox!.get(entry.id);
             if (latestEntry != null) {
-              latestEntry.tags = tagsResult.value;
-              latestEntry.updatedAt = DateTime.now();
-              await latestEntry.save();
-              _searchTextIndex[latestEntry.id] = _buildSearchableText(
-                latestEntry,
+              await onTagsGenerated(latestEntry, tagsResult.value);
+              _loggingService.debug(
+                '$logLabelのタグ生成完了: ${entry.id} -> ${tagsResult.value}',
               );
-              _loggingService.debug('過去写真日記のタグ生成完了: ${tagsResult.value}');
+            } else {
+              _loggingService.warning(
+                '$logLabelタグ生成: エントリーが見つかりません: ${entry.id}',
+              );
             }
+          } else {
+            _loggingService.warning('$logLabelタグ生成: Hiveボックスが利用できません');
           }
         } else {
-          _loggingService.error('過去写真日記のタグ生成失敗', error: tagsResult.error);
+          _loggingService.error('$logLabelのタグ生成エラー', error: tagsResult.error);
         }
       } catch (e) {
-        _loggingService.error('過去写真日記のタグ生成エラー', error: e);
+        _loggingService.error('$logLabelのタグ生成エラー', error: e);
       }
     });
   }
