@@ -70,6 +70,7 @@ web/build/
 *.tmp
 *.swp
 *.lock
+!pubspec.lock
 
 # --- 環境変数ファイル ---
 .env
