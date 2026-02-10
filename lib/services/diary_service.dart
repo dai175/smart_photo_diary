@@ -380,6 +380,7 @@ class DiaryService implements IDiaryService {
       logLabel: 'バックグラウンド',
       onTagsGenerated: (latestEntry, tags) async {
         await latestEntry.updateTags(tags);
+        _searchTextIndex[latestEntry.id] = _buildSearchableText(latestEntry);
       },
     );
   }
@@ -761,7 +762,9 @@ class DiaryService implements IDiaryService {
     final daysDifference = DateTime.now().difference(entry.date).inDays;
     String pastContext;
 
-    if (daysDifference == 1) {
+    if (daysDifference <= 0) {
+      pastContext = '今日の思い出';
+    } else if (daysDifference == 1) {
       pastContext = '昨日の思い出';
     } else if (daysDifference <= 7) {
       pastContext = '$daysDifference日前の思い出';

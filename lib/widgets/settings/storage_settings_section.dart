@@ -199,6 +199,7 @@ class StorageSettingsSection extends StatelessWidget {
 
       result.fold(
         (importResult) {
+          onReloadSettings();
           _showImportResultDialog(context, importResult);
         },
         (error) {
