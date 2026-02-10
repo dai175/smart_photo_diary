@@ -443,11 +443,6 @@ void handlePhotoTap({
       return;
     }
 
-    if (controller.isPhotoUsed(index)) {
-      onUsedPhotoSelected?.call();
-      return;
-    }
-
     if (onDifferentDateSelected != null) {
       onDifferentDateSelected();
     }
