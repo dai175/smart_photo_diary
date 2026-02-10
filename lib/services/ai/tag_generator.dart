@@ -64,7 +64,7 @@ class TagGenerator {
           final allTags = [...baseTags, ...tags];
 
           // 似たようなタグを統合
-          final filteredTags = _filterSimilarTags(allTags);
+          final filteredTags = _filterSimilarTags(allTags, locale);
 
           return filteredTags.take(5).toList();
         }
@@ -186,7 +186,7 @@ class TagGenerator {
     }
 
     // 似たようなタグを統合
-    final filteredTags = _filterSimilarTags(tags);
+    final filteredTags = _filterSimilarTags(tags, locale);
 
     return filteredTags.take(5).toList();
   }
@@ -227,27 +227,53 @@ class TagGenerator {
   }
 
   /// 似たようなタグを統合・フィルタリング
-  List<String> _filterSimilarTags(List<String> tags) {
+  List<String> _filterSimilarTags(List<String> tags, Locale? locale) {
     final filteredTags = <String>[];
+    final isEnglish = locale?.languageCode == 'en';
 
-    // 類似タグのマッピング
-    final similarTagGroups = {
-      '食事': ['朝食', '昼食', '夕食', 'ご飯', '食べ物', '料理', 'グルメ'],
-      '外出': ['散歩', 'お出かけ', '外', '屋外', 'ウォーキング'],
-      '自宅': ['家', '部屋', '室内', 'おうち'],
-      '仕事': ['作業', 'お仕事', 'ワーク'],
-      '運動': ['スポーツ', 'トレーニング', 'エクササイズ', '筋トレ'],
-      '読書': ['本', '読み物', '図書'],
-      '買い物': ['ショッピング', '購入', 'お買い物'],
-      'リラックス': ['癒し', 'のんびり', 'ゆっくり', '休憩'],
-      '楽しい': ['嬉しい', 'ハッピー', '喜び', 'ポジティブ'],
-      '友達': ['友人', '友だち', '仲間'],
-      '勉強': ['学習', '学び', '勉強会'],
-      '料理': ['調理', 'クッキング', '手料理'],
-      '掃除': ['片付け', '整理', '清掃'],
-      '映画': ['動画', 'ムービー', '視聴'],
-      '音楽': ['歌', '楽器', 'ライブ'],
-    };
+    // 類似タグのマッピング（言語別）
+    final similarTagGroups = isEnglish
+        ? {
+            'Meal': [
+              'Breakfast',
+              'Lunch',
+              'Dinner',
+              'Food',
+              'Cooking',
+              'Gourmet',
+            ],
+            'Outside': ['Walk', 'Outdoor', 'Outing', 'Walking'],
+            'Home': ['House', 'Room', 'Indoor'],
+            'Work': ['Office', 'Job', 'Task'],
+            'Exercise': ['Sport', 'Training', 'Fitness', 'Workout'],
+            'Reading': ['Book', 'Read', 'Library'],
+            'Shopping': ['Purchase', 'Buy', 'Store'],
+            'Relax': ['Rest', 'Calm', 'Peaceful', 'Break'],
+            'Happy': ['Joy', 'Fun', 'Enjoy', 'Positive'],
+            'Friends': ['Friend', 'Buddy', 'Pal'],
+            'Study': ['Learning', 'Lesson', 'Class'],
+            'Cooking': ['Cook', 'Recipe', 'Kitchen'],
+            'Cleaning': ['Tidy', 'Organize', 'Clean'],
+            'Movie': ['Video', 'Film', 'Watch'],
+            'Music': ['Song', 'Instrument', 'Concert'],
+          }
+        : {
+            '食事': ['朝食', '昼食', '夕食', 'ご飯', '食べ物', '料理', 'グルメ'],
+            '外出': ['散歩', 'お出かけ', '外', '屋外', 'ウォーキング'],
+            '自宅': ['家', '部屋', '室内', 'おうち'],
+            '仕事': ['作業', 'お仕事', 'ワーク'],
+            '運動': ['スポーツ', 'トレーニング', 'エクササイズ', '筋トレ'],
+            '読書': ['本', '読み物', '図書'],
+            '買い物': ['ショッピング', '購入', 'お買い物'],
+            'リラックス': ['癒し', 'のんびり', 'ゆっくり', '休憩'],
+            '楽しい': ['嬉しい', 'ハッピー', '喜び', 'ポジティブ'],
+            '友達': ['友人', '友だち', '仲間'],
+            '勉強': ['学習', '学び', '勉強会'],
+            '料理': ['調理', 'クッキング', '手料理'],
+            '掃除': ['片付け', '整理', '清掃'],
+            '映画': ['動画', 'ムービー', '視聴'],
+            '音楽': ['歌', '楽器', 'ライブ'],
+          };
 
     final usedGroups = <String>{};
 

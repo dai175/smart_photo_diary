@@ -50,6 +50,15 @@ class _SubscriptionSettingsSectionState
           context.l10n.subscriptionUpgradeRecommendationLimit(limit),
       upgradeRecommendationGeneralFormatter: () =>
           context.l10n.subscriptionUpgradeRecommendationGeneral,
+      expiredText: context.l10n.subscriptionExpired,
+      todayText: context.l10n.subscriptionResetToday,
+      tomorrowText: context.l10n.subscriptionResetTomorrow,
+      inactiveStatusText: context.l10n.subscriptionStatusInactive,
+      expiryNearStatusText: context.l10n.subscriptionStatusExpiryNear,
+      autoRenewalNotApplicableText:
+          context.l10n.subscriptionAutoRenewalNotApplicable,
+      autoRenewalEnabledText: context.l10n.subscriptionAutoRenewalEnabled,
+      autoRenewalDisabledText: context.l10n.subscriptionAutoRenewalDisabled,
     );
   }
 
