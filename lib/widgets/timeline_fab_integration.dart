@@ -119,11 +119,11 @@ class TimelineFABIntegration extends StatelessWidget {
         builder: (dialogContext) => PromptSelectionModal(
           onPromptSelected: (prompt) {
             Navigator.of(dialogContext).pop();
-            _navigateToDiaryPreview(dialogContext, selectedPhotos, prompt);
+            _navigateToDiaryPreview(context, selectedPhotos, prompt);
           },
           onSkip: () {
             Navigator.of(dialogContext).pop();
-            _navigateToDiaryPreview(dialogContext, selectedPhotos, null);
+            _navigateToDiaryPreview(context, selectedPhotos, null);
           },
         ),
       );
@@ -151,18 +151,20 @@ class TimelineFABIntegration extends StatelessWidget {
           'プロンプト: ${selectedPrompt?.text ?? "なし"}, 写真数: ${selectedPhotos.length}',
     );
 
-    Navigator.push(
+    Navigator.push<bool>(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<bool>(
         builder: (context) => DiaryPreviewScreen(
           selectedAssets: selectedPhotos,
           selectedPrompt: selectedPrompt,
         ),
       ),
-    ).then((_) {
-      // 日記作成完了後に選択をクリアし、コールバックを実行
-      controller.clearSelection();
-      onDiaryCreated?.call();
+    ).then((created) {
+      if (created == true) {
+        // 日記作成完了後に選択をクリアし、コールバックを実行
+        controller.clearSelection();
+        onDiaryCreated?.call();
+      }
     });
   }
 }

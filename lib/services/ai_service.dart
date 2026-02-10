@@ -5,8 +5,10 @@ import 'ai/ai_service_interface.dart';
 import 'ai/diary_generator.dart';
 import 'ai/tag_generator.dart';
 import 'interfaces/subscription_service_interface.dart';
+import 'logging_service.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import '../core/service_locator.dart';
 
 /// AIを使用して日記文を生成するサービスクラス（リファクタリング済み）
 ///
@@ -71,8 +73,23 @@ class AiService implements IAiService {
 
   /// AI生成成功後の使用量記録
   Future<void> _recordAiUsage() async {
-    if (_subscriptionService != null) {
-      await _subscriptionService.incrementAiUsage();
+    if (_subscriptionService == null) return;
+
+    try {
+      final result = await _subscriptionService.incrementAiUsage();
+      if (result.isFailure) {
+        serviceLocator.get<LoggingService>().warning(
+          'AI使用量の記録に失敗しました',
+          context: 'AiService._recordAiUsage',
+          data: result.error.toString(),
+        );
+      }
+    } catch (e) {
+      serviceLocator.get<LoggingService>().warning(
+        'AI使用量の記録中に例外が発生しました',
+        context: 'AiService._recordAiUsage',
+        data: e.toString(),
+      );
     }
   }
 

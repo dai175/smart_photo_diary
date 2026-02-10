@@ -314,10 +314,12 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       // ウィジェットがまだマウントされている場合のみ遷移
       if (mounted) {
         // 日記詳細画面に遷移（保存完了メッセージ付き）
+        // result: true で呼び出し元のpush Futureを「作成成功」として完了させる
         navigator.pushReplacement(
           MaterialPageRoute(
             builder: (context) => DiaryDetailScreen(diaryId: savedDiary.id),
           ),
+          result: true,
         );
 
         // 保存成功メッセージを表示
@@ -406,8 +408,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
         );
 
-        // 前の画面に戻る
-        navigator.pop();
+        // 前の画面に戻る（作成成功を通知）
+        navigator.pop(true);
       }
     } catch (e, stackTrace) {
       final loggingService = await LoggingService.getInstance();
