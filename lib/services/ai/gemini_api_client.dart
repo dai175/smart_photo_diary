@@ -73,7 +73,7 @@ class GeminiApiClient {
         _logger.debug(
           'Gemini API レスポンス受信成功',
           context: 'sendTextRequest',
-          data: data.toString(),
+          data: _summarizeResponse(data),
         );
         return data;
       } else {
@@ -149,7 +149,7 @@ class GeminiApiClient {
         _logger.debug(
           'Gemini Vision API レスポンス受信成功',
           context: 'sendVisionRequest',
-          data: data.toString(),
+          data: _summarizeResponse(data),
         );
         return data;
       } else {
@@ -193,6 +193,29 @@ class GeminiApiClient {
     } catch (e) {
       _logger.error('APIキーテストエラー', context: 'testApiKey', error: e);
       return false;
+    }
+  }
+
+  /// APIレスポンスのサマリーを生成（ログ出力用）
+  String _summarizeResponse(Map<String, dynamic> data) {
+    try {
+      final candidates = data['candidates'] as List?;
+      final candidateCount = candidates?.length ?? 0;
+      String? finishReason;
+      int? textLength;
+
+      if (candidates != null && candidates.isNotEmpty) {
+        final candidate = candidates[0] as Map<String, dynamic>;
+        finishReason = candidate['finishReason'] as String?;
+        final text = extractTextFromResponse(data);
+        textLength = text?.length;
+      }
+
+      return 'candidates=$candidateCount, '
+          'finishReason=$finishReason, '
+          'textLength=$textLength';
+    } catch (_) {
+      return 'レスポンスサマリー生成失敗';
     }
   }
 
