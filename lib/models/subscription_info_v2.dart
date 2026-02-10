@@ -37,6 +37,7 @@ class UsageStatisticsV2 {
   bool get isNearLimit => usageRate >= 0.8 && remainingCount > 0;
 
   /// 使用状況の表示文字列
+  @Deprecated('Use getLocalizedUsageDisplay() instead')
   String get usageDisplay => '$monthlyUsageCount / $monthlyLimit回';
 
   /// 使用状況の表示文字列（多言語化対応）
@@ -115,6 +116,7 @@ class AutoRenewalInfoV2 {
   }
 
   /// 自動更新状態の表示テキスト
+  @Deprecated('Use localized text via context.l10n instead')
   String get statusDisplay => isAutoRenewalEnabled ? '有効' : '無効';
 }
 
@@ -260,6 +262,7 @@ class SubscriptionInfoV2 {
   // ============================================================================
 
   /// 設定画面用のプラン状態表示文字列（問題がある場合のみ表示）
+  @Deprecated('Use localized text via context.l10n instead')
   String? get planStatusDisplay {
     if (!isActive) return '無効';
     if (isPremium && periodInfo.isExpiryNear) return '期限間近';
@@ -267,6 +270,7 @@ class SubscriptionInfoV2 {
   }
 
   /// 設定画面用の期限表示文字列
+  @Deprecated('Use getLocalizedDisplayData() instead')
   String? get expiryDisplayText {
     if (periodInfo.expiryDate == null) return null;
 
@@ -285,12 +289,14 @@ class SubscriptionInfoV2 {
   }
 
   /// 設定画面用の自動更新状態表示
+  @Deprecated('Use getLocalizedDisplayData() instead')
   String get autoRenewalDisplayText {
     if (!isPremium) return '対象外';
     return autoRenewalInfo.isAutoRenewalEnabled ? '有効' : '無効';
   }
 
   /// 設定画面用の使用量警告メッセージ
+  @Deprecated('Use getLocalizedUsageWarningMessage() instead')
   String? get usageWarningMessage {
     if (usageStats.isNearLimit) {
       final remaining = usageStats.remainingCount;
@@ -314,6 +320,7 @@ class SubscriptionInfoV2 {
   }
 
   /// 設定画面用のプラン推奨メッセージ
+  @Deprecated('Use getLocalizedPlanRecommendationMessage() instead')
   String? get planRecommendationMessage {
     if (isPremium) return null;
 
@@ -345,6 +352,7 @@ class SubscriptionInfoV2 {
   }
 
   /// 設定画面用のリセット日表示
+  @Deprecated('Use getLocalizedDisplayData() instead')
   String get resetDateDisplayText {
     final resetDate = usageStats.nextResetDate;
     final today = DateTime.now();
@@ -370,27 +378,86 @@ class SubscriptionInfoV2 {
     required String Function(int remaining) warningRemainingFormatter,
     required String Function(int limit) upgradeRecommendationLimitFormatter,
     required String Function() upgradeRecommendationGeneralFormatter,
-  }) => SubscriptionDisplayDataV2(
-    planName: getLocalizedPlanDisplayName(locale),
-    planStatus: planStatusDisplay,
-    usageText: usageStats.getLocalizedUsageDisplay(usageFormatter),
-    remainingText: remainingFormatter(usageStats.remainingCount),
-    resetDateText: resetDateDisplayText,
-    expiryText: expiryDisplayText,
-    autoRenewalText: autoRenewalDisplayText,
-    warningMessage: getLocalizedUsageWarningMessage(
-      limitReachedFormatter,
-      warningRemainingFormatter,
-    ),
-    recommendationMessage: getLocalizedPlanRecommendationMessage(
-      upgradeRecommendationLimitFormatter,
-      upgradeRecommendationGeneralFormatter,
-    ),
-    showUpgradeButton: !isPremium,
-    usageProgressValue: usageStats.usageRate,
-    isNearLimit: usageStats.isNearLimit,
-    isExpiryNear: periodInfo.isExpiryNear,
-  );
+    required String expiredText,
+    required String todayText,
+    required String tomorrowText,
+    required String inactiveStatusText,
+    required String expiryNearStatusText,
+    required String autoRenewalNotApplicableText,
+    required String autoRenewalEnabledText,
+    required String autoRenewalDisabledText,
+  }) {
+    // planStatus（ローカライズ版）
+    String? localizedPlanStatus;
+    if (!isActive) {
+      localizedPlanStatus = inactiveStatusText;
+    } else if (isPremium && periodInfo.isExpiryNear) {
+      localizedPlanStatus = expiryNearStatusText;
+    }
+
+    // expiryText（ローカライズ版）
+    String? localizedExpiryText;
+    if (periodInfo.expiryDate != null) {
+      final expiry = periodInfo.expiryDate!;
+      final daysUntil = periodInfo.daysUntilExpiry ?? 0;
+      final now = DateTime.now();
+      if (daysUntil <= 0) {
+        localizedExpiryText = expiredText;
+      } else if (expiry.year != now.year) {
+        localizedExpiryText = '${expiry.year}/${expiry.month}/${expiry.day}';
+      } else {
+        localizedExpiryText = '${expiry.month}/${expiry.day}';
+      }
+    }
+
+    // autoRenewalText（ローカライズ版）
+    String localizedAutoRenewalText;
+    if (!isPremium) {
+      localizedAutoRenewalText = autoRenewalNotApplicableText;
+    } else {
+      localizedAutoRenewalText = autoRenewalInfo.isAutoRenewalEnabled
+          ? autoRenewalEnabledText
+          : autoRenewalDisabledText;
+    }
+
+    // resetDateText（ローカライズ版）
+    String localizedResetDateText;
+    final resetDate = usageStats.nextResetDate;
+    final today = DateTime.now();
+    final daysUntilReset = resetDate.difference(today).inDays;
+    if (daysUntilReset <= 0) {
+      localizedResetDateText = todayText;
+    } else if (daysUntilReset == 1) {
+      localizedResetDateText = tomorrowText;
+    } else if (resetDate.year != today.year) {
+      localizedResetDateText =
+          '${resetDate.year}/${resetDate.month}/${resetDate.day}';
+    } else {
+      localizedResetDateText = '${resetDate.month}/${resetDate.day}';
+    }
+
+    return SubscriptionDisplayDataV2(
+      planName: getLocalizedPlanDisplayName(locale),
+      planStatus: localizedPlanStatus,
+      usageText: usageStats.getLocalizedUsageDisplay(usageFormatter),
+      remainingText: remainingFormatter(usageStats.remainingCount),
+      resetDateText: localizedResetDateText,
+      expiryText: localizedExpiryText,
+      autoRenewalText: localizedAutoRenewalText,
+      warningMessage: getLocalizedUsageWarningMessage(
+        limitReachedFormatter,
+        warningRemainingFormatter,
+      ),
+      recommendationMessage: getLocalizedPlanRecommendationMessage(
+        upgradeRecommendationLimitFormatter,
+        upgradeRecommendationGeneralFormatter,
+      ),
+      showUpgradeButton: !isPremium,
+      usageProgressValue: usageStats.usageRate,
+      isNearLimit: usageStats.isNearLimit,
+      isExpiryNear: periodInfo.isExpiryNear,
+    );
+  }
 }
 
 /// 設定画面表示用のデータクラス（V2版）

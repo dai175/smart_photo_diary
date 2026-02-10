@@ -1399,6 +1399,38 @@
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "一般的なアップグレード推奨メッセージ"
   },
+  "subscriptionExpired": "期限切れ",
+  "@subscriptionExpired": {
+    "description": "サブスクリプション期限切れ表示"
+  },
+  "subscriptionResetToday": "今日",
+  "@subscriptionResetToday": {
+    "description": "使用量リセット日が今日の場合の表示"
+  },
+  "subscriptionResetTomorrow": "明日",
+  "@subscriptionResetTomorrow": {
+    "description": "使用量リセット日が明日の場合の表示"
+  },
+  "subscriptionStatusInactive": "無効",
+  "@subscriptionStatusInactive": {
+    "description": "サブスクリプションが無効な状態の表示"
+  },
+  "subscriptionStatusExpiryNear": "期限間近",
+  "@subscriptionStatusExpiryNear": {
+    "description": "サブスクリプション期限が近い状態の表示"
+  },
+  "subscriptionAutoRenewalNotApplicable": "対象外",
+  "@subscriptionAutoRenewalNotApplicable": {
+    "description": "自動更新が対象外（Basicプラン）の表示"
+  },
+  "subscriptionAutoRenewalEnabled": "有効",
+  "@subscriptionAutoRenewalEnabled": {
+    "description": "自動更新が有効な状態の表示"
+  },
+  "subscriptionAutoRenewalDisabled": "無効",
+  "@subscriptionAutoRenewalDisabled": {
+    "description": "自動更新が無効な状態の表示"
+  },
   "timelineToday": "今日",
   "@timelineToday": {
     "description": "タイムライン見出し：今日の写真"

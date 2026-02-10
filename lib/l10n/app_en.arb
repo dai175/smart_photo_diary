@@ -1399,6 +1399,38 @@
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "General upgrade recommendation message"
   },
+  "subscriptionExpired": "Expired",
+  "@subscriptionExpired": {
+    "description": "Subscription expired status display"
+  },
+  "subscriptionResetToday": "Today",
+  "@subscriptionResetToday": {
+    "description": "Display when usage reset date is today"
+  },
+  "subscriptionResetTomorrow": "Tomorrow",
+  "@subscriptionResetTomorrow": {
+    "description": "Display when usage reset date is tomorrow"
+  },
+  "subscriptionStatusInactive": "Inactive",
+  "@subscriptionStatusInactive": {
+    "description": "Subscription inactive status display"
+  },
+  "subscriptionStatusExpiryNear": "Expiring soon",
+  "@subscriptionStatusExpiryNear": {
+    "description": "Subscription expiring soon status display"
+  },
+  "subscriptionAutoRenewalNotApplicable": "N/A",
+  "@subscriptionAutoRenewalNotApplicable": {
+    "description": "Auto renewal not applicable (Basic plan) display"
+  },
+  "subscriptionAutoRenewalEnabled": "Enabled",
+  "@subscriptionAutoRenewalEnabled": {
+    "description": "Auto renewal enabled status display"
+  },
+  "subscriptionAutoRenewalDisabled": "Disabled",
+  "@subscriptionAutoRenewalDisabled": {
+    "description": "Auto renewal disabled status display"
+  },
   "timelineToday": "Today",
   "@timelineToday": {
     "description": "Timeline section header for today's photos"
