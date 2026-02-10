@@ -8,11 +8,11 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/interfaces/social_share_service_interface.dart';
 import 'package:smart_photo_diary/services/social_share_service.dart';
-import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 
 class MockSocialShareService extends Mock implements ISocialShareService {}
 
-class MockLoggingService extends Mock implements LoggingService {}
+class MockLoggingService extends Mock implements ILoggingService {}
 
 void main() {
   late ISocialShareService shareService;
@@ -143,7 +143,7 @@ void main() {
       mockLoggingService = MockLoggingService();
 
       // LoggingServiceを登録
-      testServiceLocator.registerSingleton<LoggingService>(mockLoggingService);
+      testServiceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
       // SocialShareServiceのインスタンスを作成
       actualService = SocialShareService.getInstance();

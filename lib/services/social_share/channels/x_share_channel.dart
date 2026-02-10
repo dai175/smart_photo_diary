@@ -11,15 +11,15 @@ import '../../../localization/localization_utils.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
-import '../../logging_service.dart';
-import '../../settings_service.dart';
+import '../../interfaces/logging_service_interface.dart';
+import '../../interfaces/settings_service_interface.dart';
 
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
 class XShareChannel {
   static const int _shareTimeoutSeconds = 60;
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
 
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   Future<Result<void>> share({
     required DiaryEntry diary,
@@ -48,7 +48,7 @@ class XShareChannel {
       Locale? locale;
       try {
         final settingsService =
-            await ServiceRegistration.getAsync<SettingsService>();
+            await ServiceRegistration.getAsync<ISettingsService>();
         locale = settingsService.locale;
       } catch (_) {
         locale = null;
@@ -99,7 +99,7 @@ class XShareChannel {
       Locale? locale;
       try {
         final settingsService =
-            await ServiceRegistration.getAsync<SettingsService>();
+            await ServiceRegistration.getAsync<ISettingsService>();
         locale = settingsService.locale;
       } catch (_) {
         locale = null;

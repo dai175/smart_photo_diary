@@ -3,12 +3,12 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
-import '../logging_service.dart';
+import '../interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 
 /// Gemini APIクライアント - API通信を担当
 class GeminiApiClient {
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   // Google Gemini APIのエンドポイント
   static String get _apiUrl =>

@@ -17,9 +17,10 @@ import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
-import 'package:smart_photo_diary/services/settings_service.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import '../mocks/mock_services.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -79,7 +80,7 @@ class IntegrationTestHelpers {
 
     // Register LoggingService first, as it's needed by ServiceRegistration
     final loggingService = await LoggingService.getInstance();
-    serviceLocator.registerSingleton<LoggingService>(loggingService);
+    serviceLocator.registerSingleton<ILoggingService>(loggingService);
 
     // Use the same service registration as main app, then override with mocks
     await ServiceRegistration.initialize();
@@ -111,7 +112,7 @@ class IntegrationTestHelpers {
     _serviceLocator.unregister<IAiService>();
     _serviceLocator.unregister<IDiaryService>();
     _serviceLocator.unregister<ISubscriptionService>();
-    _serviceLocator.unregister<SettingsService>();
+    _serviceLocator.unregister<ISettingsService>();
     _serviceLocator.unregister<IStorageService>();
 
     _serviceLocator.registerSingleton<IPhotoService>(_mockPhotoService);
@@ -120,7 +121,7 @@ class IntegrationTestHelpers {
     _serviceLocator.registerSingleton<ISubscriptionService>(
       mockSubscriptionService,
     );
-    _serviceLocator.registerSingleton<SettingsService>(mockSettingsService);
+    _serviceLocator.registerSingleton<ISettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<IStorageService>(mockStorageService);
   }
 

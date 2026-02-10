@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
 import 'interfaces/prompt_service_interface.dart';
@@ -59,7 +59,7 @@ class PromptService implements IPromptService {
 
   @override
   Future<bool> initialize() async {
-    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
 
     try {
       loggingService.info('PromptService: 初期化開始');
@@ -104,7 +104,7 @@ class PromptService implements IPromptService {
 
   /// JSONアセットからプロンプトデータを読み込み
   Future<void> _loadPromptsFromAsset() async {
-    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
 
     try {
       // JSONファイルを読み込み
@@ -133,7 +133,7 @@ class PromptService implements IPromptService {
 
   /// プロンプトデータの整合性をチェック
   Future<void> _validatePromptData(Map<String, dynamic> jsonData) async {
-    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
 
     // メタデータと実際のデータ数の整合性確認
     final int expectedTotal = jsonData['totalPrompts'] ?? 0;
@@ -164,7 +164,7 @@ class PromptService implements IPromptService {
 
   /// 各種キャッシュを構築
   Future<void> _buildCaches() async {
-    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
 
     try {
       // プラン別キャッシュ
@@ -198,7 +198,7 @@ class PromptService implements IPromptService {
 
   /// 使用履歴Box初期化
   Future<void> _initializeUsageHistoryBox() async {
-    final loggingService = await ServiceLocator().getAsync<LoggingService>();
+    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
 
     // 既存のBoxがあればクローズ
     if (Hive.isBoxOpen(_usageHistoryBoxName)) {
@@ -495,12 +495,12 @@ class PromptService implements IPromptService {
 
       await _usageHistoryBox!.add(usage);
 
-      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
       loggingService.info('PromptService: プロンプト使用履歴記録完了（promptId: $promptId）');
 
       return true;
     } catch (e) {
-      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
       loggingService.error('PromptService: 使用履歴記録失敗', error: e);
       return false;
     }
@@ -596,12 +596,12 @@ class PromptService implements IPromptService {
         }
       }
 
-      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
       loggingService.info('PromptService: 使用履歴クリア完了');
 
       return true;
     } catch (e) {
-      final loggingService = await ServiceLocator().getAsync<LoggingService>();
+      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
       loggingService.error('PromptService: 使用履歴クリア失敗', error: e);
       return false;
     }

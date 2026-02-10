@@ -7,6 +7,7 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -45,7 +46,7 @@ class DiaryPreviewScreen extends StatefulWidget {
 }
 
 class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
-  late final LoggingService _logger;
+  late final ILoggingService _logger;
   late final IAiService _aiService;
   late final IPhotoService _photoService;
 
@@ -75,7 +76,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     _contentController = TextEditingController();
 
     // サービスロケータからサービスを取得
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _aiService = ServiceRegistration.get<IAiService>();
     _photoService = ServiceRegistration.get<IPhotoService>();
 

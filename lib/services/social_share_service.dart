@@ -5,7 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import 'interfaces/social_share_service_interface.dart';
 import 'diary_image_generator.dart';
@@ -25,7 +25,7 @@ class SocialShareService implements ISocialShareService {
   }
 
   /// ログサービスを取得
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// 画像生成サービス（後方互換で保持）
   DiaryImageGenerator get _imageGenerator => DiaryImageGenerator.getInstance();

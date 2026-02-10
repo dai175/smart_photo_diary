@@ -8,7 +8,7 @@ import '../services/timeline_grouping_service.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../constants/app_constants.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/photo_cache_service.dart';
@@ -82,7 +82,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   List<TimelinePhotoGroup> _photoGroups = [];
 
   // ログサービス
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   // 無限スクロール用状態（シンプル版）
   bool _isLoadingMore = false;

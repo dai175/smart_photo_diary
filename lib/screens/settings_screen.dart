@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import '../services/settings_service.dart';
+import '../services/interfaces/settings_service_interface.dart';
 import '../services/storage_service.dart'; // StorageInfoクラス用
 import '../services/interfaces/storage_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../models/subscription_info_v2.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -33,8 +33,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late final LoggingService _logger;
-  late SettingsService _settingsService;
+  late final ILoggingService _logger;
+  late ISettingsService _settingsService;
   late final ScrollController _scrollController;
   PackageInfo? _packageInfo;
   StorageInfo? _storageInfo;
@@ -45,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _scrollController = ScrollController();
     widget.scrollSignal?.addListener(_onScrollToTop);
     _loadSettings();
@@ -74,7 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      _settingsService = await ServiceRegistration.getAsync<SettingsService>();
+      _settingsService = await ServiceRegistration.getAsync<ISettingsService>();
       _packageInfo = await PackageInfo.fromPlatform();
       final storageService = ServiceRegistration.get<IStorageService>();
       final storageResult = await storageService.getStorageInfoResult();

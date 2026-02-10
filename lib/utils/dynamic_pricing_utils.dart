@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/interfaces/subscription_service_interface.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
@@ -14,7 +14,7 @@ class DynamicPricingUtils {
   DynamicPricingUtils._(); // プライベートコンストラクタ
 
   // LoggingServiceのゲッター
-  static LoggingService get _logger => serviceLocator.get<LoggingService>();
+  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// 指定プランの動的価格を取得（フォールバック付き）
   ///

@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 
 /// 環境変数を安全に管理するクラス
 class EnvironmentConfig {
-  static LoggingService get _logger => serviceLocator.get<LoggingService>();
+  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
   static bool _isInitialized = false;
   static String? _cachedGeminiApiKey;
   static String? _cachedForcePlan;

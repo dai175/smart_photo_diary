@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 
 /// フォントデバッグ用の画面
@@ -15,7 +15,7 @@ class _FontDebugScreenState extends State<FontDebugScreen> {
   List<String> systemFonts = [];
 
   // LoggingServiceのゲッター
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   @override
   void initState() {

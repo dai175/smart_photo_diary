@@ -10,10 +10,10 @@ import '../../../core/result/result.dart';
 import '../../../core/service_locator.dart';
 import '../../../core/service_registration.dart';
 import '../../../models/diary_entry.dart';
-import '../../logging_service.dart';
+import '../../interfaces/logging_service_interface.dart';
 import '../../diary_image_generator.dart';
 import '../../interfaces/social_share_service_interface.dart';
-import '../../settings_service.dart';
+import '../../interfaces/settings_service_interface.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../localization/localization_utils.dart';
 
@@ -22,7 +22,7 @@ class InstagramShareChannel {
   static const int _shareTimeoutSeconds = 60;
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
 
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
   DiaryImageGenerator get _imageGenerator => DiaryImageGenerator.getInstance();
 
   Future<Result<void>> share({
@@ -52,7 +52,7 @@ class InstagramShareChannel {
       // Get current locale for share text
       Locale? locale;
       try {
-        final settingsService = ServiceRegistration.get<SettingsService>();
+        final settingsService = ServiceRegistration.get<ISettingsService>();
         locale = settingsService.locale;
       } catch (_) {
         locale = null;
@@ -74,7 +74,7 @@ class InstagramShareChannel {
           // Get current locale for error message
           Locale? locale;
           try {
-            final settingsService = ServiceRegistration.get<SettingsService>();
+            final settingsService = ServiceRegistration.get<ISettingsService>();
             locale = settingsService.locale;
           } catch (_) {
             locale = null;
@@ -102,7 +102,7 @@ class InstagramShareChannel {
       // Get current locale for error message
       Locale? locale;
       try {
-        final settingsService = ServiceRegistration.get<SettingsService>();
+        final settingsService = ServiceRegistration.get<ISettingsService>();
         locale = settingsService.locale;
       } catch (_) {
         locale = null;

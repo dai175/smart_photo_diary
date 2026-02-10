@@ -3,7 +3,7 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
-import 'package:smart_photo_diary/services/settings_service.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import '../integration/mocks/mock_services.dart';
 
@@ -35,7 +35,7 @@ class WidgetTestServiceSetup {
     serviceLocator.registerSingleton<IDiaryService>(
       TestServiceSetup.getDiaryService(),
     );
-    serviceLocator.registerSingleton<SettingsService>(
+    serviceLocator.registerSingleton<ISettingsService>(
       TestServiceSetup.getSettingsService(),
     );
     serviceLocator.registerSingleton<IStorageService>(
@@ -61,7 +61,7 @@ class WidgetTestServiceSetup {
     globalServiceLocator.registerSingleton<IDiaryService>(
       TestServiceSetup.getDiaryService(),
     );
-    globalServiceLocator.registerSingleton<SettingsService>(
+    globalServiceLocator.registerSingleton<ISettingsService>(
       TestServiceSetup.getSettingsService(),
     );
     globalServiceLocator.registerSingleton<IStorageService>(

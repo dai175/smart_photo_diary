@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/settings_service.dart';
+import '../services/interfaces/settings_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -29,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _isProcessing = false;
 
   // LoggingServiceアクセス用getter
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   @override
   void dispose() {
@@ -44,7 +44,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     try {
       // 初回起動フラグを更新
-      final settingsService = await SettingsService.getInstance();
+      final settingsService =
+          await ServiceRegistration.getAsync<ISettingsService>();
       await settingsService.setFirstLaunchCompleted();
 
       // 写真アクセス権限をリクエスト

@@ -5,7 +5,7 @@ import '../controllers/scroll_signal.dart';
 import '../core/service_registration.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../widgets/prompt_selection_modal.dart';
 import '../widgets/smart_fab_widget.dart';
 import '../widgets/timeline_photo_widget.dart';
@@ -93,7 +93,7 @@ class TimelineFABIntegration extends StatelessWidget {
 
   /// 日記作成ボタンがタップされた時の処理
   Future<void> _onCreateDiaryPressed(BuildContext context) async {
-    final logger = ServiceRegistration.get<LoggingService>();
+    final logger = ServiceRegistration.get<ILoggingService>();
 
     try {
       final selectedPhotos = controller.selectedPhotos;
@@ -142,7 +142,7 @@ class TimelineFABIntegration extends StatelessWidget {
     List<AssetEntity> selectedPhotos,
     WritingPrompt? selectedPrompt,
   ) {
-    final logger = ServiceRegistration.get<LoggingService>();
+    final logger = ServiceRegistration.get<ILoggingService>();
 
     logger.info(
       '日記プレビュー画面に遷移',

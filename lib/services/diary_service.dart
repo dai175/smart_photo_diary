@@ -13,7 +13,7 @@ import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
 import 'logging_service.dart';
-import 'settings_service.dart';
+import 'interfaces/settings_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
@@ -861,7 +861,7 @@ class DiaryService implements IDiaryService {
   /// 現在のロケールを取得
   Locale _getCurrentLocale() {
     try {
-      final settingsService = ServiceRegistration.get<SettingsService>();
+      final settingsService = ServiceRegistration.get<ISettingsService>();
       final locale = settingsService.locale;
       if (locale != null) {
         return locale;

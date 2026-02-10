@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../models/diary_entry.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
@@ -27,7 +27,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  late final LoggingService _logger;
+  late final ILoggingService _logger;
   late IDiaryService _diaryService;
   List<DiaryEntry> _allDiaries = [];
   bool _isLoading = true;
@@ -45,7 +45,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _loadStatistics();
     _subscribeDiaryChanges();
   }

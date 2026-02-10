@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/interfaces/subscription_service_interface.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -27,7 +27,7 @@ class UpgradeDialogUtils {
   static bool _isPurchasing = false;
 
   // LoggingServiceのゲッター
-  static LoggingService get _logger => serviceLocator.get<LoggingService>();
+  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// プランの多言語化対応名称を取得
   static String _getLocalizedPlanName(BuildContext context, Plan plan) {

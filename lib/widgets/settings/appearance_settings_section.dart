@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_icons.dart';
 import '../../localization/localization_extensions.dart';
-import '../../services/logging_service.dart';
-import '../../services/settings_service.dart';
+import '../../services/interfaces/logging_service_interface.dart';
+import '../../services/interfaces/settings_service_interface.dart';
 import '../../ui/design_system/app_colors.dart';
 import '../../utils/dialog_utils.dart';
 import 'settings_row.dart';
@@ -28,8 +28,8 @@ class LocaleChoice {
 
 /// Appearance settings section for theme and language selection.
 class AppearanceSettingsSection extends StatelessWidget {
-  final SettingsService settingsService;
-  final LoggingService logger;
+  final ISettingsService settingsService;
+  final ILoggingService logger;
   final Locale? selectedLocale;
   final Function(ThemeMode)? onThemeChanged;
   final ValueChanged<Locale?> onLocaleChanged;

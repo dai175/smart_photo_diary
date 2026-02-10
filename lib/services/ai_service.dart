@@ -5,7 +5,7 @@ import 'ai/ai_service_interface.dart';
 import 'ai/diary_generator.dart';
 import 'ai/tag_generator.dart';
 import 'interfaces/subscription_service_interface.dart';
-import 'logging_service.dart';
+import 'interfaces/logging_service_interface.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/service_locator.dart';
@@ -78,14 +78,14 @@ class AiService implements IAiService {
     try {
       final result = await _subscriptionService.incrementAiUsage();
       if (result.isFailure) {
-        serviceLocator.get<LoggingService>().warning(
+        serviceLocator.get<ILoggingService>().warning(
           'AI使用量の記録に失敗しました',
           context: 'AiService._recordAiUsage',
           data: result.error.toString(),
         );
       }
     } catch (e) {
-      serviceLocator.get<LoggingService>().warning(
+      serviceLocator.get<ILoggingService>().warning(
         'AI使用量の記録中に例外が発生しました',
         context: 'AiService._recordAiUsage',
         data: e.toString(),

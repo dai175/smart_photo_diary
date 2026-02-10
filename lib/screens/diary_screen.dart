@@ -4,7 +4,7 @@ import '../localization/localization_extensions.dart';
 import '../widgets/diary_card_widget.dart';
 import '../shared/filter_bottom_sheet.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../shared/active_filters_display.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_colors.dart';
@@ -29,7 +29,7 @@ class DiaryScreen extends StatefulWidget {
 }
 
 class _DiaryScreenState extends State<DiaryScreen> {
-  late final LoggingService _logger;
+  late final ILoggingService _logger;
   late final DiaryScreenController _controller;
   late final ScrollController _scrollController;
   int _lastPrefetchIndex = 0;
@@ -38,7 +38,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _controller = DiaryScreenController();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);

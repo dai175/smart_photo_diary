@@ -6,6 +6,7 @@ import '../core/result/result_extensions.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
+import 'interfaces/settings_service_interface.dart';
 import 'interfaces/subscription_service_interface.dart';
 import '../core/service_locator.dart';
 
@@ -15,7 +16,7 @@ enum DiaryGenerationMode {
   vision,
 }
 
-class SettingsService {
+class SettingsService implements ISettingsService {
   static SettingsService? _instance;
   static SharedPreferences? _preferences;
 
@@ -75,9 +76,11 @@ class SettingsService {
   // 初回起動フラグのキー
   static const String _firstLaunchKey = 'is_first_launch';
 
+  @override
   ValueNotifier<Locale?> get localeNotifier => _localeNotifier;
 
   // テーマモード
+  @override
   ThemeMode get themeMode {
     return ErrorHandler.safeExecuteSync(
           () {
@@ -94,12 +97,14 @@ class SettingsService {
         ThemeMode.system;
   }
 
+  @override
   Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
     return ResultHelper.tryExecuteAsync(() async {
       await _preferences?.setInt(_themeKey, themeMode.index);
     }, context: 'SettingsService.setThemeMode');
   }
 
+  @override
   Locale? get locale {
     return ErrorHandler.safeExecuteSync<Locale?>(() {
       final rawValue = _preferences?.getString(_localeKey);
@@ -107,6 +112,7 @@ class SettingsService {
     }, context: 'SettingsService.locale');
   }
 
+  @override
   Future<Result<void>> setLocale(Locale? locale) async {
     return ResultHelper.tryExecuteAsync(() async {
       if (locale == null) {
@@ -119,6 +125,7 @@ class SettingsService {
   }
 
   // 初回起動判定
+  @override
   bool get isFirstLaunch {
     return ErrorHandler.safeExecuteSync(
           () {
@@ -131,6 +138,7 @@ class SettingsService {
   }
 
   // 初回起動完了を記録
+  @override
   Future<Result<void>> setFirstLaunchCompleted() async {
     return ResultHelper.tryExecuteAsync(() async {
       await _preferences?.setBool(_firstLaunchKey, false);
@@ -175,6 +183,7 @@ class SettingsService {
 
   /// 包括的なサブスクリプション情報を取得（メイン実装 - V2版）
   /// 設定画面表示で使用する統合されたサブスクリプション情報を返します
+  @override
   Future<Result<SubscriptionInfoV2>> getSubscriptionInfoV2() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -193,6 +202,7 @@ class SettingsService {
   }
 
   /// 現在のプラン情報を取得（メイン実装 - Planクラス版）
+  @override
   Future<Result<Plan>> getCurrentPlanClass() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -209,6 +219,7 @@ class SettingsService {
   }
 
   /// プラン期限情報を取得（メイン実装 - V2版）
+  @override
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -233,6 +244,7 @@ class SettingsService {
   }
 
   /// Phase 1.8.1.3: 自動更新状態情報を取得
+  @override
   Future<Result<AutoRenewalInfoV2>> getAutoRenewalInfo() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -249,6 +261,7 @@ class SettingsService {
   }
 
   /// 使用統計情報を取得（メイン実装 - Planクラス版）
+  @override
   Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -273,6 +286,7 @@ class SettingsService {
   }
 
   /// Phase 1.8.1.4: 残り使用可能回数を取得（既存のSubscriptionServiceメソッドのラッパー）
+  @override
   Future<Result<int>> getRemainingGenerations() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -289,6 +303,7 @@ class SettingsService {
   }
 
   /// Phase 1.8.1.4: 次回リセット日を取得（既存のSubscriptionServiceメソッドのラッパー）
+  @override
   Future<Result<DateTime>> getNextResetDate() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -305,6 +320,7 @@ class SettingsService {
   }
 
   /// Phase 1.8.1.4: プラン変更可能かどうかを確認
+  @override
   Future<Result<bool>> canChangePlan() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {
@@ -323,6 +339,7 @@ class SettingsService {
   }
 
   /// プラン比較情報を取得（メイン実装 - V2版）
+  @override
   Future<Result<List<Plan>>> getAvailablePlansV2() async {
     return ResultHelper.tryExecuteAsync(() async {
       if (_subscriptionService == null) {

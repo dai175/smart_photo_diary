@@ -1,6 +1,7 @@
 import '../services/ai_service.dart';
 import '../services/ai/ai_service_interface.dart';
 import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/photo_service.dart';
@@ -10,6 +11,7 @@ import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/photo_access_control_service.dart';
 import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../services/settings_service.dart';
+import '../services/interfaces/settings_service_interface.dart';
 import '../services/storage_service.dart';
 import '../services/interfaces/storage_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -55,7 +57,7 @@ import 'service_locator.dart';
 /// **循環依存**: なし（全て単方向の依存関係）
 class ServiceRegistration {
   static bool _isInitialized = false;
-  static LoggingService get _logger => serviceLocator.get<LoggingService>();
+  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// Initialize and register all services
   static Future<void> initialize() async {
@@ -105,7 +107,7 @@ class ServiceRegistration {
   static Future<void> _registerCoreServices() async {
     // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
     final loggingService = await LoggingService.getInstance();
-    serviceLocator.registerSingleton<LoggingService>(loggingService);
+    serviceLocator.registerSingleton<ILoggingService>(loggingService);
 
     _logger.debug(
       'コアサービス登録開始',
@@ -118,7 +120,7 @@ class ServiceRegistration {
     );
 
     // 3. SettingsService (SubscriptionServiceに依存)
-    serviceLocator.registerAsyncFactory<SettingsService>(
+    serviceLocator.registerAsyncFactory<ISettingsService>(
       () => SettingsService.getInstance(),
     );
 
