@@ -1,6 +1,6 @@
 import '../models/plans/plan.dart';
 import 'interfaces/photo_access_control_service_interface.dart';
-import 'logging_service.dart';
+import 'interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 
 /// 写真アクセス制御サービスの実装
@@ -9,7 +9,7 @@ import '../core/service_locator.dart';
 class PhotoAccessControlService implements IPhotoAccessControlService {
   // シングルトンパターン
   static PhotoAccessControlService? _instance;
-  LoggingService? _logger;
+  ILoggingService? _logger;
 
   PhotoAccessControlService._();
 
@@ -19,8 +19,8 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
   }
 
   /// LoggingServiceを取得（遅延初期化）
-  LoggingService _getLogger() {
-    _logger ??= serviceLocator.get<LoggingService>();
+  ILoggingService _getLogger() {
+    _logger ??= serviceLocator.get<ILoggingService>();
     return _logger!;
   }
 

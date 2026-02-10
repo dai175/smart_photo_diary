@@ -4,7 +4,7 @@ import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_dialog.dart';
@@ -27,7 +27,7 @@ class PromptSelectionModal extends StatefulWidget {
 }
 
 class _PromptSelectionModalState extends State<PromptSelectionModal> {
-  late final LoggingService _logger;
+  late final ILoggingService _logger;
   late final IPromptService _promptService;
   late final ISubscriptionService _subscriptionService;
 
@@ -40,7 +40,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _initializeServices();
   }
 

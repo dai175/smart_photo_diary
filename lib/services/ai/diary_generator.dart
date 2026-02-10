@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'ai_service_interface.dart';
 import 'gemini_api_client.dart';
-import '../logging_service.dart';
+import '../interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 
 /// 日記生成を担当するサービス
@@ -14,7 +14,7 @@ class DiaryGenerator {
   DiaryGenerator({GeminiApiClient? apiClient})
     : _apiClient = apiClient ?? GeminiApiClient();
 
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   bool _isJapanese(Locale locale) => locale.languageCode.toLowerCase() == 'ja';
 

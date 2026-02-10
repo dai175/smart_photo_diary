@@ -8,9 +8,9 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_image_generator.dart';
 import 'package:smart_photo_diary/services/interfaces/social_share_service_interface.dart';
-import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 
-class MockLoggingService extends Mock implements LoggingService {}
+class MockLoggingService extends Mock implements ILoggingService {}
 
 void main() {
   late DiaryImageGenerator generator;
@@ -30,7 +30,7 @@ void main() {
     mockLoggingService = MockLoggingService();
 
     // LoggingServiceを登録
-    testServiceLocator.registerSingleton<LoggingService>(mockLoggingService);
+    testServiceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
     generator = DiaryImageGenerator.getInstance();
 

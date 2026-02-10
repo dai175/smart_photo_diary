@@ -14,7 +14,7 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../utils/dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
 import '../ui/components/custom_dialog.dart';
@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen>
   int _currentIndex = 0;
 
   // サービス
-  late final LoggingService _logger;
+  late final ILoggingService _logger;
 
   // 統合後の単一コントローラー
   late final PhotoSelectionController _photoController;
@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _photoController = PhotoSelectionController();
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);

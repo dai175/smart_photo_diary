@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 
 /// パフォーマンス監視ユーティリティ
@@ -9,7 +9,7 @@ class PerformanceMonitor {
   static final Map<String, List<double>> _measurements = {};
 
   // LoggingServiceのゲッター
-  static LoggingService get _logger => serviceLocator.get<LoggingService>();
+  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// パフォーマンス計測を開始
   static void startMeasurement(String label) {

@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../core/errors/error_handler.dart';
+import 'interfaces/logging_service_interface.dart';
 
 /// ログレベル定義
 enum LogLevel { debug, info, warning, error }
 
 /// アプリケーション全体のロギングサービス
-class LoggingService {
+class LoggingService implements ILoggingService {
   static LoggingService? _instance;
 
   LoggingService._();
@@ -34,21 +35,25 @@ class LoggingService {
   }
 
   /// デバッグログ
+  @override
   void debug(String message, {String? context, dynamic data}) {
     _log(LogLevel.debug, message, context: context, data: data);
   }
 
   /// 情報ログ
+  @override
   void info(String message, {String? context, dynamic data}) {
     _log(LogLevel.info, message, context: context, data: data);
   }
 
   /// 警告ログ
+  @override
   void warning(String message, {String? context, dynamic data}) {
     _log(LogLevel.warning, message, context: context, data: data);
   }
 
   /// エラーログ
+  @override
   void error(
     String message, {
     String? context,
@@ -81,6 +86,7 @@ class LoggingService {
   }
 
   /// パフォーマンス測定用のストップウォッチ機能
+  @override
   Stopwatch startTimer(String operation, {String? context}) {
     final stopwatch = Stopwatch()..start();
     debug('Started: $operation', context: context);
@@ -88,6 +94,7 @@ class LoggingService {
   }
 
   /// パフォーマンス測定終了
+  @override
   void endTimer(Stopwatch stopwatch, String operation, {String? context}) {
     stopwatch.stop();
     final elapsed = stopwatch.elapsedMilliseconds;

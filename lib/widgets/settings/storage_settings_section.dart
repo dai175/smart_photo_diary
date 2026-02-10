@@ -4,7 +4,7 @@ import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/import_result.dart';
 import '../../services/interfaces/storage_service_interface.dart';
-import '../../services/logging_service.dart';
+import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/storage_service.dart';
 import '../../ui/components/custom_dialog.dart';
 import '../../ui/design_system/app_colors.dart';
@@ -170,7 +170,7 @@ class StorageSettingsSection extends StatelessWidget {
         );
       }
     } catch (e) {
-      ServiceRegistration.get<LoggingService>().error(
+      ServiceRegistration.get<ILoggingService>().error(
         'Data export failed',
         context: 'StorageSettingsSection._exportData',
         error: e,
@@ -210,7 +210,7 @@ class StorageSettingsSection extends StatelessWidget {
         },
       );
     } catch (e) {
-      ServiceRegistration.get<LoggingService>().error(
+      ServiceRegistration.get<ILoggingService>().error(
         'Data restore failed',
         context: 'StorageSettingsSection._restoreData',
         error: e,
@@ -253,7 +253,7 @@ class StorageSettingsSection extends StatelessWidget {
         DialogUtils.showErrorDialog(context, errorMessage);
       }
     } catch (e) {
-      ServiceRegistration.get<LoggingService>().error(
+      ServiceRegistration.get<ILoggingService>().error(
         'Database optimization failed',
         context: 'StorageSettingsSection._optimizeDatabase',
         error: e,

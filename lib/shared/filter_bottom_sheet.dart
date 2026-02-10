@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/diary_filter.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
 import '../ui/components/animated_button.dart';
 import '../localization/localization_extensions.dart';
@@ -24,7 +24,7 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  late final LoggingService _logger;
+  late final ILoggingService _logger;
   late DiaryFilter _currentFilter;
   List<String> _availableTags = [];
   bool _isLoadingTags = true;
@@ -32,7 +32,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<LoggingService>();
+    _logger = serviceLocator.get<ILoggingService>();
     _currentFilter = widget.initialFilter;
     _loadAvailableTags();
   }

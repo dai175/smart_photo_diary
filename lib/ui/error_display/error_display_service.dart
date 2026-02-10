@@ -4,6 +4,7 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
 import '../../services/logging_service.dart';
+import '../../services/interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 import 'error_severity.dart';
 import 'error_display_widgets.dart';
@@ -14,9 +15,9 @@ class ErrorDisplayService {
   factory ErrorDisplayService() => _instance;
   ErrorDisplayService._internal();
 
-  LoggingService? _loggingService;
+  ILoggingService? _loggingService;
 
-  LoggingService? get loggingService {
+  ILoggingService? get loggingService {
     try {
       _loggingService ??= LoggingService.instance;
       return _loggingService;
@@ -51,7 +52,7 @@ class ErrorDisplayService {
       } catch (e) {
         // LoggingService初期化エラーの場合はログ出力をスキップ
         try {
-          final logger = serviceLocator.get<LoggingService>();
+          final logger = serviceLocator.get<ILoggingService>();
           logger.warning(
             'Failed to log error',
             context: 'ErrorDisplayService.showError',

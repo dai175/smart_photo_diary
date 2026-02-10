@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
 import 'gemini_api_client.dart';
-import '../logging_service.dart';
+import '../interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 
 /// タグ生成を担当するサービス
@@ -11,7 +11,7 @@ class TagGenerator {
   TagGenerator({GeminiApiClient? apiClient})
     : _apiClient = apiClient ?? GeminiApiClient();
 
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// 日記の内容からタグを自動生成
   Future<List<String>> generateTags({

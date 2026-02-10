@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/main.dart';
-import 'package:smart_photo_diary/services/logging_service.dart';
-import 'package:smart_photo_diary/services/settings_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 
-class _MockSettingsService extends Mock implements SettingsService {}
+class _MockSettingsService extends Mock implements ISettingsService {}
 
-class _MockLoggingService extends Mock implements LoggingService {}
+class _MockLoggingService extends Mock implements ILoggingService {}
 
 void main() {
   setUp(() {
@@ -32,8 +32,8 @@ void main() {
         () => settingsService.locale,
       ).thenAnswer((invocation) => localeNotifier.value);
 
-      serviceLocator.registerSingleton<LoggingService>(loggingService);
-      serviceLocator.registerSingleton<SettingsService>(settingsService);
+      serviceLocator.registerSingleton<ILoggingService>(loggingService);
+      serviceLocator.registerSingleton<ISettingsService>(settingsService);
 
       addTearDown(localeNotifier.dispose);
 

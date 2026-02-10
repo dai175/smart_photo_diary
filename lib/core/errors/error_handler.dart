@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'app_exceptions.dart';
-import '../../services/logging_service.dart';
+import '../../services/interfaces/logging_service_interface.dart';
 import '../service_locator.dart';
 
 /// アプリケーション全体のエラーハンドリングユーティリティ
@@ -10,7 +10,7 @@ class ErrorHandler {
     // 既にAppExceptionの場合はそのまま返す
     if (error is AppException) {
       try {
-        final logger = serviceLocator.get<LoggingService>();
+        final logger = serviceLocator.get<ILoggingService>();
         logger.error(
           'AppException: ${error.message}',
           context: context ?? 'ErrorHandler.handleError',
@@ -29,7 +29,7 @@ class ErrorHandler {
     final exception = ServiceException(message, originalError: error);
 
     try {
-      final logger = serviceLocator.get<LoggingService>();
+      final logger = serviceLocator.get<ILoggingService>();
       logger.error(
         message,
         context: context ?? 'ErrorHandler.handleError',
@@ -51,7 +51,7 @@ class ErrorHandler {
     StackTrace? stackTrace,
   }) {
     try {
-      final logger = serviceLocator.get<LoggingService>();
+      final logger = serviceLocator.get<ILoggingService>();
       logger.error(
         'Error: $error',
         context: context ?? 'ErrorHandler.logError',

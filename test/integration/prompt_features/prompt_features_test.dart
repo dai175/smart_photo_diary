@@ -4,7 +4,7 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/prompt_service.dart';
-import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
@@ -12,7 +12,7 @@ import '../../mocks/mock_subscription_service.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 /// テスト用の簡単なLoggingServiceモック
-class _MockLoggingService implements LoggingService {
+class _MockLoggingService implements ILoggingService {
   @override
   void info(String message, {String? context, dynamic data}) {
     // テスト用なので何もしない
@@ -97,7 +97,7 @@ void main() {
 
       // MockLoggingServiceを作成・登録
       mockLoggingService = _MockLoggingService();
-      serviceLocator.registerSingleton<LoggingService>(mockLoggingService);
+      serviceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
       // MockSubscriptionServiceを作成・登録
       mockSubscriptionService = MockSubscriptionService();

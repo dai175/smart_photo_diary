@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:photo_manager/photo_manager.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 
 part 'diary_entry.g.dart';
@@ -70,7 +70,7 @@ class DiaryEntry extends HiveObject {
         }
       } catch (e) {
         try {
-          final logger = serviceLocator.get<LoggingService>();
+          final logger = serviceLocator.get<ILoggingService>();
           logger.error(
             '写真の取得エラー: photoId: $photoId',
             context: 'DiaryEntry.getPhotoAssets',

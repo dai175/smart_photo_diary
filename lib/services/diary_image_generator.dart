@@ -7,10 +7,10 @@ import 'package:path_provider/path_provider.dart';
 import '../models/diary_entry.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/service_registration.dart';
-import '../services/settings_service.dart';
+import '../services/interfaces/settings_service_interface.dart';
 import 'interfaces/social_share_service_interface.dart';
 
 /// 日記画像生成専用クラス
@@ -66,7 +66,7 @@ class DiaryImageGenerator {
   }
 
   /// ログサービスを取得
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// 共有用画像を生成
   Future<Result<File>> generateImage({
@@ -596,7 +596,7 @@ class DiaryImageGenerator {
       // SettingsServiceからロケールを取得
       Locale? locale;
       try {
-        final settingsService = ServiceRegistration.get<SettingsService>();
+        final settingsService = ServiceRegistration.get<ISettingsService>();
         locale = settingsService.locale;
       } catch (_) {
         locale = null;

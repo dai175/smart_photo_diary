@@ -9,8 +9,8 @@ import 'models/writing_prompt.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'core/service_locator.dart';
-import 'services/settings_service.dart';
-import 'services/logging_service.dart';
+import 'services/interfaces/settings_service_interface.dart';
+import 'services/interfaces/logging_service_interface.dart';
 import 'core/service_registration.dart';
 import 'ui/design_system/app_theme.dart';
 import 'localization/localization_extensions.dart';
@@ -36,7 +36,7 @@ Future<void> main() async {
 
   // サービスロケータの初期化（LoggingService登録のため先に実行）
   await ServiceRegistration.initialize();
-  final logger = serviceLocator.get<LoggingService>();
+  final logger = serviceLocator.get<ILoggingService>();
 
   logger.info('アプリケーション初期化開始', context: 'main');
   logger.info('ServiceRegistration初期化完了', context: 'main');
@@ -64,7 +64,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  SettingsService? _settingsService;
+  ISettingsService? _settingsService;
   ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
   bool _isFirstLaunch = false;
@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
   ValueNotifier<Locale?>? _localeNotifier;
 
   // LoggingServiceアクセス用getter
-  LoggingService get _logger => serviceLocator.get<LoggingService>();
+  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _loadSettings() async {
     try {
-      _settingsService = await ServiceLocator().getAsync<SettingsService>();
+      _settingsService = await ServiceLocator().getAsync<ISettingsService>();
       final notifier = _settingsService!.localeNotifier;
       if (_localeNotifier != notifier) {
         _localeNotifier?.removeListener(_handleLocaleChanged);

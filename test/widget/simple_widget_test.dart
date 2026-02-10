@@ -4,6 +4,7 @@ import 'package:smart_photo_diary/ui/components/custom_dialog.dart';
 import 'package:smart_photo_diary/ui/components/animated_button.dart';
 import 'package:smart_photo_diary/ui/components/custom_card.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 
 void main() {
@@ -12,7 +13,7 @@ void main() {
       // テスト用のServiceLocator設定
       serviceLocator.clear();
       final loggingService = await LoggingService.getInstance();
-      serviceLocator.registerSingleton<LoggingService>(loggingService);
+      serviceLocator.registerSingleton<ILoggingService>(loggingService);
     });
 
     tearDownAll(() {
