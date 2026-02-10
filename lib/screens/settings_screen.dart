@@ -273,9 +273,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       subtitle: context.l10n.settingsLicenseSubtitle,
       onTap: () => showLicensePage(
         context: context,
-        applicationName: 'Smart Photo Diary',
+        applicationName: context.l10n.appTitle,
         applicationVersion: _packageInfo?.version ?? '1.0.0',
-        applicationLegalese: '© 2024 Smart Photo Diary',
+        applicationLegalese:
+            '© ${DateTime.now().year} ${context.l10n.appTitle}',
       ),
     );
   }

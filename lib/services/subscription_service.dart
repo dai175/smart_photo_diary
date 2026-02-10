@@ -809,6 +809,7 @@ class SubscriptionService implements ISubscriptionService {
       final resetStatus = status.copyWith(
         monthlyUsageCount: 0,
         lastResetDate: now,
+        usageMonth: currentMonth,
       );
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, resetStatus);
