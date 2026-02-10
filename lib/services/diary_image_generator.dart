@@ -60,6 +60,7 @@ class DiaryImageGenerator {
 
   DiaryImageGenerator._();
 
+  @Deprecated('Use ServiceLocator registration instead')
   static DiaryImageGenerator getInstance() {
     _instance ??= DiaryImageGenerator._();
     return _instance!;

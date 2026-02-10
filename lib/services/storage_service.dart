@@ -15,6 +15,7 @@ class StorageService implements IStorageService {
 
   StorageService._();
 
+  @Deprecated('Use ServiceLocator.get<IStorageService>() instead')
   static StorageService getInstance() {
     _instance ??= StorageService._();
     return _instance!;

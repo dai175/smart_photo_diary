@@ -5,12 +5,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import '../constants/app_constants.dart';
 import 'interfaces/photo_service_interface.dart';
-import 'photo_cache_service.dart';
-import 'logging_service.dart';
+import 'interfaces/photo_cache_service_interface.dart';
+import 'interfaces/logging_service_interface.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 import '../core/errors/photo_error.dart';
+import '../core/service_locator.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
 class PhotoService implements IPhotoService {
@@ -20,10 +21,18 @@ class PhotoService implements IPhotoService {
   // image_picker インスタンス
   final ImagePicker _imagePicker = ImagePicker();
 
-  PhotoService._();
+  final ILoggingService _logger;
 
+  PhotoService({required ILoggingService logger}) : _logger = logger;
+
+  PhotoService._({required ILoggingService logger}) : _logger = logger;
+
+  @Deprecated('Use constructor injection via ServiceLocator instead')
   static PhotoService getInstance() {
-    _instance ??= PhotoService._();
+    // 後方互換性のため維持。新規コードではコンストラクタ注入を使用すること。
+    _instance ??= PhotoService._(
+      logger: ServiceLocator().get<ILoggingService>(),
+    );
     return _instance!;
   }
 
@@ -32,7 +41,7 @@ class PhotoService implements IPhotoService {
   /// 戻り値: 権限が付与されたかどうか
   @override
   Future<bool> requestPermission() async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     try {
       loggingService.debug(
@@ -154,7 +163,7 @@ class PhotoService implements IPhotoService {
   /// 戻り値: 写真アセットのリスト
   @override
   Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -251,7 +260,7 @@ class PhotoService implements IPhotoService {
     required DateTime endDate,
     int limit = 100,
   }) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -425,7 +434,7 @@ class PhotoService implements IPhotoService {
       final Uint8List? data = await asset.originBytes;
       return data?.toList();
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = _logger;
       final appError = ErrorHandler.handleError(
         e,
         context: 'PhotoService.getPhotoData',
@@ -454,7 +463,7 @@ class PhotoService implements IPhotoService {
       );
       return data?.toList();
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = _logger;
       final appError = ErrorHandler.handleError(
         e,
         context: 'PhotoService.getThumbnailData',
@@ -480,7 +489,7 @@ class PhotoService implements IPhotoService {
     required int offset,
     required int limit,
   }) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -647,7 +656,7 @@ class PhotoService implements IPhotoService {
       await PhotoManager.presentLimited();
       return true;
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = _logger;
       final appError = ErrorHandler.handleError(
         e,
         context: 'PhotoService.presentLimitedLibraryPicker',
@@ -668,7 +677,7 @@ class PhotoService implements IPhotoService {
       final pmState = await PhotoManager.requestPermissionExtend();
       return pmState == PermissionState.limited;
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = _logger;
       final appError = ErrorHandler.handleError(
         e,
         context: 'PhotoService.isLimitedAccess',
@@ -695,7 +704,7 @@ class PhotoService implements IPhotoService {
     int height = AppConstants.defaultThumbnailHeight,
   }) async {
     // PhotoCacheServiceを使用してキャッシュ付きでサムネイルを取得
-    final cacheService = PhotoCacheService.getInstance();
+    final cacheService = ServiceLocator().get<IPhotoCacheService>();
     return await cacheService.getThumbnail(
       asset,
       width: width,
@@ -713,7 +722,7 @@ class PhotoService implements IPhotoService {
     try {
       return await asset.originBytes;
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = _logger;
       final appError = ErrorHandler.handleError(
         e,
         context: 'PhotoService.getOriginalFile',
@@ -734,7 +743,7 @@ class PhotoService implements IPhotoService {
   Future<List<AssetEntity>> getAllPhotos({
     int limit = AppConstants.maxPhotoLimit,
   }) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -812,7 +821,7 @@ class PhotoService implements IPhotoService {
     int offset = 0,
     int limit = 30,
   }) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     // 権限チェック
     final bool hasPermission = await requestPermission();
@@ -928,7 +937,7 @@ class PhotoService implements IPhotoService {
   /// カメラから写真を撮影する
   @override
   Future<Result<AssetEntity?>> capturePhoto() async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     try {
       loggingService.debug('カメラ撮影を開始', context: 'PhotoService.capturePhoto');
@@ -1089,7 +1098,7 @@ class PhotoService implements IPhotoService {
   /// カメラ権限をリクエストする
   @override
   Future<Result<bool>> requestCameraPermission() async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     try {
       loggingService.debug(
@@ -1150,7 +1159,7 @@ class PhotoService implements IPhotoService {
   /// カメラ権限が拒否されているかチェック
   @override
   Future<Result<bool>> isCameraPermissionDenied() async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     try {
       final status = await Permission.camera.status;

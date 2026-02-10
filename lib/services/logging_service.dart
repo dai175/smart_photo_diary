@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 import '../core/errors/error_handler.dart';
 import 'interfaces/logging_service_interface.dart';
 
-/// ログレベル定義
-enum LogLevel { debug, info, warning, error }
+// LogLevel は logging_service_interface.dart で定義
+// 後方互換のため re-export
+export 'interfaces/logging_service_interface.dart' show LogLevel;
 
 /// アプリケーション全体のロギングサービス
 class LoggingService implements ILoggingService {
@@ -12,6 +13,7 @@ class LoggingService implements ILoggingService {
   LoggingService._();
 
   /// 非同期ファクトリメソッドでサービスインスタンスを取得
+  @Deprecated('Use ServiceLocator.get<ILoggingService>() instead')
   static Future<LoggingService> getInstance() async {
     try {
       _instance ??= LoggingService._();

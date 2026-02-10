@@ -10,7 +10,8 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
+import '../core/service_locator.dart';
 import '../core/errors/error_handler.dart';
 import '../localization/localization_extensions.dart';
 
@@ -123,7 +124,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         _isLoading = false;
       });
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '写真カウント読み込み');
       loggingService.warning(
         '写真数の読み込みに失敗しましたが、機能は継続します',
@@ -166,7 +167,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       // 選択された写真を親に通知
       widget.onPhotosSelected(photos);
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '日付別写真読み込み');
       loggingService.error(
         '選択日の写真読み込みエラー',
@@ -241,7 +242,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
             _diaryDates = dates;
           });
         case Failure(exception: final e):
-          final loggingService = await LoggingService.getInstance();
+          final loggingService = serviceLocator.get<ILoggingService>();
           loggingService.warning(
             '日記日付の読み込みに失敗しましたが、機能は継続します',
             context: 'PastPhotoCalendarWidget._loadDiaryDates',
@@ -249,7 +250,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
           );
       }
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '日記日付読み込み');
       loggingService.warning(
         '日記日付の読み込みに失敗しましたが、機能は継続します',

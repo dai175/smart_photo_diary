@@ -13,6 +13,7 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
 
   PhotoAccessControlService._();
 
+  @Deprecated('Use ServiceLocator.get<IPhotoAccessControlService>() instead')
   static PhotoAccessControlService getInstance() {
     _instance ??= PhotoAccessControlService._();
     return _instance!;

@@ -16,7 +16,7 @@ import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
 import 'package:photo_manager/photo_manager.dart';
-import '../services/photo_cache_service.dart';
+import '../services/interfaces/photo_cache_service_interface.dart';
 import '../controllers/scroll_signal.dart';
 
 class DiaryScreen extends StatefulWidget {
@@ -115,7 +115,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       return;
     }
 
-    final cache = PhotoCacheService.getInstance();
+    final cache = serviceLocator.get<IPhotoCacheService>();
     final size = AppConstants.diaryThumbnailSize.toInt();
     await cache.preloadThumbnails(
       assets,

@@ -19,6 +19,7 @@ class SocialShareService implements ISocialShareService {
 
   SocialShareService._();
 
+  @Deprecated('Use ServiceLocator.get<ISocialShareService>() instead')
   static SocialShareService getInstance() {
     _instance ??= SocialShareService._();
     return _instance!;

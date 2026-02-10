@@ -12,11 +12,33 @@ import 'interfaces/diary_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'ai_service.dart';
-import 'logging_service.dart';
+import 'interfaces/logging_service_interface.dart';
 import 'interfaces/settings_service_interface.dart';
 import '../core/service_registration.dart';
+import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+
+/// フォールバック用の無操作ロガー（テスト環境等でServiceLocator未設定時に使用）
+class _NoOpLoggingService implements ILoggingService {
+  @override
+  void debug(String message, {String? context, dynamic data}) {}
+  @override
+  void info(String message, {String? context, dynamic data}) {}
+  @override
+  void warning(String message, {String? context, dynamic data}) {}
+  @override
+  void error(
+    String message, {
+    String? context,
+    dynamic error,
+    StackTrace? stackTrace,
+  }) {}
+  @override
+  Stopwatch startTimer(String operation, {String? context}) => Stopwatch();
+  @override
+  void endTimer(Stopwatch stopwatch, String operation, {String? context}) {}
+}
 
 class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
@@ -24,7 +46,7 @@ class DiaryService implements IDiaryService {
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
   final IAiService _aiService;
-  late final LoggingService _loggingService;
+  late final ILoggingService _loggingService;
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
 
   // 日付降順のインメモリインデックス（エントリーIDの配列）
@@ -40,6 +62,7 @@ class DiaryService implements IDiaryService {
   DiaryService._(this._aiService);
 
   // 従来のシングルトンパターン（後方互換性のため保持）
+  @Deprecated('Use ServiceLocator.getAsync<IDiaryService>() instead')
   static Future<DiaryService> getInstance() async {
     if (_instance == null) {
       final aiService = AiService();
@@ -68,8 +91,13 @@ class DiaryService implements IDiaryService {
 
   // 初期化処理
   Future<void> _init() async {
-    // LoggingServiceの初期化を最初に行う
-    _loggingService = await LoggingService.getInstance();
+    // LoggingServiceの初期化（ServiceLocator経由、未登録時はフォールバック）
+    try {
+      _loggingService = ServiceLocator().get<ILoggingService>();
+    } catch (_) {
+      // テスト環境など、LoggingServiceが未登録の場合
+      _loggingService = _NoOpLoggingService();
+    }
 
     try {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
