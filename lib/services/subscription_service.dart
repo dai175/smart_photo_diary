@@ -875,7 +875,7 @@ class SubscriptionService implements ISubscriptionService {
         data: {'forcePlan': forcePlan},
       );
       if (forcePlan != null) {
-        final forceResult = forcePlan.startsWith('premium');
+        final forceResult = forcePlan.toLowerCase().startsWith('premium');
         _log(
           'プラン強制設定により Premium アクセス',
           level: LogLevel.debug,
