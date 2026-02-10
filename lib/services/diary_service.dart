@@ -701,6 +701,11 @@ class DiaryService implements IDiaryService {
       await _ensureIndex();
       final insertAt = _findInsertIndex(entry.date);
       _sortedIdsByDateDesc.insert(insertAt, entry.id);
+      _sortedDatesByDayDesc.insert(
+        insertAt,
+        DateTime(entry.date.year, entry.date.month, entry.date.day),
+      );
+      _searchTextIndex[entry.id] = _buildSearchableText(entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(

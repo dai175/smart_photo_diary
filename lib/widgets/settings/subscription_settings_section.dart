@@ -365,8 +365,9 @@ class _SubscriptionSettingsSectionState
     );
   }
 
-  void _showUpgradeDialog() async {
+  Future<void> _showUpgradeDialog() async {
     await UpgradeDialogUtils.showUpgradeDialog(context);
+    if (!mounted) return;
     widget.onStateChanged();
   }
 
