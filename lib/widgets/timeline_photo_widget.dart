@@ -11,7 +11,6 @@ import '../constants/app_constants.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
-import '../services/photo_cache_service.dart';
 import '../controllers/scroll_signal.dart';
 import '../ui/component_constants.dart';
 import '../localization/localization_extensions.dart';
@@ -139,7 +138,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   static const int _thumbnailQuality = AppConstants.timelineThumbnailQuality;
 
   // 画像キャッシュ（Service + Futureインスタンスのメモ化で再描画時の再フェッチを防止）
-  late final IPhotoCacheService _cacheService = PhotoCacheService.getInstance();
+  late final IPhotoCacheService _cacheService = serviceLocator
+      .get<IPhotoCacheService>();
   final Map<String, Future<Uint8List?>> _thumbFutureCache = {};
 
   // ビューポート先読み（高速スクロール対策）

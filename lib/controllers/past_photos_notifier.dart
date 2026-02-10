@@ -3,14 +3,16 @@ import '../models/states/past_photos_state.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../models/plans/plan.dart';
+import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../core/errors/error_handler.dart';
-import '../services/logging_service.dart';
+import '../services/interfaces/logging_service_interface.dart';
 
 /// 過去の写真機能の状態を管理するNotifier
 class PastPhotosNotifier extends ChangeNotifier {
   final IPhotoService _photoService;
   final IPhotoAccessControlService _accessControlService;
+  ILoggingService? _logger;
 
   PastPhotosState _state = PastPhotosState.initial();
   PastPhotosState get state => _state;
@@ -28,6 +30,17 @@ class PastPhotosNotifier extends ChangeNotifier {
     required IPhotoAccessControlService accessControlService,
   }) : _photoService = photoService,
        _accessControlService = accessControlService;
+
+  /// LoggingServiceを取得（遅延初期化、未登録時はnull）
+  ILoggingService? _getLogger() {
+    if (_logger != null) return _logger;
+    try {
+      _logger = serviceLocator.get<ILoggingService>();
+    } catch (_) {
+      // テスト環境など、ServiceLocator未登録の場合
+    }
+    return _logger;
+  }
 
   /// 工場メソッドでサービスを自動注入
   factory PastPhotosNotifier.create() {
@@ -51,7 +64,7 @@ class PastPhotosNotifier extends ChangeNotifier {
     );
 
     try {
-      final loggingService = await LoggingService.getInstance();
+      final logger = _getLogger();
 
       // アクセス可能な日付範囲を取得
       final accessibleDate = _accessControlService.getAccessibleDateForPlan(
@@ -64,7 +77,7 @@ class PastPhotosNotifier extends ChangeNotifier {
       final startDate = accessibleDate;
       final endDate = today; // 今日は除外
 
-      loggingService.debug(
+      logger?.debug(
         '過去の写真を読み込み中',
         context: 'PastPhotosNotifier.loadInitialPhotos',
         data: {
@@ -101,16 +114,15 @@ class PastPhotosNotifier extends ChangeNotifier {
         ),
       );
 
-      loggingService.info(
+      logger?.info(
         '過去の写真読み込み完了',
         context: 'PastPhotosNotifier.loadInitialPhotos',
         data: '写真数: ${photos.length}',
       );
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
       final appError = ErrorHandler.handleError(e, context: '過去の写真読み込み');
 
-      loggingService.error(
+      _getLogger()?.error(
         '過去の写真読み込みエラー',
         context: 'PastPhotosNotifier.loadInitialPhotos',
         error: appError,
@@ -177,10 +189,9 @@ class PastPhotosNotifier extends ChangeNotifier {
         ),
       );
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
       final appError = ErrorHandler.handleError(e, context: '追加写真読み込み');
 
-      loggingService.error(
+      _getLogger()?.error(
         '追加写真読み込みエラー',
         context: 'PastPhotosNotifier.loadMorePhotos',
         error: appError,
@@ -241,10 +252,9 @@ class PastPhotosNotifier extends ChangeNotifier {
         ),
       );
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
       final appError = ErrorHandler.handleError(e, context: '日付指定写真読み込み');
 
-      loggingService.error(
+      _getLogger()?.error(
         '日付指定写真読み込みエラー',
         context: 'PastPhotosNotifier.loadPhotosForDate',
         error: appError,

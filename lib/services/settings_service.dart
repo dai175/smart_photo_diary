@@ -31,6 +31,7 @@ class SettingsService implements ISettingsService {
   SettingsService._();
 
   /// 非同期ファクトリメソッドでサービスインスタンスを取得
+  @Deprecated('Use ServiceLocator.get<ISettingsService>() instead')
   static Future<SettingsService> getInstance() async {
     try {
       _instance ??= SettingsService._();

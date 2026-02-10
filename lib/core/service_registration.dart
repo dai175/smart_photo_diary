@@ -126,12 +126,12 @@ class ServiceRegistration {
 
     // 4. PhotoService (LoggingServiceに依存)
     serviceLocator.registerFactory<IPhotoService>(
-      () => PhotoService.getInstance(),
+      () => PhotoService(logger: serviceLocator.get<ILoggingService>()),
     );
 
     // 5. PhotoCacheService (LoggingServiceに依存)
     serviceLocator.registerFactory<IPhotoCacheService>(
-      () => PhotoCacheService.getInstance(),
+      () => PhotoCacheService(logger: serviceLocator.get<ILoggingService>()),
     );
 
     // 6. PhotoAccessControlService (依存なし)

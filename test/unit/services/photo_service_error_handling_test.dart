@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
@@ -12,9 +13,12 @@ class MockAssetEntity extends Mock implements AssetEntity {}
 
 class MockFilterOptionGroup extends Mock implements FilterOptionGroup {}
 
+class MockLoggingService extends Mock implements ILoggingService {}
+
 void main() {
   group('PhotoService Error Handling Tests', () {
     late IPhotoService photoService;
+    late MockLoggingService mockLogger;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -29,8 +33,9 @@ void main() {
     });
 
     setUp(() async {
-      // PhotoServiceの新しいインスタンスを作成
-      photoService = PhotoService.getInstance();
+      mockLogger = MockLoggingService();
+      // PhotoServiceをコンストラクタインジェクションで作成
+      photoService = PhotoService(logger: mockLogger);
     });
 
     group('getPhotosForDate Error Scenarios', () {

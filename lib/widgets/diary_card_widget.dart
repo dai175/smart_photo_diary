@@ -11,7 +11,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/modern_chip.dart';
 import '../ui/components/loading_shimmer.dart';
-import '../services/photo_cache_service.dart';
+import '../services/interfaces/photo_cache_service_interface.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../localization/localization_extensions.dart';
 
@@ -177,7 +177,7 @@ class DiaryCardWidget extends StatelessWidget {
   }
 
   Widget _buildThumbnail(AssetEntity asset) {
-    final cacheService = PhotoCacheService.getInstance();
+    final cacheService = serviceLocator.get<IPhotoCacheService>();
     final size = AppConstants.diaryThumbnailSize.toInt();
     return FutureBuilder<Uint8List?>(
       future: cacheService.getThumbnail(

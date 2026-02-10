@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/photo_cache_service_interface.dart';
-import 'logging_service.dart';
+import 'interfaces/logging_service_interface.dart';
 import '../core/errors/error_handler.dart';
+import '../core/service_locator.dart';
 import '../constants/app_constants.dart';
 
 /// LRUキャッシュのエントリー
@@ -27,19 +28,19 @@ class _LRUCacheEntry {
 class PhotoCacheService implements IPhotoCacheService {
   // シングルトンパターン
   static PhotoCacheService? _instance;
-  LoggingService? _logger;
+  final ILoggingService _logger;
 
-  PhotoCacheService._();
+  PhotoCacheService({required ILoggingService logger}) : _logger = logger;
 
+  PhotoCacheService._({required ILoggingService logger}) : _logger = logger;
+
+  @Deprecated('Use constructor injection via ServiceLocator instead')
   static PhotoCacheService getInstance() {
-    _instance ??= PhotoCacheService._();
+    // 後方互換性のため維持。新規コードではコンストラクタ注入を使用すること。
+    _instance ??= PhotoCacheService._(
+      logger: ServiceLocator().get<ILoggingService>(),
+    );
     return _instance!;
-  }
-
-  /// LoggingServiceを取得（遅延初期化）
-  Future<LoggingService> _getLogger() async {
-    _logger ??= await LoggingService.getInstance();
-    return _logger!;
   }
 
   // LRUメモリキャッシュ
@@ -69,7 +70,7 @@ class PhotoCacheService implements IPhotoCacheService {
     int height = 200,
     int quality = 80,
   }) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
     final cacheKey = _generateCacheKey(asset.id, width, height, quality);
 
     try {
@@ -133,11 +134,9 @@ class PhotoCacheService implements IPhotoCacheService {
     _memoryCache.clear();
     _currentCacheSizeInBytes = 0;
 
-    _getLogger().then(
-      (logger) => logger.info(
-        'メモリキャッシュをクリアしました',
-        context: 'PhotoCacheService.clearMemoryCache',
-      ),
+    _logger.info(
+      'メモリキャッシュをクリアしました',
+      context: 'PhotoCacheService.clearMemoryCache',
     );
   }
 
@@ -152,11 +151,9 @@ class PhotoCacheService implements IPhotoCacheService {
       _removeFromCache(key);
     }
 
-    _getLogger().then(
-      (logger) => logger.info(
-        'アセット $assetId のキャッシュをクリアしました',
-        context: 'PhotoCacheService.clearCacheForAsset',
-      ),
+    _logger.info(
+      'アセット $assetId のキャッシュをクリアしました',
+      context: 'PhotoCacheService.clearCacheForAsset',
     );
   }
 
@@ -174,7 +171,7 @@ class PhotoCacheService implements IPhotoCacheService {
     int height = 200,
     int quality = 80,
   }) async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
 
     loggingService.debug(
       'サムネイルのプリロード開始',
@@ -272,11 +269,9 @@ class PhotoCacheService implements IPhotoCacheService {
       _removeFromCache(sortedEntries[i].key);
     }
 
-    _getLogger().then(
-      (logger) => logger.info(
-        'LRUキャッシュエビクション実行 - $entriesToRemove エントリーを削除',
-        context: 'PhotoCacheService._evictOldestEntries',
-      ),
+    _logger.info(
+      'LRUキャッシュエビクション実行 - $entriesToRemove エントリーを削除',
+      context: 'PhotoCacheService._evictOldestEntries',
     );
   }
 
@@ -291,7 +286,7 @@ class PhotoCacheService implements IPhotoCacheService {
     _lastMemoryCheck = now;
 
     // メモリ使用量を記録
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
     loggingService.debug(
       'キャッシュメモリ使用状況',
       context: 'PhotoCacheService._checkMemoryUsage',
@@ -318,7 +313,7 @@ class PhotoCacheService implements IPhotoCacheService {
 
   /// アグレッシブなクリーンアップ
   void _performAggressiveCleanup() async {
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = _logger;
     loggingService.warning(
       'アグレッシブクリーンアップを実行',
       context: 'PhotoCacheService._performAggressiveCleanup',
@@ -362,11 +357,9 @@ class PhotoCacheService implements IPhotoCacheService {
     }
 
     if (keysToRemove.isNotEmpty) {
-      _getLogger().then(
-        (logger) => logger.info(
-          '${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
-          context: 'PhotoCacheService.cleanupExpiredEntries',
-        ),
+      _logger.info(
+        '${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
+        context: 'PhotoCacheService.cleanupExpiredEntries',
       );
     }
   }

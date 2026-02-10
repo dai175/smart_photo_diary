@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
-import '../services/photo_cache_service.dart';
+import '../core/service_locator.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../utils/performance_monitor.dart';
 import 'photo_grid_components.dart';
@@ -48,7 +48,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
   @override
   void initState() {
     super.initState();
-    _cacheService = PhotoCacheService.getInstance();
+    _cacheService = serviceLocator.get<IPhotoCacheService>();
     _scrollController.addListener(_onScroll);
 
     _visibleItemCount = widget.controller.photoAssets.length.clamp(

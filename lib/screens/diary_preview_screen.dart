@@ -6,7 +6,6 @@ import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
-import '../services/logging_service.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
@@ -329,7 +328,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
       }
     } catch (e, stackTrace) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '自動保存');
       loggingService.error(
         '日記の自動保存に失敗しました',
@@ -413,7 +412,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         navigator.pop(true);
       }
     } catch (e, stackTrace) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '日記保存');
       loggingService.error(
         '日記の保存に失敗しました',
@@ -477,7 +476,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
       }
     } catch (e) {
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = serviceLocator.get<ILoggingService>();
       loggingService.warning(
         '使用量制限ダイアログ表示エラー',
         context: 'DiaryPreviewScreen._showUsageLimitDialog',

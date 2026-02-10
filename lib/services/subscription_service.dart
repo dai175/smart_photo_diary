@@ -13,7 +13,8 @@ import '../constants/subscription_constants.dart';
 import '../config/in_app_purchase_config.dart';
 import '../config/environment_config.dart';
 import 'interfaces/subscription_service_interface.dart';
-import 'logging_service.dart';
+import 'interfaces/logging_service_interface.dart';
+import '../core/service_locator.dart';
 
 // 型エイリアスで名前衝突を解決
 import 'package:in_app_purchase/in_app_purchase.dart' as iap;
@@ -53,7 +54,7 @@ class SubscriptionService implements ISubscriptionService {
   bool _isInitialized = false;
 
   // ロギングサービス
-  LoggingService? _loggingService;
+  ILoggingService? _loggingService;
 
   // In-App Purchase関連
   InAppPurchase? _inAppPurchase;
@@ -73,6 +74,7 @@ class SubscriptionService implements ISubscriptionService {
   ///
   /// 初回呼び出し時に自動的に初期化処理を実行
   /// エラーが発生した場合は例外をスロー
+  @Deprecated('Use ServiceLocator.getAsync<ISubscriptionService>() instead')
   static Future<SubscriptionService> getInstance() async {
     if (_instance == null) {
       _instance = SubscriptionService._();
@@ -94,8 +96,12 @@ class SubscriptionService implements ISubscriptionService {
     try {
       _log('Initializing SubscriptionService...', level: LogLevel.info);
 
-      // LoggingServiceを取得
-      _loggingService = await LoggingService.getInstance();
+      // LoggingServiceを取得（ServiceLocator経由、未登録時はnullのまま）
+      try {
+        _loggingService = ServiceLocator().get<ILoggingService>();
+      } catch (_) {
+        // テスト環境など、LoggingServiceが未登録の場合はnullのまま
+      }
 
       // Hiveボックスを開く
       _subscriptionBox = await Hive.openBox<SubscriptionStatus>(
