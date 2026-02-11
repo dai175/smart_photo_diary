@@ -23,7 +23,8 @@ flutter_*.png
 # --- Android 関連 ---
 android/.gradle/
 android/captures/
-android/gradle/
+android/gradle/*
+!android/gradle/wrapper/
 android/local.properties
 
 # --- iOS 関連 ---

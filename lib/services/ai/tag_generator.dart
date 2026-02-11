@@ -234,14 +234,7 @@ class TagGenerator {
     // 類似タグのマッピング（言語別）
     final similarTagGroups = isEnglish
         ? {
-            'Meal': [
-              'Breakfast',
-              'Lunch',
-              'Dinner',
-              'Food',
-              'Cooking',
-              'Gourmet',
-            ],
+            'Meal': ['Breakfast', 'Lunch', 'Dinner', 'Food', 'Gourmet'],
             'Outside': ['Walk', 'Outdoor', 'Outing', 'Walking'],
             'Home': ['House', 'Room', 'Indoor'],
             'Work': ['Office', 'Job', 'Task'],
@@ -258,7 +251,7 @@ class TagGenerator {
             'Music': ['Song', 'Instrument', 'Concert'],
           }
         : {
-            '食事': ['朝食', '昼食', '夕食', 'ご飯', '食べ物', '料理', 'グルメ'],
+            '食事': ['朝食', '昼食', '夕食', 'ご飯', '食べ物', 'グルメ'],
             '外出': ['散歩', 'お出かけ', '外', '屋外', 'ウォーキング'],
             '自宅': ['家', '部屋', '室内', 'おうち'],
             '仕事': ['作業', 'お仕事', 'ワーク'],

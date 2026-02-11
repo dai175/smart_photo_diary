@@ -1431,6 +1431,19 @@
   "@subscriptionAutoRenewalDisabled": {
     "description": "Auto renewal disabled status display"
   },
+  "fabTooltipTakePhoto": "Take photo",
+  "@fabTooltipTakePhoto": {
+    "description": "FAB tooltip: camera capture"
+  },
+  "fabTooltipCreateDiary": "Create diary with {count} photos",
+  "@fabTooltipCreateDiary": {
+    "description": "FAB tooltip: create diary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "timelineToday": "Today",
   "@timelineToday": {
     "description": "Timeline section header for today's photos"

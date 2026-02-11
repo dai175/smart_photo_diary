@@ -46,7 +46,7 @@ class DiaryService implements IDiaryService {
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
   final IAiService _aiService;
-  late final ILoggingService _loggingService;
+  ILoggingService _loggingService = _NoOpLoggingService();
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
 
   // 日付降順のインメモリインデックス（エントリーIDの配列）

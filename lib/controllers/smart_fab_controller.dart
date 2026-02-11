@@ -45,12 +45,26 @@ class SmartFABController extends ChangeNotifier {
   }
 
   /// 現在の状態に応じたtooltipテキストを取得
+  @Deprecated('Use getLocalizedTooltip() or context.l10n in widget instead')
   String get tooltip {
     switch (currentState) {
       case SmartFABState.camera:
         return '写真を撮影';
       case SmartFABState.createDiary:
         return '${_photoController.selectedCount}枚で日記を作成';
+    }
+  }
+
+  /// ローカライズ対応のtooltipテキストを取得
+  String getLocalizedTooltip({
+    required String cameraText,
+    required String Function(int count) createDiaryText,
+  }) {
+    switch (currentState) {
+      case SmartFABState.camera:
+        return cameraText;
+      case SmartFABState.createDiary:
+        return createDiaryText(_photoController.selectedCount);
     }
   }
 

@@ -92,20 +92,30 @@ void main() {
       });
     });
 
-    group('tooltip', () {
-      test('camera状態では「写真を撮影」', () {
-        expect(fabController.tooltip, '写真を撮影');
+    group('getLocalizedTooltip', () {
+      test('camera状態ではcameraTextが返される', () {
+        final result = fabController.getLocalizedTooltip(
+          cameraText: 'Take photo',
+          createDiaryText: (count) => 'Create diary with $count photos',
+        );
+        expect(result, 'Take photo');
       });
 
-      test('createDiary状態では「N枚で日記を作成」', () {
+      test('createDiary状態ではcreateDiaryTextが選択数付きで返される', () {
         // Arrange
         final mockAssets = _createMockAssets(5);
         photoController.setPhotoAssets(mockAssets);
         photoController.toggleSelect(0);
         photoController.toggleSelect(1);
 
+        // Act
+        final result = fabController.getLocalizedTooltip(
+          cameraText: 'Take photo',
+          createDiaryText: (count) => 'Create diary with $count photos',
+        );
+
         // Assert
-        expect(fabController.tooltip, '2枚で日記を作成');
+        expect(result, 'Create diary with 2 photos');
       });
     });
 
