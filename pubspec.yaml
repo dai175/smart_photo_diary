@@ -1,5 +1,5 @@
 name: smart_photo_diary
-description: "A new Flutter project."
+description: "AI-powered photo diary app that generates diary entries from photos using Google Gemini."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
