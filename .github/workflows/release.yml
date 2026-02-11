@@ -286,7 +286,8 @@ jobs:
           # Upload all release assets using GitHub CLI
           gh release upload ${{ needs.version.outputs.version }} \
             ./artifacts/ios/smart-photo-diary-ios-*.zip \
-            ./artifacts/ios/smart-photo-diary-checksums.txt
+            ./artifacts/ios/smart-photo-diary-checksums.txt \
+            --clobber
           
       - name: Create release summary
         run: |
