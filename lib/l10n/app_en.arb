@@ -855,6 +855,10 @@
   "@diaryPreviewNoPhotosError": {
     "description": "Error message shown when no photos are selected for diary generation"
   },
+  "diaryPreviewPhotoDataError": "Failed to load photo data",
+  "@diaryPreviewPhotoDataError": {
+    "description": "Error message when photo data cannot be loaded"
+  },
   "diaryPreviewGenerationError": "We ran into an issue while generating your diary.\\nPlease try again in a moment.",
   "@diaryPreviewGenerationError": {
     "description": "Message shown when diary generation fails"

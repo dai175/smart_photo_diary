@@ -17,13 +17,67 @@ class ImageTextRenderer {
     canvas.drawRect(area, fill);
   }
 
+  // ── スタイルヘルパー ──────────────────────────────────
+
+  static TextStyle _dateStyle(double size) => TextStyle(
+    color: Colors.white.withValues(alpha: 0.95),
+    fontSize: size,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.8,
+    fontFamily: 'NotoSansJP',
+    height: 1.4,
+  );
+
+  static TextStyle _titleStyle(double size, {bool withShadows = false}) =>
+      TextStyle(
+        color: Colors.white,
+        fontSize: size,
+        fontWeight: FontWeight.w700,
+        height: 1.3,
+        letterSpacing: 0.5,
+        fontFamily: 'NotoSansJP',
+        shadows: withShadows
+            ? [
+                Shadow(
+                  offset: const Offset(0, 1),
+                  blurRadius: 3,
+                  color: Colors.black.withValues(alpha: 0.3),
+                ),
+              ]
+            : null,
+      );
+
+  static TextStyle _contentStyle(
+    double size,
+    double lineHeight, {
+    bool withShadows = false,
+  }) => TextStyle(
+    color: Colors.white.withValues(alpha: 0.98),
+    fontSize: size,
+    height: lineHeight,
+    letterSpacing: 0.4,
+    fontFamily: 'NotoSansJP',
+    fontWeight: FontWeight.w400,
+    shadows: withShadows
+        ? [
+            Shadow(
+              offset: const Offset(0, 0.5),
+              blurRadius: 2,
+              color: Colors.black.withValues(alpha: 0.2),
+            ),
+          ]
+        : null,
+  );
+
+  // ── 描画メソッド ──────────────────────────────────
+
   /// 指定エリアに日付/タイトル/本文を描画（分離レイアウト用）
-  static Future<void> drawTextElementsInArea(
+  static void drawTextElementsInArea(
     Canvas canvas,
     DiaryEntry diary,
     ShareFormat format,
     Rect contentArea,
-  ) async {
+  ) {
     final textAreaPadding = format.isSquare
         ? 24.0
         : (format.isPortrait ? 28.0 : 24.0);
@@ -47,14 +101,7 @@ class ImageTextRenderer {
       final datePainter = TextPainter(
         text: TextSpan(
           text: formatDate(diary.date),
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.95),
-            fontSize: dateSize,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.8,
-            fontFamily: 'NotoSansJP',
-            height: 1.4,
-          ),
+          style: _dateStyle(dateSize),
         ),
         textDirection: TextDirection.ltr,
       )..layout(maxWidth: textArea.width);
@@ -62,21 +109,7 @@ class ImageTextRenderer {
       final titlePainter = TextPainter(
         text: TextSpan(
           text: diary.title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: titleSize,
-            fontWeight: FontWeight.w700,
-            height: 1.3,
-            letterSpacing: 0.5,
-            fontFamily: 'NotoSansJP',
-            shadows: [
-              Shadow(
-                offset: const Offset(0, 1),
-                blurRadius: 3,
-                color: Colors.black.withOpacity(0.3),
-              ),
-            ],
-          ),
+          style: _titleStyle(titleSize, withShadows: true),
         ),
         textDirection: TextDirection.ltr,
         maxLines: baseSizes.titleMaxLines, // タイトルは最大行を維持
@@ -85,20 +118,10 @@ class ImageTextRenderer {
       final contentPainter = TextPainter(
         text: TextSpan(
           text: diary.content, // 全文
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.98),
-            fontSize: contentSize,
-            height: contentLineHeight,
-            letterSpacing: 0.4,
-            fontFamily: 'NotoSansJP',
-            fontWeight: FontWeight.w400,
-            shadows: [
-              Shadow(
-                offset: const Offset(0, 0.5),
-                blurRadius: 2,
-                color: Colors.black.withOpacity(0.2),
-              ),
-            ],
+          style: _contentStyle(
+            contentSize,
+            contentLineHeight,
+            withShadows: true,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -142,17 +165,7 @@ class ImageTextRenderer {
     // フォールバック：ここに来るのは極端な長文だけ。末尾に…を付けて収める
     double currentY = textArea.top;
     final datePainterFallback = TextPainter(
-      text: TextSpan(
-        text: formatDate(diary.date),
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.95),
-          fontSize: dateSize,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.8,
-          fontFamily: 'NotoSansJP',
-          height: 1.4,
-        ),
-      ),
+      text: TextSpan(text: formatDate(diary.date), style: _dateStyle(dateSize)),
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: textArea.width);
     datePainterFallback.paint(canvas, Offset(textArea.left, currentY));
@@ -160,17 +173,7 @@ class ImageTextRenderer {
 
     if (diary.title.isNotEmpty) {
       final tp = TextPainter(
-        text: TextSpan(
-          text: diary.title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: titleSize,
-            fontWeight: FontWeight.w700,
-            height: 1.3,
-            letterSpacing: 0.5,
-            fontFamily: 'NotoSansJP',
-          ),
-        ),
+        text: TextSpan(text: diary.title, style: _titleStyle(titleSize)),
         textDirection: TextDirection.ltr,
         maxLines: baseSizes.titleMaxLines,
         ellipsis: '…',
@@ -185,14 +188,7 @@ class ImageTextRenderer {
     final tpContent = TextPainter(
       text: TextSpan(
         text: diary.content,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.98),
-          fontSize: contentSize,
-          height: contentLineHeight,
-          letterSpacing: 0.4,
-          fontFamily: 'NotoSansJP',
-          fontWeight: FontWeight.w400,
-        ),
+        style: _contentStyle(contentSize, contentLineHeight),
       ),
       textDirection: TextDirection.ltr,
       maxLines: maxLines > 0 ? maxLines : 1,
@@ -207,7 +203,7 @@ class ImageTextRenderer {
     final brandSpan = TextSpan(
       text: 'Smart Photo Diary',
       style: TextStyle(
-        color: Colors.white.withOpacity(0.86),
+        color: Colors.white.withValues(alpha: 0.86),
         fontSize: ImageLayoutCalculator.calculateBrandFontSize(format),
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,

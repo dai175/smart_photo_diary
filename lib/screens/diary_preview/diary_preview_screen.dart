@@ -136,7 +136,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         final imageData = await _photoService.getOriginalFile(firstAsset);
 
         if (imageData == null) {
-          throw Exception('写真データの取得に失敗しました');
+          throw Exception(context.l10n.diaryPreviewPhotoDataError);
         }
 
         final resultFromAi = await _aiService.generateDiaryFromImage(
@@ -173,7 +173,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         }
 
         if (imagesWithTimes.isEmpty) {
-          throw Exception('写真データの取得に失敗しました');
+          throw Exception(context.l10n.diaryPreviewPhotoDataError);
         }
 
         setState(() {
@@ -275,15 +275,15 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       _logger.info('自動保存成功', context: 'DiaryPreviewScreen');
 
       if (mounted) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
+        );
+
         navigator.pushReplacement(
           MaterialPageRoute(
             builder: (context) => DiaryDetailScreen(diaryId: savedDiary.id),
           ),
           result: true,
-        );
-
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
         );
       }
     } catch (e, stackTrace) {

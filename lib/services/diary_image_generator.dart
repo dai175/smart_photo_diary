@@ -129,7 +129,7 @@ class DiaryImageGenerator {
     ImageTextRenderer.fillTextPanel(canvas, split.textRect, format);
 
     // テキスト描画
-    await ImageTextRenderer.drawTextElementsInArea(
+    ImageTextRenderer.drawTextElementsInArea(
       canvas,
       diary,
       format,
