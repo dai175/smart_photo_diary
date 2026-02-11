@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:async';
-import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -10,6 +9,7 @@ import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import '../unit/helpers/hive_test_helpers.dart';
+import '../unit/helpers/subscription_test_helpers.dart';
 
 /// Phase 1.6.2: In-App Purchase機能統合テスト
 ///
@@ -52,7 +52,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -126,7 +127,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -211,7 +213,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -309,7 +312,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -385,7 +389,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -488,33 +493,6 @@ void main() {
 
 /// In-App Purchase統合テスト用ヘルパークラス
 class InAppPurchaseTestHelpers {
-  // 注意: PurchaseResultとPurchaseProductは旧バージョンでenumに依存しているため、
-  // ヘルパーメソッドは一旦コメントアウト。V2バージョンが利用可能になったら再実装。
-
-  /*
-  /// テスト用購入結果を作成
-  static PurchaseResult createTestPurchaseResult({
-    PurchaseStatus status = PurchaseStatus.pending,
-    String? productId,
-    String? transactionId,
-    Plan? plan,
-    String? errorMessage,
-  }) {
-    // 旧バージョンはenum依存のため、V2バージョンでの実装を待つ
-  }
-
-  /// テスト用商品情報を作成
-  static PurchaseProduct createTestPurchaseProduct({
-    required String id,
-    required String title,
-    required Plan plan,
-    String price = '¥300',
-    double priceAmount = 300.0,
-  }) {
-    // 旧バージョンはenum依存のため、V2バージョンでの実装を待つ
-  }
-  */
-
   /// 購入ストリームのテスト用監視
   static Future<List<PurchaseResult>> listenToPurchaseStream(
     Stream<PurchaseResult> stream,

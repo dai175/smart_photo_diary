@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
+import 'package:smart_photo_diary/services/subscription_state_service.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../helpers/hive_test_helpers.dart';
+import '../helpers/subscription_test_helpers.dart';
 
 /// Phase 1.5.2.2: 使用量管理テスト
 ///
@@ -14,9 +16,11 @@ import '../helpers/hive_test_helpers.dart';
 /// - 使用量インクリメント
 /// - 残り回数計算
 /// - エラーケース処理
+
 void main() {
   group('Phase 1.5.2.2: SubscriptionService使用量管理テスト', () {
     late SubscriptionService subscriptionService;
+    late SubscriptionStateService stateService;
 
     setUpAll(() async {
       // Hiveテスト環境のセットアップ
@@ -28,8 +32,9 @@ void main() {
       await HiveTestHelpers.clearSubscriptionBox();
 
       // 新しいインスタンスを取得
-      subscriptionService = SubscriptionService();
-      await subscriptionService.initialize();
+      final bundle = await SubscriptionTestHelpers.createInitializedBundle();
+      subscriptionService = bundle.subscriptionService;
+      stateService = bundle.stateService;
     });
 
     tearDownAll(() async {
@@ -70,7 +75,7 @@ void main() {
       test('Premiumプラン: より高い制限で使用可能', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 50回使用（Premiumの制限は100回）
         for (int i = 0; i < 50; i++) {
@@ -85,7 +90,7 @@ void main() {
       test('Premiumプラン: 制限に達すると使用不可', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 100回使用（制限に到達）
         for (int i = 0; i < 100; i++) {
@@ -112,7 +117,7 @@ void main() {
       test('Premium: 使用量が正しくインクリメントされる', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         await subscriptionService.incrementAiUsage();
         await subscriptionService.incrementAiUsage();
@@ -158,7 +163,7 @@ void main() {
       test('Premium: 初期状態で正しい残り回数', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         final remaining = await subscriptionService.getRemainingGenerations();
         expect(remaining.value, equals(100)); // Premiumプランの制限
@@ -167,7 +172,7 @@ void main() {
       test('Premium: 使用後の残り回数計算', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 25回使用
         for (int i = 0; i < 25; i++) {
@@ -289,7 +294,7 @@ void main() {
         status.isActive = true;
         status.autoRenewal = true;
         status.expiryDate = DateTime.now().add(const Duration(days: 365));
-        await subscriptionService.updateStatus(status);
+        await stateService.updateStatus(status);
 
         final afterChange = await subscriptionService.getMonthlyUsage();
         expect(afterChange.value, equals(5)); // 使用量は保持
@@ -302,7 +307,7 @@ void main() {
       test('PremiumからBasicに変更すると制限が厳しくなる', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 15回使用（Basicの制限10回を超える）
         for (int i = 0; i < 15; i++) {
@@ -317,7 +322,7 @@ void main() {
         status.isActive = true;
         status.autoRenewal = false;
         status.expiryDate = null;
-        await subscriptionService.updateStatus(status);
+        await stateService.updateStatus(status);
 
         final usage = await subscriptionService.getMonthlyUsage();
         expect(usage.value, greaterThan(10)); // Basicの制限を超えている
@@ -408,7 +413,7 @@ void main() {
       test('Premium: 制限ちょうど(100回)での使用可否', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 99回使用（制限の1回前）
         for (int i = 0; i < 99; i++) {

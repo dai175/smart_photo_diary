@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
+import 'package:smart_photo_diary/services/subscription_state_service.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import '../helpers/hive_test_helpers.dart';
+import '../helpers/subscription_test_helpers.dart';
 
 /// Phase 1.5.2.3: アクセス権限テスト
 ///
@@ -15,9 +17,11 @@ import '../helpers/hive_test_helpers.dart';
 /// - 高度な分析機能
 /// - 優先サポート機能
 /// - 期限切れ・無効状態での制限
+
 void main() {
   group('Phase 1.5.2.3: SubscriptionService アクセス権限テスト', () {
     late SubscriptionService subscriptionService;
+    late SubscriptionStateService stateService;
 
     setUpAll(() async {
       // Hiveテスト環境のセットアップ
@@ -29,8 +33,9 @@ void main() {
       await HiveTestHelpers.clearSubscriptionBox();
 
       // 新しいインスタンスを取得
-      subscriptionService = SubscriptionService();
-      await subscriptionService.initialize();
+      final bundle = await SubscriptionTestHelpers.createInitializedBundle();
+      subscriptionService = bundle.subscriptionService;
+      stateService = bundle.stateService;
     });
 
     tearDownAll(() async {
@@ -98,7 +103,7 @@ void main() {
       setUp(() async {
         // Premium月額プランに変更
         final premiumMonthlyPlan = PremiumMonthlyPlan();
-        await subscriptionService.createStatusClass(premiumMonthlyPlan);
+        await stateService.createStatusForPlan(premiumMonthlyPlan);
       });
 
       test('プレミアム機能にアクセスできる', () async {
@@ -160,7 +165,7 @@ void main() {
       setUp(() async {
         // Premium年額プランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
       });
 
       test('プレミアム機能にアクセスできる', () async {
@@ -213,7 +218,7 @@ void main() {
 
         // 月額プランに変更
         final premiumMonthlyPlan = PremiumMonthlyPlan();
-        await subscriptionService.createStatusClass(premiumMonthlyPlan);
+        await stateService.createStatusForPlan(premiumMonthlyPlan);
 
         // 月額プランの権限を確認
         final monthlyPremium = await subscriptionService
@@ -238,7 +243,7 @@ void main() {
 
     group('期限切れPremiumプランのアクセス権限', () {
       setUp(() async {
-        // 期限切れのPremiumプランを設定
+        // 期限切れのPremiumプランを設定（stateService経由で更新）
         final currentStatus = await subscriptionService.getCurrentStatus();
         final status = currentStatus.value;
 
@@ -247,7 +252,7 @@ void main() {
         status.planId = 'premium_yearly';
         status.isActive = true;
         status.expiryDate = pastDate;
-        status.save();
+        await stateService.updateStatus(status);
       });
 
       test('期限切れではプレミアム機能にアクセスできない', () async {
@@ -288,7 +293,7 @@ void main() {
 
     group('非アクティブPremiumプランのアクセス権限', () {
       setUp(() async {
-        // 非アクティブのPremiumプランを設定
+        // 非アクティブのPremiumプランを設定（stateService経由で更新）
         final currentStatus = await subscriptionService.getCurrentStatus();
         final status = currentStatus.value;
 
@@ -297,7 +302,7 @@ void main() {
         status.expiryDate = DateTime.now().add(
           const Duration(days: 30),
         ); // 期限は有効
-        status.save();
+        await stateService.updateStatus(status);
       });
 
       test('非アクティブではプレミアム機能にアクセスできない', () async {
@@ -340,7 +345,7 @@ void main() {
 
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 変更後のアクセス権限を確認
         final premiumPremium = await subscriptionService
@@ -355,7 +360,7 @@ void main() {
       test('PremiumからBasicへの変更でアクセス権限が無効になる', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // Premium状態でアクセス権限を確認
         final premiumAccess = await subscriptionService
@@ -364,7 +369,7 @@ void main() {
 
         // Basicプランに変更
         final basicPlan = BasicPlan();
-        await subscriptionService.createStatusClass(basicPlan);
+        await stateService.createStatusForPlan(basicPlan);
 
         // 変更後のアクセス権限を確認
         final basicAccess = await subscriptionService
@@ -380,7 +385,7 @@ void main() {
       test('Premium月額から年額への変更でアクセス権限は維持される', () async {
         // Premium月額プランに変更
         final premiumMonthlyPlan = PremiumMonthlyPlan();
-        await subscriptionService.createStatusClass(premiumMonthlyPlan);
+        await stateService.createStatusForPlan(premiumMonthlyPlan);
 
         // 月額状態でアクセス権限を確認
         final monthlyAccess = await subscriptionService
@@ -389,7 +394,7 @@ void main() {
 
         // 年額プランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 変更後もアクセス権限が維持されることを確認
         final yearlyAccess = await subscriptionService
@@ -402,7 +407,7 @@ void main() {
       test('キャンセル後はアクセス権限が無効になる', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
         final status = (await subscriptionService.getCurrentStatus()).value;
 
         // Premium状態でアクセス権限を確認
@@ -410,8 +415,9 @@ void main() {
             .canAccessPremiumFeatures();
         expect(beforeCancel.value, isTrue);
 
-        // キャンセル
+        // キャンセル（stateService経由で更新）
         status.cancel();
+        await stateService.updateStatus(status);
 
         // キャンセル後のアクセス権限を確認
         final afterCancel = await subscriptionService
@@ -422,9 +428,10 @@ void main() {
       test('復元後はアクセス権限が有効になる', () async {
         // Premiumプランに変更してキャンセル
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
         final status = (await subscriptionService.getCurrentStatus()).value;
         status.cancel();
+        await stateService.updateStatus(status);
 
         // キャンセル状態でアクセス権限を確認
         final afterCancel = await subscriptionService
@@ -437,9 +444,8 @@ void main() {
         expect(promptsAfterCancel.value, isTrue);
 
         // 復元してPremiumプランに戻す
-        status.restore();
         final restoredPremiumPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(restoredPremiumPlan);
+        await stateService.createStatusForPlan(restoredPremiumPlan);
 
         // 復元後のアクセス権限を確認
         final afterRestore = await subscriptionService
@@ -465,7 +471,7 @@ void main() {
           59,
           59,
         );
-        status.save();
+        await stateService.updateStatus(status);
 
         // まだ有効であることを確認
         final result = await subscriptionService.canAccessPremiumFeatures();
@@ -481,7 +487,7 @@ void main() {
         status.planId = 'premium_yearly';
         status.isActive = true;
         status.expiryDate = pastDate;
-        status.save();
+        await stateService.updateStatus(status);
 
         // 期限切れであることを確認
         final result = await subscriptionService.canAccessPremiumFeatures();
@@ -542,7 +548,7 @@ void main() {
       test('プラン変更とアクセス権限チェックの並行実行', () async {
         // Premiumプランに変更
         final premiumYearlyPlan = PremiumYearlyPlan();
-        await subscriptionService.createStatusClass(premiumYearlyPlan);
+        await stateService.createStatusForPlan(premiumYearlyPlan);
 
         // 並行でアクセス権限をチェック
         final futures = <Future>[];
@@ -569,7 +575,7 @@ void main() {
 
         test('Premiumプランでは完全に使用可能', () async {
           final premiumYearlyPlan = PremiumYearlyPlan();
-          await subscriptionService.createStatusClass(premiumYearlyPlan);
+          await stateService.createStatusForPlan(premiumYearlyPlan);
 
           final result = await subscriptionService.canAccessWritingPrompts();
           expect(result.value, isTrue);
@@ -584,7 +590,7 @@ void main() {
 
         test('Premiumプランでは使用可能', () async {
           final premiumYearlyPlan = PremiumYearlyPlan();
-          await subscriptionService.createStatusClass(premiumYearlyPlan);
+          await stateService.createStatusForPlan(premiumYearlyPlan);
 
           final result = await subscriptionService.canAccessAdvancedFilters();
           expect(result.value, isTrue);
@@ -599,7 +605,7 @@ void main() {
 
         test('Premiumプランでは使用可能', () async {
           final premiumYearlyPlan = PremiumYearlyPlan();
-          await subscriptionService.createStatusClass(premiumYearlyPlan);
+          await stateService.createStatusForPlan(premiumYearlyPlan);
 
           final result = await subscriptionService.canAccessAdvancedAnalytics();
           expect(result.value, isTrue);
@@ -614,7 +620,7 @@ void main() {
 
         test('Premiumプランでは使用可能', () async {
           final premiumYearlyPlan = PremiumYearlyPlan();
-          await subscriptionService.createStatusClass(premiumYearlyPlan);
+          await stateService.createStatusForPlan(premiumYearlyPlan);
 
           final result = await subscriptionService.canAccessPrioritySupport();
           expect(result.value, isTrue);
