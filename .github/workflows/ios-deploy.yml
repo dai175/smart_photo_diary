@@ -7,6 +7,11 @@ on:
         description: 'Git tag to deploy (e.g., v1.1.0)'
         required: true
         type: string
+      skip_tests:
+        description: 'Skip tests (use when already passed on this tag)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   FLUTTER_VERSION: '3.32.0'
@@ -15,6 +20,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,6 +34,14 @@ jobs:
           
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-
 
       - name: Generate code
         run: |
@@ -46,6 +60,7 @@ jobs:
   ios-deploy:
     name: Deploy to App Store
     needs: test
+    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     runs-on: macos-14
     environment: production
     timeout-minutes: 60
@@ -78,6 +93,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-
+
       - name: Generate code
         run: |
           dart run build_runner build --delete-conflicting-outputs
@@ -93,7 +116,15 @@ jobs:
             exit 1
           fi
           echo "✅ Required secrets verified"
-          
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Install CocoaPods dependencies
         run: |
           cd ios

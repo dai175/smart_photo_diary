@@ -72,6 +72,7 @@ web/build/
 *.swp
 *.lock
 !pubspec.lock
+!ios/Podfile.lock
 
 # --- 環境変数ファイル ---
 .env

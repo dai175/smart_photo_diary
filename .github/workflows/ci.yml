@@ -36,6 +36,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-
+
       - name: Generate code
         run: |
           dart run build_runner build --delete-conflicting-outputs
@@ -96,6 +104,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-
+
       - name: Generate code
         run: |
           dart run build_runner build --delete-conflicting-outputs
@@ -152,6 +168,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-
+
       - name: Generate code
         run: |
           dart run build_runner build --delete-conflicting-outputs
@@ -161,6 +185,14 @@ jobs:
         run: |
           echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
           echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
 
       - name: Install CocoaPods dependencies
         run: |
