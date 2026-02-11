@@ -1431,6 +1431,19 @@
   "@subscriptionAutoRenewalDisabled": {
     "description": "自動更新が無効な状態の表示"
   },
+  "fabTooltipTakePhoto": "写真を撮影",
+  "@fabTooltipTakePhoto": {
+    "description": "FABのツールチップ：カメラ撮影"
+  },
+  "fabTooltipCreateDiary": "{count}枚で日記を作成",
+  "@fabTooltipCreateDiary": {
+    "description": "FABのツールチップ：日記作成",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "timelineToday": "今日",
   "@timelineToday": {
     "description": "タイムライン見出し：今日の写真"

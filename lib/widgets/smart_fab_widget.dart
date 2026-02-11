@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/smart_fab_controller.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../localization/localization_extensions.dart';
 
 /// スマートFABウィジェット
 /// 写真選択状態に応じてカメラ撮影と日記作成を切り替える
@@ -87,7 +88,10 @@ class _SmartFABWidgetState extends State<SmartFABWidget> {
       onPressed: _onPressed,
       backgroundColor: _fabController.getBackgroundColor(theme.colorScheme),
       foregroundColor: _fabController.getForegroundColor(theme.colorScheme),
-      tooltip: _fabController.tooltip,
+      tooltip: _fabController.getLocalizedTooltip(
+        cameraText: context.l10n.fabTooltipTakePhoto,
+        createDiaryText: (count) => context.l10n.fabTooltipCreateDiary(count),
+      ),
       shape: const CircleBorder(),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
