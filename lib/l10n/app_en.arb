@@ -197,6 +197,10 @@
   "@diaryNotFoundMessage": {
     "description": "Error message when a diary entry cannot be found"
   },
+  "diaryNotFoundSubtitle": "The specified diary may not exist or may have been deleted",
+  "@diaryNotFoundSubtitle": {
+    "description": "Supplementary explanation when a diary entry cannot be found"
+  },
   "diaryLoadErrorMessage": "Failed to load the diary",
   "@diaryLoadErrorMessage": {
     "description": "Error message shown when diary loading fails"

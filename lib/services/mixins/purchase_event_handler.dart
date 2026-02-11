@@ -29,9 +29,19 @@ mixin PurchaseEventHandler on ServiceLogging {
   set isPurchasing(bool value);
 
   /// 購入ストリーム更新ハンドラ
-  void onPurchaseUpdated(List<iap.PurchaseDetails> purchaseDetailsList) async {
+  Future<void> onPurchaseUpdated(
+    List<iap.PurchaseDetails> purchaseDetailsList,
+  ) async {
     for (final purchaseDetails in purchaseDetailsList) {
-      await processPurchaseUpdate(purchaseDetails);
+      try {
+        await processPurchaseUpdate(purchaseDetails);
+      } catch (e) {
+        log(
+          'Unhandled error in purchase update',
+          level: LogLevel.error,
+          error: e,
+        );
+      }
     }
   }
 
@@ -126,7 +136,11 @@ mixin PurchaseEventHandler on ServiceLogging {
         status: iapsi.PurchaseStatus.purchased,
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
-        purchaseDate: DateTime.now(),
+        purchaseDate: purchaseDetails.transactionDate != null
+            ? DateTime.fromMillisecondsSinceEpoch(
+                int.parse(purchaseDetails.transactionDate!),
+              )
+            : DateTime.now(),
         plan: plan,
       );
       purchaseStreamController.add(result);
@@ -176,7 +190,11 @@ mixin PurchaseEventHandler on ServiceLogging {
         status: iapsi.PurchaseStatus.restored,
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
-        purchaseDate: DateTime.now(),
+        purchaseDate: purchaseDetails.transactionDate != null
+            ? DateTime.fromMillisecondsSinceEpoch(
+                int.parse(purchaseDetails.transactionDate!),
+              )
+            : DateTime.now(),
         plan: InAppPurchaseConfig.getPlanFromProductId(
           purchaseDetails.productID,
         ),
@@ -275,14 +293,14 @@ mixin PurchaseEventHandler on ServiceLogging {
     try {
       final now = DateTime.now();
 
-      DateTime expiryDate;
+      Duration subscriptionDuration;
       if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
-        expiryDate = now.add(
-          const Duration(days: SubscriptionConstants.subscriptionMonthDays),
+        subscriptionDuration = const Duration(
+          days: SubscriptionConstants.subscriptionMonthDays,
         );
       } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
-        expiryDate = now.add(
-          const Duration(days: SubscriptionConstants.subscriptionYearDays),
+        subscriptionDuration = const Duration(
+          days: SubscriptionConstants.subscriptionYearDays,
         );
       } else {
         throw ArgumentError('Basic plan cannot be purchased');
@@ -296,6 +314,17 @@ mixin PurchaseEventHandler on ServiceLogging {
       final currentLastResetDate = currentStatusResult.isSuccess
           ? currentStatusResult.value.lastResetDate
           : now;
+
+      // 復元時は既存の有効期限を維持（まだ有効であればそちらを使用）
+      DateTime expiryDate;
+      if (purchaseDetails.status == iap.PurchaseStatus.restored &&
+          currentStatusResult.isSuccess &&
+          currentStatusResult.value.expiryDate != null &&
+          currentStatusResult.value.expiryDate!.isAfter(now)) {
+        expiryDate = currentStatusResult.value.expiryDate!;
+      } else {
+        expiryDate = now.add(subscriptionDuration);
+      }
 
       final newStatus = SubscriptionStatus(
         planId: plan.id,

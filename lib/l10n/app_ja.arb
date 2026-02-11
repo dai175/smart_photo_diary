@@ -197,6 +197,10 @@
   "@diaryNotFoundMessage": {
     "description": "日記が存在しない場合のエラーメッセージ"
   },
+  "diaryNotFoundSubtitle": "指定された日記は存在しないか、削除された可能性があります",
+  "@diaryNotFoundSubtitle": {
+    "description": "日記が存在しない場合の補足説明"
+  },
   "diaryLoadErrorMessage": "日記の読み込みに失敗しました",
   "@diaryLoadErrorMessage": {
     "description": "日記取得に失敗した際のメッセージ"

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../../models/diary_entry.dart';
 import '../../core/service_registration.dart';
+import '../ai/diary_locale_utils.dart';
 import '../interfaces/settings_service_interface.dart';
 import '../interfaces/social_share_service_interface.dart';
 import 'image_layout_calculator.dart';
@@ -223,88 +224,13 @@ class ImageTextRenderer {
 
   /// 日付をフォーマット（多言語化対応）
   static String formatDate(DateTime date) {
+    Locale locale;
     try {
-      // SettingsServiceからロケールを取得
-      Locale? locale;
-      try {
-        final settingsService = ServiceRegistration.get<ISettingsService>();
-        locale = settingsService.locale;
-      } catch (_) {
-        locale = null;
-      }
-      final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
-
-      if (resolvedLocale.languageCode == 'ja') {
-        // 日本語フォーマット
-        final months = [
-          '1月',
-          '2月',
-          '3月',
-          '4月',
-          '5月',
-          '6月',
-          '7月',
-          '8月',
-          '9月',
-          '10月',
-          '11月',
-          '12月',
-        ];
-        return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
-      } else {
-        // 英語フォーマット
-        final months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ];
-        return '${months[date.month - 1]} ${date.day}, ${date.year}';
-      }
-    } catch (e) {
-      // フォールバック：設定取得に失敗した場合はプラットフォームロケールを使用
-      final platformLocale = ui.PlatformDispatcher.instance.locale;
-      if (platformLocale.languageCode == 'ja') {
-        final months = [
-          '1月',
-          '2月',
-          '3月',
-          '4月',
-          '5月',
-          '6月',
-          '7月',
-          '8月',
-          '9月',
-          '10月',
-          '11月',
-          '12月',
-        ];
-        return '${date.year}年 ${months[date.month - 1]} ${date.day}日';
-      } else {
-        final months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ];
-        return '${months[date.month - 1]} ${date.day}, ${date.year}';
-      }
+      final settingsService = ServiceRegistration.get<ISettingsService>();
+      locale = settingsService.locale ?? ui.PlatformDispatcher.instance.locale;
+    } catch (_) {
+      locale = ui.PlatformDispatcher.instance.locale;
     }
+    return DiaryLocaleUtils.formatDate(date, locale);
   }
 }

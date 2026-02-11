@@ -54,7 +54,7 @@ class DiaryStatisticsService implements IDiaryStatisticsService {
       }
       final count = box.values
           .where(
-            (entry) => entry.date.isAfter(start) && entry.date.isBefore(end),
+            (entry) => !entry.date.isBefore(start) && !entry.date.isAfter(end),
           )
           .length;
       return Success(count);
