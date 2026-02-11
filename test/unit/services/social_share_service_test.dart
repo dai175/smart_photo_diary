@@ -146,7 +146,7 @@ void main() {
       testServiceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
       // SocialShareServiceのインスタンスを作成
-      actualService = SocialShareService.getInstance();
+      actualService = SocialShareService();
 
       // モックの設定
       when(
@@ -170,11 +170,12 @@ void main() {
       ServiceLocator().clear();
     });
 
-    test('getInstance returns singleton instance', () {
-      final instance1 = SocialShareService.getInstance();
-      final instance2 = SocialShareService.getInstance();
+    test('constructor returns new instance', () {
+      final instance1 = SocialShareService();
+      final instance2 = SocialShareService();
 
-      expect(instance1, same(instance2));
+      expect(instance1, isA<SocialShareService>());
+      expect(instance2, isA<SocialShareService>());
     });
 
     test('getSupportedFormats returns all ShareFormat values', () {

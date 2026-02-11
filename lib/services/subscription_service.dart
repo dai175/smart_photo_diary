@@ -44,9 +44,6 @@ import 'interfaces/subscription_service_interface.dart' as ssi;
 /// - Phase 1.3.3: 使用量管理機能 ✅
 /// - Phase 1.3.4: アクセス権限チェック ✅
 class SubscriptionService implements ISubscriptionService {
-  // シングルトンインスタンス
-  static SubscriptionService? _instance;
-
   // Hiveボックス
   Box<SubscriptionStatus>? _subscriptionBox;
 
@@ -67,21 +64,8 @@ class SubscriptionService implements ISubscriptionService {
   // 購入処理中フラグ
   bool _isPurchasing = false;
 
-  // プライベートコンストラクタ
-  SubscriptionService._();
-
-  /// シングルトンインスタンスを取得
-  ///
-  /// 初回呼び出し時に自動的に初期化処理を実行
-  /// エラーが発生した場合は例外をスロー
-  @Deprecated('Use ServiceLocator.getAsync<ISubscriptionService>() instead')
-  static Future<SubscriptionService> getInstance() async {
-    if (_instance == null) {
-      _instance = SubscriptionService._();
-      await _instance!._initialize();
-    }
-    return _instance!;
-  }
+  /// DI用の公開コンストラクタ
+  SubscriptionService();
 
   /// サービス初期化処理
   ///
@@ -2004,12 +1988,5 @@ class SubscriptionService implements ISubscriptionService {
     _inAppPurchase = null;
 
     _log('SubscriptionService disposed', level: LogLevel.info);
-  }
-
-  /// テスト用リセットメソッド
-  static void resetForTesting() {
-    _instance?._purchaseSubscription?.cancel();
-    _instance?._purchaseStreamController.close();
-    _instance = null;
   }
 }

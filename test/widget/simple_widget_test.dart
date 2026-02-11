@@ -12,7 +12,7 @@ void main() {
     setUpAll(() async {
       // テスト用のServiceLocator設定
       serviceLocator.clear();
-      final loggingService = await LoggingService.getInstance();
+      final loggingService = LoggingService();
       serviceLocator.registerSingleton<ILoggingService>(loggingService);
     });
 

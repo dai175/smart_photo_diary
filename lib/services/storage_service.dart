@@ -11,15 +11,8 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
 class StorageService implements IStorageService {
-  static StorageService? _instance;
-
-  StorageService._();
-
-  @Deprecated('Use ServiceLocator.get<IStorageService>() instead')
-  static StorageService getInstance() {
-    _instance ??= StorageService._();
-    return _instance!;
-  }
+  /// DI用の公開コンストラクタ
+  StorageService();
 
   // ストレージ使用量を取得
   @override

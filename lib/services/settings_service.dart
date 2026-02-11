@@ -17,7 +17,6 @@ enum DiaryGenerationMode {
 }
 
 class SettingsService implements ISettingsService {
-  static SettingsService? _instance;
   static SharedPreferences? _preferences;
 
   // Phase 1.8.1.1: SubscriptionService依存注入
@@ -28,47 +27,15 @@ class SettingsService implements ISettingsService {
     null,
   );
 
-  SettingsService._();
+  /// DI用の公開コンストラクタ
+  SettingsService();
 
-  /// 非同期ファクトリメソッドでサービスインスタンスを取得
-  @Deprecated('Use ServiceLocator.get<ISettingsService>() instead')
-  static Future<SettingsService> getInstance() async {
-    try {
-      _instance ??= SettingsService._();
-      _preferences ??= await SharedPreferences.getInstance();
-
-      _localeNotifier.value = _instance!._loadStoredLocale();
-
-      // Phase 1.8.1.1: SubscriptionService依存注入
-      if (_instance!._subscriptionService == null) {
-        _instance!._subscriptionService = await ServiceLocator()
-            .getAsync<ISubscriptionService>();
-      }
-
-      return _instance!;
-    } catch (error) {
-      throw ErrorHandler.handleError(
-        error,
-        context: 'SettingsService.getInstance',
-      );
-    }
-  }
-
-  /// 同期的なサービスインスタンス取得（事前に初期化済みの場合のみ）
-  static SettingsService get instance {
-    if (_instance == null) {
-      throw StateError(
-        'SettingsService has not been initialized. Call getInstance() first.',
-      );
-    }
-    return _instance!;
-  }
-
-  /// テスト用: インスタンスをリセット
-  @visibleForTesting
-  static void resetInstance() {
-    _instance = null;
-    _preferences = null;
+  /// DI用の非同期初期化
+  Future<void> initialize() async {
+    _preferences ??= await SharedPreferences.getInstance();
+    _localeNotifier.value = _loadStoredLocale();
+    _subscriptionService ??= await ServiceLocator()
+        .getAsync<ISubscriptionService>();
   }
 
   // テーマ設定のキー

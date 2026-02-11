@@ -27,11 +27,9 @@ void main() {
       // 各テスト前にHiveボックスをクリア
       await HiveTestHelpers.clearSubscriptionBox();
 
-      // SubscriptionServiceインスタンスをリセット
-      SubscriptionService.resetForTesting();
-
       // 新しいインスタンスを取得
-      subscriptionService = await SubscriptionService.getInstance();
+      subscriptionService = SubscriptionService();
+      await subscriptionService.initialize();
     });
 
     tearDownAll(() async {

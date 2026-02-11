@@ -3,7 +3,6 @@ import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/errors/error_handler.dart';
-import '../core/service_locator.dart';
 import '../constants/app_constants.dart';
 
 /// LRUキャッシュのエントリー
@@ -26,22 +25,9 @@ class _LRUCacheEntry {
 
 /// 写真のサムネイルキャッシュを管理するサービス
 class PhotoCacheService implements IPhotoCacheService {
-  // シングルトンパターン
-  static PhotoCacheService? _instance;
   final ILoggingService _logger;
 
   PhotoCacheService({required ILoggingService logger}) : _logger = logger;
-
-  PhotoCacheService._({required ILoggingService logger}) : _logger = logger;
-
-  @Deprecated('Use constructor injection via ServiceLocator instead')
-  static PhotoCacheService getInstance() {
-    // 後方互換性のため維持。新規コードではコンストラクタ注入を使用すること。
-    _instance ??= PhotoCacheService._(
-      logger: ServiceLocator().get<ILoggingService>(),
-    );
-    return _instance!;
-  }
 
   // LRUメモリキャッシュ
   final Map<String, _LRUCacheEntry> _memoryCache = {};

@@ -283,8 +283,7 @@ class SubscriptionStatus extends HiveObject {
     );
   }
 
-  /// 現在のプランを新しいPlanクラスとして取得（拡張メソッドの代替）
-  /// @deprecated 拡張メソッド SubscriptionStatusExtensions.plan を使用してください
+  /// 現在のプランを新しいPlanクラスとして取得
   Plan getCurrentPlanClass() {
     return PlanFactory.createPlan(planId);
   }

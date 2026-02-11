@@ -14,7 +14,7 @@ void main() {
     late MockAssetEntity mockAsset;
 
     setUp(() {
-      photoAccessControlService = PhotoAccessControlService.getInstance();
+      photoAccessControlService = PhotoAccessControlService();
       mockAsset = MockAssetEntity();
       registerFallbackValue(DateTime.now());
       registerFallbackValue(BasicPlan());

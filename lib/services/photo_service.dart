@@ -15,26 +15,12 @@ import '../core/service_locator.dart';
 
 /// 写真の取得と管理を担当するサービスクラス
 class PhotoService implements IPhotoService {
-  // シングルトンパターン
-  static PhotoService? _instance;
-
   // image_picker インスタンス
   final ImagePicker _imagePicker = ImagePicker();
 
   final ILoggingService _logger;
 
   PhotoService({required ILoggingService logger}) : _logger = logger;
-
-  PhotoService._({required ILoggingService logger}) : _logger = logger;
-
-  @Deprecated('Use constructor injection via ServiceLocator instead')
-  static PhotoService getInstance() {
-    // 後方互換性のため維持。新規コードではコンストラクタ注入を使用すること。
-    _instance ??= PhotoService._(
-      logger: ServiceLocator().get<ILoggingService>(),
-    );
-    return _instance!;
-  }
 
   /// 写真アクセス権限をリクエストする
   ///

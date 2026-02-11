@@ -79,7 +79,7 @@ class IntegrationTestHelpers {
     serviceLocator.clear();
 
     // Register LoggingService first, as it's needed by ServiceRegistration
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = LoggingService();
     serviceLocator.registerSingleton<ILoggingService>(loggingService);
 
     // Use the same service registration as main app, then override with mocks

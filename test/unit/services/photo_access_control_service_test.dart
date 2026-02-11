@@ -10,7 +10,7 @@ void main() {
     late IPhotoAccessControlService accessControlService;
 
     setUp(() {
-      accessControlService = PhotoAccessControlService.getInstance();
+      accessControlService = PhotoAccessControlService();
     });
 
     group('getAccessibleDateForPlan', () {

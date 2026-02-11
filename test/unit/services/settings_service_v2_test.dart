@@ -32,7 +32,6 @@ void main() {
     setUp(() async {
       // 完全なリセット
       ServiceLocator().clear();
-      SettingsService.resetInstance();
     });
 
     tearDown(() async {
@@ -56,7 +55,8 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = await SettingsService.getInstance();
+      settingsService = SettingsService();
+      await settingsService.initialize();
 
       final result = await settingsService.getSubscriptionInfoV2();
 
@@ -80,7 +80,8 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = await SettingsService.getInstance();
+      settingsService = SettingsService();
+      await settingsService.initialize();
 
       final result = await settingsService.getCurrentPlanClass();
 
@@ -108,7 +109,8 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = await SettingsService.getInstance();
+      settingsService = SettingsService();
+      await settingsService.initialize();
 
       final result = await settingsService.getUsageStatisticsWithPlanClass();
 
@@ -119,7 +121,10 @@ void main() {
       expect(stats.remainingCount, 2);
       expect(stats.isNearLimit, true); // 80%以上
       expect(stats.usageRate, 0.8);
-      expect(stats.usageDisplay, '8 / 10回');
+      expect(
+        stats.getLocalizedUsageDisplay((used, limit) => '$used / $limit回'),
+        '8 / 10回',
+      );
     });
 
     test('getPlanPeriodInfoV2()でV2形式の期限情報を取得できる', () async {
@@ -141,7 +146,8 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = await SettingsService.getInstance();
+      settingsService = SettingsService();
+      await settingsService.initialize();
 
       final result = await settingsService.getPlanPeriodInfoV2();
 
@@ -163,7 +169,8 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = await SettingsService.getInstance();
+      settingsService = SettingsService();
+      await settingsService.initialize();
 
       final result = await settingsService.getAvailablePlansV2();
 
@@ -193,7 +200,8 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = await SettingsService.getInstance();
+      settingsService = SettingsService();
+      await settingsService.initialize();
 
       // V2メソッド
       final v2PlanResult = await settingsService.getCurrentPlanClass();
