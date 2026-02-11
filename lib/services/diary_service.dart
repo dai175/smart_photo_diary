@@ -124,19 +124,26 @@ class DiaryService implements IDiaryService {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
       _loggingService.info('Hiveボックス初期化完了: ${_diaryBox?.length ?? 0}件のエントリー');
       await _buildIndex();
-    } catch (e) {
-      _loggingService.error('Hiveボックス初期化エラー', error: e);
-      // スキーマ変更により既存データが読めない場合はボックスを削除して再作成
-      try {
-        await Hive.deleteBoxFromDisk(_boxName);
-        _loggingService.warning('古いボックスを削除しました');
-        _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
-        _loggingService.info('新しいボックスを作成しました');
-        await _buildIndex();
-      } catch (deleteError) {
-        _loggingService.error('ボックス削除エラー', error: deleteError);
-        rethrow;
-      }
+    } on HiveError catch (e) {
+      _loggingService.error('Hiveスキーマエラー、ボックスを再作成します', error: e);
+      await _recreateBox();
+    } on TypeError catch (e) {
+      _loggingService.error('Hive型不整合エラー、ボックスを再作成します', error: e);
+      await _recreateBox();
+    }
+  }
+
+  /// スキーマ不整合時のみボックスを削除して再作成する
+  Future<void> _recreateBox() async {
+    try {
+      await Hive.deleteBoxFromDisk(_boxName);
+      _loggingService.warning('古いボックスを削除しました');
+      _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
+      _loggingService.info('新しいボックスを作成しました');
+      await _buildIndex();
+    } catch (deleteError) {
+      _loggingService.error('ボックス再作成エラー', error: deleteError);
+      rethrow;
     }
   }
 
