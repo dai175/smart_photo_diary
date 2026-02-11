@@ -176,6 +176,7 @@ void main() {
 
       expect(instance1, isA<SocialShareService>());
       expect(instance2, isA<SocialShareService>());
+      expect(instance1, isNot(same(instance2)));
     });
 
     test('getSupportedFormats returns all ShareFormat values', () {

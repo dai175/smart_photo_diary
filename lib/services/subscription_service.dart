@@ -33,7 +33,7 @@ import 'interfaces/subscription_service_interface.dart' as ssi;
 /// - 月次使用量リセット処理
 ///
 /// ## 設計方針
-/// - シングルトンパターンによるインスタンス管理
+/// - DI（依存性注入）によるインスタンス管理
 /// - Result<T>パターンによる関数型エラーハンドリング
 /// - Hiveによる永続化でオフライン対応
 /// - 将来のin_app_purchase統合準備
@@ -1133,12 +1133,12 @@ class SubscriptionService implements ISubscriptionService {
           _loggingService!.warning(message, context: logContext, data: data);
           break;
         case LogLevel.error:
-          _loggingService!.error(message, context: logContext, error: data);
+          _loggingService!.error(message, context: logContext, error: error);
           break;
       }
 
-      // エラーオブジェクトがある場合は追加ログ
-      if (error != null) {
+      // エラーオブジェクトがある場合は追加ログ（errorレベル以外）
+      if (error != null && level != LogLevel.error) {
         _loggingService!.error('Error details: $error', context: logContext);
       }
     } else {

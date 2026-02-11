@@ -92,13 +92,15 @@ class ServiceRegistration {
       // Debug print all registered services
       serviceLocator.debugPrintServices();
     } catch (e) {
-      // LoggingService may not be available if initialization failed
-      if (_isInitialized) {
+      // LoggingServiceが登録済みの場合のみエラーログを出力
+      try {
         _logger.error(
           'サービス初期化エラー',
           context: 'ServiceRegistration.initialize',
           error: e,
         );
+      } catch (_) {
+        // LoggingService未登録の場合は無視
       }
       rethrow;
     }
@@ -131,13 +133,13 @@ class ServiceRegistration {
     });
 
     // 4. PhotoService (LoggingServiceに依存)
-    serviceLocator.registerFactory<IPhotoService>(
-      () => PhotoService(logger: serviceLocator.get<ILoggingService>()),
+    serviceLocator.registerSingleton<IPhotoService>(
+      PhotoService(logger: serviceLocator.get<ILoggingService>()),
     );
 
     // 5. PhotoCacheService (LoggingServiceに依存)
-    serviceLocator.registerFactory<IPhotoCacheService>(
-      () => PhotoCacheService(logger: serviceLocator.get<ILoggingService>()),
+    serviceLocator.registerSingleton<IPhotoCacheService>(
+      PhotoCacheService(logger: serviceLocator.get<ILoggingService>()),
     );
 
     // 6. PhotoAccessControlService (依存なし)
