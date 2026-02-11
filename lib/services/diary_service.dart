@@ -1,19 +1,17 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
-import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_change.dart';
 import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
+import 'interfaces/diary_tag_service_interface.dart';
+import 'interfaces/diary_statistics_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
-import 'interfaces/settings_service_interface.dart';
-import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
@@ -39,11 +37,14 @@ class _NoOpLoggingService implements ILoggingService {
   void endTimer(Stopwatch stopwatch, String operation, {String? context}) {}
 }
 
+/// 日記の管理を担当するサービスクラス（Facade）
+///
+/// コアCRUD・クエリ・インデックス管理は本クラスに保持。
+/// タグ管理はIDiaryTagServiceに、統計はIDiaryStatisticsServiceに委譲。
 class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
-  final IAiService _aiService;
   ILoggingService _loggingService = _NoOpLoggingService();
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
 
@@ -57,14 +58,14 @@ class DiaryService implements IDiaryService {
   final List<DateTime> _sortedDatesByDayDesc = [];
 
   // プライベートコンストラクタ（依存性注入用）
-  DiaryService._(this._aiService);
+  DiaryService._();
 
   // 依存性注入用のファクトリメソッド
   static DiaryService createWithDependencies({
     required IAiService aiService,
     required IPhotoService photoService,
   }) {
-    return DiaryService._(aiService);
+    return DiaryService._();
   }
 
   // 初期化メソッド（外部から呼び出し可能）
@@ -75,6 +76,44 @@ class DiaryService implements IDiaryService {
   // 変更ストリーム
   @override
   Stream<DiaryChange> get changes => _diaryChangeController.stream;
+
+  // =================================================================
+  // タグ管理メソッド（IDiaryTagServiceへの委譲）
+  // =================================================================
+
+  /// タグサービス（遅延解決）
+  IDiaryTagService get _tagService => serviceLocator.get<IDiaryTagService>();
+
+  @override
+  Future<Result<List<String>>> getTagsForEntry(DiaryEntry entry) =>
+      _tagService.getTagsForEntry(entry);
+
+  @override
+  Future<Result<Set<String>>> getAllTags() => _tagService.getAllTags();
+
+  @override
+  Future<Result<List<String>>> getPopularTags({int limit = 10}) =>
+      _tagService.getPopularTags(limit: limit);
+
+  // =================================================================
+  // 統計メソッド（IDiaryStatisticsServiceへの委譲）
+  // =================================================================
+
+  /// 統計サービス（遅延解決）
+  IDiaryStatisticsService get _statisticsService =>
+      serviceLocator.get<IDiaryStatisticsService>();
+
+  @override
+  Future<Result<int>> getTotalDiaryCount() =>
+      _statisticsService.getTotalDiaryCount();
+
+  @override
+  Future<Result<int>> getDiaryCountInPeriod(DateTime start, DateTime end) =>
+      _statisticsService.getDiaryCountInPeriod(start, end);
+
+  // =================================================================
+  // 初期化・インデックス管理（本クラスに保持）
+  // =================================================================
 
   // 初期化処理
   Future<void> _init() async {
@@ -195,6 +234,15 @@ class DiaryService implements IDiaryService {
     return [startIndex, endExclusive];
   }
 
+  /// 検索インデックスを更新するコールバック（タグサービスから呼ばれる）
+  void _updateSearchIndex(String id, String searchableText) {
+    _searchTextIndex[id] = searchableText;
+  }
+
+  // =================================================================
+  // CRUD メソッド（本クラスに保持）
+  // =================================================================
+
   // 日記エントリーを保存
   @override
   Future<Result<DiaryEntry>> saveDiaryEntry({
@@ -257,7 +305,10 @@ class DiaryService implements IDiaryService {
       );
 
       // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
-      _generateTagsInBackground(entry);
+      _tagService.generateTagsInBackground(
+        entry,
+        onSearchIndexUpdate: _updateSearchIndex,
+      );
 
       return Success(entry);
     } catch (e, stackTrace) {
@@ -351,6 +402,10 @@ class DiaryService implements IDiaryService {
     }
   }
 
+  // =================================================================
+  // クエリメソッド（本クラスに保持）
+  // =================================================================
+
   // すべての日記エントリーを取得
   Future<List<DiaryEntry>> _getAllDiaryEntries() async {
     if (_diaryBox == null) await _init();
@@ -385,80 +440,6 @@ class DiaryService implements IDiaryService {
       _loggingService.error('日記取得エラー', error: e);
       return Failure(ServiceException('日記の取得に失敗しました', originalError: e));
     }
-  }
-
-  // バックグラウンドでタグを生成
-  void _generateTagsInBackground(DiaryEntry entry) {
-    _generateTagsInBackgroundCore(
-      entry: entry,
-      content: entry.content,
-      logLabel: 'バックグラウンド',
-      onTagsGenerated: (latestEntry, tags) async {
-        await latestEntry.updateTags(tags);
-        _searchTextIndex[latestEntry.id] = _buildSearchableText(latestEntry);
-      },
-    );
-  }
-
-  // 日記エントリーのタグを取得（キャッシュ優先）
-  @override
-  Future<Result<List<String>>> getTagsForEntry(DiaryEntry entry) async {
-    try {
-      // 有効なキャッシュがあればそれを返す
-      if (entry.hasValidTags) {
-        return Success(entry.cachedTags!);
-      }
-
-      // キャッシュが無効または存在しない場合は新しく生成
-      _loggingService.debug('新しいタグを生成中: ${entry.id}');
-      final tagsResult = await _aiService.generateTagsFromContent(
-        title: entry.title,
-        content: entry.content,
-        date: entry.date,
-        photoCount: entry.photoIds.length,
-        locale: _getCurrentLocale(),
-      );
-
-      if (tagsResult.isSuccess) {
-        // Hiveボックスから最新のエントリーを取得して更新
-        if (_diaryBox != null && _diaryBox!.isOpen) {
-          final latestEntry = _diaryBox!.get(entry.id);
-          if (latestEntry != null) {
-            await latestEntry.updateTags(tagsResult.value);
-          }
-        }
-        return Success(tagsResult.value);
-      } else {
-        _loggingService.error('タグ生成エラー', error: tagsResult.error);
-        // エラー時はフォールバックタグを返す
-        return Success(_generateFallbackTags(entry));
-      }
-    } catch (e) {
-      _loggingService.error('タグ生成エラー', error: e);
-      // エラー時はフォールバックタグを返す
-      return Success(_generateFallbackTags(entry));
-    }
-  }
-
-  // フォールバックタグを生成（ロケール対応）
-  List<String> _generateFallbackTags(DiaryEntry entry) {
-    final tags = <String>[];
-    final locale = _getCurrentLocale();
-    final isEnglish = locale.languageCode == 'en';
-
-    // 時間帯タグのみ
-    final hour = entry.date.hour;
-    if (hour >= 5 && hour < 12) {
-      tags.add(isEnglish ? 'Morning' : '朝');
-    } else if (hour >= 12 && hour < 18) {
-      tags.add(isEnglish ? 'Afternoon' : '昼');
-    } else if (hour >= 18 && hour < 22) {
-      tags.add(isEnglish ? 'Evening' : '夕方');
-    } else {
-      tags.add(isEnglish ? 'Night' : '夜');
-    }
-
-    return tags;
   }
 
   // フィルタを適用して日記エントリーを取得
@@ -569,78 +550,6 @@ class DiaryService implements IDiaryService {
     }
   }
 
-  // 全ての日記からユニークなタグを取得
-  @override
-  Future<Result<Set<String>>> getAllTags() async {
-    try {
-      if (_diaryBox == null) await _init();
-      final allTags = <String>{};
-
-      for (final entry in _diaryBox!.values) {
-        allTags.addAll(entry.effectiveTags);
-      }
-
-      return Success(allTags);
-    } catch (e) {
-      _loggingService.error('タグ一覧取得エラー', error: e);
-      return Failure(ServiceException('タグ一覧の取得に失敗しました', originalError: e));
-    }
-  }
-
-  // よく使われるタグを取得（使用頻度順）
-  @override
-  Future<Result<List<String>>> getPopularTags({int limit = 10}) async {
-    try {
-      if (_diaryBox == null) await _init();
-      final tagCounts = <String, int>{};
-
-      for (final entry in _diaryBox!.values) {
-        for (final tag in entry.effectiveTags) {
-          tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
-        }
-      }
-
-      final sortedTags = tagCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
-
-      return Success(sortedTags.take(limit).map((e) => e.key).toList());
-    } catch (e) {
-      _loggingService.error('人気タグ取得エラー', error: e);
-      return Failure(ServiceException('人気タグの取得に失敗しました', originalError: e));
-    }
-  }
-
-  // インターフェース実装のための追加メソッド
-  @override
-  Future<Result<int>> getTotalDiaryCount() async {
-    try {
-      if (_diaryBox == null) await _init();
-      return Success(_diaryBox!.length);
-    } catch (e) {
-      _loggingService.error('日記総数取得エラー', error: e);
-      return Failure(ServiceException('日記総数の取得に失敗しました', originalError: e));
-    }
-  }
-
-  @override
-  Future<Result<int>> getDiaryCountInPeriod(
-    DateTime start,
-    DateTime end,
-  ) async {
-    try {
-      if (_diaryBox == null) await _init();
-      final count = _diaryBox!.values
-          .where(
-            (entry) => entry.date.isAfter(start) && entry.date.isBefore(end),
-          )
-          .length;
-      return Success(count);
-    } catch (e) {
-      _loggingService.error('期間別日記数取得エラー', error: e);
-      return Failure(ServiceException('期間別日記数の取得に失敗しました', originalError: e));
-    }
-  }
-
   // 写真付きで日記エントリーを保存（後方互換性）
   @override
   Future<Result<DiaryEntry>> saveDiaryEntryWithPhotos({
@@ -735,7 +644,10 @@ class DiaryService implements IDiaryService {
       );
 
       // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
-      _generateTagsInBackgroundForPastPhoto(entry);
+      _tagService.generateTagsInBackgroundForPastPhoto(
+        entry,
+        onSearchIndexUpdate: _updateSearchIndex,
+      );
 
       return Success(entry);
     } catch (e, stackTrace) {
@@ -773,96 +685,6 @@ class DiaryService implements IDiaryService {
     }
   }
 
-  /// 過去の写真用のバックグラウンドタグ生成
-  void _generateTagsInBackgroundForPastPhoto(DiaryEntry entry) {
-    // 過去の日付であることを示すコンテキストを生成
-    final daysDifference = DateTime.now().difference(entry.date).inDays;
-    final locale = _getCurrentLocale();
-    final isEnglish = locale.languageCode == 'en';
-    String pastContext;
-
-    if (daysDifference <= 0) {
-      pastContext = isEnglish ? "Today's memory" : '今日の思い出';
-    } else if (daysDifference == 1) {
-      pastContext = isEnglish ? "Yesterday's memory" : '昨日の思い出';
-    } else if (daysDifference <= 7) {
-      pastContext = isEnglish
-          ? 'Memory from $daysDifference days ago'
-          : '$daysDifference日前の思い出';
-    } else if (daysDifference <= 30) {
-      final weeks = (daysDifference / 7).round();
-      pastContext = isEnglish
-          ? 'Memory from about $weeks weeks ago'
-          : '約$weeks週間前の思い出';
-    } else if (daysDifference <= 365) {
-      final months = (daysDifference / 30).round();
-      pastContext = isEnglish
-          ? 'Memory from about $months months ago'
-          : '約$monthsヶ月前の思い出';
-    } else {
-      final years = (daysDifference / 365).round();
-      pastContext = isEnglish
-          ? 'Memory from about $years years ago'
-          : '約$years年前の思い出';
-    }
-
-    _generateTagsInBackgroundCore(
-      entry: entry,
-      content: '$pastContext: ${entry.content}',
-      logLabel: '過去写真日記',
-      onTagsGenerated: (latestEntry, tags) async {
-        latestEntry.tags = tags;
-        latestEntry.updatedAt = DateTime.now();
-        await latestEntry.save();
-        _searchTextIndex[latestEntry.id] = _buildSearchableText(latestEntry);
-      },
-    );
-  }
-
-  /// バックグラウンドタグ生成の共通処理
-  void _generateTagsInBackgroundCore({
-    required DiaryEntry entry,
-    required String content,
-    required String logLabel,
-    required Future<void> Function(DiaryEntry latestEntry, List<String> tags)
-    onTagsGenerated,
-  }) {
-    Future.delayed(Duration.zero, () async {
-      try {
-        _loggingService.debug('$logLabelのタグ生成開始: ${entry.id}');
-        final tagsResult = await _aiService.generateTagsFromContent(
-          title: entry.title,
-          content: content,
-          date: entry.date,
-          photoCount: entry.photoIds.length,
-          locale: _getCurrentLocale(),
-        );
-
-        if (tagsResult.isSuccess) {
-          if (_diaryBox != null && _diaryBox!.isOpen) {
-            final latestEntry = _diaryBox!.get(entry.id);
-            if (latestEntry != null) {
-              await onTagsGenerated(latestEntry, tagsResult.value);
-              _loggingService.debug(
-                '$logLabelのタグ生成完了: ${entry.id} -> ${tagsResult.value}',
-              );
-            } else {
-              _loggingService.warning(
-                '$logLabelタグ生成: エントリーが見つかりません: ${entry.id}',
-              );
-            }
-          } else {
-            _loggingService.warning('$logLabelタグ生成: Hiveボックスが利用できません');
-          }
-        } else {
-          _loggingService.error('$logLabelのタグ生成エラー', error: tagsResult.error);
-        }
-      } catch (e) {
-        _loggingService.error('$logLabelのタグ生成エラー', error: e);
-      }
-    });
-  }
-
   /// 写真IDから日記エントリーを取得
   @override
   Future<Result<DiaryEntry?>> getDiaryEntryByPhotoId(String photoId) async {
@@ -886,36 +708,5 @@ class DiaryService implements IDiaryService {
       _loggingService.error('写真IDから日記エントリー取得エラー', error: e);
       return Failure(ServiceException('写真IDから日記の取得に失敗しました', originalError: e));
     }
-  }
-
-  /// 現在のロケールを取得
-  Locale _getCurrentLocale() {
-    try {
-      final settingsService = ServiceRegistration.get<ISettingsService>();
-      final locale = settingsService.locale;
-      if (locale != null) {
-        return locale;
-      }
-    } catch (e) {
-      _loggingService.warning('ロケール取得エラー: $e');
-    }
-
-    // フォールバック: システムロケール
-    try {
-      final currentLocale = Intl.getCurrentLocale();
-      if (currentLocale.isNotEmpty) {
-        final parts = currentLocale.split('_');
-        if (parts.length >= 2) {
-          return Locale(parts[0], parts[1]);
-        } else {
-          return Locale(parts[0]);
-        }
-      }
-    } catch (e2) {
-      _loggingService.warning('システムロケール取得エラー: $e2');
-    }
-
-    // 最終的なフォールバック: 日本語
-    return const Locale('ja');
   }
 }

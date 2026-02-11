@@ -4,6 +4,10 @@ import '../services/logging_service.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_tag_service_interface.dart';
+import '../services/interfaces/diary_statistics_service_interface.dart';
+import '../services/diary_tag_service.dart';
+import '../services/diary_statistics_service.dart';
 import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/photo_permission_service.dart';
@@ -64,7 +68,9 @@ import 'service_locator.dart';
 ///
 /// ### Phase 2: Dependent Services
 /// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
-/// 2. **DiaryService** - 日記管理（AiService, PhotoServiceに依存）
+/// 2. **DiaryTagService** - タグ管理（AiServiceに依存）
+/// 3. **DiaryStatisticsService** - 統計（LoggingServiceに依存）
+/// 4. **DiaryService** - Facade: 日記CRUD + タグ・統計委譲（AiService, PhotoServiceに依存）
 ///
 /// ## 依存関係マップ
 /// - LoggingService → なし（基盤サービス）
@@ -79,7 +85,9 @@ import 'service_locator.dart';
 /// - PhotoCacheService → LoggingService
 /// - SettingsService → SubscriptionService
 /// - AiService → SubscriptionService
-/// - DiaryService → AiService + PhotoService + LoggingService
+/// - DiaryTagService → AiService + LoggingService
+/// - DiaryStatisticsService → LoggingService
+/// - DiaryService(Facade) → AiService + PhotoService + LoggingService（DiaryTagService/DiaryStatisticsServiceは遅延解決）
 /// - StorageService → DiaryService（DatabaseOptimization用）
 ///
 /// **循環依存**: なし（全て単方向の依存関係）
@@ -276,11 +284,28 @@ class ServiceRegistration {
       return AiService(subscriptionService: subscriptionService);
     });
 
-    // DiaryService (depends on AiService and PhotoService)
+    // DiaryTagService (タグ管理 - AiServiceに依存)
+    serviceLocator.registerAsyncFactory<IDiaryTagService>(() async {
+      final aiService = await serviceLocator.getAsync<IAiService>();
+      return DiaryTagService(
+        aiService: aiService,
+        logger: serviceLocator.get<ILoggingService>(),
+      );
+    });
+
+    // DiaryStatisticsService (統計 - LoggingServiceに依存)
+    serviceLocator.registerSingleton<IDiaryStatisticsService>(
+      DiaryStatisticsService(logger: serviceLocator.get<ILoggingService>()),
+    );
+
+    // DiaryService (Facade - AiService, PhotoServiceに依存、Tag/Statisticsは遅延解決)
     serviceLocator.registerAsyncFactory<IDiaryService>(() async {
       // Get dependencies
       final aiService = await serviceLocator.getAsync<IAiService>();
       final photoService = serviceLocator.get<IPhotoService>();
+
+      // DiaryTagServiceを事前解決（DiaryServiceからの同期アクセスのため）
+      await serviceLocator.getAsync<IDiaryTagService>();
 
       // Create DiaryService with dependency injection
       final diaryService = DiaryService.createWithDependencies(

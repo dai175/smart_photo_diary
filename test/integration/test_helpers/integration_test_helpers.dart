@@ -19,6 +19,7 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
 import 'package:smart_photo_diary/services/logging_service.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import '../mocks/mock_services.dart';
@@ -107,13 +108,39 @@ class IntegrationTestHelpers {
       mockStorageService,
     );
 
+    // Create mock for DiaryTagService
+    final mockDiaryTagService = MockIDiaryTagService();
+    when(
+      () => mockDiaryTagService.getTagsForEntry(any()),
+    ).thenAnswer((_) async => const Success(['テスト', 'タグ']));
+    when(
+      () => mockDiaryTagService.getAllTags(),
+    ).thenAnswer((_) async => const Success(<String>{}));
+    when(
+      () => mockDiaryTagService.getPopularTags(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => const Success(<String>[]));
+    when(
+      () => mockDiaryTagService.generateTagsInBackground(
+        any(),
+        onSearchIndexUpdate: any(named: 'onSearchIndexUpdate'),
+      ),
+    ).thenReturn(null);
+    when(
+      () => mockDiaryTagService.generateTagsInBackgroundForPastPhoto(
+        any(),
+        onSearchIndexUpdate: any(named: 'onSearchIndexUpdate'),
+      ),
+    ).thenReturn(null);
+
     // Override real services with mock services
+    // Note: IDiaryStatisticsService は実際のサービスを保持（Hive統合テストで必要）
     _serviceLocator.unregister<IPhotoService>();
     _serviceLocator.unregister<IAiService>();
     _serviceLocator.unregister<IDiaryService>();
     _serviceLocator.unregister<ISubscriptionService>();
     _serviceLocator.unregister<ISettingsService>();
     _serviceLocator.unregister<IStorageService>();
+    _serviceLocator.unregister<IDiaryTagService>();
 
     _serviceLocator.registerSingleton<IPhotoService>(_mockPhotoService);
     _serviceLocator.registerSingleton<IAiService>(_mockAiService);
@@ -123,6 +150,7 @@ class IntegrationTestHelpers {
     );
     _serviceLocator.registerSingleton<ISettingsService>(mockSettingsService);
     _serviceLocator.registerSingleton<IStorageService>(mockStorageService);
+    _serviceLocator.registerSingleton<IDiaryTagService>(mockDiaryTagService);
   }
 
   /// Setup default behaviors for mock services
