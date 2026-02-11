@@ -171,8 +171,8 @@ class SubscriptionStateService
 
           final expiryDuration =
               forcedPlan.id == SubscriptionConstants.premiumYearlyPlanId
-              ? const Duration(days: 365)
-              : const Duration(days: 30);
+              ? Duration(days: SubscriptionConstants.subscriptionYearDays)
+              : Duration(days: SubscriptionConstants.subscriptionMonthDays);
 
           final forcedStatus = status.copyWith(
             planId: forcedPlanId,
@@ -203,7 +203,10 @@ class SubscriptionStateService
         );
       }
 
-      await _subscriptionBox?.put(SubscriptionConstants.statusKey, status);
+      if (_subscriptionBox == null) {
+        return Failure(ServiceException('Subscription box is not available'));
+      }
+      await _subscriptionBox!.put(SubscriptionConstants.statusKey, status);
       log('Status updated successfully', level: LogLevel.info);
       return const Success(null);
     } catch (e) {
@@ -283,7 +286,10 @@ class SubscriptionStateService
         );
       }
 
-      await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
+      if (_subscriptionBox == null) {
+        return Failure(ServiceException('Subscription box is not available'));
+      }
+      await _subscriptionBox!.put(SubscriptionConstants.statusKey, newStatus);
       log(
         'Created new status for plan',
         level: LogLevel.info,

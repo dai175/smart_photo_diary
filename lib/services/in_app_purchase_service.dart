@@ -123,7 +123,7 @@ class InAppPurchaseService
         level: LogLevel.error,
         error: e,
       );
-      log('Error details: $e', level: LogLevel.error);
+      rethrow;
     }
   }
 
@@ -252,7 +252,10 @@ class InAppPurchaseService
         ),
       );
       _purchaseStreamController.add(result);
+
+      _isPurchasing = false;
     } catch (e) {
+      _isPurchasing = false;
       log(
         'Error handling purchase restoration',
         level: LogLevel.error,
