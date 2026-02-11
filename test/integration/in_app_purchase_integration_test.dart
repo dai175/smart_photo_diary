@@ -1,10 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:async';
-import 'package:smart_photo_diary/services/subscription_service.dart';
-import 'package:smart_photo_diary/services/subscription_state_service.dart';
-import 'package:smart_photo_diary/services/ai_usage_service.dart';
-import 'package:smart_photo_diary/services/feature_access_service.dart';
-import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -14,28 +9,12 @@ import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import '../unit/helpers/hive_test_helpers.dart';
+import '../unit/helpers/subscription_test_helpers.dart';
 
 /// Phase 1.6.2: In-App Purchase機能統合テスト
 ///
 /// Phase 1.6.2で実装された購入機能の統合テスト
 /// In-App Purchase機能（商品情報取得、購入フロー、復元機能）の動作確認
-
-/// SubscriptionService (Facade) とサブサービスを構築するヘルパー
-Future<SubscriptionService> _createSubscriptionService() async {
-  final stateService = SubscriptionStateService();
-  await stateService.initialize();
-
-  final usageService = AiUsageService(stateService: stateService);
-  final accessService = FeatureAccessService(stateService: stateService);
-  final purchaseService = InAppPurchaseService(stateService: stateService);
-
-  return SubscriptionService(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-  );
-}
 
 void main() {
   group('Phase 1.6.2: In-App Purchase機能統合テスト', () {
@@ -73,7 +52,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -147,7 +127,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -232,7 +213,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -330,7 +312,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -406,7 +389,8 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });

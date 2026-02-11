@@ -2,57 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
-import 'package:smart_photo_diary/services/ai_usage_service.dart';
-import 'package:smart_photo_diary/services/feature_access_service.dart';
-import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import '../helpers/hive_test_helpers.dart';
-
-/// テスト用にSubscriptionService (Facade) とサブサービスを保持するクラス
-class _TestBundle {
-  final SubscriptionStateService stateService;
-  final AiUsageService usageService;
-  final FeatureAccessService accessService;
-  final InAppPurchaseService purchaseService;
-  final SubscriptionService subscriptionService;
-
-  _TestBundle({
-    required this.stateService,
-    required this.usageService,
-    required this.accessService,
-    required this.purchaseService,
-    required this.subscriptionService,
-  });
-}
-
-/// SubscriptionService (Facade) とサブサービスを構築するヘルパー
-Future<_TestBundle> _createTestBundle() async {
-  final stateService = SubscriptionStateService();
-  await stateService.initialize();
-
-  final usageService = AiUsageService(stateService: stateService);
-  final accessService = FeatureAccessService(stateService: stateService);
-  final purchaseService = InAppPurchaseService(stateService: stateService);
-
-  final subscriptionService = SubscriptionService(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-  );
-
-  return _TestBundle(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-    subscriptionService: subscriptionService,
-  );
-}
+import '../helpers/subscription_test_helpers.dart';
 
 void main() {
   group('SubscriptionService', () {
@@ -77,8 +33,8 @@ void main() {
     group('コンストラクタパターン', () {
       test('コンストラクタは独立したインスタンスを作成する', () async {
         // Act
-        final bundle1 = await _createTestBundle();
-        final bundle2 = await _createTestBundle();
+        final bundle1 = await SubscriptionTestHelpers.createInitializedBundle();
+        final bundle2 = await SubscriptionTestHelpers.createInitializedBundle();
 
         // Assert
         expect(
@@ -91,8 +47,8 @@ void main() {
 
       test('各インスタンスが独立して初期化される', () async {
         // Act
-        final bundle1 = await _createTestBundle();
-        final bundle2 = await _createTestBundle();
+        final bundle1 = await SubscriptionTestHelpers.createInitializedBundle();
+        final bundle2 = await SubscriptionTestHelpers.createInitializedBundle();
 
         // Assert
         expect(bundle1.subscriptionService.isInitialized, isTrue);
@@ -109,7 +65,7 @@ void main() {
     group('初期化処理', () {
       test('初回初期化時にBasicプランの初期状態が作成される', () async {
         // Act
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
 
@@ -152,7 +108,7 @@ void main() {
         await box.close();
 
         // Act
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
 
@@ -168,7 +124,7 @@ void main() {
 
       test('正常に初期化が完了する', () async {
         // Act
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
 
@@ -180,7 +136,7 @@ void main() {
 
     group('Hive操作実装確認 (Phase 1.3.2)', () {
       setUp(() async {
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
       });
@@ -347,7 +303,7 @@ void main() {
 
     group('使用量管理機能確認 (Phase 1.3.3)', () {
       setUp(() async {
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
       });
@@ -550,7 +506,7 @@ void main() {
 
     group('Phase 1.3.4 未実装メソッド確認', () {
       setUp(() async {
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
       });
@@ -633,7 +589,7 @@ void main() {
 
     group('機能別アクセス権限テスト (Phase 1.3.4)', () {
       setUp(() async {
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
         stateService = bundle.stateService;
       });
@@ -796,7 +752,7 @@ void main() {
     group('内部状態確認', () {
       test('isInitialized プロパティが正しく動作する', () async {
         // Act
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         subscriptionService = bundle.subscriptionService;
 
         // Assert
@@ -805,7 +761,7 @@ void main() {
 
       test('stateService.subscriptionBox プロパティがHiveボックスを返す', () async {
         // Act
-        final bundle = await _createTestBundle();
+        final bundle = await SubscriptionTestHelpers.createInitializedBundle();
         stateService = bundle.stateService;
 
         // Assert
@@ -817,8 +773,8 @@ void main() {
 
       test('新しいインスタンスが別のオブジェクトとして作成される', () async {
         // Arrange
-        final bundle1 = await _createTestBundle();
-        final bundle2 = await _createTestBundle();
+        final bundle1 = await SubscriptionTestHelpers.createInitializedBundle();
+        final bundle2 = await SubscriptionTestHelpers.createInitializedBundle();
 
         // Assert
         expect(

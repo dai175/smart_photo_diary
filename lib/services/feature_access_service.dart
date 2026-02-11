@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import '../models/subscription_status.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
 import '../config/environment_config.dart';
@@ -200,6 +201,8 @@ class FeatureAccessService implements IFeatureAccessService {
       final premiumFeaturesResult = await canAccessPremiumFeatures();
       final writingPromptsResult = await canAccessWritingPrompts();
       final advancedFiltersResult = await canAccessAdvancedFilters();
+      final advancedAnalyticsResult = await canAccessAdvancedAnalytics();
+      final prioritySupportResult = await canAccessPrioritySupport();
       final dataExportResult = await canAccessDataExport();
       final statsDashboardResult = await canAccessStatsDashboard();
 
@@ -209,6 +212,10 @@ class FeatureAccessService implements IFeatureAccessService {
         return Failure(writingPromptsResult.error);
       if (advancedFiltersResult.isFailure)
         return Failure(advancedFiltersResult.error);
+      if (advancedAnalyticsResult.isFailure)
+        return Failure(advancedAnalyticsResult.error);
+      if (prioritySupportResult.isFailure)
+        return Failure(prioritySupportResult.error);
       if (dataExportResult.isFailure) return Failure(dataExportResult.error);
       if (statsDashboardResult.isFailure)
         return Failure(statsDashboardResult.error);
@@ -217,6 +224,8 @@ class FeatureAccessService implements IFeatureAccessService {
         'premiumFeatures': premiumFeaturesResult.value,
         'writingPrompts': writingPromptsResult.value,
         'advancedFilters': advancedFiltersResult.value,
+        'advancedAnalytics': advancedAnalyticsResult.value,
+        'prioritySupport': prioritySupportResult.value,
         'dataExport': dataExportResult.value,
         'statsDashboard': statsDashboardResult.value,
       };
@@ -278,7 +287,7 @@ class FeatureAccessService implements IFeatureAccessService {
     }
   }
 
-  bool _isSubscriptionValid(dynamic status) {
+  bool _isSubscriptionValid(SubscriptionStatus status) {
     final stateService = _stateService;
     if (stateService is SubscriptionStateService) {
       return stateService.isSubscriptionValid(status);

@@ -1,9 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
-import 'package:smart_photo_diary/services/subscription_state_service.dart';
-import 'package:smart_photo_diary/services/ai_usage_service.dart';
-import 'package:smart_photo_diary/services/feature_access_service.dart';
-import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
@@ -11,59 +7,12 @@ import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../unit/helpers/hive_test_helpers.dart';
+import '../unit/helpers/subscription_test_helpers.dart';
 
 /// Phase 1.5.3: SubscriptionService統合テスト
 ///
 /// Service Registration、基本フロー、エラーケースの実動作確認
 /// ServiceLocatorとの統合、実際のHive操作、フルスタック動作テスト
-
-/// テスト用にSubscriptionService (Facade) とサブサービスを保持するクラス
-class _TestBundle {
-  final SubscriptionStateService stateService;
-  final AiUsageService usageService;
-  final FeatureAccessService accessService;
-  final InAppPurchaseService purchaseService;
-  final SubscriptionService subscriptionService;
-
-  _TestBundle({
-    required this.stateService,
-    required this.usageService,
-    required this.accessService,
-    required this.purchaseService,
-    required this.subscriptionService,
-  });
-}
-
-/// SubscriptionService (Facade) とサブサービスを構築するヘルパー
-Future<_TestBundle> _createTestBundle() async {
-  final stateService = SubscriptionStateService();
-  await stateService.initialize();
-
-  final usageService = AiUsageService(stateService: stateService);
-  final accessService = FeatureAccessService(stateService: stateService);
-  final purchaseService = InAppPurchaseService(stateService: stateService);
-
-  final subscriptionService = SubscriptionService(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-  );
-
-  return _TestBundle(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-    subscriptionService: subscriptionService,
-  );
-}
-
-/// SubscriptionService (Facade) のみ構築するヘルパー
-Future<SubscriptionService> _createSubscriptionService() async {
-  final bundle = await _createTestBundle();
-  return bundle.subscriptionService;
-}
 
 void main() {
   group('Phase 1.5.3: SubscriptionService 統合テスト', () {
@@ -100,7 +49,8 @@ void main() {
       test('ServiceLocatorにISubscriptionServiceが正しく登録される', () async {
         // Arrange & Act
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -116,7 +66,8 @@ void main() {
       test('ServiceLocatorからISubscriptionServiceのインスタンスを取得できる', () async {
         // Arrange
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -133,7 +84,8 @@ void main() {
       test('複数回の取得で同じシングルトンインスタンスが返される', () async {
         // Arrange
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -150,9 +102,9 @@ void main() {
 
       test('ServiceLocator登録後に初期化が正常に完了する', () async {
         // Arrange - bundleを使ってstateServiceにもアクセス
-        late _TestBundle bundle;
+        late SubscriptionServiceTestBundle bundle;
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          bundle = await _createTestBundle();
+          bundle = await SubscriptionTestHelpers.createInitializedBundle();
           await bundle.subscriptionService.initialize();
           return bundle.subscriptionService;
         });
@@ -174,7 +126,8 @@ void main() {
       test('依存注入を使った他サービスとの連携確認', () async {
         // Arrange - 複数サービスを登録
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -199,7 +152,8 @@ void main() {
       test('サービス登録の初期化順序が正しく動作する', () async {
         // Arrange - 複数の非同期ファクトリを登録
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -225,7 +179,8 @@ void main() {
       test('登録解除と再登録が正常に動作する', () async {
         // Arrange
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -238,7 +193,8 @@ void main() {
         expect(serviceLocator.isRegistered<ISubscriptionService>(), isFalse);
 
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -262,7 +218,8 @@ void main() {
       setUp(() async {
         // ServiceLocator経由でサービスを取得
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });
@@ -458,11 +415,11 @@ void main() {
 
     group('Phase 1.5.3.3: エラーケースハンドリング確認', () {
       late ISubscriptionService subscriptionService;
-      late _TestBundle testBundle;
+      late SubscriptionServiceTestBundle testBundle;
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          testBundle = await _createTestBundle();
+          testBundle = await SubscriptionTestHelpers.createInitializedBundle();
           await testBundle.subscriptionService.initialize();
           return testBundle.subscriptionService;
         });
@@ -484,7 +441,8 @@ void main() {
         // ここでは基本的な操作が適切にResult<T>パターンでエラーを返すことを確認
 
         // 新しいインスタンスを作成してテスト
-        final newService = await _createSubscriptionService();
+        final newService =
+            await SubscriptionTestHelpers.createInitializedService();
         await newService.initialize();
         final newStatus = await newService.getCurrentStatus();
         expect(newStatus.isSuccess, isTrue); // 新しいボックスで正常動作
@@ -614,7 +572,8 @@ void main() {
           final testServiceLocator = ServiceLocator();
           testServiceLocator.registerAsyncFactory<ISubscriptionService>(
             () async {
-              final service = await _createSubscriptionService();
+              final service =
+                  await SubscriptionTestHelpers.createInitializedService();
               await service.initialize();
               return service;
             },
@@ -647,7 +606,8 @@ void main() {
         // 1. Service Registration
         final testServiceLocator = ServiceLocator();
         testServiceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = await _createSubscriptionService();
+          final service =
+              await SubscriptionTestHelpers.createInitializedService();
           await service.initialize();
           return service;
         });

@@ -186,12 +186,11 @@ class InAppPurchaseService implements IInAppPurchaseService {
         data: {'productId': purchaseDetails.productID},
       );
 
+      await _applyPurchaseSideEffects(purchaseDetails);
+
       final plan = InAppPurchaseConfig.getPlanFromProductId(
         purchaseDetails.productID,
       );
-
-      await _updateSubscriptionFromPurchase(purchaseDetails, plan);
-
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.purchased,
         productId: purchaseDetails.productID,
@@ -217,6 +216,17 @@ class InAppPurchaseService implements IInAppPurchaseService {
     }
   }
 
+  /// 購入完了時のサイドエフェクト（サブスクリプション状態更新）のみを実行する。
+  /// ストリームイベントはemitしない。
+  Future<void> _applyPurchaseSideEffects(
+    PurchaseDetails purchaseDetails,
+  ) async {
+    final plan = InAppPurchaseConfig.getPlanFromProductId(
+      purchaseDetails.productID,
+    );
+    await _updateSubscriptionFromPurchase(purchaseDetails, plan);
+  }
+
   Future<void> _handlePurchaseRestored(PurchaseDetails purchaseDetails) async {
     try {
       _log(
@@ -225,7 +235,8 @@ class InAppPurchaseService implements IInAppPurchaseService {
         data: {'productId': purchaseDetails.productID},
       );
 
-      await _handlePurchaseCompleted(purchaseDetails);
+      // サイドエフェクトのみ実行（ストリームイベントはemitしない）
+      await _applyPurchaseSideEffects(purchaseDetails);
 
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.restored,
@@ -312,9 +323,13 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
       DateTime expiryDate;
       if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
-        expiryDate = now.add(const Duration(days: 30));
+        expiryDate = now.add(
+          const Duration(days: SubscriptionConstants.subscriptionMonthDays),
+        );
       } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
-        expiryDate = now.add(const Duration(days: 365));
+        expiryDate = now.add(
+          const Duration(days: SubscriptionConstants.subscriptionYearDays),
+        );
       } else {
         throw ArgumentError('Basic plan cannot be purchased');
       }
@@ -767,7 +782,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
   // 内部ヘルパーメソッド
   // =================================================================
 
-  bool _isSubscriptionValid(dynamic status) {
+  bool _isSubscriptionValid(SubscriptionStatus status) {
     final stateService = _stateService;
     if (stateService is SubscriptionStateService) {
       return stateService.isSubscriptionValid(status);

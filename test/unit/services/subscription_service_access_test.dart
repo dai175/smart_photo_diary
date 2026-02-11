@@ -1,13 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
-import 'package:smart_photo_diary/services/ai_usage_service.dart';
-import 'package:smart_photo_diary/services/feature_access_service.dart';
-import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import '../helpers/hive_test_helpers.dart';
+import '../helpers/subscription_test_helpers.dart';
 
 /// Phase 1.5.2.3: アクセス権限テスト
 ///
@@ -19,48 +17,6 @@ import '../helpers/hive_test_helpers.dart';
 /// - 高度な分析機能
 /// - 優先サポート機能
 /// - 期限切れ・無効状態での制限
-
-/// テスト用にSubscriptionService (Facade) とサブサービスを保持するクラス
-class _TestBundle {
-  final SubscriptionStateService stateService;
-  final AiUsageService usageService;
-  final FeatureAccessService accessService;
-  final InAppPurchaseService purchaseService;
-  final SubscriptionService subscriptionService;
-
-  _TestBundle({
-    required this.stateService,
-    required this.usageService,
-    required this.accessService,
-    required this.purchaseService,
-    required this.subscriptionService,
-  });
-}
-
-/// SubscriptionService (Facade) とサブサービスを構築するヘルパー
-Future<_TestBundle> _createTestBundle() async {
-  final stateService = SubscriptionStateService();
-  await stateService.initialize();
-
-  final usageService = AiUsageService(stateService: stateService);
-  final accessService = FeatureAccessService(stateService: stateService);
-  final purchaseService = InAppPurchaseService(stateService: stateService);
-
-  final subscriptionService = SubscriptionService(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-  );
-
-  return _TestBundle(
-    stateService: stateService,
-    usageService: usageService,
-    accessService: accessService,
-    purchaseService: purchaseService,
-    subscriptionService: subscriptionService,
-  );
-}
 
 void main() {
   group('Phase 1.5.2.3: SubscriptionService アクセス権限テスト', () {
@@ -77,7 +33,7 @@ void main() {
       await HiveTestHelpers.clearSubscriptionBox();
 
       // 新しいインスタンスを取得
-      final bundle = await _createTestBundle();
+      final bundle = await SubscriptionTestHelpers.createInitializedBundle();
       subscriptionService = bundle.subscriptionService;
       stateService = bundle.stateService;
     });

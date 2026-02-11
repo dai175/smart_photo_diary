@@ -361,6 +361,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
   @override
   Future<void> dispose() async {
     _log('Disposing SubscriptionStateService...', level: LogLevel.info);
+    await _subscriptionBox?.close();
     _log('SubscriptionStateService disposed', level: LogLevel.info);
   }
 

@@ -38,7 +38,7 @@ import 'service_locator.dart';
 ///
 /// ## Service Initialization Order and Dependencies
 ///
-/// ### Phase 1: Core Services (No Dependencies)
+/// ### Phase 1: Core Services (Internal Dependencies)
 /// 1. **LoggingService** - 基盤ログ機能（他サービスの依存基盤）
 /// 2. **SubscriptionStateService** - サブスクリプション状態管理（Hive依存のみ）
 /// 3. **AiUsageService** - AI使用量管理（SubscriptionStateServiceに依存）
