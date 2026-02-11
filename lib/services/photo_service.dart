@@ -690,7 +690,7 @@ class PhotoService implements IPhotoService {
     int height = AppConstants.defaultThumbnailHeight,
   }) async {
     // PhotoCacheServiceを使用してキャッシュ付きでサムネイルを取得
-    final cacheService = ServiceLocator().get<IPhotoCacheService>();
+    final cacheService = serviceLocator.get<IPhotoCacheService>();
     return await cacheService.getThumbnail(
       asset,
       width: width,

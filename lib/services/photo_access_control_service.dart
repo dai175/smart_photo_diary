@@ -79,20 +79,12 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
   }
 
   /// 現在のプランでアクセス可能な日付範囲の説明を取得
+  /// [formatter] はUI層からローカライズ済みの文字列を生成するコールバック
   @override
-  String getAccessRangeDescription(Plan plan) {
-    final days = plan.pastPhotoAccessDays;
-
-    if (days == 1) {
-      return 'Premiumで過去1年分';
-    } else if (days == 7) {
-      return '1週間前までの写真';
-    } else if (days == 30) {
-      return '1ヶ月前までの写真';
-    } else if (days == 365) {
-      return '1年前までの写真';
-    } else {
-      return '$days日前までの写真';
-    }
+  String getAccessRangeDescription(
+    Plan plan, {
+    required String Function(int days) formatter,
+  }) {
+    return formatter(plan.pastPhotoAccessDays);
   }
 }

@@ -75,6 +75,7 @@ void main() {
 
       expect(instance1, isA<DiaryImageGenerator>());
       expect(instance2, isA<DiaryImageGenerator>());
+      expect(instance1, isNot(same(instance2)));
     });
 
     test('generateImage calls logging service on start', () async {
@@ -165,7 +166,7 @@ void main() {
 
   group('DiaryImageGenerator Constants Tests', () {
     test('internal constants are within reasonable ranges', () {
-      // シングルトンインスタンスを取得
+      // インスタンスを生成
       final generator = DiaryImageGenerator();
 
       // インスタンスが正常に作成されることを確認

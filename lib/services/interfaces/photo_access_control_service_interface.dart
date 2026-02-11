@@ -20,6 +20,10 @@ abstract class IPhotoAccessControlService {
   /// 現在のプランでアクセス可能な日付範囲の説明を取得
   ///
   /// [plan]: 対象のプラン
-  /// 戻り値: ユーザー向けの説明文（例: "1日前まで"、"365日前まで"）
-  String getAccessRangeDescription(Plan plan);
+  /// [formatter]: 日数を受け取りローカライズ済み説明文を返すコールバック
+  /// 戻り値: ユーザー向けの説明文
+  String getAccessRangeDescription(
+    Plan plan, {
+    required String Function(int days) formatter,
+  });
 }

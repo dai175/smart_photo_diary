@@ -17,15 +17,13 @@ enum DiaryGenerationMode {
 }
 
 class SettingsService implements ISettingsService {
-  static SharedPreferences? _preferences;
+  SharedPreferences? _preferences;
 
   // Phase 1.8.1.1: SubscriptionService依存注入
   ISubscriptionService? _subscriptionService;
 
   static const String _localeKey = 'app_locale';
-  static final ValueNotifier<Locale?> _localeNotifier = ValueNotifier<Locale?>(
-    null,
-  );
+  final ValueNotifier<Locale?> _localeNotifier = ValueNotifier<Locale?>(null);
 
   /// DI用の公開コンストラクタ
   SettingsService();
@@ -34,7 +32,7 @@ class SettingsService implements ISettingsService {
   Future<void> initialize() async {
     _preferences ??= await SharedPreferences.getInstance();
     _localeNotifier.value = _loadStoredLocale();
-    _subscriptionService ??= await ServiceLocator()
+    _subscriptionService ??= await serviceLocator
         .getAsync<ISubscriptionService>();
   }
 

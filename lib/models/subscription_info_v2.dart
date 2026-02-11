@@ -305,15 +305,18 @@ class SubscriptionInfoV2 {
       localizedPlanStatus = expiryNearStatusText;
     }
 
+    // 日付計算用の正規化された「今日」
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
     // expiryText（ローカライズ版）
     String? localizedExpiryText;
     if (periodInfo.expiryDate != null) {
       final expiry = periodInfo.expiryDate!;
       final daysUntil = periodInfo.daysUntilExpiry ?? 0;
-      final now = DateTime.now();
       if (daysUntil <= 0) {
         localizedExpiryText = expiredText;
-      } else if (expiry.year != now.year) {
+      } else if (expiry.year != today.year) {
         localizedExpiryText = '${expiry.year}/${expiry.month}/${expiry.day}';
       } else {
         localizedExpiryText = '${expiry.month}/${expiry.day}';
@@ -333,7 +336,6 @@ class SubscriptionInfoV2 {
     // resetDateText（ローカライズ版）
     String localizedResetDateText;
     final resetDate = usageStats.nextResetDate;
-    final today = DateTime.now();
     final daysUntilReset = resetDate.difference(today).inDays;
     if (daysUntilReset <= 0) {
       localizedResetDateText = todayText;

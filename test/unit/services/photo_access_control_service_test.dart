@@ -229,6 +229,8 @@ void main() {
     });
 
     group('getAccessRangeDescription', () {
+      String testFormatter(int days) => '$days days access';
+
       test('should return correct description for BasicPlan', () {
         // Arrange
         final plan = BasicPlan();
@@ -236,10 +238,11 @@ void main() {
         // Act
         final description = accessControlService.getAccessRangeDescription(
           plan,
+          formatter: testFormatter,
         );
 
         // Assert
-        expect(description, equals('Premiumで過去1年分'));
+        expect(description, equals('1 days access'));
       });
 
       test('should return correct description for PremiumPlans', () {
@@ -249,13 +252,13 @@ void main() {
 
         // Act
         final monthlyDescription = accessControlService
-            .getAccessRangeDescription(monthlyPlan);
+            .getAccessRangeDescription(monthlyPlan, formatter: testFormatter);
         final yearlyDescription = accessControlService
-            .getAccessRangeDescription(yearlyPlan);
+            .getAccessRangeDescription(yearlyPlan, formatter: testFormatter);
 
         // Assert
-        expect(monthlyDescription, equals('1年前までの写真'));
-        expect(yearlyDescription, equals('1年前までの写真'));
+        expect(monthlyDescription, equals('365 days access'));
+        expect(yearlyDescription, equals('365 days access'));
       });
 
       test('should return correct description for various day counts', () {

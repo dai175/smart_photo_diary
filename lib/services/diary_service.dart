@@ -777,20 +777,33 @@ class DiaryService implements IDiaryService {
   void _generateTagsInBackgroundForPastPhoto(DiaryEntry entry) {
     // 過去の日付であることを示すコンテキストを生成
     final daysDifference = DateTime.now().difference(entry.date).inDays;
+    final locale = _getCurrentLocale();
+    final isEnglish = locale.languageCode == 'en';
     String pastContext;
 
     if (daysDifference <= 0) {
-      pastContext = '今日の思い出';
+      pastContext = isEnglish ? "Today's memory" : '今日の思い出';
     } else if (daysDifference == 1) {
-      pastContext = '昨日の思い出';
+      pastContext = isEnglish ? "Yesterday's memory" : '昨日の思い出';
     } else if (daysDifference <= 7) {
-      pastContext = '$daysDifference日前の思い出';
+      pastContext = isEnglish
+          ? 'Memory from $daysDifference days ago'
+          : '$daysDifference日前の思い出';
     } else if (daysDifference <= 30) {
-      pastContext = '約${(daysDifference / 7).round()}週間前の思い出';
+      final weeks = (daysDifference / 7).round();
+      pastContext = isEnglish
+          ? 'Memory from about $weeks weeks ago'
+          : '約$weeks週間前の思い出';
     } else if (daysDifference <= 365) {
-      pastContext = '約${(daysDifference / 30).round()}ヶ月前の思い出';
+      final months = (daysDifference / 30).round();
+      pastContext = isEnglish
+          ? 'Memory from about $months months ago'
+          : '約$monthsヶ月前の思い出';
     } else {
-      pastContext = '約${(daysDifference / 365).round()}年前の思い出';
+      final years = (daysDifference / 365).round();
+      pastContext = isEnglish
+          ? 'Memory from about $years years ago'
+          : '約$years年前の思い出';
     }
 
     _generateTagsInBackgroundCore(

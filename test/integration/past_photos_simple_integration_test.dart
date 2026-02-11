@@ -73,8 +73,9 @@ void main() {
         // 3. アクセス制限の理由を確認
         final accessRange = photoAccessControlService.getAccessRangeDescription(
           basicPlan,
+          formatter: (days) => '$days days access',
         );
-        expect(accessRange, contains('Premiumで過去1年分'));
+        expect(accessRange, equals('1 days access'));
 
         // 4. プレミアムプランでのアクセス確認
         final premiumPlan = PremiumMonthlyPlan();
