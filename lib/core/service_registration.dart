@@ -25,7 +25,9 @@ import '../services/feature_access_service.dart';
 import '../services/interfaces/in_app_purchase_service_interface.dart';
 import '../services/in_app_purchase_service.dart';
 import '../services/interfaces/prompt_service_interface.dart';
+import '../services/interfaces/prompt_usage_service_interface.dart';
 import '../services/prompt_service.dart';
+import '../services/prompt_usage_service.dart';
 import '../services/social_share_service.dart';
 import '../services/interfaces/social_share_service_interface.dart';
 import '../services/diary_image_generator.dart';
@@ -50,7 +52,8 @@ import 'service_locator.dart';
 /// 9. **PhotoAccessControlService** - 写真アクセス制御
 /// 10. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
 /// 11. **StorageService** - ストレージ操作
-/// 12. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み）
+/// 12a. **PromptUsageService** - プロンプト使用履歴管理（Hive依存のみ）
+/// 12b. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み、PromptUsageServiceに依存）
 /// 13. **SocialShareService** - ソーシャル共有機能（LoggingServiceに依存）
 ///
 /// ### Phase 2: Dependent Services
@@ -205,7 +208,14 @@ class ServiceRegistration {
     // 11. StorageService (DiaryServiceに依存するが、最適化機能のみ)
     serviceLocator.registerFactory<IStorageService>(() => StorageService());
 
-    // 12. PromptService (JSONアセット読み込み - 依存なし)
+    // 12a. PromptUsageService (使用履歴管理 - Hive依存のみ)
+    serviceLocator.registerAsyncFactory<IPromptUsageService>(() async {
+      final service = PromptUsageService();
+      await service.initialize();
+      return service;
+    });
+
+    // 12b. PromptService (JSONアセット読み込み - PromptUsageServiceに依存)
     serviceLocator.registerAsyncFactory<IPromptService>(() async {
       final service = PromptService.instance;
       await service.initialize();
