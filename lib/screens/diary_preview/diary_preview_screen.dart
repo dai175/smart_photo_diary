@@ -253,17 +253,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
-      _logger.info('自動保存開始', context: 'DiaryPreviewScreen');
       _logger.info(
-        'タイトル: ${_titleController.text}',
-        context: 'DiaryPreviewScreen',
-      );
-      _logger.info(
-        '本文: ${_contentController.text}',
-        context: 'DiaryPreviewScreen',
-      );
-      _logger.info(
-        '写真数: ${widget.selectedAssets.length}',
+        '自動保存開始: 写真数=${widget.selectedAssets.length}',
         context: 'DiaryPreviewScreen',
       );
 
@@ -333,17 +324,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _isLoading = true;
       });
 
-      _logger.info('日記保存開始', context: 'DiaryPreviewScreen');
       _logger.info(
-        'タイトル: ${_titleController.text}',
-        context: 'DiaryPreviewScreen',
-      );
-      _logger.info(
-        '本文: ${_contentController.text}',
-        context: 'DiaryPreviewScreen',
-      );
-      _logger.info(
-        '写真数: ${widget.selectedAssets.length}',
+        '日記保存開始: 写真数=${widget.selectedAssets.length}',
         context: 'DiaryPreviewScreen',
       );
 

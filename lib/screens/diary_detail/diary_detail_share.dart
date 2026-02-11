@@ -170,6 +170,8 @@ class DiaryDetailShareHelper {
     required ShareFormat format,
   }) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
     final shareOrigin = _resolveShareOrigin(context);
     final l10n = context.l10n;
 
@@ -207,7 +209,7 @@ class DiaryDetailShareHelper {
       );
 
       // ローディングダイアログを閉じる
-      if (context.mounted) Navigator.of(context).pop();
+      if (context.mounted) navigator.pop();
 
       result.fold(
         (_) {
@@ -218,19 +220,19 @@ class DiaryDetailShareHelper {
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text(l10n.commonShareFailedWithReason(error.message)),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: errorColor,
             ),
           );
         },
       );
     } catch (e) {
       // ローディングダイアログを閉じる
-      if (context.mounted) Navigator.of(context).pop();
+      if (context.mounted) navigator.pop();
 
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(l10n.commonUnexpectedErrorWithDetails('$e')),
-          backgroundColor: Theme.of(context).colorScheme.error,
+          backgroundColor: errorColor,
         ),
       );
     }

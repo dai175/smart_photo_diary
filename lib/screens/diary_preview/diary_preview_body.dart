@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:typed_data' as typed_data;
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -174,63 +174,12 @@ class DiaryPreviewBody extends StatelessWidget {
                           ? AppSpacing.sm
                           : 0,
                     ),
-                    child: _buildPhotoThumbnail(context, index),
+                    child: _PhotoThumbnailWidget(asset: selectedAssets[index]),
                   );
                 },
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  /// 写真サムネイルを構築
-  Widget _buildPhotoThumbnail(BuildContext context, int index) {
-    return Container(
-      decoration: BoxDecoration(borderRadius: AppSpacing.photoRadius),
-      child: ClipRRect(
-        borderRadius: AppSpacing.photoRadius,
-        child: FutureBuilder<Uint8List?>(
-          future: selectedAssets[index].thumbnailDataWithSize(
-            ThumbnailSize(
-              (AppConstants.previewImageSize * 1.2).toInt(),
-              (AppConstants.previewImageSize * 1.2).toInt(),
-            ),
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.data != null) {
-              return Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: AppSpacing.photoRadius,
-                ),
-                child: ClipRRect(
-                  borderRadius: AppSpacing.photoRadius,
-                  child: Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.contain,
-                    width: 120,
-                    height: 120,
-                  ),
-                ),
-              );
-            }
-            return Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: AppSpacing.photoRadius,
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            );
-          },
         ),
       ),
     );
@@ -676,6 +625,77 @@ class DiaryPreviewPromptDisplay extends StatelessWidget {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 写真サムネイルウィジェット（future をキャッシュして再ビルド時の再取得を防止）
+class _PhotoThumbnailWidget extends StatefulWidget {
+  final AssetEntity asset;
+
+  const _PhotoThumbnailWidget({required this.asset});
+
+  @override
+  State<_PhotoThumbnailWidget> createState() => _PhotoThumbnailWidgetState();
+}
+
+class _PhotoThumbnailWidgetState extends State<_PhotoThumbnailWidget> {
+  late final Future<typed_data.Uint8List?> _thumbnailFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _thumbnailFuture = widget.asset.thumbnailDataWithSize(
+      ThumbnailSize(
+        (AppConstants.previewImageSize * 1.2).toInt(),
+        (AppConstants.previewImageSize * 1.2).toInt(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(borderRadius: AppSpacing.photoRadius),
+      child: ClipRRect(
+        borderRadius: AppSpacing.photoRadius,
+        child: FutureBuilder<typed_data.Uint8List?>(
+          future: _thumbnailFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.data != null) {
+              return Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: AppSpacing.photoRadius,
+                ),
+                child: ClipRRect(
+                  borderRadius: AppSpacing.photoRadius,
+                  child: Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.contain,
+                    width: 120,
+                    height: 120,
+                  ),
+                ),
+              );
+            }
+            return Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: AppSpacing.photoRadius,
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          },
         ),
       ),
     );

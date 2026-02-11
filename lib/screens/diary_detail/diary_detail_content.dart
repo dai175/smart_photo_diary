@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
 import '../../ui/components/custom_card.dart';
@@ -74,7 +75,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// 日付ヘッダーカードを構築
-  Widget _buildDateHeader(BuildContext context, dynamic l10n) {
+  Widget _buildDateHeader(BuildContext context, AppLocalizations l10n) {
     return FadeInWidget(
       child: Container(
         width: double.infinity,
@@ -156,7 +157,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// 写真セクションを構築
-  Widget _buildPhotoSection(BuildContext context, dynamic l10n) {
+  Widget _buildPhotoSection(BuildContext context, AppLocalizations l10n) {
     return SlideInWidget(
       delay: const Duration(milliseconds: 100),
       child: CustomCard(
@@ -202,7 +203,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// コンテンツセクション（タイトル + 本文）を構築
-  Widget _buildContentSection(BuildContext context, dynamic l10n) {
+  Widget _buildContentSection(BuildContext context, AppLocalizations l10n) {
     return SlideInWidget(
       delay: Duration(milliseconds: photoAssets.isNotEmpty ? 200 : 100),
       child: CustomCard(
@@ -245,7 +246,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// 編集可能タイトル
-  Widget _buildEditableTitle(BuildContext context, dynamic l10n) {
+  Widget _buildEditableTitle(BuildContext context, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -274,7 +275,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// 読み取り専用タイトル
-  Widget _buildReadOnlyTitle(BuildContext context, dynamic l10n) {
+  Widget _buildReadOnlyTitle(BuildContext context, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -298,7 +299,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// 編集可能本文
-  Widget _buildEditableContent(BuildContext context, dynamic l10n) {
+  Widget _buildEditableContent(BuildContext context, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -331,7 +332,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// 読み取り専用本文
-  Widget _buildReadOnlyContent(BuildContext context, dynamic l10n) {
+  Widget _buildReadOnlyContent(BuildContext context, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -353,7 +354,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// メタデータセクションを構築
-  Widget _buildMetadataSection(BuildContext context, dynamic l10n) {
+  Widget _buildMetadataSection(BuildContext context, AppLocalizations l10n) {
     return SlideInWidget(
       delay: Duration(milliseconds: photoAssets.isNotEmpty ? 300 : 200),
       child: CustomCard(
@@ -499,7 +500,7 @@ class DiaryDetailContent extends StatelessWidget {
   }
 
   /// タグ行を構築
-  Widget _buildTagsRow(BuildContext context, dynamic l10n) {
+  Widget _buildTagsRow(BuildContext context, AppLocalizations l10n) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

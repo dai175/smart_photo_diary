@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../constants/app_constants.dart';
 import '../../core/result/result.dart';
 import '../../core/service_registration.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
 import '../../services/interfaces/diary_service_interface.dart';
@@ -275,7 +276,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   /// AppBarを構築
-  PreferredSizeWidget _buildAppBar(dynamic l10n) {
+  PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
     return AppBar(
       title: Text(
         _isEditing ? l10n.diaryDetailEditTitle : l10n.diaryDetailViewTitle,
@@ -342,7 +343,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   /// Bodyを構築
-  Widget _buildBody(dynamic l10n) {
+  Widget _buildBody(AppLocalizations l10n) {
     if (_isLoading) {
       return _buildLoadingState(l10n);
     }
@@ -362,7 +363,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   /// BottomBarを構築
-  Widget? _buildBottomBar(dynamic l10n) {
+  Widget? _buildBottomBar(AppLocalizations l10n) {
     if (!_isEditing || _isLoading || _hasError || _diaryEntry == null) {
       return null;
     }
@@ -413,7 +414,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   /// ローディング状態を構築
-  Widget _buildLoadingState(dynamic l10n) {
+  Widget _buildLoadingState(AppLocalizations l10n) {
     return Center(
       child: FadeInWidget(
         child: CustomCard(
@@ -451,7 +452,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   /// エラー状態を構築
-  Widget _buildErrorState(dynamic l10n) {
+  Widget _buildErrorState(AppLocalizations l10n) {
     return Center(
       child: FadeInWidget(
         child: CustomCard(
@@ -496,7 +497,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   /// 未検出状態を構築
-  Widget _buildNotFoundState(dynamic l10n) {
+  Widget _buildNotFoundState(AppLocalizations l10n) {
     return Center(
       child: FadeInWidget(
         child: CustomCard(
@@ -521,7 +522,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               Text(l10n.diaryNotFoundMessage, style: AppTypography.titleLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                context.l10n.diaryNotFoundMessage,
+                l10n.diaryNotFoundSubtitle,
                 style: AppTypography.bodyMedium.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
