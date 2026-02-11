@@ -4,27 +4,25 @@ import 'dart:async';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
-import '../models/subscription_status.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
-import '../constants/subscription_constants.dart';
 import '../config/in_app_purchase_config.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'mixins/service_logging.dart';
+import 'mixins/purchase_event_handler.dart';
 import '../core/service_locator.dart';
 
 // 型エイリアスで名前衝突を解決
-import 'package:in_app_purchase/in_app_purchase.dart' as iap;
 import 'interfaces/in_app_purchase_service_interface.dart' as iapsi;
 
 /// InAppPurchaseService
 ///
 /// IAP商品情報取得、購入フロー、復元、検証を担当する。
 class InAppPurchaseService
-    with ServiceLogging
+    with ServiceLogging, PurchaseEventHandler
     implements IInAppPurchaseService {
   final ISubscriptionStateService _stateService;
   ILoggingService? _loggingService;
@@ -34,6 +32,23 @@ class InAppPurchaseService
 
   @override
   String get logTag => 'InAppPurchaseService';
+
+  // PurchaseEventHandler mixin 用のアクセサ
+  @override
+  ISubscriptionStateService get purchaseStateService => _stateService;
+
+  @override
+  StreamController<PurchaseResult> get purchaseStreamController =>
+      _purchaseStreamController;
+
+  @override
+  InAppPurchase? get inAppPurchaseInstance => _inAppPurchase;
+
+  @override
+  bool get isPurchasing => _isPurchasing;
+
+  @override
+  set isPurchasing(bool value) => _isPurchasing = value;
 
   // In-App Purchase関連
   InAppPurchase? _inAppPurchase;
@@ -99,8 +114,8 @@ class InAppPurchaseService
         _inAppPurchase = InAppPurchase.instance;
 
         _purchaseSubscription = _inAppPurchase!.purchaseStream.listen(
-          _onPurchaseUpdated,
-          onError: _onPurchaseError,
+          onPurchaseUpdated,
+          onError: onPurchaseError,
           onDone: () => log('Purchase stream completed', level: LogLevel.debug),
         );
 
@@ -120,254 +135,6 @@ class InAppPurchaseService
     } catch (e) {
       log(
         'Failed to initialize In-App Purchase',
-        level: LogLevel.error,
-        error: e,
-      );
-      rethrow;
-    }
-  }
-
-  void _onPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) async {
-    for (final purchaseDetails in purchaseDetailsList) {
-      await _processPurchaseUpdate(purchaseDetails);
-    }
-  }
-
-  void _onPurchaseError(dynamic error) {
-    log('Purchase stream error', level: LogLevel.error, error: error);
-
-    final errorResult = PurchaseResult(
-      status: iapsi.PurchaseStatus.error,
-      errorMessage: error.toString(),
-    );
-    _purchaseStreamController.add(errorResult);
-  }
-
-  Future<void> _processPurchaseUpdate(PurchaseDetails purchaseDetails) async {
-    try {
-      log(
-        'Processing purchase update',
-        level: LogLevel.info,
-        data: {'status': purchaseDetails.status},
-      );
-
-      switch (purchaseDetails.status) {
-        case iap.PurchaseStatus.purchased:
-          await _handlePurchaseCompleted(purchaseDetails);
-          break;
-
-        case iap.PurchaseStatus.restored:
-          await _handlePurchaseRestored(purchaseDetails);
-          break;
-
-        case iap.PurchaseStatus.error:
-          await _handlePurchaseError(purchaseDetails);
-          break;
-
-        case iap.PurchaseStatus.canceled:
-          await _handlePurchaseCanceled(purchaseDetails);
-          break;
-
-        case iap.PurchaseStatus.pending:
-          await _handlePurchasePending(purchaseDetails);
-          break;
-      }
-
-      if (purchaseDetails.pendingCompletePurchase) {
-        await _inAppPurchase!.completePurchase(purchaseDetails);
-        log('Purchase completion confirmed to platform', level: LogLevel.debug);
-      }
-    } catch (e) {
-      log('Error processing purchase update', level: LogLevel.error, error: e);
-    }
-  }
-
-  Future<void> _handlePurchaseCompleted(PurchaseDetails purchaseDetails) async {
-    try {
-      log(
-        'Purchase completed',
-        level: LogLevel.info,
-        data: {'productId': purchaseDetails.productID},
-      );
-
-      await _applyPurchaseSideEffects(purchaseDetails);
-
-      final plan = InAppPurchaseConfig.getPlanFromProductId(
-        purchaseDetails.productID,
-      );
-      final result = PurchaseResult(
-        status: iapsi.PurchaseStatus.purchased,
-        productId: purchaseDetails.productID,
-        transactionId: purchaseDetails.purchaseID,
-        purchaseDate: DateTime.now(),
-        plan: plan,
-      );
-      _purchaseStreamController.add(result);
-
-      _isPurchasing = false;
-      log(
-        '購入フラグをリセットしました',
-        level: LogLevel.debug,
-        context: '_handlePurchaseCompleted',
-      );
-    } catch (e) {
-      log(
-        'Error handling purchase completion',
-        level: LogLevel.error,
-        error: e,
-      );
-      await _handlePurchaseError(purchaseDetails);
-    }
-  }
-
-  /// 購入完了時のサイドエフェクト（サブスクリプション状態更新）のみを実行する。
-  /// ストリームイベントはemitしない。
-  Future<void> _applyPurchaseSideEffects(
-    PurchaseDetails purchaseDetails,
-  ) async {
-    final plan = InAppPurchaseConfig.getPlanFromProductId(
-      purchaseDetails.productID,
-    );
-    await _updateSubscriptionFromPurchase(purchaseDetails, plan);
-  }
-
-  Future<void> _handlePurchaseRestored(PurchaseDetails purchaseDetails) async {
-    try {
-      log(
-        'Purchase restored',
-        level: LogLevel.info,
-        data: {'productId': purchaseDetails.productID},
-      );
-
-      // サイドエフェクトのみ実行（ストリームイベントはemitしない）
-      await _applyPurchaseSideEffects(purchaseDetails);
-
-      final result = PurchaseResult(
-        status: iapsi.PurchaseStatus.restored,
-        productId: purchaseDetails.productID,
-        transactionId: purchaseDetails.purchaseID,
-        purchaseDate: DateTime.now(),
-        plan: InAppPurchaseConfig.getPlanFromProductId(
-          purchaseDetails.productID,
-        ),
-      );
-      _purchaseStreamController.add(result);
-
-      _isPurchasing = false;
-    } catch (e) {
-      _isPurchasing = false;
-      log(
-        'Error handling purchase restoration',
-        level: LogLevel.error,
-        error: e,
-      );
-    }
-  }
-
-  Future<void> _handlePurchaseError(PurchaseDetails purchaseDetails) async {
-    log(
-      'Purchase error',
-      level: LogLevel.error,
-      error: purchaseDetails.error?.message,
-    );
-
-    final result = PurchaseResult(
-      status: iapsi.PurchaseStatus.error,
-      productId: purchaseDetails.productID,
-      errorMessage: purchaseDetails.error?.message ?? 'Unknown purchase error',
-    );
-    _purchaseStreamController.add(result);
-
-    _isPurchasing = false;
-    log(
-      '購入フラグをリセットしました',
-      level: LogLevel.debug,
-      context: '_handlePurchaseError',
-    );
-  }
-
-  Future<void> _handlePurchaseCanceled(PurchaseDetails purchaseDetails) async {
-    log(
-      'Purchase canceled',
-      level: LogLevel.info,
-      data: {'productId': purchaseDetails.productID},
-    );
-
-    final result = PurchaseResult(
-      status: iapsi.PurchaseStatus.cancelled,
-      productId: purchaseDetails.productID,
-    );
-    _purchaseStreamController.add(result);
-
-    _isPurchasing = false;
-    log(
-      '購入フラグをリセットしました',
-      level: LogLevel.debug,
-      context: '_handlePurchaseCanceled',
-    );
-  }
-
-  Future<void> _handlePurchasePending(PurchaseDetails purchaseDetails) async {
-    log(
-      'Purchase pending',
-      level: LogLevel.info,
-      data: {'productId': purchaseDetails.productID},
-    );
-
-    final result = PurchaseResult(
-      status: iapsi.PurchaseStatus.pending,
-      productId: purchaseDetails.productID,
-    );
-    _purchaseStreamController.add(result);
-  }
-
-  Future<void> _updateSubscriptionFromPurchase(
-    PurchaseDetails purchaseDetails,
-    Plan plan,
-  ) async {
-    try {
-      final now = DateTime.now();
-
-      DateTime expiryDate;
-      if (plan.id == SubscriptionConstants.premiumMonthlyPlanId) {
-        expiryDate = now.add(
-          const Duration(days: SubscriptionConstants.subscriptionMonthDays),
-        );
-      } else if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
-        expiryDate = now.add(
-          const Duration(days: SubscriptionConstants.subscriptionYearDays),
-        );
-      } else {
-        throw ArgumentError('Basic plan cannot be purchased');
-      }
-
-      // 現在の使用量を引き継ぐ（月途中のアップグレードで使用量がリセットされるのを防止）
-      final currentStatusResult = await _stateService.getCurrentStatus();
-      final currentUsageCount = currentStatusResult.isSuccess
-          ? currentStatusResult.value.monthlyUsageCount
-          : 0;
-      final currentLastResetDate = currentStatusResult.isSuccess
-          ? currentStatusResult.value.lastResetDate
-          : now;
-
-      final newStatus = SubscriptionStatus(
-        planId: plan.id,
-        isActive: true,
-        startDate: now,
-        expiryDate: expiryDate,
-        autoRenewal: true,
-        monthlyUsageCount: currentUsageCount,
-        lastResetDate: currentLastResetDate ?? now,
-        transactionId: purchaseDetails.purchaseID ?? '',
-        lastPurchaseDate: now,
-      );
-
-      await _stateService.updateStatus(newStatus);
-
-      log('Subscription status updated from purchase', level: LogLevel.info);
-    } catch (e) {
-      log(
-        'Error updating subscription from purchase',
         level: LogLevel.error,
         error: e,
       );
