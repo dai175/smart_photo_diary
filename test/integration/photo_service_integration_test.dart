@@ -2,10 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_permission_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:mocktail/mocktail.dart';
 import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
+
+class MockPhotoPermissionService extends Mock
+    implements IPhotoPermissionService {}
 
 void main() {
   group('PhotoService Integration Tests', () {
@@ -22,8 +27,22 @@ void main() {
 
     setUp(() async {
       // Initialize PhotoService with real implementation
+      final mockPermissionService = MockPhotoPermissionService();
+      when(
+        () => mockPermissionService.requestPermission(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockPermissionService.isPermissionPermanentlyDenied(),
+      ).thenAnswer((_) async => false);
+      when(
+        () => mockPermissionService.presentLimitedLibraryPicker(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockPermissionService.isLimitedAccess(),
+      ).thenAnswer((_) async => false);
       photoService = PhotoService(
         logger: serviceLocator.get<ILoggingService>(),
+        permissionService: mockPermissionService,
       );
     });
 
