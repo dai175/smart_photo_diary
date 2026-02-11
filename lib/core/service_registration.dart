@@ -6,6 +6,10 @@ import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/photo_permission_service.dart';
+import '../services/interfaces/photo_permission_service_interface.dart';
+import '../services/camera_service.dart';
+import '../services/interfaces/camera_service_interface.dart';
 import '../services/photo_cache_service.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/photo_access_control_service.dart';
@@ -47,7 +51,9 @@ import 'service_locator.dart';
 /// 4. **FeatureAccessService** - 機能アクセス制御（SubscriptionStateServiceに依存）
 /// 5. **InAppPurchaseService** - IAP処理（SubscriptionStateServiceに依存）
 /// 6. **SubscriptionService** - Facade（上記4サービスに委譲）
-/// 7. **PhotoService** - 写真アクセス機能（LoggingServiceに依存）
+/// 7a. **PhotoPermissionService** - 写真権限管理（LoggingServiceに依存）
+/// 7b. **PhotoService** - Facade: 写真クエリ/データ + 権限・カメラ委譲
+/// 7c. **CameraService** - カメラ撮影機能（LoggingService + PhotoService.getTodayPhotosに依存）
 /// 8. **PhotoCacheService** - 写真キャッシュ機能（LoggingServiceに依存）
 /// 9. **PhotoAccessControlService** - 写真アクセス制御
 /// 10. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
@@ -67,7 +73,9 @@ import 'service_locator.dart';
 /// - FeatureAccessService → SubscriptionStateService
 /// - InAppPurchaseService → SubscriptionStateService
 /// - SubscriptionService(Facade) → SubscriptionStateService + AiUsageService + FeatureAccessService + InAppPurchaseService
-/// - PhotoService → LoggingService
+/// - PhotoPermissionService → LoggingService
+/// - PhotoService(Facade) → LoggingService + PhotoPermissionService（CameraServiceは遅延解決）
+/// - CameraService → LoggingService + PhotoService.getTodayPhotos
 /// - PhotoCacheService → LoggingService
 /// - SettingsService → SubscriptionService
 /// - AiService → SubscriptionService
@@ -190,9 +198,25 @@ class ServiceRegistration {
       return service;
     });
 
-    // 8. PhotoService (LoggingServiceに依存)
-    serviceLocator.registerSingleton<IPhotoService>(
-      PhotoService(logger: serviceLocator.get<ILoggingService>()),
+    // 7a. PhotoPermissionService (写真権限管理 - LoggingServiceに依存)
+    serviceLocator.registerSingleton<IPhotoPermissionService>(
+      PhotoPermissionService(logger: serviceLocator.get<ILoggingService>()),
+    );
+
+    // 7b. PhotoService (Facade - 写真クエリ/データ + 権限・カメラ委譲)
+    final photoService = PhotoService(
+      logger: serviceLocator.get<ILoggingService>(),
+      permissionService: serviceLocator.get<IPhotoPermissionService>(),
+    );
+    serviceLocator.registerSingleton<IPhotoService>(photoService);
+
+    // 7c. CameraService (カメラ撮影 - LoggingService + PhotoService.getTodayPhotosに依存)
+    serviceLocator.registerSingleton<ICameraService>(
+      CameraService(
+        logger: serviceLocator.get<ILoggingService>(),
+        getTodayPhotos: ({int limit = 20}) =>
+            photoService.getTodayPhotos(limit: limit),
+      ),
     );
 
     // 9. PhotoCacheService (LoggingServiceに依存)
