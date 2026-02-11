@@ -183,9 +183,7 @@ class DiaryTagService implements IDiaryTagService {
       content: '$pastContext: ${entry.content}',
       logLabel: '過去写真日記',
       onTagsGenerated: (latestEntry, tags) async {
-        latestEntry.tags = tags;
-        latestEntry.updatedAt = DateTime.now();
-        await latestEntry.save();
+        await latestEntry.updateTags(tags);
         onSearchIndexUpdate?.call(
           latestEntry.id,
           _buildSearchableText(latestEntry),

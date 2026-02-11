@@ -80,11 +80,29 @@ mixin PurchaseEventHandler on ServiceLogging {
       }
 
       if (purchaseDetails.pendingCompletePurchase) {
-        await inAppPurchaseInstance!.completePurchase(purchaseDetails);
-        log('Purchase completion confirmed to platform', level: LogLevel.debug);
+        final instance = inAppPurchaseInstance;
+        if (instance != null) {
+          await instance.completePurchase(purchaseDetails);
+          log(
+            'Purchase completion confirmed to platform',
+            level: LogLevel.debug,
+          );
+        } else {
+          log(
+            'Cannot complete purchase: InAppPurchase instance is null',
+            level: LogLevel.error,
+          );
+        }
       }
     } catch (e) {
       log('Error processing purchase update', level: LogLevel.error, error: e);
+      isPurchasing = false;
+      purchaseStreamController.add(
+        PurchaseResult(
+          status: iapsi.PurchaseStatus.error,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 

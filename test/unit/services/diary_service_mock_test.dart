@@ -6,21 +6,17 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
-import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
 class MockIAiService extends Mock implements IAiService {}
 
-class MockIPhotoService extends Mock implements IPhotoService {}
-
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
   group('DiaryService Mock Tests', () {
     late MockIAiService mockAiService;
-    late MockIPhotoService mockPhotoService;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +31,6 @@ void main() {
 
     setUp(() {
       mockAiService = MockIAiService();
-      mockPhotoService = MockIPhotoService();
     });
 
     group('Past Photo Diary Creation', () {
@@ -405,10 +400,7 @@ void main() {
 
       test('should create instance with dependencies', () {
         // Act
-        final service = DiaryService.createWithDependencies(
-          aiService: mockAiService,
-          photoService: mockPhotoService,
-        );
+        final service = DiaryService.createWithDependencies();
 
         // Assert
         expect(service, isA<DiaryService>());
@@ -418,10 +410,7 @@ void main() {
     group('Interface Compliance', () {
       test('should implement DiaryService interface', () {
         // Act
-        final service = DiaryService.createWithDependencies(
-          aiService: mockAiService,
-          photoService: mockPhotoService,
-        );
+        final service = DiaryService.createWithDependencies();
 
         // Assert
         expect(service, isA<DiaryService>());
@@ -429,10 +418,7 @@ void main() {
 
       test('should have all required service methods', () {
         // Act
-        final service = DiaryService.createWithDependencies(
-          aiService: mockAiService,
-          photoService: mockPhotoService,
-        );
+        final service = DiaryService.createWithDependencies();
 
         // Assert
         expect(service.saveDiaryEntry, isA<Function>());
