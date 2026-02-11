@@ -15,6 +15,15 @@ import 'service_logging.dart';
 /// 購入ストリームからのイベントを処理し、
 /// サブスクリプション状態を更新する責務を持つ。
 mixin PurchaseEventHandler on ServiceLogging {
+  /// トランザクション日時をパースする（不正な値はフォールバック）
+  static DateTime _parseTransactionDate(String? transactionDate) {
+    if (transactionDate == null) return DateTime.now();
+    final ms = int.tryParse(transactionDate);
+    return ms != null
+        ? DateTime.fromMillisecondsSinceEpoch(ms)
+        : DateTime.now();
+  }
+
   /// サブスクリプション状態サービス
   ISubscriptionStateService get purchaseStateService;
 
@@ -136,11 +145,7 @@ mixin PurchaseEventHandler on ServiceLogging {
         status: iapsi.PurchaseStatus.purchased,
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
-        purchaseDate: purchaseDetails.transactionDate != null
-            ? DateTime.fromMillisecondsSinceEpoch(
-                int.parse(purchaseDetails.transactionDate!),
-              )
-            : DateTime.now(),
+        purchaseDate: _parseTransactionDate(purchaseDetails.transactionDate),
         plan: plan,
       );
       purchaseStreamController.add(result);
@@ -190,11 +195,7 @@ mixin PurchaseEventHandler on ServiceLogging {
         status: iapsi.PurchaseStatus.restored,
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
-        purchaseDate: purchaseDetails.transactionDate != null
-            ? DateTime.fromMillisecondsSinceEpoch(
-                int.parse(purchaseDetails.transactionDate!),
-              )
-            : DateTime.now(),
+        purchaseDate: _parseTransactionDate(purchaseDetails.transactionDate),
         plan: InAppPurchaseConfig.getPlanFromProductId(
           purchaseDetails.productID,
         ),

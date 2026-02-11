@@ -855,6 +855,10 @@
   "@diaryPreviewNoPhotosError": {
     "description": "日記生成のための写真が未選択の場合に表示するエラーメッセージ"
   },
+  "diaryPreviewPhotoDataError": "写真データの取得に失敗しました",
+  "@diaryPreviewPhotoDataError": {
+    "description": "写真データの読み込みに失敗した場合のエラーメッセージ"
+  },
   "diaryPreviewGenerationError": "日記の生成中にエラーが発生しました。\\n時間を空けてもう一度お試しください。",
   "@diaryPreviewGenerationError": {
     "description": "日記生成に失敗した際に表示するメッセージ"
