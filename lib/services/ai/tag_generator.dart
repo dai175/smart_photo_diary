@@ -278,8 +278,10 @@ class TagGenerator {
         final groupName = entry.key;
         final groupTags = entry.value;
 
-        // このタグがグループに属するかチェック
-        if (groupTags.contains(tag) || tag == groupName) {
+        // このタグがグループに属するかチェック（大文字小文字を無視）
+        final tagLower = tag.toLowerCase();
+        if (groupTags.any((t) => t.toLowerCase() == tagLower) ||
+            groupName.toLowerCase() == tagLower) {
           if (!usedGroups.contains(groupName)) {
             filteredTags.add(groupName); // グループの代表名を使用
             usedGroups.add(groupName);
