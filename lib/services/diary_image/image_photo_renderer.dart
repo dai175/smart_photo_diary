@@ -30,6 +30,8 @@ class ImagePhotoRenderer {
           area.height,
         );
         canvas.drawImageRect(image, src, area, Paint());
+        image.dispose();
+        codec.dispose();
       }
       return;
     }
@@ -84,6 +86,8 @@ class ImagePhotoRenderer {
         rects[i].height,
       );
       canvas.drawImageRect(image, src, rects[i], Paint());
+      image.dispose();
+      codec.dispose();
     }
   }
 }

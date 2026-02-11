@@ -242,7 +242,9 @@ class ServiceRegistration {
 
     // 12a. PromptUsageService (使用履歴管理 - Hive依存のみ)
     serviceLocator.registerAsyncFactory<IPromptUsageService>(() async {
-      final service = PromptUsageService();
+      final service = PromptUsageService(
+        logger: serviceLocator.get<ILoggingService>(),
+      );
       await service.initialize();
       return service;
     });
@@ -298,20 +300,14 @@ class ServiceRegistration {
       DiaryStatisticsService(logger: serviceLocator.get<ILoggingService>()),
     );
 
-    // DiaryService (Facade - AiService, PhotoServiceに依存、Tag/Statisticsは遅延解決)
+    // DiaryService (Facade - Tag/Statisticsは遅延解決)
     serviceLocator.registerAsyncFactory<IDiaryService>(() async {
-      // Get dependencies
-      final aiService = await serviceLocator.getAsync<IAiService>();
-      final photoService = serviceLocator.get<IPhotoService>();
-
       // DiaryTagServiceを事前解決（DiaryServiceからの同期アクセスのため）
+      // ※ IDiaryTagService解決時にIAiServiceも連鎖的に解決される
       await serviceLocator.getAsync<IDiaryTagService>();
 
       // Create DiaryService with dependency injection
-      final diaryService = DiaryService.createWithDependencies(
-        aiService: aiService,
-        photoService: photoService,
-      );
+      final diaryService = DiaryService.createWithDependencies();
 
       // Initialize the service
       await diaryService.initialize();

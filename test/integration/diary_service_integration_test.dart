@@ -2,17 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
-import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
-import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
-import 'package:smart_photo_diary/core/service_locator.dart';
 import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
 
 // Mock classes for integration testing with real database
-class MockIAiService extends Mock implements IAiService {}
-
-class MockIPhotoService extends Mock implements IPhotoService {}
-
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
@@ -30,10 +23,7 @@ void main() {
 
     setUp(() async {
       // Initialize DiaryService with real Hive database
-      diaryService = DiaryService.createWithDependencies(
-        aiService: serviceLocator.get<IAiService>(),
-        photoService: serviceLocator.get<IPhotoService>(),
-      );
+      diaryService = DiaryService.createWithDependencies();
       await diaryService.initialize();
     });
 

@@ -4,7 +4,6 @@
 // Hive Boxを使用したローカル永続化
 
 import 'package:hive_flutter/hive_flutter.dart';
-import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../models/writing_prompt.dart';
 import 'interfaces/prompt_usage_service_interface.dart';
@@ -16,15 +15,16 @@ import 'interfaces/prompt_usage_service_interface.dart';
 class PromptUsageService implements IPromptUsageService {
   static const String _usageHistoryBoxName = 'prompt_usage_history';
 
+  final ILoggingService _logger;
   Box<PromptUsageHistory>? _usageHistoryBox;
+
+  PromptUsageService({required ILoggingService logger}) : _logger = logger;
 
   @override
   bool get isAvailable => _usageHistoryBox != null && _usageHistoryBox!.isOpen;
 
   @override
   Future<void> initialize() async {
-    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-
     // 既存のBoxがあればクローズ
     if (Hive.isBoxOpen(_usageHistoryBoxName)) {
       await Hive.box<PromptUsageHistory>(_usageHistoryBoxName).close();
@@ -33,7 +33,7 @@ class PromptUsageService implements IPromptUsageService {
     _usageHistoryBox = await Hive.openBox<PromptUsageHistory>(
       _usageHistoryBoxName,
     );
-    loggingService.info(
+    _logger.info(
       'PromptUsageService: 使用履歴Box初期化完了（履歴数: ${_usageHistoryBox!.length}）',
     );
   }
@@ -57,15 +57,11 @@ class PromptUsageService implements IPromptUsageService {
 
       await _usageHistoryBox!.add(usage);
 
-      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-      loggingService.info(
-        'PromptUsageService: プロンプト使用履歴記録完了（promptId: $promptId）',
-      );
+      _logger.info('PromptUsageService: プロンプト使用履歴記録完了（promptId: $promptId）');
 
       return true;
     } catch (e) {
-      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-      loggingService.error('PromptUsageService: 使用履歴記録失敗', error: e);
+      _logger.error('PromptUsageService: 使用履歴記録失敗', error: e);
       return false;
     }
   }
@@ -154,13 +150,11 @@ class PromptUsageService implements IPromptUsageService {
         }
       }
 
-      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-      loggingService.info('PromptUsageService: 使用履歴クリア完了');
+      _logger.info('PromptUsageService: 使用履歴クリア完了');
 
       return true;
     } catch (e) {
-      final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-      loggingService.error('PromptUsageService: 使用履歴クリア失敗', error: e);
+      _logger.error('PromptUsageService: 使用履歴クリア失敗', error: e);
       return false;
     }
   }

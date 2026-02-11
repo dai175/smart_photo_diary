@@ -46,6 +46,12 @@ void main() {
       when(
         () => mockPermissionService.isPermissionPermanentlyDenied(),
       ).thenAnswer((_) async => false);
+      when(
+        () => mockPermissionService.presentLimitedLibraryPicker(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockPermissionService.isLimitedAccess(),
+      ).thenAnswer((_) async => false);
       // PhotoServiceをコンストラクタインジェクションで作成
       photoService = PhotoService(
         logger: mockLogger,

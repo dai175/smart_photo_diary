@@ -9,8 +9,6 @@ import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/diary_tag_service_interface.dart';
 import 'interfaces/diary_statistics_service_interface.dart';
-import 'interfaces/photo_service_interface.dart';
-import 'ai/ai_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/result/result.dart';
@@ -61,10 +59,7 @@ class DiaryService implements IDiaryService {
   DiaryService._();
 
   // 依存性注入用のファクトリメソッド
-  static DiaryService createWithDependencies({
-    required IAiService aiService,
-    required IPhotoService photoService,
-  }) {
+  static DiaryService createWithDependencies() {
     return DiaryService._();
   }
 

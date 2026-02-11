@@ -1,8 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
-import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
-import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
-import 'package:smart_photo_diary/core/service_locator.dart';
 import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
 
@@ -21,10 +18,7 @@ void main() {
 
     setUp(() async {
       // Initialize DiaryService with real Hive database
-      diaryService = DiaryService.createWithDependencies(
-        aiService: serviceLocator.get<IAiService>(),
-        photoService: serviceLocator.get<IPhotoService>(),
-      );
+      diaryService = DiaryService.createWithDependencies();
       await diaryService.initialize();
 
       // Clear any existing entries
