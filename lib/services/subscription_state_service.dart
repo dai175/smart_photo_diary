@@ -362,6 +362,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
   Future<void> dispose() async {
     _log('Disposing SubscriptionStateService...', level: LogLevel.info);
     await _subscriptionBox?.close();
+    _isInitialized = false;
     _log('SubscriptionStateService disposed', level: LogLevel.info);
   }
 

@@ -85,7 +85,7 @@ class ServiceRegistration {
 
     final startTime = DateTime.now();
     try {
-      // Register core services that don't have dependencies
+      // Register core services (internal dependencies only)
       await _registerCoreServices();
 
       // LoggingService登録後にログ出力
@@ -122,7 +122,7 @@ class ServiceRegistration {
     }
   }
 
-  /// Register services that don't have dependencies
+  /// Register core services (with internal dependencies only)
   static Future<void> _registerCoreServices() async {
     // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
     final loggingService = LoggingService();
