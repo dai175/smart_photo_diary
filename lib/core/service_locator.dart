@@ -17,6 +17,9 @@ class ServiceLocator {
   /// Storage for factory functions
   final Map<Type, Function> _factories = {};
 
+  /// Storage for in-flight async initialization futures to prevent duplicate factory execution
+  final Map<Type, Future<dynamic>> _pendingFutures = {};
+
   /// Register a singleton instance
   void registerSingleton<T>(T instance) {
     _services[T] = instance;
@@ -72,14 +75,30 @@ class ServiceLocator {
       return _services[type] as T;
     }
 
+    // Check if initialization is already in progress
+    if (_pendingFutures.containsKey(type)) {
+      return await _pendingFutures[type] as T;
+    }
+
     // Check if factory exists
     if (_factories.containsKey(type)) {
       final factory = _factories[type]!;
-      final instance = await factory();
+      final result = factory();
 
-      // Register as singleton for future use
-      _services[type] = instance;
-      return instance as T;
+      if (result is Future) {
+        _pendingFutures[type] = result;
+        try {
+          final instance = await result;
+          _services[type] = instance;
+          return instance as T;
+        } finally {
+          _pendingFutures.remove(type);
+        }
+      } else {
+        // Sync factory
+        _services[type] = result;
+        return result as T;
+      }
     }
 
     throw Exception(
@@ -98,12 +117,14 @@ class ServiceLocator {
     final type = T;
     _services.remove(type);
     _factories.remove(type);
+    _pendingFutures.remove(type);
   }
 
   /// Clear all services (useful for testing)
   void clear() {
     _services.clear();
     _factories.clear();
+    _pendingFutures.clear();
   }
 
   /// Get all registered service types (for debugging)
