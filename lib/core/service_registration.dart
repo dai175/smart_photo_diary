@@ -16,6 +16,14 @@ import '../services/storage_service.dart';
 import '../services/interfaces/storage_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
+import '../services/interfaces/subscription_state_service_interface.dart';
+import '../services/subscription_state_service.dart';
+import '../services/interfaces/ai_usage_service_interface.dart';
+import '../services/ai_usage_service.dart';
+import '../services/interfaces/feature_access_service_interface.dart';
+import '../services/feature_access_service.dart';
+import '../services/interfaces/in_app_purchase_service_interface.dart';
+import '../services/in_app_purchase_service.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/prompt_service.dart';
 import '../services/social_share_service.dart';
@@ -32,14 +40,18 @@ import 'service_locator.dart';
 ///
 /// ### Phase 1: Core Services (No Dependencies)
 /// 1. **LoggingService** - 基盤ログ機能（他サービスの依存基盤）
-/// 2. **PhotoService** - 写真アクセス機能（LoggingServiceに依存）
-/// 3. **PhotoCacheService** - 写真キャッシュ機能（LoggingServiceに依存）
-/// 4. **PhotoAccessControlService** - 写真アクセス制御
-/// 5. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
-/// 6. **StorageService** - ストレージ操作
-/// 7. **SubscriptionService** - サブスクリプション管理（Hive依存のみ）
-/// 8. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み）
-/// 9. **SocialShareService** - ソーシャル共有機能（LoggingServiceに依存）
+/// 2. **SubscriptionStateService** - サブスクリプション状態管理（Hive依存のみ）
+/// 3. **AiUsageService** - AI使用量管理（SubscriptionStateServiceに依存）
+/// 4. **FeatureAccessService** - 機能アクセス制御（SubscriptionStateServiceに依存）
+/// 5. **InAppPurchaseService** - IAP処理（SubscriptionStateServiceに依存）
+/// 6. **SubscriptionService** - Facade（上記4サービスに委譲）
+/// 7. **PhotoService** - 写真アクセス機能（LoggingServiceに依存）
+/// 8. **PhotoCacheService** - 写真キャッシュ機能（LoggingServiceに依存）
+/// 9. **PhotoAccessControlService** - 写真アクセス制御
+/// 10. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
+/// 11. **StorageService** - ストレージ操作
+/// 12. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み）
+/// 13. **SocialShareService** - ソーシャル共有機能（LoggingServiceに依存）
 ///
 /// ### Phase 2: Dependent Services
 /// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
@@ -47,10 +59,14 @@ import 'service_locator.dart';
 ///
 /// ## 依存関係マップ
 /// - LoggingService → なし（基盤サービス）
+/// - SubscriptionStateService → LoggingService
+/// - AiUsageService → SubscriptionStateService
+/// - FeatureAccessService → SubscriptionStateService
+/// - InAppPurchaseService → SubscriptionStateService
+/// - SubscriptionService(Facade) → SubscriptionStateService + AiUsageService + FeatureAccessService + InAppPurchaseService
 /// - PhotoService → LoggingService
 /// - PhotoCacheService → LoggingService
 /// - SettingsService → SubscriptionService
-/// - SubscriptionService → LoggingService
 /// - AiService → SubscriptionService
 /// - DiaryService → AiService + PhotoService + LoggingService
 /// - StorageService → DiaryService（DatabaseOptimization用）
@@ -117,52 +133,91 @@ class ServiceRegistration {
       context: 'ServiceRegistration._registerCoreServices',
     );
 
-    // 2. SubscriptionService (Hive依存のみ、LoggingServiceに後で依存)
-    serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-      final service = SubscriptionService();
-      // インターフェースのinitialize()でHiveボックス等の初期化を実行
+    // 2. SubscriptionStateService (Hive依存のみ、基盤サブスクリプション状態管理)
+    serviceLocator.registerAsyncFactory<ISubscriptionStateService>(() async {
+      final service = SubscriptionStateService();
       await service.initialize();
       return service;
     });
 
-    // 3. SettingsService (SubscriptionServiceに依存)
+    // 3. AiUsageService (SubscriptionStateServiceに依存)
+    serviceLocator.registerAsyncFactory<IAiUsageService>(() async {
+      final stateService = await serviceLocator
+          .getAsync<ISubscriptionStateService>();
+      return AiUsageService(stateService: stateService);
+    });
+
+    // 4. FeatureAccessService (SubscriptionStateServiceに依存)
+    serviceLocator.registerAsyncFactory<IFeatureAccessService>(() async {
+      final stateService = await serviceLocator
+          .getAsync<ISubscriptionStateService>();
+      return FeatureAccessService(stateService: stateService);
+    });
+
+    // 5. InAppPurchaseService (SubscriptionStateServiceに依存)
+    serviceLocator.registerAsyncFactory<IInAppPurchaseService>(() async {
+      final stateService = await serviceLocator
+          .getAsync<ISubscriptionStateService>();
+      final service = InAppPurchaseService(stateService: stateService);
+      await service.initialize();
+      return service;
+    });
+
+    // 6. SubscriptionService (Facade - 後方互換性のため)
+    serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+      final stateService = await serviceLocator
+          .getAsync<ISubscriptionStateService>();
+      final usageService = await serviceLocator.getAsync<IAiUsageService>();
+      final accessService = await serviceLocator
+          .getAsync<IFeatureAccessService>();
+      final purchaseService = await serviceLocator
+          .getAsync<IInAppPurchaseService>();
+      return SubscriptionService(
+        stateService: stateService,
+        usageService: usageService,
+        accessService: accessService,
+        purchaseService: purchaseService,
+      );
+    });
+
+    // 7. SettingsService (SubscriptionServiceに依存)
     serviceLocator.registerAsyncFactory<ISettingsService>(() async {
       final service = SettingsService();
       await service.initialize();
       return service;
     });
 
-    // 4. PhotoService (LoggingServiceに依存)
+    // 8. PhotoService (LoggingServiceに依存)
     serviceLocator.registerSingleton<IPhotoService>(
       PhotoService(logger: serviceLocator.get<ILoggingService>()),
     );
 
-    // 5. PhotoCacheService (LoggingServiceに依存)
+    // 9. PhotoCacheService (LoggingServiceに依存)
     serviceLocator.registerSingleton<IPhotoCacheService>(
       PhotoCacheService(logger: serviceLocator.get<ILoggingService>()),
     );
 
-    // 6. PhotoAccessControlService (依存なし)
+    // 10. PhotoAccessControlService (依存なし)
     serviceLocator.registerFactory<IPhotoAccessControlService>(
       () => PhotoAccessControlService(),
     );
 
-    // 7. StorageService (DiaryServiceに依存するが、最適化機能のみ)
+    // 11. StorageService (DiaryServiceに依存するが、最適化機能のみ)
     serviceLocator.registerFactory<IStorageService>(() => StorageService());
 
-    // 8. PromptService (JSONアセット読み込み - 依存なし)
+    // 12. PromptService (JSONアセット読み込み - 依存なし)
     serviceLocator.registerAsyncFactory<IPromptService>(() async {
       final service = PromptService.instance;
       await service.initialize();
       return service;
     });
 
-    // 9. SocialShareService (LoggingServiceに依存)
+    // 13. SocialShareService (LoggingServiceに依存)
     serviceLocator.registerFactory<ISocialShareService>(
       () => SocialShareService(),
     );
 
-    // 10. DiaryImageGenerator (ソーシャル共有用画像生成)
+    // 14. DiaryImageGenerator (ソーシャル共有用画像生成)
     serviceLocator.registerFactory<DiaryImageGenerator>(
       () => DiaryImageGenerator(),
     );

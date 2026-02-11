@@ -1,6 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:async';
 import 'package:smart_photo_diary/services/subscription_service.dart';
+import 'package:smart_photo_diary/services/subscription_state_service.dart';
+import 'package:smart_photo_diary/services/ai_usage_service.dart';
+import 'package:smart_photo_diary/services/feature_access_service.dart';
+import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -15,6 +19,23 @@ import '../unit/helpers/hive_test_helpers.dart';
 ///
 /// Phase 1.6.2で実装された購入機能の統合テスト
 /// In-App Purchase機能（商品情報取得、購入フロー、復元機能）の動作確認
+
+/// SubscriptionService (Facade) とサブサービスを構築するヘルパー
+Future<SubscriptionService> _createSubscriptionService() async {
+  final stateService = SubscriptionStateService();
+  await stateService.initialize();
+
+  final usageService = AiUsageService(stateService: stateService);
+  final accessService = FeatureAccessService(stateService: stateService);
+  final purchaseService = InAppPurchaseService(stateService: stateService);
+
+  return SubscriptionService(
+    stateService: stateService,
+    usageService: usageService,
+    accessService: accessService,
+    purchaseService: purchaseService,
+  );
+}
 
 void main() {
   group('Phase 1.6.2: In-App Purchase機能統合テスト', () {
@@ -52,7 +73,7 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service = await _createSubscriptionService();
           await service.initialize();
           return service;
         });
@@ -126,7 +147,7 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service = await _createSubscriptionService();
           await service.initialize();
           return service;
         });
@@ -211,7 +232,7 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service = await _createSubscriptionService();
           await service.initialize();
           return service;
         });
@@ -309,7 +330,7 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service = await _createSubscriptionService();
           await service.initialize();
           return service;
         });
@@ -385,7 +406,7 @@ void main() {
 
       setUp(() async {
         serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
-          final service = SubscriptionService();
+          final service = await _createSubscriptionService();
           await service.initialize();
           return service;
         });
@@ -488,33 +509,6 @@ void main() {
 
 /// In-App Purchase統合テスト用ヘルパークラス
 class InAppPurchaseTestHelpers {
-  // 注意: PurchaseResultとPurchaseProductは旧バージョンでenumに依存しているため、
-  // ヘルパーメソッドは一旦コメントアウト。V2バージョンが利用可能になったら再実装。
-
-  /*
-  /// テスト用購入結果を作成
-  static PurchaseResult createTestPurchaseResult({
-    PurchaseStatus status = PurchaseStatus.pending,
-    String? productId,
-    String? transactionId,
-    Plan? plan,
-    String? errorMessage,
-  }) {
-    // 旧バージョンはenum依存のため、V2バージョンでの実装を待つ
-  }
-
-  /// テスト用商品情報を作成
-  static PurchaseProduct createTestPurchaseProduct({
-    required String id,
-    required String title,
-    required Plan plan,
-    String price = '¥300',
-    double priceAmount = 300.0,
-  }) {
-    // 旧バージョンはenum依存のため、V2バージョンでの実装を待つ
-  }
-  */
-
   /// 購入ストリームのテスト用監視
   static Future<List<PurchaseResult>> listenToPurchaseStream(
     Stream<PurchaseResult> stream,
