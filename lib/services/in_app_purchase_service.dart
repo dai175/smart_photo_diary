@@ -13,7 +13,7 @@ import '../config/in_app_purchase_config.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
-import 'subscription_state_service.dart';
+import 'mixins/service_logging.dart';
 import '../core/service_locator.dart';
 
 // 型エイリアスで名前衝突を解決
@@ -23,9 +23,17 @@ import 'interfaces/in_app_purchase_service_interface.dart' as iapsi;
 /// InAppPurchaseService
 ///
 /// IAP商品情報取得、購入フロー、復元、検証を担当する。
-class InAppPurchaseService implements IInAppPurchaseService {
+class InAppPurchaseService
+    with ServiceLogging
+    implements IInAppPurchaseService {
   final ISubscriptionStateService _stateService;
   ILoggingService? _loggingService;
+
+  @override
+  ILoggingService? get loggingService => _loggingService;
+
+  @override
+  String get logTag => 'InAppPurchaseService';
 
   // In-App Purchase関連
   InAppPurchase? _inAppPurchase;
@@ -53,7 +61,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       await _initializeInAppPurchase();
       return const Success(null);
     } catch (e) {
-      _log(
+      log(
         'Error initializing InAppPurchaseService',
         level: LogLevel.error,
         error: e,
@@ -69,11 +77,11 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
   Future<void> _initializeInAppPurchase() async {
     try {
-      _log('Initializing In-App Purchase...', level: LogLevel.info);
+      log('Initializing In-App Purchase...', level: LogLevel.info);
 
       try {
         if (kDebugMode && (defaultTargetPlatform == TargetPlatform.iOS)) {
-          _log(
+          log(
             'Running in iOS debug mode - checking simulator environment',
             level: LogLevel.debug,
           );
@@ -81,7 +89,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
         final bool isAvailable = await InAppPurchase.instance.isAvailable();
         if (!isAvailable) {
-          _log(
+          log(
             'In-App Purchase not available on this device',
             level: LogLevel.warning,
           );
@@ -93,16 +101,15 @@ class InAppPurchaseService implements IInAppPurchaseService {
         _purchaseSubscription = _inAppPurchase!.purchaseStream.listen(
           _onPurchaseUpdated,
           onError: _onPurchaseError,
-          onDone: () =>
-              _log('Purchase stream completed', level: LogLevel.debug),
+          onDone: () => log('Purchase stream completed', level: LogLevel.debug),
         );
 
-        _log('In-App Purchase initialization completed', level: LogLevel.info);
+        log('In-App Purchase initialization completed', level: LogLevel.info);
       } catch (bindingError) {
         final errorString = bindingError.toString();
         if (errorString.contains('Binding has not yet been initialized') ||
             errorString.contains('ServicesBinding')) {
-          _log(
+          log(
             'In-App Purchase not available (test/simulator environment)',
             level: LogLevel.warning,
           );
@@ -111,12 +118,12 @@ class InAppPurchaseService implements IInAppPurchaseService {
         rethrow;
       }
     } catch (e) {
-      _log(
+      log(
         'Failed to initialize In-App Purchase',
         level: LogLevel.error,
         error: e,
       );
-      _log('Error details: $e', level: LogLevel.error);
+      log('Error details: $e', level: LogLevel.error);
     }
   }
 
@@ -127,7 +134,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
   }
 
   void _onPurchaseError(dynamic error) {
-    _log('Purchase stream error', level: LogLevel.error, error: error);
+    log('Purchase stream error', level: LogLevel.error, error: error);
 
     final errorResult = PurchaseResult(
       status: iapsi.PurchaseStatus.error,
@@ -138,7 +145,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
   Future<void> _processPurchaseUpdate(PurchaseDetails purchaseDetails) async {
     try {
-      _log(
+      log(
         'Processing purchase update',
         level: LogLevel.info,
         data: {'status': purchaseDetails.status},
@@ -168,19 +175,16 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
       if (purchaseDetails.pendingCompletePurchase) {
         await _inAppPurchase!.completePurchase(purchaseDetails);
-        _log(
-          'Purchase completion confirmed to platform',
-          level: LogLevel.debug,
-        );
+        log('Purchase completion confirmed to platform', level: LogLevel.debug);
       }
     } catch (e) {
-      _log('Error processing purchase update', level: LogLevel.error, error: e);
+      log('Error processing purchase update', level: LogLevel.error, error: e);
     }
   }
 
   Future<void> _handlePurchaseCompleted(PurchaseDetails purchaseDetails) async {
     try {
-      _log(
+      log(
         'Purchase completed',
         level: LogLevel.info,
         data: {'productId': purchaseDetails.productID},
@@ -201,13 +205,13 @@ class InAppPurchaseService implements IInAppPurchaseService {
       _purchaseStreamController.add(result);
 
       _isPurchasing = false;
-      _log(
+      log(
         '購入フラグをリセットしました',
         level: LogLevel.debug,
         context: '_handlePurchaseCompleted',
       );
     } catch (e) {
-      _log(
+      log(
         'Error handling purchase completion',
         level: LogLevel.error,
         error: e,
@@ -229,7 +233,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
   Future<void> _handlePurchaseRestored(PurchaseDetails purchaseDetails) async {
     try {
-      _log(
+      log(
         'Purchase restored',
         level: LogLevel.info,
         data: {'productId': purchaseDetails.productID},
@@ -249,7 +253,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       );
       _purchaseStreamController.add(result);
     } catch (e) {
-      _log(
+      log(
         'Error handling purchase restoration',
         level: LogLevel.error,
         error: e,
@@ -258,7 +262,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
   }
 
   Future<void> _handlePurchaseError(PurchaseDetails purchaseDetails) async {
-    _log(
+    log(
       'Purchase error',
       level: LogLevel.error,
       error: purchaseDetails.error?.message,
@@ -272,7 +276,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
     _purchaseStreamController.add(result);
 
     _isPurchasing = false;
-    _log(
+    log(
       '購入フラグをリセットしました',
       level: LogLevel.debug,
       context: '_handlePurchaseError',
@@ -280,7 +284,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
   }
 
   Future<void> _handlePurchaseCanceled(PurchaseDetails purchaseDetails) async {
-    _log(
+    log(
       'Purchase canceled',
       level: LogLevel.info,
       data: {'productId': purchaseDetails.productID},
@@ -293,7 +297,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
     _purchaseStreamController.add(result);
 
     _isPurchasing = false;
-    _log(
+    log(
       '購入フラグをリセットしました',
       level: LogLevel.debug,
       context: '_handlePurchaseCanceled',
@@ -301,7 +305,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
   }
 
   Future<void> _handlePurchasePending(PurchaseDetails purchaseDetails) async {
-    _log(
+    log(
       'Purchase pending',
       level: LogLevel.info,
       data: {'productId': purchaseDetails.productID},
@@ -357,9 +361,9 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
       await _stateService.updateStatus(newStatus);
 
-      _log('Subscription status updated from purchase', level: LogLevel.info);
+      log('Subscription status updated from purchase', level: LogLevel.info);
     } catch (e) {
-      _log(
+      log(
         'Error updating subscription from purchase',
         level: LogLevel.error,
         error: e,
@@ -384,7 +388,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       final plan = PlanFactory.createPlan(planId);
       final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
 
-      _log(
+      log(
         'Fetching price for plan: $planId (productId: $productId)',
         level: LogLevel.info,
       );
@@ -416,7 +420,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         plan: plan,
       );
 
-      _log(
+      log(
         'Successfully fetched price from App Store API',
         level: LogLevel.info,
         data: {
@@ -446,7 +450,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         return Failure(ServiceException('In-App Purchase not available'));
       }
 
-      _log('Fetching product information...', level: LogLevel.info);
+      log('Fetching product information...', level: LogLevel.info);
 
       final productIds = InAppPurchaseConfig.allProductIds.toSet();
 
@@ -463,7 +467,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       }
 
       if (response.notFoundIDs.isNotEmpty) {
-        _log(
+        log(
           'Products not found: ${response.notFoundIDs}',
           level: LogLevel.warning,
         );
@@ -484,7 +488,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         );
       }).toList();
 
-      _log(
+      log(
         'Successfully fetched ${products.length} products',
         level: LogLevel.info,
       );
@@ -511,11 +515,11 @@ class InAppPurchaseService implements IInAppPurchaseService {
         return Failure(ServiceException('In-App Purchase not available'));
       }
 
-      _log('Starting purchase restoration...', level: LogLevel.info);
+      log('Starting purchase restoration...', level: LogLevel.info);
 
       await _inAppPurchase!.restorePurchases();
 
-      _log('Purchase restoration initiated', level: LogLevel.info);
+      log('Purchase restoration initiated', level: LogLevel.info);
 
       return Success([PurchaseResult(status: iapsi.PurchaseStatus.pending)]);
     } catch (e) {
@@ -532,7 +536,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         );
       }
 
-      _log('Validating purchase: $transactionId', level: LogLevel.info);
+      log('Validating purchase: $transactionId', level: LogLevel.info);
 
       final statusResult = await _stateService.getCurrentStatus();
       if (statusResult.isFailure) {
@@ -541,9 +545,10 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
       final status = statusResult.value;
       final isValid =
-          status.transactionId == transactionId && _isSubscriptionValid(status);
+          status.transactionId == transactionId &&
+          _stateService.isSubscriptionValid(status);
 
-      _log('Purchase validation result: $isValid', level: LogLevel.info);
+      log('Purchase validation result: $isValid', level: LogLevel.info);
 
       return Success(isValid);
     } catch (e) {
@@ -574,7 +579,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         return Failure(ServiceException('Basic plan cannot be purchased'));
       }
 
-      _log(
+      log(
         '購入処理開始',
         level: LogLevel.info,
         context: 'purchasePlan',
@@ -583,7 +588,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       _isPurchasing = true;
 
       final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
-      _log(
+      log(
         '商品ID取得完了',
         level: LogLevel.debug,
         context: 'purchasePlan',
@@ -591,7 +596,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       );
 
       try {
-        _log(
+        log(
           '商品詳細をクエリ中',
           level: LogLevel.debug,
           context: 'purchasePlan',
@@ -600,7 +605,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         final productResponse = await _inAppPurchase!.queryProductDetails({
           productId,
         });
-        _log(
+        log(
           '商品クエリ完了',
           level: LogLevel.debug,
           context: 'purchasePlan',
@@ -626,7 +631,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         }
 
         final productDetails = productResponse.productDetails.first;
-        _log(
+        log(
           '商品詳細取得',
           level: LogLevel.info,
           context: 'purchasePlan',
@@ -641,7 +646,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
           productDetails: productDetails,
         );
 
-        _log(
+        log(
           'buyNonConsumable呼び出し中...',
           level: LogLevel.info,
           context: 'purchasePlan',
@@ -649,7 +654,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         final bool success = await _inAppPurchase!.buyNonConsumable(
           purchaseParam: purchaseParam,
         );
-        _log(
+        log(
           'buyNonConsumable結果',
           level: LogLevel.info,
           context: 'purchasePlan',
@@ -661,7 +666,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
           return Failure(ServiceException('Failed to initiate purchase'));
         }
 
-        _log('購入処理が正常に開始されました', level: LogLevel.info, context: 'purchasePlan');
+        log('購入処理が正常に開始されました', level: LogLevel.info, context: 'purchasePlan');
 
         return Success(
           PurchaseResult(
@@ -672,7 +677,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         );
       } catch (storeError) {
         _isPurchasing = false;
-        _log(
+        log(
           'ストアエラー発生',
           level: LogLevel.error,
           context: 'purchasePlan',
@@ -684,7 +689,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
           if (errorString.contains('not connected to app store') ||
               errorString.contains('sandbox') ||
               errorString.contains('StoreKit')) {
-            _log(
+            log(
               'シミュレーター環境のストア接続エラー - 成功をモック',
               level: LogLevel.warning,
               context: 'purchasePlan',
@@ -709,12 +714,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
       }
     } catch (e) {
       _isPurchasing = false;
-      _log(
-        '予期しないエラー',
-        level: LogLevel.error,
-        context: 'purchasePlan',
-        error: e,
-      );
+      log('予期しないエラー', level: LogLevel.error, context: 'purchasePlan', error: e);
       return _handleError(
         e,
         'purchasePlan',
@@ -752,7 +752,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
         );
       }
 
-      _log('Canceling subscription...', level: LogLevel.info);
+      log('Canceling subscription...', level: LogLevel.info);
 
       final statusResult = await _stateService.getCurrentStatus();
       if (statusResult.isFailure) {
@@ -765,7 +765,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
       await _stateService.updateStatus(updatedStatus);
 
-      _log('Subscription auto-renewal disabled', level: LogLevel.info);
+      log('Subscription auto-renewal disabled', level: LogLevel.info);
 
       return const Success(null);
     } catch (e) {
@@ -775,7 +775,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
   @override
   Future<void> dispose() async {
-    _log('Disposing InAppPurchaseService...', level: LogLevel.info);
+    log('Disposing InAppPurchaseService...', level: LogLevel.info);
 
     await _purchaseSubscription?.cancel();
     _purchaseSubscription = null;
@@ -784,68 +784,12 @@ class InAppPurchaseService implements IInAppPurchaseService {
 
     _inAppPurchase = null;
 
-    _log('InAppPurchaseService disposed', level: LogLevel.info);
+    log('InAppPurchaseService disposed', level: LogLevel.info);
   }
 
   // =================================================================
   // 内部ヘルパーメソッド
   // =================================================================
-
-  bool _isSubscriptionValid(SubscriptionStatus status) {
-    final stateService = _stateService;
-    if (stateService is SubscriptionStateService) {
-      return stateService.isSubscriptionValid(status);
-    }
-    if (!status.isActive) return false;
-    final currentPlan = PlanFactory.createPlan(status.planId);
-    if (currentPlan.id == 'basic') return true;
-    if (status.expiryDate == null) return false;
-    return DateTime.now().isBefore(status.expiryDate!);
-  }
-
-  void _log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    dynamic error,
-    String? context,
-    Map<String, dynamic>? data,
-  }) {
-    final logContext = context ?? 'InAppPurchaseService';
-
-    if (_loggingService != null) {
-      switch (level) {
-        case LogLevel.debug:
-          _loggingService!.debug(message, context: logContext, data: data);
-          break;
-        case LogLevel.info:
-          _loggingService!.info(message, context: logContext, data: data);
-          break;
-        case LogLevel.warning:
-          _loggingService!.warning(message, context: logContext, data: data);
-          break;
-        case LogLevel.error:
-          _loggingService!.error(message, context: logContext, error: error);
-          break;
-      }
-
-      if (error != null && level != LogLevel.error) {
-        _loggingService!.error('Error details: $error', context: logContext);
-      }
-    } else {
-      final prefix = level == LogLevel.error
-          ? 'ERROR'
-          : level == LogLevel.warning
-          ? 'WARNING'
-          : level == LogLevel.debug
-          ? 'DEBUG'
-          : 'INFO';
-
-      debugPrint('[$prefix] $logContext: $message');
-      if (error != null) {
-        debugPrint('[$prefix] $logContext: Error - $error');
-      }
-    }
-  }
 
   Result<T> _handleError<T>(
     dynamic error,
@@ -856,7 +800,7 @@ class InAppPurchaseService implements IInAppPurchaseService {
     final message =
         'Operation failed: $operation${details != null ? ' - $details' : ''}';
 
-    _log(message, level: LogLevel.error, error: error, context: errorContext);
+    log(message, level: LogLevel.error, error: error, context: errorContext);
 
     final handledException = ErrorHandler.handleError(
       error,

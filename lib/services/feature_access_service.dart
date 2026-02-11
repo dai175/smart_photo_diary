@@ -1,22 +1,29 @@
 import 'package:flutter/foundation.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../models/subscription_status.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
 import '../config/environment_config.dart';
 import 'interfaces/feature_access_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
-import 'subscription_state_service.dart';
+import 'mixins/service_logging.dart';
 import '../core/service_locator.dart';
 
 /// FeatureAccessService
 ///
 /// プラン別の機能アクセス権限チェックを担当する。
-class FeatureAccessService implements IFeatureAccessService {
+class FeatureAccessService
+    with ServiceLogging
+    implements IFeatureAccessService {
   final ISubscriptionStateService _stateService;
   ILoggingService? _loggingService;
+
+  @override
+  ILoggingService? get loggingService => _loggingService;
+
+  @override
+  String get logTag => 'FeatureAccessService';
 
   FeatureAccessService({required ISubscriptionStateService stateService})
     : _stateService = stateService {
@@ -32,21 +39,17 @@ class FeatureAccessService implements IFeatureAccessService {
     // デバッグモードでプラン強制設定をチェック
     if (kDebugMode) {
       final forcePlan = EnvironmentConfig.forcePlan;
-      _log(
-        'デバッグモードチェック',
-        level: LogLevel.debug,
-        data: {'forcePlan': forcePlan},
-      );
+      log('デバッグモードチェック', level: LogLevel.debug, data: {'forcePlan': forcePlan});
       if (forcePlan != null) {
         final forceResult = forcePlan.toLowerCase().startsWith('premium');
-        _log(
+        log(
           'プラン強制設定により Premium アクセス',
           level: LogLevel.debug,
           data: {'access': forceResult, 'plan': forcePlan},
         );
         return Success(forceResult);
       } else {
-        _log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
+        log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
       }
     }
 
@@ -66,7 +69,7 @@ class FeatureAccessService implements IFeatureAccessService {
       if (kDebugMode) {
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null) {
-          _log(
+          log(
             'プラン強制設定により Writing Prompts アクセス: true',
             level: LogLevel.debug,
             data: {'plan': forcePlan},
@@ -84,30 +87,30 @@ class FeatureAccessService implements IFeatureAccessService {
       final currentPlan = PlanFactory.createPlan(status.planId);
 
       if (currentPlan is BasicPlan) {
-        _log(
+        log(
           'Writing prompts access - Basic plan (limited prompts)',
           level: LogLevel.debug,
         );
         return const Success(true);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
+      final isPremiumValid = _stateService.isSubscriptionValid(status);
       if (isPremiumValid) {
-        _log(
+        log(
           'Writing prompts access - Premium plan',
           level: LogLevel.debug,
           data: {'valid': isPremiumValid},
         );
         return const Success(true);
       } else {
-        _log(
+        log(
           'Writing prompts access - Premium plan expired/inactive, basic access only',
           level: LogLevel.debug,
         );
         return const Success(true);
       }
     } catch (e) {
-      _log(
+      log(
         'Error checking writing prompts access',
         level: LogLevel.error,
         error: e,
@@ -154,15 +157,15 @@ class FeatureAccessService implements IFeatureAccessService {
       final currentPlan = PlanFactory.createPlan(status.planId);
 
       if (currentPlan is BasicPlan) {
-        _log(
+        log(
           'Data export access - Basic plan (JSON only)',
           level: LogLevel.debug,
         );
         return const Success(true);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
+      final isPremiumValid = _stateService.isSubscriptionValid(status);
+      log(
         'Data export access - Premium plan',
         level: LogLevel.debug,
         data: {'valid': isPremiumValid},
@@ -170,11 +173,7 @@ class FeatureAccessService implements IFeatureAccessService {
 
       return Success(isPremiumValid);
     } catch (e) {
-      _log(
-        'Error checking data export access',
-        level: LogLevel.error,
-        error: e,
-      );
+      log('Error checking data export access', level: LogLevel.error, error: e);
       return Failure(
         ServiceException(
           'Failed to check data export access',
@@ -230,10 +229,10 @@ class FeatureAccessService implements IFeatureAccessService {
         'statsDashboard': statsDashboardResult.value,
       };
 
-      _log('Feature access map', level: LogLevel.debug, data: featureAccess);
+      log('Feature access map', level: LogLevel.debug, data: featureAccess);
       return Success(featureAccess);
     } catch (e) {
-      _log('Error getting feature access', level: LogLevel.error, error: e);
+      log('Error getting feature access', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to get feature access', details: e.toString()),
       );
@@ -264,8 +263,8 @@ class FeatureAccessService implements IFeatureAccessService {
         return const Success(false);
       }
 
-      final isPremiumValid = _isSubscriptionValid(status);
-      _log(
+      final isPremiumValid = _stateService.isSubscriptionValid(status);
+      log(
         '$featureName access check',
         level: LogLevel.debug,
         data: {'plan': currentPlan.id, 'valid': isPremiumValid},
@@ -273,7 +272,7 @@ class FeatureAccessService implements IFeatureAccessService {
 
       return Success(isPremiumValid);
     } catch (e) {
-      _log(
+      log(
         'Error checking $featureName access',
         level: LogLevel.error,
         error: e,
@@ -284,62 +283,6 @@ class FeatureAccessService implements IFeatureAccessService {
           details: e.toString(),
         ),
       );
-    }
-  }
-
-  bool _isSubscriptionValid(SubscriptionStatus status) {
-    final stateService = _stateService;
-    if (stateService is SubscriptionStateService) {
-      return stateService.isSubscriptionValid(status);
-    }
-    if (!status.isActive) return false;
-    final currentPlan = PlanFactory.createPlan(status.planId);
-    if (currentPlan.id == 'basic') return true;
-    if (status.expiryDate == null) return false;
-    return DateTime.now().isBefore(status.expiryDate!);
-  }
-
-  void _log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    dynamic error,
-    String? context,
-    Map<String, dynamic>? data,
-  }) {
-    final logContext = context ?? 'FeatureAccessService';
-
-    if (_loggingService != null) {
-      switch (level) {
-        case LogLevel.debug:
-          _loggingService!.debug(message, context: logContext, data: data);
-          break;
-        case LogLevel.info:
-          _loggingService!.info(message, context: logContext, data: data);
-          break;
-        case LogLevel.warning:
-          _loggingService!.warning(message, context: logContext, data: data);
-          break;
-        case LogLevel.error:
-          _loggingService!.error(message, context: logContext, error: error);
-          break;
-      }
-
-      if (error != null && level != LogLevel.error) {
-        _loggingService!.error('Error details: $error', context: logContext);
-      }
-    } else {
-      final prefix = level == LogLevel.error
-          ? 'ERROR'
-          : level == LogLevel.warning
-          ? 'WARNING'
-          : level == LogLevel.debug
-          ? 'DEBUG'
-          : 'INFO';
-
-      debugPrint('[$prefix] $logContext: $message');
-      if (error != null) {
-        debugPrint('[$prefix] $logContext: Error - $error');
-      }
     }
   }
 }

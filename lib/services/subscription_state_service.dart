@@ -12,21 +12,33 @@ import '../constants/subscription_constants.dart';
 import '../config/environment_config.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
+import 'mixins/service_logging.dart';
 import '../core/service_locator.dart';
 
 /// SubscriptionStateService
 ///
 /// サブスクリプション状態の永続化（Hive）、プラン情報取得、
 /// 状態変更通知を担当する基盤サービス。
-class SubscriptionStateService implements ISubscriptionStateService {
+class SubscriptionStateService
+    with ServiceLogging
+    implements ISubscriptionStateService {
   // Hiveボックス
   Box<SubscriptionStatus>? _subscriptionBox;
 
   // 初期化フラグ
   bool _isInitialized = false;
 
+  // キャッシュ済みstatusStream
+  Stream<SubscriptionStatus>? _statusStream;
+
   // ロギングサービス
   ILoggingService? _loggingService;
+
+  @override
+  ILoggingService? get loggingService => _loggingService;
+
+  @override
+  String get logTag => 'SubscriptionStateService';
 
   /// DI用の公開コンストラクタ
   SubscriptionStateService();
@@ -36,7 +48,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
   /// Hiveボックスの初期化と初期データ作成を実行
   Future<void> _initialize() async {
     if (_isInitialized) {
-      _log(
+      log(
         'SubscriptionStateService already initialized',
         level: LogLevel.debug,
       );
@@ -44,7 +56,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
     }
 
     try {
-      _log('Initializing SubscriptionStateService...', level: LogLevel.info);
+      log('Initializing SubscriptionStateService...', level: LogLevel.info);
 
       // LoggingServiceを取得（ServiceLocator経由、未登録時はnullのまま）
       try {
@@ -62,13 +74,13 @@ class SubscriptionStateService implements ISubscriptionStateService {
       await _ensureInitialStatus();
 
       _isInitialized = true;
-      _log(
+      log(
         'SubscriptionStateService initialization completed successfully',
         level: LogLevel.info,
       );
     } catch (e) {
       final errorContext = 'SubscriptionStateService._initialize';
-      _log(
+      log(
         'SubscriptionStateService initialization failed',
         level: LogLevel.error,
         error: e,
@@ -84,7 +96,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
     const statusKey = SubscriptionConstants.statusKey;
 
     if (_subscriptionBox?.get(statusKey) == null) {
-      _log('Creating initial Basic plan status', level: LogLevel.info);
+      log('Creating initial Basic plan status', level: LogLevel.info);
 
       final initialStatus = SubscriptionStatus(
         planId: BasicPlan().id,
@@ -99,9 +111,9 @@ class SubscriptionStateService implements ISubscriptionStateService {
       );
 
       await _subscriptionBox?.put(statusKey, initialStatus);
-      _log('Initial status created successfully', level: LogLevel.info);
+      log('Initial status created successfully', level: LogLevel.info);
     } else {
-      _log('Existing status found, skipping creation', level: LogLevel.debug);
+      log('Existing status found, skipping creation', level: LogLevel.debug);
     }
   }
 
@@ -114,7 +126,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
       await _initialize();
       return const Success(null);
     } catch (e) {
-      _log('Error in public initialize', level: LogLevel.error, error: e);
+      log('Error in public initialize', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to initialize service', details: e.toString()),
       );
@@ -148,7 +160,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
       if (kDebugMode) {
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null) {
-          _log(
+          log(
             'プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）',
             level: LogLevel.debug,
             data: {'forcedPlan': forcePlan},
@@ -175,7 +187,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
 
       return Success(status);
     } catch (e) {
-      _log('Error getting current status', level: LogLevel.error, error: e);
+      log('Error getting current status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to get current status', details: e.toString()),
       );
@@ -192,10 +204,10 @@ class SubscriptionStateService implements ISubscriptionStateService {
       }
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, status);
-      _log('Status updated successfully', level: LogLevel.info);
+      log('Status updated successfully', level: LogLevel.info);
       return const Success(null);
     } catch (e) {
-      _log('Error updating status', level: LogLevel.error, error: e);
+      log('Error updating status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to update status', details: e.toString()),
       );
@@ -218,7 +230,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
 
       return const Success(null);
     } catch (e) {
-      _log('Error refreshing status', level: LogLevel.error, error: e);
+      log('Error refreshing status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to refresh status', details: e.toString()),
       );
@@ -272,14 +284,14 @@ class SubscriptionStateService implements ISubscriptionStateService {
       }
 
       await _subscriptionBox?.put(SubscriptionConstants.statusKey, newStatus);
-      _log(
+      log(
         'Created new status for plan',
         level: LogLevel.info,
         data: {'planId': plan.id},
       );
       return Success(newStatus);
     } catch (e) {
-      _log('Error creating status', level: LogLevel.error, error: e);
+      log('Error creating status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to create status', details: e.toString()),
       );
@@ -289,7 +301,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
   @override
   Result<Plan> getPlanClass(String planId) {
     try {
-      _log(
+      log(
         'Getting plan class by ID',
         level: LogLevel.debug,
         data: {'planId': planId},
@@ -297,7 +309,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
 
       final plan = PlanFactory.createPlan(planId);
 
-      _log(
+      log(
         'Successfully retrieved plan class',
         level: LogLevel.debug,
         data: {'planId': plan.id, 'displayName': plan.displayName},
@@ -312,7 +324,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
   @override
   Future<Result<Plan>> getCurrentPlanClass() async {
     try {
-      _log('Getting current plan class', level: LogLevel.debug);
+      log('Getting current plan class', level: LogLevel.debug);
 
       if (!_isInitialized) {
         return _handleError(
@@ -324,7 +336,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
 
       final statusResult = await getCurrentStatus();
       if (statusResult.isFailure) {
-        _log(
+        log(
           'Failed to get current status',
           level: LogLevel.warning,
           error: statusResult.error,
@@ -335,7 +347,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
       final status = statusResult.value;
       final plan = PlanFactory.createPlan(status.planId);
 
-      _log(
+      log(
         'Successfully retrieved current plan class',
         level: LogLevel.debug,
         data: {'planId': plan.id, 'displayName': plan.displayName},
@@ -349,28 +361,30 @@ class SubscriptionStateService implements ISubscriptionStateService {
 
   @override
   Stream<SubscriptionStatus> get statusStream {
-    return Stream.periodic(const Duration(minutes: 5), (_) async {
-          final statusResult = await getCurrentStatus();
-          return statusResult.isSuccess ? statusResult.value : null;
-        })
-        .asyncMap((statusFuture) => statusFuture)
-        .where((status) => status != null)
-        .cast<SubscriptionStatus>();
+    return _statusStream ??=
+        Stream.periodic(const Duration(minutes: 5), (_) async {
+              final statusResult = await getCurrentStatus();
+              return statusResult.isSuccess ? statusResult.value : null;
+            })
+            .asyncMap((statusFuture) => statusFuture)
+            .where((status) => status != null)
+            .cast<SubscriptionStatus>()
+            .asBroadcastStream();
   }
 
   @override
   Future<void> dispose() async {
-    _log('Disposing SubscriptionStateService...', level: LogLevel.info);
+    log('Disposing SubscriptionStateService...', level: LogLevel.info);
     await _subscriptionBox?.close();
     _isInitialized = false;
-    _log('SubscriptionStateService disposed', level: LogLevel.info);
+    log('SubscriptionStateService disposed', level: LogLevel.info);
   }
 
   // =================================================================
   // 公開ヘルパーメソッド（他サービスから利用）
   // =================================================================
 
-  /// サブスクリプションが有効かどうかをチェック
+  @override
   bool isSubscriptionValid(SubscriptionStatus status) {
     if (!status.isActive) return false;
 
@@ -399,10 +413,10 @@ class SubscriptionStateService implements ISubscriptionStateService {
       }
 
       await _subscriptionBox?.delete(SubscriptionConstants.statusKey);
-      _log('Status cleared', level: LogLevel.info);
+      log('Status cleared', level: LogLevel.info);
       return const Success(null);
     } catch (e) {
-      _log('Error clearing status', level: LogLevel.error, error: e);
+      log('Error clearing status', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to clear status', details: e.toString()),
       );
@@ -427,51 +441,6 @@ class SubscriptionStateService implements ISubscriptionStateService {
     }
   }
 
-  /// 統一ログ出力メソッド
-  void _log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    dynamic error,
-    String? context,
-    Map<String, dynamic>? data,
-  }) {
-    final logContext = context ?? 'SubscriptionStateService';
-
-    if (_loggingService != null) {
-      switch (level) {
-        case LogLevel.debug:
-          _loggingService!.debug(message, context: logContext, data: data);
-          break;
-        case LogLevel.info:
-          _loggingService!.info(message, context: logContext, data: data);
-          break;
-        case LogLevel.warning:
-          _loggingService!.warning(message, context: logContext, data: data);
-          break;
-        case LogLevel.error:
-          _loggingService!.error(message, context: logContext, error: error);
-          break;
-      }
-
-      if (error != null && level != LogLevel.error) {
-        _loggingService!.error('Error details: $error', context: logContext);
-      }
-    } else {
-      final prefix = level == LogLevel.error
-          ? 'ERROR'
-          : level == LogLevel.warning
-          ? 'WARNING'
-          : level == LogLevel.debug
-          ? 'DEBUG'
-          : 'INFO';
-
-      debugPrint('[$prefix] $logContext: $message');
-      if (error != null) {
-        debugPrint('[$prefix] $logContext: Error - $error');
-      }
-    }
-  }
-
   /// Result<T>パターンでのエラーハンドリングヘルパー
   Result<T> _handleError<T>(
     dynamic error,
@@ -482,7 +451,7 @@ class SubscriptionStateService implements ISubscriptionStateService {
     final message =
         'Operation failed: $operation${details != null ? ' - $details' : ''}';
 
-    _log(message, level: LogLevel.error, error: error, context: errorContext);
+    log(message, level: LogLevel.error, error: error, context: errorContext);
 
     final handledException = ErrorHandler.handleError(
       error,

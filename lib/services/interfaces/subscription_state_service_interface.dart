@@ -32,6 +32,9 @@ abstract class ISubscriptionStateService {
   /// 現在のプランを取得
   Future<Result<Plan>> getCurrentPlanClass();
 
+  /// サブスクリプションが有効かどうかをチェック
+  bool isSubscriptionValid(SubscriptionStatus status);
+
   /// サブスクリプション状態変更を監視
   Stream<SubscriptionStatus> get statusStream;
 

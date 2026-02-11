@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../models/subscription_status.dart';
@@ -6,15 +5,21 @@ import '../models/plans/plan_factory.dart';
 import 'interfaces/ai_usage_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
-import 'subscription_state_service.dart';
+import 'mixins/service_logging.dart';
 import '../core/service_locator.dart';
 
 /// AiUsageService
 ///
 /// AI生成の使用量追跡、月次リセット、残回数計算を担当する。
-class AiUsageService implements IAiUsageService {
+class AiUsageService with ServiceLogging implements IAiUsageService {
   final ISubscriptionStateService _stateService;
   ILoggingService? _loggingService;
+
+  @override
+  ILoggingService? get loggingService => _loggingService;
+
+  @override
+  String get logTag => 'AiUsageService';
 
   AiUsageService({required ISubscriptionStateService stateService})
     : _stateService = stateService {
@@ -28,7 +33,7 @@ class AiUsageService implements IAiUsageService {
   @override
   Future<Result<bool>> canUseAiGeneration() async {
     try {
-      _log('Checking AI generation usage availability', level: LogLevel.debug);
+      log('Checking AI generation usage availability', level: LogLevel.debug);
 
       if (!_stateService.isInitialized) {
         return Failure(
@@ -43,8 +48,8 @@ class AiUsageService implements IAiUsageService {
 
       final status = statusResult.value;
 
-      if (!_isSubscriptionValid(status)) {
-        _log(
+      if (!_stateService.isSubscriptionValid(status)) {
+        log(
           'Subscription is not valid - AI generation unavailable',
           level: LogLevel.warning,
           data: {'planId': status.planId, 'isActive': status.isActive},
@@ -65,7 +70,7 @@ class AiUsageService implements IAiUsageService {
 
       final canUse = updatedStatus.monthlyUsageCount < monthlyLimit;
 
-      _log(
+      log(
         'AI generation availability check completed',
         level: LogLevel.debug,
         data: {
@@ -78,7 +83,7 @@ class AiUsageService implements IAiUsageService {
 
       return Success(canUse);
     } catch (e) {
-      _log('Error checking AI generation', level: LogLevel.error, error: e);
+      log('Error checking AI generation', level: LogLevel.error, error: e);
       return Failure(
         ServiceException(
           'Failed to check AI generation availability',
@@ -104,7 +109,7 @@ class AiUsageService implements IAiUsageService {
 
       final status = statusResult.value;
 
-      if (!_isSubscriptionValid(status)) {
+      if (!_stateService.isSubscriptionValid(status)) {
         return Failure(
           ServiceException('Cannot increment usage: subscription is not valid'),
         );
@@ -134,7 +139,7 @@ class AiUsageService implements IAiUsageService {
       );
 
       await _stateService.updateStatus(updatedStatus);
-      _log(
+      log(
         'AI usage incremented',
         level: LogLevel.info,
         data: {'usage': updatedStatus.monthlyUsageCount, 'limit': monthlyLimit},
@@ -142,7 +147,7 @@ class AiUsageService implements IAiUsageService {
 
       return const Success(null);
     } catch (e) {
-      _log('Error incrementing AI usage', level: LogLevel.error, error: e);
+      log('Error incrementing AI usage', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to increment AI usage', details: e.toString()),
       );
@@ -165,7 +170,7 @@ class AiUsageService implements IAiUsageService {
 
       final status = statusResult.value;
 
-      if (!_isSubscriptionValid(status)) {
+      if (!_stateService.isSubscriptionValid(status)) {
         return const Success(0);
       }
 
@@ -183,7 +188,7 @@ class AiUsageService implements IAiUsageService {
 
       return Success(remaining > 0 ? remaining : 0);
     } catch (e) {
-      _log(
+      log(
         'Error getting remaining generations',
         level: LogLevel.error,
         error: e,
@@ -214,7 +219,7 @@ class AiUsageService implements IAiUsageService {
       final status = statusResult.value;
       return Success(status.monthlyUsageCount);
     } catch (e) {
-      _log('Error getting monthly usage', level: LogLevel.error, error: e);
+      log('Error getting monthly usage', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to get monthly usage', details: e.toString()),
       );
@@ -243,11 +248,11 @@ class AiUsageService implements IAiUsageService {
       );
 
       await _stateService.updateStatus(resetStatus);
-      _log('Usage manually reset', level: LogLevel.info);
+      log('Usage manually reset', level: LogLevel.info);
 
       return const Success(null);
     } catch (e) {
-      _log('Error resetting usage', level: LogLevel.error, error: e);
+      log('Error resetting usage', level: LogLevel.error, error: e);
       return Failure(
         ServiceException('Failed to reset usage', details: e.toString()),
       );
@@ -269,7 +274,7 @@ class AiUsageService implements IAiUsageService {
       final status = statusResult.value;
       await _resetMonthlyUsageIfNeeded(status);
     } catch (e) {
-      _log('Error resetting monthly usage', level: LogLevel.error, error: e);
+      log('Error resetting monthly usage', level: LogLevel.error, error: e);
     }
   }
 
@@ -292,7 +297,7 @@ class AiUsageService implements IAiUsageService {
 
       return Success(nextResetDate);
     } catch (e) {
-      _log('Error getting next reset date', level: LogLevel.error, error: e);
+      log('Error getting next reset date', level: LogLevel.error, error: e);
       return Failure(
         ServiceException(
           'Failed to get next reset date',
@@ -306,25 +311,12 @@ class AiUsageService implements IAiUsageService {
   // 内部ヘルパーメソッド
   // =================================================================
 
-  bool _isSubscriptionValid(SubscriptionStatus status) {
-    final stateService = _stateService;
-    if (stateService is SubscriptionStateService) {
-      return stateService.isSubscriptionValid(status);
-    }
-    // フォールバック: 基本的な有効性チェック
-    if (!status.isActive) return false;
-    final currentPlan = PlanFactory.createPlan(status.planId);
-    if (currentPlan.id == 'basic') return true;
-    if (status.expiryDate == null) return false;
-    return DateTime.now().isBefore(status.expiryDate!);
-  }
-
   Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
     final currentMonth = _getCurrentMonth();
     final statusMonth = _getUsageMonth(status);
 
     if (statusMonth != currentMonth) {
-      _log(
+      log(
         'Resetting monthly usage',
         level: LogLevel.info,
         data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
@@ -362,50 +354,6 @@ class AiUsageService implements IAiUsageService {
       return DateTime(currentYear + 1, 1, 1);
     } else {
       return DateTime(currentYear, currentMonth + 1, 1);
-    }
-  }
-
-  void _log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    dynamic error,
-    String? context,
-    Map<String, dynamic>? data,
-  }) {
-    final logContext = context ?? 'AiUsageService';
-
-    if (_loggingService != null) {
-      switch (level) {
-        case LogLevel.debug:
-          _loggingService!.debug(message, context: logContext, data: data);
-          break;
-        case LogLevel.info:
-          _loggingService!.info(message, context: logContext, data: data);
-          break;
-        case LogLevel.warning:
-          _loggingService!.warning(message, context: logContext, data: data);
-          break;
-        case LogLevel.error:
-          _loggingService!.error(message, context: logContext, error: error);
-          break;
-      }
-
-      if (error != null && level != LogLevel.error) {
-        _loggingService!.error('Error details: $error', context: logContext);
-      }
-    } else {
-      final prefix = level == LogLevel.error
-          ? 'ERROR'
-          : level == LogLevel.warning
-          ? 'WARNING'
-          : level == LogLevel.debug
-          ? 'DEBUG'
-          : 'INFO';
-
-      debugPrint('[$prefix] $logContext: $message');
-      if (error != null) {
-        debugPrint('[$prefix] $logContext: Error - $error');
-      }
     }
   }
 }
