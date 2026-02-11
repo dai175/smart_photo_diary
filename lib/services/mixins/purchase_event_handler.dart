@@ -186,6 +186,13 @@ mixin PurchaseEventHandler on ServiceLogging {
       isPurchasing = false;
     } catch (e) {
       isPurchasing = false;
+      purchaseStreamController.add(
+        PurchaseResult(
+          status: iapsi.PurchaseStatus.error,
+          productId: purchaseDetails.productID,
+          errorMessage: e.toString(),
+        ),
+      );
       log(
         'Error handling purchase restoration',
         level: LogLevel.error,
