@@ -334,14 +334,23 @@ class InAppPurchaseService implements IInAppPurchaseService {
         throw ArgumentError('Basic plan cannot be purchased');
       }
 
+      // 現在の使用量を引き継ぐ（月途中のアップグレードで使用量がリセットされるのを防止）
+      final currentStatusResult = await _stateService.getCurrentStatus();
+      final currentUsageCount = currentStatusResult.isSuccess
+          ? currentStatusResult.value.monthlyUsageCount
+          : 0;
+      final currentLastResetDate = currentStatusResult.isSuccess
+          ? currentStatusResult.value.lastResetDate
+          : now;
+
       final newStatus = SubscriptionStatus(
         planId: plan.id,
         isActive: true,
         startDate: now,
         expiryDate: expiryDate,
         autoRenewal: true,
-        monthlyUsageCount: 0,
-        lastResetDate: now,
+        monthlyUsageCount: currentUsageCount,
+        lastResetDate: currentLastResetDate ?? now,
         transactionId: purchaseDetails.purchaseID ?? '',
         lastPurchaseDate: now,
       );
