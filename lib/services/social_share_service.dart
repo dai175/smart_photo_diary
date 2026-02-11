@@ -14,22 +14,15 @@ import 'social_share/channels/instagram_share_channel.dart';
 
 /// ソーシャル共有サービスの実装クラス
 class SocialShareService implements ISocialShareService {
-  // シングルトンパターン
-  static SocialShareService? _instance;
-
-  SocialShareService._();
-
-  @Deprecated('Use ServiceLocator.get<ISocialShareService>() instead')
-  static SocialShareService getInstance() {
-    _instance ??= SocialShareService._();
-    return _instance!;
-  }
+  /// DI用の公開コンストラクタ
+  SocialShareService();
 
   /// ログサービスを取得
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
-  /// 画像生成サービス（後方互換で保持）
-  DiaryImageGenerator get _imageGenerator => DiaryImageGenerator.getInstance();
+  /// 画像生成サービス
+  DiaryImageGenerator get _imageGenerator =>
+      serviceLocator.get<DiaryImageGenerator>();
 
   /// チャネル実装
   final XShareChannel _xChannel = XShareChannel();

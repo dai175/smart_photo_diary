@@ -23,7 +23,8 @@ class InstagramShareChannel {
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
 
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
-  DiaryImageGenerator get _imageGenerator => DiaryImageGenerator.getInstance();
+  DiaryImageGenerator get _imageGenerator =>
+      serviceLocator.get<DiaryImageGenerator>();
 
   Future<Result<void>> share({
     required DiaryEntry diary,

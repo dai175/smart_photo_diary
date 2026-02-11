@@ -11,7 +11,6 @@ import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/photo_service_interface.dart';
 import 'ai/ai_service_interface.dart';
-import 'ai_service.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'interfaces/settings_service_interface.dart';
 import '../core/service_registration.dart';
@@ -42,7 +41,6 @@ class _NoOpLoggingService implements ILoggingService {
 
 class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
-  static DiaryService? _instance;
   Box<DiaryEntry>? _diaryBox;
   final _uuid = const Uuid();
   final IAiService _aiService;
@@ -60,17 +58,6 @@ class DiaryService implements IDiaryService {
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._(this._aiService);
-
-  // 従来のシングルトンパターン（後方互換性のため保持）
-  @Deprecated('Use ServiceLocator.getAsync<IDiaryService>() instead')
-  static Future<DiaryService> getInstance() async {
-    if (_instance == null) {
-      final aiService = AiService();
-      _instance = DiaryService._(aiService);
-      await _instance!._init();
-    }
-    return _instance!;
-  }
 
   // 依存性注入用のファクトリメソッド
   static DiaryService createWithDependencies({

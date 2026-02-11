@@ -55,16 +55,8 @@ class DiaryImageGenerator {
   /// 写真間のスペーシング
   static const double _photoSpacing = 6.0;
 
-  // シングルトンパターン
-  static DiaryImageGenerator? _instance;
-
-  DiaryImageGenerator._();
-
-  @Deprecated('Use ServiceLocator registration instead')
-  static DiaryImageGenerator getInstance() {
-    _instance ??= DiaryImageGenerator._();
-    return _instance!;
-  }
+  /// DI用の公開コンストラクタ
+  DiaryImageGenerator();
 
   /// ログサービスを取得
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();

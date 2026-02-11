@@ -20,9 +20,6 @@ void main() {
     setUp(() async {
       // 各テスト前にHiveボックスをクリア
       await HiveTestHelpers.clearSubscriptionBox();
-
-      // SubscriptionServiceインスタンスをリセット
-      SubscriptionService.resetForTesting();
     });
 
     tearDownAll(() async {
@@ -30,35 +27,41 @@ void main() {
       await HiveTestHelpers.closeHive();
     });
 
-    group('シングルトンパターン', () {
-      test('getInstance()は同じインスタンスを返す', () async {
+    group('コンストラクタパターン', () {
+      test('コンストラクタは独立したインスタンスを作成する', () async {
         // Act
-        final instance1 = await SubscriptionService.getInstance();
-        final instance2 = await SubscriptionService.getInstance();
+        final instance1 = SubscriptionService();
+        await instance1.initialize();
+        final instance2 = SubscriptionService();
+        await instance2.initialize();
 
         // Assert
-        expect(instance1, same(instance2));
+        expect(instance1, isNot(same(instance2)));
         expect(instance1.isInitialized, isTrue);
+        expect(instance2.isInitialized, isTrue);
       });
 
-      test('初期化は一度だけ実行される', () async {
+      test('各インスタンスが独立して初期化される', () async {
         // Act
-        final instance1 = await SubscriptionService.getInstance();
-        final instance2 = await SubscriptionService.getInstance();
+        final instance1 = SubscriptionService();
+        await instance1.initialize();
+        final instance2 = SubscriptionService();
+        await instance2.initialize();
 
         // Assert
         expect(instance1.isInitialized, isTrue);
         expect(instance2.isInitialized, isTrue);
 
-        // 両方とも同じインスタンスなので、初期化も一度だけ
-        expect(instance1, same(instance2));
+        // 各コンストラクタ呼び出しが独立したインスタンスを生成
+        expect(instance1, isNot(same(instance2)));
       });
     });
 
     group('初期化処理', () {
       test('初回初期化時にBasicプランの初期状態が作成される', () async {
         // Act
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
 
         // Assert
         expect(subscriptionService.isInitialized, isTrue);
@@ -99,7 +102,8 @@ void main() {
         await box.close();
 
         // Act
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
 
         // Assert
         final status = subscriptionService.subscriptionBox?.get(
@@ -113,7 +117,8 @@ void main() {
 
       test('正常に初期化が完了する', () async {
         // Act
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
 
         // Assert
         expect(subscriptionService.isInitialized, isTrue);
@@ -123,7 +128,8 @@ void main() {
 
     group('Hive操作実装確認 (Phase 1.3.2)', () {
       setUp(() async {
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
       });
 
       test('getCurrentStatus()は初期化後にBasicプランを返す', () async {
@@ -288,7 +294,8 @@ void main() {
 
     group('使用量管理機能確認 (Phase 1.3.3)', () {
       setUp(() async {
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
       });
 
       test('canUseAiGeneration()はBasicプランで制限内なら使用可能', () async {
@@ -490,7 +497,8 @@ void main() {
 
     group('Phase 1.3.4 未実装メソッド確認', () {
       setUp(() async {
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
       });
 
       test('getCurrentStatus()は正常にBasicプランを返す', () async {
@@ -571,7 +579,8 @@ void main() {
 
     group('機能別アクセス権限テスト (Phase 1.3.4)', () {
       setUp(() async {
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
       });
 
       test('canAccessWritingPrompts()は全プランでtrueを返す', () async {
@@ -721,11 +730,9 @@ void main() {
 
     group('内部状態確認', () {
       test('isInitialized プロパティが正しく動作する', () async {
-        // Arrange
-        SubscriptionService.resetForTesting();
-
         // Act
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
 
         // Assert
         expect(subscriptionService.isInitialized, isTrue);
@@ -733,7 +740,8 @@ void main() {
 
       test('subscriptionBox プロパティがHiveボックスを返す', () async {
         // Act
-        subscriptionService = await SubscriptionService.getInstance();
+        subscriptionService = SubscriptionService();
+        await subscriptionService.initialize();
 
         // Assert
         final box = subscriptionService.subscriptionBox;
@@ -742,13 +750,14 @@ void main() {
         expect(box.name, equals(SubscriptionConstants.hiveBoxName));
       });
 
-      test('resetForTesting()でインスタンスがリセットされる', () async {
+      test('新しいインスタンスが別のオブジェクトとして作成される', () async {
         // Arrange
-        final instance1 = await SubscriptionService.getInstance();
+        final instance1 = SubscriptionService();
+        await instance1.initialize();
 
         // Act
-        SubscriptionService.resetForTesting();
-        final instance2 = await SubscriptionService.getInstance();
+        final instance2 = SubscriptionService();
+        await instance2.initialize();
 
         // Assert
         expect(instance1, isNot(same(instance2)));

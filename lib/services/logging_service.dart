@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import '../core/errors/error_handler.dart';
 import 'interfaces/logging_service_interface.dart';
 
 // LogLevel は logging_service_interface.dart で定義
@@ -8,33 +7,7 @@ export 'interfaces/logging_service_interface.dart' show LogLevel;
 
 /// アプリケーション全体のロギングサービス
 class LoggingService implements ILoggingService {
-  static LoggingService? _instance;
-
-  LoggingService._();
-
-  /// 非同期ファクトリメソッドでサービスインスタンスを取得
-  @Deprecated('Use ServiceLocator.get<ILoggingService>() instead')
-  static Future<LoggingService> getInstance() async {
-    try {
-      _instance ??= LoggingService._();
-      return _instance!;
-    } catch (error) {
-      throw ErrorHandler.handleError(
-        error,
-        context: 'LoggingService.getInstance',
-      );
-    }
-  }
-
-  /// 同期的なサービスインスタンス取得（事前に初期化済みの場合のみ）
-  static LoggingService get instance {
-    if (_instance == null) {
-      throw StateError(
-        'LoggingService has not been initialized. Call getInstance() first.',
-      );
-    }
-    return _instance!;
-  }
+  LoggingService();
 
   /// デバッグログ
   @override

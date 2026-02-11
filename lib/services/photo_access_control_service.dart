@@ -7,17 +7,10 @@ import '../core/service_locator.dart';
 ///
 /// プランに基づいた写真へのアクセス可否を判定する
 class PhotoAccessControlService implements IPhotoAccessControlService {
-  // シングルトンパターン
-  static PhotoAccessControlService? _instance;
   ILoggingService? _logger;
 
-  PhotoAccessControlService._();
-
-  @Deprecated('Use ServiceLocator.get<IPhotoAccessControlService>() instead')
-  static PhotoAccessControlService getInstance() {
-    _instance ??= PhotoAccessControlService._();
-    return _instance!;
-  }
+  /// DI用の公開コンストラクタ
+  PhotoAccessControlService();
 
   /// LoggingServiceを取得（遅延初期化）
   ILoggingService _getLogger() {

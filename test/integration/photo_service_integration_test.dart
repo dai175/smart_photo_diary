@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'test_helpers/integration_test_helpers.dart';
 import 'mocks/mock_services.dart';
@@ -20,7 +22,9 @@ void main() {
 
     setUp(() async {
       // Initialize PhotoService with real implementation
-      photoService = PhotoService.getInstance();
+      photoService = PhotoService(
+        logger: serviceLocator.get<ILoggingService>(),
+      );
     });
 
     group('getPhotosForDate - Real Implementation', () {

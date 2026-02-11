@@ -3,7 +3,6 @@ import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
-import '../../services/logging_service.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 import 'error_severity.dart';
@@ -19,7 +18,7 @@ class ErrorDisplayService {
 
   ILoggingService? get loggingService {
     try {
-      _loggingService ??= LoggingService.instance;
+      _loggingService ??= serviceLocator.get<ILoggingService>();
       return _loggingService;
     } catch (e) {
       // LoggingServiceが初期化されていない場合

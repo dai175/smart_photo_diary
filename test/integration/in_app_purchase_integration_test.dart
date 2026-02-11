@@ -29,9 +29,6 @@ void main() {
       // 各テスト前にHiveボックスをクリア
       await HiveTestHelpers.clearSubscriptionBox();
 
-      // SubscriptionServiceインスタンスをリセット
-      SubscriptionService.resetForTesting();
-
       // ServiceLocator新規作成
       serviceLocator = ServiceLocator();
     });
@@ -54,9 +51,11 @@ void main() {
       late ISubscriptionService subscriptionService;
 
       setUp(() async {
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });
@@ -126,9 +125,11 @@ void main() {
       late ISubscriptionService subscriptionService;
 
       setUp(() async {
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });
@@ -209,9 +210,11 @@ void main() {
       late ISubscriptionService subscriptionService;
 
       setUp(() async {
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });
@@ -305,9 +308,11 @@ void main() {
       late ISubscriptionService subscriptionService;
 
       setUp(() async {
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });
@@ -379,9 +384,11 @@ void main() {
       late ISubscriptionService subscriptionService;
 
       setUp(() async {
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });

@@ -20,6 +20,7 @@ import '../services/interfaces/prompt_service_interface.dart';
 import '../services/prompt_service.dart';
 import '../services/social_share_service.dart';
 import '../services/interfaces/social_share_service_interface.dart';
+import '../services/diary_image_generator.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -106,7 +107,7 @@ class ServiceRegistration {
   /// Register services that don't have dependencies
   static Future<void> _registerCoreServices() async {
     // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
-    final loggingService = await LoggingService.getInstance();
+    final loggingService = LoggingService();
     serviceLocator.registerSingleton<ILoggingService>(loggingService);
 
     _logger.debug(
@@ -115,14 +116,19 @@ class ServiceRegistration {
     );
 
     // 2. SubscriptionService (Hive依存のみ、LoggingServiceに後で依存)
-    serviceLocator.registerAsyncFactory<ISubscriptionService>(
-      () => SubscriptionService.getInstance(),
-    );
+    serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+      final service = SubscriptionService();
+      // インターフェースのinitialize()でHiveボックス等の初期化を実行
+      await service.initialize();
+      return service;
+    });
 
     // 3. SettingsService (SubscriptionServiceに依存)
-    serviceLocator.registerAsyncFactory<ISettingsService>(
-      () => SettingsService.getInstance(),
-    );
+    serviceLocator.registerAsyncFactory<ISettingsService>(() async {
+      final service = SettingsService();
+      await service.initialize();
+      return service;
+    });
 
     // 4. PhotoService (LoggingServiceに依存)
     serviceLocator.registerFactory<IPhotoService>(
@@ -136,13 +142,11 @@ class ServiceRegistration {
 
     // 6. PhotoAccessControlService (依存なし)
     serviceLocator.registerFactory<IPhotoAccessControlService>(
-      () => PhotoAccessControlService.getInstance(),
+      () => PhotoAccessControlService(),
     );
 
     // 7. StorageService (DiaryServiceに依存するが、最適化機能のみ)
-    serviceLocator.registerFactory<IStorageService>(
-      () => StorageService.getInstance(),
-    );
+    serviceLocator.registerFactory<IStorageService>(() => StorageService());
 
     // 8. PromptService (JSONアセット読み込み - 依存なし)
     serviceLocator.registerAsyncFactory<IPromptService>(() async {
@@ -153,7 +157,12 @@ class ServiceRegistration {
 
     // 9. SocialShareService (LoggingServiceに依存)
     serviceLocator.registerFactory<ISocialShareService>(
-      () => SocialShareService.getInstance(),
+      () => SocialShareService(),
+    );
+
+    // 10. DiaryImageGenerator (ソーシャル共有用画像生成)
+    serviceLocator.registerFactory<DiaryImageGenerator>(
+      () => DiaryImageGenerator(),
     );
 
     // X共有はSocialShareService内のチャネルで対応（別登録不要）

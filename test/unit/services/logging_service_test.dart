@@ -5,9 +5,8 @@ import 'package:smart_photo_diary/services/interfaces/logging_service_interface.
 void main() {
   late LoggingService logger;
 
-  setUp(() async {
-    // ignore: deprecated_member_use_from_same_package
-    logger = await LoggingService.getInstance();
+  setUp(() {
+    logger = LoggingService();
   });
 
   group('LoggingService', () {

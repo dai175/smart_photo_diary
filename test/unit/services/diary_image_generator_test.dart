@@ -32,7 +32,7 @@ void main() {
     // LoggingServiceを登録
     testServiceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
-    generator = DiaryImageGenerator.getInstance();
+    generator = DiaryImageGenerator();
 
     // テスト用のDiaryEntryを作成
     final now = DateTime.now();
@@ -69,11 +69,12 @@ void main() {
   });
 
   group('DiaryImageGenerator Tests', () {
-    test('getInstance returns singleton instance', () {
-      final instance1 = DiaryImageGenerator.getInstance();
-      final instance2 = DiaryImageGenerator.getInstance();
+    test('constructor returns new instance', () {
+      final instance1 = DiaryImageGenerator();
+      final instance2 = DiaryImageGenerator();
 
-      expect(instance1, same(instance2));
+      expect(instance1, isA<DiaryImageGenerator>());
+      expect(instance2, isA<DiaryImageGenerator>());
     });
 
     test('generateImage calls logging service on start', () async {
@@ -165,7 +166,7 @@ void main() {
   group('DiaryImageGenerator Constants Tests', () {
     test('internal constants are within reasonable ranges', () {
       // シングルトンインスタンスを取得
-      final generator = DiaryImageGenerator.getInstance();
+      final generator = DiaryImageGenerator();
 
       // インスタンスが正常に作成されることを確認
       expect(generator, isNotNull);

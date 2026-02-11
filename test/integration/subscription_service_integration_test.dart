@@ -26,9 +26,6 @@ void main() {
       // 各テスト前にHiveボックスをクリア
       await HiveTestHelpers.clearSubscriptionBox();
 
-      // SubscriptionServiceインスタンスをリセット
-      SubscriptionService.resetForTesting();
-
       // ServiceLocator新規作成
       serviceLocator = ServiceLocator();
     });
@@ -50,9 +47,11 @@ void main() {
     group('Phase 1.5.3.1: Service Registration動作確認', () {
       test('ServiceLocatorにISubscriptionServiceが正しく登録される', () async {
         // Arrange & Act
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         // Assert
         expect(serviceLocator.isRegistered<ISubscriptionService>(), isTrue);
@@ -64,9 +63,11 @@ void main() {
 
       test('ServiceLocatorからISubscriptionServiceのインスタンスを取得できる', () async {
         // Arrange
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         // Act
         final service = await serviceLocator.getAsync<ISubscriptionService>();
@@ -79,9 +80,11 @@ void main() {
 
       test('複数回の取得で同じシングルトンインスタンスが返される', () async {
         // Arrange
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         // Act
         final service1 = await serviceLocator.getAsync<ISubscriptionService>();
@@ -95,9 +98,11 @@ void main() {
 
       test('ServiceLocator登録後に初期化が正常に完了する', () async {
         // Arrange
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         // Act
         final service =
@@ -117,9 +122,11 @@ void main() {
 
       test('依存注入を使った他サービスとの連携確認', () async {
         // Arrange - 複数サービスを登録
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         // Mock他サービスを登録（実際の統合では実サービスを使用）
         serviceLocator.registerSingleton<String>('test-dependency');
@@ -140,9 +147,11 @@ void main() {
 
       test('サービス登録の初期化順序が正しく動作する', () async {
         // Arrange - 複数の非同期ファクトリを登録
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         // 他の依存サービスもモック登録
         serviceLocator.registerSingleton<int>(42);
@@ -167,9 +176,11 @@ void main() {
 
       test('登録解除と再登録が正常に動作する', () async {
         // Arrange
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         final service1 = await serviceLocator.getAsync<ISubscriptionService>();
         expect(service1, isNotNull);
@@ -178,12 +189,11 @@ void main() {
         serviceLocator.clear();
         expect(serviceLocator.isRegistered<ISubscriptionService>(), isFalse);
 
-        // SubscriptionServiceもリセット（新しいインスタンス用）
-        SubscriptionService.resetForTesting();
-
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         final service2 = await serviceLocator.getAsync<ISubscriptionService>();
 
@@ -203,9 +213,11 @@ void main() {
 
       setUp(() async {
         // ServiceLocator経由でサービスを取得
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });
@@ -400,9 +412,11 @@ void main() {
       late ISubscriptionService subscriptionService;
 
       setUp(() async {
-        serviceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
         subscriptionService = await serviceLocator
             .getAsync<ISubscriptionService>();
       });
@@ -422,8 +436,8 @@ void main() {
         // ここでは基本的な操作が適切にResult<T>パターンでエラーを返すことを確認
 
         // 新しいインスタンスを作成してテスト
-        SubscriptionService.resetForTesting();
-        final newSubscriptionService = await SubscriptionService.getInstance();
+        final newSubscriptionService = SubscriptionService();
+        await newSubscriptionService.initialize();
         final newStatus = await newSubscriptionService.getCurrentStatus();
         expect(newStatus.isSuccess, isTrue); // 新しいボックスで正常動作
       });
@@ -553,7 +567,11 @@ void main() {
           // 新しいServiceLocatorを作成
           final testServiceLocator = ServiceLocator();
           testServiceLocator.registerAsyncFactory<ISubscriptionService>(
-            () async => await SubscriptionService.getInstance(),
+            () async {
+              final service = SubscriptionService();
+              await service.initialize();
+              return service;
+            },
           );
 
           final testService = await testServiceLocator
@@ -582,9 +600,11 @@ void main() {
       test('完全なライフサイクルテスト: 登録→使用→プラン変更→リセット', () async {
         // 1. Service Registration
         final testServiceLocator = ServiceLocator();
-        testServiceLocator.registerAsyncFactory<ISubscriptionService>(
-          () async => await SubscriptionService.getInstance(),
-        );
+        testServiceLocator.registerAsyncFactory<ISubscriptionService>(() async {
+          final service = SubscriptionService();
+          await service.initialize();
+          return service;
+        });
 
         final service = await testServiceLocator
             .getAsync<ISubscriptionService>();
