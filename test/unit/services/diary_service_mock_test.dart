@@ -317,7 +317,7 @@ void main() {
         final morningTime = DateTime(2024, 1, 15, 8); // 8 AM
 
         // Assert - Test time-based logic
-        expect(morningTime.hour >= 6 && morningTime.hour < 12, isTrue);
+        expect(morningTime.hour >= 5 && morningTime.hour < 12, isTrue);
       });
 
       test('should identify afternoon time correctly', () {
@@ -341,7 +341,7 @@ void main() {
         final nightTime = DateTime(2024, 1, 15, 23); // 11 PM
 
         // Assert - Test time-based logic
-        expect(nightTime.hour >= 22 || nightTime.hour < 6, isTrue);
+        expect(nightTime.hour >= 22 || nightTime.hour < 5, isTrue);
       });
 
       test('should generate appropriate fallback tag based on time', () {
@@ -357,7 +357,7 @@ void main() {
           String actualTag;
           final hour = dateTime.hour;
 
-          if (hour >= 6 && hour < 12) {
+          if (hour >= 5 && hour < 12) {
             actualTag = '朝';
           } else if (hour >= 12 && hour < 18) {
             actualTag = '昼';
