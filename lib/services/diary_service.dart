@@ -440,20 +440,22 @@ class DiaryService implements IDiaryService {
     }
   }
 
-  // フォールバックタグを生成
+  // フォールバックタグを生成（ロケール対応）
   List<String> _generateFallbackTags(DiaryEntry entry) {
     final tags = <String>[];
+    final locale = _getCurrentLocale();
+    final isEnglish = locale.languageCode == 'en';
 
     // 時間帯タグのみ
     final hour = entry.date.hour;
     if (hour >= 5 && hour < 12) {
-      tags.add('朝');
+      tags.add(isEnglish ? 'Morning' : '朝');
     } else if (hour >= 12 && hour < 18) {
-      tags.add('昼');
+      tags.add(isEnglish ? 'Afternoon' : '昼');
     } else if (hour >= 18 && hour < 22) {
-      tags.add('夕方');
+      tags.add(isEnglish ? 'Evening' : '夕方');
     } else {
-      tags.add('夜');
+      tags.add(isEnglish ? 'Night' : '夜');
     }
 
     return tags;
