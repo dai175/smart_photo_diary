@@ -50,14 +50,14 @@ class DiaryDetailMetadataSection extends StatelessWidget {
             _buildMetadataRow(
               context,
               l10n.commonCreatedAtLabel,
-              context.l10n.formatFullDateTime(diaryEntry.createdAt),
+              l10n.formatFullDateTime(diaryEntry.createdAt),
               Icons.access_time_rounded,
             ),
             const SizedBox(height: AppSpacing.sm),
             _buildMetadataRow(
               context,
               l10n.commonUpdatedAtLabel,
-              context.l10n.formatFullDateTime(diaryEntry.updatedAt),
+              l10n.formatFullDateTime(diaryEntry.updatedAt),
               Icons.update_rounded,
             ),
             if (diaryEntry.effectiveTags.isNotEmpty) ...[

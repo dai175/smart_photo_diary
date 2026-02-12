@@ -406,6 +406,7 @@ class PhotoQueryService {
       );
 
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
         filterOption: filterOption,
       );
 
@@ -531,7 +532,7 @@ class PhotoQueryService {
     }
   }
 
-  /// 効率的な写真取得（Result版）
+  /// 効率的な写真取得（Result版 — エラーを Failure として伝播）
   Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
     DateTime? startDate,
     DateTime? endDate,
@@ -539,12 +540,82 @@ class PhotoQueryService {
     int limit = 30,
   }) async {
     return ResultHelper.tryExecuteAsync(() async {
-      return await getPhotosEfficient(
+      return await _getPhotosEfficientInternal(
         startDate: startDate,
         endDate: endDate,
         offset: offset,
         limit: limit,
       );
     }, context: 'PhotoService.getPhotosEfficientResult');
+  }
+
+  /// 内部実装（例外を伝播 — Result版から呼ばれる）
+  Future<List<AssetEntity>> _getPhotosEfficientInternal({
+    DateTime? startDate,
+    DateTime? endDate,
+    int offset = 0,
+    int limit = 30,
+  }) async {
+    final bool hasPermission = await _requestPermission();
+    if (!hasPermission) {
+      _logger.info(
+        '写真アクセス権限がありません',
+        context: 'PhotoService.getPhotosEfficient',
+      );
+      return [];
+    }
+
+    final FilterOptionGroup filterOption;
+    if (startDate != null || endDate != null) {
+      filterOption = FilterOptionGroup(
+        orders: const [
+          OrderOption(type: OrderOptionType.createDate, asc: false),
+        ],
+        createTimeCond: DateTimeCond(
+          min: startDate ?? DateTime(1970),
+          max: endDate ?? DateTime.now(),
+        ),
+      );
+    } else {
+      filterOption = FilterOptionGroup(
+        orders: const [
+          OrderOption(type: OrderOptionType.createDate, asc: false),
+        ],
+      );
+    }
+
+    final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+      type: RequestType.image,
+      filterOption: filterOption,
+    );
+
+    if (albums.isEmpty) {
+      _logger.debug('アルバムが見つかりません', context: 'PhotoService.getPhotosEfficient');
+      return [];
+    }
+
+    final AssetPathEntity album = albums.first;
+    final int totalCount = await album.assetCountAsync;
+
+    if (offset >= totalCount) {
+      return [];
+    }
+
+    final int actualLimit = (offset + limit > totalCount)
+        ? totalCount - offset
+        : limit;
+
+    final List<AssetEntity> assets = await album.getAssetListRange(
+      start: offset,
+      end: offset + actualLimit,
+    );
+
+    _logger.debug(
+      '写真を効率的に取得しました',
+      context: 'PhotoService.getPhotosEfficient',
+      data: '取得数: ${assets.length}, オフセット: $offset, 制限: $limit',
+    );
+
+    return assets;
   }
 }

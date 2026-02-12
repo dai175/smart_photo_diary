@@ -18,12 +18,24 @@ class PhotoThumbnailWidget extends StatefulWidget {
 }
 
 class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
-  late final Future<typed_data.Uint8List?> _thumbnailFuture;
+  late Future<typed_data.Uint8List?> _thumbnailFuture;
 
   @override
   void initState() {
     super.initState();
-    _thumbnailFuture = widget.asset.thumbnailDataWithSize(
+    _thumbnailFuture = _loadThumbnail();
+  }
+
+  @override
+  void didUpdateWidget(PhotoThumbnailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.asset.id != widget.asset.id) {
+      _thumbnailFuture = _loadThumbnail();
+    }
+  }
+
+  Future<typed_data.Uint8List?> _loadThumbnail() {
+    return widget.asset.thumbnailDataWithSize(
       ThumbnailSize(
         (AppConstants.previewImageSize * 1.2).toInt(),
         (AppConstants.previewImageSize * 1.2).toInt(),

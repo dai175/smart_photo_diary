@@ -62,13 +62,26 @@ class PhotoDataService {
     int width = AppConstants.defaultThumbnailWidth,
     int height = AppConstants.defaultThumbnailHeight,
   }) async {
-    final cacheService = serviceLocator.get<IPhotoCacheService>();
-    return await cacheService.getThumbnail(
-      asset,
-      width: width,
-      height: height,
-      quality: 80,
-    );
+    try {
+      final cacheService = serviceLocator.get<IPhotoCacheService>();
+      return await cacheService.getThumbnail(
+        asset,
+        width: width,
+        height: height,
+        quality: 80,
+      );
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoDataService.getThumbnail',
+      );
+      _logger.error(
+        'サムネイル取得エラー',
+        context: 'PhotoDataService.getThumbnail',
+        error: appError,
+      );
+      return null;
+    }
   }
 
   /// 写真の元画像を取得する

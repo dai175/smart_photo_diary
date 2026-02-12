@@ -57,7 +57,10 @@ class DiaryDetailPhotoSection extends StatelessWidget {
                           ? 0
                           : AppSpacing.md,
                     ),
-                    child: _buildPhotoItem(context, index),
+                    child: _PhotoItem(
+                      asset: photoAssets[index],
+                      onTap: _showPhotoDialog,
+                    ),
                   );
                 },
               ),
@@ -68,71 +71,7 @@ class DiaryDetailPhotoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildPhotoItem(BuildContext context, int index) {
-    return FutureBuilder<Uint8List?>(
-      future: photoAssets[index].thumbnailDataWithSize(
-        ThumbnailSize(
-          (AppConstants.largeImageSize * 1.2).toInt(),
-          (AppConstants.largeImageSize * 1.2).toInt(),
-        ),
-      ),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        return MicroInteractions.bounceOnTap(
-          onTap: () {
-            MicroInteractions.hapticTap();
-            _showPhotoDialog(context, snapshot.data!, index);
-          },
-          child: Container(
-            width: 200,
-            constraints: const BoxConstraints(minHeight: 150, maxHeight: 300),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: ClipRRect(
-              borderRadius: AppSpacing.photoRadius,
-              child: RepaintBoundary(
-                child: Image.memory(
-                  snapshot.data!,
-                  width: 200,
-                  fit: BoxFit.contain,
-                  cacheWidth: (200 * MediaQuery.of(context).devicePixelRatio)
-                      .round(),
-                  gaplessPlayback: true,
-                  filterQuality: FilterQuality.medium,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showPhotoDialog(BuildContext context, Uint8List imageData, int index) {
+  void _showPhotoDialog(BuildContext context, Uint8List imageData) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -194,6 +133,104 @@ class DiaryDetailPhotoSection extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 写真アイテム（FutureをStatefulWidgetでキャッシュ）
+class _PhotoItem extends StatefulWidget {
+  const _PhotoItem({required this.asset, required this.onTap});
+
+  final AssetEntity asset;
+  final void Function(BuildContext context, Uint8List imageData) onTap;
+
+  @override
+  State<_PhotoItem> createState() => _PhotoItemState();
+}
+
+class _PhotoItemState extends State<_PhotoItem> {
+  late Future<Uint8List?> _thumbnailFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _thumbnailFuture = _loadThumbnail();
+  }
+
+  @override
+  void didUpdateWidget(_PhotoItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.asset.id != widget.asset.id) {
+      _thumbnailFuture = _loadThumbnail();
+    }
+  }
+
+  Future<Uint8List?> _loadThumbnail() {
+    return widget.asset.thumbnailDataWithSize(
+      ThumbnailSize(
+        (AppConstants.largeImageSize * 1.2).toInt(),
+        (AppConstants.largeImageSize * 1.2).toInt(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List?>(
+      future: _thumbnailFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: AppSpacing.photoRadius,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return MicroInteractions.bounceOnTap(
+          onTap: () {
+            MicroInteractions.hapticTap();
+            widget.onTap(context, snapshot.data!);
+          },
+          child: Container(
+            width: 200,
+            constraints: const BoxConstraints(minHeight: 150, maxHeight: 300),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: AppSpacing.photoRadius,
+            ),
+            child: ClipRRect(
+              borderRadius: AppSpacing.photoRadius,
+              child: RepaintBoundary(
+                child: Image.memory(
+                  snapshot.data!,
+                  width: 200,
+                  fit: BoxFit.contain,
+                  cacheWidth: (200 * MediaQuery.of(context).devicePixelRatio)
+                      .round(),
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
