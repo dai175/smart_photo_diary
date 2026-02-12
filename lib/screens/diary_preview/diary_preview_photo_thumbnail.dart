@@ -72,6 +72,21 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
                 ),
               );
             }
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: AppSpacing.photoRadius,
+                ),
+                child: Icon(
+                  Icons.broken_image_outlined,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 32,
+                ),
+              );
+            }
             return Container(
               width: 120,
               height: 120,

@@ -1,6 +1,7 @@
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import 'interfaces/logging_service_interface.dart';
+import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
@@ -20,7 +21,10 @@ class PhotoQueryService {
   Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
     final bool hasPermission = await _requestPermission();
     if (!hasPermission) {
-      _logger.info('写真アクセス権限がありません', context: 'PhotoService.getTodayPhotos');
+      _logger.info(
+        '写真アクセス権限がありません',
+        context: 'PhotoQueryService.getTodayPhotos',
+      );
       return [];
     }
 
@@ -51,13 +55,13 @@ class PhotoQueryService {
 
       _logger.debug(
         '取得したアルバム数: ${albums.length}',
-        context: 'PhotoService.getTodayPhotos',
+        context: 'PhotoQueryService.getTodayPhotos',
       );
 
       if (albums.isEmpty) {
         _logger.debug(
           '今日のアルバムが見つかりません',
-          context: 'PhotoService.getTodayPhotos',
+          context: 'PhotoQueryService.getTodayPhotos',
         );
         return [];
       }
@@ -65,7 +69,7 @@ class PhotoQueryService {
       final AssetPathEntity recentAlbum = albums.first;
       _logger.debug(
         'アルバム名: ${recentAlbum.name}',
-        context: 'PhotoService.getTodayPhotos',
+        context: 'PhotoQueryService.getTodayPhotos',
       );
 
       final List<AssetEntity> assets = await recentAlbum.getAssetListRange(
@@ -75,18 +79,18 @@ class PhotoQueryService {
 
       _logger.info(
         '今日の写真を取得しました',
-        context: 'PhotoService.getTodayPhotos',
+        context: 'PhotoQueryService.getTodayPhotos',
         data: '取得数: ${assets.length}枚',
       );
       return assets;
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getTodayPhotos',
+        context: 'PhotoQueryService.getTodayPhotos',
       );
       _logger.error(
         '写真取得エラー',
-        context: 'PhotoService.getTodayPhotos',
+        context: 'PhotoQueryService.getTodayPhotos',
         error: appError,
       );
       return [];
@@ -103,7 +107,7 @@ class PhotoQueryService {
     if (!hasPermission) {
       _logger.info(
         '写真アクセス権限がありません',
-        context: 'PhotoService.getPhotosInDateRange',
+        context: 'PhotoQueryService.getPhotosInDateRange',
       );
       return [];
     }
@@ -113,7 +117,7 @@ class PhotoQueryService {
       if (startDate.isAfter(now)) {
         _logger.warning(
           '開始日が未来の日付です',
-          context: 'PhotoService.getPhotosInDateRange',
+          context: 'PhotoQueryService.getPhotosInDateRange',
           data: 'startDate: $startDate',
         );
         return [];
@@ -138,7 +142,7 @@ class PhotoQueryService {
 
       _logger.debug(
         '日付範囲: $localStartDate - $localEndDate (ローカルタイムゾーン)',
-        context: 'PhotoService.getPhotosInDateRange',
+        context: 'PhotoQueryService.getPhotosInDateRange',
       );
 
       final FilterOptionGroup filterOption = FilterOptionGroup(
@@ -156,7 +160,7 @@ class PhotoQueryService {
       if (albums.isEmpty) {
         _logger.debug(
           '指定期間のアルバムが見つかりません',
-          context: 'PhotoService.getPhotosInDateRange',
+          context: 'PhotoQueryService.getPhotosInDateRange',
         );
         return [];
       }
@@ -174,7 +178,7 @@ class PhotoQueryService {
           if (createDate.year < 1970 || createDate.isAfter(now)) {
             _logger.warning(
               '不正な作成日時の写真をスキップ',
-              context: 'PhotoService.getPhotosInDateRange',
+              context: 'PhotoQueryService.getPhotosInDateRange',
               data: 'createDate: $createDate, assetId: ${asset.id}',
             );
             continue;
@@ -193,23 +197,9 @@ class PhotoQueryService {
               localCreateDate.isAfter(localEndDate)) {
             _logger.debug(
               'タイムゾーン調整後、日付範囲外の写真をスキップ',
-              context: 'PhotoService.getPhotosInDateRange',
+              context: 'PhotoQueryService.getPhotosInDateRange',
               data:
                   'createDate: $localCreateDate, range: $localStartDate - $localEndDate',
-            );
-            continue;
-          }
-
-          final thumbnail = await asset.thumbnailDataWithSize(
-            const ThumbnailSize(100, 100),
-            quality: 50,
-          );
-
-          if (thumbnail == null || thumbnail.isEmpty) {
-            _logger.warning(
-              'サムネイルを取得できない写真をスキップ',
-              context: 'PhotoService.getPhotosInDateRange',
-              data: 'assetId: ${asset.id}',
             );
             continue;
           }
@@ -218,7 +208,7 @@ class PhotoQueryService {
         } catch (e) {
           _logger.warning(
             '写真の検証中にエラーが発生',
-            context: 'PhotoService.getPhotosInDateRange',
+            context: 'PhotoQueryService.getPhotosInDateRange',
             data: 'assetId: ${asset.id}, error: $e',
           );
           continue;
@@ -227,7 +217,7 @@ class PhotoQueryService {
 
       _logger.info(
         '写真を取得しました',
-        context: 'PhotoService.getPhotosInDateRange',
+        context: 'PhotoQueryService.getPhotosInDateRange',
         data: '全${assets.length}枚中、有効${validAssets.length}枚',
       );
 
@@ -235,11 +225,11 @@ class PhotoQueryService {
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getPhotosInDateRange',
+        context: 'PhotoQueryService.getPhotosInDateRange',
       );
       _logger.error(
         '写真取得エラー',
-        context: 'PhotoService.getPhotosInDateRange',
+        context: 'PhotoQueryService.getPhotosInDateRange',
         error: appError,
       );
       return [];
@@ -254,7 +244,10 @@ class PhotoQueryService {
   }) async {
     final bool hasPermission = await _requestPermission();
     if (!hasPermission) {
-      _logger.info('写真アクセス権限がありません', context: 'PhotoService.getPhotosForDate');
+      _logger.info(
+        '写真アクセス権限がありません',
+        context: 'PhotoQueryService.getPhotosForDate',
+      );
       return [];
     }
 
@@ -272,7 +265,7 @@ class PhotoQueryService {
 
       _logger.debug(
         '指定日の写真を検索',
-        context: 'PhotoService.getPhotosForDate',
+        context: 'PhotoQueryService.getPhotosForDate',
         data:
             '日付: $date, オフセット: $offset, 制限: $limit, 検索範囲: $startOfDay - $endOfDay (ローカルタイムゾーン)',
       );
@@ -291,13 +284,13 @@ class PhotoQueryService {
 
       _logger.debug(
         '取得したアルバム数: ${albums.length}',
-        context: 'PhotoService.getPhotosForDate',
+        context: 'PhotoQueryService.getPhotosForDate',
       );
 
       if (albums.isEmpty) {
         _logger.debug(
           '指定日のアルバムが見つかりません',
-          context: 'PhotoService.getPhotosForDate',
+          context: 'PhotoQueryService.getPhotosForDate',
         );
         return [];
       }
@@ -306,14 +299,14 @@ class PhotoQueryService {
       final int totalCount = await album.assetCountAsync;
       _logger.debug(
         'アルバム情報',
-        context: 'PhotoService.getPhotosForDate',
+        context: 'PhotoQueryService.getPhotosForDate',
         data: 'アルバム名: ${album.name}, 総写真数: $totalCount',
       );
 
       if (offset >= totalCount) {
         _logger.debug(
           'オフセットが総数を超えています',
-          context: 'PhotoService.getPhotosForDate',
+          context: 'PhotoQueryService.getPhotosForDate',
           data: 'オフセット: $offset, 総数: $totalCount',
         );
         return [];
@@ -345,7 +338,7 @@ class PhotoQueryService {
           } else {
             _logger.debug(
               'タイムゾーン調整後、異なる日付の写真をスキップ',
-              context: 'PhotoService.getPhotosForDate',
+              context: 'PhotoQueryService.getPhotosForDate',
               data:
                   'expected: ${date.toIso8601String()}, actual: ${localCreateDate.toIso8601String()}',
             );
@@ -353,7 +346,7 @@ class PhotoQueryService {
         } catch (e) {
           _logger.warning(
             '写真の日付確認中にエラー',
-            context: 'PhotoService.getPhotosForDate',
+            context: 'PhotoQueryService.getPhotosForDate',
             data: 'assetId: ${asset.id}, error: $e',
           );
           validAssets.add(asset);
@@ -362,7 +355,7 @@ class PhotoQueryService {
 
       _logger.info(
         '指定日の写真を取得しました',
-        context: 'PhotoService.getPhotosForDate',
+        context: 'PhotoQueryService.getPhotosForDate',
         data:
             '取得数: ${validAssets.length}枚（元: ${assets.length}枚）, 取得範囲: $offset - ${offset + actualLimit}',
       );
@@ -371,11 +364,11 @@ class PhotoQueryService {
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getPhotosForDate',
+        context: 'PhotoQueryService.getPhotosForDate',
       );
       _logger.error(
         '写真取得エラー',
-        context: 'PhotoService.getPhotosForDate',
+        context: 'PhotoQueryService.getPhotosForDate',
         error: appError,
       );
       return [];
@@ -396,7 +389,7 @@ class PhotoQueryService {
   }) async {
     final bool hasPermission = await _requestPermission();
     if (!hasPermission) {
-      _logger.info('写真アクセス権限がありません', context: 'PhotoService.getAllPhotos');
+      _logger.info('写真アクセス権限がありません', context: 'PhotoQueryService.getAllPhotos');
       return [];
     }
 
@@ -412,11 +405,14 @@ class PhotoQueryService {
 
       _logger.debug(
         '取得したアルバム数: ${albums.length}',
-        context: 'PhotoService.getAllPhotos',
+        context: 'PhotoQueryService.getAllPhotos',
       );
 
       if (albums.isEmpty) {
-        _logger.debug('アルバムが見つかりません', context: 'PhotoService.getAllPhotos');
+        _logger.debug(
+          'アルバムが見つかりません',
+          context: 'PhotoQueryService.getAllPhotos',
+        );
         return [];
       }
 
@@ -428,18 +424,18 @@ class PhotoQueryService {
 
       _logger.info(
         'すべての写真を取得しました',
-        context: 'PhotoService.getAllPhotos',
+        context: 'PhotoQueryService.getAllPhotos',
         data: 'アルバム名: ${album.name}, 取得数: ${assets.length}枚',
       );
       return assets;
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getAllPhotos',
+        context: 'PhotoQueryService.getAllPhotos',
       );
       _logger.error(
         '写真取得エラー',
-        context: 'PhotoService.getAllPhotos',
+        context: 'PhotoQueryService.getAllPhotos',
         error: appError,
       );
       return [];
@@ -457,7 +453,7 @@ class PhotoQueryService {
     if (!hasPermission) {
       _logger.info(
         '写真アクセス権限がありません',
-        context: 'PhotoService.getPhotosEfficient',
+        context: 'PhotoQueryService.getPhotosEfficient',
       );
       return [];
     }
@@ -490,7 +486,7 @@ class PhotoQueryService {
       if (albums.isEmpty) {
         _logger.debug(
           'アルバムが見つかりません',
-          context: 'PhotoService.getPhotosEfficient',
+          context: 'PhotoQueryService.getPhotosEfficient',
         );
         return [];
       }
@@ -513,7 +509,7 @@ class PhotoQueryService {
 
       _logger.debug(
         '写真を効率的に取得しました',
-        context: 'PhotoService.getPhotosEfficient',
+        context: 'PhotoQueryService.getPhotosEfficient',
         data: '取得数: ${assets.length}, オフセット: $offset, 制限: $limit',
       );
 
@@ -521,11 +517,11 @@ class PhotoQueryService {
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getPhotosEfficient',
+        context: 'PhotoQueryService.getPhotosEfficient',
       );
       _logger.error(
         '写真取得エラー',
-        context: 'PhotoService.getPhotosEfficient',
+        context: 'PhotoQueryService.getPhotosEfficient',
         error: appError,
       );
       return [];
@@ -546,7 +542,7 @@ class PhotoQueryService {
         offset: offset,
         limit: limit,
       );
-    }, context: 'PhotoService.getPhotosEfficientResult');
+    }, context: 'PhotoQueryService.getPhotosEfficientResult');
   }
 
   /// 内部実装（例外を伝播 — Result版から呼ばれる）
@@ -558,11 +554,10 @@ class PhotoQueryService {
   }) async {
     final bool hasPermission = await _requestPermission();
     if (!hasPermission) {
-      _logger.info(
+      throw const PhotoAccessException(
         '写真アクセス権限がありません',
-        context: 'PhotoService.getPhotosEfficient',
+        details: 'Permission denied',
       );
-      return [];
     }
 
     final FilterOptionGroup filterOption;
@@ -590,7 +585,10 @@ class PhotoQueryService {
     );
 
     if (albums.isEmpty) {
-      _logger.debug('アルバムが見つかりません', context: 'PhotoService.getPhotosEfficient');
+      _logger.debug(
+        'アルバムが見つかりません',
+        context: 'PhotoQueryService.getPhotosEfficient',
+      );
       return [];
     }
 
@@ -612,7 +610,7 @@ class PhotoQueryService {
 
     _logger.debug(
       '写真を効率的に取得しました',
-      context: 'PhotoService.getPhotosEfficient',
+      context: 'PhotoQueryService.getPhotosEfficient',
       data: '取得数: ${assets.length}, オフセット: $offset, 制限: $limit',
     );
 

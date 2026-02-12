@@ -21,11 +21,11 @@ class PhotoDataService {
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getPhotoData',
+        context: 'PhotoDataService.getPhotoData',
       );
       _logger.error(
         '写真データ取得エラー',
-        context: 'PhotoService.getPhotoData',
+        context: 'PhotoDataService.getPhotoData',
         error: appError,
       );
       return null;
@@ -45,11 +45,11 @@ class PhotoDataService {
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getThumbnailData',
+        context: 'PhotoDataService.getThumbnailData',
       );
       _logger.error(
         'サムネイルデータ取得エラー',
-        context: 'PhotoService.getThumbnailData',
+        context: 'PhotoDataService.getThumbnailData',
         error: appError,
       );
       return null;
@@ -91,11 +91,11 @@ class PhotoDataService {
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
-        context: 'PhotoService.getOriginalFile',
+        context: 'PhotoDataService.getOriginalFile',
       );
       _logger.error(
         '元画像取得エラー',
-        context: 'PhotoService.getOriginalFile',
+        context: 'PhotoDataService.getOriginalFile',
         error: appError,
       );
       return null;
