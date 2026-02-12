@@ -136,7 +136,7 @@ class TimelineScrollManager {
 
     // 連続トリガー（軽いデバウンス）
     Timer(
-      Duration(
+      const Duration(
         milliseconds: TimelineScrollConstants.scrollCheckIntervalMs ~/ 2,
       ),
       () {
@@ -184,7 +184,9 @@ class TimelineScrollManager {
 
     // 遅延チェック（レイアウト完了を待つ）
     Future.delayed(
-      Duration(milliseconds: TimelineScrollConstants.layoutCompleteDelayMs),
+      const Duration(
+        milliseconds: TimelineScrollConstants.layoutCompleteDelayMs,
+      ),
       () {
         if (isMounted()) {
           _performPhotoCheck();
@@ -194,7 +196,7 @@ class TimelineScrollManager {
 
     // さらなる遅延チェック（完全な初期化を待つ）
     Future.delayed(
-      Duration(
+      const Duration(
         milliseconds: TimelineScrollConstants.initializationCompleteDelayMs,
       ),
       () {

@@ -38,7 +38,7 @@ class OnboardingFeaturesPage extends StatelessWidget {
           color: AppColors.primary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(
+        child: const Icon(
           Icons.auto_awesome_motion_rounded,
           size: 50,
           color: AppColors.primary,

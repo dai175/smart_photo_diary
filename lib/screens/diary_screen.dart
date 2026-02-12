@@ -178,7 +178,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 // アクティブフィルタ表示（AppBar直下に固定されないようスリバーとして配置）
                 SliverToBoxAdapter(
                   child: Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
                       vertical: AppSpacing.sm,
                     ),
@@ -197,11 +197,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 // フッター：追加読み込みインジケータ
                 SliverToBoxAdapter(
                   child: _controller.isLoadingMore
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(
                             vertical: AppSpacing.lg,
                           ),
-                          child: const Center(
+                          child: Center(
                             child: SizedBox(
                               width: AppConstants.diaryListFooterSpinnerSize,
                               height: AppConstants.diaryListFooterSpinnerSize,

@@ -144,7 +144,7 @@ class MockSubscriptionService implements ISubscriptionService {
         ),
       );
     }
-    return Success(null);
+    return const Success(null);
   }
 
   @override
@@ -172,7 +172,7 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Stream<PurchaseResult> get purchaseStream {
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   @override

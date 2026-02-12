@@ -134,7 +134,7 @@ class PhotoGridSelectionIndicator extends StatelessWidget {
 
   Widget _buildIcon() {
     if (isUsed) {
-      return Icon(Icons.done_rounded, color: AppColors.warning, size: 18);
+      return const Icon(Icons.done_rounded, color: AppColors.warning, size: 18);
     }
     return Icon(
       isSelected
@@ -193,7 +193,7 @@ class PhotoGridPermissionRequest extends StatelessWidget {
             color: AppColors.warning.withValues(alpha: 0.1),
             borderRadius: AppSpacing.cardRadius,
           ),
-          child: Icon(
+          child: const Icon(
             Icons.photo_camera_outlined,
             size: AppSpacing.iconLg,
             color: AppColors.warning,
@@ -337,11 +337,11 @@ class PhotoThumbnailPlaceholder extends StatelessWidget {
     return Container(
       height: AppConstants.photoThumbnailSize,
       width: AppConstants.photoThumbnailSize,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.surfaceVariant,
         borderRadius: AppSpacing.photoRadius,
       ),
-      child: Center(
+      child: const Center(
         child: SizedBox(
           width: 20,
           height: 20,
@@ -393,7 +393,7 @@ class PhotoGridItemWrapper extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             curve: Curves.easeOutCubic,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.transparent,
               borderRadius: AppSpacing.photoRadius,
             ),

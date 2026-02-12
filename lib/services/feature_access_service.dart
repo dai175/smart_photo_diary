@@ -60,7 +60,7 @@ class FeatureAccessService
   Future<Result<bool>> canAccessWritingPrompts() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -143,7 +143,7 @@ class FeatureAccessService
   Future<Result<bool>> canAccessDataExport() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -192,7 +192,7 @@ class FeatureAccessService
   Future<Result<Map<String, bool>>> getFeatureAccess() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -246,7 +246,7 @@ class FeatureAccessService
   Future<Result<bool>> _checkFeatureAccess(String featureName) async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }

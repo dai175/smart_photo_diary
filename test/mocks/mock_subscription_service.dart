@@ -244,7 +244,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -259,7 +259,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<void>> refreshStatus() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -285,7 +285,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<Plan>> getCurrentPlanClass() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -312,7 +312,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canUseAiGeneration() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -329,7 +329,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<void>> incrementAiUsage() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -342,7 +342,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<int>> getRemainingGenerations() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -359,7 +359,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<int>> getMonthlyUsage() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -370,7 +370,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<void>> resetUsage() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -406,7 +406,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<DateTime>> getNextResetDate() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -427,7 +427,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -444,7 +444,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canAccessWritingPrompts() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -461,7 +461,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canAccessAdvancedFilters() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -478,7 +478,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canAccessAdvancedAnalytics() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -495,7 +495,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> canAccessPrioritySupport() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -520,7 +520,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -531,7 +531,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<PurchaseProduct?>> getProductPrice(String planId) async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -548,7 +548,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -559,7 +559,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<bool>> validatePurchase(String transactionId) async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -575,7 +575,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<PurchaseResult>> purchasePlanClass(Plan plan) async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -626,7 +626,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<void>> changePlanClass(Plan newPlan) async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }
@@ -640,7 +640,7 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Future<Result<void>> cancelSubscription() async {
     if (!_isInitialized) {
-      return Failure(
+      return const Failure(
         ServiceException('MockSubscriptionService is not initialized'),
       );
     }

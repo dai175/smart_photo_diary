@@ -368,7 +368,7 @@ class StorageSettingsSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning_amber_rounded,
                 size: AppSpacing.iconSm,
                 color: AppColors.warning,
@@ -412,7 +412,7 @@ class StorageSettingsSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_rounded,
                 size: AppSpacing.iconSm,
                 color: AppColors.error,

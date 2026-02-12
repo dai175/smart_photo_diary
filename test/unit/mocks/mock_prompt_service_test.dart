@@ -604,19 +604,19 @@ void main() {
         mockService.addMockUsageHistory(
           PromptUsageHistory(
             promptId: 'recent_001',
-            usedAt: now.subtract(Duration(hours: 1)),
+            usedAt: now.subtract(const Duration(hours: 1)),
           ),
         );
         mockService.addMockUsageHistory(
           PromptUsageHistory(
             promptId: 'recent_002',
-            usedAt: now.subtract(Duration(hours: 2)),
+            usedAt: now.subtract(const Duration(hours: 2)),
           ),
         );
         mockService.addMockUsageHistory(
           PromptUsageHistory(
             promptId: 'old_001',
-            usedAt: now.subtract(Duration(days: 10)),
+            usedAt: now.subtract(const Duration(days: 10)),
           ),
         );
 
@@ -646,19 +646,19 @@ void main() {
         mockService.addMockUsageHistory(
           PromptUsageHistory(
             promptId: 'frequent_001',
-            usedAt: now.subtract(Duration(days: 1)),
+            usedAt: now.subtract(const Duration(days: 1)),
           ),
         );
         mockService.addMockUsageHistory(
           PromptUsageHistory(
             promptId: 'frequent_001',
-            usedAt: now.subtract(Duration(days: 2)),
+            usedAt: now.subtract(const Duration(days: 2)),
           ),
         );
         mockService.addMockUsageHistory(
           PromptUsageHistory(
             promptId: 'frequent_002',
-            usedAt: now.subtract(Duration(days: 3)),
+            usedAt: now.subtract(const Duration(days: 3)),
           ),
         );
 

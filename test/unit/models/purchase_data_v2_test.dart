@@ -277,7 +277,7 @@ void main() {
       });
 
       test('既存PurchaseResultから正しく変換される（エラー時）', () {
-        final legacy = PurchaseResult(
+        final legacy = const PurchaseResult(
           status: PurchaseStatus.error,
           errorMessage: 'Legacy error',
         );

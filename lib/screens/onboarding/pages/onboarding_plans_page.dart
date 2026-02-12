@@ -39,7 +39,7 @@ class OnboardingPlansPage extends StatelessWidget {
           color: AppColors.primary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(
+        child: const Icon(
           Icons.workspace_premium_rounded,
           size: 50,
           color: AppColors.primary,

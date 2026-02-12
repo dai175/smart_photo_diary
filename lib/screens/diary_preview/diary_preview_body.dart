@@ -211,7 +211,7 @@ class DiaryPreviewBody extends StatelessWidget {
                   color: AppColors.error.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.error_outline_rounded,
                   color: AppColors.error,
                   size: AppSpacing.iconLg,

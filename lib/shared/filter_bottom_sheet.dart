@@ -117,7 +117,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.filterDateSelectionError),
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -254,10 +254,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         )
                       : _availableTags.isEmpty
                       ? Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           child: Text(
                             context.l10n.filterNoTags,
-                            style: TextStyle(color: Colors.grey),
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         )
                       : Wrap(

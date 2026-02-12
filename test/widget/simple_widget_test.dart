@@ -29,7 +29,7 @@ void main() {
             body: Center(
               child: CustomDialog(
                 title: 'Test Dialog',
-                content: Text('This is test content'),
+                content: const Text('This is test content'),
                 actions: [CustomDialogAction(text: 'OK', onPressed: () {})],
               ),
             ),
@@ -54,7 +54,7 @@ void main() {
                 onPressed: () {
                   tapped = true;
                 },
-                child: Text('Tap me'),
+                child: const Text('Tap me'),
               ),
             ),
           ),
@@ -76,7 +76,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: Center(
               child: CustomCard(
@@ -102,14 +102,14 @@ void main() {
             length: 2,
             child: Scaffold(
               appBar: AppBar(
-                bottom: TabBar(
+                bottom: const TabBar(
                   tabs: [
                     Tab(text: '今日'),
                     Tab(text: '過去'),
                   ],
                 ),
               ),
-              body: TabBarView(
+              body: const TabBarView(
                 children: [
                   Center(child: Text('今日のコンテンツ')),
                   Center(child: Text('過去のコンテンツ')),
@@ -146,9 +146,9 @@ void main() {
                     width: 100,
                     height: 100,
                     color: Colors.grey,
-                    child: Center(child: Text('Photo')),
+                    child: const Center(child: Text('Photo')),
                   ),
-                  Positioned(
+                  const Positioned(
                     top: 4,
                     right: 4,
                     child: Icon(
@@ -177,15 +177,18 @@ void main() {
           home: Scaffold(
             body: Center(
               child: Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: Colors.orange),
-                    SizedBox(width: 8),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Premiumプランで過去365日の写真にアクセス',
@@ -213,14 +216,17 @@ void main() {
           home: Scaffold(
             body: Center(
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(
                     tester.element(find.byType(Container).first),
                   ).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.check_circle, size: 20),

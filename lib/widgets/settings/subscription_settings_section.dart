@@ -309,7 +309,7 @@ class _SubscriptionSettingsSectionState
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.warning_amber_rounded,
             color: AppColors.warning,
             size: AppSpacing.iconSm,
@@ -342,7 +342,7 @@ class _SubscriptionSettingsSectionState
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.lightbulb_outline_rounded,
             color: AppColors.info,
             size: AppSpacing.iconSm,
@@ -438,7 +438,7 @@ class _SubscriptionSettingsSectionState
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.info_outline_rounded,
                 size: AppSpacing.iconXs,
                 color: AppColors.info,
@@ -501,7 +501,7 @@ class _SubscriptionSettingsSectionState
           width: 6,
           height: 6,
           margin: const EdgeInsets.only(top: 6),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.primary,
             shape: BoxShape.circle,
           ),

@@ -46,7 +46,7 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(borderRadius: AppSpacing.photoRadius),
+      decoration: const BoxDecoration(borderRadius: AppSpacing.photoRadius),
       child: ClipRRect(
         borderRadius: AppSpacing.photoRadius,
         child: FutureBuilder<typed_data.Uint8List?>(
@@ -76,7 +76,7 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
               return Container(
                 width: 120,
                 height: 120,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.surfaceVariant,
                   borderRadius: AppSpacing.photoRadius,
                 ),
@@ -90,7 +90,7 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
             return Container(
               width: 120,
               height: 120,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.surfaceVariant,
                 borderRadius: AppSpacing.photoRadius,
               ),

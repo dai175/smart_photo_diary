@@ -110,11 +110,11 @@ class SubscriptionStatus extends HiveObject {
       // 年額プランと月額プランで有効期限を設定
       if (newPlan.id.contains('yearly')) {
         expiryDate = startDate!.add(
-          Duration(days: SubscriptionConstants.subscriptionYearDays),
+          const Duration(days: SubscriptionConstants.subscriptionYearDays),
         );
       } else {
         expiryDate = startDate!.add(
-          Duration(days: SubscriptionConstants.subscriptionMonthDays),
+          const Duration(days: SubscriptionConstants.subscriptionMonthDays),
         );
       }
 
@@ -325,10 +325,10 @@ class SubscriptionStatus extends HiveObject {
 
     final expiryDate = plan.id.contains('yearly')
         ? startDate.add(
-            Duration(days: SubscriptionConstants.subscriptionYearDays),
+            const Duration(days: SubscriptionConstants.subscriptionYearDays),
           )
         : startDate.add(
-            Duration(days: SubscriptionConstants.subscriptionMonthDays),
+            const Duration(days: SubscriptionConstants.subscriptionMonthDays),
           );
 
     return SubscriptionStatus(

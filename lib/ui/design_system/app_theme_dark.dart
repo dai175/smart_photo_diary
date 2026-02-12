@@ -89,7 +89,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
             ),
 
     // Card Theme
-    cardTheme: CardThemeData(
+    cardTheme: const CardThemeData(
       color: AppColors.surfaceDark,
       elevation: AppSpacing.elevationSm,
       shadowColor: Colors.black54,
@@ -104,7 +104,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         foregroundColor: AppColors.onBackground,
         elevation: AppSpacing.elevationSm,
         shadowColor: Colors.black54,
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
         padding: AppSpacing.buttonPadding,
         textStyle: AppTypography.button,
         minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -116,7 +118,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primaryLight,
         side: const BorderSide(color: AppColors.primaryLight),
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
         padding: AppSpacing.buttonPadding,
         textStyle: AppTypography.button,
         minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -127,7 +131,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primaryLight,
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
         padding: AppSpacing.buttonPaddingSmall,
         textStyle: AppTypography.button,
       ),
@@ -145,24 +151,24 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.primaryDark,
-      border: OutlineInputBorder(
+      border: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: AppColors.primaryLight,
           width: InputConstants.borderWidthFocused,
         ),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(color: AppColors.error),
+        borderSide: BorderSide(color: AppColors.error),
       ),
       contentPadding: AppSpacing.inputPadding,
       labelStyle: AppTypography.withColor(
@@ -196,7 +202,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         AppTypography.tag,
         AppColors.primaryLight,
       ),
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
+      shape: const RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
@@ -220,12 +226,12 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     ),
 
     // Tab Bar Theme (Dark)
-    tabBarTheme: TabBarThemeData(
+    tabBarTheme: const TabBarThemeData(
       labelColor: AppColors.primaryLight,
       unselectedLabelColor: AppColors.onSurfaceVariant,
       labelStyle: AppTypography.labelLarge,
       unselectedLabelStyle: AppTypography.labelLarge,
-      indicator: const UnderlineTabIndicator(
+      indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
           color: AppColors.primaryLight,
           width: TabConstants.indicatorThickness,
@@ -237,7 +243,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surfaceDark,
       elevation: AppSpacing.elevationLg,
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadiusLarge),
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppSpacing.cardRadiusLarge,
+      ),
       titleTextStyle: AppTypography.withColor(
         AppTypography.headlineSmall,
         AppColors.onSurfaceDark,
@@ -255,7 +263,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         AppTypography.bodyMedium,
         AppColors.surfaceDark,
       ),
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppSpacing.buttonRadius,
+      ),
       behavior: SnackBarBehavior.floating,
     ),
   );

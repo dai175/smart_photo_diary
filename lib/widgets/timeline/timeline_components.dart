@@ -130,7 +130,7 @@ class TimelineSelectionIndicator extends StatelessWidget {
         boxShadow: shouldDimPhoto
             ? null
             : [
-                BoxShadow(
+                const BoxShadow(
                   color: _shadowColor,
                   blurRadius: _shadowBlurRadius,
                   offset: _shadowOffset,

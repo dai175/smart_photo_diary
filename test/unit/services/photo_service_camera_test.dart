@@ -71,7 +71,7 @@ void main() {
 
       test('カメラアクセス拒否時は適切なエラーを返す', () async {
         // Arrange
-        final error = PhotoAccessException('カメラの権限が拒否されています');
+        final error = const PhotoAccessException('カメラの権限が拒否されています');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),
@@ -89,7 +89,7 @@ void main() {
 
       test('デバイスでカメラが利用不可時は適切なエラーを返す', () async {
         // Arrange
-        final error = PhotoAccessException('カメラが利用できません');
+        final error = const PhotoAccessException('カメラが利用できません');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),
@@ -107,7 +107,7 @@ void main() {
 
       test('ストレージ容量不足時は適切なエラーを返す', () async {
         // Arrange
-        final error = PhotoAccessException('ストレージ容量が不足しています');
+        final error = const PhotoAccessException('ストレージ容量が不足しています');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),
@@ -124,7 +124,7 @@ void main() {
 
       test('その他のシステムエラー時は適切なエラーを返す', () async {
         // Arrange
-        final error = ServiceException('予期しないシステムエラーが発生しました');
+        final error = const ServiceException('予期しないシステムエラーが発生しました');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),
@@ -177,7 +177,7 @@ void main() {
 
       test('権限チェック処理エラー時は適切なエラーを返す', () async {
         // Arrange
-        final error = ServiceException('権限チェック処理中にエラーが発生しました');
+        final error = const ServiceException('権限チェック処理中にエラーが発生しました');
         final errorResult = ResultHelper.failure<bool>(error);
         when(
           () => mockPhotoService.requestCameraPermission(),
@@ -231,7 +231,7 @@ void main() {
 
       test('権限チェック処理エラー時は適切なエラーを返す', () async {
         // Arrange
-        final error = ServiceException('権限チェック処理中にエラーが発生しました');
+        final error = const ServiceException('権限チェック処理中にエラーが発生しました');
         final errorResult = ResultHelper.failure<bool>(error);
         when(
           () => mockPhotoService.isCameraPermissionDenied(),
@@ -282,7 +282,7 @@ void main() {
         // Arrange
         final deniedResult = ResultHelper.success<bool>(true);
         final captureErrorResult = ResultHelper.failure<AssetEntity?>(
-          PhotoAccessException('カメラ権限が拒否されています'),
+          const PhotoAccessException('カメラ権限が拒否されています'),
         );
 
         when(
@@ -337,7 +337,7 @@ void main() {
     group('エラーハンドリング詳細テスト', () {
       test('カメラビジー状態の処理', () async {
         // Arrange
-        final error = PhotoAccessException('カメラがビジー状態です');
+        final error = const PhotoAccessException('カメラがビジー状態です');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),
@@ -354,7 +354,7 @@ void main() {
 
       test('ネットワークエラーの処理（クラウド同期等）', () async {
         // Arrange
-        final error = ServiceException('ネットワークエラーが発生しました');
+        final error = const ServiceException('ネットワークエラーが発生しました');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),
@@ -371,7 +371,7 @@ void main() {
 
       test('予期しない例外の処理', () async {
         // Arrange
-        final error = ServiceException('予期しないフォーマットエラーが発生しました');
+        final error = const ServiceException('予期しないフォーマットエラーが発生しました');
         final errorResult = ResultHelper.failure<AssetEntity?>(error);
         when(
           () => mockPhotoService.capturePhoto(),

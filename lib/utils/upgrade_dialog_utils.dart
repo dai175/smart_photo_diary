@@ -245,11 +245,11 @@ class UpgradeDialogUtils {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(AppSpacing.md),
             ),
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: AppSpacing.md),
+                CircularProgressIndicator(),
+                SizedBox(height: AppSpacing.md),
                 Text('Loading prices...', style: AppTypography.bodyMedium),
               ],
             ),
