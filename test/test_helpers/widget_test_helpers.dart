@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'mock_platform_channels.dart';
 
@@ -11,6 +12,21 @@ class WidgetTestHelpers {
     return MaterialApp(
       theme: theme ?? ThemeData(useMaterial3: true),
       home: Scaffold(body: child),
+    );
+  }
+
+  /// Wrap a widget with MaterialApp + l10n delegates for testing
+  static Widget wrapWithLocalizedApp(
+    Widget child, {
+    ThemeData? theme,
+    Locale? locale,
+  }) {
+    return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: locale ?? const Locale('en'),
+      theme: theme ?? ThemeData(useMaterial3: true),
+      home: child,
     );
   }
 

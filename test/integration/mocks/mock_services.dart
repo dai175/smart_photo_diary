@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:mocktail/mocktail.dart';
@@ -11,6 +12,8 @@ import 'package:smart_photo_diary/services/interfaces/settings_service_interface
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_statistics_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/models/diary_change.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
@@ -50,6 +53,9 @@ class MockIDiaryTagService extends Mock implements IDiaryTagService {}
 class MockIDiaryStatisticsService extends Mock
     implements IDiaryStatisticsService {}
 
+/// Mock LoggingService for integration testing
+class MockILoggingService extends Mock implements ILoggingService {}
+
 /// Mock AssetEntity for integration testing
 class MockAssetEntity extends Mock implements AssetEntity {}
 
@@ -63,12 +69,18 @@ class MockImageClassifier extends Mock {}
 
 /// Central service mock setup for consistent testing
 class TestServiceSetup {
+  static MockILoggingService? _mockLoggingService;
   static MockIPhotoService? _mockPhotoService;
   static MockIAiService? _mockAiService;
   static MockIDiaryService? _mockDiaryService;
   static MockSubscriptionServiceInterface? _mockSubscriptionService;
   static MockSettingsService? _mockSettingsService;
   static MockStorageService? _mockStorageService;
+
+  /// Get or create mock LoggingService with default behavior
+  static MockILoggingService getLoggingService() {
+    return _mockLoggingService ??= _createLoggingServiceMock();
+  }
 
   /// Get or create mock PhotoService with default behavior
   static MockIPhotoService getPhotoService() {
@@ -102,6 +114,7 @@ class TestServiceSetup {
 
   /// Clear all mock instances (for test isolation)
   static void clearAllMocks() {
+    _mockLoggingService = null;
     _mockPhotoService = null;
     _mockAiService = null;
     _mockDiaryService = null;
@@ -113,6 +126,7 @@ class TestServiceSetup {
   /// Set up all services with default mock behavior
   static void setupAllServices() {
     registerMockFallbacks();
+    getLoggingService();
     getPhotoService();
     getAiService();
     getDiaryService();
@@ -122,6 +136,32 @@ class TestServiceSetup {
   }
 
   // Private factory methods with default mock behavior
+  static MockILoggingService _createLoggingServiceMock() {
+    final mock = MockILoggingService();
+
+    when(
+      () => mock.debug(any(), context: any(named: 'context'), data: any(named: 'data')),
+    ).thenReturn(null);
+    when(
+      () => mock.info(any(), context: any(named: 'context'), data: any(named: 'data')),
+    ).thenReturn(null);
+    when(
+      () => mock.warning(any(), context: any(named: 'context'), data: any(named: 'data')),
+    ).thenReturn(null);
+    when(
+      () => mock.error(
+        any(),
+        context: any(named: 'context'),
+        error: any(named: 'error'),
+        stackTrace: any(named: 'stackTrace'),
+      ),
+    ).thenReturn(null);
+    when(() => mock.startTimer(any(), context: any(named: 'context')))
+        .thenReturn(Stopwatch());
+
+    return mock;
+  }
+
   static MockIPhotoService _createPhotoServiceMock() {
     final mock = MockIPhotoService();
 
@@ -153,6 +193,19 @@ class TestServiceSetup {
     when(
       () => mock.getOriginalFile(any()),
     ).thenAnswer((_) async => 'mock_file_path');
+    when(() => mock.isLimitedAccess()).thenAnswer((_) async => false);
+    when(
+      () => mock.getPhotosEfficient(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        offset: any(named: 'offset'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => []);
+    when(() => mock.isPermissionPermanentlyDenied())
+        .thenAnswer((_) async => false);
+    when(() => mock.capturePhoto())
+        .thenAnswer((_) async => const Success(null));
 
     return mock;
   }
@@ -210,6 +263,9 @@ class TestServiceSetup {
 
   static MockIDiaryService _createDiaryServiceMock() {
     final mock = MockIDiaryService();
+
+    // Stream for diary changes
+    when(() => mock.changes).thenAnswer((_) => const Stream<DiaryChange>.empty());
 
     // Default mock behavior for DiaryService (all methods return Result)
     when(
@@ -469,6 +525,7 @@ class TestServiceSetup {
 /// Helper to register fallback values for mocktail
 void registerMockFallbacks() {
   registerFallbackValue(DateTime.now());
+  registerFallbackValue(Stopwatch());
   registerFallbackValue(MockAssetEntity());
   registerFallbackValue(const Duration(seconds: 1));
   registerFallbackValue(<AssetEntity>[]);
