@@ -25,6 +25,9 @@ import '../models/diary_change.dart';
 import '../localization/localization_extensions.dart';
 import 'dart:async';
 
+part 'home/home_dialogs.dart';
+part 'home/home_data_loader.dart';
+
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
 
@@ -35,7 +38,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+    with
+        WidgetsBindingObserver,
+        SingleTickerProviderStateMixin,
+        _HomeDialogsMixin,
+        _HomeDataLoaderMixin {
   int _currentIndex = 0;
 
   // サービス
@@ -92,32 +99,6 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-  Future<void> _subscribeDiaryChanges() async {
-    try {
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      _diarySub = diaryService.changes.listen((change) {
-        switch (change.type) {
-          case DiaryChangeType.created:
-            _photoController.addUsedPhotoIds(change.addedPhotoIds);
-            break;
-          case DiaryChangeType.updated:
-            if (change.removedPhotoIds.isNotEmpty) {
-              _photoController.removeUsedPhotoIds(change.removedPhotoIds);
-            }
-            if (change.addedPhotoIds.isNotEmpty) {
-              _photoController.addUsedPhotoIds(change.addedPhotoIds);
-            }
-            break;
-          case DiaryChangeType.deleted:
-            _photoController.removeUsedPhotoIds(change.removedPhotoIds);
-            break;
-        }
-      });
-    } catch (_) {
-      // 失敗時はフォールバックで定期的に再読込してもよいが、ここでは無視
-    }
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -125,17 +106,6 @@ class _HomeScreenState extends State<HomeScreen>
       // アプリがフォアグラウンドに戻った時に権限状態をチェック
       _refreshHome();
     }
-  }
-
-  // モーダル表示メソッド
-  void _showSelectionLimitModal() {
-    _showSimpleDialog(
-      context.l10n.photoSelectionLimitMessage(AppConstants.maxPhotosSelection),
-    );
-  }
-
-  void _showUsedPhotoModal() {
-    _showSimpleDialog(context.l10n.photoUsedPhotoMessage);
   }
 
   /// 日記詳細画面を開いた結果を共通で処理
@@ -199,79 +169,6 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  void _showSimpleDialog(String message) {
-    DialogUtils.showSimpleDialog(context, message);
-  }
-
-  // 権限拒否時のダイアログを表示
-  Future<void> _showPermissionDeniedDialog() async {
-    if (!mounted) return;
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomDialog(
-          icon: Icons.photo_library_outlined,
-          iconColor: AppColors.warning,
-          title: context.l10n.homePermissionDialogTitle,
-          message: context.l10n.homePermissionDialogMessage,
-          actions: [
-            CustomDialogAction(
-              text: context.l10n.commonCancel,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            CustomDialogAction(
-              text: context.l10n.commonOpenSettings,
-              isPrimary: true,
-              icon: Icons.settings_rounded,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await openAppSettings();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Limited Access時のダイアログを表示
-  Future<void> _showLimitedAccessDialog() async {
-    if (!mounted) return;
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomDialog(
-          icon: Icons.photo_library_outlined,
-          iconColor: AppColors.info,
-          title: context.l10n.homeLimitedAccessTitle,
-          message: context.l10n.homeLimitedAccessMessage,
-          actions: [
-            CustomDialogAction(
-              text: context.l10n.commonLater,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            CustomDialogAction(
-              text: context.l10n.photoSelectAction,
-              isPrimary: true,
-              icon: Icons.add_photo_alternate_rounded,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final photoService = ServiceRegistration.get<IPhotoService>();
-                await photoService.presentLimitedLibraryPicker();
-                // 選択後に写真を再読み込み
-                _loadTodayPhotos();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // ホーム画面全体のリロード
   Future<void> _refreshHome() async {
     _currentPhotoOffset = 0; // オフセットをリセット
@@ -281,241 +178,64 @@ class _HomeScreenState extends State<HomeScreen>
     await _loadUsedPhotoIds();
   }
 
-  // 使用済み写真IDを読み込む
-  Future<void> _loadUsedPhotoIds() async {
+  // カメラ撮影処理
+  Future<void> _capturePhoto() async {
     try {
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final result = await diaryService.getSortedDiaryEntries();
-      switch (result) {
-        case Success(data: final entries):
-          _collectUsedPhotoIds(entries);
-        case Failure(exception: final e):
-          _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
-      }
-    } catch (e) {
-      _logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
-    }
-  }
-
-  // 使用済み写真IDを収集
-  void _collectUsedPhotoIds(List<DiaryEntry> allEntries) {
-    final usedIds = <String>{};
-    for (final entry in allEntries) {
-      usedIds.addAll(entry.photoIds);
-    }
-    _photoController.setUsedPhotoIds(usedIds);
-  }
-
-  // 統合後のタイムライン写真読み込み
-  Future<void> _loadTodayPhotos() async {
-    if (!mounted) return;
-
-    // 既に権限リクエスト中の場合は処理をスキップ
-    if (_isRequestingPermission) {
-      return;
-    }
-
-    _isRequestingPermission = true;
-    _photoController.setLoading(true);
-
-    try {
-      // 権限リクエスト
       final photoService = ServiceRegistration.get<IPhotoService>();
-      final hasPermission = await photoService.requestPermission();
 
-      if (!mounted) return;
+      _logger.info('カメラ撮影を開始（FABから）', context: 'HomeScreen._capturePhoto');
 
-      _photoController.setPermission(hasPermission);
+      // カメラで撮影（権限チェックはcapturePhoto内で実行）
+      final captureResult = await photoService.capturePhoto();
 
-      if (!hasPermission) {
-        _photoController.setLoading(false);
-        // 権限が拒否された場合は説明ダイアログを表示
-        await _showPermissionDeniedDialog();
+      if (captureResult.isFailure) {
+        _logger.error(
+          'カメラ撮影に失敗（FABから）',
+          context: 'HomeScreen._capturePhoto',
+          error: captureResult.error,
+        );
+
+        if (mounted) {
+          // カメラ権限拒否の場合は設定ダイアログを表示
+          if (captureResult.error.toString().contains('権限が拒否されています')) {
+            await _showCameraPermissionDialog();
+          }
+        }
         return;
       }
 
-      // 統合後：今日を含む過去の写真を全て取得（タイムライン用）
-      final today = DateTime.now();
-      final todayStart = DateTime(today.year, today.month, today.day);
+      final capturedPhoto = captureResult.value;
+      if (capturedPhoto != null) {
+        // 撮影成功：写真を今日の写真コントローラーに追加
+        _logger.info(
+          'カメラ撮影成功（FABから）',
+          context: 'HomeScreen._capturePhoto',
+          data: 'Asset ID: ${capturedPhoto.id}',
+        );
 
-      // プラン制限に応じた過去日数を計算
-      final allowedDays = await _getAllowedDays();
+        // 今日の写真リストを再読み込みして新しい写真を含める
+        await _loadTodayPhotos();
 
-      final photos = await photoService.getPhotosInDateRange(
-        startDate: todayStart.subtract(Duration(days: allowedDays)),
-        endDate: todayStart.add(const Duration(days: 1)), // 今日を含む
-        limit: _photosPerPage, // 初回読み込み分のみ
-      );
+        // 撮影した写真を自動選択状態で追加
+        _photoController.refreshPhotosWithNewCapture(
+          _photoController.photoAssets,
+          capturedPhoto.id,
+        );
 
-      if (!mounted) return;
-
-      // Limited Access で写真が少ない場合は追加選択を提案
-      if (photos.isEmpty) {
-        final isLimited = await photoService.isLimitedAccess();
-        if (isLimited) {
-          await _showLimitedAccessDialog();
+        // 撮影成功のフィードバックを表示
+        if (mounted) {
+          _showCaptureSuccessSnackBar();
         }
-      }
-
-      _photoController.setPhotoAssets(photos);
-      _currentPhotoOffset = photos.length; // 次回読み込み用にオフセット更新
-      // 初回読み込み時点で末尾到達か判定
-      if (photos.length < _photosPerPage) {
-        _photoController.setHasMorePhotos(false);
       } else {
-        _photoController.setHasMorePhotos(true);
-      }
-      _photoController.setLoading(false);
-
-      // 初回描画後にバックグラウンド先読みを即時トリガー
-      // ユーザー体感のスクロール待ち時間を低減
-      if (mounted && _photoController.hasMorePhotos) {
-        Future.microtask(() => _preloadMorePhotos(showLoading: false));
-      }
-    } catch (e) {
-      if (mounted) {
-        _photoController.setPhotoAssets([]);
-        _photoController.setLoading(false);
-      }
-    } finally {
-      _isRequestingPermission = false;
-    }
-  }
-
-  // 追加写真読み込み（無限スクロール用）
-  Future<void> _loadMorePhotos() async {
-    // 先読み版を呼び出し（UIブロッキングあり）
-    await _preloadMorePhotos(showLoading: true);
-  }
-
-  // 日記作成完了時の処理：使用済み写真更新 + Diary画面を再構築
-  Future<void> _onDiaryCreated() async {
-    setState(() {
-      _diaryScreenKey = UniqueKey();
-    });
-    await _loadUsedPhotoIds();
-  }
-
-  // プラン情報を取得
-  Future<int> _getAllowedDays() async {
-    int allowedDays = 1; // デフォルトはBasicプラン
-    try {
-      final subscriptionService =
-          await ServiceRegistration.getAsync<ISubscriptionService>();
-      final planResult = await subscriptionService.getCurrentPlanClass();
-      if (planResult.isSuccess) {
-        final plan = planResult.value;
-        allowedDays = plan.isPremium ? 365 : 1;
+        // キャンセル時
+        _logger.info('カメラ撮影をキャンセル（FABから）', context: 'HomeScreen._capturePhoto');
       }
     } catch (e) {
       _logger.error(
-        'プラン情報取得エラー',
-        error: e,
-        context: 'HomeScreen._getCachedAllowedDays',
-      );
-    }
-
-    return allowedDays;
-  }
-
-  // 先読み機能付き追加写真読み込み（最適化版）
-  Future<void> _preloadMorePhotos({bool showLoading = false}) async {
-    if (!mounted ||
-        _isRequestingPermission ||
-        !_photoController.hasMorePhotos) {
-      if (!showLoading) {
-        _logger.info(
-          '先読みスキップ: mounted=$mounted, requesting=$_isRequestingPermission, hasMore=${_photoController.hasMorePhotos}',
-          context: 'HomeScreen._preloadMorePhotos',
-        );
-      }
-      return;
-    }
-
-    // 既に先読み中の場合はスキップ
-    if (_isPreloading) {
-      if (!showLoading) {
-        _logger.info(
-          '先読みスキップ: 既に先読み中',
-          context: 'HomeScreen._preloadMorePhotos',
-        );
-      }
-      return;
-    }
-
-    _isPreloading = true;
-
-    if (!showLoading) {
-      _logger.info('先読み開始', context: 'HomeScreen._preloadMorePhotos');
-    }
-
-    // UIにローディング状態を反映（必要な場合のみ）
-    if (showLoading) {
-      _photoController.setLoading(true);
-    }
-
-    try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-      final today = DateTime.now();
-      final todayStart = DateTime(today.year, today.month, today.day);
-
-      // プラン情報を取得
-      final allowedDays = await _getAllowedDays();
-
-      // シンプルな先読み戦略
-      final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
-      final requested = _photosPerPage * preloadPages;
-
-      final newPhotos = await photoService.getPhotosEfficient(
-        startDate: todayStart.subtract(Duration(days: allowedDays)),
-        endDate: todayStart.add(const Duration(days: 1)),
-        offset: _currentPhotoOffset,
-        limit: requested,
-      );
-
-      if (!mounted) return;
-
-      final currentCount = _photoController.photoAssets.length;
-
-      if (!showLoading) {
-        _logger.info(
-          '先読み結果: 現在=$currentCount, 新規=${newPhotos.length}, offset=$_currentPhotoOffset, req=$requested',
-          context: 'HomeScreen._preloadMorePhotos',
-        );
-      }
-
-      if (newPhotos.isNotEmpty) {
-        final combined = <AssetEntity>[
-          ..._photoController.photoAssets,
-          ...newPhotos,
-        ];
-        _photoController.setPhotoAssetsPreservingSelection(combined);
-        _currentPhotoOffset += newPhotos.length;
-        // 追加分が要求数に満たない場合は末尾まで到達
-        final reachedEnd = newPhotos.length < requested;
-        _photoController.setHasMorePhotos(!reachedEnd);
-      } else {
-        // 追加なし→これ以上は存在しない
-        _photoController.setHasMorePhotos(false);
-
-        if (!showLoading) {
-          _logger.info(
-            '先読み終了: これ以上写真がありません',
-            context: 'HomeScreen._preloadMorePhotos',
-          );
-        }
-      }
-    } catch (e) {
-      _logger.error(
-        '先読み写真読み込みエラー',
-        context: 'HomeScreen._preloadMorePhotos',
+        'カメラ撮影処理中にエラーが発生（FABから）',
+        context: 'HomeScreen._capturePhoto',
         error: e,
       );
-    } finally {
-      _isPreloading = false;
-      if (showLoading) {
-        _photoController.setLoading(false);
-      }
     }
   }
 
@@ -608,104 +328,6 @@ class _HomeScreenState extends State<HomeScreen>
             items: _buildNavigationItems(),
           ),
         ],
-      ),
-    );
-  }
-
-  // カメラ撮影処理
-  Future<void> _capturePhoto() async {
-    try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-
-      _logger.info('カメラ撮影を開始（FABから）', context: 'HomeScreen._capturePhoto');
-
-      // カメラで撮影（権限チェックはcapturePhoto内で実行）
-      final captureResult = await photoService.capturePhoto();
-
-      if (captureResult.isFailure) {
-        _logger.error(
-          'カメラ撮影に失敗（FABから）',
-          context: 'HomeScreen._capturePhoto',
-          error: captureResult.error,
-        );
-
-        if (mounted) {
-          // カメラ権限拒否の場合は設定ダイアログを表示
-          if (captureResult.error.toString().contains('権限が拒否されています')) {
-            await _showCameraPermissionDialog();
-          }
-        }
-        return;
-      }
-
-      final capturedPhoto = captureResult.value;
-      if (capturedPhoto != null) {
-        // 撮影成功：写真を今日の写真コントローラーに追加
-        _logger.info(
-          'カメラ撮影成功（FABから）',
-          context: 'HomeScreen._capturePhoto',
-          data: 'Asset ID: ${capturedPhoto.id}',
-        );
-
-        // 今日の写真リストを再読み込みして新しい写真を含める
-        await _loadTodayPhotos();
-
-        // 撮影した写真を自動選択状態で追加
-        _photoController.refreshPhotosWithNewCapture(
-          _photoController.photoAssets,
-          capturedPhoto.id,
-        );
-
-        // 撮影成功のフィードバックを表示
-        if (mounted) {
-          _showCaptureSuccessSnackBar();
-        }
-      } else {
-        // キャンセル時
-        _logger.info('カメラ撮影をキャンセル（FABから）', context: 'HomeScreen._capturePhoto');
-      }
-    } catch (e) {
-      _logger.error(
-        'カメラ撮影処理中にエラーが発生（FABから）',
-        context: 'HomeScreen._capturePhoto',
-        error: e,
-      );
-    }
-  }
-
-  // カメラ権限拒否時のダイアログを表示
-  Future<void> _showCameraPermissionDialog() async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => CustomDialog(
-        icon: Icons.camera_alt_outlined,
-        iconColor: Theme.of(context).colorScheme.primary,
-        title: context.l10n.cameraPermissionDialogTitle,
-        message: context.l10n.cameraPermissionDialogMessage,
-        actions: [
-          CustomDialogAction(
-            text: context.l10n.commonCancel,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          CustomDialogAction(
-            text: context.l10n.commonOpenSettings,
-            isPrimary: true,
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await openAppSettings();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 撮影成功のフィードバックを表示
-  void _showCaptureSuccessSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.cameraCaptureSuccess),
-        duration: const Duration(seconds: 2),
       ),
     );
   }
