@@ -1,9 +1,6 @@
-import 'dart:typed_data' as typed_data;
-
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/writing_prompt.dart';
 import '../../ui/components/animated_button.dart';
@@ -12,7 +9,10 @@ import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
-import '../../utils/prompt_category_utils.dart';
+import 'diary_preview_prompt_display.dart';
+import 'diary_preview_photo_thumbnail.dart';
+import 'diary_preview_loading_states.dart';
+import 'diary_preview_editor.dart';
 
 /// 日記プレビュー画面のボディコンテンツ
 ///
@@ -72,13 +72,24 @@ class DiaryPreviewBody extends StatelessWidget {
 
           // ローディング表示（初期化中、日記生成中、または自動保存中）
           if (isInitializing || isLoading || isSaving)
-            _buildLoadingState(context)
+            DiaryPreviewLoadingStates(
+              isInitializing: isInitializing,
+              isSaving: isSaving,
+              isAnalyzingPhotos: isAnalyzingPhotos,
+              currentPhotoIndex: currentPhotoIndex,
+              totalPhotos: totalPhotos,
+              selectedPrompt: selectedPrompt,
+            )
           // エラー表示（初期化完了後のみ）
           else if (!isInitializing && hasError)
             _buildErrorState(context)
           // 日記編集フィールド（初期化完了後、日記生成完了後、自動保存前）
           else if (!isInitializing && !isLoading && !isSaving && !hasError)
-            _buildEditorState(context),
+            DiaryPreviewEditor(
+              titleController: titleController,
+              contentController: contentController,
+              selectedPrompt: selectedPrompt,
+            ),
 
           // 底部パディング
           const SizedBox(height: AppSpacing.md),
@@ -174,203 +185,13 @@ class DiaryPreviewBody extends StatelessWidget {
                           ? AppSpacing.sm
                           : 0,
                     ),
-                    child: _PhotoThumbnailWidget(asset: selectedAssets[index]),
+                    child: PhotoThumbnailWidget(asset: selectedAssets[index]),
                   );
                 },
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  /// ローディング状態を構築
-  Widget _buildLoadingState(BuildContext context) {
-    return FadeInWidget(
-      child: CustomCard(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: AppSpacing.cardPadding,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: const CircularProgressIndicator(strokeWidth: 3),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              if (isAnalyzingPhotos && totalPhotos > 1)
-                _buildAnalyzingProgress(context)
-              else if (isInitializing)
-                _buildInitializingText(context)
-              else if (isSaving)
-                _buildSavingText(context)
-              else
-                _buildGeneratingText(context),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 写真分析進捗を構築
-  Widget _buildAnalyzingProgress(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          context.l10n.diaryPreviewAnalyzingPhotos,
-          style: AppTypography.titleLarge,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.diaryPreviewAnalyzingProgress(
-            currentPhotoIndex,
-            totalPhotos,
-          ),
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Container(
-          width: double.infinity,
-          height: 6,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: totalPhotos > 0 ? currentPhotoIndex / totalPhotos : 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 初期化中テキストを構築
-  Widget _buildInitializingText(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          context.l10n.diaryPreviewInitializingPromptsTitle,
-          style: AppTypography.titleLarge,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.diaryPreviewInitializingPromptsDescription,
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  /// 保存中テキストを構築
-  Widget _buildSavingText(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          context.l10n.diaryPreviewSavingDiaryTitle,
-          style: AppTypography.titleLarge,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.diaryPreviewSavingDiaryDescription,
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  /// 生成中テキストを構築
-  Widget _buildGeneratingText(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          context.l10n.diaryPreviewGeneratingDiaryTitle,
-          style: AppTypography.titleLarge,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.diaryPreviewGeneratingDiaryDescription,
-          style: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        if (selectedPrompt != null) ...[
-          const SizedBox(height: AppSpacing.md),
-          _buildPromptIndicator(context),
-        ],
-      ],
-    );
-  }
-
-  /// 生成中のプロンプトインジケーターを構築
-  Widget _buildPromptIndicator(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: PromptCategoryUtils.getCategoryColor(
-          selectedPrompt!.category,
-        ).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
-        border: Border.all(
-          color: PromptCategoryUtils.getCategoryColor(
-            selectedPrompt!.category,
-          ).withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.edit_note_rounded,
-            size: 16,
-            color: PromptCategoryUtils.getCategoryColor(
-              selectedPrompt!.category,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Flexible(
-            child: Text(
-              selectedPrompt!.text.length > 30
-                  ? '${selectedPrompt!.text.substring(0, 30)}...'
-                  : selectedPrompt!.text,
-              style: AppTypography.bodySmall.copyWith(
-                color: PromptCategoryUtils.getCategoryColor(
-                  selectedPrompt!.category,
-                ),
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -417,285 +238,6 @@ class DiaryPreviewBody extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  /// エディタ状態を構築
-  Widget _buildEditorState(BuildContext context) {
-    return SlideInWidget(
-      delay: const Duration(milliseconds: 200),
-      child: CustomCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildEditorHeader(context),
-            const SizedBox(height: AppSpacing.md),
-            _buildTitleField(context),
-            const SizedBox(height: AppSpacing.sm),
-            _buildContentField(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// エディタヘッダーを構築
-  Widget _buildEditorHeader(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          Icons.edit_rounded,
-          color: Theme.of(context).colorScheme.primary,
-          size: AppSpacing.iconMd,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            context.l10n.diaryPreviewContentSectionTitle,
-            style: AppTypography.titleLarge,
-          ),
-        ),
-        if (selectedPrompt != null)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: PromptCategoryUtils.getCategoryColor(
-                selectedPrompt!.category,
-              ).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(AppSpacing.xs),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.edit_note_rounded,
-                  size: 12,
-                  color: PromptCategoryUtils.getCategoryColor(
-                    selectedPrompt!.category,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  context.l10n.diaryPreviewPromptTag,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: PromptCategoryUtils.getCategoryColor(
-                      selectedPrompt!.category,
-                    ),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// タイトル入力フィールドを構築
-  Widget _buildTitleField(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.outline.withValues(alpha: 0.2)),
-        borderRadius: AppSpacing.inputRadius,
-        color: Theme.of(context).colorScheme.surface,
-      ),
-      child: TextField(
-        controller: titleController,
-        style: AppTypography.titleMedium.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-        decoration: InputDecoration(
-          labelText: context.l10n.diaryPreviewTitleLabel,
-          border: InputBorder.none,
-          hintText: context.l10n.diaryPreviewTitleHint,
-          contentPadding: AppSpacing.inputPadding,
-          labelStyle: AppTypography.labelMedium,
-          hintStyle: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 本文入力フィールドを構築
-  Widget _buildContentField(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.outline.withValues(alpha: 0.2)),
-        borderRadius: AppSpacing.inputRadius,
-        color: Theme.of(context).colorScheme.surface,
-      ),
-      child: TextField(
-        controller: contentController,
-        maxLines: null,
-        minLines: 12,
-        textAlignVertical: TextAlignVertical.top,
-        style: AppTypography.bodyLarge.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-        decoration: InputDecoration(
-          labelText: context.l10n.diaryPreviewContentLabel,
-          hintText: context.l10n.diaryPreviewContentHint,
-          border: InputBorder.none,
-          contentPadding: AppSpacing.inputPadding,
-          labelStyle: AppTypography.labelMedium,
-          hintStyle: AppTypography.bodyMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          alignLabelWithHint: true,
-        ),
-      ),
-    );
-  }
-}
-
-/// 選択されたプロンプトの表示ウィジェット
-class DiaryPreviewPromptDisplay extends StatelessWidget {
-  const DiaryPreviewPromptDisplay({super.key, required this.prompt});
-
-  final WritingPrompt prompt;
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeInWidget(
-      delay: const Duration(milliseconds: 50),
-      child: CustomCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.edit_note_rounded,
-                  color: PromptCategoryUtils.getCategoryColor(prompt.category),
-                  size: AppSpacing.iconMd,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    context.l10n.diaryPreviewCurrentPromptTitle,
-                    style: AppTypography.titleMedium,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PromptCategoryUtils.getCategoryColor(
-                      prompt.category,
-                    ),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                  ),
-                  child: Text(
-                    PromptCategoryUtils.getCategoryDisplayName(
-                      prompt.category,
-                      locale: Localizations.localeOf(context),
-                    ),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              prompt.text,
-              style: AppTypography.bodyMedium.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (prompt.description != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                prompt.description!,
-                style: AppTypography.bodySmall.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 写真サムネイルウィジェット（future をキャッシュして再ビルド時の再取得を防止）
-class _PhotoThumbnailWidget extends StatefulWidget {
-  final AssetEntity asset;
-
-  const _PhotoThumbnailWidget({required this.asset});
-
-  @override
-  State<_PhotoThumbnailWidget> createState() => _PhotoThumbnailWidgetState();
-}
-
-class _PhotoThumbnailWidgetState extends State<_PhotoThumbnailWidget> {
-  late final Future<typed_data.Uint8List?> _thumbnailFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _thumbnailFuture = widget.asset.thumbnailDataWithSize(
-      ThumbnailSize(
-        (AppConstants.previewImageSize * 1.2).toInt(),
-        (AppConstants.previewImageSize * 1.2).toInt(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(borderRadius: AppSpacing.photoRadius),
-      child: ClipRRect(
-        borderRadius: AppSpacing.photoRadius,
-        child: FutureBuilder<typed_data.Uint8List?>(
-          future: _thumbnailFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.data != null) {
-              return Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: AppSpacing.photoRadius,
-                ),
-                child: ClipRRect(
-                  borderRadius: AppSpacing.photoRadius,
-                  child: Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.contain,
-                    width: 120,
-                    height: 120,
-                  ),
-                ),
-              );
-            }
-            return Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: AppSpacing.photoRadius,
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            );
-          },
         ),
       ),
     );
