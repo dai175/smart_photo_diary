@@ -184,7 +184,7 @@ void main() {
         const content = '今日は友達と公園でピクニックをしました。天気も良く、とても楽しい時間を過ごすことができました。';
         final date = DateTime(2024, 1, 15);
         const photoCount = 5;
-        final expectedTags = Success(['公園', 'ピクニック', '友達', '天気', '楽しい']);
+        final expectedTags = const Success(['公園', 'ピクニック', '友達', '天気', '楽しい']);
 
         when(
           () => mockAiService.generateTagsFromContent(
@@ -224,7 +224,7 @@ void main() {
         const content = '短い散歩をしました。';
         final date = DateTime(2024, 1, 15);
         const photoCount = 1;
-        final expectedTags = Success(['散歩', '短時間']);
+        final expectedTags = const Success(['散歩', '短時間']);
 
         when(
           () => mockAiService.generateTagsFromContent(
@@ -254,7 +254,7 @@ void main() {
         const content = '';
         final date = DateTime(2024, 1, 15);
         const photoCount = 0;
-        final expectedTags = Success(<String>[]);
+        final expectedTags = const Success(<String>[]);
 
         when(
           () => mockAiService.generateTagsFromContent(
@@ -283,7 +283,7 @@ void main() {
         const content = '早朝に起きて散歩をしました。';
         final date = DateTime(2024, 1, 15, 6, 0); // Early morning
         const photoCount = 2;
-        final expectedTags = Success(['朝', '早朝', '散歩', '時間']);
+        final expectedTags = const Success(['朝', '早朝', '散歩', '時間']);
 
         when(
           () => mockAiService.generateTagsFromContent(

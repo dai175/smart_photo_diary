@@ -36,7 +36,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
       log('Checking AI generation usage availability', level: LogLevel.debug);
 
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -97,7 +97,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   Future<Result<void>> incrementAiUsage() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -110,7 +110,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
       final status = statusResult.value;
 
       if (!_stateService.isSubscriptionValid(status)) {
-        return Failure(
+        return const Failure(
           ServiceException('Cannot increment usage: subscription is not valid'),
         );
       }
@@ -158,7 +158,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   Future<Result<int>> getRemainingGenerations() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -206,7 +206,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   Future<Result<int>> getMonthlyUsage() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -230,7 +230,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   Future<Result<void>> resetUsage() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -263,7 +263,9 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   Future<void> resetMonthlyUsageIfNeeded() async {
     try {
       if (!_stateService.isInitialized) {
-        throw ServiceException('SubscriptionStateService is not initialized');
+        throw const ServiceException(
+          'SubscriptionStateService is not initialized',
+        );
       }
 
       final statusResult = await _stateService.getCurrentStatus();
@@ -282,7 +284,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   Future<Result<DateTime>> getNextResetDate() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }

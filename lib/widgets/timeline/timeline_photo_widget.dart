@@ -274,9 +274,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         }),
         // 追加読み込みインジケーター（追加写真がある場合のみ）
         if (_scrollManager.isLoadingMore && widget.controller.hasMorePhotos)
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Center(
                 child: SizedBox(
                   width: TimelineLayoutConstants.loadingIndicatorSize,

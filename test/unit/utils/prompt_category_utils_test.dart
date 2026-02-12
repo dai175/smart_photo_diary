@@ -399,7 +399,7 @@ void main() {
 
   group('CategoryStats', () {
     test('calculates ratios correctly', () {
-      final stats = CategoryStats(
+      final stats = const CategoryStats(
         category: PromptCategory.emotion,
         totalPrompts: 10,
         basicPrompts: 3,
@@ -413,7 +413,7 @@ void main() {
     });
 
     test('handles zero prompts correctly', () {
-      final stats = CategoryStats(
+      final stats = const CategoryStats(
         category: PromptCategory.emotionDepth,
         totalPrompts: 0,
         basicPrompts: 0,

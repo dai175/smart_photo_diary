@@ -140,7 +140,7 @@ class AppearanceSettingsSection extends StatelessWidget {
       (choice) => choice.title,
     );
 
-    if (result == null) return;
+    if (result == null || !context.mounted) return;
 
     await _handleLocaleSelection(context, result.locale);
   }

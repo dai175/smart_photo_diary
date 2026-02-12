@@ -117,7 +117,7 @@ void main() {
             offset: any(named: 'offset'),
             limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => Failure(ServiceException('DB error')));
+        ).thenAnswer((_) async => const Failure(ServiceException('DB error')));
 
         final controller = createController();
         await Future.delayed(Duration.zero);
@@ -240,7 +240,7 @@ void main() {
         final controller = createController();
         await Future.delayed(Duration.zero);
 
-        final filter = DiaryFilter(selectedTags: {'旅行'});
+        final filter = const DiaryFilter(selectedTags: {'旅行'});
         controller.applyFilter(filter);
         await Future.delayed(Duration.zero);
 
@@ -261,7 +261,7 @@ void main() {
         final controller = createController();
         await Future.delayed(Duration.zero);
 
-        controller.applyFilter(DiaryFilter(selectedTags: {'旅行'}));
+        controller.applyFilter(const DiaryFilter(selectedTags: {'旅行'}));
         await Future.delayed(Duration.zero);
         expect(controller.currentFilter.isActive, true);
 
@@ -284,7 +284,7 @@ void main() {
         final controller = createController();
         await Future.delayed(Duration.zero);
 
-        controller.applyFilter(DiaryFilter(selectedTags: {'旅行', '食事'}));
+        controller.applyFilter(const DiaryFilter(selectedTags: {'旅行', '食事'}));
         await Future.delayed(Duration.zero);
 
         controller.removeTagFilter('旅行');
@@ -422,7 +422,7 @@ void main() {
         final controller = createController();
         await Future.delayed(Duration.zero);
 
-        controller.applyFilter(DiaryFilter(selectedTags: {'旅行'}));
+        controller.applyFilter(const DiaryFilter(selectedTags: {'旅行'}));
         await Future.delayed(Duration.zero);
 
         final message = controller.getLocalizedEmptyStateMessage(

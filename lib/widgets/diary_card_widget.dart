@@ -191,7 +191,7 @@ class DiaryCardWidget extends StatelessWidget {
           return Container(
             width: AppConstants.diaryThumbnailSize,
             height: AppConstants.diaryThumbnailSize,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.surfaceVariant,
               borderRadius: AppSpacing.photoRadius,
             ),

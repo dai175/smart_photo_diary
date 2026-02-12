@@ -70,7 +70,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
             ),
 
     // Card Theme
-    cardTheme: CardThemeData(
+    cardTheme: const CardThemeData(
       color: AppColors.surface,
       elevation: AppSpacing.elevationSm,
       shadowColor: AppColors.shadow,
@@ -85,7 +85,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
         foregroundColor: Colors.white,
         elevation: AppSpacing.elevationSm,
         shadowColor: AppColors.shadow,
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
         padding: AppSpacing.buttonPadding,
         textStyle: AppTypography.button,
         minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -97,7 +99,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
         side: const BorderSide(color: AppColors.primary),
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
         padding: AppSpacing.buttonPadding,
         textStyle: AppTypography.button,
         minimumSize: const Size(0, AppSpacing.buttonHeightMd),
@@ -108,7 +112,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.buttonRadius,
+        ),
         padding: AppSpacing.buttonPaddingSmall,
         textStyle: AppTypography.button,
       ),
@@ -126,24 +132,24 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surfaceVariant,
-      border: OutlineInputBorder(
+      border: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: AppColors.primary,
           width: InputConstants.borderWidthFocused,
         ),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: const BorderSide(color: AppColors.error),
+        borderSide: BorderSide(color: AppColors.error),
       ),
       contentPadding: AppSpacing.inputPadding,
       labelStyle: AppTypography.bodyMedium,
@@ -172,7 +178,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
         AppTypography.tag,
         AppColors.onPrimaryContainer,
       ),
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
+      shape: const RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
@@ -195,12 +201,12 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     ),
 
     // Tab Bar Theme
-    tabBarTheme: TabBarThemeData(
+    tabBarTheme: const TabBarThemeData(
       labelColor: AppColors.primary,
       unselectedLabelColor: AppColors.onSurfaceVariant,
       labelStyle: AppTypography.labelLarge,
       unselectedLabelStyle: AppTypography.labelLarge,
-      indicator: const UnderlineTabIndicator(
+      indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
           color: AppColors.primary,
           width: TabConstants.indicatorThickness,
@@ -212,7 +218,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surface,
       elevation: AppSpacing.elevationLg,
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadiusLarge),
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppSpacing.cardRadiusLarge,
+      ),
       titleTextStyle: AppTypography.withColor(
         AppTypography.headlineSmall,
         AppColors.onSurface,
@@ -230,7 +238,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
         AppTypography.bodyMedium,
         AppColors.surface,
       ),
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppSpacing.buttonRadius,
+      ),
       behavior: SnackBarBehavior.floating,
     ),
   );

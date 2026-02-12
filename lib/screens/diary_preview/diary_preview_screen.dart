@@ -130,25 +130,30 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
       DiaryGenerationResult result;
 
+      // async gap 前に context 依存の値をキャプチャ
+      final locale = Localizations.localeOf(context);
+      final photoDataErrorMsg = context.l10n.diaryPreviewPhotoDataError;
+
       if (widget.selectedAssets.length == 1) {
         // 単一写真の場合
         final firstAsset = widget.selectedAssets.first;
         final imageData = await _photoService.getOriginalFile(firstAsset);
 
         if (imageData == null) {
-          throw Exception(context.l10n.diaryPreviewPhotoDataError);
+          throw Exception(photoDataErrorMsg);
         }
 
         final resultFromAi = await _aiService.generateDiaryFromImage(
           imageData: imageData,
           date: photoDateTime,
           prompt: _selectedPrompt?.text,
-          locale: Localizations.localeOf(context),
+          locale: locale,
         );
 
         if (resultFromAi.isFailure) {
           if (resultFromAi.error is AiProcessingException &&
               resultFromAi.error.message.contains('月間制限に達しました')) {
+            if (!mounted) return;
             await DiaryPreviewDialogHelper.showUsageLimitDialog(context);
             return;
           }
@@ -173,7 +178,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         }
 
         if (imagesWithTimes.isEmpty) {
-          throw Exception(context.l10n.diaryPreviewPhotoDataError);
+          throw Exception(photoDataErrorMsg);
         }
 
         setState(() {
@@ -195,12 +200,13 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               _totalPhotos = total;
             });
           },
-          locale: Localizations.localeOf(context),
+          locale: locale,
         );
 
         if (resultFromAi.isFailure) {
           if (resultFromAi.error is AiProcessingException &&
               resultFromAi.error.message.contains('月間制限に達しました')) {
+            if (!mounted) return;
             await DiaryPreviewDialogHelper.showUsageLimitDialog(context);
             return;
           }
@@ -402,7 +408,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               await DiaryPreviewDialogHelper.showDiscardConfirmationDialog(
                 context,
               );
-          if (shouldPop && mounted) {
+          if (shouldPop && context.mounted) {
             Navigator.of(context).pop();
           }
         } else {
@@ -488,7 +494,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
 
     return SafeArea(
       child: Container(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),

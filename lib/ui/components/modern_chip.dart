@@ -236,7 +236,7 @@ class _ModernChipState extends State<ModernChip>
   _ChipSizeData _getChipSizeData(ChipSize size) {
     switch (size) {
       case ChipSize.small:
-        return _ChipSizeData(
+        return const _ChipSizeData(
           height: ChipConstants.heightSm,
           horizontalPadding: AppSpacing.sm,
           verticalPadding: AppSpacing.xxs,
@@ -245,7 +245,7 @@ class _ModernChipState extends State<ModernChip>
           textStyle: AppTypography.labelSmall,
         );
       case ChipSize.medium:
-        return _ChipSizeData(
+        return const _ChipSizeData(
           height: ChipConstants.heightMd,
           horizontalPadding: AppSpacing.md,
           verticalPadding: AppSpacing.xs,
@@ -254,7 +254,7 @@ class _ModernChipState extends State<ModernChip>
           textStyle: AppTypography.labelMedium,
         );
       case ChipSize.large:
-        return _ChipSizeData(
+        return const _ChipSizeData(
           height: ChipConstants.heightLg,
           horizontalPadding: AppSpacing.lg,
           verticalPadding: AppSpacing.sm,

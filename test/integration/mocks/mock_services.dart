@@ -203,7 +203,7 @@ class TestServiceSetup {
         date: any(named: 'date'),
         photoCount: any(named: 'photoCount'),
       ),
-    ).thenAnswer((_) async => Success(['mock', 'test', 'generated']));
+    ).thenAnswer((_) async => const Success(['mock', 'test', 'generated']));
 
     return mock;
   }
@@ -223,7 +223,7 @@ class TestServiceSetup {
     ).thenAnswer((_) async => const Success(0));
     when(
       () => mock.getAllTags(),
-    ).thenAnswer((_) async => Success({'mock', 'test', 'tags'}));
+    ).thenAnswer((_) async => const Success({'mock', 'test', 'tags'}));
     when(
       () => mock.getDiaryCountInPeriod(any(), any()),
     ).thenAnswer((_) async => const Success(0));
@@ -239,10 +239,10 @@ class TestServiceSetup {
     ).thenAnswer((_) async => const Success([]));
     when(
       () => mock.getTagsForEntry(any()),
-    ).thenAnswer((_) async => Success(['mock', 'test']));
+    ).thenAnswer((_) async => const Success(['mock', 'test']));
     when(
       () => mock.getPopularTags(limit: any(named: 'limit')),
-    ).thenAnswer((_) async => Success(['mock', 'test']));
+    ).thenAnswer((_) async => const Success(['mock', 'test']));
     when(
       () => mock.saveDiaryEntry(
         date: any(named: 'date'),

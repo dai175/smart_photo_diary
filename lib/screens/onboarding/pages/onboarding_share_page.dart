@@ -37,7 +37,7 @@ class OnboardingSharePage extends StatelessWidget {
           color: AppColors.info.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.share_rounded, size: 50, color: AppColors.info),
+        child: const Icon(Icons.share_rounded, size: 50, color: AppColors.info),
       ),
       const SizedBox(height: AppSpacing.xl),
 

@@ -16,11 +16,9 @@ analyzer:
   errors:
     # Suppress info-level lints for cleaner output in mature codebase
     # These rules provide style guidance but don't indicate actual problems
-    prefer_const_constructors: ignore  # Performance hint, not critical
     prefer_const_declarations: ignore  # Use const for declarations when possible
     avoid_redundant_argument_values: ignore  # Style preference, not error
     unintended_html_in_doc_comment: ignore  # Documentation formatting, not functional issue
-    use_build_context_synchronously: ignore  # Async context usage, handled by mounted checks
     # Migration-related suppressions
     deprecated_member_use: ignore  # Ignore deprecation warnings during migration
     deprecated_member_use_from_same_package: ignore  # Ignore deprecation warnings within the same package
@@ -39,7 +37,7 @@ linter:
   rules:
     # Code Style Consistency
     prefer_single_quotes: true  # Prefer single quotes for strings
-    # prefer_const_constructors: suppressed in analyzer.errors
+    prefer_const_constructors: true  # Flutter widget tree optimization
     # prefer_const_declarations: suppressed in analyzer.errors
     unnecessary_this: true  # Avoid unnecessary use of 'this'
     

@@ -146,13 +146,13 @@ class InAppPurchaseService
   Future<Result<PurchaseProduct?>> getProductPrice(String planId) async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
       if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
+        return const Failure(ServiceException('In-App Purchase not available'));
       }
 
       final plan = PlanFactory.createPlan(planId);
@@ -176,7 +176,7 @@ class InAppPurchaseService
       }
 
       if (response.productDetails.isEmpty) {
-        return Success(null);
+        return const Success(null);
       }
 
       final productDetail = response.productDetails.first;
@@ -211,13 +211,13 @@ class InAppPurchaseService
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
       if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
+        return const Failure(ServiceException('In-App Purchase not available'));
       }
 
       log('Fetching product information...', level: LogLevel.info);
@@ -276,13 +276,13 @@ class InAppPurchaseService
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
       if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
+        return const Failure(ServiceException('In-App Purchase not available'));
       }
 
       log('Starting purchase restoration...', level: LogLevel.info);
@@ -291,7 +291,9 @@ class InAppPurchaseService
 
       log('Purchase restoration initiated', level: LogLevel.info);
 
-      return Success([PurchaseResult(status: iapsi.PurchaseStatus.pending)]);
+      return const Success([
+        PurchaseResult(status: iapsi.PurchaseStatus.pending),
+      ]);
     } catch (e) {
       return _handleError(e, 'restorePurchases');
     }
@@ -301,7 +303,7 @@ class InAppPurchaseService
   Future<Result<bool>> validatePurchase(String transactionId) async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -330,23 +332,25 @@ class InAppPurchaseService
   Future<Result<PurchaseResult>> purchasePlan(Plan plan) async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
       if (_inAppPurchase == null) {
-        return Failure(ServiceException('In-App Purchase not available'));
+        return const Failure(ServiceException('In-App Purchase not available'));
       }
 
       if (_isPurchasing) {
-        return Failure(
+        return const Failure(
           ServiceException('Another purchase is already in progress'),
         );
       }
 
       if (plan.id == BasicPlan().id) {
-        return Failure(ServiceException('Basic plan cannot be purchased'));
+        return const Failure(
+          ServiceException('Basic plan cannot be purchased'),
+        );
       }
 
       log(
@@ -433,7 +437,7 @@ class InAppPurchaseService
 
         if (!success) {
           _isPurchasing = false;
-          return Failure(ServiceException('Failed to initiate purchase'));
+          return const Failure(ServiceException('Failed to initiate purchase'));
         }
 
         log('購入処理が正常に開始されました', level: LogLevel.info, context: 'purchasePlan');
@@ -497,12 +501,12 @@ class InAppPurchaseService
   Future<Result<void>> changePlan(Plan newPlan) async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
-      return Failure(
+      return const Failure(
         ServiceException(
           'Plan change is not yet implemented',
           details: 'This feature will be available in future versions',
@@ -517,7 +521,7 @@ class InAppPurchaseService
   Future<Result<void>> cancelSubscription() async {
     try {
       if (!_stateService.isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }

@@ -66,7 +66,7 @@ class CameraService implements ICameraService {
 
       if (photo == null) {
         _logger.info('カメラ撮影がキャンセルされました', context: 'CameraService.capturePhoto');
-        return Success(null);
+        return const Success(null);
       }
 
       _logger.debug(
@@ -201,7 +201,7 @@ class CameraService implements ICameraService {
             'カメラ権限が永続的に拒否されています。設定アプリでの許可が必要です。',
             context: 'CameraService.requestCameraPermission',
           );
-          return Success(false);
+          return const Success(false);
         }
 
         _logger.debug(

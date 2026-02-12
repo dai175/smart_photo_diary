@@ -8,7 +8,7 @@ void main() {
     group('Success', () {
       test('should create success result', () {
         const value = 'test value';
-        final result = Success(value);
+        final result = const Success(value);
 
         expect(result.isSuccess, true);
         expect(result.isFailure, false);
@@ -19,14 +19,14 @@ void main() {
       test('should get value or default', () {
         const value = 'test value';
         const defaultValue = 'default';
-        final result = Success(value);
+        final result = const Success(value);
 
         expect(result.getOrDefault(defaultValue), value);
       });
 
       test('should execute onSuccess callback', () {
         const value = 'test value';
-        final result = Success(value);
+        final result = const Success(value);
         String? callbackValue;
 
         result.onSuccess((v) => callbackValue = v);
@@ -36,7 +36,7 @@ void main() {
 
       test('should not execute onFailure callback', () {
         const value = 'test value';
-        final result = Success(value);
+        final result = const Success(value);
         bool callbackExecuted = false;
 
         result.onFailure((_) => callbackExecuted = true);
@@ -46,7 +46,7 @@ void main() {
 
       test('should map value successfully', () {
         const value = 'test';
-        final result = Success(value);
+        final result = const Success(value);
 
         final mapped = result.map((v) => v.toUpperCase());
 
@@ -56,7 +56,7 @@ void main() {
 
       test('should fold to success path', () {
         const value = 'test value';
-        final result = Success(value);
+        final result = const Success(value);
 
         final folded = result.fold((v) => 'success: $v', (e) => 'failure: $e');
 
@@ -66,7 +66,7 @@ void main() {
 
     group('Failure', () {
       test('should create failure result', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
 
         expect(result.isSuccess, false);
@@ -77,7 +77,7 @@ void main() {
       });
 
       test('should get default value on failure', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         const defaultValue = 'default';
         final result = Failure<String>(error);
 
@@ -85,7 +85,7 @@ void main() {
       });
 
       test('should not execute onSuccess callback', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
         bool callbackExecuted = false;
 
@@ -95,7 +95,7 @@ void main() {
       });
 
       test('should execute onFailure callback', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
         AppException? callbackError;
 
@@ -105,7 +105,7 @@ void main() {
       });
 
       test('should not map value on failure', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
 
         final mapped = result.map((v) => v.toUpperCase());
@@ -115,7 +115,7 @@ void main() {
       });
 
       test('should fold to failure path', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
 
         final folded = result.fold((v) => 'success: $v', (e) => 'failure: $e');
@@ -124,7 +124,7 @@ void main() {
       });
 
       test('should throw error when accessing value', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
 
         expect(() => result.value, throwsStateError);
@@ -132,7 +132,7 @@ void main() {
 
       test('should throw error when accessing error from success', () {
         const value = 'test';
-        final result = Success(value);
+        final result = const Success(value);
 
         expect(() => result.error, throwsStateError);
       });
@@ -148,7 +148,7 @@ void main() {
       });
 
       test('should create failure result', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = ResultHelper.failure<String>(error);
 
         expect(result.isFailure, true);
@@ -190,7 +190,11 @@ void main() {
       });
 
       test('should combine successful results', () {
-        final results = [Success('a'), Success('b'), Success('c')];
+        final results = [
+          const Success('a'),
+          const Success('b'),
+          const Success('c'),
+        ];
 
         final combined = ResultHelper.combine(results);
 
@@ -199,8 +203,12 @@ void main() {
       });
 
       test('should return first failure when combining', () {
-        final error = ServiceException('test error');
-        final results = [Success('a'), Failure<String>(error), Success('c')];
+        final error = const ServiceException('test error');
+        final results = [
+          const Success('a'),
+          Failure<String>(error),
+          const Success('c'),
+        ];
 
         final combined = ResultHelper.combine(results);
 
@@ -212,7 +220,7 @@ void main() {
         final result = ResultHelper.fromCondition(
           true,
           () => 'success',
-          () => ServiceException('error'),
+          () => const ServiceException('error'),
         );
 
         expect(result.isSuccess, true);
@@ -220,7 +228,7 @@ void main() {
       });
 
       test('should create result from condition - false', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = ResultHelper.fromCondition(
           false,
           () => 'success',
@@ -235,7 +243,7 @@ void main() {
         const value = 'test';
         final result = ResultHelper.fromNullable(
           value,
-          () => ServiceException('null error'),
+          () => const ServiceException('null error'),
         );
 
         expect(result.isSuccess, true);
@@ -243,7 +251,7 @@ void main() {
       });
 
       test('should create result from null value', () {
-        final error = ServiceException('null error');
+        final error = const ServiceException('null error');
         final result = ResultHelper.fromNullable<String>(null, () => error);
 
         expect(result.isFailure, true);
@@ -253,22 +261,22 @@ void main() {
 
     group('Equality', () {
       test('should be equal for same success values', () {
-        final result1 = Success('test');
-        final result2 = Success('test');
+        final result1 = const Success('test');
+        final result2 = const Success('test');
 
         expect(result1, equals(result2));
         expect(result1.hashCode, equals(result2.hashCode));
       });
 
       test('should not be equal for different success values', () {
-        final result1 = Success('test1');
-        final result2 = Success('test2');
+        final result1 = const Success('test1');
+        final result2 = const Success('test2');
 
         expect(result1, isNot(equals(result2)));
       });
 
       test('should be equal for same failure errors', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result1 = Failure<String>(error);
         final result2 = Failure<String>(error);
 
@@ -277,8 +285,8 @@ void main() {
       });
 
       test('should not be equal for success and failure', () {
-        final success = Success('test');
-        final failure = Failure<String>(ServiceException('error'));
+        final success = const Success('test');
+        final failure = const Failure<String>(ServiceException('error'));
 
         expect(success, isNot(equals(failure)));
       });
@@ -286,12 +294,12 @@ void main() {
 
     group('String representation', () {
       test('should show success value in toString', () {
-        final result = Success('test');
+        final result = const Success('test');
         expect(result.toString(), 'Success(test)');
       });
 
       test('should show failure error in toString', () {
-        final error = ServiceException('test error');
+        final error = const ServiceException('test error');
         final result = Failure<String>(error);
         expect(result.toString(), contains('Failure'));
         expect(result.toString(), contains('test error'));
@@ -301,7 +309,7 @@ void main() {
 
   group('FutureResultExtensions', () {
     test('should map async result successfully', () async {
-      Future<Result<String>> futureResult = Future.value(Success('test'));
+      Future<Result<String>> futureResult = Future.value(const Success('test'));
 
       final mapped = await futureResult.mapAsync(
         (value) async => value.toUpperCase(),
@@ -312,7 +320,7 @@ void main() {
     });
 
     test('should chain async results', () async {
-      Future<Result<String>> futureResult = Future.value(Success('test'));
+      Future<Result<String>> futureResult = Future.value(const Success('test'));
 
       final chained = await futureResult.chainAsync((value) async {
         return Success(value.toUpperCase());
@@ -323,9 +331,11 @@ void main() {
     });
 
     test('should get value or null from future result', () async {
-      Future<Result<String>> futureSuccess = Future.value(Success('test'));
+      Future<Result<String>> futureSuccess = Future.value(
+        const Success('test'),
+      );
       Future<Result<String>> futureFailure = Future.value(
-        Failure(ServiceException('error')),
+        const Failure(ServiceException('error')),
       );
 
       final successValue = await futureSuccess.getValueOrNull();
@@ -336,9 +346,11 @@ void main() {
     });
 
     test('should get or default from future result', () async {
-      Future<Result<String>> futureSuccess = Future.value(Success('test'));
+      Future<Result<String>> futureSuccess = Future.value(
+        const Success('test'),
+      );
       Future<Result<String>> futureFailure = Future.value(
-        Failure(ServiceException('error')),
+        const Failure(ServiceException('error')),
       );
 
       final successValue = await futureSuccess.getOrDefault('default');
@@ -352,9 +364,9 @@ void main() {
   group('ListResultExtensions', () {
     test('should get success values only', () {
       final results = [
-        Success('a'),
-        Failure<String>(ServiceException('error')),
-        Success('c'),
+        const Success('a'),
+        const Failure<String>(ServiceException('error')),
+        const Success('c'),
       ];
 
       final successValues = results.getSuccessValues();
@@ -363,10 +375,10 @@ void main() {
     });
 
     test('should get failure errors only', () {
-      final error1 = ServiceException('error1');
-      final error2 = ServiceException('error2');
+      final error1 = const ServiceException('error1');
+      final error2 = const ServiceException('error2');
       final results = [
-        Success('a'),
+        const Success('a'),
         Failure<String>(error1),
         Failure<String>(error2),
       ];
@@ -377,8 +389,15 @@ void main() {
     });
 
     test('should check if all are success', () {
-      final allSuccess = [Success('a'), Success('b'), Success('c')];
-      final mixed = [Success('a'), Failure<String>(ServiceException('error'))];
+      final allSuccess = [
+        const Success('a'),
+        const Success('b'),
+        const Success('c'),
+      ];
+      final mixed = [
+        const Success('a'),
+        const Failure<String>(ServiceException('error')),
+      ];
 
       expect(allSuccess.allSuccess, true);
       expect(mixed.allSuccess, false);
@@ -386,21 +405,24 @@ void main() {
 
     test('should check if all are failure', () {
       final allFailure = [
-        Failure<String>(ServiceException('error1')),
-        Failure<String>(ServiceException('error2')),
+        const Failure<String>(ServiceException('error1')),
+        const Failure<String>(ServiceException('error2')),
       ];
-      final mixed = [Success('a'), Failure<String>(ServiceException('error'))];
+      final mixed = [
+        const Success('a'),
+        const Failure<String>(ServiceException('error')),
+      ];
 
       expect(allFailure.allFailure, true);
       expect(mixed.allFailure, false);
     });
 
     test('should get first failure', () {
-      final error = ServiceException('first error');
+      final error = const ServiceException('first error');
       final results = [
-        Success('a'),
+        const Success('a'),
         Failure<String>(error),
-        Failure<String>(ServiceException('second error')),
+        const Failure<String>(ServiceException('second error')),
       ];
 
       final firstFailure = results.firstFailure;

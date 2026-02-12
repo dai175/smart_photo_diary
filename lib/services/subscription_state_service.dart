@@ -137,7 +137,7 @@ class SubscriptionStateService
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     try {
       if (!_isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -149,7 +149,7 @@ class SubscriptionStateService
           SubscriptionConstants.statusKey,
         );
         if (initialStatus == null) {
-          return Failure(
+          return const Failure(
             ServiceException('Failed to create initial subscription status'),
           );
         }
@@ -171,8 +171,10 @@ class SubscriptionStateService
 
           final expiryDuration =
               forcedPlan.id == SubscriptionConstants.premiumYearlyPlanId
-              ? Duration(days: SubscriptionConstants.subscriptionYearDays)
-              : Duration(days: SubscriptionConstants.subscriptionMonthDays);
+              ? const Duration(days: SubscriptionConstants.subscriptionYearDays)
+              : const Duration(
+                  days: SubscriptionConstants.subscriptionMonthDays,
+                );
 
           final forcedStatus = status.copyWith(
             planId: forcedPlanId,
@@ -198,13 +200,15 @@ class SubscriptionStateService
   Future<Result<void>> updateStatus(SubscriptionStatus status) async {
     try {
       if (!_isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
       if (_subscriptionBox == null) {
-        return Failure(ServiceException('Subscription box is not available'));
+        return const Failure(
+          ServiceException('Subscription box is not available'),
+        );
       }
       await _subscriptionBox!.put(SubscriptionConstants.statusKey, status);
       log('Status updated successfully', level: LogLevel.info);
@@ -221,7 +225,7 @@ class SubscriptionStateService
   Future<Result<void>> refreshStatus() async {
     try {
       if (!_isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -244,7 +248,7 @@ class SubscriptionStateService
   Future<Result<SubscriptionStatus>> createStatusForPlan(Plan plan) async {
     try {
       if (!_isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
@@ -267,10 +271,14 @@ class SubscriptionStateService
       } else {
         final expiryDate = plan.isYearly
             ? now.add(
-                Duration(days: SubscriptionConstants.subscriptionYearDays),
+                const Duration(
+                  days: SubscriptionConstants.subscriptionYearDays,
+                ),
               )
             : now.add(
-                Duration(days: SubscriptionConstants.subscriptionMonthDays),
+                const Duration(
+                  days: SubscriptionConstants.subscriptionMonthDays,
+                ),
               );
 
         newStatus = SubscriptionStatus(
@@ -287,7 +295,9 @@ class SubscriptionStateService
       }
 
       if (_subscriptionBox == null) {
-        return Failure(ServiceException('Subscription box is not available'));
+        return const Failure(
+          ServiceException('Subscription box is not available'),
+        );
       }
       await _subscriptionBox!.put(SubscriptionConstants.statusKey, newStatus);
       log(
@@ -413,7 +423,7 @@ class SubscriptionStateService
   Future<Result<void>> clearStatus() async {
     try {
       if (!_isInitialized) {
-        return Failure(
+        return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }

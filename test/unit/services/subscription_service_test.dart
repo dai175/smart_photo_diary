@@ -250,7 +250,7 @@ void main() {
 
         // 有効期限が月額プラン期間（30日）に設定されている
         final expectedExpiry = status.startDate!.add(
-          Duration(days: SubscriptionConstants.subscriptionMonthDays),
+          const Duration(days: SubscriptionConstants.subscriptionMonthDays),
         );
         expect(
           status.expiryDate!.difference(expectedExpiry).inMinutes.abs(),
@@ -279,7 +279,7 @@ void main() {
 
         // 有効期限が年額プラン期間（365日）に設定されている
         final expectedExpiry = status.startDate!.add(
-          Duration(days: SubscriptionConstants.subscriptionYearDays),
+          const Duration(days: SubscriptionConstants.subscriptionYearDays),
         );
         expect(
           status.expiryDate!.difference(expectedExpiry).inMinutes.abs(),

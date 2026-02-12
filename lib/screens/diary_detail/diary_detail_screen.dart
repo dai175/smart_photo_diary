@@ -369,7 +369,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     }
     return SafeArea(
       child: Container(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),

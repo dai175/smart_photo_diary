@@ -88,6 +88,8 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
   }
 
   Future<void> _showCameraPermissionDialog() async {
+    if (!mounted) return;
+
     await showDialog<void>(
       context: context,
       builder: (context) => CustomDialog(

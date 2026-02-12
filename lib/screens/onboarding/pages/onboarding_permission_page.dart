@@ -41,7 +41,11 @@ class OnboardingPermissionPage extends StatelessWidget {
           color: AppColors.info.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.security_rounded, size: 50, color: AppColors.info),
+        child: const Icon(
+          Icons.security_rounded,
+          size: 50,
+          color: AppColors.info,
+        ),
       ),
       const SizedBox(height: AppSpacing.xl),
 
@@ -92,7 +96,7 @@ class OnboardingPermissionPage extends StatelessWidget {
                     color: AppColors.success.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.verified_user_rounded,
                     size: 20,
                     color: AppColors.success,

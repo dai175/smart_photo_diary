@@ -56,7 +56,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
                 onPressed: onClear,
                 child: Text(
                   context.l10n.filterActiveClearAll,
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ],
@@ -137,7 +137,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
         ).colorScheme.onSurface.withValues(alpha: AppConstants.opacityMedium),
       ),
       label: Text(label, style: AppTypography.labelSmall),
-      deleteIcon: Icon(Icons.close, size: AppSpacing.iconXs),
+      deleteIcon: const Icon(Icons.close, size: AppSpacing.iconXs),
       onDeleted: onRemove,
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer
           .withValues(alpha: AppConstants.opacityLow),

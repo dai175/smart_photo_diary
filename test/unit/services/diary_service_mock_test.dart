@@ -382,7 +382,7 @@ void main() {
             date: any(named: 'date'),
             photoCount: any(named: 'photoCount'),
           ),
-        ).thenAnswer((_) async => Success(['mock-tag']));
+        ).thenAnswer((_) async => const Success(['mock-tag']));
 
         // Act & Assert - Verify mock is properly configured
         expect(mockAiService, isA<IAiService>());

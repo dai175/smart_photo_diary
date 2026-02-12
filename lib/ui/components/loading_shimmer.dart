@@ -246,7 +246,7 @@ class CardShimmer extends StatelessWidget {
         width: width,
         height: height,
         margin: AppSpacing.cardMargin,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surfaceVariant,
           borderRadius: AppSpacing.cardRadius,
         ),
@@ -269,7 +269,7 @@ class AvatarShimmer extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surfaceVariant,
           shape: BoxShape.circle,
         ),
@@ -334,16 +334,16 @@ class ListItemShimmer extends StatelessWidget {
         child: Row(
           children: [
             if (showAvatar) ...[
-              AvatarShimmer(enabled: false, size: TileConstants.sizeMd),
+              const AvatarShimmer(enabled: false, size: TileConstants.sizeMd),
               const SizedBox(width: AppSpacing.lg),
             ],
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextShimmer(enabled: false, width: 150, height: 16),
-                  const SizedBox(height: AppSpacing.xs),
+                  SizedBox(height: AppSpacing.xs),
                   TextShimmer(enabled: false, width: 100, height: 12),
                 ],
               ),
@@ -379,7 +379,7 @@ class DiaryCardShimmer extends StatelessWidget {
       child: Container(
         margin: AppSpacing.cardMargin,
         padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surfaceVariant,
           borderRadius: AppSpacing.cardRadius,
         ),
@@ -387,23 +387,31 @@ class DiaryCardShimmer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 日付
-            TextShimmer(enabled: false, width: 120, height: 14),
+            const TextShimmer(enabled: false, width: 120, height: 14),
             const SizedBox(height: AppSpacing.sm),
 
             // タイトル
-            TextShimmer(enabled: false, width: 200, height: 18),
+            const TextShimmer(enabled: false, width: 200, height: 18),
             const SizedBox(height: AppSpacing.lg),
 
             // 画像
-            ImageShimmer(enabled: false, width: double.infinity, height: 150),
+            const ImageShimmer(
+              enabled: false,
+              width: double.infinity,
+              height: 150,
+            ),
             const SizedBox(height: AppSpacing.lg),
 
             // 本文
-            TextShimmer(enabled: false, width: double.infinity, height: 14),
+            const TextShimmer(
+              enabled: false,
+              width: double.infinity,
+              height: 14,
+            ),
             const SizedBox(height: AppSpacing.xs),
-            TextShimmer(enabled: false, width: 250, height: 14),
+            const TextShimmer(enabled: false, width: 250, height: 14),
             const SizedBox(height: AppSpacing.xs),
-            TextShimmer(enabled: false, width: 180, height: 14),
+            const TextShimmer(enabled: false, width: 180, height: 14),
             const SizedBox(height: AppSpacing.lg),
 
             // タグ

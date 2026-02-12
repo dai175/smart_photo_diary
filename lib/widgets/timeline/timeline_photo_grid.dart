@@ -94,7 +94,7 @@ class TimelinePhotoGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         // プレースホルダー領域
         if (index >= group.photos.length) {
-          return TimelineSkeletonTile(
+          return const TimelineSkeletonTile(
             borderRadius: TimelineLayoutConstants.borderRadius,
             strokeWidth: TimelineLayoutConstants.loadingIndicatorStrokeWidth,
             indicatorSize: TimelineLayoutConstants.loadingIndicatorSize,
@@ -129,19 +129,19 @@ class TimelinePhotoGrid extends StatelessWidget {
               // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
               AnimatedOpacity(
                 opacity: shouldDimPhoto ? 0.6 : 1.0,
-                duration: Duration(
+                duration: const Duration(
                   milliseconds: TimelineLayoutConstants.animationDurationMs,
                 ),
                 curve: Curves.easeInOut,
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE0E0E0), // 固定値でパフォーマンス最適化
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE0E0E0), // 固定値でパフォーマンス最適化
                     borderRadius: BorderRadius.all(
                       Radius.circular(TimelineLayoutConstants.borderRadius),
                     ),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.all(
+                    borderRadius: const BorderRadius.all(
                       Radius.circular(TimelineLayoutConstants.borderRadius),
                     ),
                     child: Hero(
@@ -177,7 +177,7 @@ class TimelinePhotoGrid extends StatelessWidget {
               ),
               // パフォーマンス最適化された使用済みラベル
               if (isUsed)
-                TimelineUsedLabel(
+                const TimelineUsedLabel(
                   bottom: TimelineLayoutConstants.usedLabelBottom,
                   left: TimelineLayoutConstants.usedLabelLeft,
                   horizontalPadding:

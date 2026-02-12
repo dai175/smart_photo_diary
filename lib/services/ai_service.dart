@@ -204,7 +204,9 @@ class AiService implements IAiService {
   @override
   Future<Result<int>> getRemainingGenerations() async {
     if (_subscriptionService == null) {
-      return Failure(ServiceException('SubscriptionService is not available'));
+      return const Failure(
+        ServiceException('SubscriptionService is not available'),
+      );
     }
 
     return await _subscriptionService.getRemainingGenerations();
@@ -213,7 +215,9 @@ class AiService implements IAiService {
   @override
   Future<Result<DateTime>> getNextResetDate() async {
     if (_subscriptionService == null) {
-      return Failure(ServiceException('SubscriptionService is not available'));
+      return const Failure(
+        ServiceException('SubscriptionService is not available'),
+      );
     }
 
     return await _subscriptionService.getNextResetDate();
@@ -222,7 +226,9 @@ class AiService implements IAiService {
   @override
   Future<Result<bool>> canUseAiGeneration() async {
     if (_subscriptionService == null) {
-      return Failure(ServiceException('SubscriptionService is not available'));
+      return const Failure(
+        ServiceException('SubscriptionService is not available'),
+      );
     }
 
     // 月次リセット処理統合

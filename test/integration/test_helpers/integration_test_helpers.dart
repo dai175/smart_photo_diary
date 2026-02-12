@@ -213,7 +213,7 @@ class IntegrationTestHelpers {
         date: any(named: 'date'),
         photoCount: any(named: 'photoCount'),
       ),
-    ).thenAnswer((_) async => Success(['テスト', 'タグ']));
+    ).thenAnswer((_) async => const Success(['テスト', 'タグ']));
   }
 
   /// Create mock diary generation result
@@ -428,7 +428,7 @@ class IntegrationTestHelpers {
     ).thenAnswer((_) async => const Success([]));
     when(
       () => mockDiaryService.getAllTags(),
-    ).thenAnswer((_) async => Success(<String>{}));
+    ).thenAnswer((_) async => const Success(<String>{}));
     when(
       () => mockDiaryService.getTotalDiaryCount(),
     ).thenAnswer((_) async => const Success(0));
@@ -503,7 +503,7 @@ class IntegrationTestHelpers {
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');
     when(
       () => mockStorageService.exportDataResult(),
-    ).thenAnswer((_) async => Success('{}'));
+    ).thenAnswer((_) async => const Success('{}'));
   }
 
   /// Get mock photo service for additional setup
