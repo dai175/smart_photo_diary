@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
 import '../models/diary_entry.dart';
 import '../screens/diary_screen.dart';
@@ -197,7 +198,9 @@ class _HomeScreenState extends State<HomeScreen>
 
         if (mounted) {
           // カメラ権限拒否の場合は設定ダイアログを表示
-          if (captureResult.error.toString().contains('権限が拒否されています')) {
+          if (captureResult.error is PhotoAccessException &&
+              (captureResult.error as PhotoAccessException).details ==
+                  'Camera permission denied') {
             await _showCameraPermissionDialog();
           }
         }
