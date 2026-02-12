@@ -1491,5 +1491,9 @@
   "tagNight": "Night",
   "@tagNight": {
     "description": "Fallback tag: night time period"
+  },
+  "loadingPrices": "Loading prices...",
+  "@loadingPrices": {
+    "description": "Text shown while loading prices in upgrade dialog"
   }
 }
