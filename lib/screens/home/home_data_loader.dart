@@ -1,0 +1,255 @@
+part of '../home_screen.dart';
+
+// ---------------------------------------------------------------------------
+// _HomeScreenState データ読み込み系メソッド (mixin)
+// ---------------------------------------------------------------------------
+
+mixin _HomeDataLoaderMixin on State<HomeScreen> {
+  _HomeScreenState get _self => this as _HomeScreenState;
+
+  Future<void> _loadTodayPhotos() async {
+    if (!mounted) return;
+
+    if (_self._isRequestingPermission) {
+      return;
+    }
+
+    _self._isRequestingPermission = true;
+    _self._photoController.setLoading(true);
+
+    try {
+      final photoService = ServiceRegistration.get<IPhotoService>();
+      final hasPermission = await photoService.requestPermission();
+
+      if (!mounted) return;
+
+      _self._photoController.setPermission(hasPermission);
+
+      if (!hasPermission) {
+        _self._photoController.setLoading(false);
+        await _self._showPermissionDeniedDialog();
+        return;
+      }
+
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+
+      final allowedDays = await _getAllowedDays();
+
+      final photos = await photoService.getPhotosInDateRange(
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        endDate: todayStart.add(const Duration(days: 1)),
+        limit: _HomeScreenState._photosPerPage,
+      );
+
+      if (!mounted) return;
+
+      if (photos.isEmpty) {
+        final isLimited = await photoService.isLimitedAccess();
+        if (isLimited) {
+          await _self._showLimitedAccessDialog();
+        }
+      }
+
+      _self._photoController.setPhotoAssets(photos);
+      _self._currentPhotoOffset = photos.length;
+      if (photos.length < _HomeScreenState._photosPerPage) {
+        _self._photoController.setHasMorePhotos(false);
+      } else {
+        _self._photoController.setHasMorePhotos(true);
+      }
+      _self._photoController.setLoading(false);
+
+      if (mounted && _self._photoController.hasMorePhotos) {
+        Future.microtask(() => _preloadMorePhotos(showLoading: false));
+      }
+    } catch (e) {
+      if (mounted) {
+        _self._photoController.setPhotoAssets([]);
+        _self._photoController.setLoading(false);
+      }
+    } finally {
+      _self._isRequestingPermission = false;
+    }
+  }
+
+  Future<void> _loadMorePhotos() async {
+    await _preloadMorePhotos(showLoading: true);
+  }
+
+  Future<void> _preloadMorePhotos({bool showLoading = false}) async {
+    if (!mounted ||
+        _self._isRequestingPermission ||
+        !_self._photoController.hasMorePhotos) {
+      if (!showLoading) {
+        _self._logger.info(
+          '先読みスキップ: mounted=$mounted, requesting=${_self._isRequestingPermission}, hasMore=${_self._photoController.hasMorePhotos}',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
+      }
+      return;
+    }
+
+    if (_self._isPreloading) {
+      if (!showLoading) {
+        _self._logger.info(
+          '先読みスキップ: 既に先読み中',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
+      }
+      return;
+    }
+
+    _self._isPreloading = true;
+
+    if (!showLoading) {
+      _self._logger.info('先読み開始', context: 'HomeScreen._preloadMorePhotos');
+    }
+
+    if (showLoading) {
+      _self._photoController.setLoading(true);
+    }
+
+    try {
+      final photoService = ServiceRegistration.get<IPhotoService>();
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+
+      final allowedDays = await _getAllowedDays();
+
+      final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
+      final requested = _HomeScreenState._photosPerPage * preloadPages;
+
+      final newPhotos = await photoService.getPhotosEfficient(
+        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        endDate: todayStart.add(const Duration(days: 1)),
+        offset: _self._currentPhotoOffset,
+        limit: requested,
+      );
+
+      if (!mounted) return;
+
+      final currentCount = _self._photoController.photoAssets.length;
+
+      if (!showLoading) {
+        _self._logger.info(
+          '先読み結果: 現在=$currentCount, 新規=${newPhotos.length}, offset=${_self._currentPhotoOffset}, req=$requested',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
+      }
+
+      if (newPhotos.isNotEmpty) {
+        final combined = <AssetEntity>[
+          ..._self._photoController.photoAssets,
+          ...newPhotos,
+        ];
+        _self._photoController.setPhotoAssetsPreservingSelection(combined);
+        _self._currentPhotoOffset += newPhotos.length;
+        final reachedEnd = newPhotos.length < requested;
+        _self._photoController.setHasMorePhotos(!reachedEnd);
+      } else {
+        _self._photoController.setHasMorePhotos(false);
+
+        if (!showLoading) {
+          _self._logger.info(
+            '先読み終了: これ以上写真がありません',
+            context: 'HomeScreen._preloadMorePhotos',
+          );
+        }
+      }
+    } catch (e) {
+      _self._logger.error(
+        '先読み写真読み込みエラー',
+        context: 'HomeScreen._preloadMorePhotos',
+        error: e,
+      );
+    } finally {
+      _self._isPreloading = false;
+      if (showLoading) {
+        _self._photoController.setLoading(false);
+      }
+    }
+  }
+
+  Future<void> _loadUsedPhotoIds() async {
+    try {
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final result = await diaryService.getSortedDiaryEntries();
+      switch (result) {
+        case Success(data: final entries):
+          _collectUsedPhotoIds(entries);
+        case Failure(exception: final e):
+          _self._logger.error(
+            '使用済み写真IDの読み込みエラー',
+            error: e,
+            context: 'HomeScreen',
+          );
+      }
+    } catch (e) {
+      _self._logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
+    }
+  }
+
+  void _collectUsedPhotoIds(List<DiaryEntry> allEntries) {
+    final usedIds = <String>{};
+    for (final entry in allEntries) {
+      usedIds.addAll(entry.photoIds);
+    }
+    _self._photoController.setUsedPhotoIds(usedIds);
+  }
+
+  Future<void> _subscribeDiaryChanges() async {
+    try {
+      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      _self._diarySub = diaryService.changes.listen((change) {
+        switch (change.type) {
+          case DiaryChangeType.created:
+            _self._photoController.addUsedPhotoIds(change.addedPhotoIds);
+            break;
+          case DiaryChangeType.updated:
+            if (change.removedPhotoIds.isNotEmpty) {
+              _self._photoController.removeUsedPhotoIds(change.removedPhotoIds);
+            }
+            if (change.addedPhotoIds.isNotEmpty) {
+              _self._photoController.addUsedPhotoIds(change.addedPhotoIds);
+            }
+            break;
+          case DiaryChangeType.deleted:
+            _self._photoController.removeUsedPhotoIds(change.removedPhotoIds);
+            break;
+        }
+      });
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  // ignore: invalid_use_of_protected_member
+  Future<void> _onDiaryCreated() async {
+    _self.setState(() {
+      _self._diaryScreenKey = UniqueKey();
+    });
+    await _loadUsedPhotoIds();
+  }
+
+  Future<int> _getAllowedDays() async {
+    int allowedDays = 1;
+    try {
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+      final planResult = await subscriptionService.getCurrentPlanClass();
+      if (planResult.isSuccess) {
+        final plan = planResult.value;
+        allowedDays = plan.isPremium ? 365 : 1;
+      }
+    } catch (e) {
+      _self._logger.error(
+        'プラン情報取得エラー',
+        error: e,
+        context: 'HomeScreen._getCachedAllowedDays',
+      );
+    }
+
+    return allowedDays;
+  }
+}
