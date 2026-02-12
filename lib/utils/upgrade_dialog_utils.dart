@@ -235,22 +235,23 @@ class UpgradeDialogUtils {
 
   /// ローディングオーバーレイを表示
   static OverlayEntry _showLoadingOverlay(BuildContext context) {
+    final loadingText = context.l10n.loadingPrices;
     final overlay = OverlayEntry(
-      builder: (context) => Material(
+      builder: (overlayContext) => Material(
         color: Colors.black54,
         child: Center(
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(overlayContext).colorScheme.surface,
               borderRadius: BorderRadius.circular(AppSpacing.md),
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: AppSpacing.md),
-                Text('Loading prices...', style: AppTypography.bodyMedium),
+                const CircularProgressIndicator(),
+                const SizedBox(height: AppSpacing.md),
+                Text(loadingText, style: AppTypography.bodyMedium),
               ],
             ),
           ),

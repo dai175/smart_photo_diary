@@ -1491,5 +1491,9 @@
   "tagNight": "夜",
   "@tagNight": {
     "description": "フォールバックタグ: 夜の時間帯"
+  },
+  "loadingPrices": "価格を読み込み中...",
+  "@loadingPrices": {
+    "description": "アップグレードダイアログで価格読み込み中に表示するテキスト"
   }
 }
