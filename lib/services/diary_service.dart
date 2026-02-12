@@ -13,6 +13,7 @@ import 'interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import 'diary_index_manager.dart';
 
 /// フォールバック用の無操作ロガー（テスト環境等でServiceLocator未設定時に使用）
 class _NoOpLoggingService implements ILoggingService {
@@ -37,8 +38,9 @@ class _NoOpLoggingService implements ILoggingService {
 
 /// 日記の管理を担当するサービスクラス（Facade）
 ///
-/// コアCRUD・クエリ・インデックス管理は本クラスに保持。
-/// タグ管理はIDiaryTagServiceに、統計はIDiaryStatisticsServiceに委譲。
+/// コアCRUD・クエリは本クラスに保持。
+/// インデックス管理はDiaryIndexManagerに、タグ管理はIDiaryTagServiceに、
+/// 統計はIDiaryStatisticsServiceに委譲。
 class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
   Box<DiaryEntry>? _diaryBox;
@@ -46,14 +48,8 @@ class DiaryService implements IDiaryService {
   ILoggingService _loggingService = _NoOpLoggingService();
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
 
-  // 日付降順のインメモリインデックス（エントリーIDの配列）
-  List<String> _sortedIdsByDateDesc = [];
-  bool _indexBuilt = false;
-
-  // 検索用インデックス（id -> 検索対象文字列（小文字化済み））
-  final Map<String, String> _searchTextIndex = {};
-  // 日付（年月日）だけを保持した並行配列（_sortedIdsByDateDesc と同じ順）
-  final List<DateTime> _sortedDatesByDayDesc = [];
+  // インデックス管理（DiaryIndexManagerに委譲）
+  final _indexManager = DiaryIndexManager();
 
   // プライベートコンストラクタ（依存性注入用）
   DiaryService._();
@@ -107,7 +103,7 @@ class DiaryService implements IDiaryService {
       _statisticsService.getDiaryCountInPeriod(start, end);
 
   // =================================================================
-  // 初期化・インデックス管理（本クラスに保持）
+  // 初期化（本クラスに保持）
   // =================================================================
 
   // 初期化処理
@@ -123,7 +119,7 @@ class DiaryService implements IDiaryService {
     try {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
       _loggingService.info('Hiveボックス初期化完了: ${_diaryBox?.length ?? 0}件のエントリー');
-      await _buildIndex();
+      await _indexManager.buildIndex(_diaryBox!);
     } on HiveError catch (e) {
       _loggingService.error('Hiveスキーマエラー、ボックスを再作成します', error: e);
       await _recreateBox();
@@ -140,105 +136,11 @@ class DiaryService implements IDiaryService {
       _loggingService.warning('古いボックスを削除しました');
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
       _loggingService.info('新しいボックスを作成しました');
-      await _buildIndex();
+      await _indexManager.buildIndex(_diaryBox!);
     } catch (deleteError) {
       _loggingService.error('ボックス再作成エラー', error: deleteError);
       rethrow;
     }
-  }
-
-  // インデックス構築（起動時/再初期化時）
-  Future<void> _buildIndex() async {
-    if (_diaryBox == null) return;
-    final entries = _diaryBox!.values.toList();
-    entries.sort((a, b) => b.date.compareTo(a.date));
-    _sortedIdsByDateDesc = entries.map((e) => e.id).toList(growable: true);
-    _sortedDatesByDayDesc
-      ..clear()
-      ..addAll(
-        entries.map((e) => DateTime(e.date.year, e.date.month, e.date.day)),
-      );
-    // 検索インデックス
-    _searchTextIndex.clear();
-    for (final e in entries) {
-      _searchTextIndex[e.id] = _buildSearchableText(e);
-    }
-    _indexBuilt = true;
-  }
-
-  Future<void> _ensureIndex() async {
-    if (!_indexBuilt) {
-      await _buildIndex();
-    }
-  }
-
-  int _findInsertIndex(DateTime date) {
-    int low = 0;
-    int high = _sortedIdsByDateDesc.length;
-    while (low < high) {
-      final mid = (low + high) >> 1;
-      final midId = _sortedIdsByDateDesc[mid];
-      final midEntry = _diaryBox!.get(midId);
-      if (midEntry == null) {
-        high = mid;
-        continue;
-      }
-      if (date.isAfter(midEntry.date)) {
-        high = mid;
-      } else {
-        low = mid + 1;
-      }
-    }
-    return low;
-  }
-
-  // 検索用テキストを作成
-  String _buildSearchableText(DiaryEntry entry) {
-    final tags = entry.effectiveTags.join(' ');
-    final location = entry.location ?? '';
-    final text = '${entry.title} ${entry.content} $tags $location';
-    return text.toLowerCase();
-  }
-
-  // 日付範囲に一致するインデックス範囲を二分探索で求める（降順リスト）
-  // 戻り値は [startIndex, endExclusive]
-  List<int> _findRangeByDateRangeInternal(DateTime startDay, DateTime endDay) {
-    final n = _sortedDatesByDayDesc.length;
-    if (n == 0) return const [0, 0];
-
-    // end側（新しい方）の左端: 最初に date <= endDay となる位置
-    int low = 0, high = n;
-    while (low < high) {
-      final mid = (low + high) >> 1;
-      final d = _sortedDatesByDayDesc[mid];
-      if (d.isAfter(endDay)) {
-        // d > endDay → まだ左（新しい）側に進む
-        low = mid + 1;
-      } else {
-        high = mid;
-      }
-    }
-    final startIndex = low.clamp(0, n);
-
-    // start側（古い方）の右端の次: 最初に date < startDay となる位置
-    low = startIndex;
-    high = n;
-    while (low < high) {
-      final mid = (low + high) >> 1;
-      final d = _sortedDatesByDayDesc[mid];
-      if (d.isBefore(startDay)) {
-        high = mid;
-      } else {
-        low = mid + 1;
-      }
-    }
-    final endExclusive = low.clamp(startIndex, n);
-    return [startIndex, endExclusive];
-  }
-
-  /// 検索インデックスを更新するコールバック（タグサービスから呼ばれる）
-  void _updateSearchIndex(String id, String searchableText) {
-    _searchTextIndex[id] = searchableText;
   }
 
   // =================================================================
@@ -288,14 +190,8 @@ class DiaryService implements IDiaryService {
       _loggingService.info('日記エントリー保存完了: ${entry.id}');
 
       // インデックスに挿入
-      await _ensureIndex();
-      final insertAt = _findInsertIndex(entry.date);
-      _sortedIdsByDateDesc.insert(insertAt, entry.id);
-      _sortedDatesByDayDesc.insert(
-        insertAt,
-        DateTime(entry.date.year, entry.date.month, entry.date.day),
-      );
-      _searchTextIndex[entry.id] = _buildSearchableText(entry);
+      await _indexManager.ensureIndex(_diaryBox!);
+      _indexManager.insertEntry(_diaryBox!, entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
@@ -309,7 +205,7 @@ class DiaryService implements IDiaryService {
       // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
       _tagService.generateTagsInBackground(
         entry,
-        onSearchIndexUpdate: _updateSearchIndex,
+        onSearchIndexUpdate: _indexManager.updateSearchIndex,
       );
 
       return Success(entry);
@@ -330,25 +226,11 @@ class DiaryService implements IDiaryService {
       if (old != null) {
         // 日付変更時はインデックスを更新
         if (old.date != entry.date) {
-          await _ensureIndex();
-          final oldIdx = _sortedIdsByDateDesc.indexOf(entry.id);
-          if (oldIdx != -1) {
-            if (_sortedIdsByDateDesc.length > oldIdx) {
-              _sortedIdsByDateDesc.removeAt(oldIdx);
-            }
-            if (_sortedDatesByDayDesc.length > oldIdx) {
-              _sortedDatesByDayDesc.removeAt(oldIdx);
-            }
-          }
-          final insertAt = _findInsertIndex(entry.date);
-          _sortedIdsByDateDesc.insert(insertAt, entry.id);
-          _sortedDatesByDayDesc.insert(
-            insertAt,
-            DateTime(entry.date.year, entry.date.month, entry.date.day),
-          );
+          await _indexManager.ensureIndex(_diaryBox!);
+          _indexManager.updateEntryDate(_diaryBox!, entry);
         }
         // 検索インデックス更新
-        _searchTextIndex[entry.id] = _buildSearchableText(entry);
+        _indexManager.updateEntrySearchText(entry);
         final oldIds = Set<String>.from(old.photoIds);
         final newIds = Set<String>.from(entry.photoIds);
         final removed = oldIds.difference(newIds).toList();
@@ -376,17 +258,8 @@ class DiaryService implements IDiaryService {
       if (_diaryBox == null) await _init();
       final existing = _diaryBox!.get(id);
       await _diaryBox!.delete(id);
-      if (_indexBuilt) {
-        final idx = _sortedIdsByDateDesc.indexOf(id);
-        if (idx != -1) {
-          if (_sortedIdsByDateDesc.length > idx) {
-            _sortedIdsByDateDesc.removeAt(idx);
-          }
-          if (_sortedDatesByDayDesc.length > idx) {
-            _sortedDatesByDayDesc.removeAt(idx);
-          }
-        }
-        _searchTextIndex.remove(id);
+      if (_indexManager.indexBuilt) {
+        _indexManager.removeEntry(id);
       }
       if (existing != null) {
         _diaryChangeController.add(
@@ -450,29 +323,32 @@ class DiaryService implements IDiaryService {
     DiaryFilter filter,
   ) async {
     try {
-      await _ensureIndex();
+      await _indexManager.ensureIndex(_diaryBox!);
       final result = <DiaryEntry>[];
       if (!filter.isActive) {
-        for (final id in _sortedIdsByDateDesc) {
+        for (final id in _indexManager.sortedIdsByDateDesc) {
           final e = _diaryBox!.get(id);
           if (e != null) result.add(e);
         }
         return Success(result);
       }
       // 日付範囲があれば二分探索で範囲を絞る
-      Iterable<String> idIterable = _sortedIdsByDateDesc;
+      Iterable<String> idIterable = _indexManager.sortedIdsByDateDesc;
       if (filter.dateRange != null) {
         final r = filter.dateRange!;
         final s = DateTime(r.start.year, r.start.month, r.start.day);
         final e = DateTime(r.end.year, r.end.month, r.end.day);
-        final range = _findRangeByDateRangeInternal(s, e);
-        idIterable = _sortedIdsByDateDesc.sublist(range[0], range[1]);
+        final range = _indexManager.findRangeByDateRange(s, e);
+        idIterable = _indexManager.sortedIdsByDateDesc.sublist(
+          range[0],
+          range[1],
+        );
       }
       // 検索語があれば検索インデックスで候補を絞り込み
       final q = (filter.searchText ?? '').trim().toLowerCase();
       if (q.isNotEmpty) {
         idIterable = idIterable.where((id) {
-          final text = _searchTextIndex[id];
+          final text = _indexManager.searchTextIndex[id];
           return text != null && text.contains(q);
         });
       }
@@ -497,14 +373,14 @@ class DiaryService implements IDiaryService {
     required int limit,
   }) async {
     try {
-      await _ensureIndex();
+      await _indexManager.ensureIndex(_diaryBox!);
       if (!filter.isActive) {
-        final total = _sortedIdsByDateDesc.length;
+        final total = _indexManager.sortedIdsByDateDesc.length;
         if (total == 0) return const Success([]);
         final start = offset.clamp(0, total);
         final end = (offset + limit).clamp(0, total);
         if (start >= end) return const Success([]);
-        final ids = _sortedIdsByDateDesc.sublist(start, end);
+        final ids = _indexManager.sortedIdsByDateDesc.sublist(start, end);
         final entries = <DiaryEntry>[];
         for (final id in ids) {
           final e = _diaryBox!.get(id);
@@ -517,19 +393,22 @@ class DiaryService implements IDiaryService {
       int skipped = 0;
 
       // 日付範囲があれば先に範囲を絞る
-      Iterable<String> idIterable = _sortedIdsByDateDesc;
+      Iterable<String> idIterable = _indexManager.sortedIdsByDateDesc;
       if (filter.dateRange != null) {
         final r = filter.dateRange!;
         final s = DateTime(r.start.year, r.start.month, r.start.day);
         final e = DateTime(r.end.year, r.end.month, r.end.day);
-        final range = _findRangeByDateRangeInternal(s, e);
-        idIterable = _sortedIdsByDateDesc.sublist(range[0], range[1]);
+        final range = _indexManager.findRangeByDateRange(s, e);
+        idIterable = _indexManager.sortedIdsByDateDesc.sublist(
+          range[0],
+          range[1],
+        );
       }
       // 検索語があれば候補を先に絞る
       final q = (filter.searchText ?? '').trim().toLowerCase();
       if (q.isNotEmpty) {
         idIterable = idIterable.where((id) {
-          final text = _searchTextIndex[id];
+          final text = _indexManager.searchTextIndex[id];
           return text != null && text.contains(q);
         });
       }
@@ -627,14 +506,8 @@ class DiaryService implements IDiaryService {
       _loggingService.info('過去写真日記の保存完了: ${entry.id}');
 
       // インデックスに挿入
-      await _ensureIndex();
-      final insertAt = _findInsertIndex(entry.date);
-      _sortedIdsByDateDesc.insert(insertAt, entry.id);
-      _sortedDatesByDayDesc.insert(
-        insertAt,
-        DateTime(entry.date.year, entry.date.month, entry.date.day),
-      );
-      _searchTextIndex[entry.id] = _buildSearchableText(entry);
+      await _indexManager.ensureIndex(_diaryBox!);
+      _indexManager.insertEntry(_diaryBox!, entry);
 
       // 変更イベント（作成）を通知
       _diaryChangeController.add(
@@ -648,7 +521,7 @@ class DiaryService implements IDiaryService {
       // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
       _tagService.generateTagsInBackgroundForPastPhoto(
         entry,
-        onSearchIndexUpdate: _updateSearchIndex,
+        onSearchIndexUpdate: _indexManager.updateSearchIndex,
       );
 
       return Success(entry);
