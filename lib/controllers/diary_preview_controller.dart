@@ -251,7 +251,13 @@ class DiaryPreviewController extends BaseErrorController {
       }
 
       await _autoSaveDiary(assets: assets);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.error(
+        '日記生成に失敗しました',
+        error: e,
+        context: 'DiaryPreviewController._loadModelAndGenerateDiary',
+        stackTrace: stackTrace,
+      );
       _setErrorState(DiaryPreviewErrorType.generationFailed);
     }
   }

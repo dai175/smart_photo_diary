@@ -247,6 +247,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     if (_controller.isLoading) {
       return _buildLoadingState(l10n);
     }
+    if (_controller.errorType == DiaryDetailErrorType.notFound) {
+      return _buildNotFoundState(l10n);
+    }
     if (_controller.hasError) {
       return _buildErrorState(l10n);
     }

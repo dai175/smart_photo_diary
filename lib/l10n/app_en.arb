@@ -304,6 +304,10 @@
   "@settingsLoadingSubtitle": {
     "description": "Subtitle shown while settings are loading"
   },
+  "settingsLoadErrorSubtitle": "Failed to load settings. Pull down to retry.",
+  "@settingsLoadErrorSubtitle": {
+    "description": "Subtitle shown when settings fail to load"
+  },
   "settingsLanguageSectionTitle": "Language",
   "@settingsLanguageSectionTitle": {
     "description": "Title for the language section"

@@ -230,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    context.l10n.settingsLoadingSubtitle,
+                    context.l10n.settingsLoadErrorSubtitle,
                     style: AppTypography.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

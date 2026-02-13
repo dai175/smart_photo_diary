@@ -304,6 +304,10 @@
   "@settingsLoadingSubtitle": {
     "description": "設定画面ローディングカードのサブタイトル"
   },
+  "settingsLoadErrorSubtitle": "設定の読み込みに失敗しました。下に引いて再試行してください。",
+  "@settingsLoadErrorSubtitle": {
+    "description": "設定読み込みエラー時のサブタイトル"
+  },
   "settingsLanguageSectionTitle": "言語設定",
   "@settingsLanguageSectionTitle": {
     "description": "言語セクションのタイトル"
