@@ -50,8 +50,12 @@ class PhotoAccessException extends AppException {
 
 /// AI処理関連エラー
 class AiProcessingException extends AppException {
+  /// 使用量制限エラーかどうか
+  final bool isUsageLimitError;
+
   const AiProcessingException(
     super.message, {
+    this.isUsageLimitError = false,
     super.details,
     super.originalError,
     super.stackTrace,

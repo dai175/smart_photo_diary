@@ -162,7 +162,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Diary not found'), findsOneWidget);
-        expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
       });
 
       testWidgets('shows Back button on not-found', (

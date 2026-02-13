@@ -304,6 +304,10 @@
   "@settingsLoadingSubtitle": {
     "description": "設定画面ローディングカードのサブタイトル"
   },
+  "settingsLoadErrorSubtitle": "設定の読み込みに失敗しました。下に引いて再試行してください。",
+  "@settingsLoadErrorSubtitle": {
+    "description": "設定読み込みエラー時のサブタイトル"
+  },
   "settingsLanguageSectionTitle": "言語設定",
   "@settingsLanguageSectionTitle": {
     "description": "言語セクションのタイトル"
@@ -1289,6 +1293,15 @@
   "diaryDetailDeleteDialogMessage": "この日記を削除してもよろしいですか？\nこの操作は元に戻せません。",
   "@diaryDetailDeleteDialogMessage": {
     "description": "日記削除時の警告メッセージ"
+  },
+  "diaryDetailLoadError": "日記の読み込みに失敗しました: {details}",
+  "@diaryDetailLoadError": {
+    "description": "日記読み込みに失敗した際のメッセージ（詳細あり）",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
   },
   "diaryDetailUpdateError": "日記の更新に失敗しました: {details}",
   "@diaryDetailUpdateError": {

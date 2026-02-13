@@ -304,6 +304,10 @@
   "@settingsLoadingSubtitle": {
     "description": "Subtitle shown while settings are loading"
   },
+  "settingsLoadErrorSubtitle": "Failed to load settings. Pull down to retry.",
+  "@settingsLoadErrorSubtitle": {
+    "description": "Subtitle shown when settings fail to load"
+  },
   "settingsLanguageSectionTitle": "Language",
   "@settingsLanguageSectionTitle": {
     "description": "Title for the language section"
@@ -1289,6 +1293,15 @@
   "diaryDetailDeleteDialogMessage": "Are you sure you want to delete this diary? This action cannot be undone.",
   "@diaryDetailDeleteDialogMessage": {
     "description": "Message explaining the consequences of deleting a diary"
+  },
+  "diaryDetailLoadError": "Failed to load diary: {details}",
+  "@diaryDetailLoadError": {
+    "description": "Error shown when loading a diary fails with details",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
   },
   "diaryDetailUpdateError": "Failed to update diary: {details}",
   "@diaryDetailUpdateError": {

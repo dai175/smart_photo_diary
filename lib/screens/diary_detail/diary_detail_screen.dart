@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
-import '../../core/result/result.dart';
-import '../../core/service_registration.dart';
+import '../../controllers/diary_detail_controller.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
-import '../../models/diary_entry.dart';
-import '../../services/interfaces/diary_service_interface.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/components/custom_card.dart';
 import '../../ui/design_system/app_spacing.dart';
@@ -52,151 +48,64 @@ class DiaryDetailScreen extends StatefulWidget {
 }
 
 class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
-  DiaryEntry? _diaryEntry;
-  bool _isLoading = true;
-  bool _isEditing = false;
-  bool _hasError = false;
-  String _errorMessage = '';
+  late final DiaryDetailController _controller;
   late TextEditingController _titleController;
   late TextEditingController _contentController;
-  List<AssetEntity> _photoAssets = [];
 
   @override
   void initState() {
     super.initState();
+    _controller = DiaryDetailController();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
-    // ローカライズへの依存をinitState完了後に解決するため初回ロードはフレーム後に実行
+    _controller.addListener(_onControllerChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _loadDiaryEntry();
+        _controller.loadDiaryEntry(widget.diaryId);
       }
     });
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();
   }
 
-  /// 日記エントリーを読み込む
-  Future<void> _loadDiaryEntry() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _hasError = false;
-      });
-
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final result = await diaryService.getDiaryEntry(widget.diaryId);
-
-      if (!mounted) return;
-
-      switch (result) {
-        case Success(data: final entry):
-          if (entry == null) {
-            setState(() {
-              _isLoading = false;
-              _hasError = true;
-              _errorMessage = context.l10n.diaryNotFoundMessage;
-            });
-            return;
-          }
-
-          final assets = await entry.getPhotoAssets();
-
-          if (!mounted) return;
-
-          setState(() {
-            _diaryEntry = entry;
-            _titleController.text = entry.title;
-            _contentController.text = entry.content;
-            _photoAssets = assets;
-            _isLoading = false;
-          });
-        case Failure(exception: final e):
-          setState(() {
-            _isLoading = false;
-            _hasError = true;
-            _errorMessage =
-                '${context.l10n.diaryLoadErrorMessage}: ${e.message}';
-          });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      final l10n = context.l10n;
-      setState(() {
-        _isLoading = false;
-        _hasError = true;
-        _errorMessage = '${l10n.diaryLoadErrorMessage}: $e';
-      });
+  void _onControllerChanged() {
+    // Controller の diaryEntry が変わったらテキストコントローラーを同期
+    final entry = _controller.diaryEntry;
+    if (entry != null && !_controller.isEditing) {
+      _titleController.text = entry.title;
+      _contentController.text = entry.content;
     }
+    // ListenableBuilder がUIを再構築するため setState は不要
   }
 
   /// 日記を更新する
   Future<void> _updateDiary() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
 
-    if (_diaryEntry == null) return;
+    final success = await _controller.updateDiary(
+      widget.diaryId,
+      title: _titleController.text,
+      content: _contentController.text,
+    );
 
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-
-      final updatedEntry = _diaryEntry!.copyWith(
-        title: _titleController.text,
-        content: _contentController.text,
-        updatedAt: DateTime.now(),
+    if (success && mounted) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.diaryUpdateSuccessMessage)),
       );
-      final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
-
-      switch (updateResult) {
-        case Success():
-          await _loadDiaryEntry();
-
-          if (mounted) {
-            setState(() {
-              _isEditing = false;
-            });
-
-            scaffoldMessenger.showSnackBar(
-              SnackBar(content: Text(context.l10n.diaryUpdateSuccessMessage)),
-            );
-          }
-        case Failure(exception: final e):
-          if (mounted) {
-            final l10n = context.l10n;
-            setState(() {
-              _isLoading = false;
-              _hasError = true;
-              _errorMessage = l10n.diaryDetailUpdateError(e.message);
-            });
-
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text(l10n.commonErrorWithMessage(_errorMessage)),
-              ),
-            );
-          }
-      }
-    } catch (e) {
-      if (mounted) {
-        final l10n = context.l10n;
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-          _errorMessage = l10n.diaryDetailUpdateError('$e');
-        });
-
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(l10n.commonErrorWithMessage(_errorMessage))),
-        );
-      }
+    } else if (!success && mounted && _controller.hasError) {
+      final errorMsg = _getErrorMessage(l10n);
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.commonErrorWithMessage(errorMsg))),
+      );
     }
   }
 
@@ -205,8 +114,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final l10n = context.l10n;
-
-    if (_diaryEntry == null) return;
 
     final confirmed = await DialogUtils.showConfirmationDialog(
       context,
@@ -218,60 +125,46 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
     if (confirmed != true) return;
 
-    try {
-      setState(() {
-        _isLoading = true;
-      });
+    final success = await _controller.deleteDiary(widget.diaryId);
 
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final deleteResult = await diaryService.deleteDiaryEntry(_diaryEntry!.id);
-
-      switch (deleteResult) {
-        case Success():
-          if (mounted) {
-            scaffoldMessenger.showSnackBar(
-              SnackBar(content: Text(context.l10n.diaryDeleteSuccessMessage)),
-            );
-            navigator.pop(true);
-          }
-        case Failure(exception: final e):
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-              _hasError = true;
-              _errorMessage = l10n.diaryDetailDeleteError(e.message);
-            });
-
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text(l10n.commonErrorWithMessage(_errorMessage)),
-              ),
-            );
-          }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-          _errorMessage = l10n.diaryDetailDeleteError('$e');
-        });
-
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(l10n.commonErrorWithMessage(_errorMessage))),
-        );
-      }
+    if (success && mounted) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.diaryDeleteSuccessMessage)),
+      );
+      navigator.pop(true);
+    } else if (!success && mounted && _controller.hasError) {
+      final errorMsg = _getErrorMessage(l10n);
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.commonErrorWithMessage(errorMsg))),
+      );
     }
+  }
+
+  /// エラー種別からローカライズされたメッセージを取得
+  String _getErrorMessage(AppLocalizations l10n) {
+    final detail = _controller.rawErrorDetail;
+    return switch (_controller.errorType) {
+      DiaryDetailErrorType.notFound => l10n.diaryNotFoundMessage,
+      DiaryDetailErrorType.loadFailed => l10n.diaryDetailLoadError(detail),
+      DiaryDetailErrorType.updateFailed => l10n.diaryDetailUpdateError(detail),
+      DiaryDetailErrorType.deleteFailed => l10n.diaryDetailDeleteError(detail),
+      null => '',
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: _buildAppBar(l10n),
-      body: _buildBody(l10n),
-      bottomNavigationBar: _buildBottomBar(l10n),
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          appBar: _buildAppBar(l10n),
+          body: _buildBody(l10n),
+          bottomNavigationBar: _buildBottomBar(l10n),
+        );
+      },
     );
   }
 
@@ -279,7 +172,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
     return AppBar(
       title: Text(
-        _isEditing ? l10n.diaryDetailEditTitle : l10n.diaryDetailViewTitle,
+        _controller.isEditing
+            ? l10n.diaryDetailEditTitle
+            : l10n.diaryDetailViewTitle,
       ),
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -290,14 +185,17 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       elevation: 2,
       actions: [
         // 共有ボタン
-        if (!_isLoading && !_hasError && _diaryEntry != null && !_isEditing)
+        if (!_controller.isLoading &&
+            !_controller.hasError &&
+            _controller.diaryEntry != null &&
+            !_controller.isEditing)
           IconButton(
             onPressed: () {
               MicroInteractions.hapticTap();
               DiaryDetailShareHelper.showShareDialog(
                 context: context,
-                diaryEntry: _diaryEntry!,
-                photoAssets: _photoAssets,
+                diaryEntry: _controller.diaryEntry!,
+                photoAssets: _controller.photoAssets,
               );
             },
             icon: Icon(
@@ -307,26 +205,28 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             tooltip: l10n.commonShare,
           ),
         // 編集モード切替ボタン
-        if (!_isLoading && !_hasError && _diaryEntry != null)
+        if (!_controller.isLoading &&
+            !_controller.hasError &&
+            _controller.diaryEntry != null)
           IconButton(
             onPressed: () {
               MicroInteractions.hapticTap();
-              if (_isEditing) {
+              if (_controller.isEditing) {
                 _updateDiary();
               } else {
-                setState(() {
-                  _isEditing = true;
-                });
+                _controller.startEditing();
               }
             },
             icon: Icon(
-              _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+              _controller.isEditing ? Icons.check_rounded : Icons.edit_rounded,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
-            tooltip: _isEditing ? l10n.commonSave : l10n.commonEdit,
+            tooltip: _controller.isEditing ? l10n.commonSave : l10n.commonEdit,
           ),
         // 削除ボタン
-        if (!_isLoading && !_hasError && _diaryEntry != null)
+        if (!_controller.isLoading &&
+            !_controller.hasError &&
+            _controller.diaryEntry != null)
           IconButton(
             onPressed: () {
               MicroInteractions.hapticTap(intensity: VibrationIntensity.medium);
@@ -344,19 +244,22 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
   /// Bodyを構築
   Widget _buildBody(AppLocalizations l10n) {
-    if (_isLoading) {
+    if (_controller.isLoading) {
       return _buildLoadingState(l10n);
     }
-    if (_hasError) {
+    if (_controller.errorType == DiaryDetailErrorType.notFound) {
+      return _buildNotFoundState(l10n);
+    }
+    if (_controller.hasError) {
       return _buildErrorState(l10n);
     }
-    if (_diaryEntry == null) {
+    if (_controller.diaryEntry == null) {
       return _buildNotFoundState(l10n);
     }
     return DiaryDetailContent(
-      diaryEntry: _diaryEntry!,
-      photoAssets: _photoAssets,
-      isEditing: _isEditing,
+      diaryEntry: _controller.diaryEntry!,
+      photoAssets: _controller.photoAssets,
+      isEditing: _controller.isEditing,
       titleController: _titleController,
       contentController: _contentController,
     );
@@ -364,7 +267,10 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
   /// BottomBarを構築
   Widget? _buildBottomBar(AppLocalizations l10n) {
-    if (!_isEditing || _isLoading || _hasError || _diaryEntry == null) {
+    if (!_controller.isEditing ||
+        _controller.isLoading ||
+        _controller.hasError ||
+        _controller.diaryEntry == null) {
       return null;
     }
     return SafeArea(
@@ -389,11 +295,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               flex: 1,
               child: SecondaryButton(
                 onPressed: () {
-                  setState(() {
-                    _isEditing = false;
-                    _titleController.text = _diaryEntry!.title;
-                    _contentController.text = _diaryEntry!.content;
-                  });
+                  _controller.cancelEditing();
+                  _titleController.text = _controller.diaryEntry!.title;
+                  _contentController.text = _controller.diaryEntry!.content;
                 },
                 text: l10n.commonCancel,
               ),
@@ -477,7 +381,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               Text(l10n.commonErrorOccurred, style: AppTypography.titleLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                _errorMessage,
+                _getErrorMessage(l10n),
                 style: AppTypography.bodyMedium.copyWith(
                   color: Theme.of(context).colorScheme.error,
                 ),

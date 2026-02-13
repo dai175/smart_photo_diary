@@ -63,6 +63,7 @@ class AiService implements IAiService {
           'AI生成の月間制限に達しました。'
           '現在のプラン（$planName）では今月の残り使用回数は$remaining回です。'
           'より多くの生成を行うにはPremiumプランにアップグレードしてください。',
+          isUsageLimitError: true,
           details: 'Usage limit exceeded for current plan',
         ),
       );

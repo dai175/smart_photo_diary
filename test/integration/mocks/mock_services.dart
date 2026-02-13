@@ -140,13 +140,25 @@ class TestServiceSetup {
     final mock = MockILoggingService();
 
     when(
-      () => mock.debug(any(), context: any(named: 'context'), data: any(named: 'data')),
+      () => mock.debug(
+        any(),
+        context: any(named: 'context'),
+        data: any(named: 'data'),
+      ),
     ).thenReturn(null);
     when(
-      () => mock.info(any(), context: any(named: 'context'), data: any(named: 'data')),
+      () => mock.info(
+        any(),
+        context: any(named: 'context'),
+        data: any(named: 'data'),
+      ),
     ).thenReturn(null);
     when(
-      () => mock.warning(any(), context: any(named: 'context'), data: any(named: 'data')),
+      () => mock.warning(
+        any(),
+        context: any(named: 'context'),
+        data: any(named: 'data'),
+      ),
     ).thenReturn(null);
     when(
       () => mock.error(
@@ -156,8 +168,9 @@ class TestServiceSetup {
         stackTrace: any(named: 'stackTrace'),
       ),
     ).thenReturn(null);
-    when(() => mock.startTimer(any(), context: any(named: 'context')))
-        .thenReturn(Stopwatch());
+    when(
+      () => mock.startTimer(any(), context: any(named: 'context')),
+    ).thenReturn(Stopwatch());
 
     return mock;
   }
@@ -202,10 +215,12 @@ class TestServiceSetup {
         limit: any(named: 'limit'),
       ),
     ).thenAnswer((_) async => []);
-    when(() => mock.isPermissionPermanentlyDenied())
-        .thenAnswer((_) async => false);
-    when(() => mock.capturePhoto())
-        .thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.isPermissionPermanentlyDenied(),
+    ).thenAnswer((_) async => false);
+    when(
+      () => mock.capturePhoto(),
+    ).thenAnswer((_) async => const Success(null));
 
     return mock;
   }
@@ -265,7 +280,9 @@ class TestServiceSetup {
     final mock = MockIDiaryService();
 
     // Stream for diary changes
-    when(() => mock.changes).thenAnswer((_) => const Stream<DiaryChange>.empty());
+    when(
+      () => mock.changes,
+    ).thenAnswer((_) => const Stream<DiaryChange>.empty());
 
     // Default mock behavior for DiaryService (all methods return Result)
     when(
