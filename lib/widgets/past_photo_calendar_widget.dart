@@ -130,7 +130,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         context: 'photo-count-loading',
       );
       loggingService.warning(
-        '写真数の読み込みに失敗しましたが、機能は継続します',
+        'Failed to load photo counts, but continuing',
         context: 'PastPhotoCalendarWidget._loadPhotoCountsForMonth',
         data: appError.toString(),
       );
@@ -176,7 +176,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         context: 'load-photos-by-date',
       );
       loggingService.error(
-        '選択日の写真読み込みエラー',
+        'Error loading photos for selected date',
         context: 'PastPhotoCalendarWidget._loadPhotosForDate',
         error: appError,
       );
@@ -250,7 +250,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         case Failure(exception: final e):
           final loggingService = serviceLocator.get<ILoggingService>();
           loggingService.warning(
-            '日記日付の読み込みに失敗しましたが、機能は継続します',
+            'Failed to load diary dates, but continuing',
             context: 'PastPhotoCalendarWidget._loadDiaryDates',
             data: e.message,
           );

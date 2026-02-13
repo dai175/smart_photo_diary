@@ -71,7 +71,7 @@ void main() {
       // 期限切れエントリーがないのでinfoログは呼ばれない
       verifyNever(
         () => mockLogger.info(
-          any(that: contains('期限切れ')),
+          any(that: contains('expired')),
           context: any(named: 'context'),
         ),
       );
