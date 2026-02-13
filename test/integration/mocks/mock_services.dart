@@ -221,6 +221,9 @@ class TestServiceSetup {
     when(
       () => mock.capturePhoto(),
     ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.getAssetsByIds(any()),
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
 
     return mock;
   }

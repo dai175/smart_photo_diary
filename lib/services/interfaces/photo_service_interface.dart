@@ -56,6 +56,9 @@ abstract class IPhotoService {
     int limit = 30,
   });
 
+  /// 写真IDリストからAssetEntityを取得する
+  Future<Result<List<AssetEntity>>> getAssetsByIds(List<String> photoIds);
+
   // ========================================
   // Result<T>パターン版のメソッド
   // ========================================

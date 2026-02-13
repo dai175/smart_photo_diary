@@ -9,6 +9,7 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/screens/diary_detail/diary_detail_screen.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
 import '../integration/mocks/mock_services.dart';
 import '../test_helpers/mock_platform_channels.dart';
@@ -39,6 +40,9 @@ void main() {
 
     mockDiaryService = TestServiceSetup.getDiaryService();
     serviceLocator.registerSingleton<IDiaryService>(mockDiaryService);
+
+    final mockPhotoService = TestServiceSetup.getPhotoService();
+    serviceLocator.registerSingleton<IPhotoService>(mockPhotoService);
   });
 
   tearDown(() {

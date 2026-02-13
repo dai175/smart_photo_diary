@@ -4,6 +4,7 @@ import '../core/result/result.dart';
 import '../core/service_registration.dart';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/photo_service_interface.dart';
 import 'base_error_controller.dart';
 
 /// DiaryDetailScreen のエラー種別
@@ -64,10 +65,14 @@ class DiaryDetailController extends BaseErrorController {
             return;
           }
 
-          final assets = await entry.getPhotoAssets();
+          final photoService =
+              await ServiceRegistration.getAsync<IPhotoService>();
+          final assetsResult = await photoService.getAssetsByIds(
+            entry.photoIds,
+          );
 
           _diaryEntry = entry;
-          _photoAssets = assets;
+          _photoAssets = assetsResult.getOrDefault([]);
           setLoading(false);
 
         case Failure(exception: final e):

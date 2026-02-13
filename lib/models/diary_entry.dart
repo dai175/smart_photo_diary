@@ -1,8 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
-import 'package:photo_manager/photo_manager.dart';
-import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 
 part 'diary_entry.g.dart';
 
@@ -57,32 +53,6 @@ class DiaryEntry extends HiveObject {
     this.location,
     this.tags,
   });
-
-  // 写真のIDリストからAssetEntityのリストを取得するメソッド
-  Future<List<AssetEntity>> getPhotoAssets() async {
-    final results = await Future.wait(
-      photoIds.map((photoId) async {
-        try {
-          return await AssetEntity.fromId(photoId);
-        } catch (e) {
-          try {
-            final logger = serviceLocator.get<ILoggingService>();
-            logger.error(
-              'Photo retrieval error: photoId: $photoId',
-              context: 'DiaryEntry.getPhotoAssets',
-              error: e,
-            );
-          } catch (_) {
-            // LoggingServiceが利用できない場合はdebugPrintにフォールバック
-            debugPrint('Photo retrieval error: $e');
-          }
-          return null;
-        }
-      }),
-    );
-
-    return results.whereType<AssetEntity>().toList();
-  }
 
   // 日記エントリーを更新するメソッド
   void updateContent(String newTitle, String newContent) {
