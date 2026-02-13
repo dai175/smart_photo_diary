@@ -78,7 +78,7 @@ class PastPhotosNotifier extends ChangeNotifier {
       final endDate = today; // 今日は除外
 
       logger?.debug(
-        '過去の写真を読み込み中',
+        'Loading past photos',
         context: 'PastPhotosNotifier.loadInitialPhotos',
         data: {
           'startDate': startDate.toIso8601String(),
@@ -115,15 +115,18 @@ class PastPhotosNotifier extends ChangeNotifier {
       );
 
       logger?.info(
-        '過去の写真読み込み完了',
+        'Past photos loading completed',
         context: 'PastPhotosNotifier.loadInitialPhotos',
-        data: '写真数: ${photos.length}',
+        data: 'Photo count: ${photos.length}',
       );
     } catch (e) {
-      final appError = ErrorHandler.handleError(e, context: '過去の写真読み込み');
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'past-photos-loading',
+      );
 
       _getLogger()?.error(
-        '過去の写真読み込みエラー',
+        'Past photos loading error',
         context: 'PastPhotosNotifier.loadInitialPhotos',
         error: appError,
       );
@@ -189,10 +192,10 @@ class PastPhotosNotifier extends ChangeNotifier {
         ),
       );
     } catch (e) {
-      final appError = ErrorHandler.handleError(e, context: '追加写真読み込み');
+      final appError = ErrorHandler.handleError(e, context: 'load-more-photos');
 
       _getLogger()?.error(
-        '追加写真読み込みエラー',
+        'Load more photos error',
         context: 'PastPhotosNotifier.loadMorePhotos',
         error: appError,
       );
@@ -252,10 +255,13 @@ class PastPhotosNotifier extends ChangeNotifier {
         ),
       );
     } catch (e) {
-      final appError = ErrorHandler.handleError(e, context: '日付指定写真読み込み');
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'load-photos-for-date',
+      );
 
       _getLogger()?.error(
-        '日付指定写真読み込みエラー',
+        'Load photos for date error',
         context: 'PastPhotosNotifier.loadPhotosForDate',
         error: appError,
       );

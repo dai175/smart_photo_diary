@@ -16,7 +16,7 @@ class PremiumMonthlyPlan extends Plan {
   PremiumMonthlyPlan._internal()
     : super(
         id: SubscriptionConstants.premiumMonthlyPlanId,
-        displayName: '${SubscriptionConstants.premiumDisplayName} (月額)',
+        displayName: '${SubscriptionConstants.premiumDisplayName} (Monthly)',
         description: SubscriptionConstants.premiumDescription,
         price: SubscriptionConstants.premiumMonthlyPrice,
         monthlyAiGenerationLimit: SubscriptionConstants.premiumMonthlyAiLimit,

@@ -88,7 +88,7 @@ void main() {
       // ログ呼び出しの確認
       verify(
         () => mockLoggingService.info(
-          '画像生成開始: 正方形',
+          'Starting image generation: 正方形',
           context: 'DiaryImageGenerator.generateImage',
           data: 'diary_id: ${diary.id}',
         ),
@@ -108,7 +108,7 @@ void main() {
         // 各フォーマットでログが呼ばれることを確認
         verify(
           () => mockLoggingService.info(
-            '画像生成開始: ${format.displayName}',
+            'Starting image generation: ${format.displayName}',
             context: 'DiaryImageGenerator.generateImage',
             data: 'diary_id: ${diary.id}',
           ),
@@ -130,7 +130,7 @@ void main() {
       // ログ呼び出しの確認
       verify(
         () => mockLoggingService.info(
-          '画像生成開始: 正方形',
+          'Starting image generation: 正方形',
           context: 'DiaryImageGenerator.generateImage',
           data: 'diary_id: ${diary.id}',
         ),

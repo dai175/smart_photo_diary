@@ -5,7 +5,7 @@ class PhotoError {
   /// カメラ権限が拒否された
   static PhotoAccessException cameraPermissionDenied() {
     return const PhotoAccessException(
-      'カメラの権限が拒否されています。設定からカメラアクセスを許可してください。',
+      'Camera permission denied. Please allow camera access in Settings.',
       details: 'Camera permission denied',
     );
   }
@@ -13,7 +13,7 @@ class PhotoError {
   /// カメラが利用できない
   static PhotoAccessException cameraNotAvailable() {
     return const PhotoAccessException(
-      'カメラが利用できません。デバイスにカメラが搭載されているか確認してください。',
+      'Camera is not available. Please check if your device has a camera.',
       details: 'Camera not available on device',
     );
   }
@@ -21,7 +21,7 @@ class PhotoError {
   /// 撮影後のAssetEntity取得に失敗
   static PhotoAccessException cameraAssetNotFound() {
     return const PhotoAccessException(
-      '撮影した写真の取得に失敗しました。しばらく待ってから再度お試しください。',
+      'Failed to retrieve captured photo. Please wait and try again.',
       details: 'Failed to retrieve captured photo asset',
     );
   }
@@ -29,7 +29,7 @@ class PhotoError {
   /// カメラ撮影中にエラーが発生
   static PhotoAccessException cameraCaptureFailed({String? details}) {
     return PhotoAccessException(
-      'カメラ撮影中にエラーが発生しました。',
+      'An error occurred during camera capture.',
       details: details ?? 'Camera capture failed',
     );
   }

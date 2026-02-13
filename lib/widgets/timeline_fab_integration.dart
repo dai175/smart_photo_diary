@@ -99,14 +99,14 @@ class TimelineFABIntegration extends StatelessWidget {
       final selectedPhotos = controller.selectedPhotos;
 
       logger.info(
-        '日記作成開始（スマートFABから）',
+        'Starting diary creation (from smart FAB)',
         context: 'TimelineFABIntegration._onCreateDiaryPressed',
-        data: '選択写真数: ${selectedPhotos.length}',
+        data: 'Selected photos: ${selectedPhotos.length}',
       );
 
       if (selectedPhotos.isEmpty) {
         logger.warning(
-          '日記作成: 写真が選択されていません',
+          'Diary creation: no photos selected',
           context: 'TimelineFABIntegration._onCreateDiaryPressed',
         );
         return;
@@ -129,7 +129,7 @@ class TimelineFABIntegration extends StatelessWidget {
       );
     } catch (e) {
       logger.error(
-        '日記作成処理中にエラーが発生',
+        'Error during diary creation process',
         context: 'TimelineFABIntegration._onCreateDiaryPressed',
         error: e,
       );
@@ -145,10 +145,10 @@ class TimelineFABIntegration extends StatelessWidget {
     final logger = ServiceRegistration.get<ILoggingService>();
 
     logger.info(
-      '日記プレビュー画面に遷移',
+      'Navigating to diary preview screen',
       context: 'TimelineFABIntegration._navigateToDiaryPreview',
       data:
-          'プロンプト: ${selectedPrompt?.text ?? "なし"}, 写真数: ${selectedPhotos.length}',
+          'Prompt: ${selectedPrompt?.text ?? "none"}, Photos: ${selectedPhotos.length}',
     );
 
     Navigator.push<bool>(

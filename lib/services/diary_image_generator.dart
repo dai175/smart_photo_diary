@@ -33,7 +33,7 @@ class DiaryImageGenerator {
   }) async {
     try {
       _logger.info(
-        '画像生成開始: ${format.displayName}',
+        'Starting image generation: ${format.displayName}',
         context: 'DiaryImageGenerator.generateImage',
         data: 'diary_id: ${diary.id}',
       );
@@ -63,14 +63,16 @@ class DiaryImageGenerator {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
-        return const Failure<File>(ImageGenerationException('画像データの変換に失敗しました'));
+        return const Failure<File>(
+          ImageGenerationException('Failed to convert image data'),
+        );
       }
 
       // ファイルに保存
       await outputFile.writeAsBytes(byteData.buffer.asUint8List());
 
       _logger.info(
-        '画像生成完了',
+        'Image generation completed',
         context: 'DiaryImageGenerator.generateImage',
         data:
             'file_path: ${outputFile.path}, size: ${(await outputFile.length())} bytes',
@@ -79,12 +81,12 @@ class DiaryImageGenerator {
       return Success<File>(outputFile);
     } catch (e) {
       _logger.error(
-        '画像生成エラー',
+        'Image generation error',
         context: 'DiaryImageGenerator.generateImage',
         error: e,
       );
       return Failure<File>(
-        ImageGenerationException('画像の生成に失敗しました', originalError: e),
+        ImageGenerationException('Failed to generate image', originalError: e),
       );
     }
   }

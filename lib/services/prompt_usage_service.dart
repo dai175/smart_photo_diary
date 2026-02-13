@@ -34,7 +34,7 @@ class PromptUsageService implements IPromptUsageService {
       _usageHistoryBoxName,
     );
     _logger.info(
-      'PromptUsageService: 使用履歴Box初期化完了（履歴数: ${_usageHistoryBox!.length}）',
+      'PromptUsageService: Usage history box initialized (count: ${_usageHistoryBox!.length})',
     );
   }
 
@@ -57,11 +57,16 @@ class PromptUsageService implements IPromptUsageService {
 
       await _usageHistoryBox!.add(usage);
 
-      _logger.info('PromptUsageService: プロンプト使用履歴記録完了（promptId: $promptId）');
+      _logger.info(
+        'PromptUsageService: Prompt usage history recorded (promptId: $promptId)',
+      );
 
       return true;
     } catch (e) {
-      _logger.error('PromptUsageService: 使用履歴記録失敗', error: e);
+      _logger.error(
+        'PromptUsageService: Failed to record usage history',
+        error: e,
+      );
       return false;
     }
   }
@@ -150,11 +155,14 @@ class PromptUsageService implements IPromptUsageService {
         }
       }
 
-      _logger.info('PromptUsageService: 使用履歴クリア完了');
+      _logger.info('PromptUsageService: Usage history cleared');
 
       return true;
     } catch (e) {
-      _logger.error('PromptUsageService: 使用履歴クリア失敗', error: e);
+      _logger.error(
+        'PromptUsageService: Failed to clear usage history',
+        error: e,
+      );
       return false;
     }
   }

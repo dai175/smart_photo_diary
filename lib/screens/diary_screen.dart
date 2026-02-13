@@ -138,7 +138,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
       // 削除された場合の追加処理（必要に応じて）
       if (result == true) {
-        _logger.info('日記が削除されました', context: 'DiaryScreen');
+        _logger.info('Diary deleted', context: 'DiaryScreen');
       }
     });
   }

@@ -118,13 +118,18 @@ class DiaryService implements IDiaryService {
 
     try {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
-      _loggingService.info('Hiveボックス初期化完了: ${_diaryBox?.length ?? 0}件のエントリー');
+      _loggingService.info(
+        'Hive box initialization completed: ${_diaryBox?.length ?? 0} entries',
+      );
       await _indexManager.buildIndex(_diaryBox!);
     } on HiveError catch (e) {
-      _loggingService.error('Hiveスキーマエラー、ボックスを再作成します', error: e);
+      _loggingService.error('Hive schema error, recreating box', error: e);
       await _recreateBox();
     } on TypeError catch (e) {
-      _loggingService.error('Hive型不整合エラー、ボックスを再作成します', error: e);
+      _loggingService.error(
+        'Hive type mismatch error, recreating box',
+        error: e,
+      );
       await _recreateBox();
     }
   }
@@ -133,12 +138,12 @@ class DiaryService implements IDiaryService {
   Future<void> _recreateBox() async {
     try {
       await Hive.deleteBoxFromDisk(_boxName);
-      _loggingService.warning('古いボックスを削除しました');
+      _loggingService.warning('Old box deleted');
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
-      _loggingService.info('新しいボックスを作成しました');
+      _loggingService.info('New box created');
       await _indexManager.buildIndex(_diaryBox!);
     } catch (deleteError) {
-      _loggingService.error('ボックス再作成エラー', error: deleteError);
+      _loggingService.error('Box recreation error', error: deleteError);
       rethrow;
     }
   }
@@ -160,7 +165,9 @@ class DiaryService implements IDiaryService {
     try {
       // _diaryBoxが初期化されているかチェック
       if (_diaryBox == null) {
-        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
+        _loggingService.warning(
+          '_diaryBox is not initialized. Reinitializing...',
+        );
         await _init();
       }
 
@@ -169,7 +176,7 @@ class DiaryService implements IDiaryService {
       final id = _uuid.v4();
 
       _loggingService.debug(
-        'DiaryEntry作成中 - ID: $id, 日付: $date, 写真数: ${photoIds.length}',
+        'Creating DiaryEntry - ID: $id, date: $date, photoCount: ${photoIds.length}',
       );
 
       final entry = DiaryEntry(
@@ -184,10 +191,10 @@ class DiaryService implements IDiaryService {
         updatedAt: now,
       );
 
-      _loggingService.debug('Hiveに保存中...');
+      _loggingService.debug('Saving to Hive...');
       // Hiveに保存
       await _diaryBox!.put(entry.id, entry);
-      _loggingService.info('日記エントリー保存完了: ${entry.id}');
+      _loggingService.info('Diary entry saved: ${entry.id}');
 
       // インデックスに挿入
       await _indexManager.ensureIndex(_diaryBox!);
@@ -210,8 +217,14 @@ class DiaryService implements IDiaryService {
 
       return Success(entry);
     } catch (e, stackTrace) {
-      _loggingService.error('日記保存エラー', error: e, stackTrace: stackTrace);
-      return Failure(ServiceException('日記の保存に失敗しました', originalError: e));
+      _loggingService.error(
+        'Diary save error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return Failure(
+        ServiceException('Failed to save diary', originalError: e),
+      );
     }
   }
 
@@ -246,8 +259,10 @@ class DiaryService implements IDiaryService {
       }
       return const Success(null);
     } catch (e) {
-      _loggingService.error('日記更新エラー', error: e);
-      return Failure(ServiceException('日記の更新に失敗しました', originalError: e));
+      _loggingService.error('Diary update error', error: e);
+      return Failure(
+        ServiceException('Failed to update diary', originalError: e),
+      );
     }
   }
 
@@ -272,8 +287,10 @@ class DiaryService implements IDiaryService {
       }
       return const Success(null);
     } catch (e) {
-      _loggingService.error('日記削除エラー', error: e);
-      return Failure(ServiceException('日記の削除に失敗しました', originalError: e));
+      _loggingService.error('Diary delete error', error: e);
+      return Failure(
+        ServiceException('Failed to delete diary', originalError: e),
+      );
     }
   }
 
@@ -300,8 +317,10 @@ class DiaryService implements IDiaryService {
       );
       return Success(entries);
     } catch (e) {
-      _loggingService.error('日記一覧取得エラー', error: e);
-      return Failure(ServiceException('日記一覧の取得に失敗しました', originalError: e));
+      _loggingService.error('Diary list retrieval error', error: e);
+      return Failure(
+        ServiceException('Failed to retrieve diary list', originalError: e),
+      );
     }
   }
 
@@ -312,8 +331,10 @@ class DiaryService implements IDiaryService {
       if (_diaryBox == null) await _init();
       return Success(_diaryBox!.get(id));
     } catch (e) {
-      _loggingService.error('日記取得エラー', error: e);
-      return Failure(ServiceException('日記の取得に失敗しました', originalError: e));
+      _loggingService.error('Diary retrieval error', error: e);
+      return Failure(
+        ServiceException('Failed to retrieve diary', originalError: e),
+      );
     }
   }
 
@@ -360,8 +381,13 @@ class DiaryService implements IDiaryService {
       }
       return Success(result);
     } catch (e) {
-      _loggingService.error('フィルタ取得エラー', error: e);
-      return Failure(ServiceException('フィルタ付き日記の取得に失敗しました', originalError: e));
+      _loggingService.error('Filtered retrieval error', error: e);
+      return Failure(
+        ServiceException(
+          'Failed to retrieve filtered diaries',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -426,8 +452,13 @@ class DiaryService implements IDiaryService {
       }
       return Success(page);
     } catch (e) {
-      _loggingService.error('ページ取得エラー', error: e);
-      return Failure(ServiceException('ページ付き日記の取得に失敗しました', originalError: e));
+      _loggingService.error('Paginated retrieval error', error: e);
+      return Failure(
+        ServiceException(
+          'Failed to retrieve paginated diaries',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -469,7 +500,9 @@ class DiaryService implements IDiaryService {
   }) async {
     try {
       if (_diaryBox == null) {
-        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
+        _loggingService.warning(
+          '_diaryBox is not initialized. Reinitializing...',
+        );
         await _init();
       }
 
@@ -477,7 +510,7 @@ class DiaryService implements IDiaryService {
       final existingResult = await getDiaryByPhotoDate(photoDate);
       if (existingResult.isSuccess && existingResult.value.isNotEmpty) {
         _loggingService.warning(
-          '${photoDate.toString().split(' ')[0]}の日記が既に存在します',
+          'Diary already exists for ${photoDate.toString().split(' ')[0]}',
         );
         // 重複がある場合でも作成を続行（ユーザーが複数の日記を作成したい場合もある）
       }
@@ -486,7 +519,7 @@ class DiaryService implements IDiaryService {
       final id = _uuid.v4();
 
       _loggingService.debug(
-        '過去の写真から日記エントリー作成中 - ID: $id, 撮影日: $photoDate, 写真数: ${photoIds.length}',
+        'Creating diary entry from past photo - ID: $id, photoDate: $photoDate, photoCount: ${photoIds.length}',
       );
 
       final entry = DiaryEntry(
@@ -501,9 +534,9 @@ class DiaryService implements IDiaryService {
         updatedAt: now,
       );
 
-      _loggingService.debug('Hiveに保存中...');
+      _loggingService.debug('Saving to Hive...');
       await _diaryBox!.put(entry.id, entry);
-      _loggingService.info('過去写真日記の保存完了: ${entry.id}');
+      _loggingService.info('Past photo diary saved: ${entry.id}');
 
       // インデックスに挿入
       await _indexManager.ensureIndex(_diaryBox!);
@@ -526,8 +559,14 @@ class DiaryService implements IDiaryService {
 
       return Success(entry);
     } catch (e, stackTrace) {
-      _loggingService.error('過去写真日記作成エラー', error: e, stackTrace: stackTrace);
-      return Failure(ServiceException('過去写真日記の作成に失敗しました', originalError: e));
+      _loggingService.error(
+        'Past photo diary creation error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return Failure(
+        ServiceException('Failed to create past photo diary', originalError: e),
+      );
     }
   }
 
@@ -555,8 +594,13 @@ class DiaryService implements IDiaryService {
       }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return Success(entries);
     } catch (e) {
-      _loggingService.error('撮影日別日記検索エラー', error: e);
-      return Failure(ServiceException('撮影日別日記の検索に失敗しました', originalError: e));
+      _loggingService.error('Diary search by capture date error', error: e);
+      return Failure(
+        ServiceException(
+          'Failed to search diaries by capture date',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -565,23 +609,35 @@ class DiaryService implements IDiaryService {
   Future<Result<DiaryEntry?>> getDiaryEntryByPhotoId(String photoId) async {
     try {
       if (_diaryBox == null) {
-        _loggingService.warning('_diaryBoxが未初期化です。再初期化します...');
+        _loggingService.warning(
+          '_diaryBox is not initialized. Reinitializing...',
+        );
         await _init();
       }
 
       final allEntries = _diaryBox!.values;
       for (final entry in allEntries) {
         if (entry.photoIds.contains(photoId)) {
-          _loggingService.info('写真ID: $photoId の日記を発見: ${entry.id}');
+          _loggingService.info(
+            'Diary found for photoId: $photoId, diaryId: ${entry.id}',
+          );
           return Success(entry);
         }
       }
 
-      _loggingService.info('写真ID: $photoId に対応する日記は見つかりませんでした');
+      _loggingService.info('No diary found for photoId: $photoId');
       return const Success(null);
     } catch (e) {
-      _loggingService.error('写真IDから日記エントリー取得エラー', error: e);
-      return Failure(ServiceException('写真IDから日記の取得に失敗しました', originalError: e));
+      _loggingService.error(
+        'Error retrieving diary entry by photo ID',
+        error: e,
+      );
+      return Failure(
+        ServiceException(
+          'Failed to retrieve diary by photo ID',
+          originalError: e,
+        ),
+      );
     }
   }
 }

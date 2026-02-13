@@ -18,10 +18,10 @@ void main() {
 
       test('正しい表示名を持つ', () {
         expect(plan.displayName, contains('Premium'));
-        expect(plan.displayName, contains('月額'));
+        expect(plan.displayName, contains('Monthly'));
         expect(
           plan.displayName,
-          '${SubscriptionConstants.premiumDisplayName} (月額)',
+          '${SubscriptionConstants.premiumDisplayName} (Monthly)',
         );
       });
 
@@ -117,7 +117,7 @@ void main() {
         // 同じプラン同士
         expect(plan.hasMoreFeaturesThan(anotherPremiumMonthly), false);
 
-        // Premium月額プランは7つの機能を持つ
+        // PremiumMonthlyプランは7つの機能を持つ
         expect(plan.features.length, 9);
       });
     });
@@ -138,7 +138,7 @@ void main() {
 
         expect(debugString, contains('Plan('));
         expect(debugString, contains('id: premium_monthly'));
-        expect(debugString, contains('displayName: Premium (月額)'));
+        expect(debugString, contains('displayName: Premium (Monthly)'));
         expect(debugString, contains('price: ¥300'));
         expect(debugString, contains('monthlyLimit: 100'));
         expect(debugString, contains('isPremium: true'));

@@ -69,7 +69,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         locale: locale,
       );
       _logger.info(
-        'プロンプト初期化完了: ${_availablePrompts.length}個のプロンプト, isPremium: $_isPremium',
+        'Prompt initialization completed: ${_availablePrompts.length} prompts, isPremium: $_isPremium',
         context: 'PromptSelectionModal',
       );
 
@@ -80,7 +80,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       }
     } catch (e) {
       _logger.error(
-        'プロンプトサービス初期化エラー',
+        'Prompt service initialization error',
         error: e,
         context: 'PromptSelectionModal',
       );

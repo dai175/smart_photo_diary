@@ -354,7 +354,7 @@ class InAppPurchaseService
       }
 
       log(
-        '購入処理開始',
+        'Purchase process started',
         level: LogLevel.info,
         context: 'purchasePlan',
         data: {'planId': plan.id, 'productId': plan.productId},
@@ -363,7 +363,7 @@ class InAppPurchaseService
 
       final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
       log(
-        '商品ID取得完了',
+        'Product ID retrieved',
         level: LogLevel.debug,
         context: 'purchasePlan',
         data: {'productId': productId},
@@ -371,7 +371,7 @@ class InAppPurchaseService
 
       try {
         log(
-          '商品詳細をクエリ中',
+          'Querying product details',
           level: LogLevel.debug,
           context: 'purchasePlan',
           data: {'productId': productId},
@@ -380,7 +380,7 @@ class InAppPurchaseService
           productId,
         });
         log(
-          '商品クエリ完了',
+          'Product query completed',
           level: LogLevel.debug,
           context: 'purchasePlan',
           data: {
@@ -406,7 +406,7 @@ class InAppPurchaseService
 
         final productDetails = productResponse.productDetails.first;
         log(
-          '商品詳細取得',
+          'Product details retrieved',
           level: LogLevel.info,
           context: 'purchasePlan',
           data: {
@@ -421,7 +421,7 @@ class InAppPurchaseService
         );
 
         log(
-          'buyNonConsumable呼び出し中...',
+          'Calling buyNonConsumable...',
           level: LogLevel.info,
           context: 'purchasePlan',
         );
@@ -429,7 +429,7 @@ class InAppPurchaseService
           purchaseParam: purchaseParam,
         );
         log(
-          'buyNonConsumable結果',
+          'buyNonConsumable result',
           level: LogLevel.info,
           context: 'purchasePlan',
           data: {'success': success},
@@ -440,7 +440,11 @@ class InAppPurchaseService
           return const Failure(ServiceException('Failed to initiate purchase'));
         }
 
-        log('購入処理が正常に開始されました', level: LogLevel.info, context: 'purchasePlan');
+        log(
+          'Purchase process started successfully',
+          level: LogLevel.info,
+          context: 'purchasePlan',
+        );
 
         return Success(
           PurchaseResult(
@@ -452,7 +456,7 @@ class InAppPurchaseService
       } catch (storeError) {
         _isPurchasing = false;
         log(
-          'ストアエラー発生',
+          'Store error occurred',
           level: LogLevel.error,
           context: 'purchasePlan',
           error: storeError,
@@ -464,7 +468,7 @@ class InAppPurchaseService
               errorString.contains('sandbox') ||
               errorString.contains('StoreKit')) {
             log(
-              'シミュレーター環境のストア接続エラー - 成功をモック',
+              'Simulator environment store connection error - mocking success',
               level: LogLevel.warning,
               context: 'purchasePlan',
             );
@@ -488,7 +492,12 @@ class InAppPurchaseService
       }
     } catch (e) {
       _isPurchasing = false;
-      log('予期しないエラー', level: LogLevel.error, context: 'purchasePlan', error: e);
+      log(
+        'Unexpected error',
+        level: LogLevel.error,
+        context: 'purchasePlan',
+        error: e,
+      );
       return _handleError(
         e,
         'purchasePlan',

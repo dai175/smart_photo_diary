@@ -34,7 +34,7 @@ class InstagramShareChannel {
   }) async {
     try {
       _logger.info(
-        'Instagram共有開始: ${format.displayName}',
+        'Starting Instagram share: ${format.displayName}',
         context: 'InstagramShareChannel.share',
         data: 'diary_id: ${diary.id}',
       );
@@ -91,11 +91,14 @@ class InstagramShareChannel {
         },
       );
 
-      _logger.info('Instagram共有成功', context: 'InstagramShareChannel.share');
+      _logger.info(
+        'Instagram share succeeded',
+        context: 'InstagramShareChannel.share',
+      );
       return const Success<void>(null);
     } catch (e, st) {
       _logger.error(
-        'Instagram共有エラー',
+        'Instagram share error',
         context: 'InstagramShareChannel.share',
         error: e,
         stackTrace: st,

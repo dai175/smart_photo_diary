@@ -71,12 +71,16 @@ class TagGenerator {
       }
 
       _logger.warning(
-        'タグ生成 API エラーまたはレスポンスなし',
+        'Tag generation API error or no response',
         context: 'TagGenerator.generateTags',
       );
       return _generateOfflineTags(title, content, date, photoCount, locale);
     } catch (e) {
-      _logger.error('タグ生成エラー', context: 'TagGenerator.generateTags', error: e);
+      _logger.error(
+        'Tag generation error',
+        context: 'TagGenerator.generateTags',
+        error: e,
+      );
       return _generateOfflineTags(title, content, date, photoCount, locale);
     }
   }

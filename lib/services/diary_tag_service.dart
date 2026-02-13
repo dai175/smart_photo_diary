@@ -47,7 +47,7 @@ class DiaryTagService implements IDiaryTagService {
       }
 
       // キャッシュが無効または存在しない場合は新しく生成
-      _logger.debug('新しいタグを生成中: ${entry.id}');
+      _logger.debug('Generating new tags: ${entry.id}');
       final tagsResult = await _aiService.generateTagsFromContent(
         title: entry.title,
         content: entry.content,
@@ -67,12 +67,12 @@ class DiaryTagService implements IDiaryTagService {
         }
         return Success(tagsResult.value);
       } else {
-        _logger.error('タグ生成エラー', error: tagsResult.error);
+        _logger.error('Tag generation error', error: tagsResult.error);
         // エラー時はフォールバックタグを返す
         return Success(_generateFallbackTags(entry));
       }
     } catch (e) {
-      _logger.error('タグ生成エラー', error: e);
+      _logger.error('Tag generation error', error: e);
       // エラー時はフォールバックタグを返す
       return Success(_generateFallbackTags(entry));
     }
@@ -93,8 +93,10 @@ class DiaryTagService implements IDiaryTagService {
 
       return Success(allTags);
     } catch (e) {
-      _logger.error('タグ一覧取得エラー', error: e);
-      return Failure(ServiceException('タグ一覧の取得に失敗しました', originalError: e));
+      _logger.error('Tag list retrieval error', error: e);
+      return Failure(
+        ServiceException('Failed to retrieve tag list', originalError: e),
+      );
     }
   }
 
@@ -118,8 +120,10 @@ class DiaryTagService implements IDiaryTagService {
 
       return Success(sortedTags.take(limit).map((e) => e.key).toList());
     } catch (e) {
-      _logger.error('人気タグ取得エラー', error: e);
-      return Failure(ServiceException('人気タグの取得に失敗しました', originalError: e));
+      _logger.error('Popular tag retrieval error', error: e);
+      return Failure(
+        ServiceException('Failed to retrieve popular tags', originalError: e),
+      );
     }
   }
 
@@ -131,7 +135,7 @@ class DiaryTagService implements IDiaryTagService {
     _generateTagsInBackgroundCore(
       entry: entry,
       content: entry.content,
-      logLabel: 'バックグラウンド',
+      logLabel: 'background',
       onTagsGenerated: (latestEntry, tags) async {
         await latestEntry.updateTags(tags);
         onSearchIndexUpdate?.call(
@@ -181,7 +185,7 @@ class DiaryTagService implements IDiaryTagService {
     _generateTagsInBackgroundCore(
       entry: entry,
       content: '$pastContext: ${entry.content}',
-      logLabel: '過去写真日記',
+      logLabel: 'past-photo-diary',
       onTagsGenerated: (latestEntry, tags) async {
         await latestEntry.updateTags(tags);
         onSearchIndexUpdate?.call(
@@ -202,7 +206,7 @@ class DiaryTagService implements IDiaryTagService {
   }) {
     Future.delayed(Duration.zero, () async {
       try {
-        _logger.debug('$logLabelのタグ生成開始: ${entry.id}');
+        _logger.debug('Starting $logLabel tag generation: ${entry.id}');
         final tagsResult = await _aiService.generateTagsFromContent(
           title: entry.title,
           content: content,
@@ -218,19 +222,26 @@ class DiaryTagService implements IDiaryTagService {
             if (latestEntry != null) {
               await onTagsGenerated(latestEntry, tagsResult.value);
               _logger.debug(
-                '$logLabelのタグ生成完了: ${entry.id} -> ${tagsResult.value}',
+                '$logLabel tag generation completed: ${entry.id} -> ${tagsResult.value}',
               );
             } else {
-              _logger.warning('$logLabelタグ生成: エントリーが見つかりません: ${entry.id}');
+              _logger.warning(
+                '$logLabel tag generation: Entry not found: ${entry.id}',
+              );
             }
           } else {
-            _logger.warning('$logLabelタグ生成: Hiveボックスが利用できません');
+            _logger.warning(
+              '$logLabel tag generation: Hive box is unavailable',
+            );
           }
         } else {
-          _logger.error('$logLabelのタグ生成エラー', error: tagsResult.error);
+          _logger.error(
+            '$logLabel tag generation error',
+            error: tagsResult.error,
+          );
         }
       } catch (e) {
-        _logger.error('$logLabelのタグ生成エラー', error: e);
+        _logger.error('$logLabel tag generation error', error: e);
       }
     });
   }
@@ -273,7 +284,7 @@ class DiaryTagService implements IDiaryTagService {
         return locale;
       }
     } catch (e) {
-      _logger.warning('ロケール取得エラー: $e');
+      _logger.warning('Locale retrieval error: $e');
     }
 
     // フォールバック: システムロケール
@@ -288,7 +299,7 @@ class DiaryTagService implements IDiaryTagService {
         }
       }
     } catch (e2) {
-      _logger.warning('システムロケール取得エラー: $e2');
+      _logger.warning('System locale retrieval error: $e2');
     }
 
     // 最終的なフォールバック: 日本語

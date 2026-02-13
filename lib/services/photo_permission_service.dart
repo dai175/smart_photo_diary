@@ -18,20 +18,20 @@ class PhotoPermissionService implements IPhotoPermissionService {
   Future<bool> requestPermission() async {
     try {
       _logger.debug(
-        '権限リクエスト開始',
+        'Starting permission request',
         context: 'PhotoPermissionService.requestPermission',
       );
 
       // まずはPhotoManagerで権限リクエスト（これがメイン）
       final pmState = await PhotoManager.requestPermissionExtend();
       _logger.debug(
-        'PhotoManager権限状態: $pmState',
+        'PhotoManager permission status: $pmState',
         context: 'PhotoPermissionService.requestPermission',
       );
 
       if (pmState.isAuth) {
         _logger.info(
-          '写真アクセス権限が付与されました',
+          'Photo access permission granted',
           context: 'PhotoPermissionService.requestPermission',
         );
         return true;
@@ -40,7 +40,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
       // Limited access の場合も部分的に許可とみなす（iOS専用）
       if (pmState == PermissionState.limited) {
         _logger.info(
-          '制限つき写真アクセスが許可されました',
+          'Limited photo access was granted',
           context: 'PhotoPermissionService.requestPermission',
         );
         return true;
@@ -49,7 +49,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
       // PhotoManagerで権限が拒否された場合、Androidでは追加でpermission_handlerを試す
       if (defaultTargetPlatform == TargetPlatform.android) {
         _logger.debug(
-          'Android: permission_handlerで追加の権限チェックを実行',
+          'Android: Running additional permission check with permission_handler',
           context: 'PhotoPermissionService.requestPermission',
         );
 
@@ -58,31 +58,31 @@ class PhotoPermissionService implements IPhotoPermissionService {
 
         var status = await permission.status;
         _logger.debug(
-          'permission_handler権限状態: $status',
+          'permission_handler permission status: $status',
           context: 'PhotoPermissionService.requestPermission',
         );
 
         // 権限が未決定または拒否の場合は明示的にリクエスト
         if (status.isDenied) {
           _logger.debug(
-            'Android: 権限を明示的にリクエストします',
+            'Android: Explicitly requesting permission',
             context: 'PhotoPermissionService.requestPermission',
           );
           status = await permission.request();
           _logger.debug(
-            'Android: リクエスト後の権限状態: $status',
+            'Android: Permission status after request: $status',
             context: 'PhotoPermissionService.requestPermission',
           );
 
           if (status.isGranted) {
             _logger.info(
-              'Android: 権限が付与されました',
+              'Android: Permission granted',
               context: 'PhotoPermissionService.requestPermission',
             );
             // PhotoManagerで再度確認
             final pmStateAfter = await PhotoManager.requestPermissionExtend();
             _logger.debug(
-              'Android: PhotoManager再確認結果: $pmStateAfter',
+              'Android: PhotoManager re-verification result: $pmStateAfter',
               context: 'PhotoPermissionService.requestPermission',
             );
             return pmStateAfter.isAuth;
@@ -92,7 +92,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
         // 永続的に拒否されている場合
         if (status.isPermanentlyDenied) {
           _logger.warning(
-            'Android: 権限が永続的に拒否されています',
+            'Android: Permission is permanently denied',
             context: 'PhotoPermissionService.requestPermission',
           );
           return false;
@@ -100,7 +100,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
       }
 
       _logger.warning(
-        '写真アクセス権限が拒否されました',
+        'Photo access permission denied',
         context: 'PhotoPermissionService.requestPermission',
         data: 'pmState: $pmState',
       );
@@ -111,7 +111,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.requestPermission',
       );
       _logger.error(
-        '権限リクエストエラー',
+        'Permission request error',
         context: 'PhotoPermissionService.requestPermission',
         error: appError,
       );
@@ -140,7 +140,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.presentLimitedLibraryPicker',
       );
       _logger.error(
-        'Limited Library Picker表示エラー',
+        'Limited Library Picker display error',
         context: 'PhotoPermissionService.presentLimitedLibraryPicker',
         error: appError,
       );
@@ -159,7 +159,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.isLimitedAccess',
       );
       _logger.error(
-        '権限状態チェックエラー',
+        'Permission status check error',
         context: 'PhotoPermissionService.isLimitedAccess',
         error: appError,
       );
