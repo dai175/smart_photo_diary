@@ -84,7 +84,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: AppSpacing.screenPadding,
               children: _controller.isLoading
                   ? [_buildLoadingContent()]
-                  : [_buildSettingsContent()],
+                  : _controller.hasSettingsLoaded
+                  ? [_buildSettingsContent()]
+                  : [_buildSettingsLoadError()],
             ),
           ),
         );
@@ -188,6 +190,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: AppSpacing.xxxl),
+      ],
+    );
+  }
+
+  Widget _buildSettingsLoadError() {
+    return Column(
+      children: [
+        SizedBox(
+          height:
+              MediaQuery.of(context).size.height *
+              AppConstants.loadingCenterHeightRatio,
+        ),
+        Center(
+          child: FadeInWidget(
+            child: CustomCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: AppSpacing.cardPadding,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.errorContainer
+                          .withValues(alpha: AppConstants.opacityXLow),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.error_outline_rounded,
+                      color: Theme.of(context).colorScheme.error,
+                      size: AppSpacing.iconLg,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(
+                    context.l10n.commonErrorOccurred,
+                    style: AppTypography.titleLarge.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    context.l10n.settingsLoadingSubtitle,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

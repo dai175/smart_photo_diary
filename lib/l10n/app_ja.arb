@@ -1290,6 +1290,15 @@
   "@diaryDetailDeleteDialogMessage": {
     "description": "日記削除時の警告メッセージ"
   },
+  "diaryDetailLoadError": "日記の読み込みに失敗しました: {details}",
+  "@diaryDetailLoadError": {
+    "description": "日記読み込みに失敗した際のメッセージ（詳細あり）",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
   "diaryDetailUpdateError": "日記の更新に失敗しました: {details}",
   "@diaryDetailUpdateError": {
     "description": "日記更新に失敗した際のメッセージ",

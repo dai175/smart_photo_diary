@@ -73,13 +73,13 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       _contentController.text = _controller.generatedContent;
     }
 
-    // 使用量制限に到達した場合はダイアログ表示
-    if (_controller.usageLimitReached && mounted) {
+    // 使用量制限に到達した場合はダイアログ表示（consumeで1回限り）
+    if (_controller.consumeUsageLimitReached() && mounted) {
       DiaryPreviewDialogHelper.showUsageLimitDialog(context);
     }
 
-    // 自動保存完了後のナビゲーション
-    final savedId = _controller.savedDiaryId;
+    // 自動保存完了後のナビゲーション（consumeで1回限り）
+    final savedId = _controller.consumeSavedDiaryId();
     if (savedId != null && mounted) {
       final scaffoldMessenger = ScaffoldMessenger.of(context);
       scaffoldMessenger.showSnackBar(
@@ -133,7 +133,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       builder: (context, child) {
         return PopScope(
           canPop: false,
-          onPopInvoked: (didPop) async {
+          onPopInvokedWithResult: (didPop, result) async {
             if (didPop) return;
 
             if (!_controller.isLoading &&

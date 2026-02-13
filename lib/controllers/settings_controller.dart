@@ -39,6 +39,9 @@ class SettingsController extends BaseErrorController {
   /// 設定サービス（UI側で直接アクセスが必要な場合用）
   ISettingsService? get settingsService => _settingsService;
 
+  /// 設定データの読み込みが完了しているか
+  bool get hasSettingsLoaded => _settingsService != null;
+
   SettingsController() {
     _logger = serviceLocator.get<ILoggingService>();
   }

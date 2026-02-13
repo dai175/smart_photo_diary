@@ -161,7 +161,7 @@ class DiaryPreviewController extends BaseErrorController {
 
         if (resultFromAi.isFailure) {
           if (resultFromAi.error is AiProcessingException &&
-              resultFromAi.error.message.contains('月間制限に達しました')) {
+              (resultFromAi.error as AiProcessingException).isUsageLimitError) {
             _usageLimitReached = true;
             setLoading(false);
             notifyListeners();
@@ -214,7 +214,7 @@ class DiaryPreviewController extends BaseErrorController {
 
         if (resultFromAi.isFailure) {
           if (resultFromAi.error is AiProcessingException &&
-              resultFromAi.error.message.contains('月間制限に達しました')) {
+              (resultFromAi.error as AiProcessingException).isUsageLimitError) {
             _usageLimitReached = true;
             _isAnalyzingPhotos = false;
             setLoading(false);
@@ -284,9 +284,8 @@ class DiaryPreviewController extends BaseErrorController {
       _isSaving = false;
       notifyListeners();
     } catch (e, stackTrace) {
-      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '自動保存');
-      loggingService.error(
+      _logger.error(
         '日記の自動保存に失敗しました',
         context: 'DiaryPreviewController._autoSaveDiary',
         error: appError,
@@ -330,9 +329,8 @@ class DiaryPreviewController extends BaseErrorController {
       setLoading(false);
       return true;
     } catch (e, stackTrace) {
-      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(e, context: '日記保存');
-      loggingService.error(
+      _logger.error(
         '日記の保存に失敗しました',
         context: 'DiaryPreviewController._saveDiaryEntry',
         error: appError,
@@ -342,6 +340,22 @@ class DiaryPreviewController extends BaseErrorController {
       _setErrorState(DiaryPreviewErrorType.saveFailed);
       return false;
     }
+  }
+
+  /// 使用量制限フラグを消費する（1回限りのイベント処理用）
+  bool consumeUsageLimitReached() {
+    if (_usageLimitReached) {
+      _usageLimitReached = false;
+      return true;
+    }
+    return false;
+  }
+
+  /// 保存済み日記IDを消費する（1回限りのナビゲーション処理用）
+  String? consumeSavedDiaryId() {
+    final id = _savedDiaryId;
+    _savedDiaryId = null;
+    return id;
   }
 
   /// プロンプトをクリア

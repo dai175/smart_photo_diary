@@ -1290,6 +1290,15 @@
   "@diaryDetailDeleteDialogMessage": {
     "description": "Message explaining the consequences of deleting a diary"
   },
+  "diaryDetailLoadError": "Failed to load diary: {details}",
+  "@diaryDetailLoadError": {
+    "description": "Error shown when loading a diary fails with details",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
   "diaryDetailUpdateError": "Failed to update diary: {details}",
   "@diaryDetailUpdateError": {
     "description": "Error shown when updating a diary fails",

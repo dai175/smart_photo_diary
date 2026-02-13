@@ -145,8 +145,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     final detail = _controller.rawErrorDetail;
     return switch (_controller.errorType) {
       DiaryDetailErrorType.notFound => l10n.diaryNotFoundMessage,
-      DiaryDetailErrorType.loadFailed =>
-        '${l10n.diaryLoadErrorMessage}: $detail',
+      DiaryDetailErrorType.loadFailed => l10n.diaryDetailLoadError(detail),
       DiaryDetailErrorType.updateFailed => l10n.diaryDetailUpdateError(detail),
       DiaryDetailErrorType.deleteFailed => l10n.diaryDetailDeleteError(detail),
       null => '',

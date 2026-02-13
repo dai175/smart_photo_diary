@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/errors/app_exceptions.dart';
 import '../core/service_locator.dart';
 import '../models/diary_change.dart';
 import '../models/diary_entry.dart';
@@ -59,7 +60,7 @@ class StatisticsController extends BaseErrorController {
           error: result.error,
           context: 'StatisticsController',
         );
-        setLoading(false);
+        setError(result.error);
       }
     } catch (e) {
       _logger.error(
@@ -67,7 +68,11 @@ class StatisticsController extends BaseErrorController {
         error: e,
         context: 'StatisticsController',
       );
-      setLoading(false);
+      setError(
+        e is AppException
+            ? e
+            : ServiceException('統計データの読み込みに失敗しました', originalError: e),
+      );
     }
   }
 
@@ -103,7 +108,7 @@ class StatisticsController extends BaseErrorController {
 
     if (isSameDay) return null;
 
-    _selectedDay = selectedDay;
+    _selectedDay = normalizedDay;
     _focusedDay = focusedDay;
     notifyListeners();
 
@@ -125,6 +130,7 @@ class StatisticsController extends BaseErrorController {
   /// カレンダーページ変更
   void onPageChanged(DateTime focusedDay) {
     _focusedDay = focusedDay;
+    notifyListeners();
   }
 
   @override
