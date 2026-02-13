@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
+import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/errors/error_handler.dart';
@@ -12,6 +14,33 @@ class PhotoDataService {
   final ILoggingService _logger;
 
   PhotoDataService({required ILoggingService logger}) : _logger = logger;
+
+  /// 写真IDリストからAssetEntityを取得する
+  Future<Result<List<AssetEntity>>> getAssetsByIds(
+    List<String> photoIds,
+  ) async {
+    try {
+      final results = await Future.wait(
+        photoIds.map((photoId) async {
+          try {
+            return await AssetEntity.fromId(photoId);
+          } catch (e) {
+            _logger.error(
+              'Photo retrieval error: photoId: $photoId',
+              context: 'PhotoDataService.getAssetsByIds',
+              error: e,
+            );
+            return null;
+          }
+        }),
+      );
+      return Success(results.whereType<AssetEntity>().toList());
+    } catch (e) {
+      return Failure(
+        PhotoAccessException('Failed to load photo assets', originalError: e),
+      );
+    }
+  }
 
   /// 写真のバイナリデータを取得する
   Future<List<int>?> getPhotoData(AssetEntity asset) async {

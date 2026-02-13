@@ -117,6 +117,14 @@ class PhotoService implements IPhotoService {
   );
 
   // =================================================================
+  // ID指定での写真取得（PhotoDataServiceへの委譲）
+  // =================================================================
+
+  @override
+  Future<Result<List<AssetEntity>>> getAssetsByIds(List<String> photoIds) =>
+      _dataService.getAssetsByIds(photoIds);
+
+  // =================================================================
   // データ取得メソッド（PhotoDataServiceへの委譲）
   // =================================================================
 

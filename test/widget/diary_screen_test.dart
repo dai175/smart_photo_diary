@@ -8,6 +8,7 @@ import 'package:smart_photo_diary/screens/diary_screen.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/ui/components/loading_shimmer.dart';
 import 'package:smart_photo_diary/widgets/diary_card_widget.dart';
@@ -49,6 +50,9 @@ void main() {
 
     serviceLocator.registerSingleton<ILoggingService>(mockLogger);
     serviceLocator.registerSingleton<IPhotoCacheService>(mockPhotoCache);
+
+    final mockPhotoService = TestServiceSetup.getPhotoService();
+    serviceLocator.registerSingleton<IPhotoService>(mockPhotoService);
   });
 
   tearDown(() {

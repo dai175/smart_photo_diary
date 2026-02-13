@@ -1,13 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/controllers/diary_detail_controller.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
 class MockDiaryService extends Mock implements IDiaryService {}
+
+class MockPhotoService extends Mock implements IPhotoService {}
 
 DiaryEntry _createEntry({
   String id = 'test-id',
@@ -28,6 +32,7 @@ DiaryEntry _createEntry({
 
 void main() {
   late MockDiaryService mockDiaryService;
+  late MockPhotoService mockPhotoService;
 
   setUpAll(() {
     registerFallbackValue(_createEntry());
@@ -36,7 +41,14 @@ void main() {
   setUp(() {
     ServiceLocator().clear();
     mockDiaryService = MockDiaryService();
+    mockPhotoService = MockPhotoService();
     ServiceLocator().registerSingleton<IDiaryService>(mockDiaryService);
+    ServiceLocator().registerSingleton<IPhotoService>(mockPhotoService);
+
+    // Default: getAssetsByIds returns empty list
+    when(
+      () => mockPhotoService.getAssetsByIds(any()),
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
   });
 
   tearDown(() {

@@ -12,6 +12,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
 import '../../interfaces/logging_service_interface.dart';
+import '../../interfaces/photo_service_interface.dart';
 import '../../interfaces/settings_service_interface.dart';
 
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
@@ -34,7 +35,14 @@ class XShareChannel {
       );
 
       // 画像の準備（最大3枚）
-      final assets = photos ?? await diary.getPhotoAssets();
+      List<AssetEntity> assets;
+      if (photos != null) {
+        assets = photos;
+      } else {
+        final photoService = serviceLocator.get<IPhotoService>();
+        final result = await photoService.getAssetsByIds(diary.photoIds);
+        assets = result.getOrDefault([]);
+      }
       final limited = assets.take(AppConstants.maxPhotosSelection).toList();
       final files = <XFile>[];
       for (final a in limited) {

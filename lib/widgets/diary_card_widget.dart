@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_locator.dart';
 import '../constants/app_constants.dart';
 import '../ui/design_system/app_colors.dart';
@@ -131,8 +132,11 @@ class DiaryCardWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoThumbnails() {
+    final photoService = serviceLocator.get<IPhotoService>();
     return FutureBuilder<List<AssetEntity>>(
-      future: entry.getPhotoAssets(),
+      future: photoService
+          .getAssetsByIds(entry.photoIds)
+          .then((result) => result.getOrDefault([])),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SizedBox(

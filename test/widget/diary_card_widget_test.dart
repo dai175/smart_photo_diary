@@ -9,11 +9,14 @@ import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/widgets/diary_card_widget.dart';
 
 class MockDiaryService extends Mock implements IDiaryService {}
 
 class MockPhotoCacheService extends Mock implements IPhotoCacheService {}
+
+class MockPhotoService extends Mock implements IPhotoService {}
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 
@@ -58,15 +61,23 @@ Widget _wrapWithApp(Widget child) {
 void main() {
   late MockDiaryService mockDiaryService;
   late MockPhotoCacheService mockPhotoCacheService;
+  late MockPhotoService mockPhotoService;
 
   setUp(() {
     ServiceLocator().clear();
     mockDiaryService = MockDiaryService();
     mockPhotoCacheService = MockPhotoCacheService();
+    mockPhotoService = MockPhotoService();
     ServiceLocator().registerSingleton<IDiaryService>(mockDiaryService);
     ServiceLocator().registerSingleton<IPhotoCacheService>(
       mockPhotoCacheService,
     );
+    ServiceLocator().registerSingleton<IPhotoService>(mockPhotoService);
+
+    // Default: getAssetsByIds returns empty list
+    when(
+      () => mockPhotoService.getAssetsByIds(any()),
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
   });
 
   tearDown(() {
