@@ -2,7 +2,10 @@
 abstract class IPhotoPermissionService {
   /// 写真アクセス権限をリクエストする
   ///
-  /// 戻り値: 権限が付与されれば true。エラー時は false。
+  /// iOS 14以降で Limited Access が付与された場合も true を返す。
+  /// Limited Access かどうかの判定は [isLimitedAccess] で確認すること。
+  ///
+  /// 戻り値: 権限が付与されれば true（Limited Access含む）。エラー時は false。
   Future<bool> requestPermission();
 
   /// 権限が永続的に拒否されているかチェック
