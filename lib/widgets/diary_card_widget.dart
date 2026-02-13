@@ -16,29 +16,61 @@ import '../services/interfaces/photo_cache_service_interface.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../localization/localization_extensions.dart';
 
-class DiaryCardWidget extends StatelessWidget {
+class DiaryCardWidget extends StatefulWidget {
   final DiaryEntry entry;
   final VoidCallback onTap;
 
   const DiaryCardWidget({super.key, required this.entry, required this.onTap});
 
+  @override
+  State<DiaryCardWidget> createState() => _DiaryCardWidgetState();
+}
+
+class _DiaryCardWidgetState extends State<DiaryCardWidget> {
+  late Future<List<AssetEntity>> _photoAssetsFuture;
+  late Future<List<String>?> _tagsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _photoAssetsFuture = _fetchPhotoAssets();
+    _tagsFuture = _fetchTags();
+  }
+
+  @override
+  void didUpdateWidget(DiaryCardWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.entry.id != widget.entry.id) {
+      _photoAssetsFuture = _fetchPhotoAssets();
+      _tagsFuture = _fetchTags();
+    }
+  }
+
+  Future<List<AssetEntity>> _fetchPhotoAssets() {
+    final photoService = serviceLocator.get<IPhotoService>();
+    return photoService
+        .getAssetsByIds(widget.entry.photoIds)
+        .then((result) => result.getOrDefault([]));
+  }
+
   // タグを取得（永続化キャッシュ優先）
-  Future<List<String>> _generateTags(AppLocalizations l10n) async {
+  // Returns null on failure to signal that l10n-dependent fallback is needed
+  Future<List<String>?> _fetchTags() async {
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getTagsForEntry(entry);
+      final result = await diaryService.getTagsForEntry(widget.entry);
       if (result.isSuccess) {
         return result.value;
       }
-      return _fallbackTags(l10n);
+      return null;
     } catch (e) {
-      return _fallbackTags(l10n);
+      return null;
     }
   }
 
   // エラー時のフォールバックタグ（時間帯のみ）
   List<String> _fallbackTags(AppLocalizations l10n) {
-    final hour = entry.date.hour;
+    final hour = widget.entry.date.hour;
     if (hour >= 5 && hour < 12) return [l10n.tagMorning];
     if (hour >= 12 && hour < 18) return [l10n.tagAfternoon];
     if (hour >= 18 && hour < 22) return [l10n.tagEvening];
@@ -48,10 +80,12 @@ class DiaryCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final title = entry.title.isNotEmpty ? entry.title : l10n.diaryCardUntitled;
+    final title = widget.entry.title.isNotEmpty
+        ? widget.entry.title
+        : l10n.diaryCardUntitled;
 
     return CustomCard(
-      onTap: onTap,
+      onTap: widget.onTap,
       elevation: AppSpacing.elevationSm,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +112,7 @@ class DiaryCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.xxs),
                     Text(
-                      l10n.formatMonthDay(entry.date),
+                      l10n.formatMonthDay(widget.entry.date),
                       style: AppTypography.withColor(
                         AppTypography.labelSmall,
                         Theme.of(context).colorScheme.onPrimaryContainer,
@@ -110,7 +144,7 @@ class DiaryCardWidget extends StatelessWidget {
 
           // 本文（一部）
           Text(
-            entry.content,
+            widget.entry.content,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.withColor(
@@ -132,11 +166,8 @@ class DiaryCardWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoThumbnails() {
-    final photoService = serviceLocator.get<IPhotoService>();
     return FutureBuilder<List<AssetEntity>>(
-      future: photoService
-          .getAssetsByIds(entry.photoIds)
-          .then((result) => result.getOrDefault([])),
+      future: _photoAssetsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SizedBox(
@@ -237,8 +268,8 @@ class DiaryCardWidget extends StatelessWidget {
 
   Widget _buildTags(BuildContext context) {
     final l10n = context.l10n;
-    return FutureBuilder<List<String>>(
-      future: _generateTags(l10n),
+    return FutureBuilder<List<String>?>(
+      future: _tagsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Row(
@@ -260,7 +291,7 @@ class DiaryCardWidget extends StatelessWidget {
           );
         }
 
-        final tags = snapshot.data ?? [];
+        final tags = snapshot.data ?? _fallbackTags(l10n);
         if (tags.isEmpty) return const SizedBox();
 
         return Wrap(

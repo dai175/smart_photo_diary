@@ -503,6 +503,14 @@
       }
     }
   },
+  "settingsBackupDialogTitle": "日記のバックアップを保存",
+  "@settingsBackupDialogTitle": {
+    "description": "バックアップ保存時のファイルピッカーダイアログタイトル"
+  },
+  "settingsRestoreDialogTitle": "バックアップファイルを選択",
+  "@settingsRestoreDialogTitle": {
+    "description": "リストア時のファイルピッカーダイアログタイトル"
+  },
   "settingsRestoreInProgress": "リストア中...",
   "@settingsRestoreInProgress": {
     "description": "リストア実行中に表示するメッセージ"

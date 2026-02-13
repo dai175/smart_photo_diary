@@ -41,6 +41,13 @@ class XShareChannel {
       } else {
         final photoService = serviceLocator.get<IPhotoService>();
         final result = await photoService.getAssetsByIds(diary.photoIds);
+        if (result.isFailure) {
+          _logger.warning(
+            'Failed to load photo assets for sharing',
+            context: 'XShareChannel.share',
+            data: 'diary_id: ${diary.id}, error: ${result.error.message}',
+          );
+        }
         assets = result.getOrDefault([]);
       }
       final limited = assets.take(AppConstants.maxPhotosSelection).toList();

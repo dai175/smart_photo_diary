@@ -1,9 +1,11 @@
 import 'package:photo_manager/photo_manager.dart';
 
 import '../core/result/result.dart';
+import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import 'base_error_controller.dart';
 
@@ -70,6 +72,17 @@ class DiaryDetailController extends BaseErrorController {
           final assetsResult = await photoService.getAssetsByIds(
             entry.photoIds,
           );
+
+          if (assetsResult.isFailure) {
+            try {
+              serviceLocator.get<ILoggingService>().warning(
+                'Failed to load photo assets for diary entry',
+                context: 'DiaryDetailController.loadDiaryEntry',
+                data:
+                    'diaryId: ${entry.id}, error: ${assetsResult.error.message}',
+              );
+            } catch (_) {}
+          }
 
           _diaryEntry = entry;
           _photoAssets = assetsResult.getOrDefault([]);
