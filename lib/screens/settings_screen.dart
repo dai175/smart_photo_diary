@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import '../services/interfaces/settings_service_interface.dart';
-import '../services/storage_service.dart'; // StorageInfoクラス用
-import '../services/interfaces/storage_service_interface.dart';
-import '../core/service_registration.dart';
-import '../core/service_locator.dart';
-import '../services/interfaces/logging_service_interface.dart';
-import '../models/subscription_info_v2.dart';
+import '../controllers/settings_controller.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -33,26 +26,21 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late final ILoggingService _logger;
-  late ISettingsService _settingsService;
+  late final SettingsController _controller;
   late final ScrollController _scrollController;
-  PackageInfo? _packageInfo;
-  StorageInfo? _storageInfo;
-  SubscriptionInfoV2? _subscriptionInfo;
-  bool _isLoading = true;
-  Locale? _selectedLocale;
 
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<ILoggingService>();
+    _controller = SettingsController();
     _scrollController = ScrollController();
     widget.scrollSignal?.addListener(_onScrollToTop);
-    _loadSettings();
+    _controller.loadSettings();
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     _scrollController.dispose();
     widget.scrollSignal?.removeListener(_onScrollToTop);
     super.dispose();
@@ -68,79 +56,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _loadSettings() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      _settingsService = await ServiceRegistration.getAsync<ISettingsService>();
-      _packageInfo = await PackageInfo.fromPlatform();
-      final storageService = ServiceRegistration.get<IStorageService>();
-      final storageResult = await storageService.getStorageInfoResult();
-      if (storageResult.isSuccess) {
-        _storageInfo = storageResult.value;
-      } else {
-        _logger.error(
-          'Failed to fetch storage info',
-          error: storageResult.error,
-          context: 'SettingsScreen',
-        );
-      }
-
-      _selectedLocale = _settingsService.locale;
-
-      final subscriptionResult = await _settingsService.getSubscriptionInfoV2();
-      if (subscriptionResult.isSuccess) {
-        _subscriptionInfo = subscriptionResult.value;
-      } else {
-        _logger.error(
-          'Failed to fetch subscription info',
-          error: subscriptionResult.error,
-          context: 'SettingsScreen',
-        );
-      }
-    } catch (e) {
-      _logger.error(
-        'Failed to load settings',
-        error: e,
-        context: 'SettingsScreen',
-      );
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: Text(context.l10n.settingsAppBarTitle),
-        centerTitle: false,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-        iconTheme: IconThemeData(
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-        elevation: 2,
-      ),
-      body: MicroInteractions.pullToRefresh(
-        onRefresh: _loadSettings,
-        color: AppColors.primary,
-        child: ListView(
-          controller: _scrollController,
-          padding: AppSpacing.screenPadding,
-          children: _isLoading
-              ? [_buildLoadingContent()]
-              : [_buildSettingsContent()],
-        ),
-      ),
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          appBar: AppBar(
+            title: Text(context.l10n.settingsAppBarTitle),
+            centerTitle: false,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            elevation: 2,
+          ),
+          body: MicroInteractions.pullToRefresh(
+            onRefresh: _controller.loadSettings,
+            color: AppColors.primary,
+            child: ListView(
+              controller: _scrollController,
+              padding: AppSpacing.screenPadding,
+              children: _controller.isLoading
+                  ? [_buildLoadingContent()]
+                  : [_buildSettingsContent()],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -201,32 +149,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               FadeInWidget(
                 child: AppearanceSettingsSection(
-                  settingsService: _settingsService,
-                  logger: _logger,
-                  selectedLocale: _selectedLocale,
+                  settingsService: _controller.settingsService!,
+                  logger: _controller.logger,
+                  selectedLocale: _controller.selectedLocale,
                   onThemeChanged: widget.onThemeChanged,
                   onLocaleChanged: (locale) {
-                    setState(() {
-                      _selectedLocale = locale;
-                    });
+                    _controller.onLocaleChanged(locale);
                   },
-                  onStateChanged: () => setState(() {}),
+                  onStateChanged: _controller.notifyStateChanged,
                 ),
               ),
               _buildDivider(),
               SlideInWidget(
                 delay: const Duration(milliseconds: 50),
                 child: SubscriptionSettingsSection(
-                  subscriptionInfo: _subscriptionInfo,
-                  onStateChanged: () => setState(() {}),
+                  subscriptionInfo: _controller.subscriptionInfo,
+                  onStateChanged: _controller.notifyStateChanged,
                 ),
               ),
               _buildDivider(),
               SlideInWidget(
                 delay: const Duration(milliseconds: 100),
                 child: StorageSettingsSection(
-                  storageInfo: _storageInfo,
-                  onReloadSettings: _loadSettings,
+                  storageInfo: _controller.storageInfo,
+                  onReloadSettings: _controller.loadSettings,
                 ),
               ),
               _buildDivider(),
@@ -259,8 +205,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       icon: AppIcons.settingsInfo,
       iconColor: AppColors.primary,
       title: context.l10n.settingsVersionTitle,
-      subtitle: _packageInfo != null
-          ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
+      subtitle: _controller.packageInfo != null
+          ? '${_controller.packageInfo!.version} (${_controller.packageInfo!.buildNumber})'
           : context.l10n.commonLoading,
     );
   }
@@ -274,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () => showLicensePage(
         context: context,
         applicationName: context.l10n.appTitle,
-        applicationVersion: _packageInfo?.version ?? '1.0.0',
+        applicationVersion: _controller.packageInfo?.version ?? '1.0.0',
         applicationLegalese:
             '© ${DateTime.now().year} ${context.l10n.appTitle}',
       ),
