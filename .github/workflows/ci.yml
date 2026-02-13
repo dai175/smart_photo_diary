@@ -61,21 +61,21 @@ jobs:
       - name: Run tests
         run: flutter test --coverage --reporter=expanded
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: coverage/lcov.info
-          fail_ci_if_error: false
-
-      - name: Check test results
+      - name: Remove generated files from coverage
         run: |
-          if [ -f coverage/lcov.info ]; then
-            echo "✅ Tests completed successfully"
-          else
-            echo "❌ Test coverage file not found"
-            exit 1
-          fi
+          sudo apt-get install -y lcov > /dev/null 2>&1
+          lcov --remove coverage/lcov.info \
+            '**/*.g.dart' \
+            '**/l10n/generated/*' \
+            '**/debug/*' \
+            --ignore-errors unused \
+            -o coverage/lcov.info
+
+      - name: Check coverage threshold
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: coverage/lcov.info
+          min_coverage: 40
 
   build-android:
     name: Build Android

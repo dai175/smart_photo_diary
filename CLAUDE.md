@@ -23,6 +23,11 @@ fvm flutter test test/integration/   # Integration tests only
 fvm flutter analyze                # Must show "No issues found!"
 fvm dart format .                  # ALWAYS run after code changes
 
+# Coverage measurement (threshold: 40%, enforced in CI)
+fvm flutter test --coverage
+lcov --summary coverage/lcov.info                                    # Summary
+genhtml coverage/lcov.info -o coverage/html && open coverage/html/index.html  # HTML report
+
 # Internationalization
 fvm flutter gen-l10n              # Generate localization files
 
