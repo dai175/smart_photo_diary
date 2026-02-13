@@ -98,6 +98,7 @@ lib/
 
 ### Logging (MANDATORY)
 ALL logging must use `LoggingService`. Never use `print`/`debugPrint` except in fallbacks when `ServiceLocator` is unavailable.
+All log messages, exception messages, and debug data map keys must be written in English (comments may remain in Japanese).
 
 ### Security (CRITICAL)
 - NEVER commit API keys: Use `.env` file in project root (gitignored)
