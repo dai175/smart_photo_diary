@@ -60,9 +60,9 @@ class AiService implements IAiService {
 
       return Failure(
         AiProcessingException(
-          'AI生成の月間制限に達しました。'
-          '現在のプラン（$planName）では今月の残り使用回数は$remaining回です。'
-          'より多くの生成を行うにはPremiumプランにアップグレードしてください。',
+          'Monthly AI generation limit reached. '
+          'Current plan ($planName) has $remaining generations remaining. '
+          'Upgrade to Premium for more generations.',
           isUsageLimitError: true,
           details: 'Usage limit exceeded for current plan',
         ),
@@ -80,14 +80,14 @@ class AiService implements IAiService {
       final result = await _subscriptionService.incrementAiUsage();
       if (result.isFailure) {
         serviceLocator.get<ILoggingService>().warning(
-          'AI使用量の記録に失敗しました',
+          'Failed to record AI usage',
           context: 'AiService._recordAiUsage',
           data: result.error.toString(),
         );
       }
     } catch (e) {
       serviceLocator.get<ILoggingService>().warning(
-        'AI使用量の記録中に例外が発生しました',
+        'Exception occurred while recording AI usage',
         context: 'AiService._recordAiUsage',
         data: e.toString(),
       );
@@ -124,7 +124,7 @@ class AiService implements IAiService {
     } catch (e) {
       return Failure(
         AiProcessingException(
-          'AI日記生成中にエラーが発生しました',
+          'Error occurred during AI diary generation',
           details: e.toString(),
           originalError: e,
         ),
@@ -160,7 +160,7 @@ class AiService implements IAiService {
     } catch (e) {
       return Failure(
         AiProcessingException(
-          'AI日記生成中にエラーが発生しました',
+          'Error occurred during AI diary generation',
           details: e.toString(),
           originalError: e,
         ),
@@ -192,7 +192,7 @@ class AiService implements IAiService {
     } catch (e) {
       return Failure(
         AiProcessingException(
-          'タグ生成中にエラーが発生しました',
+          'Error occurred during tag generation',
           details: e.toString(),
           originalError: e,
         ),

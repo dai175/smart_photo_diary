@@ -84,7 +84,7 @@ class StorageService implements IStorageService {
     final fileName =
         'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
     final outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: '日記のバックアップを保存',
+      dialogTitle: 'Save diary backup',
       fileName: fileName,
       type: FileType.custom,
       allowedExtensions: ['json'],
@@ -102,7 +102,7 @@ class StorageService implements IStorageService {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
-        dialogTitle: 'バックアップファイルを選択',
+        dialogTitle: 'Select backup file',
       );
 
       if (result == null || result.files.single.path == null) {
