@@ -6,33 +6,69 @@ import '../../models/plans/plan.dart';
 /// IAP商品情報取得、購入フロー、復元、検証を担当する。
 abstract class IInAppPurchaseService {
   /// サービスを初期化（IAP利用可能性チェックと購入ストリーム監視開始）
+  ///
+  /// Returns:
+  /// - Success: 初期化が正常に完了
+  /// - Failure: [ServiceException] ストアが利用不可、またはストリーム監視の開始に失敗した場合
   Future<Result<void>> initialize();
 
   /// In-App Purchase商品情報を取得
+  ///
+  /// Returns:
+  /// - Success: 取得可能な [PurchaseProduct] のリスト
+  /// - Failure: [ServiceException] ストアへの問い合わせ失敗、またはネットワークエラー時
   Future<Result<List<PurchaseProduct>>> getProducts();
 
   /// 指定プランの実際の価格情報を取得
+  ///
+  /// Returns:
+  /// - Success: 該当する [PurchaseProduct]（見つからない場合は null）
+  /// - Failure: [ServiceException] ストアへの問い合わせ失敗時
   Future<Result<PurchaseProduct?>> getProductPrice(String planId);
 
   /// プランを購入
+  ///
+  /// Returns:
+  /// - Success: 購入結果を示す [PurchaseResult]
+  /// - Failure: [ServiceException] 購入フロー失敗、ネットワークエラー、またはストア利用不可時
   Future<Result<PurchaseResult>> purchasePlan(Plan plan);
 
   /// 購入を復元
+  ///
+  /// Returns:
+  /// - Success: 復元された購入結果の [PurchaseResult] リスト（復元対象なしの場合は空リスト）
+  /// - Failure: [ServiceException] 復元処理失敗、またはネットワークエラー時
   Future<Result<List<PurchaseResult>>> restorePurchases();
 
   /// 購入状態を検証
+  ///
+  /// Returns:
+  /// - Success: 有効な購入なら true、無効なら false
+  /// - Failure: [ServiceException] 検証処理失敗、またはトランザクションIDが不正な場合
   Future<Result<bool>> validatePurchase(String transactionId);
 
   /// プランを変更
+  ///
+  /// Returns:
+  /// - Success: プラン変更が正常に完了
+  /// - Failure: [ServiceException] 変更処理失敗、現在のサブスクリプションが見つからない、またはストアエラー時
   Future<Result<void>> changePlan(Plan newPlan);
 
   /// サブスクリプションをキャンセル
+  ///
+  /// Returns:
+  /// - Success: キャンセル処理が正常に完了
+  /// - Failure: [ServiceException] キャンセル処理失敗、または有効なサブスクリプションが見つからない場合
   Future<Result<void>> cancelSubscription();
 
   /// 購入状態変更を監視
+  ///
+  /// 購入フローの進行状況や完了/失敗をリアルタイムで通知する。
   Stream<PurchaseResult> get purchaseStream;
 
   /// サービスを破棄
+  ///
+  /// 購入ストリームの監視を停止し、リソースを解放する。
   Future<void> dispose();
 }
 
