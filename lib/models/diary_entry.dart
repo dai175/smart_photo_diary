@@ -60,30 +60,28 @@ class DiaryEntry extends HiveObject {
 
   // 写真のIDリストからAssetEntityのリストを取得するメソッド
   Future<List<AssetEntity>> getPhotoAssets() async {
-    final List<AssetEntity> assets = [];
-
-    for (final photoId in photoIds) {
-      try {
-        final asset = await AssetEntity.fromId(photoId);
-        if (asset != null) {
-          assets.add(asset);
-        }
-      } catch (e) {
+    final results = await Future.wait(
+      photoIds.map((photoId) async {
         try {
-          final logger = serviceLocator.get<ILoggingService>();
-          logger.error(
-            '写真の取得エラー: photoId: $photoId',
-            context: 'DiaryEntry.getPhotoAssets',
-            error: e,
-          );
-        } catch (_) {
-          // LoggingServiceが利用できない場合はdebugPrintにフォールバック
-          debugPrint('写真の取得エラー: $e');
+          return await AssetEntity.fromId(photoId);
+        } catch (e) {
+          try {
+            final logger = serviceLocator.get<ILoggingService>();
+            logger.error(
+              '写真の取得エラー: photoId: $photoId',
+              context: 'DiaryEntry.getPhotoAssets',
+              error: e,
+            );
+          } catch (_) {
+            // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+            debugPrint('写真の取得エラー: $e');
+          }
+          return null;
         }
-      }
-    }
+      }),
+    );
 
-    return assets;
+    return results.whereType<AssetEntity>().toList();
   }
 
   // 日記エントリーを更新するメソッド
