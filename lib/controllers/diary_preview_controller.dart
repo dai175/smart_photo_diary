@@ -21,7 +21,6 @@ enum DiaryPreviewErrorType { noPhotos, generationFailed, saveFailed }
 /// DiaryPreviewScreen の状態管理・ビジネスロジック
 class DiaryPreviewController extends BaseErrorController {
   late final ILoggingService _logger;
-  late final IAiService _aiService;
   late final IPhotoService _photoService;
 
   bool _isInitializing = true;
@@ -79,7 +78,6 @@ class DiaryPreviewController extends BaseErrorController {
 
   DiaryPreviewController() {
     _logger = serviceLocator.get<ILoggingService>();
-    _aiService = ServiceRegistration.get<IAiService>();
     _photoService = ServiceRegistration.get<IPhotoService>();
   }
 
@@ -125,6 +123,7 @@ class DiaryPreviewController extends BaseErrorController {
     setLoading(true);
 
     try {
+      final aiService = await ServiceRegistration.getAsync<IAiService>();
       // 写真の撮影日時を取得
       List<DateTime> photoTimes = [];
       for (final asset in assets) {
@@ -152,7 +151,7 @@ class DiaryPreviewController extends BaseErrorController {
           return;
         }
 
-        final resultFromAi = await _aiService.generateDiaryFromImage(
+        final resultFromAi = await aiService.generateDiaryFromImage(
           imageData: imageData,
           date: photoDateTime,
           prompt: _selectedPrompt?.text,
@@ -197,7 +196,7 @@ class DiaryPreviewController extends BaseErrorController {
         _currentPhotoIndex = 0;
         notifyListeners();
 
-        final resultFromAi = await _aiService.generateDiaryFromMultipleImages(
+        final resultFromAi = await aiService.generateDiaryFromMultipleImages(
           imagesWithTimes: imagesWithTimes,
           prompt: _selectedPrompt?.text,
           onProgress: (current, total) {
