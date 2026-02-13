@@ -17,92 +17,81 @@ class StorageService implements IStorageService {
   // ストレージ使用量を取得
   @override
   Future<StorageInfo> getStorageInfo() async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      int diaryDataSize = 0;
+    final appDir = await getApplicationDocumentsDirectory();
+    int diaryDataSize = 0;
 
-      // Hiveデータベースのサイズを計算
-      final hiveDir = Directory(appDir.path);
-      if (await hiveDir.exists()) {
-        await for (final entity in hiveDir.list(recursive: true)) {
-          if (entity is File && entity.path.contains('.hive')) {
-            final size = await entity.length();
-            diaryDataSize += size;
-          }
+    // Hiveデータベースのサイズを計算
+    final hiveDir = Directory(appDir.path);
+    if (await hiveDir.exists()) {
+      await for (final entity in hiveDir.list(recursive: true)) {
+        if (entity is File && entity.path.contains('.hive')) {
+          final size = await entity.length();
+          diaryDataSize += size;
         }
       }
-
-      return StorageInfo(
-        totalSize: diaryDataSize,
-        diaryDataSize: diaryDataSize,
-      );
-    } catch (e) {
-      return StorageInfo(totalSize: 0, diaryDataSize: 0);
     }
+
+    return StorageInfo(totalSize: diaryDataSize, diaryDataSize: diaryDataSize);
   }
 
   // データのエクスポート（保存先選択可能）
   @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
-    try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getSortedDiaryEntries();
+    final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+    final result = await diaryService.getSortedDiaryEntries();
 
-      if (result.isFailure) {
-        throw StorageException(
-          'Failed to retrieve diary data: ${result.error.message}',
-        );
-      }
-
-      var entries = result.value;
-
-      // 期間フィルター
-      if (startDate != null || endDate != null) {
-        entries = entries.where((entry) {
-          if (startDate != null && entry.date.isBefore(startDate)) return false;
-          if (endDate != null && entry.date.isAfter(endDate)) return false;
-          return true;
-        }).toList();
-      }
-
-      // JSON形式でエクスポート
-      final exportData = {
-        'app_name': 'Smart Photo Diary',
-        'export_date': DateTime.now().toIso8601String(),
-        'version': '1.0.0',
-        'entries': entries
-            .map(
-              (entry) => {
-                'id': entry.id,
-                'title': entry.title,
-                'content': entry.content,
-                'date': entry.date.toIso8601String(),
-                'photoIds': entry.photoIds,
-                'tags': entry.effectiveTags, // タグも含める
-                'createdAt': entry.createdAt.toIso8601String(),
-                'updatedAt': entry.updatedAt.toIso8601String(),
-              },
-            )
-            .toList(),
-      };
-
-      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
-
-      // ファイル保存先を選択
-      final fileName =
-          'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
-      final outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: '日記のバックアップを保存',
-        fileName: fileName,
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-        bytes: utf8.encode(jsonString),
+    if (result.isFailure) {
+      throw StorageException(
+        'Failed to retrieve diary data: ${result.error.message}',
       );
-
-      return outputFile;
-    } catch (e) {
-      return null;
     }
+
+    var entries = result.value;
+
+    // 期間フィルター
+    if (startDate != null || endDate != null) {
+      entries = entries.where((entry) {
+        if (startDate != null && entry.date.isBefore(startDate)) return false;
+        if (endDate != null && entry.date.isAfter(endDate)) return false;
+        return true;
+      }).toList();
+    }
+
+    // JSON形式でエクスポート
+    final exportData = {
+      'app_name': 'Smart Photo Diary',
+      'export_date': DateTime.now().toIso8601String(),
+      'version': '1.0.0',
+      'entries': entries
+          .map(
+            (entry) => {
+              'id': entry.id,
+              'title': entry.title,
+              'content': entry.content,
+              'date': entry.date.toIso8601String(),
+              'photoIds': entry.photoIds,
+              'tags': entry.effectiveTags, // タグも含める
+              'createdAt': entry.createdAt.toIso8601String(),
+              'updatedAt': entry.updatedAt.toIso8601String(),
+            },
+          )
+          .toList(),
+    };
+
+    final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+
+    // ファイル保存先を選択
+    final fileName =
+        'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
+    final outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: '日記のバックアップを保存',
+      fileName: fileName,
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+      bytes: utf8.encode(jsonString),
+    );
+
+    return outputFile;
   }
 
   // データのインポート（リストア機能）
@@ -377,19 +366,15 @@ class StorageService implements IStorageService {
   // データの最適化
   @override
   Future<bool> optimizeDatabase() async {
-    try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+    final diaryService = await ServiceLocator().getAsync<IDiaryService>();
 
-      // Hiveデータベースのコンパクト（断片化を解消）
-      await diaryService.compactDatabase();
+    // Hiveデータベースのコンパクト（断片化を解消）
+    await diaryService.compactDatabase();
 
-      // 一時ファイルを削除
-      await _cleanupTempFiles();
+    // 一時ファイルを削除
+    await _cleanupTempFiles();
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return true;
   }
 
   // 一時ファイルの削除
