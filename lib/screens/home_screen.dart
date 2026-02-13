@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
+import '../controllers/home_controller.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
@@ -44,10 +45,11 @@ class _HomeScreenState extends State<HomeScreen>
         SingleTickerProviderStateMixin,
         _HomeDialogsMixin,
         _HomeDataLoaderMixin {
-  int _currentIndex = 0;
-
   // サービス
   late final ILoggingService _logger;
+
+  // タブナビゲーション・画面キー管理コントローラー
+  late final HomeController _homeController;
 
   // 統合後の単一コントローラー
   late final PhotoSelectionController _photoController;
@@ -67,11 +69,6 @@ class _HomeScreenState extends State<HomeScreen>
   final ScrollSignal _diaryScrollSignal = ScrollSignal();
   final ScrollSignal _settingsScrollSignal = ScrollSignal();
 
-  // Diaryタブの再構築用キー（作成直後の一覧更新のため）
-  Key _diaryScreenKey = UniqueKey();
-  // 統計タブの再構築用キー（フォールバック再読込）
-  Key _statsScreenKey = UniqueKey();
-
   // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
 
@@ -80,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _logger = serviceLocator.get<ILoggingService>();
+    _homeController = HomeController();
     _photoController = PhotoSelectionController();
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);
@@ -96,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _diarySub?.cancel();
+    _homeController.dispose();
     _photoController.dispose();
     super.dispose();
   }
@@ -115,10 +114,7 @@ class _HomeScreenState extends State<HomeScreen>
       _photoController.clearSelection();
       await _loadUsedPhotoIds();
       if (mounted) {
-        setState(() {
-          _diaryScreenKey = UniqueKey();
-          _statsScreenKey = UniqueKey();
-        });
+        _homeController.refreshDiaryAndStats();
       }
     }
   }
@@ -268,8 +264,11 @@ class _HomeScreenState extends State<HomeScreen>
         scrollSignal: _homeScrollSignal,
         onDiaryTap: _openDiaryDetail,
       ),
-      DiaryScreen(key: _diaryScreenKey, scrollSignal: _diaryScrollSignal),
-      StatisticsScreen(key: _statsScreenKey),
+      DiaryScreen(
+        key: _homeController.diaryScreenKey,
+        scrollSignal: _diaryScrollSignal,
+      ),
+      StatisticsScreen(key: _homeController.statsScreenKey),
     ];
 
     // 設定画面を追加
@@ -285,61 +284,65 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screens = _getScreens();
+    return ListenableBuilder(
+      listenable: _homeController,
+      builder: (context, _) {
+        final screens = _getScreens();
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: IndexedStack(index: _currentIndex, children: screens),
-      floatingActionButton: null,
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: NavBarConstants.hairlineThickness,
-            width: double.infinity,
-            child: ColoredBox(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: IndexedStack(
+            index: _homeController.currentIndex,
+            children: screens,
           ),
-          BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              if (_currentIndex == index) {
-                // 同じタブを再タップした場合、先頭へスクロール
-                switch (index) {
-                  case AppConstants.homeTabIndex:
-                    _homeScrollSignal.trigger();
-                    break;
-                  case AppConstants.diaryTabIndex:
-                    _diaryScrollSignal.trigger();
-                    break;
-                  case AppConstants.settingsTabIndex:
-                    _settingsScrollSignal.trigger();
-                    break;
-                }
-                return;
-              }
+          floatingActionButton: null,
+          bottomNavigationBar: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: NavBarConstants.hairlineThickness,
+                width: double.infinity,
+                child: ColoredBox(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: _homeController.currentIndex,
+                onTap: (index) {
+                  if (_homeController.currentIndex == index) {
+                    // 同じタブを再タップした場合、先頭へスクロール
+                    switch (index) {
+                      case AppConstants.homeTabIndex:
+                        _homeScrollSignal.trigger();
+                        break;
+                      case AppConstants.diaryTabIndex:
+                        _diaryScrollSignal.trigger();
+                        break;
+                      case AppConstants.settingsTabIndex:
+                        _settingsScrollSignal.trigger();
+                        break;
+                    }
+                    return;
+                  }
 
-              // フォールバック: タブ切替時に必要な再同期を実施
-              if (index == AppConstants.homeTabIndex) {
-                // Home を表示する際に使用済みIDを再同期
-                _loadUsedPhotoIds();
-              } else if (index == AppConstants.statisticsTabIndex) {
-                // Statistics を表示する直前に再構築し再計算を促す
-                setState(() {
-                  _statsScreenKey = UniqueKey();
-                });
-              }
+                  // フォールバック: タブ切替時に必要な再同期を実施
+                  if (index == AppConstants.homeTabIndex) {
+                    // Home を表示する際に使用済みIDを再同期
+                    _loadUsedPhotoIds();
+                  } else if (index == AppConstants.statisticsTabIndex) {
+                    // Statistics を表示する直前に再構築し再計算を促す
+                    _homeController.refreshStats();
+                  }
 
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            items: _buildNavigationItems(),
+                  _homeController.setCurrentIndex(index);
+                },
+                items: _buildNavigationItems(),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

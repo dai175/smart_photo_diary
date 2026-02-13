@@ -231,11 +231,8 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
     }
   }
 
-  // ignore: invalid_use_of_protected_member
   Future<void> _onDiaryCreated() async {
-    _self.setState(() {
-      _self._diaryScreenKey = UniqueKey();
-    });
+    _self._homeController.refreshDiaryAndStats();
     await _loadUsedPhotoIds();
   }
 
