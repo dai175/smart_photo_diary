@@ -227,7 +227,7 @@ class StorageService implements IStorageService {
       final existingResult = await diaryService.getSortedDiaryEntries();
       if (existingResult.isFailure) {
         throw StorageException(
-          '既存日記データの取得に失敗しました: ${existingResult.error.message}',
+          'Failed to retrieve existing diary data: ${existingResult.error.message}',
         );
       }
       final existingEntries = existingResult.value;
@@ -247,15 +247,17 @@ class StorageService implements IStorageService {
               successfulImports++;
             } else if (importStatus == 'skipped') {
               skippedEntries++;
-              warnings.add('エントリー "${entryData['title']}" は重複のためスキップされました');
+              warnings.add(
+                'Entry "${entryData['title']}" was skipped due to duplicate',
+              );
             }
           } else {
             failedImports++;
-            errors.add('エントリー ${i + 1}: ${result.error.message}');
+            errors.add('Entry ${i + 1}: ${result.error.message}');
           }
         } catch (e) {
           failedImports++;
-          errors.add('エントリー ${i + 1}: インポート中にエラーが発生しました: $e');
+          errors.add('Entry ${i + 1}: An error occurred during import: $e');
         }
       }
 

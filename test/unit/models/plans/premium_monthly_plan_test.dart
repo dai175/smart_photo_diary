@@ -117,7 +117,7 @@ void main() {
         // 同じプラン同士
         expect(plan.hasMoreFeaturesThan(anotherPremiumMonthly), false);
 
-        // PremiumMonthlyプランは7つの機能を持つ
+        // PremiumMonthlyプランは9つの機能を持つ
         expect(plan.features.length, 9);
       });
     });

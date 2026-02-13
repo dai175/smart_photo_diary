@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen>
 
       if (captureResult.isFailure) {
         _logger.error(
-          'カメラ撮影に失敗（FABから）',
+          'Camera capture failed (from FAB)',
           context: 'HomeScreen._capturePhoto',
           error: captureResult.error,
         );
@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen>
       if (capturedPhoto != null) {
         // 撮影成功：写真を今日の写真コントローラーに追加
         _logger.info(
-          'カメラ撮影成功（FABから）',
+          'Camera capture succeeded (from FAB)',
           context: 'HomeScreen._capturePhoto',
           data: 'Asset ID: ${capturedPhoto.id}',
         );
@@ -243,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen>
       }
     } catch (e) {
       _logger.error(
-        'カメラ撮影処理中にエラーが発生（FABから）',
+        'Error during camera capture processing (from FAB)',
         context: 'HomeScreen._capturePhoto',
         error: e,
       );

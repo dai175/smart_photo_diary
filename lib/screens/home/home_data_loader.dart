@@ -83,7 +83,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
         !_self._photoController.hasMorePhotos) {
       if (!showLoading) {
         _self._logger.info(
-          '先読みスキップ: mounted=$mounted, requesting=${_self._isRequestingPermission}, hasMore=${_self._photoController.hasMorePhotos}',
+          'Preload skipped: mounted=$mounted, requesting=${_self._isRequestingPermission}, hasMore=${_self._photoController.hasMorePhotos}',
           context: 'HomeScreen._preloadMorePhotos',
         );
       }
@@ -93,7 +93,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
     if (_self._isPreloading) {
       if (!showLoading) {
         _self._logger.info(
-          '先読みスキップ: 既に先読み中',
+          'Preload skipped: already preloading',
           context: 'HomeScreen._preloadMorePhotos',
         );
       }
@@ -136,7 +136,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
       if (!showLoading) {
         _self._logger.info(
-          '先読み結果: 現在=$currentCount, 新規=${newPhotos.length}, offset=${_self._currentPhotoOffset}, req=$requested',
+          'Preload result: current=$currentCount, new=${newPhotos.length}, offset=${_self._currentPhotoOffset}, req=$requested',
           context: 'HomeScreen._preloadMorePhotos',
         );
       }
@@ -155,14 +155,14 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
         if (!showLoading) {
           _self._logger.info(
-            '先読み終了: これ以上写真がありません',
+            'Preload finished: no more photos',
             context: 'HomeScreen._preloadMorePhotos',
           );
         }
       }
     } catch (e) {
       _self._logger.error(
-        '先読み写真読み込みエラー',
+        'Preload photo loading error',
         context: 'HomeScreen._preloadMorePhotos',
         error: e,
       );
@@ -251,7 +251,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       }
     } catch (e) {
       _self._logger.error(
-        'プラン情報取得エラー',
+        'Failed to get plan info',
         error: e,
         context: 'HomeScreen._getCachedAllowedDays',
       );
