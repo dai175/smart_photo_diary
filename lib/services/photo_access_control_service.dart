@@ -33,9 +33,9 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
     try {
       final logger = _getLogger();
       logger.info(
-        'アクセス可能範囲計算: プラン=${plan.displayName}, '
-        '過去${plan.pastPhotoAccessDays}日前まで, '
-        '最古アクセス可能日=$accessibleDate (ローカルタイムゾーン)',
+        'Accessible range calculated: plan=${plan.displayName}, '
+        'pastDays=${plan.pastPhotoAccessDays}, '
+        'oldestAccessibleDate=$accessibleDate (local timezone)',
         context: 'PhotoAccessControlService.getAccessibleDateForPlan',
       );
     } catch (e) {
@@ -64,11 +64,11 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
     try {
       final logger = _getLogger();
       logger.info(
-        '写真アクセス判定: '
-        'プラン=${plan.displayName}, '
-        '撮影日=$photoDateOnly (ローカル), '
-        '最古アクセス可能日=$accessibleDate (ローカル), '
-        '結果=$isAccessible',
+        'Photo access check: '
+        'plan=${plan.displayName}, '
+        'photoDate=$photoDateOnly (local), '
+        'oldestAccessibleDate=$accessibleDate (local), '
+        'result=$isAccessible',
         context: 'PhotoAccessControlService.isPhotoAccessible',
       );
     } catch (e) {
