@@ -503,6 +503,14 @@
       }
     }
   },
+  "settingsBackupDialogTitle": "Save diary backup",
+  "@settingsBackupDialogTitle": {
+    "description": "Dialog title for file picker when saving backup"
+  },
+  "settingsRestoreDialogTitle": "Select backup file",
+  "@settingsRestoreDialogTitle": {
+    "description": "Dialog title for file picker when selecting backup to restore"
+  },
   "settingsRestoreInProgress": "Restoring...",
   "@settingsRestoreInProgress": {
     "description": "Message shown while restore is running"

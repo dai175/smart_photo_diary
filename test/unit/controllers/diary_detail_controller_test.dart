@@ -7,11 +7,16 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
 class MockDiaryService extends Mock implements IDiaryService {}
 
 class MockPhotoService extends Mock implements IPhotoService {}
+
+class MockLoggingService extends Mock implements ILoggingService {}
+
+class MockAssetEntity extends Mock implements AssetEntity {}
 
 DiaryEntry _createEntry({
   String id = 'test-id',
@@ -33,6 +38,7 @@ DiaryEntry _createEntry({
 void main() {
   late MockDiaryService mockDiaryService;
   late MockPhotoService mockPhotoService;
+  late MockLoggingService mockLoggingService;
 
   setUpAll(() {
     registerFallbackValue(_createEntry());
@@ -42,8 +48,10 @@ void main() {
     ServiceLocator().clear();
     mockDiaryService = MockDiaryService();
     mockPhotoService = MockPhotoService();
+    mockLoggingService = MockLoggingService();
     ServiceLocator().registerSingleton<IDiaryService>(mockDiaryService);
     ServiceLocator().registerSingleton<IPhotoService>(mockPhotoService);
+    ServiceLocator().registerSingleton<ILoggingService>(mockLoggingService);
 
     // Default: getAssetsByIds returns empty list
     when(
@@ -137,6 +145,55 @@ void main() {
 
         await controller.loadDiaryEntry('test-id');
         expect(wasLoadingTrue, isTrue);
+      });
+
+      test('写真アセットが正常にロードされる', () async {
+        final asset1 = MockAssetEntity();
+        final asset2 = MockAssetEntity();
+        final entry = _createEntry();
+        when(
+          () => mockDiaryService.getDiaryEntry('test-id'),
+        ).thenAnswer((_) async => Success(entry));
+        when(
+          () => mockPhotoService.getAssetsByIds(any()),
+        ).thenAnswer((_) async => Success([asset1, asset2]));
+
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        await controller.loadDiaryEntry('test-id');
+
+        expect(controller.photoAssets, hasLength(2));
+        expect(controller.photoAssets, contains(asset1));
+        expect(controller.photoAssets, contains(asset2));
+      });
+
+      test('写真アセット取得失敗時は空リストとなりwarningがログに記録される', () async {
+        final entry = _createEntry();
+        when(
+          () => mockDiaryService.getDiaryEntry('test-id'),
+        ).thenAnswer((_) async => Success(entry));
+        when(() => mockPhotoService.getAssetsByIds(any())).thenAnswer(
+          (_) async => const Failure<List<AssetEntity>>(
+            PhotoAccessException('Photo load failed'),
+          ),
+        );
+
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        await controller.loadDiaryEntry('test-id');
+
+        expect(controller.diaryEntry, equals(entry));
+        expect(controller.photoAssets, isEmpty);
+        expect(controller.hasError, isFalse);
+        verify(
+          () => mockLoggingService.warning(
+            any(that: contains('Failed to load photo assets')),
+            context: 'DiaryDetailController.loadDiaryEntry',
+            data: any(named: 'data'),
+          ),
+        ).called(1);
       });
 
       test('notifyListeners が呼ばれる', () async {

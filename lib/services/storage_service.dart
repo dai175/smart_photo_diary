@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:ui';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/diary_service_interface.dart';
+import 'interfaces/settings_service_interface.dart';
 import 'interfaces/storage_service_interface.dart';
 import '../core/service_locator.dart';
+import '../localization/localization_utils.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
@@ -13,6 +16,17 @@ import '../core/errors/app_exceptions.dart';
 class StorageService implements IStorageService {
   /// DI用の公開コンストラクタ
   StorageService();
+
+  /// 現在のロケールを解決する
+  Future<Locale> _resolveLocale() async {
+    try {
+      final settingsService = await ServiceLocator()
+          .getAsync<ISettingsService>();
+      return settingsService.locale ?? PlatformDispatcher.instance.locale;
+    } catch (_) {
+      return PlatformDispatcher.instance.locale;
+    }
+  }
 
   // ストレージ使用量を取得
   @override
@@ -83,8 +97,9 @@ class StorageService implements IStorageService {
     // ファイル保存先を選択
     final fileName =
         'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
+    final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
     final outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: 'Save diary backup',
+      dialogTitle: l10n.settingsBackupDialogTitle,
       fileName: fileName,
       type: FileType.custom,
       allowedExtensions: ['json'],
@@ -99,10 +114,11 @@ class StorageService implements IStorageService {
   Future<Result<ImportResult>> importData() async {
     try {
       // ファイル選択
+      final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
-        dialogTitle: 'Select backup file',
+        dialogTitle: l10n.settingsRestoreDialogTitle,
       );
 
       if (result == null || result.files.single.path == null) {
