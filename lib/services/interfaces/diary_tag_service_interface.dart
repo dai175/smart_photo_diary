@@ -9,6 +9,10 @@ import '../../core/result/result.dart';
 abstract class IDiaryTagService {
   /// 日記エントリーのタグを取得（キャッシュ優先、なければAI生成）
   ///
+  /// AI生成が失敗した場合やその他の例外が発生した場合でも、
+  /// 時間帯ベースのフォールバックタグを生成してSuccessとして返す。
+  /// そのため、このメソッドは常にSuccessを返し、Failureを返すことはない。
+  ///
   /// Returns:
   /// - Success: タグ文字列のリスト（AI生成失敗時はフォールバックタグを返す）
   Future<Result<List<String>>> getTagsForEntry(DiaryEntry entry);

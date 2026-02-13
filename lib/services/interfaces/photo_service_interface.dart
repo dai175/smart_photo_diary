@@ -9,7 +9,10 @@ import '../../core/result/result.dart';
 abstract class IPhotoService {
   /// 写真アクセス権限をリクエストする
   ///
-  /// 戻り値: 権限が許可された場合 true、拒否された場合 false。
+  /// iOS 14以降で Limited Access が付与された場合も true を返す。
+  /// Limited Access かどうかの判定は [isLimitedAccess] で確認すること。
+  ///
+  /// 戻り値: 権限が許可された場合 true（Limited Access含む）、拒否された場合 false。
   /// エラー時は false を返す（例外をスローしない）。
   Future<bool> requestPermission();
 
@@ -20,6 +23,10 @@ abstract class IPhotoService {
   Future<bool> isPermissionPermanentlyDenied();
 
   /// 今日撮影された写真を取得する
+  ///
+  /// Limited Access（iOS 14+）の場合、ユーザーが選択した写真のみ返される。
+  /// 日付範囲によるアクセス制限（プレミアム: 365日）は
+  /// [IPhotoAccessControlService] の責務であり、このメソッドでは適用されない。
   ///
   /// 戻り値: [AssetEntity] リスト。権限なし・エラー時は空リスト。
   Future<List<AssetEntity>> getTodayPhotos({int limit = 20});
@@ -54,12 +61,14 @@ abstract class IPhotoService {
 
   /// 写真の元画像を取得する（後方互換性）
   ///
-  /// 戻り値: Uint8List? 。取得失敗時は null（ログ記録済み）。
+  /// 戻り値型は後方互換性のため dynamic だが、実際には Uint8List? を返す。
+  /// 取得失敗時は null（ログ記録済み）。
   Future<dynamic> getOriginalFile(AssetEntity asset);
 
   /// 写真のサムネイルを取得する（後方互換性）
   ///
-  /// 戻り値: Uint8List? 。取得失敗時は null（ログ記録済み）。
+  /// 戻り値型は後方互換性のため dynamic だが、実際には Uint8List? を返す。
+  /// 取得失敗時は null（ログ記録済み）。
   Future<dynamic> getThumbnail(
     AssetEntity asset, {
     int width = 200,
