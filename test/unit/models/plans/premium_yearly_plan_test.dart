@@ -18,10 +18,10 @@ void main() {
 
       test('正しい表示名を持つ', () {
         expect(plan.displayName, contains('Premium'));
-        expect(plan.displayName, contains('年額'));
+        expect(plan.displayName, contains('Yearly'));
         expect(
           plan.displayName,
-          '${SubscriptionConstants.premiumDisplayName} (年額)',
+          '${SubscriptionConstants.premiumDisplayName} (Yearly)',
         );
       });
 
@@ -48,7 +48,7 @@ void main() {
         expect(plan.features, SubscriptionConstants.premiumFeatures);
         expect(plan.features.length, greaterThanOrEqualTo(6));
         expect(plan.features[0], contains('AI日記'));
-        // 割引情報は年額プラン固有のメソッドで取得
+        // 割引情報はYearlyプラン固有のメソッドで取得
       });
 
       test('正しい商品IDを持つ', () {
@@ -124,7 +124,7 @@ void main() {
         // 同じプラン同士
         expect(plan.hasMoreFeaturesThan(anotherPremiumYearly), false);
 
-        // Premium年額プランはPremium共通の機能を持つ
+        // PremiumYearlyプランはPremium共通の機能を持つ
         expect(plan.features.length, greaterThanOrEqualTo(6));
       });
     });
@@ -145,7 +145,7 @@ void main() {
 
         expect(debugString, contains('Plan('));
         expect(debugString, contains('id: premium_yearly'));
-        expect(debugString, contains('displayName: Premium (年額)'));
+        expect(debugString, contains('displayName: Premium (Yearly)'));
         expect(debugString, contains('price: ¥2,800'));
         expect(debugString, contains('monthlyLimit: 100'));
         expect(debugString, contains('isPremium: true'));

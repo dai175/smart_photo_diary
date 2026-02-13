@@ -146,16 +146,18 @@ class _HomeScreenState extends State<HomeScreen>
       switch (result) {
         case Success(data: final diaryEntry):
           if (diaryEntry != null) {
-            _logger.info('写真ID: $photoId の日記詳細に遷移: ${diaryEntry.id}');
+            _logger.info(
+              'Navigating to diary detail for photoId: $photoId, diaryId: ${diaryEntry.id}',
+            );
             await _openDiaryDetail(diaryEntry.id);
           } else {
-            _logger.warning('写真ID: $photoId に対応する日記が見つかりません');
+            _logger.warning('No diary found for photoId: $photoId');
             if (mounted) {
               _showSimpleDialog(context.l10n.homeLinkedDiaryNotFound);
             }
           }
         case Failure(exception: final e):
-          _logger.error('写真IDから日記取得エラー', error: e);
+          _logger.error('Error retrieving diary by photo ID', error: e);
           if (mounted) {
             _showSimpleDialog(
               '${context.l10n.homeDiaryLoadError}\n${e.message}',
@@ -163,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen>
           }
       }
     } catch (e) {
-      _logger.error('写真IDから日記取得エラー', error: e);
+      _logger.error('Error retrieving diary by photo ID', error: e);
       if (mounted) {
         _showSimpleDialog('${context.l10n.homeDiaryLoadError}\n$e');
       }
@@ -184,7 +186,10 @@ class _HomeScreenState extends State<HomeScreen>
     try {
       final photoService = ServiceRegistration.get<IPhotoService>();
 
-      _logger.info('カメラ撮影を開始（FABから）', context: 'HomeScreen._capturePhoto');
+      _logger.info(
+        'Starting camera capture (from FAB)',
+        context: 'HomeScreen._capturePhoto',
+      );
 
       // カメラで撮影（権限チェックはcapturePhoto内で実行）
       final captureResult = await photoService.capturePhoto();
@@ -231,7 +236,10 @@ class _HomeScreenState extends State<HomeScreen>
         }
       } else {
         // キャンセル時
-        _logger.info('カメラ撮影をキャンセル（FABから）', context: 'HomeScreen._capturePhoto');
+        _logger.info(
+          'Camera capture cancelled (from FAB)',
+          context: 'HomeScreen._capturePhoto',
+        );
       }
     } catch (e) {
       _logger.error(

@@ -24,7 +24,7 @@ class PhotoDataService {
         context: 'PhotoDataService.getPhotoData',
       );
       _logger.error(
-        '写真データ取得エラー',
+        'Photo data retrieval error',
         context: 'PhotoDataService.getPhotoData',
         error: appError,
       );
@@ -48,7 +48,7 @@ class PhotoDataService {
         context: 'PhotoDataService.getThumbnailData',
       );
       _logger.error(
-        'サムネイルデータ取得エラー',
+        'Thumbnail data retrieval error',
         context: 'PhotoDataService.getThumbnailData',
         error: appError,
       );
@@ -76,7 +76,7 @@ class PhotoDataService {
         context: 'PhotoDataService.getThumbnail',
       );
       _logger.error(
-        'サムネイル取得エラー',
+        'Thumbnail retrieval error',
         context: 'PhotoDataService.getThumbnail',
         error: appError,
       );
@@ -94,7 +94,7 @@ class PhotoDataService {
         context: 'PhotoDataService.getOriginalFile',
       );
       _logger.error(
-        '元画像取得エラー',
+        'Original image retrieval error',
         context: 'PhotoDataService.getOriginalFile',
         error: appError,
       );

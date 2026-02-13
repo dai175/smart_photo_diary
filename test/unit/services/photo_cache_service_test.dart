@@ -30,7 +30,7 @@ void main() {
       expect(cacheService.getCacheSize(), equals(0));
       verify(
         () => mockLogger.info(
-          any(that: contains('クリア')),
+          any(that: contains('cleared')),
           context: any(named: 'context'),
         ),
       ).called(1);

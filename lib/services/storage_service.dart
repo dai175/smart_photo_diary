@@ -49,7 +49,9 @@ class StorageService implements IStorageService {
       final result = await diaryService.getSortedDiaryEntries();
 
       if (result.isFailure) {
-        throw StorageException('日記データの取得に失敗しました: ${result.error.message}');
+        throw StorageException(
+          'Failed to retrieve diary data: ${result.error.message}',
+        );
       }
 
       var entries = result.value;
@@ -115,13 +117,18 @@ class StorageService implements IStorageService {
       );
 
       if (result == null || result.files.single.path == null) {
-        return const Failure(ServiceException('ファイルが選択されませんでした'));
+        return const Failure(ServiceException('No file was selected'));
       }
 
       final filePath = result.files.single.path!;
       return await _processImportFile(filePath);
     } catch (e) {
-      return Failure(ServiceException('ファイル選択中にエラーが発生しました', originalError: e));
+      return Failure(
+        ServiceException(
+          'An error occurred during file selection',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -131,7 +138,7 @@ class StorageService implements IStorageService {
       // ファイルを読み込み
       final file = File(filePath);
       if (!await file.exists()) {
-        return const Failure(ServiceException('選択されたファイルが存在しません'));
+        return const Failure(ServiceException('Selected file does not exist'));
       }
 
       final jsonContent = await file.readAsString();
@@ -141,7 +148,9 @@ class StorageService implements IStorageService {
         data = jsonDecode(jsonContent) as Map<String, dynamic>;
       } catch (e) {
         return const Failure(
-          ServiceException('無効なJSONファイルです。正しいバックアップファイルを選択してください'),
+          ServiceException(
+            'Invalid JSON file. Please select a valid backup file',
+          ),
         );
       }
 
@@ -154,7 +163,12 @@ class StorageService implements IStorageService {
       // データをインポート
       return await _importDiaryEntries(data);
     } catch (e) {
-      return Failure(ServiceException('ファイル処理中にエラーが発生しました', originalError: e));
+      return Failure(
+        ServiceException(
+          'An error occurred during file processing',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -164,13 +178,13 @@ class StorageService implements IStorageService {
     if (!data.containsKey('app_name') ||
         data['app_name'] != 'Smart Photo Diary') {
       return const Failure(
-        ServiceException('Smart Photo Diaryのバックアップファイルではありません'),
+        ServiceException('Not a Smart Photo Diary backup file'),
       );
     }
 
     if (!data.containsKey('entries') || data['entries'] is! List) {
       return const Failure(
-        ServiceException('バックアップファイルの形式が正しくありません（entriesが見つかりません）'),
+        ServiceException('Invalid backup file format (entries not found)'),
       );
     }
 
@@ -179,7 +193,7 @@ class StorageService implements IStorageService {
       final version = data['version'] as String?;
       if (version != null && !_isVersionCompatible(version)) {
         return const Failure(
-          ServiceException('このバックアップファイルのバージョンはサポートされていません'),
+          ServiceException('This backup file version is not supported'),
         );
       }
     }
@@ -256,7 +270,12 @@ class StorageService implements IStorageService {
 
       return Success(importResult);
     } catch (e) {
-      return Failure(ServiceException('インポート処理中にエラーが発生しました', originalError: e));
+      return Failure(
+        ServiceException(
+          'An error occurred during import processing',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -268,14 +287,14 @@ class StorageService implements IStorageService {
   ) async {
     try {
       if (entryData is! Map<String, dynamic>) {
-        return const Failure(ServiceException('無効なエントリー形式です'));
+        return const Failure(ServiceException('Invalid entry format'));
       }
 
       // 必須フィールドの確認
       final requiredFields = ['id', 'title', 'content', 'date'];
       for (final field in requiredFields) {
         if (!entryData.containsKey(field)) {
-          return Failure(ServiceException('必須フィールド $field が見つかりません'));
+          return Failure(ServiceException('Required field $field not found'));
         }
       }
 
@@ -284,7 +303,7 @@ class StorageService implements IStorageService {
       try {
         date = DateTime.parse(entryData['date'] as String);
       } catch (e) {
-        return const Failure(ServiceException('無効な日付形式です'));
+        return const Failure(ServiceException('Invalid date format'));
       }
 
       // 写真IDの検証
@@ -337,13 +356,18 @@ class StorageService implements IStorageService {
       );
 
       if (saveResult.isFailure) {
-        throw StorageException('エントリーの保存に失敗しました: ${saveResult.error.message}');
+        throw StorageException(
+          'Failed to save entry: ${saveResult.error.message}',
+        );
       }
 
       return const Success('imported');
     } catch (e) {
       return Failure(
-        ServiceException('エントリーの処理中にエラーが発生しました', originalError: e),
+        ServiceException(
+          'An error occurred during entry processing',
+          originalError: e,
+        ),
       );
     }
   }
@@ -406,7 +430,12 @@ class StorageService implements IStorageService {
       final result = await getStorageInfo();
       return Success(result);
     } catch (e) {
-      return Failure(ServiceException('ストレージ情報の取得に失敗しました', originalError: e));
+      return Failure(
+        ServiceException(
+          'Failed to retrieve storage information',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -420,7 +449,9 @@ class StorageService implements IStorageService {
       final result = await exportData(startDate: startDate, endDate: endDate);
       return Success(result);
     } catch (e) {
-      return Failure(ServiceException('データエクスポートに失敗しました', originalError: e));
+      return Failure(
+        ServiceException('Failed to export data', originalError: e),
+      );
     }
   }
 
@@ -431,7 +462,9 @@ class StorageService implements IStorageService {
       final result = await optimizeDatabase();
       return Success(result);
     } catch (e) {
-      return Failure(ServiceException('データベース最適化に失敗しました', originalError: e));
+      return Failure(
+        ServiceException('Failed to optimize database', originalError: e),
+      );
     }
   }
 }

@@ -20,7 +20,7 @@ class GeminiApiClient {
     if (key.isEmpty) {
       final client = GeminiApiClient();
       client._logger.warning(
-        'GEMINI_API_KEYが設定されていません',
+        'GEMINI_API_KEY is not configured',
         context: 'GeminiApiClient._apiKey',
       );
       EnvironmentConfig.printDebugInfo();
@@ -37,7 +37,7 @@ class GeminiApiClient {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
       _logger.error(
-        'Gemini API エラー: 有効なAPIキーが設定されていません',
+        'Gemini API error: No valid API key configured',
         context: 'sendTextRequest',
       );
       EnvironmentConfig.printDebugInfo();
@@ -71,26 +71,26 @@ class GeminiApiClient {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _logger.debug(
-          'Gemini API レスポンス受信成功',
+          'Gemini API response received successfully',
           context: 'sendTextRequest',
           data: _summarizeResponse(data),
         );
         return data;
       } else {
         _logger.error(
-          'Gemini API エラー: ${response.statusCode}',
+          'Gemini API error: ${response.statusCode}',
           context: 'sendTextRequest',
         );
         return null;
       }
     } catch (e) {
       _logger.error(
-        'Gemini API リクエストエラー',
+        'Gemini API request error',
         context: 'sendTextRequest',
         error: e,
       );
       _logger.debug(
-        'API接続情報: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : '空'}',
+        'API connection info: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : 'empty'}',
         context: 'sendTextRequest',
       );
       return null;
@@ -107,7 +107,7 @@ class GeminiApiClient {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
       _logger.error(
-        'Gemini Vision API エラー: 有効なAPIキーが設定されていません',
+        'Gemini Vision API error: No valid API key configured',
         context: 'sendVisionRequest',
       );
       EnvironmentConfig.printDebugInfo();
@@ -147,26 +147,26 @@ class GeminiApiClient {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _logger.debug(
-          'Gemini Vision API レスポンス受信成功',
+          'Gemini Vision API response received successfully',
           context: 'sendVisionRequest',
           data: _summarizeResponse(data),
         );
         return data;
       } else {
         _logger.error(
-          'Gemini Vision API エラー: ${response.statusCode}',
+          'Gemini Vision API error: ${response.statusCode}',
           context: 'sendVisionRequest',
         );
         return null;
       }
     } catch (e) {
       _logger.error(
-        'Gemini Vision API リクエストエラー',
+        'Gemini Vision API request error',
         context: 'sendVisionRequest',
         error: e,
       );
       _logger.debug(
-        'Vision API接続情報: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : '空'}',
+        'Vision API connection info: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : 'empty'}',
         context: 'sendVisionRequest',
       );
       return null;
@@ -176,7 +176,10 @@ class GeminiApiClient {
   /// APIキーの有効性をテスト
   Future<bool> testApiKey() async {
     if (!EnvironmentConfig.hasValidApiKey) {
-      _logger.warning('APIキーテスト: 有効なAPIキーが設定されていません', context: 'testApiKey');
+      _logger.warning(
+        'API key test: No valid API key configured',
+        context: 'testApiKey',
+      );
       EnvironmentConfig.printDebugInfo();
       return false;
     }
@@ -185,13 +188,13 @@ class GeminiApiClient {
       final response = await sendTextRequest(prompt: 'Hello, this is a test.');
       final isValid = response != null;
       _logger.info(
-        'APIキーテスト',
+        'API key test',
         context: 'testApiKey',
-        data: '結果: ${isValid ? '有効' : '無効'}',
+        data: 'Result: ${isValid ? 'valid' : 'invalid'}',
       );
       return isValid;
     } catch (e) {
-      _logger.error('APIキーテストエラー', context: 'testApiKey', error: e);
+      _logger.error('API key test error', context: 'testApiKey', error: e);
       return false;
     }
   }
@@ -215,7 +218,7 @@ class GeminiApiClient {
           'finishReason=$finishReason, '
           'textLength=$textLength';
     } catch (_) {
-      return 'レスポンスサマリー生成失敗';
+      return 'Failed to generate response summary';
     }
   }
 
@@ -249,21 +252,25 @@ class GeminiApiClient {
           return content.trim();
         } else {
           _logger.warning(
-            'テキストコンテンツが見つかりません - finishReason: ${candidate['finishReason']}',
+            'Text content not found - finishReason: ${candidate['finishReason']}',
             context: 'extractTextFromResponse',
           );
           return null;
         }
       } else {
         _logger.warning(
-          'レスポンス構造が予期されたものと異なります',
+          'Response structure differs from expected format',
           context: 'extractTextFromResponse',
           data: data.toString(),
         );
         return null;
       }
     } catch (e) {
-      _logger.error('レスポンス解析エラー', context: 'extractTextFromResponse', error: e);
+      _logger.error(
+        'Response parsing error',
+        context: 'extractTextFromResponse',
+        error: e,
+      );
       return null;
     }
   }

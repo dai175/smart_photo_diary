@@ -103,7 +103,10 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
     _self._isPreloading = true;
 
     if (!showLoading) {
-      _self._logger.info('先読み開始', context: 'HomeScreen._preloadMorePhotos');
+      _self._logger.info(
+        'Starting preload',
+        context: 'HomeScreen._preloadMorePhotos',
+      );
     }
 
     if (showLoading) {
@@ -180,13 +183,17 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
           _collectUsedPhotoIds(entries);
         case Failure(exception: final e):
           _self._logger.error(
-            '使用済み写真IDの読み込みエラー',
+            'Error loading used photo IDs',
             error: e,
             context: 'HomeScreen',
           );
       }
     } catch (e) {
-      _self._logger.error('使用済み写真IDの読み込みエラー', error: e, context: 'HomeScreen');
+      _self._logger.error(
+        'Error loading used photo IDs',
+        error: e,
+        context: 'HomeScreen',
+      );
     }
   }
 

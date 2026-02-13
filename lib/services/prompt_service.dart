@@ -65,11 +65,11 @@ class PromptService implements IPromptService {
     final loggingService = await ServiceLocator().getAsync<ILoggingService>();
 
     try {
-      loggingService.info('PromptService: 初期化開始');
+      loggingService.info('PromptService: Initialization started');
 
       // 既に初期化済みの場合はスキップ
       if (_isInitialized) {
-        loggingService.info('PromptService: 既に初期化済み');
+        loggingService.info('PromptService: Already initialized');
         return true;
       }
 
@@ -84,20 +84,20 @@ class PromptService implements IPromptService {
         _usageService = await ServiceLocator().getAsync<IPromptUsageService>();
       } catch (e) {
         loggingService.warning(
-          'PromptService: 使用履歴機能は無効化されました（${e.toString()}）',
+          'PromptService: Usage history feature disabled (${e.toString()})',
         );
         _usageService = null;
       }
 
       _isInitialized = true;
       loggingService.info(
-        'PromptService: 初期化完了（プロンプト数: ${_allPrompts.length}）',
+        'PromptService: Initialization completed (prompt count: ${_allPrompts.length})',
       );
 
       return true;
     } catch (e, stackTrace) {
       loggingService.error(
-        'PromptService: 初期化失敗',
+        'PromptService: Initialization failed',
         error: e,
         stackTrace: stackTrace,
       );
@@ -123,13 +123,13 @@ class PromptService implements IPromptService {
           .toList();
 
       loggingService.info(
-        'PromptService: JSON読み込み完了（${_allPrompts.length}個のプロンプト）',
+        'PromptService: JSON loading completed (${_allPrompts.length} prompts)',
       );
 
       // データ整合性チェック
       await _validatePromptData(jsonData);
     } catch (e) {
-      loggingService.error('PromptService: JSON読み込み失敗', error: e);
+      loggingService.error('PromptService: JSON loading failed', error: e);
       rethrow;
     }
   }
@@ -151,9 +151,9 @@ class PromptService implements IPromptService {
         actualBasic != expectedBasic ||
         actualPremium != expectedPremium) {
       final error =
-          'プロンプトデータ不整合: '
-          '期待値(total:$expectedTotal, basic:$expectedBasic, premium:$expectedPremium) '
-          '実際(total:$actualTotal, basic:$actualBasic, premium:$actualPremium)';
+          'Prompt data mismatch: '
+          'expected(total:$expectedTotal, basic:$expectedBasic, premium:$expectedPremium) '
+          'actual(total:$actualTotal, basic:$actualBasic, premium:$actualPremium)';
       loggingService.warning('PromptService: $error');
     }
 
@@ -161,7 +161,7 @@ class PromptService implements IPromptService {
     final ids = _allPrompts.map((p) => p.id).toList();
     final uniqueIds = ids.toSet();
     if (ids.length != uniqueIds.length) {
-      loggingService.warning('PromptService: プロンプトIDに重複があります');
+      loggingService.warning('PromptService: Duplicate prompt IDs found');
     }
   }
 
@@ -192,9 +192,9 @@ class PromptService implements IPromptService {
         _idCache[prompt.id] = prompt;
       }
 
-      loggingService.info('PromptService: キャッシュ構築完了');
+      loggingService.info('PromptService: Cache build completed');
     } catch (e) {
-      loggingService.error('PromptService: キャッシュ構築失敗', error: e);
+      loggingService.error('PromptService: Cache build failed', error: e);
       rethrow;
     }
   }
@@ -508,7 +508,9 @@ class PromptService implements IPromptService {
   /// 初期化チェック
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('PromptService が初期化されていません。initialize() を呼び出してください。');
+      throw StateError(
+        'PromptService is not initialized. Call initialize() first.',
+      );
     }
   }
 }

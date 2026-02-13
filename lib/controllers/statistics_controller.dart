@@ -56,7 +56,7 @@ class StatisticsController extends BaseErrorController {
         setLoading(false);
       } else {
         _logger.error(
-          '統計データの読み込みエラー',
+          'Statistics data loading error',
           error: result.error,
           context: 'StatisticsController',
         );
@@ -64,14 +64,17 @@ class StatisticsController extends BaseErrorController {
       }
     } catch (e) {
       _logger.error(
-        '統計データの読み込み中に予期しないエラー',
+        'Unexpected error while loading statistics data',
         error: e,
         context: 'StatisticsController',
       );
       setError(
         e is AppException
             ? e
-            : ServiceException('統計データの読み込みに失敗しました', originalError: e),
+            : ServiceException(
+                'Failed to load statistics data',
+                originalError: e,
+              ),
       );
     }
   }

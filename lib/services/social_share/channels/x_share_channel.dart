@@ -28,7 +28,7 @@ class XShareChannel {
   }) async {
     try {
       _logger.info(
-        'テキスト共有開始',
+        'Starting text share',
         context: 'XShareChannel.share',
         data: 'diary_id: ${diary.id}',
       );
@@ -85,11 +85,11 @@ class XShareChannel {
         },
       );
 
-      _logger.info('テキスト共有成功', context: 'XShareChannel.share');
+      _logger.info('Text share succeeded', context: 'XShareChannel.share');
       return const Success<void>(null);
     } catch (e, st) {
       _logger.error(
-        'テキスト共有エラー',
+        'Text share error',
         context: 'XShareChannel.share',
         error: e,
         stackTrace: st,

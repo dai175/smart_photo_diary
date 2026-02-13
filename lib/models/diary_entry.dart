@@ -68,13 +68,13 @@ class DiaryEntry extends HiveObject {
           try {
             final logger = serviceLocator.get<ILoggingService>();
             logger.error(
-              '写真の取得エラー: photoId: $photoId',
+              'Photo retrieval error: photoId: $photoId',
               context: 'DiaryEntry.getPhotoAssets',
               error: e,
             );
           } catch (_) {
             // LoggingServiceが利用できない場合はdebugPrintにフォールバック
-            debugPrint('写真の取得エラー: $e');
+            debugPrint('Photo retrieval error: $e');
           }
           return null;
         }

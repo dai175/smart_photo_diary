@@ -38,19 +38,19 @@ Future<void> main() async {
   await ServiceRegistration.initialize();
   final logger = serviceLocator.get<ILoggingService>();
 
-  logger.info('アプリケーション初期化開始', context: 'main');
-  logger.info('ServiceRegistration初期化完了', context: 'main');
+  logger.info('Application initialization started', context: 'main');
+  logger.info('ServiceRegistration initialization completed', context: 'main');
 
   // 環境変数の初期化（LoggingServiceが利用可能になった後）
   await EnvironmentConfig.initialize();
-  logger.info('EnvironmentConfig初期化完了', context: 'main');
+  logger.info('EnvironmentConfig initialization completed', context: 'main');
 
   // 初期化完了時間の計測
   final initDuration = DateTime.now().difference(appStartTime);
   logger.info(
-    'アプリケーション初期化完了',
+    'Application initialization completed',
     context: 'main',
-    data: '初期化時間: ${initDuration.inMilliseconds}ms',
+    data: 'Initialization time: ${initDuration.inMilliseconds}ms',
   );
 
   runApp(const MyApp());
@@ -101,7 +101,7 @@ class _MyAppState extends State<MyApp> {
         _isLoading = false;
       });
       _logger.error(
-        '設定の読み込みエラー',
+        'Settings loading error',
         context: '_MyAppState._loadSettings',
         error: e,
       );

@@ -37,7 +37,7 @@ class SocialShareService implements ISocialShareService {
   }) async {
     try {
       _logger.info(
-        'SNS共有開始: ${format.displayName}',
+        'Starting social share: ${format.displayName}',
         context: 'SocialShareService.shareToSocialMedia',
         data: 'diary_id: ${diary.id}',
       );
@@ -52,12 +52,15 @@ class SocialShareService implements ISocialShareService {
       return result;
     } catch (e) {
       _logger.error(
-        '予期しないエラー',
+        'Unexpected error',
         context: 'SocialShareService.shareToSocialMedia',
         error: e,
       );
       return Failure<void>(
-        SocialShareException('共有処理中に予期しないエラーが発生しました', originalError: e),
+        SocialShareException(
+          'An unexpected error occurred during sharing',
+          originalError: e,
+        ),
       );
     }
   }
@@ -82,7 +85,7 @@ class SocialShareService implements ISocialShareService {
     List<AssetEntity>? photos,
   }) async {
     _logger.info(
-      '共有画像生成開始: ${format.displayName}',
+      'Starting share image generation: ${format.displayName}',
       context: 'SocialShareService.generateShareImage',
       data: 'diary_id: ${diary.id}',
     );
@@ -132,5 +135,5 @@ class SocialShareException extends AppException {
   });
 
   @override
-  String get userMessage => 'SNS共有でエラーが発生しました: $message';
+  String get userMessage => 'Social sharing error: $message';
 }

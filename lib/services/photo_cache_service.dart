@@ -70,7 +70,7 @@ class PhotoCacheService implements IPhotoCacheService {
           cachedEntry.updateAccess();
 
           loggingService.debug(
-            'サムネイルをキャッシュから取得',
+            'Retrieved thumbnail from cache',
             context: 'PhotoCacheService.getThumbnail',
             data: 'assetId: ${asset.id}, size: ${width}x$height',
           );
@@ -92,7 +92,7 @@ class PhotoCacheService implements IPhotoCacheService {
         _addToCache(cacheKey, thumbnail);
 
         loggingService.debug(
-          'サムネイルを生成してキャッシュに追加',
+          'Generated thumbnail and added to cache',
           context: 'PhotoCacheService.getThumbnail',
           data:
               'assetId: ${asset.id}, size: ${width}x$height, bytes: ${thumbnail.length}',
@@ -106,7 +106,7 @@ class PhotoCacheService implements IPhotoCacheService {
         context: 'PhotoCacheService.getThumbnail',
       );
       loggingService.error(
-        'サムネイル取得エラー',
+        'Thumbnail retrieval error',
         context: 'PhotoCacheService.getThumbnail',
         error: appError,
       );
@@ -121,7 +121,7 @@ class PhotoCacheService implements IPhotoCacheService {
     _currentCacheSizeInBytes = 0;
 
     _logger.info(
-      'メモリキャッシュをクリアしました',
+      'Memory cache cleared',
       context: 'PhotoCacheService.clearMemoryCache',
     );
   }
@@ -138,7 +138,7 @@ class PhotoCacheService implements IPhotoCacheService {
     }
 
     _logger.info(
-      'アセット $assetId のキャッシュをクリアしました',
+      'Cache cleared for asset $assetId',
       context: 'PhotoCacheService.clearCacheForAsset',
     );
   }
@@ -160,9 +160,9 @@ class PhotoCacheService implements IPhotoCacheService {
     final loggingService = _logger;
 
     loggingService.debug(
-      'サムネイルのプリロード開始',
+      'Starting thumbnail preload',
       context: 'PhotoCacheService.preloadThumbnails',
-      data: '写真数: ${assets.length}',
+      data: 'Photo count: ${assets.length}',
     );
 
     // 並列処理で効率的にプリロード
@@ -194,10 +194,10 @@ class PhotoCacheService implements IPhotoCacheService {
     }
 
     loggingService.debug(
-      'サムネイルのプリロード完了',
+      'Thumbnail preload completed',
       context: 'PhotoCacheService.preloadThumbnails',
       data:
-          'キャッシュサイズ: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
+          'Cache size: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
     );
   }
 
@@ -256,7 +256,7 @@ class PhotoCacheService implements IPhotoCacheService {
     }
 
     _logger.info(
-      'LRUキャッシュエビクション実行 - $entriesToRemove エントリーを削除',
+      'LRU cache eviction executed - removed $entriesToRemove entries',
       context: 'PhotoCacheService._evictOldestEntries',
     );
   }
@@ -274,7 +274,7 @@ class PhotoCacheService implements IPhotoCacheService {
     // メモリ使用量を記録
     final loggingService = _logger;
     loggingService.debug(
-      'キャッシュメモリ使用状況',
+      'Cache memory usage status',
       context: 'PhotoCacheService._checkMemoryUsage',
       data: {
         'currentSize':
@@ -289,7 +289,7 @@ class PhotoCacheService implements IPhotoCacheService {
     // 警告閾値を超えている場合
     if (_currentCacheSizeInBytes > _memoryWarningThreshold) {
       loggingService.warning(
-        'キャッシュメモリ使用量が警告閾値を超えました',
+        'Cache memory usage exceeded warning threshold',
         context: 'PhotoCacheService._checkMemoryUsage',
         data:
             '${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB / ${(_memoryWarningThreshold / 1024 / 1024)}MB',
@@ -301,10 +301,10 @@ class PhotoCacheService implements IPhotoCacheService {
   void _performAggressiveCleanup() async {
     final loggingService = _logger;
     loggingService.warning(
-      'アグレッシブクリーンアップを実行',
+      'Executing aggressive cleanup',
       context: 'PhotoCacheService._performAggressiveCleanup',
       data:
-          '現在のサイズ: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
+          'Current size: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
     );
 
     // 最後にアクセスされた時刻でソート（LRU）
@@ -319,10 +319,10 @@ class PhotoCacheService implements IPhotoCacheService {
     }
 
     loggingService.info(
-      'アグレッシブクリーンアップ完了',
+      'Aggressive cleanup completed',
       context: 'PhotoCacheService._performAggressiveCleanup',
       data:
-          'クリーンアップ後: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
+          'After cleanup: ${(_currentCacheSizeInBytes / 1024 / 1024).toStringAsFixed(2)}MB',
     );
   }
 
@@ -344,7 +344,7 @@ class PhotoCacheService implements IPhotoCacheService {
 
     if (keysToRemove.isNotEmpty) {
       _logger.info(
-        '${keysToRemove.length} 件の期限切れエントリーをクリーンアップ',
+        'Cleaned up ${keysToRemove.length} expired entries',
         context: 'PhotoCacheService.cleanupExpiredEntries',
       );
     }

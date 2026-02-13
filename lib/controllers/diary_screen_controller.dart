@@ -72,7 +72,7 @@ class DiaryScreenController extends BaseErrorController {
         },
       );
     } catch (e) {
-      setError(ServiceException('日記の読み込みに失敗しました: $e'));
+      setError(ServiceException('Failed to load diaries: $e'));
       setLoading(false);
       notifyListeners();
     }
@@ -107,7 +107,7 @@ class DiaryScreenController extends BaseErrorController {
         },
       );
     } catch (e) {
-      setError(ServiceException('追加読み込みに失敗しました: $e'));
+      setError(ServiceException('Failed to load more: $e'));
       _isLoadingMore = false;
       notifyListeners();
     }
@@ -212,7 +212,7 @@ class DiaryScreenController extends BaseErrorController {
         },
       );
     } catch (e) {
-      setError(ServiceException('検索に失敗しました: $e'));
+      setError(ServiceException('Search failed: $e'));
       setLoading(false);
       notifyListeners();
     }

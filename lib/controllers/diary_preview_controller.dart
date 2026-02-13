@@ -172,7 +172,10 @@ class DiaryPreviewController extends BaseErrorController {
         result = resultFromAi.value;
       } else {
         // 複数写真の場合
-        _logger.info('複数写真の順次分析を開始', context: 'DiaryPreviewController');
+        _logger.info(
+          'Starting sequential analysis of multiple photos',
+          context: 'DiaryPreviewController',
+        );
 
         final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
 
@@ -201,7 +204,7 @@ class DiaryPreviewController extends BaseErrorController {
           prompt: _selectedPrompt?.text,
           onProgress: (current, total) {
             _logger.info(
-              '画像分析進捗: $current/$total',
+              'Image analysis progress: $current/$total',
               context: 'DiaryPreviewController',
             );
             _currentPhotoIndex = current;
@@ -242,7 +245,7 @@ class DiaryPreviewController extends BaseErrorController {
           await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
         } catch (e) {
           _logger.error(
-            'プロンプト使用履歴記録エラー',
+            'Prompt usage history recording error',
             error: e,
             context: 'DiaryPreviewController',
           );
@@ -252,7 +255,7 @@ class DiaryPreviewController extends BaseErrorController {
       await _autoSaveDiary(assets: assets);
     } catch (e, stackTrace) {
       _logger.error(
-        '日記生成に失敗しました',
+        'Diary generation failed',
         error: e,
         context: 'DiaryPreviewController._loadModelAndGenerateDiary',
         stackTrace: stackTrace,
@@ -265,7 +268,7 @@ class DiaryPreviewController extends BaseErrorController {
   Future<void> _autoSaveDiary({required List<AssetEntity> assets}) async {
     try {
       _logger.info(
-        '自動保存開始: 写真数=${assets.length}',
+        'Starting auto-save: photoCount=${assets.length}',
         context: 'DiaryPreviewController',
       );
 
@@ -283,15 +286,15 @@ class DiaryPreviewController extends BaseErrorController {
       }
 
       final savedDiary = saveResult.value;
-      _logger.info('自動保存成功', context: 'DiaryPreviewController');
+      _logger.info('Auto-save succeeded', context: 'DiaryPreviewController');
 
       _savedDiaryId = savedDiary.id;
       _isSaving = false;
       notifyListeners();
     } catch (e, stackTrace) {
-      final appError = ErrorHandler.handleError(e, context: '自動保存');
+      final appError = ErrorHandler.handleError(e, context: 'auto-save');
       _logger.error(
-        '日記の自動保存に失敗しました',
+        'Diary auto-save failed',
         context: 'DiaryPreviewController._autoSaveDiary',
         error: appError,
         stackTrace: stackTrace,
@@ -313,7 +316,7 @@ class DiaryPreviewController extends BaseErrorController {
       _clearErrorState();
 
       _logger.info(
-        '日記保存開始: 写真数=${assets.length}',
+        'Starting diary save: photoCount=${assets.length}',
         context: 'DiaryPreviewController',
       );
 
@@ -330,13 +333,13 @@ class DiaryPreviewController extends BaseErrorController {
         throw manualSaveResult.error;
       }
 
-      _logger.info('日記保存成功', context: 'DiaryPreviewController');
+      _logger.info('Diary save succeeded', context: 'DiaryPreviewController');
       setLoading(false);
       return true;
     } catch (e, stackTrace) {
-      final appError = ErrorHandler.handleError(e, context: '日記保存');
+      final appError = ErrorHandler.handleError(e, context: 'diary-save');
       _logger.error(
-        '日記の保存に失敗しました',
+        'Diary save failed',
         context: 'DiaryPreviewController._saveDiaryEntry',
         error: appError,
         stackTrace: stackTrace,

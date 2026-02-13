@@ -98,7 +98,10 @@ class ServiceRegistration {
   /// Initialize and register all services
   static Future<void> initialize() async {
     if (_isInitialized) {
-      _logger.debug('サービス既に初期化済み', context: 'ServiceRegistration.initialize');
+      _logger.debug(
+        'Services already initialized',
+        context: 'ServiceRegistration.initialize',
+      );
       return;
     }
 
@@ -109,7 +112,7 @@ class ServiceRegistration {
 
       // LoggingService登録後にログ出力
       _logger.debug(
-        'ServiceRegistration初期化開始',
+        'ServiceRegistration initialization started',
         context: 'ServiceRegistration.initialize',
       );
 
@@ -119,9 +122,9 @@ class ServiceRegistration {
       _isInitialized = true;
       final duration = DateTime.now().difference(startTime);
       _logger.info(
-        'サービス初期化完了',
+        'Service initialization completed',
         context: 'ServiceRegistration.initialize',
-        data: '初期化時間: ${duration.inMilliseconds}ms',
+        data: 'Initialization time: ${duration.inMilliseconds}ms',
       );
 
       // Debug print all registered services
@@ -130,7 +133,7 @@ class ServiceRegistration {
       // LoggingServiceが登録済みの場合のみエラーログを出力
       try {
         _logger.error(
-          'サービス初期化エラー',
+          'Service initialization error',
           context: 'ServiceRegistration.initialize',
           error: e,
         );
@@ -148,7 +151,7 @@ class ServiceRegistration {
     serviceLocator.registerSingleton<ILoggingService>(loggingService);
 
     _logger.debug(
-      'コアサービス登録開始',
+      'Starting core service registration',
       context: 'ServiceRegistration._registerCoreServices',
     );
 
@@ -272,7 +275,7 @@ class ServiceRegistration {
   /// Register services that have dependencies on other services
   static Future<void> _registerDependentServices() async {
     _logger.debug(
-      '依存関係サービス登録開始',
+      'Starting dependent service registration',
       context: 'ServiceRegistration._registerDependentServices',
     );
 
@@ -319,7 +322,10 @@ class ServiceRegistration {
   /// Reset service registration (useful for testing)
   static void reset() {
     if (_isInitialized) {
-      _logger.info('サービス登録リセット', context: 'ServiceRegistration.reset');
+      _logger.info(
+        'Service registration reset',
+        context: 'ServiceRegistration.reset',
+      );
     }
     serviceLocator.clear();
     _isInitialized = false;

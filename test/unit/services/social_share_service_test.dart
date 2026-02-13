@@ -279,7 +279,7 @@ void main() {
       const exception = SocialShareException('テストエラー');
 
       expect(exception.message, equals('テストエラー'));
-      expect(exception.userMessage, equals('SNS共有でエラーが発生しました: テストエラー'));
+      expect(exception.userMessage, equals('Social sharing error: テストエラー'));
     });
 
     test('SocialShareException preserves details and originalError', () {

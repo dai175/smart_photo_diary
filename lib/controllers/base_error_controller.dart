@@ -59,7 +59,9 @@ abstract class BaseErrorController extends ChangeNotifier {
       final exception = e is AppException
           ? e
           : ServiceException(
-              context != null ? '[$context] 処理中にエラーが発生しました' : '処理中にエラーが発生しました',
+              context != null
+                  ? '[$context] An error occurred during processing'
+                  : 'An error occurred during processing',
               originalError: e,
             );
       setError(exception);
@@ -89,7 +91,9 @@ abstract class BaseErrorController extends ChangeNotifier {
       final exception = e is AppException
           ? e
           : ServiceException(
-              context != null ? '[$context] 処理中にエラーが発生しました' : '処理中にエラーが発生しました',
+              context != null
+                  ? '[$context] An error occurred during processing'
+                  : 'An error occurred during processing',
               originalError: e,
             );
       setError(exception);

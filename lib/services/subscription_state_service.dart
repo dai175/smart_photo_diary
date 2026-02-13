@@ -161,7 +161,7 @@ class SubscriptionStateService
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null) {
           log(
-            'プラン強制設定 - 返り値を$forcePlanとして返却（データベースは変更せず）',
+            'Forced plan setting - returning $forcePlan (database unchanged)',
             level: LogLevel.debug,
             data: {'forcedPlan': forcePlan},
           );

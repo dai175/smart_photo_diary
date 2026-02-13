@@ -47,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final photoService = ServiceRegistration.get<IPhotoService>();
       await photoService.requestPermission();
 
-      _logger.info('オンボーディング完了', context: 'OnboardingScreen');
+      _logger.info('Onboarding completed', context: 'OnboardingScreen');
 
       if (!mounted) return;
 
@@ -58,7 +58,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       );
     } catch (e) {
-      _logger.error('オンボーディング完了エラー', error: e, context: 'OnboardingScreen');
+      _logger.error(
+        'Onboarding completion error',
+        error: e,
+        context: 'OnboardingScreen',
+      );
 
       if (mounted) {
         Navigator.of(context).pushReplacement(

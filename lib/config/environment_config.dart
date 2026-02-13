@@ -20,7 +20,7 @@ class EnvironmentConfig {
       );
 
       _logger.info(
-        'APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? ".envファイル" : "build-time constants"}',
+        'API key source: ${_cachedGeminiApiKey!.isEmpty ? ".env file" : "build-time constants"}',
         context: 'EnvironmentConfig.initialize',
       );
 
@@ -31,12 +31,12 @@ class EnvironmentConfig {
           await dotenv.load(fileName: '.env');
           _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
           _logger.info(
-            '開発環境: .envファイルから読み込み完了',
+            'Development: loaded from .env file',
             context: 'EnvironmentConfig.initialize',
           );
         } catch (e) {
           _logger.warning(
-            '.envファイル読み込み失敗（開発環境）',
+            'Failed to load .env file (development)',
             context: 'EnvironmentConfig.initialize',
             data: {'error': e.toString()},
           );
@@ -66,16 +66,16 @@ class EnvironmentConfig {
       _isInitialized = true;
 
       _logger.info(
-        'EnvironmentConfig初期化完了',
+        'EnvironmentConfig initialization completed',
         context: 'EnvironmentConfig.initialize',
       );
       _logger.info(
-        'APIキー取得方法: ${_cachedGeminiApiKey!.isEmpty ? "未設定" : (kDebugMode ? "開発環境" : "本番環境")}',
+        'API key source: ${_cachedGeminiApiKey!.isEmpty ? "not set" : (kDebugMode ? "development" : "production")}',
         context: 'EnvironmentConfig.initialize',
       );
     } catch (e) {
       _logger.error(
-        '環境変数初期化エラー',
+        'Environment config initialization error',
         context: 'EnvironmentConfig.initialize',
         error: e,
       );
@@ -87,7 +87,7 @@ class EnvironmentConfig {
   static String get geminiApiKey {
     if (!_isInitialized) {
       _logger.warning(
-        'EnvironmentConfigが初期化されていません',
+        'EnvironmentConfig is not initialized',
         context: 'EnvironmentConfig.geminiApiKey',
       );
       // テスト環境の場合はダミーキーを返す
@@ -101,7 +101,7 @@ class EnvironmentConfig {
     final key = _cachedGeminiApiKey ?? '';
     if (key.isEmpty) {
       _logger.warning(
-        'GEMINI_API_KEYが設定されていません',
+        'GEMINI_API_KEY is not set',
         context: 'EnvironmentConfig.geminiApiKey',
       );
       // テスト環境の場合はダミーキーを返す
@@ -151,7 +151,7 @@ class EnvironmentConfig {
     }
 
     _logger.warning(
-      '無効なFORCE_PLANが指定されました',
+      'Invalid FORCE_PLAN specified',
       context: 'EnvironmentConfig.forcePlan',
       data: {'invalidPlan': plan, 'validPlans': validPlans},
     );
@@ -178,14 +178,16 @@ class EnvironmentConfig {
       'Environment Config Debug Info',
       context: 'EnvironmentConfig.printDebugInfo',
       data: {
-        '初期化状態': _isInitialized,
-        'デバッグモード': kDebugMode,
-        'APIキー設定': _cachedGeminiApiKey?.isNotEmpty == true ? '有効' : '無効',
-        'APIキー形式': _cachedGeminiApiKey?.startsWith('AIza') == true
-            ? '正常'
-            : '異常',
-        'プラン強制': _cachedForcePlan,
-        'dotenv環境': '${dotenv.env.keys.length}個のキー',
+        'initialized': _isInitialized,
+        'debugMode': kDebugMode,
+        'apiKeySet': _cachedGeminiApiKey?.isNotEmpty == true
+            ? 'valid'
+            : 'invalid',
+        'apiKeyFormat': _cachedGeminiApiKey?.startsWith('AIza') == true
+            ? 'valid'
+            : 'invalid',
+        'forcePlan': _cachedForcePlan,
+        'dotenvKeys': '${dotenv.env.keys.length} keys',
       },
     );
   }

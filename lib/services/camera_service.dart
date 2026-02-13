@@ -28,7 +28,10 @@ class CameraService implements ICameraService {
   @override
   Future<Result<AssetEntity?>> capturePhoto() async {
     try {
-      _logger.debug('カメラ撮影を開始', context: 'CameraService.capturePhoto');
+      _logger.debug(
+        'Starting camera capture',
+        context: 'CameraService.capturePhoto',
+      );
 
       // 権限状態の詳細チェック
       await Future.delayed(
@@ -36,14 +39,14 @@ class CameraService implements ICameraService {
       ); // 少し待機してiOSの権限状態が更新されるのを待つ
       final cameraStatus = await Permission.camera.status;
       _logger.debug(
-        'カメラ権限状態をチェック: $cameraStatus (isGranted: ${cameraStatus.isGranted}, isDenied: ${cameraStatus.isDenied}, isPermanentlyDenied: ${cameraStatus.isPermanentlyDenied})',
+        'Checking camera permission status: $cameraStatus (isGranted: ${cameraStatus.isGranted}, isDenied: ${cameraStatus.isDenied}, isPermanentlyDenied: ${cameraStatus.isPermanentlyDenied})',
         context: 'CameraService.capturePhoto',
       );
 
       // 永続的に拒否されている場合のみ事前にブロック
       if (cameraStatus.isPermanentlyDenied) {
         _logger.warning(
-          'カメラ権限が永続的に拒否されています',
+          'Camera permission is permanently denied',
           context: 'CameraService.capturePhoto',
           data: 'status: $cameraStatus',
         );
@@ -52,9 +55,9 @@ class CameraService implements ICameraService {
 
       // denied状態でも初回は image_picker を実行して権限ダイアログを表示させる
       _logger.debug(
-        'image_pickerでカメラアクセスを実行（権限ダイアログ表示含む）',
+        'Executing camera access via image_picker (including permission dialog)',
         context: 'CameraService.capturePhoto',
-        data: '現在の権限状態: $cameraStatus',
+        data: 'Current permission status: $cameraStatus',
       );
 
       // image_pickerでカメラアクセス
@@ -65,19 +68,22 @@ class CameraService implements ICameraService {
       );
 
       if (photo == null) {
-        _logger.info('カメラ撮影がキャンセルされました', context: 'CameraService.capturePhoto');
+        _logger.info(
+          'Camera capture was cancelled',
+          context: 'CameraService.capturePhoto',
+        );
         return const Success(null);
       }
 
       _logger.debug(
-        'カメラ撮影完了',
+        'Camera capture completed',
         context: 'CameraService.capturePhoto',
-        data: 'ファイルパス: ${photo.path}',
+        data: 'File path: ${photo.path}',
       );
 
       // 撮影した写真をフォトライブラリに手動保存
       _logger.debug(
-        '撮影した写真をフォトライブラリに保存中',
+        'Saving captured photo to photo library',
         context: 'CameraService.capturePhoto',
       );
 
@@ -90,14 +96,14 @@ class CameraService implements ICameraService {
         );
 
         _logger.info(
-          'カメラ撮影が完了し、フォトライブラリに保存されました',
+          'Camera capture completed and saved to photo library',
           context: 'CameraService.capturePhoto',
           data: 'AssetID: ${savedAsset.id}',
         );
         return Success(savedAsset);
       } catch (e) {
         _logger.error(
-          '撮影した写真の保存処理でエラー: $e',
+          'Error saving captured photo: $e',
           context: 'CameraService.capturePhoto',
         );
 
@@ -110,14 +116,14 @@ class CameraService implements ICameraService {
           e.toString().contains('Permission denied') ||
           e.toString().contains('User denied')) {
         _logger.warning(
-          'カメラ権限がユーザーによって拒否されました',
+          'Camera permission was denied by user',
           context: 'CameraService.capturePhoto',
           data: 'error: $e',
         );
 
         final statusAfterDenied = await Permission.camera.status;
         _logger.debug(
-          '権限拒否後の状態: $statusAfterDenied',
+          'Permission status after denial: $statusAfterDenied',
           context: 'CameraService.capturePhoto',
         );
 
@@ -129,7 +135,7 @@ class CameraService implements ICameraService {
         context: 'CameraService.capturePhoto',
       );
       _logger.error(
-        'カメラ撮影エラー',
+        'Camera capture error',
         context: 'CameraService.capturePhoto',
         error: appError,
       );
@@ -140,7 +146,7 @@ class CameraService implements ICameraService {
   /// 撮影した写真のフォールバック検索
   Future<Result<AssetEntity?>> _fallbackSearchCapturedPhoto() async {
     _logger.debug(
-      'フォールバック: 従来の方法でAssetEntity検索',
+      'Fallback: Searching AssetEntity using legacy method',
       context: 'CameraService.capturePhoto',
     );
 
@@ -167,14 +173,14 @@ class CameraService implements ICameraService {
 
     if (capturedAsset != null) {
       _logger.info(
-        'フォールバック検索でAssetEntityを取得しました',
+        'AssetEntity retrieved via fallback search',
         context: 'CameraService.capturePhoto',
         data: 'AssetID: ${capturedAsset.id}',
       );
       return Success(capturedAsset);
     } else {
       _logger.warning(
-        'フォールバック検索でもAssetEntityの取得に失敗しました',
+        'Failed to retrieve AssetEntity even with fallback search',
         context: 'CameraService.capturePhoto',
       );
       return Failure(PhotoError.cameraAssetNotFound());
@@ -185,39 +191,39 @@ class CameraService implements ICameraService {
   Future<Result<bool>> requestCameraPermission() async {
     try {
       _logger.debug(
-        'カメラ権限リクエスト開始',
+        'Starting camera permission request',
         context: 'CameraService.requestCameraPermission',
       );
 
       var status = await Permission.camera.status;
       _logger.info(
-        'カメラ権限の現在の状態: $status (isGranted: ${status.isGranted}, isDenied: ${status.isDenied}, isPermanentlyDenied: ${status.isPermanentlyDenied})',
+        'Current camera permission status: $status (isGranted: ${status.isGranted}, isDenied: ${status.isDenied}, isPermanentlyDenied: ${status.isPermanentlyDenied})',
         context: 'CameraService.requestCameraPermission',
       );
 
       if (!status.isGranted) {
         if (status.isPermanentlyDenied) {
           _logger.warning(
-            'カメラ権限が永続的に拒否されています。設定アプリでの許可が必要です。',
+            'Camera permission is permanently denied. Permission must be granted in Settings.',
             context: 'CameraService.requestCameraPermission',
           );
           return const Success(false);
         }
 
         _logger.debug(
-          'カメラ権限をリクエスト（現在の状態: $status）',
+          'Requesting camera permission (current status: $status)',
           context: 'CameraService.requestCameraPermission',
         );
         status = await Permission.camera.request();
         _logger.info(
-          'リクエスト後のカメラ権限状態: $status (isGranted: ${status.isGranted}, isDenied: ${status.isDenied}, isPermanentlyDenied: ${status.isPermanentlyDenied})',
+          'Camera permission status after request: $status (isGranted: ${status.isGranted}, isDenied: ${status.isDenied}, isPermanentlyDenied: ${status.isPermanentlyDenied})',
           context: 'CameraService.requestCameraPermission',
         );
       }
 
       final granted = status.isGranted;
       _logger.info(
-        granted ? 'カメラ権限が付与されました' : 'カメラ権限が拒否されました',
+        granted ? 'Camera permission granted' : 'Camera permission denied',
         context: 'CameraService.requestCameraPermission',
         data: 'status: $status',
       );
@@ -229,7 +235,7 @@ class CameraService implements ICameraService {
         context: 'CameraService.requestCameraPermission',
       );
       _logger.error(
-        'カメラ権限リクエストエラー',
+        'Camera permission request error',
         context: 'CameraService.requestCameraPermission',
         error: appError,
       );
@@ -244,7 +250,7 @@ class CameraService implements ICameraService {
       final isDenied = status.isDenied || status.isPermanentlyDenied;
 
       _logger.debug(
-        'カメラ権限拒否状態をチェック',
+        'Checking camera permission denied status',
         context: 'CameraService.isCameraPermissionDenied',
         data: 'status: $status, isDenied: $isDenied',
       );
@@ -256,7 +262,7 @@ class CameraService implements ICameraService {
         context: 'CameraService.isCameraPermissionDenied',
       );
       _logger.error(
-        'カメラ権限状態チェックエラー',
+        'Camera permission status check error',
         context: 'CameraService.isCameraPermissionDenied',
         error: appError,
       );

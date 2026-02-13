@@ -25,7 +25,7 @@ class ErrorHandler {
     }
 
     // 一般的なエラーの場合は適切なAppExceptionに変換
-    final message = '予期しないエラーが発生しました';
+    final message = 'An unexpected error occurred';
     final exception = ServiceException(message, originalError: error);
 
     try {

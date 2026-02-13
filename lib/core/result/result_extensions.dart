@@ -18,7 +18,9 @@ class ResultHelper {
       final exception = e is AppException
           ? e
           : ServiceException(
-              context != null ? '[$context] 処理中にエラーが発生しました' : '処理中にエラーが発生しました',
+              context != null
+                  ? '[$context] An error occurred during processing'
+                  : 'An error occurred during processing',
               originalError: e,
             );
       return Failure(exception);
@@ -38,8 +40,8 @@ class ResultHelper {
           ? e
           : ServiceException(
               context != null
-                  ? '[$context] 非同期処理中にエラーが発生しました'
-                  : '非同期処理中にエラーが発生しました',
+                  ? '[$context] An error occurred during async processing'
+                  : 'An error occurred during async processing',
               originalError: e,
             );
       return Failure(exception);

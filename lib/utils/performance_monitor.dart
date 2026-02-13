@@ -26,7 +26,7 @@ class PerformanceMonitor {
     final startTime = _startTimes[label];
     if (startTime == null) {
       _logger.warning(
-        '計測開始されていません: $label',
+        'Measurement not started: $label',
         context: 'PerformanceMonitor.endMeasurement',
       );
       return;
@@ -50,7 +50,7 @@ class PerformanceMonitor {
 
     // ログに記録
     _logger.debug(
-      'パフォーマンス: $label: ${milliseconds}ms (平均: ${average.toStringAsFixed(1)}ms)',
+      'Performance: $label: ${milliseconds}ms (avg: ${average.toStringAsFixed(1)}ms)',
       context: context ?? 'PerformanceMonitor.endMeasurement',
     );
 
@@ -71,9 +71,9 @@ class PerformanceMonitor {
     }
 
     _logger.debug(
-      'メモリ使用状況記録',
+      'Memory usage recorded',
       context: context,
-      data: 'Flutter DevToolsで確認してください',
+      data: 'Check in Flutter DevTools',
     );
   }
 

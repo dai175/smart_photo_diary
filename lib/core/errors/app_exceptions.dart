@@ -142,5 +142,5 @@ class ImageGenerationException extends AppException {
   });
 
   @override
-  String get userMessage => '画像生成でエラーが発生しました: $message';
+  String get userMessage => 'Image generation error: $message';
 }

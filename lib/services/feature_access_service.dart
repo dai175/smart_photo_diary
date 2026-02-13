@@ -39,17 +39,24 @@ class FeatureAccessService
     // デバッグモードでプラン強制設定をチェック
     if (kDebugMode) {
       final forcePlan = EnvironmentConfig.forcePlan;
-      log('デバッグモードチェック', level: LogLevel.debug, data: {'forcePlan': forcePlan});
+      log(
+        'Debug mode check',
+        level: LogLevel.debug,
+        data: {'forcePlan': forcePlan},
+      );
       if (forcePlan != null) {
         final forceResult = forcePlan.toLowerCase().startsWith('premium');
         log(
-          'プラン強制設定により Premium アクセス',
+          'Forced plan setting: Premium access',
           level: LogLevel.debug,
           data: {'access': forceResult, 'plan': forcePlan},
         );
         return Success(forceResult);
       } else {
-        log('プラン強制設定なし、通常のプランチェックに進む', level: LogLevel.debug);
+        log(
+          'No forced plan setting, proceeding with normal plan check',
+          level: LogLevel.debug,
+        );
       }
     }
 
@@ -70,7 +77,7 @@ class FeatureAccessService
         final forcePlan = EnvironmentConfig.forcePlan;
         if (forcePlan != null) {
           log(
-            'プラン強制設定により Writing Prompts アクセス: true',
+            'Forced plan setting: Writing Prompts access: true',
             level: LogLevel.debug,
             data: {'plan': forcePlan},
           );

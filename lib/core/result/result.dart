@@ -63,7 +63,12 @@ sealed class Result<T> {
       try {
         return Success(mapper((this as Success<T>).data));
       } catch (e) {
-        return Failure(ServiceException('マップ処理中にエラーが発生しました', originalError: e));
+        return Failure(
+          ServiceException(
+            'An error occurred during map processing',
+            originalError: e,
+          ),
+        );
       }
     }
     return Failure((this as Failure<T>).exception);
@@ -77,7 +82,10 @@ sealed class Result<T> {
         return Success(result);
       } catch (e) {
         return Failure(
-          ServiceException('非同期マップ処理中にエラーが発生しました', originalError: e),
+          ServiceException(
+            'An error occurred during async map processing',
+            originalError: e,
+          ),
         );
       }
     }

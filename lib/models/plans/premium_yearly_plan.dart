@@ -16,7 +16,7 @@ class PremiumYearlyPlan extends Plan {
   PremiumYearlyPlan._internal()
     : super(
         id: SubscriptionConstants.premiumYearlyPlanId,
-        displayName: '${SubscriptionConstants.premiumDisplayName} (年額)',
+        displayName: '${SubscriptionConstants.premiumDisplayName} (Yearly)',
         description: SubscriptionConstants.premiumDescription,
         price: SubscriptionConstants.premiumYearlyPrice,
         monthlyAiGenerationLimit: SubscriptionConstants.premiumMonthlyAiLimit,

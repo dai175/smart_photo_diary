@@ -55,16 +55,16 @@ class DiaryGenerator {
 
       // デバッグログ: プロンプト統合確認（感情深掘り型対応）
       _logger.debug(
-        'AI生成プロンプト統合確認',
+        'AI generation prompt integration check',
         context: 'generateFromImage',
         data: {
-          'カスタムプロンプト': prompt ?? 'なし',
-          'プロンプト種別': promptType,
+          'customPrompt': prompt ?? 'none',
+          'promptType': promptType,
           'maxTokens': maxTokens,
           'emphasis': emphasis,
           'locale': locale.toLanguageTag(),
-          '統合後プロンプト長': finalPrompt.length,
-          '感情深掘り型プロンプト統合': prompt != null ? '成功' : 'なし',
+          'mergedPromptLength': finalPrompt.length,
+          'emotionDeepDiveIntegration': prompt != null ? 'success' : 'none',
         },
       );
 
@@ -88,7 +88,11 @@ class DiaryGenerator {
             : 'Failed to generate the diary: invalid API response',
       );
     } catch (e) {
-      _logger.error('画像ベース日記生成エラー', context: 'generateFromImage', error: e);
+      _logger.error(
+        'Image-based diary generation error',
+        context: 'generateFromImage',
+        error: e,
+      );
       // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
       rethrow;
     }
@@ -132,9 +136,9 @@ class DiaryGenerator {
         onProgress?.call(i + 1, sortedImages.length);
 
         _logger.info(
-          '画像分析中',
+          'Analyzing image',
           context: 'generateFromMultipleImages',
-          data: {'現在': i + 1, '総数': sortedImages.length},
+          data: {'current': i + 1, 'total': sortedImages.length},
         );
 
         final analysis = await _analyzeImage(
@@ -160,7 +164,7 @@ class DiaryGenerator {
       );
     } catch (e) {
       _logger.error(
-        '複数画像日記生成エラー',
+        'Multi-image diary generation error',
         context: 'generateFromMultipleImages',
         error: e,
       );
@@ -231,7 +235,11 @@ class DiaryGenerator {
             : content,
       );
     } catch (e) {
-      _logger.error('日記パース中のエラー', context: '_parseGeneratedDiary', error: e);
+      _logger.error(
+        'Error during diary parsing',
+        context: '_parseGeneratedDiary',
+        error: e,
+      );
       final defaultTitle = DiaryLocaleUtils.isJapanese(locale)
           ? '今日の日記'
           : "Today's Journal";
@@ -293,7 +301,7 @@ Describe the situation and mood you infer from the image, including any emotiona
 
       return '$timeLabel: ${DiaryLocaleUtils.analysisFailureMessage(locale)}';
     } catch (e) {
-      _logger.error('画像分析エラー', context: '_analyzeImage', error: e);
+      _logger.error('Image analysis error', context: '_analyzeImage', error: e);
       return '$timeLabel: ${DiaryLocaleUtils.analysisFailureMessage(locale)}';
     }
   }
@@ -334,15 +342,15 @@ Describe the situation and mood you infer from the image, including any emotiona
     );
 
     _logger.debug(
-      '複数画像AI生成プロンプト統合確認',
+      'Multi-image AI generation prompt integration check',
       context: '_generateDiaryFromAnalyses',
       data: {
-        'カスタムプロンプト': customPrompt ?? 'なし',
-        'プロンプト種別': promptType,
+        'customPrompt': customPrompt ?? 'none',
+        'promptType': promptType,
         'maxTokens': multiImageMaxTokens,
         'emphasis': emphasis,
         'locale': locale.toLanguageTag(),
-        '統合後プロンプト長': prompt.length,
+        'mergedPromptLength': prompt.length,
       },
     );
 
@@ -366,7 +374,7 @@ Describe the situation and mood you infer from the image, including any emotiona
       );
     } catch (e) {
       _logger.error(
-        '統合日記生成エラー',
+        'Integrated diary generation error',
         context: '_generateDiaryFromAnalyses',
         error: e,
       );

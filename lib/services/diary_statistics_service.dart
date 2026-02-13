@@ -37,8 +37,13 @@ class DiaryStatisticsService implements IDiaryStatisticsService {
       }
       return Success(box.length);
     } catch (e) {
-      _logger.error('日記総数取得エラー', error: e);
-      return Failure(ServiceException('日記総数の取得に失敗しました', originalError: e));
+      _logger.error('Total diary count retrieval error', error: e);
+      return Failure(
+        ServiceException(
+          'Failed to retrieve total diary count',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -59,8 +64,13 @@ class DiaryStatisticsService implements IDiaryStatisticsService {
           .length;
       return Success(count);
     } catch (e) {
-      _logger.error('期間別日記数取得エラー', error: e);
-      return Failure(ServiceException('期間別日記数の取得に失敗しました', originalError: e));
+      _logger.error('Period diary count retrieval error', error: e);
+      return Failure(
+        ServiceException(
+          'Failed to retrieve period diary count',
+          originalError: e,
+        ),
+      );
     }
   }
 }

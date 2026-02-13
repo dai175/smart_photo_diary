@@ -227,7 +227,10 @@ class ErrorHandledAction {
       if (context.mounted) {
         final exception = e is AppException
             ? e
-            : ServiceException('処理中にエラーが発生しました', originalError: e);
+            : ServiceException(
+                'An error occurred during processing',
+                originalError: e,
+              );
 
         await context.showError(
           exception,
@@ -273,7 +276,10 @@ class ErrorHandledAction {
     } catch (e) {
       final exception = e is AppException
           ? e
-          : ServiceException('処理中にエラーが発生しました', originalError: e);
+          : ServiceException(
+              'An error occurred during processing',
+              originalError: e,
+            );
 
       if (context.mounted && showErrors) {
         await context.showError(

@@ -23,7 +23,7 @@ void main() {
       test('Premium Monthly プランの基本プロパティが正しく設定されている', () {
         final plan = PremiumMonthlyPlan();
 
-        expect(plan.displayName, equals('Premium (月額)'));
+        expect(plan.displayName, equals('Premium (Monthly)'));
         expect(plan.id, equals('premium_monthly'));
         expect(plan.price, equals(300));
         expect(plan.yearlyPrice, equals(3600)); // 300 * 12
@@ -42,7 +42,7 @@ void main() {
       test('Premium Yearly プランの基本プロパティが正しく設定されている', () {
         final plan = PremiumYearlyPlan();
 
-        expect(plan.displayName, equals('Premium (年額)'));
+        expect(plan.displayName, equals('Premium (Yearly)'));
         expect(plan.id, equals('premium_yearly'));
         expect(plan.price, equals(2800));
         expect(plan.yearlyPrice, equals(2800));
