@@ -17,64 +17,150 @@ class PhotoQueryService {
   }) : _logger = logger,
        _requestPermission = requestPermission;
 
-  /// 今日撮影された写真を取得する
-  Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
-    final bool hasPermission = await _requestPermission();
+  // =================================================================
+  // 共通ヘルパー
+  // =================================================================
+
+  /// 権限チェック。権限がない場合は null を返す。
+  Future<bool> _ensurePermission(String caller) async {
+    final hasPermission = await _requestPermission();
     if (!hasPermission) {
       _logger.info(
         'No photo access permission',
-        context: 'PhotoQueryService.getTodayPhotos',
+        context: 'PhotoQueryService.$caller',
       );
-      return [];
     }
+    return hasPermission;
+  }
 
-    try {
-      final DateTime now = DateTime.now();
-      final DateTime startOfDay = DateTime(now.year, now.month, now.day);
-      final DateTime endOfDay = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        23,
-        59,
-        59,
-        999,
-      );
-
-      final FilterOptionGroup filterOption = FilterOptionGroup(
+  /// 日付範囲用の FilterOptionGroup を構築
+  FilterOptionGroup _buildDateFilter({DateTime? startDate, DateTime? endDate}) {
+    if (startDate != null || endDate != null) {
+      return FilterOptionGroup(
         orders: const [
           OrderOption(type: OrderOptionType.createDate, asc: false),
         ],
-        createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
+        createTimeCond: DateTimeCond(
+          min: startDate ?? DateTime(1970),
+          max: endDate ?? DateTime.now(),
+        ),
       );
+    }
+    return FilterOptionGroup(
+      orders: const [OrderOption(type: OrderOptionType.createDate, asc: false)],
+    );
+  }
 
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        filterOption: filterOption,
-      );
+  /// アルバムの先頭から写真を取得する共通処理
+  Future<List<AssetEntity>> _fetchFromAlbum(
+    FilterOptionGroup filterOption, {
+    required int offset,
+    required int limit,
+    required String caller,
+  }) async {
+    final albums = await PhotoManager.getAssetPathList(
+      type: RequestType.image,
+      filterOption: filterOption,
+    );
 
-      _logger.debug(
-        'Albums retrieved: ${albums.length}',
-        context: 'PhotoQueryService.getTodayPhotos',
-      );
+    _logger.debug(
+      'Albums retrieved: ${albums.length}',
+      context: 'PhotoQueryService.$caller',
+    );
 
-      if (albums.isEmpty) {
-        _logger.debug(
-          'No albums found for today',
-          context: 'PhotoQueryService.getTodayPhotos',
+    if (albums.isEmpty) {
+      _logger.debug('No albums found', context: 'PhotoQueryService.$caller');
+      return [];
+    }
+
+    final album = albums.first;
+    final totalCount = await album.assetCountAsync;
+
+    if (offset >= totalCount) {
+      return [];
+    }
+
+    final actualLimit = (offset + limit > totalCount)
+        ? totalCount - offset
+        : limit;
+
+    return album.getAssetListRange(start: offset, end: offset + actualLimit);
+  }
+
+  /// 写真の日付を検証し、範囲内のもののみ返す
+  List<AssetEntity> _filterByDateRange(
+    List<AssetEntity> assets, {
+    required DateTime startDate,
+    required DateTime endDate,
+    required String caller,
+  }) {
+    final now = DateTime.now();
+    final validAssets = <AssetEntity>[];
+    for (final asset in assets) {
+      try {
+        final createDate = asset.createDateTime;
+        if (createDate.year < 1970 || createDate.isAfter(now)) {
+          _logger.warning(
+            'Skipping photo with invalid creation date',
+            context: 'PhotoQueryService.$caller',
+            data: 'createDate: $createDate, assetId: ${asset.id}',
+          );
+          continue;
+        }
+
+        final localDate = DateTime(
+          createDate.year,
+          createDate.month,
+          createDate.day,
+          createDate.hour,
+          createDate.minute,
+          createDate.second,
         );
-        return [];
+
+        if (localDate.isBefore(startDate) || localDate.isAfter(endDate)) {
+          _logger.debug(
+            'Skipping photo outside date range after timezone adjustment',
+            context: 'PhotoQueryService.$caller',
+            data: 'createDate: $localDate, range: $startDate - $endDate',
+          );
+          continue;
+        }
+
+        validAssets.add(asset);
+      } catch (e) {
+        _logger.warning(
+          'Error during photo validation',
+          context: 'PhotoQueryService.$caller',
+          data: 'assetId: ${asset.id}, error: $e',
+        );
+        continue;
       }
+    }
+    return validAssets;
+  }
 
-      final AssetPathEntity recentAlbum = albums.first;
-      _logger.debug(
-        'Album name: ${recentAlbum.name}',
-        context: 'PhotoQueryService.getTodayPhotos',
+  // =================================================================
+  // 公開メソッド
+  // =================================================================
+
+  /// 今日撮影された写真を取得する
+  Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
+    if (!await _ensurePermission('getTodayPhotos')) return [];
+
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
+      final filterOption = _buildDateFilter(
+        startDate: startOfDay,
+        endDate: endOfDay,
       );
-
-      final List<AssetEntity> assets = await recentAlbum.getAssetListRange(
-        start: 0,
-        end: limit,
+      final assets = await _fetchFromAlbum(
+        filterOption,
+        offset: 0,
+        limit: limit,
+        caller: 'getTodayPhotos',
       );
 
       _logger.info(
@@ -84,15 +170,7 @@ class PhotoQueryService {
       );
       return assets;
     } catch (e) {
-      final appError = ErrorHandler.handleError(
-        e,
-        context: 'PhotoQueryService.getTodayPhotos',
-      );
-      _logger.error(
-        'Photo retrieval error',
-        context: 'PhotoQueryService.getTodayPhotos',
-        error: appError,
-      );
+      ErrorHandler.handleError(e, context: 'PhotoQueryService.getTodayPhotos');
       return [];
     }
   }
@@ -103,14 +181,7 @@ class PhotoQueryService {
     required DateTime endDate,
     int limit = 100,
   }) async {
-    final bool hasPermission = await _requestPermission();
-    if (!hasPermission) {
-      _logger.info(
-        'No photo access permission',
-        context: 'PhotoQueryService.getPhotosInDateRange',
-      );
-      return [];
-    }
+    if (!await _ensurePermission('getPhotosInDateRange')) return [];
 
     try {
       final now = DateTime.now();
@@ -145,75 +216,23 @@ class PhotoQueryService {
         context: 'PhotoQueryService.getPhotosInDateRange',
       );
 
-      final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: const [
-          OrderOption(type: OrderOptionType.createDate, asc: false),
-        ],
-        createTimeCond: DateTimeCond(min: localStartDate, max: localEndDate),
+      final filterOption = _buildDateFilter(
+        startDate: localStartDate,
+        endDate: localEndDate,
+      );
+      final assets = await _fetchFromAlbum(
+        filterOption,
+        offset: 0,
+        limit: limit,
+        caller: 'getPhotosInDateRange',
       );
 
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        filterOption: filterOption,
+      final validAssets = _filterByDateRange(
+        assets,
+        startDate: localStartDate,
+        endDate: localEndDate,
+        caller: 'getPhotosInDateRange',
       );
-
-      if (albums.isEmpty) {
-        _logger.debug(
-          'No albums found for specified period',
-          context: 'PhotoQueryService.getPhotosInDateRange',
-        );
-        return [];
-      }
-
-      final AssetPathEntity album = albums.first;
-      final List<AssetEntity> assets = await album.getAssetListRange(
-        start: 0,
-        end: limit,
-      );
-
-      final List<AssetEntity> validAssets = [];
-      for (final asset in assets) {
-        try {
-          final createDate = asset.createDateTime;
-          if (createDate.year < 1970 || createDate.isAfter(now)) {
-            _logger.warning(
-              'Skipping photo with invalid creation date',
-              context: 'PhotoQueryService.getPhotosInDateRange',
-              data: 'createDate: $createDate, assetId: ${asset.id}',
-            );
-            continue;
-          }
-
-          final localCreateDate = DateTime(
-            createDate.year,
-            createDate.month,
-            createDate.day,
-            createDate.hour,
-            createDate.minute,
-            createDate.second,
-          );
-
-          if (localCreateDate.isBefore(localStartDate) ||
-              localCreateDate.isAfter(localEndDate)) {
-            _logger.debug(
-              'Skipping photo outside date range after timezone adjustment',
-              context: 'PhotoQueryService.getPhotosInDateRange',
-              data:
-                  'createDate: $localCreateDate, range: $localStartDate - $localEndDate',
-            );
-            continue;
-          }
-
-          validAssets.add(asset);
-        } catch (e) {
-          _logger.warning(
-            'Error during photo validation',
-            context: 'PhotoQueryService.getPhotosInDateRange',
-            data: 'assetId: ${asset.id}, error: $e',
-          );
-          continue;
-        }
-      }
 
       _logger.info(
         'Photos retrieved',
@@ -224,14 +243,9 @@ class PhotoQueryService {
 
       return validAssets;
     } catch (e) {
-      final appError = ErrorHandler.handleError(
+      ErrorHandler.handleError(
         e,
         context: 'PhotoQueryService.getPhotosInDateRange',
-      );
-      _logger.error(
-        'Photo retrieval error',
-        context: 'PhotoQueryService.getPhotosInDateRange',
-        error: appError,
       );
       return [];
     }
@@ -243,18 +257,11 @@ class PhotoQueryService {
     required int offset,
     required int limit,
   }) async {
-    final bool hasPermission = await _requestPermission();
-    if (!hasPermission) {
-      _logger.info(
-        'No photo access permission',
-        context: 'PhotoQueryService.getPhotosForDate',
-      );
-      return [];
-    }
+    if (!await _ensurePermission('getPhotosForDate')) return [];
 
     try {
-      final DateTime startOfDay = DateTime(date.year, date.month, date.day);
-      final DateTime endOfDay = DateTime(
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = DateTime(
         date.year,
         date.month,
         date.day,
@@ -271,58 +278,19 @@ class PhotoQueryService {
             'Date: $date, offset: $offset, limit: $limit, range: $startOfDay - $endOfDay (local timezone)',
       );
 
-      final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: const [
-          OrderOption(type: OrderOptionType.createDate, asc: false),
-        ],
-        createTimeCond: DateTimeCond(min: startOfDay, max: endOfDay),
+      final filterOption = _buildDateFilter(
+        startDate: startOfDay,
+        endDate: endOfDay,
+      );
+      final assets = await _fetchFromAlbum(
+        filterOption,
+        offset: offset,
+        limit: limit,
+        caller: 'getPhotosForDate',
       );
 
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        filterOption: filterOption,
-      );
-
-      _logger.debug(
-        'Albums retrieved: ${albums.length}',
-        context: 'PhotoQueryService.getPhotosForDate',
-      );
-
-      if (albums.isEmpty) {
-        _logger.debug(
-          'No albums found for specified date',
-          context: 'PhotoQueryService.getPhotosForDate',
-        );
-        return [];
-      }
-
-      final AssetPathEntity album = albums.first;
-      final int totalCount = await album.assetCountAsync;
-      _logger.debug(
-        'Album info',
-        context: 'PhotoQueryService.getPhotosForDate',
-        data: 'Album name: ${album.name}, total photos: $totalCount',
-      );
-
-      if (offset >= totalCount) {
-        _logger.debug(
-          'Offset exceeds total count',
-          context: 'PhotoQueryService.getPhotosForDate',
-          data: 'Offset: $offset, total: $totalCount',
-        );
-        return [];
-      }
-
-      final int actualLimit = (offset + limit > totalCount)
-          ? totalCount - offset
-          : limit;
-
-      final List<AssetEntity> assets = await album.getAssetListRange(
-        start: offset,
-        end: offset + actualLimit,
-      );
-
-      final List<AssetEntity> validAssets = [];
+      // タイムゾーン検証
+      final validAssets = <AssetEntity>[];
       for (final asset in assets) {
         try {
           final createDate = asset.createDateTime;
@@ -358,19 +326,14 @@ class PhotoQueryService {
         'Retrieved photos for specified date',
         context: 'PhotoQueryService.getPhotosForDate',
         data:
-            'Count: ${validAssets.length} photos (original: ${assets.length}), range: $offset - ${offset + actualLimit}',
+            'Count: ${validAssets.length} photos (original: ${assets.length}), range: $offset - ${offset + limit}',
       );
 
       return validAssets;
     } catch (e) {
-      final appError = ErrorHandler.handleError(
+      ErrorHandler.handleError(
         e,
         context: 'PhotoQueryService.getPhotosForDate',
-      );
-      _logger.error(
-        'Photo retrieval error',
-        context: 'PhotoQueryService.getPhotosForDate',
-        error: appError,
       );
       return [];
     }
@@ -388,60 +351,25 @@ class PhotoQueryService {
   Future<List<AssetEntity>> getAllPhotos({
     int limit = AppConstants.maxPhotoLimit,
   }) async {
-    final bool hasPermission = await _requestPermission();
-    if (!hasPermission) {
-      _logger.info(
-        'No photo access permission',
-        context: 'PhotoQueryService.getAllPhotos',
-      );
-      return [];
-    }
+    if (!await _ensurePermission('getAllPhotos')) return [];
 
     try {
-      final FilterOptionGroup filterOption = FilterOptionGroup(
-        orders: [const OrderOption()],
-      );
-
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        filterOption: filterOption,
-      );
-
-      _logger.debug(
-        'Albums retrieved: ${albums.length}',
-        context: 'PhotoQueryService.getAllPhotos',
-      );
-
-      if (albums.isEmpty) {
-        _logger.debug(
-          'No albums found',
-          context: 'PhotoQueryService.getAllPhotos',
-        );
-        return [];
-      }
-
-      final AssetPathEntity album = albums.first;
-      final List<AssetEntity> assets = await album.getAssetListRange(
-        start: 0,
-        end: limit,
+      final filterOption = FilterOptionGroup(orders: [const OrderOption()]);
+      final assets = await _fetchFromAlbum(
+        filterOption,
+        offset: 0,
+        limit: limit,
+        caller: 'getAllPhotos',
       );
 
       _logger.info(
         'All photos retrieved',
         context: 'PhotoQueryService.getAllPhotos',
-        data: 'Album name: ${album.name}, count: ${assets.length} photos',
+        data: 'Count: ${assets.length} photos',
       );
       return assets;
     } catch (e) {
-      final appError = ErrorHandler.handleError(
-        e,
-        context: 'PhotoQueryService.getAllPhotos',
-      );
-      _logger.error(
-        'Photo retrieval error',
-        context: 'PhotoQueryService.getAllPhotos',
-        error: appError,
-      );
+      ErrorHandler.handleError(e, context: 'PhotoQueryService.getAllPhotos');
       return [];
     }
   }
@@ -453,80 +381,19 @@ class PhotoQueryService {
     int offset = 0,
     int limit = 30,
   }) async {
-    final bool hasPermission = await _requestPermission();
-    if (!hasPermission) {
-      _logger.info(
-        'No photo access permission',
-        context: 'PhotoQueryService.getPhotosEfficient',
-      );
-      return [];
-    }
+    if (!await _ensurePermission('getPhotosEfficient')) return [];
 
     try {
-      final FilterOptionGroup filterOption;
-      if (startDate != null || endDate != null) {
-        filterOption = FilterOptionGroup(
-          orders: const [
-            OrderOption(type: OrderOptionType.createDate, asc: false),
-          ],
-          createTimeCond: DateTimeCond(
-            min: startDate ?? DateTime(1970),
-            max: endDate ?? DateTime.now(),
-          ),
-        );
-      } else {
-        filterOption = FilterOptionGroup(
-          orders: const [
-            OrderOption(type: OrderOptionType.createDate, asc: false),
-          ],
-        );
-      }
-
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        filterOption: filterOption,
+      return await _getPhotosEfficientInternal(
+        startDate: startDate,
+        endDate: endDate,
+        offset: offset,
+        limit: limit,
       );
-
-      if (albums.isEmpty) {
-        _logger.debug(
-          'No albums found',
-          context: 'PhotoQueryService.getPhotosEfficient',
-        );
-        return [];
-      }
-
-      final AssetPathEntity album = albums.first;
-      final int totalCount = await album.assetCountAsync;
-
-      if (offset >= totalCount) {
-        return [];
-      }
-
-      final int actualLimit = (offset + limit > totalCount)
-          ? totalCount - offset
-          : limit;
-
-      final List<AssetEntity> assets = await album.getAssetListRange(
-        start: offset,
-        end: offset + actualLimit,
-      );
-
-      _logger.debug(
-        'Photos retrieved efficiently',
-        context: 'PhotoQueryService.getPhotosEfficient',
-        data: 'Count: ${assets.length}, offset: $offset, limit: $limit',
-      );
-
-      return assets;
     } catch (e) {
-      final appError = ErrorHandler.handleError(
+      ErrorHandler.handleError(
         e,
         context: 'PhotoQueryService.getPhotosEfficient',
-      );
-      _logger.error(
-        'Photo retrieval error',
-        context: 'PhotoQueryService.getPhotosEfficient',
-        error: appError,
       );
       return [];
     }
@@ -540,6 +407,13 @@ class PhotoQueryService {
     int limit = 30,
   }) async {
     return ResultHelper.tryExecuteAsync(() async {
+      final hasPermission = await _requestPermission();
+      if (!hasPermission) {
+        throw const PhotoAccessException(
+          'No photo access permission',
+          details: 'Permission denied',
+        );
+      }
       return await _getPhotosEfficientInternal(
         startDate: startDate,
         endDate: endDate,
@@ -549,67 +423,22 @@ class PhotoQueryService {
     }, context: 'PhotoQueryService.getPhotosEfficientResult');
   }
 
-  /// 内部実装（例外を伝播 — Result版から呼ばれる）
+  /// 内部実装（例外を伝播 — getPhotosEfficient / Result版 共通）
   Future<List<AssetEntity>> _getPhotosEfficientInternal({
     DateTime? startDate,
     DateTime? endDate,
     int offset = 0,
     int limit = 30,
   }) async {
-    final bool hasPermission = await _requestPermission();
-    if (!hasPermission) {
-      throw const PhotoAccessException(
-        'No photo access permission',
-        details: 'Permission denied',
-      );
-    }
-
-    final FilterOptionGroup filterOption;
-    if (startDate != null || endDate != null) {
-      filterOption = FilterOptionGroup(
-        orders: const [
-          OrderOption(type: OrderOptionType.createDate, asc: false),
-        ],
-        createTimeCond: DateTimeCond(
-          min: startDate ?? DateTime(1970),
-          max: endDate ?? DateTime.now(),
-        ),
-      );
-    } else {
-      filterOption = FilterOptionGroup(
-        orders: const [
-          OrderOption(type: OrderOptionType.createDate, asc: false),
-        ],
-      );
-    }
-
-    final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-      type: RequestType.image,
-      filterOption: filterOption,
+    final filterOption = _buildDateFilter(
+      startDate: startDate,
+      endDate: endDate,
     );
-
-    if (albums.isEmpty) {
-      _logger.debug(
-        'No albums found',
-        context: 'PhotoQueryService.getPhotosEfficient',
-      );
-      return [];
-    }
-
-    final AssetPathEntity album = albums.first;
-    final int totalCount = await album.assetCountAsync;
-
-    if (offset >= totalCount) {
-      return [];
-    }
-
-    final int actualLimit = (offset + limit > totalCount)
-        ? totalCount - offset
-        : limit;
-
-    final List<AssetEntity> assets = await album.getAssetListRange(
-      start: offset,
-      end: offset + actualLimit,
+    final assets = await _fetchFromAlbum(
+      filterOption,
+      offset: offset,
+      limit: limit,
+      caller: 'getPhotosEfficient',
     );
 
     _logger.debug(
