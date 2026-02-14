@@ -10,7 +10,7 @@ class ActiveFiltersDisplay extends StatelessWidget {
   final DiaryFilter filter;
   final VoidCallback onClear;
   final Function(String)? onRemoveTag;
-  final Function(String)? onRemoveTimeOfDay;
+  final Function(TimeOfDayPeriod)? onRemoveTimeOfDay;
   final VoidCallback? onRemoveDateRange;
   final VoidCallback? onRemoveSearch;
 
@@ -96,13 +96,13 @@ class ActiveFiltersDisplay extends StatelessWidget {
     }
 
     // 時間帯チップ
-    for (final time in filter.timeOfDay) {
+    for (final period in filter.timeOfDay) {
       chips.add(
         _buildChip(
           context: context,
-          label: _getLocalizedTimeLabel(context, time),
-          icon: _getTimeIcon(time),
-          onRemove: () => onRemoveTimeOfDay?.call(time),
+          label: _getLocalizedTimeLabel(context, period),
+          icon: _getTimeIcon(period),
+          onRemove: () => onRemoveTimeOfDay?.call(period),
         ),
       );
     }
@@ -147,33 +147,21 @@ class ActiveFiltersDisplay extends StatelessWidget {
     );
   }
 
-  String _getLocalizedTimeLabel(BuildContext context, String timeKey) {
-    switch (timeKey) {
-      case '朝':
-        return context.l10n.filterTimeSlotMorning;
-      case '昼':
-        return context.l10n.filterTimeSlotNoon;
-      case '夕方':
-        return context.l10n.filterTimeSlotEvening;
-      case '夜':
-        return context.l10n.filterTimeSlotNight;
-      default:
-        return timeKey;
-    }
+  String _getLocalizedTimeLabel(BuildContext context, TimeOfDayPeriod period) {
+    return switch (period) {
+      TimeOfDayPeriod.morning => context.l10n.filterTimeSlotMorning,
+      TimeOfDayPeriod.noon => context.l10n.filterTimeSlotNoon,
+      TimeOfDayPeriod.evening => context.l10n.filterTimeSlotEvening,
+      TimeOfDayPeriod.night => context.l10n.filterTimeSlotNight,
+    };
   }
 
-  IconData _getTimeIcon(String time) {
-    switch (time) {
-      case '朝':
-        return Icons.wb_sunny;
-      case '昼':
-        return Icons.light_mode;
-      case '夕方':
-        return Icons.wb_twilight;
-      case '夜':
-        return Icons.nights_stay;
-      default:
-        return Icons.access_time;
-    }
+  IconData _getTimeIcon(TimeOfDayPeriod period) {
+    return switch (period) {
+      TimeOfDayPeriod.morning => Icons.wb_sunny,
+      TimeOfDayPeriod.noon => Icons.light_mode,
+      TimeOfDayPeriod.evening => Icons.wb_twilight,
+      TimeOfDayPeriod.night => Icons.nights_stay,
+    };
   }
 }

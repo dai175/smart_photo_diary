@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
 import 'diary_entry.dart';
 
+/// 時間帯の区分
+enum TimeOfDayPeriod {
+  morning, // 5:00-11:59
+  noon, // 12:00-17:59
+  evening, // 18:00-21:59
+  night; // 22:00-4:59
+
+  /// 時刻から対応する時間帯を判定
+  static TimeOfDayPeriod fromHour(int hour) {
+    if (hour >= 5 && hour < 12) return morning;
+    if (hour >= 12 && hour < 18) return noon;
+    if (hour >= 18 && hour < 22) return evening;
+    return night;
+  }
+}
+
 class DiaryFilter {
   final DateTimeRange? dateRange;
   final Set<String> selectedTags;
-  final Set<String> timeOfDay;
+  final Set<TimeOfDayPeriod> timeOfDay;
   final String? searchText;
 
   const DiaryFilter({
@@ -55,20 +71,8 @@ class DiaryFilter {
 
     // 時間帯フィルタ
     if (timeOfDay.isNotEmpty) {
-      final hour = entry.date.hour;
-      String entryTimeOfDay;
-
-      if (hour >= 5 && hour < 12) {
-        entryTimeOfDay = '朝';
-      } else if (hour >= 12 && hour < 18) {
-        entryTimeOfDay = '昼';
-      } else if (hour >= 18 && hour < 22) {
-        entryTimeOfDay = '夕方';
-      } else {
-        entryTimeOfDay = '夜';
-      }
-
-      if (!timeOfDay.contains(entryTimeOfDay)) {
+      final entryPeriod = TimeOfDayPeriod.fromHour(entry.date.hour);
+      if (!timeOfDay.contains(entryPeriod)) {
         return false;
       }
     }
@@ -90,7 +94,7 @@ class DiaryFilter {
   DiaryFilter copyWith({
     DateTimeRange? dateRange,
     Set<String>? selectedTags,
-    Set<String>? timeOfDay,
+    Set<TimeOfDayPeriod>? timeOfDay,
     String? searchText,
     bool clearDateRange = false,
     bool clearSearchText = false,
@@ -112,35 +116,5 @@ class DiaryFilter {
     if (timeOfDay.isNotEmpty) count++;
     if (searchText != null && searchText!.isNotEmpty) count++;
     return count;
-  }
-
-  List<String> get activeFilterLabels {
-    final labels = <String>[];
-
-    if (dateRange != null) {
-      labels.add('期間指定');
-    }
-
-    if (selectedTags.isNotEmpty) {
-      if (selectedTags.length == 1) {
-        labels.add('#${selectedTags.first}');
-      } else {
-        labels.add('タグ(${selectedTags.length})');
-      }
-    }
-
-    if (timeOfDay.isNotEmpty) {
-      if (timeOfDay.length == 1) {
-        labels.add(timeOfDay.first);
-      } else {
-        labels.add('時間帯(${timeOfDay.length})');
-      }
-    }
-
-    if (searchText != null && searchText!.isNotEmpty) {
-      labels.add('検索: ${searchText!}');
-    }
-
-    return labels;
   }
 }

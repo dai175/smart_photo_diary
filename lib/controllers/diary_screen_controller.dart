@@ -138,9 +138,9 @@ class DiaryScreenController extends BaseErrorController {
     applyFilter(_currentFilter.copyWith(selectedTags: newTags));
   }
 
-  void removeTimeOfDayFilter(String time) {
-    final newTimeOfDay = Set<String>.from(_currentFilter.timeOfDay)
-      ..remove(time);
+  void removeTimeOfDayFilter(TimeOfDayPeriod period) {
+    final newTimeOfDay = Set<TimeOfDayPeriod>.from(_currentFilter.timeOfDay)
+      ..remove(period);
     applyFilter(_currentFilter.copyWith(timeOfDay: newTimeOfDay));
   }
 
