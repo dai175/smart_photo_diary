@@ -5,6 +5,7 @@ import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_permission_service_interface.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // Mock classes
@@ -60,7 +61,7 @@ void main() {
     });
 
     group('getPhotosForDate Error Scenarios', () {
-      test('should return empty list when permission is denied', () async {
+      test('should return Failure when permission is denied', () async {
         // Arrange
         final testDate = DateTime(2024, 7, 25);
 
@@ -72,8 +73,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
-        // 権限がない場合は空のリストが返される
+        expect(result.isFailure, isTrue);
+        // 権限がない場合はFailureが返される
       });
 
       test('should handle invalid offset gracefully', () async {
@@ -89,7 +90,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // 負のオフセットでもエラーにならない
       });
 
@@ -105,8 +106,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
-        // 0件のリミットでは空のリストが返される
+        expect(result.isFailure, isTrue);
+        // 権限なしでFailureが返される
       });
 
       test('should handle extremely large limit', () async {
@@ -122,7 +123,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // 大きなリミットでもエラーにならない
       });
     });
@@ -140,8 +141,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
-        // 遠い過去の日付では空のリストが返される
+        expect(result.isFailure, isTrue);
+        // 権限なしでFailureが返される
       });
 
       test('should handle far future dates', () async {
@@ -156,8 +157,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
-        // 未来の日付では空のリストが返される
+        expect(result.isFailure, isTrue);
+        // 権限なしでFailureが返される
       });
 
       test('should handle invalid date components', () async {
@@ -173,7 +174,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // 無効な日付でもエラーにならない（Dartが自動調整）
       });
     });
@@ -199,7 +200,7 @@ void main() {
         // Assert
         expect(results.length, equals(10));
         for (final result in results) {
-          expect(result, isA<List<AssetEntity>>());
+          expect(result, isA<Result<List<AssetEntity>>>());
         }
       });
 
@@ -208,7 +209,7 @@ void main() {
         final testDate = DateTime.now();
 
         // Act
-        final results = <List<AssetEntity>>[];
+        final results = <Result<List<AssetEntity>>>[];
         for (int i = 0; i < 20; i++) {
           final result = await photoService.getPhotosForDate(
             testDate,
@@ -221,7 +222,7 @@ void main() {
         // Assert
         expect(results.length, equals(20));
         for (final result in results) {
-          expect(result, isA<List<AssetEntity>>());
+          expect(result, isA<Result<List<AssetEntity>>>());
         }
       });
     });
@@ -245,8 +246,8 @@ void main() {
         );
 
         // Assert
-        expect(batch1, isA<List<AssetEntity>>());
-        expect(batch2, isA<List<AssetEntity>>());
+        expect(batch1, isA<Result<List<AssetEntity>>>());
+        expect(batch2, isA<Result<List<AssetEntity>>>());
 
         // オーバーラップしても正常に動作
       });
@@ -269,8 +270,8 @@ void main() {
         );
 
         // Assert
-        expect(batch1, isA<List<AssetEntity>>());
-        expect(batch2, isA<List<AssetEntity>>());
+        expect(batch1, isA<Result<List<AssetEntity>>>());
+        expect(batch2, isA<Result<List<AssetEntity>>>());
       });
     });
 
@@ -290,7 +291,7 @@ void main() {
             limit: 10,
           );
 
-          expect(result, isA<List<AssetEntity>>());
+          expect(result, isA<Result<List<AssetEntity>>>());
         }
 
         expect(attemptCount, equals(3));
@@ -317,8 +318,8 @@ void main() {
         );
 
         // Assert
-        expect(errorResult, isA<List<AssetEntity>>());
-        expect(normalResult, isA<List<AssetEntity>>());
+        expect(errorResult, isA<Result<List<AssetEntity>>>());
+        expect(normalResult, isA<Result<List<AssetEntity>>>());
         // エラー後も正常に動作
       });
     });
@@ -336,7 +337,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isFailure, isTrue);
       });
 
       test('should handle maximum date values', () async {
@@ -351,7 +352,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isFailure, isTrue);
       });
 
       test('should handle edge of day boundaries', () async {
@@ -360,24 +361,24 @@ void main() {
         final endOfDay = DateTime(2024, 7, 25, 23, 59, 59);
 
         // Act
-        final morningPhotos = await photoService.getPhotosForDate(
+        final morningResult = await photoService.getPhotosForDate(
           startOfDay,
           offset: 0,
           limit: 100,
         );
 
-        final nightPhotos = await photoService.getPhotosForDate(
+        final nightResult = await photoService.getPhotosForDate(
           endOfDay,
           offset: 0,
           limit: 100,
         );
 
         // Assert
-        expect(morningPhotos, isA<List<AssetEntity>>());
-        expect(nightPhotos, isA<List<AssetEntity>>());
+        expect(morningResult, isA<Result<List<AssetEntity>>>());
+        expect(nightResult, isA<Result<List<AssetEntity>>>());
 
-        // 同じ日付として扱われるべき
-        expect(morningPhotos.length, equals(nightPhotos.length));
+        // 同じ日付として扱われるべき（共にFailureでpermission denied）
+        expect(morningResult.isFailure, equals(nightResult.isFailure));
       });
     });
   });

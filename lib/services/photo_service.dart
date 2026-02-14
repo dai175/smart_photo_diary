@@ -69,11 +69,11 @@ class PhotoService implements IPhotoService {
   // =================================================================
 
   @override
-  Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) =>
+  Future<Result<List<AssetEntity>>> getTodayPhotos({int limit = 20}) =>
       _queryService.getTodayPhotos(limit: limit);
 
   @override
-  Future<List<AssetEntity>> getPhotosInDateRange({
+  Future<Result<List<AssetEntity>>> getPhotosInDateRange({
     required DateTime startDate,
     required DateTime endDate,
     int limit = 100,
@@ -84,32 +84,19 @@ class PhotoService implements IPhotoService {
   );
 
   @override
-  Future<List<AssetEntity>> getPhotosForDate(
+  Future<Result<List<AssetEntity>>> getPhotosForDate(
     DateTime date, {
     required int offset,
     required int limit,
   }) => _queryService.getPhotosForDate(date, offset: offset, limit: limit);
 
   @override
-  Future<List<AssetEntity>> getPhotosEfficient({
+  Future<Result<List<AssetEntity>>> getPhotosEfficient({
     DateTime? startDate,
     DateTime? endDate,
     int offset = 0,
     int limit = 30,
   }) => _queryService.getPhotosEfficient(
-    startDate: startDate,
-    endDate: endDate,
-    offset: offset,
-    limit: limit,
-  );
-
-  @override
-  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
-    DateTime? startDate,
-    DateTime? endDate,
-    int offset = 0,
-    int limit = 30,
-  }) => _queryService.getPhotosEfficientResult(
     startDate: startDate,
     endDate: endDate,
     offset: offset,

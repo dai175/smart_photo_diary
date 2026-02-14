@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -46,7 +47,7 @@ void main() {
               offset: offset,
               limit: limit,
             ),
-          ).thenAnswer((_) async => mockAssets);
+          ).thenAnswer((_) async => Success(mockAssets));
 
           // Act
           final result = await mockPhotoService.getPhotosForDate(
@@ -56,7 +57,8 @@ void main() {
           );
 
           // Assert
-          expect(result, equals(mockAssets));
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals(mockAssets));
           verify(
             () => mockPhotoService.getPhotosForDate(
               testDate,
@@ -79,7 +81,7 @@ void main() {
             offset: offset,
             limit: limit,
           ),
-        ).thenAnswer((_) async => []);
+        ).thenAnswer((_) async => const Success(<AssetEntity>[]));
 
         // Act
         final result = await mockPhotoService.getPhotosForDate(
@@ -89,7 +91,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
       });
 
       test('should handle pagination with offset', () async {
@@ -105,7 +108,7 @@ void main() {
             offset: offset,
             limit: limit,
           ),
-        ).thenAnswer((_) async => mockAssets);
+        ).thenAnswer((_) async => Success(mockAssets));
 
         // Act
         final result = await mockPhotoService.getPhotosForDate(
@@ -115,7 +118,8 @@ void main() {
         );
 
         // Assert
-        expect(result.length, equals(5));
+        expect(result.isSuccess, isTrue);
+        expect(result.value.length, equals(5));
         verify(
           () => mockPhotoService.getPhotosForDate(
             testDate,
@@ -162,14 +166,15 @@ void main() {
         final mockPhotos = [mockAssetEntity];
         when(
           () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => mockPhotos);
+        ).thenAnswer((_) async => Success(mockPhotos));
 
         // Act
         final result = await mockPhotoService.getTodayPhotos();
 
         // Assert
-        expect(result, equals(mockPhotos));
-        expect(result.length, equals(1));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockPhotos));
+        expect(result.value.length, equals(1));
         verify(() => mockPhotoService.getTodayPhotos(limit: 20)).called(1);
       });
 
@@ -178,14 +183,15 @@ void main() {
         final mockPhotos = List.generate(5, (index) => mockAssetEntity);
         when(
           () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => mockPhotos);
+        ).thenAnswer((_) async => Success(mockPhotos));
 
         // Act
         final result = await mockPhotoService.getTodayPhotos(limit: 5);
 
         // Assert
-        expect(result, equals(mockPhotos));
-        expect(result.length, equals(5));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockPhotos));
+        expect(result.value.length, equals(5));
         verify(() => mockPhotoService.getTodayPhotos(limit: 5)).called(1);
       });
 
@@ -201,7 +207,7 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => mockPhotos);
+        ).thenAnswer((_) async => Success(mockPhotos));
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -210,7 +216,8 @@ void main() {
         );
 
         // Assert
-        expect(result, equals(mockPhotos));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockPhotos));
         verify(
           () => mockPhotoService.getPhotosInDateRange(
             startDate: startDate,
@@ -232,7 +239,7 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => mockPhotos);
+        ).thenAnswer((_) async => Success(mockPhotos));
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -242,8 +249,9 @@ void main() {
         );
 
         // Assert
-        expect(result, equals(mockPhotos));
-        expect(result.length, equals(50));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockPhotos));
+        expect(result.value.length, equals(50));
       });
     });
 
@@ -370,13 +378,14 @@ void main() {
         // Arrange
         when(
           () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => []);
+        ).thenAnswer((_) async => const Success(<AssetEntity>[]));
 
         // Act
         final result = await mockPhotoService.getTodayPhotos();
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
       });
 
       test('should handle null photo data', () async {
@@ -416,7 +425,7 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => []);
+        ).thenAnswer((_) async => const Success(<AssetEntity>[]));
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -425,7 +434,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
       });
     });
 
@@ -434,13 +444,14 @@ void main() {
         // Arrange
         when(
           () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => []);
+        ).thenAnswer((_) async => const Success(<AssetEntity>[]));
 
         // Act
         final result = await mockPhotoService.getTodayPhotos(limit: 999999);
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
         verify(() => mockPhotoService.getTodayPhotos(limit: 999999)).called(1);
       });
 
@@ -448,13 +459,14 @@ void main() {
         // Arrange
         when(
           () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => []);
+        ).thenAnswer((_) async => const Success(<AssetEntity>[]));
 
         // Act
         final result = await mockPhotoService.getTodayPhotos(limit: 0);
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
       });
 
       test('should handle future dates', () async {
@@ -468,7 +480,7 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => []);
+        ).thenAnswer((_) async => const Success(<AssetEntity>[]));
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -477,7 +489,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
       });
 
       test('should handle same start and end dates', () async {
@@ -490,7 +503,7 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenAnswer((_) async => [mockAssetEntity]);
+        ).thenAnswer((_) async => Success([mockAssetEntity]));
 
         // Act
         final result = await mockPhotoService.getPhotosInDateRange(
@@ -499,7 +512,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isNotEmpty);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isNotEmpty);
       });
     });
 
@@ -524,7 +538,7 @@ void main() {
         // Arrange
         when(
           () => mockPhotoService.getTodayPhotos(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => [mockAssetEntity]);
+        ).thenAnswer((_) async => Success([mockAssetEntity]));
 
         // Act
         final futures = List.generate(
@@ -536,7 +550,8 @@ void main() {
         // Assert
         expect(results.length, equals(5));
         for (final result in results) {
-          expect(result, equals([mockAssetEntity]));
+          expect(result.isSuccess, isTrue);
+          expect(result.value, equals([mockAssetEntity]));
         }
         verify(() => mockPhotoService.getTodayPhotos(limit: 20)).called(5);
       });

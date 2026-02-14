@@ -40,14 +40,16 @@ class TagGenerator {
         locale: locale,
       );
 
-      final response = await _apiClient.sendTextRequest(
+      final responseResult = await _apiClient.sendTextRequest(
         prompt: prompt,
         temperature: AiConstants.tagGenerationTemperature,
         maxOutputTokens: 100,
       );
 
-      if (response != null) {
-        final tagText = _apiClient.extractTextFromResponse(response);
+      if (responseResult.isSuccess) {
+        final tagText = _apiClient.extractTextFromResponse(
+          responseResult.value,
+        );
 
         if (tagText != null && tagText.isNotEmpty) {
           // カンマ区切りでタグを分割

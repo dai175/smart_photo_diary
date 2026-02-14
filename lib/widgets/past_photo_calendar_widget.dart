@@ -102,11 +102,12 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
           : endOfMonth;
 
       // 月単位で写真を取得
-      final photos = await photoService.getPhotosInDateRange(
+      final photosResult = await photoService.getPhotosInDateRange(
         startDate: startOfMonth,
         endDate: adjustedEnd.add(const Duration(days: 1)),
         limit: 1000, // 月単位の写真数上限
       );
+      final photos = photosResult.getOrDefault([]);
 
       // 日付別に写真数をカウント
       final counts = <DateTime, int>{};
@@ -158,11 +159,12 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         999,
       );
 
-      final photos = await photoService.getPhotosInDateRange(
+      final photosResult = await photoService.getPhotosInDateRange(
         startDate: startOfDay,
         endDate: endOfDay,
         limit: 200, // 1日あたりの写真数上限
       );
+      final photos = photosResult.getOrDefault([]);
 
       // 写真をキャッシュ
       _photosByDate[startOfDay] = photos;

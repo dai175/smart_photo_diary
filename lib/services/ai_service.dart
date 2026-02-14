@@ -103,33 +103,25 @@ class AiService implements IAiService {
     String? prompt,
     Locale? locale,
   }) async {
-    try {
-      final checkResult = await _checkAiGenerationAllowed();
-      if (checkResult.isFailure) return Failure(checkResult.error);
+    final checkResult = await _checkAiGenerationAllowed();
+    if (checkResult.isFailure) return Failure(checkResult.error);
 
-      final online = await isOnline();
-      final result = await _diaryGenerator.generateFromImage(
-        imageData: imageData,
-        date: date,
-        location: location,
-        photoTimes: photoTimes,
-        prompt: prompt,
-        isOnline: online,
-        locale: locale ?? const Locale('ja'),
-      );
+    final online = await isOnline();
+    final result = await _diaryGenerator.generateFromImage(
+      imageData: imageData,
+      date: date,
+      location: location,
+      photoTimes: photoTimes,
+      prompt: prompt,
+      isOnline: online,
+      locale: locale ?? const Locale('ja'),
+    );
 
+    if (result.isSuccess) {
       await _recordAiUsage();
-
-      return Success(result);
-    } catch (e) {
-      return Failure(
-        AiProcessingException(
-          'Error occurred during AI diary generation',
-          details: e.toString(),
-          originalError: e,
-        ),
-      );
     }
+
+    return result;
   }
 
   @override
@@ -140,32 +132,24 @@ class AiService implements IAiService {
     Function(int current, int total)? onProgress,
     Locale? locale,
   }) async {
-    try {
-      final checkResult = await _checkAiGenerationAllowed();
-      if (checkResult.isFailure) return Failure(checkResult.error);
+    final checkResult = await _checkAiGenerationAllowed();
+    if (checkResult.isFailure) return Failure(checkResult.error);
 
-      final online = await isOnline();
-      final result = await _diaryGenerator.generateFromMultipleImages(
-        imagesWithTimes: imagesWithTimes,
-        location: location,
-        prompt: prompt,
-        onProgress: onProgress,
-        isOnline: online,
-        locale: locale ?? const Locale('ja'),
-      );
+    final online = await isOnline();
+    final result = await _diaryGenerator.generateFromMultipleImages(
+      imagesWithTimes: imagesWithTimes,
+      location: location,
+      prompt: prompt,
+      onProgress: onProgress,
+      isOnline: online,
+      locale: locale ?? const Locale('ja'),
+    );
 
+    if (result.isSuccess) {
       await _recordAiUsage();
-
-      return Success(result);
-    } catch (e) {
-      return Failure(
-        AiProcessingException(
-          'Error occurred during AI diary generation',
-          details: e.toString(),
-          originalError: e,
-        ),
-      );
     }
+
+    return result;
   }
 
   @override

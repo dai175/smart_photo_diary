@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'ai_service_interface.dart';
 import 'gemini_api_client.dart';
 import '../interfaces/logging_service_interface.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
 import 'diary_locale_utils.dart';
 import 'diary_time_segment.dart';
@@ -18,7 +20,7 @@ class DiaryGenerator {
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// 画像から直接日記を生成
-  Future<DiaryGenerationResult> generateFromImage({
+  Future<Result<DiaryGenerationResult>> generateFromImage({
     required Uint8List imageData,
     required DateTime date,
     String? location,
@@ -28,10 +30,12 @@ class DiaryGenerator {
     required Locale locale,
   }) async {
     if (!isOnline) {
-      throw Exception(
-        DiaryLocaleUtils.isJapanese(locale)
-            ? 'オフライン状態では日記を生成できません'
-            : 'Cannot generate a diary while offline',
+      return Failure(
+        AiProcessingException(
+          DiaryLocaleUtils.isJapanese(locale)
+              ? 'オフライン状態では日記を生成できません'
+              : 'Cannot generate a diary while offline',
+        ),
       );
     }
 
@@ -68,38 +72,45 @@ class DiaryGenerator {
         },
       );
 
-      final response = await _apiClient.sendVisionRequest(
+      final responseResult = await _apiClient.sendVisionRequest(
         prompt: finalPrompt,
         imageData: imageData,
         maxOutputTokens: maxTokens, // 生成ロジック最適化: プロンプト種別に応じた動的調整
       );
 
-      if (response != null) {
-        final content = _apiClient.extractTextFromResponse(response);
-        if (content != null) {
-          return _parseGeneratedDiary(content, locale);
-        }
+      switch (responseResult) {
+        case Success(data: final response):
+          final content = _apiClient.extractTextFromResponse(response);
+          if (content != null) {
+            return Success(_parseGeneratedDiary(content, locale));
+          }
+          return Failure(
+            AiProcessingException(
+              DiaryLocaleUtils.isJapanese(locale)
+                  ? 'AI日記生成に失敗しました: APIレスポンスが不正です'
+                  : 'Failed to generate the diary: invalid API response',
+            ),
+          );
+        case Failure(exception: final e):
+          return Failure(e);
       }
-
-      // APIエラーの場合は例外を再スロー
-      throw Exception(
-        DiaryLocaleUtils.isJapanese(locale)
-            ? 'AI日記生成に失敗しました: APIレスポンスが不正です'
-            : 'Failed to generate the diary: invalid API response',
-      );
     } catch (e) {
       _logger.error(
         'Image-based diary generation error',
         context: 'generateFromImage',
         error: e,
       );
-      // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
-      rethrow;
+      return Failure(
+        AiProcessingException(
+          'Image-based diary generation failed',
+          originalError: e,
+        ),
+      );
     }
   }
 
   /// 複数画像から順次日記を生成
-  Future<DiaryGenerationResult> generateFromMultipleImages({
+  Future<Result<DiaryGenerationResult>> generateFromMultipleImages({
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
     String? prompt,
@@ -108,18 +119,22 @@ class DiaryGenerator {
     required Locale locale,
   }) async {
     if (imagesWithTimes.isEmpty) {
-      throw Exception(
-        DiaryLocaleUtils.isJapanese(locale)
-            ? '画像が提供されていません'
-            : 'No images were provided',
+      return Failure(
+        AiProcessingException(
+          DiaryLocaleUtils.isJapanese(locale)
+              ? '画像が提供されていません'
+              : 'No images were provided',
+        ),
       );
     }
 
     if (!isOnline) {
-      throw Exception(
-        DiaryLocaleUtils.isJapanese(locale)
-            ? 'オフライン状態では日記を生成できません'
-            : 'Cannot generate a diary while offline',
+      return Failure(
+        AiProcessingException(
+          DiaryLocaleUtils.isJapanese(locale)
+              ? 'オフライン状態では日記を生成できません'
+              : 'Cannot generate a diary while offline',
+        ),
       );
     }
 
@@ -168,8 +183,12 @@ class DiaryGenerator {
         context: 'generateFromMultipleImages',
         error: e,
       );
-      // エラーが発生した場合は例外を再スローして、上位層でクレジット消費を防ぐ
-      rethrow;
+      return Failure(
+        AiProcessingException(
+          'Multi-image diary generation failed',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -285,29 +304,24 @@ Time: $timeLabel
 $locationLine
 Describe the situation and mood you infer from the image, including any emotional cues you notice.''';
 
-    try {
-      final response = await _apiClient.sendVisionRequest(
-        prompt: prompt,
-        imageData: imageData,
-        maxOutputTokens: 500,
-      );
+    final responseResult = await _apiClient.sendVisionRequest(
+      prompt: prompt,
+      imageData: imageData,
+      maxOutputTokens: 500,
+    );
 
-      if (response != null) {
-        final content = _apiClient.extractTextFromResponse(response);
-        if (content != null) {
-          return '$timeLabel: ${content.trim()}';
-        }
+    if (responseResult.isSuccess) {
+      final content = _apiClient.extractTextFromResponse(responseResult.value);
+      if (content != null) {
+        return '$timeLabel: ${content.trim()}';
       }
-
-      return '$timeLabel: ${DiaryLocaleUtils.analysisFailureMessage(locale)}';
-    } catch (e) {
-      _logger.error('Image analysis error', context: '_analyzeImage', error: e);
-      return '$timeLabel: ${DiaryLocaleUtils.analysisFailureMessage(locale)}';
     }
+
+    return '$timeLabel: ${DiaryLocaleUtils.analysisFailureMessage(locale)}';
   }
 
   /// 複数の分析結果を統合して日記を生成
-  Future<DiaryGenerationResult> _generateDiaryFromAnalyses(
+  Future<Result<DiaryGenerationResult>> _generateDiaryFromAnalyses(
     List<String> photoAnalyses,
     List<DateTime> photoTimes,
     String? location,
@@ -315,10 +329,12 @@ Describe the situation and mood you infer from the image, including any emotiona
     Locale locale,
   ) async {
     if (photoAnalyses.isEmpty) {
-      throw Exception(
-        DiaryLocaleUtils.isJapanese(locale)
-            ? '写真の分析結果がありません'
-            : 'No analysis results are available',
+      return Failure(
+        AiProcessingException(
+          DiaryLocaleUtils.isJapanese(locale)
+              ? '写真の分析結果がありません'
+              : 'No analysis results are available',
+        ),
       );
     }
 
@@ -354,31 +370,26 @@ Describe the situation and mood you infer from the image, including any emotiona
       },
     );
 
-    try {
-      final response = await _apiClient.sendTextRequest(
-        prompt: prompt,
-        maxOutputTokens: multiImageMaxTokens,
-      );
+    final responseResult = await _apiClient.sendTextRequest(
+      prompt: prompt,
+      maxOutputTokens: multiImageMaxTokens,
+    );
 
-      if (response != null) {
+    switch (responseResult) {
+      case Success(data: final response):
         final content = _apiClient.extractTextFromResponse(response);
         if (content != null) {
-          return _parseGeneratedDiary(content, locale);
+          return Success(_parseGeneratedDiary(content, locale));
         }
-      }
-
-      throw Exception(
-        DiaryLocaleUtils.isJapanese(locale)
-            ? 'AI日記生成に失敗しました: APIレスポンスが不正です'
-            : 'Failed to generate the diary: invalid API response',
-      );
-    } catch (e) {
-      _logger.error(
-        'Integrated diary generation error',
-        context: '_generateDiaryFromAnalyses',
-        error: e,
-      );
-      rethrow;
+        return Failure(
+          AiProcessingException(
+            DiaryLocaleUtils.isJapanese(locale)
+                ? 'AI日記生成に失敗しました: APIレスポンスが不正です'
+                : 'Failed to generate the diary: invalid API response',
+          ),
+        );
+      case Failure(exception: final e):
+        return Failure(e);
     }
   }
 }

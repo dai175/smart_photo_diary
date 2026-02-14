@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
+import '../../core/result/result.dart';
 import '../interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 
@@ -41,7 +42,7 @@ class GeminiApiClient {
   }
 
   /// テキストベースのAPIリクエストを送信
-  Future<Map<String, dynamic>?> sendTextRequest({
+  Future<Result<Map<String, dynamic>>> sendTextRequest({
     required String prompt,
     double? temperature,
     int? maxOutputTokens,
@@ -53,7 +54,9 @@ class GeminiApiClient {
         context: 'sendTextRequest',
       );
       EnvironmentConfig.printDebugInfo();
-      return null;
+      return const Failure(
+        AiProcessingException('No valid API key configured'),
+      );
     }
 
     try {
@@ -88,28 +91,35 @@ class GeminiApiClient {
           context: 'sendTextRequest',
           data: _summarizeResponse(data),
         );
-        return data;
+        return Success(data as Map<String, dynamic>);
       } else {
         _logger.error(
           'Gemini API error: ${response.statusCode}',
           context: 'sendTextRequest',
         );
-        return null;
+        return Failure(
+          AiProcessingException(
+            'Gemini API error: ${response.statusCode}',
+            details: response.body,
+          ),
+        );
       }
-    } on NetworkException {
-      rethrow;
+    } on NetworkException catch (e) {
+      return Failure(e);
     } catch (e) {
       _logger.error(
         'Gemini API request error',
         context: 'sendTextRequest',
         error: e,
       );
-      return null;
+      return Failure(
+        AiProcessingException('Gemini API request failed', originalError: e),
+      );
     }
   }
 
   /// 画像付きのAPIリクエストを送信（Vision API）
-  Future<Map<String, dynamic>?> sendVisionRequest({
+  Future<Result<Map<String, dynamic>>> sendVisionRequest({
     required String prompt,
     required Uint8List imageData,
     double? temperature,
@@ -122,7 +132,9 @@ class GeminiApiClient {
         context: 'sendVisionRequest',
       );
       EnvironmentConfig.printDebugInfo();
-      return null;
+      return const Failure(
+        AiProcessingException('No valid API key configured'),
+      );
     }
 
     try {
@@ -163,23 +175,33 @@ class GeminiApiClient {
           context: 'sendVisionRequest',
           data: _summarizeResponse(data),
         );
-        return data;
+        return Success(data as Map<String, dynamic>);
       } else {
         _logger.error(
           'Gemini Vision API error: ${response.statusCode}',
           context: 'sendVisionRequest',
         );
-        return null;
+        return Failure(
+          AiProcessingException(
+            'Gemini Vision API error: ${response.statusCode}',
+            details: response.body,
+          ),
+        );
       }
-    } on NetworkException {
-      rethrow;
+    } on NetworkException catch (e) {
+      return Failure(e);
     } catch (e) {
       _logger.error(
         'Gemini Vision API request error',
         context: 'sendVisionRequest',
         error: e,
       );
-      return null;
+      return Failure(
+        AiProcessingException(
+          'Gemini Vision API request failed',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -278,19 +300,14 @@ class GeminiApiClient {
       return false;
     }
 
-    try {
-      final response = await sendTextRequest(prompt: 'Hello, this is a test.');
-      final isValid = response != null;
-      _logger.info(
-        'API key test',
-        context: 'testApiKey',
-        data: 'Result: ${isValid ? 'valid' : 'invalid'}',
-      );
-      return isValid;
-    } catch (e) {
-      _logger.error('API key test error', context: 'testApiKey', error: e);
-      return false;
-    }
+    final result = await sendTextRequest(prompt: 'Hello, this is a test.');
+    final isValid = result.isSuccess;
+    _logger.info(
+      'API key test',
+      context: 'testApiKey',
+      data: 'Result: ${isValid ? 'valid' : 'invalid'}',
+    );
+    return isValid;
   }
 
   /// APIレスポンスのサマリーを生成（ログ出力用）
