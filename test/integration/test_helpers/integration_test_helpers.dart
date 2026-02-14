@@ -159,13 +159,15 @@ class IntegrationTestHelpers {
     when(
       () => _mockPhotoService.requestPermission(),
     ).thenAnswer((_) async => true);
-    when(() => _mockPhotoService.getTodayPhotos()).thenAnswer((_) async => []);
+    when(
+      () => _mockPhotoService.getTodayPhotos(),
+    ).thenAnswer((_) async => const Success([]));
     when(
       () => _mockPhotoService.getPhotosInDateRange(
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
       ),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success([]));
     when(
       () => _mockPhotoService.getPhotoData(any()),
     ).thenAnswer((_) async => _createMockImageData().toList());
@@ -262,7 +264,7 @@ class IntegrationTestHelpers {
   static void setupMockTodayPhotos(List<AssetEntity> assets) {
     when(
       () => _mockPhotoService.getTodayPhotos(),
-    ).thenAnswer((_) async => assets);
+    ).thenAnswer((_) async => Success(assets));
   }
 
   /// Setup mock photo permission

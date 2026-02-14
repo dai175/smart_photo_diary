@@ -276,10 +276,9 @@ class PhotoSelectionController extends ChangeNotifier {
   /// リソースのクリーンアップ
   @override
   void dispose() {
-    // 大量の写真リストをクリア
-    _photoAssets.clear();
-    _selected.clear();
-    _usedPhotoIds.clear();
+    _photoAssets = [];
+    _selected = [];
+    _usedPhotoIds = {};
     super.dispose();
   }
 }

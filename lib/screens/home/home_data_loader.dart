@@ -36,11 +36,12 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
       final allowedDays = await _getAllowedDays();
 
-      final photos = await photoService.getPhotosInDateRange(
+      final photosResult = await photoService.getPhotosInDateRange(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         limit: _HomeScreenState._photosPerPage,
       );
+      final photos = photosResult.getOrDefault([]);
 
       if (!mounted) return;
 
@@ -123,12 +124,13 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
       final requested = _HomeScreenState._photosPerPage * preloadPages;
 
-      final newPhotos = await photoService.getPhotosEfficient(
+      final newPhotosResult = await photoService.getPhotosEfficient(
         startDate: todayStart.subtract(Duration(days: allowedDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         offset: _self._currentPhotoOffset,
         limit: requested,
       );
+      final newPhotos = newPhotosResult.getOrDefault([]);
 
       if (!mounted) return;
 

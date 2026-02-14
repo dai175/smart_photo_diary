@@ -2,9 +2,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/errors/app_exceptions.dart';
-import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
-import '../core/result/result_extensions.dart';
 
 /// 写真のクエリ・日付フィルタリング・ページネーションを担当する内部サービス
 class PhotoQueryService {
@@ -144,8 +142,10 @@ class PhotoQueryService {
   // =================================================================
 
   /// 今日撮影された写真を取得する
-  Future<List<AssetEntity>> getTodayPhotos({int limit = 20}) async {
-    if (!await _ensurePermission('getTodayPhotos')) return [];
+  Future<Result<List<AssetEntity>>> getTodayPhotos({int limit = 20}) async {
+    if (!await _ensurePermission('getTodayPhotos')) {
+      return const Failure(PhotoAccessException('No photo access permission'));
+    }
 
     try {
       final now = DateTime.now();
@@ -176,20 +176,28 @@ class PhotoQueryService {
         data:
             'Count: ${validAssets.length} photos (original: ${assets.length})',
       );
-      return validAssets;
+      return Success(validAssets);
     } catch (e) {
-      ErrorHandler.handleError(e, context: 'PhotoQueryService.getTodayPhotos');
-      return [];
+      return Failure(
+        e is AppException
+            ? e
+            : PhotoAccessException(
+                'Failed to get today photos',
+                originalError: e,
+              ),
+      );
     }
   }
 
   /// 指定された日付範囲の写真を取得する
-  Future<List<AssetEntity>> getPhotosInDateRange({
+  Future<Result<List<AssetEntity>>> getPhotosInDateRange({
     required DateTime startDate,
     required DateTime endDate,
     int limit = 100,
   }) async {
-    if (!await _ensurePermission('getPhotosInDateRange')) return [];
+    if (!await _ensurePermission('getPhotosInDateRange')) {
+      return const Failure(PhotoAccessException('No photo access permission'));
+    }
 
     try {
       final now = DateTime.now();
@@ -199,7 +207,7 @@ class PhotoQueryService {
           context: 'PhotoQueryService.getPhotosInDateRange',
           data: 'startDate: $startDate',
         );
-        return [];
+        return const Success([]);
       }
 
       final localStartDate = DateTime(
@@ -249,23 +257,28 @@ class PhotoQueryService {
             '${validAssets.length} valid out of ${assets.length} total photos',
       );
 
-      return validAssets;
+      return Success(validAssets);
     } catch (e) {
-      ErrorHandler.handleError(
-        e,
-        context: 'PhotoQueryService.getPhotosInDateRange',
+      return Failure(
+        e is AppException
+            ? e
+            : PhotoAccessException(
+                'Failed to get photos in date range',
+                originalError: e,
+              ),
       );
-      return [];
     }
   }
 
   /// 指定された日付の写真を取得する（ページネーション対応）
-  Future<List<AssetEntity>> getPhotosForDate(
+  Future<Result<List<AssetEntity>>> getPhotosForDate(
     DateTime date, {
     required int offset,
     required int limit,
   }) async {
-    if (!await _ensurePermission('getPhotosForDate')) return [];
+    if (!await _ensurePermission('getPhotosForDate')) {
+      return const Failure(PhotoAccessException('No photo access permission'));
+    }
 
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
@@ -311,18 +324,21 @@ class PhotoQueryService {
             'Count: ${validAssets.length} photos (original: ${assets.length}), range: $offset - ${offset + limit}',
       );
 
-      return validAssets;
+      return Success(validAssets);
     } catch (e) {
-      ErrorHandler.handleError(
-        e,
-        context: 'PhotoQueryService.getPhotosForDate',
+      return Failure(
+        e is AppException
+            ? e
+            : PhotoAccessException(
+                'Failed to get photos for date',
+                originalError: e,
+              ),
       );
-      return [];
     }
   }
 
   /// 特定の日付の写真を取得する（後方互換性のため保持）
-  Future<List<AssetEntity>> getPhotosByDate(
+  Future<Result<List<AssetEntity>>> getPhotosByDate(
     DateTime date, {
     int limit = AppConstants.defaultPhotoLimit,
   }) async {
@@ -330,10 +346,12 @@ class PhotoQueryService {
   }
 
   /// すべての写真を取得する（日付フィルターなし）
-  Future<List<AssetEntity>> getAllPhotos({
+  Future<Result<List<AssetEntity>>> getAllPhotos({
     int limit = AppConstants.maxPhotoLimit,
   }) async {
-    if (!await _ensurePermission('getAllPhotos')) return [];
+    if (!await _ensurePermission('getAllPhotos')) {
+      return const Failure(PhotoAccessException('No photo access permission'));
+    }
 
     try {
       final filterOption = _buildDateFilter();
@@ -349,60 +367,48 @@ class PhotoQueryService {
         context: 'PhotoQueryService.getAllPhotos',
         data: 'Count: ${assets.length} photos',
       );
-      return assets;
+      return Success(assets);
     } catch (e) {
-      ErrorHandler.handleError(e, context: 'PhotoQueryService.getAllPhotos');
-      return [];
+      return Failure(
+        e is AppException
+            ? e
+            : PhotoAccessException(
+                'Failed to get all photos',
+                originalError: e,
+              ),
+      );
     }
   }
 
   /// 効率的な写真取得（ページネーション対応）
-  Future<List<AssetEntity>> getPhotosEfficient({
+  Future<Result<List<AssetEntity>>> getPhotosEfficient({
     DateTime? startDate,
     DateTime? endDate,
     int offset = 0,
     int limit = 30,
   }) async {
-    if (!await _ensurePermission('getPhotosEfficient')) return [];
+    if (!await _ensurePermission('getPhotosEfficient')) {
+      return const Failure(PhotoAccessException('No photo access permission'));
+    }
 
     try {
-      return await _getPhotosEfficientInternal(
+      final assets = await _getPhotosEfficientInternal(
         startDate: startDate,
         endDate: endDate,
         offset: offset,
         limit: limit,
       );
+      return Success(assets);
     } catch (e) {
-      ErrorHandler.handleError(
-        e,
-        context: 'PhotoQueryService.getPhotosEfficient',
+      return Failure(
+        e is AppException
+            ? e
+            : PhotoAccessException(
+                'Failed to get photos efficiently',
+                originalError: e,
+              ),
       );
-      return [];
     }
-  }
-
-  /// 効率的な写真取得（Result版 — エラーを Failure として伝播）
-  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
-    DateTime? startDate,
-    DateTime? endDate,
-    int offset = 0,
-    int limit = 30,
-  }) async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final hasPermission = await _requestPermission();
-      if (!hasPermission) {
-        throw const PhotoAccessException(
-          'No photo access permission',
-          details: 'Permission denied',
-        );
-      }
-      return await _getPhotosEfficientInternal(
-        startDate: startDate,
-        endDate: endDate,
-        offset: offset,
-        limit: limit,
-      );
-    }, context: 'PhotoQueryService.getPhotosEfficientResult');
   }
 
   /// 内部実装（例外を伝播 — getPhotosEfficient / Result版 共通）

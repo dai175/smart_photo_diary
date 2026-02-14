@@ -7,6 +7,7 @@ import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_access_control_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 
 // モック
 class MockPhotoService extends Mock implements IPhotoService {}
@@ -47,7 +48,7 @@ void main() {
           () => mockAccessControlService.getAccessibleDateForPlan(plan),
         ).thenReturn(yesterday);
         when(
-          () => mockPhotoService.getPhotosEfficientResult(
+          () => mockPhotoService.getPhotosEfficient(
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
@@ -80,7 +81,7 @@ void main() {
           () => mockAccessControlService.getAccessibleDateForPlan(plan),
         ).thenReturn(oneYearAgo);
         when(
-          () => mockPhotoService.getPhotosEfficientResult(
+          () => mockPhotoService.getPhotosEfficient(
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
@@ -115,7 +116,9 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenThrow(Exception('写真読み込みエラー'));
+        ).thenAnswer(
+          (_) async => const Failure(PhotoAccessException('写真読み込みエラー')),
+        );
 
         // Act
         await notifier.loadInitialPhotos(plan);
@@ -140,7 +143,7 @@ void main() {
           () => mockAccessControlService.getAccessibleDateForPlan(plan),
         ).thenReturn(oneYearAgo);
         when(
-          () => mockPhotoService.getPhotosEfficientResult(
+          () => mockPhotoService.getPhotosEfficient(
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
@@ -157,7 +160,7 @@ void main() {
 
         // 追加読み込みの設定
         when(
-          () => mockPhotoService.getPhotosEfficientResult(
+          () => mockPhotoService.getPhotosEfficient(
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
@@ -187,7 +190,7 @@ void main() {
         final photos = List.generate(20, (index) => MockAssetEntity());
 
         when(
-          () => mockPhotoService.getPhotosEfficientResult(
+          () => mockPhotoService.getPhotosEfficient(
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
@@ -275,7 +278,7 @@ void main() {
             endDate: any(named: 'endDate'),
             limit: any(named: 'limit'),
           ),
-        ).thenThrow(Exception('エラー'));
+        ).thenAnswer((_) async => const Failure(PhotoAccessException('エラー')));
 
         await notifier.loadInitialPhotos(plan);
         expect(notifier.state.errorMessage, isNotNull);

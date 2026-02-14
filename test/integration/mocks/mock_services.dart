@@ -182,14 +182,21 @@ class TestServiceSetup {
     when(() => mock.requestPermission()).thenAnswer((_) async => true);
     when(
       () => mock.getTodayPhotos(limit: any(named: 'limit')),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
+    when(
+      () => mock.getPhotosForDate(
+        any(),
+        offset: any(named: 'offset'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
     when(
       () => mock.getPhotosInDateRange(
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
         limit: any(named: 'limit'),
       ),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
     when(
       () => mock.getThumbnail(
         any(),
@@ -214,7 +221,7 @@ class TestServiceSetup {
         offset: any(named: 'offset'),
         limit: any(named: 'limit'),
       ),
-    ).thenAnswer((_) async => []);
+    ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
     when(
       () => mock.isPermissionPermanentlyDenied(),
     ).thenAnswer((_) async => false);

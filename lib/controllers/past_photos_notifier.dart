@@ -88,7 +88,7 @@ class PastPhotosNotifier extends ChangeNotifier {
       );
 
       // 写真を取得（Result版）
-      final photosResult = await _photoService.getPhotosEfficientResult(
+      final photosResult = await _photoService.getPhotosEfficient(
         startDate: startDate,
         endDate: endDate,
         limit: _state.photosPerPage,
@@ -158,7 +158,7 @@ class PastPhotosNotifier extends ChangeNotifier {
       final today = DateTime(now.year, now.month, now.day);
 
       // 追加の写真を取得（Result版）
-      final morePhotosResult = await _photoService.getPhotosEfficientResult(
+      final morePhotosResult = await _photoService.getPhotosEfficient(
         startDate: accessibleDate,
         endDate: today,
         limit: _state.photosPerPage,
@@ -229,7 +229,7 @@ class PastPhotosNotifier extends ChangeNotifier {
         999,
       );
 
-      final photosResult = await _photoService.getPhotosEfficientResult(
+      final photosResult = await _photoService.getPhotosEfficient(
         startDate: startOfDay,
         endDate: endOfDay,
         limit: 200, // 1日分なので多めに取得

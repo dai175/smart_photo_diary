@@ -28,13 +28,17 @@ abstract class IPhotoService {
   /// 日付範囲によるアクセス制限（プレミアム: 365日）は
   /// [IPhotoAccessControlService] の責務であり、このメソッドでは適用されない。
   ///
-  /// 戻り値: [AssetEntity] リスト。権限なし・エラー時は空リスト。
-  Future<List<AssetEntity>> getTodayPhotos({int limit = 20});
+  /// Returns:
+  /// - Success: [AssetEntity] リスト
+  /// - Failure: [PhotoAccessException] 権限なし・写真取得失敗時
+  Future<Result<List<AssetEntity>>> getTodayPhotos({int limit = 20});
 
   /// 指定された日付範囲の写真を取得する
   ///
-  /// 戻り値: [AssetEntity] リスト。権限なし・エラー時は空リスト。
-  Future<List<AssetEntity>> getPhotosInDateRange({
+  /// Returns:
+  /// - Success: [AssetEntity] リスト
+  /// - Failure: [PhotoAccessException] 権限なし・写真取得失敗時
+  Future<Result<List<AssetEntity>>> getPhotosInDateRange({
     required DateTime startDate,
     required DateTime endDate,
     int limit = 100,
@@ -42,8 +46,10 @@ abstract class IPhotoService {
 
   /// 指定された日付の写真を取得する
   ///
-  /// 戻り値: [AssetEntity] リスト。権限なし・エラー時は空リスト。
-  Future<List<AssetEntity>> getPhotosForDate(
+  /// Returns:
+  /// - Success: [AssetEntity] リスト
+  /// - Failure: [PhotoAccessException] 権限なし・写真取得失敗時
+  Future<Result<List<AssetEntity>>> getPhotosForDate(
     DateTime date, {
     required int offset,
     required int limit,
@@ -87,8 +93,10 @@ abstract class IPhotoService {
 
   /// 効率的な写真取得（ページネーション対応）
   ///
-  /// 戻り値: [AssetEntity] リスト。権限なし・エラー時は空リスト。
-  Future<List<AssetEntity>> getPhotosEfficient({
+  /// Returns:
+  /// - Success: [AssetEntity] リスト
+  /// - Failure: [PhotoAccessException] 権限なし・写真取得失敗時
+  Future<Result<List<AssetEntity>>> getPhotosEfficient({
     DateTime? startDate,
     DateTime? endDate,
     int offset = 0,
@@ -103,22 +111,6 @@ abstract class IPhotoService {
   /// - Success: 取得成功した [AssetEntity] リスト（一部失敗時は部分リスト）
   /// - Failure: [PhotoAccessException] 全体的な処理失敗時
   Future<Result<List<AssetEntity>>> getAssetsByIds(List<String> photoIds);
-
-  // ========================================
-  // Result<T>パターン版のメソッド
-  // ========================================
-
-  /// 効率的な写真取得（Result版）
-  ///
-  /// Returns:
-  /// - Success: [AssetEntity] リスト
-  /// - Failure: [PhotoAccessException] 権限なし・写真取得失敗時
-  Future<Result<List<AssetEntity>>> getPhotosEfficientResult({
-    DateTime? startDate,
-    DateTime? endDate,
-    int offset = 0,
-    int limit = 30,
-  });
 
   // ========================================
   // カメラ撮影機能

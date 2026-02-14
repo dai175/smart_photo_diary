@@ -3,6 +3,7 @@ import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_permission_service_interface.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:mocktail/mocktail.dart';
@@ -61,7 +62,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // 実際の写真が存在するかはデバイスに依存するため、型チェックのみ
       });
 
@@ -84,13 +85,15 @@ void main() {
         );
 
         // Assert
-        expect(firstBatch, isA<List<AssetEntity>>());
-        expect(secondBatch, isA<List<AssetEntity>>());
+        expect(firstBatch, isA<Result<List<AssetEntity>>>());
+        expect(secondBatch, isA<Result<List<AssetEntity>>>());
 
         // 両バッチに同じ写真が含まれていないことを確認
-        if (firstBatch.isNotEmpty && secondBatch.isNotEmpty) {
-          final firstIds = firstBatch.map((e) => e.id).toSet();
-          final secondIds = secondBatch.map((e) => e.id).toSet();
+        final firstPhotos = firstBatch.getOrDefault([]);
+        final secondPhotos = secondBatch.getOrDefault([]);
+        if (firstPhotos.isNotEmpty && secondPhotos.isNotEmpty) {
+          final firstIds = firstPhotos.map((e) => e.id).toSet();
+          final secondIds = secondPhotos.map((e) => e.id).toSet();
           expect(firstIds.intersection(secondIds), isEmpty);
         }
       });
@@ -107,8 +110,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
-        expect(result, isEmpty);
+        expect(result, isA<Result<List<AssetEntity>>>());
+        expect(result.getOrDefault([]), isEmpty);
       });
 
       test('should filter photos by exact date', () async {
@@ -117,23 +120,24 @@ void main() {
         final today = DateTime.now();
 
         // Act
-        final yesterdayPhotos = await photoService.getPhotosForDate(
+        final yesterdayResult = await photoService.getPhotosForDate(
           yesterday,
           offset: 0,
           limit: 100,
         );
 
-        final todayPhotos = await photoService.getPhotosForDate(
+        final todayResult = await photoService.getPhotosForDate(
           today,
           offset: 0,
           limit: 100,
         );
 
         // Assert
-        expect(yesterdayPhotos, isA<List<AssetEntity>>());
-        expect(todayPhotos, isA<List<AssetEntity>>());
+        expect(yesterdayResult, isA<Result<List<AssetEntity>>>());
+        expect(todayResult, isA<Result<List<AssetEntity>>>());
 
         // 異なる日付の写真が混在していないことを確認
+        final yesterdayPhotos = yesterdayResult.getOrDefault([]);
         for (final photo in yesterdayPhotos) {
           final createDate = photo.createDateSecond;
           if (createDate != null) {
@@ -159,10 +163,11 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
 
         // 取得した写真が正しい日付であることを確認
-        for (final photo in result) {
+        final photos = result.getOrDefault([]);
+        for (final photo in photos) {
           final createDate = photo.createDateSecond;
           if (createDate != null) {
             final photoDate = DateTime.fromMillisecondsSinceEpoch(
@@ -190,8 +195,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
-        expect(result, isEmpty); // 大きなオフセットでは結果が空になるはず
+        expect(result, isA<Result<List<AssetEntity>>>());
+        expect(result.getOrDefault([]), isEmpty); // 大きなオフセットでは結果が空になるはず
       });
     });
 
@@ -206,8 +211,8 @@ void main() {
           limit: 10,
         );
 
-        expect(result, isA<List<AssetEntity>>());
-        // 権限がない場合は空のリストが返される
+        expect(result, isA<Result<List<AssetEntity>>>());
+        // 権限がない場合はFailureが返される
       });
 
       test('should handle invalid date gracefully', () async {
@@ -222,8 +227,8 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
-        expect(result, isEmpty); // 未来の写真は存在しないはず
+        expect(result, isA<Result<List<AssetEntity>>>());
+        expect(result.getOrDefault([]), isEmpty); // 未来の写真は存在しないはず
       });
 
       test('should handle concurrent requests', () async {
@@ -244,7 +249,7 @@ void main() {
         // Assert
         expect(results.length, equals(5));
         for (final result in results) {
-          expect(result, isA<List<AssetEntity>>());
+          expect(result, isA<Result<List<AssetEntity>>>());
         }
       });
     });
@@ -265,7 +270,7 @@ void main() {
         stopwatch.stop();
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // パフォーマンス: 50枚の取得は5秒以内に完了すべき
         expect(stopwatch.elapsed.inSeconds, lessThan(5));
       });
@@ -286,8 +291,8 @@ void main() {
           );
 
           // Assert
-          expect(result, isA<List<AssetEntity>>());
-          expect(result.length, lessThanOrEqualTo(batchSize));
+          expect(result, isA<Result<List<AssetEntity>>>());
+          expect(result.getOrDefault([]).length, lessThanOrEqualTo(batchSize));
         }
 
         // メモリリークがないことを間接的に確認
@@ -308,7 +313,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // うるう年の2月29日でもエラーにならないことを確認
       });
 
@@ -318,23 +323,25 @@ void main() {
         final newYear = DateTime(2024, 1, 1);
 
         // Act
-        final evePhotos = await photoService.getPhotosForDate(
+        final eveResult = await photoService.getPhotosForDate(
           newYearEve,
           offset: 0,
           limit: 10,
         );
 
-        final newYearPhotos = await photoService.getPhotosForDate(
+        final newYearResult = await photoService.getPhotosForDate(
           newYear,
           offset: 0,
           limit: 10,
         );
 
         // Assert
-        expect(evePhotos, isA<List<AssetEntity>>());
-        expect(newYearPhotos, isA<List<AssetEntity>>());
+        expect(eveResult, isA<Result<List<AssetEntity>>>());
+        expect(newYearResult, isA<Result<List<AssetEntity>>>());
 
         // 異なる年の写真が正しく分離されることを確認
+        final evePhotos = eveResult.getOrDefault([]);
+        final newYearPhotos = newYearResult.getOrDefault([]);
         if (evePhotos.isNotEmpty && newYearPhotos.isNotEmpty) {
           final eveIds = evePhotos.map((e) => e.id).toSet();
           final newYearIds = newYearPhotos.map((e) => e.id).toSet();
@@ -354,7 +361,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
         // EXIF情報がない写真も含めて処理できることを確認
         // （エラーが発生せずに完了することを確認）
       });
@@ -371,10 +378,11 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<List<AssetEntity>>());
+        expect(result, isA<Result<List<AssetEntity>>>());
 
         // 異なるタイプの写真（JPEG、PNG、HEIF等）が混在していても処理できることを確認
-        for (final photo in result) {
+        final photos = result.getOrDefault([]);
+        for (final photo in photos) {
           expect(
             photo.type,
             anyOf([

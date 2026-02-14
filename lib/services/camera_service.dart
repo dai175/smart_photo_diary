@@ -8,7 +8,8 @@ import 'interfaces/camera_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 
 /// 今日の写真取得関数の型定義（フォールバック用）
-typedef TodayPhotosProvider = Future<List<AssetEntity>> Function({int limit});
+typedef TodayPhotosProvider =
+    Future<Result<List<AssetEntity>>> Function({int limit});
 
 /// カメラ撮影サービス
 ///
@@ -157,7 +158,8 @@ class CameraService implements ICameraService {
     await PhotoManager.clearFileCache();
 
     // より広い範囲で最新の写真を取得
-    final latestPhotos = await _getTodayPhotos(limit: 10);
+    final todayResult = await _getTodayPhotos(limit: 10);
+    final latestPhotos = todayResult.getOrDefault([]);
 
     // 撮影時刻に最も近い写真を探す
     final captureTime = DateTime.now();
