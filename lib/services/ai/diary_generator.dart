@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui';
-import 'ai_service_interface.dart';
+import '../interfaces/ai_service_interface.dart';
 import 'gemini_api_client.dart';
 import '../interfaces/logging_service_interface.dart';
 import '../../core/errors/app_exceptions.dart';

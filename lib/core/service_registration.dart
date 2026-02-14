@@ -1,5 +1,5 @@
 import '../services/ai_service.dart';
-import '../services/ai/ai_service_interface.dart';
+import '../services/interfaces/ai_service_interface.dart';
 import '../services/logging_service.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/diary_service.dart';

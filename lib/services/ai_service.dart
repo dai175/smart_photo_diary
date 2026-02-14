@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'ai/ai_service_interface.dart';
+import 'interfaces/ai_service_interface.dart';
 import 'ai/diary_generator.dart';
 import 'ai/tag_generator.dart';
 import 'interfaces/subscription_service_interface.dart';

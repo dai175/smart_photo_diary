@@ -14,7 +14,7 @@ import 'package:smart_photo_diary/ui/components/custom_dialog.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
-import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';

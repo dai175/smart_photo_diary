@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import 'interfaces/diary_tag_service_interface.dart';
-import 'ai/ai_service_interface.dart';
+import 'interfaces/ai_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'interfaces/settings_service_interface.dart';
 import '../core/service_registration.dart';
