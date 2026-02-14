@@ -65,31 +65,36 @@ class InstagramShareChannel {
         '#SmartPhotoDiary で生成',
       );
 
-      await Share.shareXFiles(
-        [XFile(imageFile.path)],
-        text: '${diary.title}\n\n$shareText',
-        sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
-      ).timeout(
-        const Duration(seconds: _shareTimeoutSeconds),
-        onTimeout: () {
-          // Get current locale for error message
-          Locale? locale;
-          try {
-            final settingsService = ServiceRegistration.get<ISettingsService>();
-            locale = settingsService.locale;
-          } catch (_) {
-            locale = null;
-          }
-          final resolvedLocale =
-              locale ?? ui.PlatformDispatcher.instance.locale;
-          final timeoutMessage = _getLocalizedMessage(
-            resolvedLocale,
-            (l10n) => l10n.commonShareTimeout,
-            'Sharing timed out',
+      await SharePlus.instance
+          .share(
+            ShareParams(
+              files: [XFile(imageFile.path)],
+              text: '${diary.title}\n\n$shareText',
+              sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
+            ),
+          )
+          .timeout(
+            const Duration(seconds: _shareTimeoutSeconds),
+            onTimeout: () {
+              // Get current locale for error message
+              Locale? locale;
+              try {
+                final settingsService =
+                    ServiceRegistration.get<ISettingsService>();
+                locale = settingsService.locale;
+              } catch (_) {
+                locale = null;
+              }
+              final resolvedLocale =
+                  locale ?? ui.PlatformDispatcher.instance.locale;
+              final timeoutMessage = _getLocalizedMessage(
+                resolvedLocale,
+                (l10n) => l10n.commonShareTimeout,
+                'Sharing timed out',
+              );
+              throw Exception(timeoutMessage);
+            },
           );
-          throw Exception(timeoutMessage);
-        },
-      );
 
       _logger.info(
         'Instagram share succeeded',

@@ -84,21 +84,25 @@ class XShareChannel {
 
       final text = parts.join('\n\n');
 
-      await Share.shareXFiles(
-        files,
-        text: text,
-        sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
-      ).timeout(
-        const Duration(seconds: _shareTimeoutSeconds),
-        onTimeout: () {
-          final timeoutMessage = _getLocalizedMessage(
-            resolvedLocale,
-            (l10n) => l10n.commonShareTimeout,
-            'Sharing timed out',
+      await SharePlus.instance
+          .share(
+            ShareParams(
+              files: files,
+              text: text,
+              sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
+            ),
+          )
+          .timeout(
+            const Duration(seconds: _shareTimeoutSeconds),
+            onTimeout: () {
+              final timeoutMessage = _getLocalizedMessage(
+                resolvedLocale,
+                (l10n) => l10n.commonShareTimeout,
+                'Sharing timed out',
+              );
+              throw Exception(timeoutMessage);
+            },
           );
-          throw Exception(timeoutMessage);
-        },
-      );
 
       _logger.info('Text share succeeded', context: 'XShareChannel.share');
       return const Success<void>(null);

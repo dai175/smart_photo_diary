@@ -272,7 +272,9 @@ class PhotoGridSelectionCounter extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: hasSelection ? theme.primaryContainer : theme.surfaceVariant,
+        color: hasSelection
+            ? theme.primaryContainer
+            : theme.surfaceContainerHighest,
         borderRadius: AppSpacing.chipRadius,
       ),
       child: Row(

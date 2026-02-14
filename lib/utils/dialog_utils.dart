@@ -183,9 +183,8 @@ class DialogUtils {
                           AppSpacing.borderRadiusSm,
                         ),
                       ),
-                      tileColor: theme.colorScheme.surfaceVariant.withValues(
-                        alpha: _radioTileOpacity,
-                      ),
+                      tileColor: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: _radioTileOpacity),
                       selectedTileColor: theme.colorScheme.primary.withValues(
                         alpha: _radioTileOpacity,
                       ),
