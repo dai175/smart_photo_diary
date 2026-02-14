@@ -43,10 +43,15 @@ class PhotoDataService {
   }
 
   /// 写真のバイナリデータを取得する
-  Future<List<int>?> getPhotoData(AssetEntity asset) async {
+  Future<Result<List<int>>> getPhotoData(AssetEntity asset) async {
     try {
       final data = await asset.originBytes;
-      return data?.toList();
+      if (data == null) {
+        return const Failure(
+          PhotoAccessException('Failed to retrieve photo data: data is null'),
+        );
+      }
+      return Success(data.toList());
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -57,12 +62,14 @@ class PhotoDataService {
         context: 'PhotoDataService.getPhotoData',
         error: appError,
       );
-      return null;
+      return Failure(
+        PhotoAccessException('Failed to retrieve photo data', originalError: e),
+      );
     }
   }
 
   /// 写真のサムネイルデータを取得する
-  Future<List<int>?> getThumbnailData(AssetEntity asset) async {
+  Future<Result<List<int>>> getThumbnailData(AssetEntity asset) async {
     try {
       final data = await asset.thumbnailDataWithSize(
         const ThumbnailSize(
@@ -70,7 +77,14 @@ class PhotoDataService {
           AppConstants.defaultThumbnailHeight,
         ),
       );
-      return data?.toList();
+      if (data == null) {
+        return const Failure(
+          PhotoAccessException(
+            'Failed to retrieve thumbnail data: data is null',
+          ),
+        );
+      }
+      return Success(data.toList());
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -81,24 +95,33 @@ class PhotoDataService {
         context: 'PhotoDataService.getThumbnailData',
         error: appError,
       );
-      return null;
+      return Failure(
+        PhotoAccessException(
+          'Failed to retrieve thumbnail data',
+          originalError: e,
+        ),
+      );
     }
   }
 
   /// 写真のサムネイルを取得する（キャッシュ付き）
-  Future<Uint8List?> getThumbnail(
+  Future<Result<Uint8List>> getThumbnail(
     AssetEntity asset, {
     int width = AppConstants.defaultThumbnailWidth,
     int height = AppConstants.defaultThumbnailHeight,
   }) async {
     try {
       final cacheService = serviceLocator.get<IPhotoCacheService>();
-      return await cacheService.getThumbnail(
+      final result = await cacheService.getThumbnail(
         asset,
         width: width,
         height: height,
         quality: 80,
       );
+      if (result.isFailure) {
+        return Failure(result.error);
+      }
+      return Success(result.value);
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -109,14 +132,24 @@ class PhotoDataService {
         context: 'PhotoDataService.getThumbnail',
         error: appError,
       );
-      return null;
+      return Failure(
+        PhotoAccessException('Failed to retrieve thumbnail', originalError: e),
+      );
     }
   }
 
   /// 写真の元画像を取得する
-  Future<Uint8List?> getOriginalFile(AssetEntity asset) async {
+  Future<Result<Uint8List>> getOriginalFile(AssetEntity asset) async {
     try {
-      return await asset.originBytes;
+      final data = await asset.originBytes;
+      if (data == null) {
+        return const Failure(
+          PhotoAccessException(
+            'Failed to retrieve original file: data is null',
+          ),
+        );
+      }
+      return Success(data);
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -127,7 +160,12 @@ class PhotoDataService {
         context: 'PhotoDataService.getOriginalFile',
         error: appError,
       );
-      return null;
+      return Failure(
+        PhotoAccessException(
+          'Failed to retrieve original file',
+          originalError: e,
+        ),
+      );
     }
   }
 }

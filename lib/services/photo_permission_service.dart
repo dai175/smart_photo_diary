@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
+import '../core/result/result.dart';
 import 'interfaces/photo_permission_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 
@@ -15,7 +17,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
   PhotoPermissionService({required ILoggingService logger}) : _logger = logger;
 
   @override
-  Future<bool> requestPermission() async {
+  Future<Result<bool>> requestPermission() async {
     try {
       _logger.debug(
         'Starting permission request',
@@ -34,7 +36,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
           'Photo access permission granted',
           context: 'PhotoPermissionService.requestPermission',
         );
-        return true;
+        return const Success(true);
       }
 
       // Limited access の場合も部分的に許可とみなす（iOS専用）
@@ -43,7 +45,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
           'Limited photo access was granted',
           context: 'PhotoPermissionService.requestPermission',
         );
-        return true;
+        return const Success(true);
       }
 
       // PhotoManagerで権限が拒否された場合、Androidでは追加でpermission_handlerを試す
@@ -85,7 +87,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
               'Android: PhotoManager re-verification result: $pmStateAfter',
               context: 'PhotoPermissionService.requestPermission',
             );
-            return pmStateAfter.isAuth;
+            return Success(pmStateAfter.isAuth);
           }
         }
 
@@ -95,7 +97,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
             'Android: Permission is permanently denied',
             context: 'PhotoPermissionService.requestPermission',
           );
-          return false;
+          return const Success(false);
         }
       }
 
@@ -104,7 +106,7 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.requestPermission',
         data: 'pmState: $pmState',
       );
-      return false;
+      return const Success(false);
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -115,25 +117,32 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.requestPermission',
         error: appError,
       );
-      return false;
+      return Failure(
+        PhotoAccessException('Permission request failed', originalError: e),
+      );
     }
   }
 
   @override
-  Future<bool> isPermissionPermanentlyDenied() async {
+  Future<Result<bool>> isPermissionPermanentlyDenied() async {
     try {
       final currentStatus = await Permission.photos.status;
-      return currentStatus.isPermanentlyDenied;
+      return Success(currentStatus.isPermanentlyDenied);
     } catch (e) {
-      return false;
+      return Failure(
+        PhotoAccessException(
+          'Permission permanently denied check failed',
+          originalError: e,
+        ),
+      );
     }
   }
 
   @override
-  Future<bool> presentLimitedLibraryPicker() async {
+  Future<Result<bool>> presentLimitedLibraryPicker() async {
     try {
       await PhotoManager.presentLimited();
-      return true;
+      return const Success(true);
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -144,15 +153,20 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.presentLimitedLibraryPicker',
         error: appError,
       );
-      return false;
+      return Failure(
+        PhotoAccessException(
+          'Limited Library Picker display failed',
+          originalError: e,
+        ),
+      );
     }
   }
 
   @override
-  Future<bool> isLimitedAccess() async {
+  Future<Result<bool>> isLimitedAccess() async {
     try {
       final pmState = await PhotoManager.requestPermissionExtend();
-      return pmState == PermissionState.limited;
+      return Success(pmState == PermissionState.limited);
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -163,7 +177,9 @@ class PhotoPermissionService implements IPhotoPermissionService {
         context: 'PhotoPermissionService.isLimitedAccess',
         error: appError,
       );
-      return false;
+      return Failure(
+        PhotoAccessException('Limited access check failed', originalError: e),
+      );
     }
   }
 }

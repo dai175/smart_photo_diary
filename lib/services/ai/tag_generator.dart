@@ -1,9 +1,11 @@
 import 'dart:ui';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
-import 'gemini_api_client.dart';
-import '../interfaces/logging_service_interface.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
+import '../interfaces/logging_service_interface.dart';
+import 'gemini_api_client.dart';
 
 /// タグ生成を担当するサービス
 class TagGenerator {
@@ -14,7 +16,7 @@ class TagGenerator {
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// 日記の内容からタグを自動生成
-  Future<List<String>> generateTags({
+  Future<Result<List<String>>> generateTags({
     required String title,
     required String content,
     required DateTime date,
@@ -23,7 +25,9 @@ class TagGenerator {
     Locale? locale,
   }) async {
     if (!isOnline) {
-      return _generateOfflineTags(title, content, date, photoCount, locale);
+      return Success(
+        _generateOfflineTags(title, content, date, photoCount, locale),
+      );
     }
 
     try {
@@ -68,7 +72,7 @@ class TagGenerator {
           // 似たようなタグを統合
           final filteredTags = _filterSimilarTags(allTags, locale);
 
-          return filteredTags.take(5).toList();
+          return Success(filteredTags.take(5).toList());
         }
       }
 
@@ -76,14 +80,27 @@ class TagGenerator {
         'Tag generation API error or no response',
         context: 'TagGenerator.generateTags',
       );
-      return _generateOfflineTags(title, content, date, photoCount, locale);
+      return Failure(
+        AiProcessingException(
+          'Tag generation failed: API returned error or empty response',
+          details: responseResult.isFailure
+              ? responseResult.error.toString()
+              : 'Empty response from API',
+        ),
+      );
     } catch (e) {
       _logger.error(
         'Tag generation error',
         context: 'TagGenerator.generateTags',
         error: e,
       );
-      return _generateOfflineTags(title, content, date, photoCount, locale);
+      return Failure(
+        AiProcessingException(
+          'Tag generation failed due to unexpected error',
+          details: e.toString(),
+          originalError: e,
+        ),
+      );
     }
   }
 

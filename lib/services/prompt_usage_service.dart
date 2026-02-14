@@ -4,6 +4,8 @@
 // Hive Boxを使用したローカル永続化
 
 import 'package:hive_flutter/hive_flutter.dart';
+import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../models/writing_prompt.dart';
 import 'interfaces/prompt_usage_service_interface.dart';
@@ -39,13 +41,15 @@ class PromptUsageService implements IPromptUsageService {
   }
 
   @override
-  Future<bool> recordPromptUsage({
+  Future<Result<bool>> recordPromptUsage({
     required String promptId,
     String? diaryEntryId,
     bool wasHelpful = true,
   }) async {
     if (!isAvailable) {
-      return false;
+      return const Failure(
+        ServiceException('PromptUsageService is not available'),
+      );
     }
 
     try {
@@ -61,13 +65,18 @@ class PromptUsageService implements IPromptUsageService {
         'PromptUsageService: Prompt usage history recorded (promptId: $promptId)',
       );
 
-      return true;
+      return const Success(true);
     } catch (e) {
       _logger.error(
         'PromptUsageService: Failed to record usage history',
         error: e,
       );
-      return false;
+      return Failure(
+        ServiceException(
+          'Failed to record prompt usage history',
+          originalError: e,
+        ),
+      );
     }
   }
 
@@ -126,9 +135,11 @@ class PromptUsageService implements IPromptUsageService {
   }
 
   @override
-  Future<bool> clearUsageHistory({int? olderThanDays}) async {
+  Future<Result<bool>> clearUsageHistory({int? olderThanDays}) async {
     if (!isAvailable) {
-      return false;
+      return const Failure(
+        ServiceException('PromptUsageService is not available'),
+      );
     }
 
     try {
@@ -157,13 +168,15 @@ class PromptUsageService implements IPromptUsageService {
 
       _logger.info('PromptUsageService: Usage history cleared');
 
-      return true;
+      return const Success(true);
     } catch (e) {
       _logger.error(
         'PromptUsageService: Failed to clear usage history',
         error: e,
       );
-      return false;
+      return Failure(
+        ServiceException('Failed to clear usage history', originalError: e),
+      );
     }
   }
 

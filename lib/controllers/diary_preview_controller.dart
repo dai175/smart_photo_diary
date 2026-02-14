@@ -198,14 +198,14 @@ class DiaryPreviewController extends BaseErrorController {
     AssetEntity asset,
     Locale locale,
   ) async {
-    final imageData = await _photoService.getOriginalFile(asset);
-    if (imageData == null) {
+    final imageResult = await _photoService.getOriginalFile(asset);
+    if (imageResult.isFailure) {
       _setErrorState(DiaryPreviewErrorType.generationFailed);
       return null;
     }
 
     final resultFromAi = await aiService.generateDiaryFromImage(
-      imageData: imageData,
+      imageData: imageResult.value,
       date: _photoDateTime,
       prompt: _selectedPrompt?.text,
       locale: locale,
@@ -230,10 +230,10 @@ class DiaryPreviewController extends BaseErrorController {
 
     final imagesWithTimes = <({Uint8List imageData, DateTime time})>[];
     for (final asset in assets) {
-      final imageData = await _photoService.getOriginalFile(asset);
-      if (imageData != null) {
+      final imageResult = await _photoService.getOriginalFile(asset);
+      if (imageResult.isSuccess) {
         imagesWithTimes.add((
-          imageData: imageData,
+          imageData: imageResult.value,
           time: _resolveAssetDateTime(asset),
         ));
       }
@@ -278,7 +278,16 @@ class DiaryPreviewController extends BaseErrorController {
     try {
       final promptService =
           await ServiceRegistration.getAsync<IPromptService>();
-      await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
+      final result = await promptService.recordPromptUsage(
+        promptId: _selectedPrompt!.id,
+      );
+      if (result case Failure(:final exception)) {
+        _logger.error(
+          'Prompt usage history recording failed',
+          error: exception,
+          context: 'DiaryPreviewController',
+        );
+      }
     } catch (e) {
       _logger.error(
         'Prompt usage history recording error',

@@ -8,6 +8,8 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 
 class MockLoggingService extends Mock implements ILoggingService {}
 
@@ -82,9 +84,10 @@ void main() {
         // getOriginalFile で null を返してエラー終了させる
         final mockAsset = MockAssetEntity();
         when(() => mockAsset.createDateTime).thenReturn(DateTime(2025, 1, 15));
-        when(
-          () => mockPhotoService.getOriginalFile(mockAsset),
-        ).thenAnswer((_) async => null);
+        when(() => mockPhotoService.getOriginalFile(mockAsset)).thenAnswer(
+          (_) async =>
+              const Failure(PhotoAccessException('No original file available')),
+        );
 
         final controller = createController();
         addTearDown(controller.dispose);

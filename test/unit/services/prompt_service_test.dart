@@ -6,6 +6,7 @@
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
@@ -543,8 +544,8 @@ void main() {
           wasHelpful: true,
         );
 
-        // 結果はboolean（成功/失敗）
-        expect(result, isA<bool>());
+        // 結果はResult<bool>（成功/失敗）
+        expect(result, isA<Result<bool>>());
 
         // 履歴取得（空リストでもエラーにならない）
         final history = promptService.getUsageHistory();
@@ -554,9 +555,9 @@ void main() {
         final recentIds = promptService.getRecentlyUsedPromptIds();
         expect(recentIds, isA<List<String>>());
 
-        // 履歴クリア（結果はboolean）
+        // 履歴クリア（結果はResult<bool>）
         final clearResult = await promptService.clearUsageHistory();
-        expect(clearResult, isA<bool>());
+        expect(clearResult, isA<Result<bool>>());
 
         // 統計取得（空マップでもエラーにならない）
         final stats = promptService.getUsageFrequencyStats();

@@ -1,20 +1,21 @@
-import 'package:flutter/material.dart';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../constants/app_constants.dart';
+import '../core/result/result.dart';
+import '../core/service_locator.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../localization/localization_extensions.dart';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
-import '../core/service_locator.dart';
-import '../constants/app_constants.dart';
+import '../ui/components/custom_card.dart';
+import '../ui/components/loading_shimmer.dart';
+import '../ui/components/modern_chip.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/custom_card.dart';
-import '../ui/components/modern_chip.dart';
-import '../ui/components/loading_shimmer.dart';
-import '../services/interfaces/photo_cache_service_interface.dart';
-import '../l10n/generated/app_localizations.dart';
-import '../localization/localization_extensions.dart';
 
 class DiaryCardWidget extends StatefulWidget {
   final DiaryEntry entry;
@@ -214,7 +215,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   Widget _buildThumbnail(AssetEntity asset) {
     final cacheService = serviceLocator.get<IPhotoCacheService>();
     final size = AppConstants.diaryThumbnailSize.toInt();
-    return FutureBuilder<Uint8List?>(
+    return FutureBuilder<Result<Uint8List>>(
       future: cacheService.getThumbnail(
         asset,
         width: size,
@@ -222,7 +223,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
         quality: AppConstants.diaryThumbnailQuality,
       ),
       builder: (context, thumbnailSnapshot) {
-        if (!thumbnailSnapshot.hasData) {
+        if (!thumbnailSnapshot.hasData || thumbnailSnapshot.data!.isFailure) {
           return Container(
             width: AppConstants.diaryThumbnailSize,
             height: AppConstants.diaryThumbnailSize,
@@ -236,6 +237,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
           );
         }
 
+        final thumbnailData = thumbnailSnapshot.data!.value;
         final dpr = MediaQuery.of(context).devicePixelRatio;
         return Container(
           decoration: BoxDecoration(
@@ -251,7 +253,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
           child: ClipRRect(
             borderRadius: AppSpacing.photoRadius,
             child: Image.memory(
-              thumbnailSnapshot.data!,
+              thumbnailData,
               height: AppConstants.diaryThumbnailSize,
               width: AppConstants.diaryThumbnailSize,
               fit: BoxFit.cover,
