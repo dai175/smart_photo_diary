@@ -24,9 +24,10 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 統計画面のみ再構築
-  void refreshStats() {
+  /// 統計画面を再構築しつつタブを切り替え（通知は1回）
+  void refreshStatsAndSwitchTab(int index) {
     _statsScreenKey = UniqueKey();
+    _currentIndex = index;
     notifyListeners();
   }
 }

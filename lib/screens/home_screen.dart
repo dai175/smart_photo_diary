@@ -330,12 +330,13 @@ class _HomeScreenState extends State<HomeScreen>
                   if (index == AppConstants.homeTabIndex) {
                     // Home を表示する際に使用済みIDを再同期
                     _loadUsedPhotoIds();
+                    _homeController.setCurrentIndex(index);
                   } else if (index == AppConstants.statisticsTabIndex) {
                     // Statistics を表示する直前に再構築し再計算を促す
-                    _homeController.refreshStats();
+                    _homeController.refreshStatsAndSwitchTab(index);
+                  } else {
+                    _homeController.setCurrentIndex(index);
                   }
-
-                  _homeController.setCurrentIndex(index);
                 },
                 items: _buildNavigationItems(),
               ),
