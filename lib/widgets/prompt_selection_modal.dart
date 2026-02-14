@@ -8,8 +8,8 @@ import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_dialog.dart';
-import '../utils/prompt_category_utils.dart';
 import '../localization/localization_extensions.dart';
+import 'prompt_selection_items.dart';
 
 /// プロンプト選択モーダル
 class PromptSelectionModal extends StatefulWidget {
@@ -168,279 +168,36 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
           const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         if (index == 0) {
-          // プロンプトなしオプション
-          return _buildNoPromptOption();
+          return PromptSelectionItems.buildNoPromptOption(
+            context,
+            isSelected: _selectedPrompt == null && !_isRandomSelected,
+            onTap: () => setState(() {
+              _selectedPrompt = null;
+              _isRandomSelected = false;
+            }),
+          );
         } else if (index == 1) {
-          // ランダム選択ボタン
-          return _buildRandomButton();
+          return PromptSelectionItems.buildRandomButton(
+            context,
+            isSelected: _isRandomSelected,
+            isLoading: _isLoading,
+            onTap: _isLoading
+                ? null
+                : () => setState(() {
+                    _selectedPrompt = null;
+                    _isRandomSelected = true;
+                  }),
+          );
         }
 
         final prompt = _availablePrompts[index - 2];
-        return _buildPromptCard(prompt);
+        return PromptSelectionItems.buildPromptCard(
+          context,
+          prompt: prompt,
+          isSelected: _selectedPrompt?.id == prompt.id && !_isRandomSelected,
+          onTap: () => _selectPrompt(prompt),
+        );
       },
-    );
-  }
-
-  Widget _buildNoPromptOption() {
-    final isSelected = _selectedPrompt == null && !_isRandomSelected;
-    final l10n = context.l10n;
-
-    return InkWell(
-      onTap: () => setState(() {
-        _selectedPrompt = null;
-        _isRandomSelected = false;
-      }),
-      borderRadius: AppSpacing.cardRadius,
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
-              : null,
-          borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.edit_off_rounded,
-                color: isSelected
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.promptOptionNone,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    l10n.promptOptionNoneDescription,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRandomButton() {
-    final isSelected = _isRandomSelected;
-    final l10n = context.l10n;
-
-    return InkWell(
-      onTap: _isLoading
-          ? null
-          : () => setState(() {
-              _selectedPrompt = null;
-              _isRandomSelected = true;
-            }),
-      borderRadius: AppSpacing.cardRadius,
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
-              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-          borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.shuffle_rounded,
-                color: isSelected
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.promptOptionRandom,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _isLoading
-                        ? l10n.promptLoadingMessage
-                        : l10n.promptRandomDescription,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              )
-            else
-              Icon(
-                Icons.auto_awesome_rounded,
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.7),
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPromptCard(WritingPrompt prompt) {
-    final isSelected = _selectedPrompt?.id == prompt.id && !_isRandomSelected;
-
-    return InkWell(
-      onTap: () => _selectPrompt(prompt),
-      borderRadius: AppSpacing.cardRadius,
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? PromptCategoryUtils.getCategoryColor(
-                  prompt.category,
-                ).withValues(alpha: 0.15)
-              : null,
-          borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: isSelected
-                ? PromptCategoryUtils.getCategoryColor(
-                    prompt.category,
-                  ).withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? PromptCategoryUtils.getCategoryColor(prompt.category)
-                        : PromptCategoryUtils.getCategoryColor(
-                            prompt.category,
-                          ).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.xs),
-                  ),
-                  child: Text(
-                    PromptCategoryUtils.getCategoryDisplayName(
-                      prompt.category,
-                      locale: Localizations.localeOf(context),
-                    ),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: isSelected
-                          ? Colors.white
-                          : PromptCategoryUtils.getCategoryColor(
-                              prompt.category,
-                            ),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle,
-                    color: PromptCategoryUtils.getCategoryColor(
-                      prompt.category,
-                    ),
-                    size: 20,
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              prompt.text,
-              style: isSelected
-                  ? AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w500,
-                    )
-                  : AppTypography.bodyMedium,
-            ),
-            if (prompt.description != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                prompt.description!,
-                style: AppTypography.bodySmall.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 
