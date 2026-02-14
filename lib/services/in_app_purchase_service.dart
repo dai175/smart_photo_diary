@@ -331,108 +331,30 @@ class InAppPurchaseService
   @override
   Future<Result<PurchaseResult>> purchasePlan(Plan plan) async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
+      final validationError = _validatePurchasePreconditions(plan);
+      if (validationError != null) return Failure(validationError);
 
-      if (_inAppPurchase == null) {
-        return const Failure(ServiceException('In-App Purchase not available'));
-      }
-
-      if (_isPurchasing) {
-        return const Failure(
-          ServiceException('Another purchase is already in progress'),
-        );
-      }
-
-      if (plan.id == BasicPlan().id) {
-        return const Failure(
-          ServiceException('Basic plan cannot be purchased'),
-        );
-      }
-
+      final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
       log(
         'Purchase process started',
         level: LogLevel.info,
         context: 'purchasePlan',
-        data: {'planId': plan.id, 'productId': plan.productId},
+        data: {'planId': plan.id, 'productId': productId},
       );
       _isPurchasing = true;
 
-      final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
-      log(
-        'Product ID retrieved',
-        level: LogLevel.debug,
-        context: 'purchasePlan',
-        data: {'productId': productId},
-      );
-
       try {
-        log(
-          'Querying product details',
-          level: LogLevel.debug,
-          context: 'purchasePlan',
-          data: {'productId': productId},
-        );
-        final productResponse = await _inAppPurchase!.queryProductDetails({
-          productId,
-        });
-        log(
-          'Product query completed',
-          level: LogLevel.debug,
-          context: 'purchasePlan',
-          data: {
-            'error': productResponse.error,
-            'productCount': productResponse.productDetails.length,
-          },
-        );
+        final productDetails = await _queryProductDetails(productId);
 
-        if (productResponse.error != null) {
-          _isPurchasing = false;
-          return Failure(
-            ServiceException(
-              'Failed to get product details for purchase',
-              details: productResponse.error.toString(),
-            ),
-          );
-        }
-
-        if (productResponse.productDetails.isEmpty) {
-          _isPurchasing = false;
-          return Failure(ServiceException('Product not found: $productId'));
-        }
-
-        final productDetails = productResponse.productDetails.first;
-        log(
-          'Product details retrieved',
-          level: LogLevel.info,
-          context: 'purchasePlan',
-          data: {
-            'id': productDetails.id,
-            'title': productDetails.title,
-            'price': productDetails.price,
-          },
-        );
-
-        final PurchaseParam purchaseParam = PurchaseParam(
-          productDetails: productDetails,
-        );
+        final purchaseParam = PurchaseParam(productDetails: productDetails);
 
         log(
           'Calling buyNonConsumable...',
           level: LogLevel.info,
           context: 'purchasePlan',
         );
-        final bool success = await _inAppPurchase!.buyNonConsumable(
+        final success = await _inAppPurchase!.buyNonConsumable(
           purchaseParam: purchaseParam,
-        );
-        log(
-          'buyNonConsumable result',
-          level: LogLevel.info,
-          context: 'purchasePlan',
-          data: {'success': success},
         );
 
         if (!success) {
@@ -455,55 +377,113 @@ class InAppPurchaseService
         );
       } catch (storeError) {
         _isPurchasing = false;
-        log(
-          'Store error occurred',
-          level: LogLevel.error,
-          context: 'purchasePlan',
-          error: storeError,
+        final simulatorResult = await _handleSimulatorStoreError(
+          storeError,
+          plan: plan,
+          productId: productId,
         );
-
-        if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
-          final errorString = storeError.toString();
-          if (errorString.contains('not connected to app store') ||
-              errorString.contains('sandbox') ||
-              errorString.contains('StoreKit')) {
-            log(
-              'Simulator environment store connection error - mocking success',
-              level: LogLevel.warning,
-              context: 'purchasePlan',
-            );
-
-            await Future.delayed(const Duration(milliseconds: 1000));
-            final result = await _stateService.createStatusForPlan(plan);
-            if (result.isSuccess) {
-              return Success(
-                PurchaseResult(
-                  status: iapsi.PurchaseStatus.purchased,
-                  productId: productId,
-                  plan: plan,
-                  purchaseDate: DateTime.now(),
-                ),
-              );
-            }
-          }
-        }
-
+        if (simulatorResult != null) return simulatorResult;
         rethrow;
       }
     } catch (e) {
       _isPurchasing = false;
-      log(
-        'Unexpected error',
-        level: LogLevel.error,
-        context: 'purchasePlan',
-        error: e,
-      );
       return _handleError(
         e,
         'purchasePlan',
         details: 'planId: ${plan.id}, productId: ${plan.productId}',
       );
     }
+  }
+
+  /// 購入前提条件を検証。エラーがある場合は例外を返す。
+  ServiceException? _validatePurchasePreconditions(Plan plan) {
+    if (!_stateService.isInitialized) {
+      return const ServiceException(
+        'SubscriptionStateService is not initialized',
+      );
+    }
+    if (_inAppPurchase == null) {
+      return const ServiceException('In-App Purchase not available');
+    }
+    if (_isPurchasing) {
+      return const ServiceException('Another purchase is already in progress');
+    }
+    if (plan.id == BasicPlan().id) {
+      return const ServiceException('Basic plan cannot be purchased');
+    }
+    return null;
+  }
+
+  /// App Store から商品詳細を取得する
+  Future<ProductDetails> _queryProductDetails(String productId) async {
+    log(
+      'Querying product details',
+      level: LogLevel.debug,
+      context: 'purchasePlan',
+      data: {'productId': productId},
+    );
+    final response = await _inAppPurchase!.queryProductDetails({productId});
+
+    if (response.error != null) {
+      throw ServiceException(
+        'Failed to get product details for purchase',
+        details: response.error.toString(),
+      );
+    }
+
+    if (response.productDetails.isEmpty) {
+      throw ServiceException('Product not found: $productId');
+    }
+
+    final details = response.productDetails.first;
+    log(
+      'Product details retrieved',
+      level: LogLevel.info,
+      context: 'purchasePlan',
+      data: {'id': details.id, 'title': details.title, 'price': details.price},
+    );
+    return details;
+  }
+
+  /// iOS シミュレータ環境でのストアエラーをハンドリング（デバッグ時のみ）
+  Future<Result<PurchaseResult>?> _handleSimulatorStoreError(
+    dynamic storeError, {
+    required Plan plan,
+    required String productId,
+  }) async {
+    log(
+      'Store error occurred',
+      level: LogLevel.error,
+      context: 'purchasePlan',
+      error: storeError,
+    );
+
+    if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
+      final errorString = storeError.toString();
+      if (errorString.contains('not connected to app store') ||
+          errorString.contains('sandbox') ||
+          errorString.contains('StoreKit')) {
+        log(
+          'Simulator environment store connection error - mocking success',
+          level: LogLevel.warning,
+          context: 'purchasePlan',
+        );
+
+        await Future.delayed(const Duration(milliseconds: 1000));
+        final result = await _stateService.createStatusForPlan(plan);
+        if (result.isSuccess) {
+          return Success(
+            PurchaseResult(
+              status: iapsi.PurchaseStatus.purchased,
+              productId: productId,
+              plan: plan,
+              purchaseDate: DateTime.now(),
+            ),
+          );
+        }
+      }
+    }
+    return null;
   }
 
   @override
