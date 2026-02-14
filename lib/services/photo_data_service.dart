@@ -112,16 +112,12 @@ class PhotoDataService {
   }) async {
     try {
       final cacheService = serviceLocator.get<IPhotoCacheService>();
-      final result = await cacheService.getThumbnail(
+      return await cacheService.getThumbnail(
         asset,
         width: width,
         height: height,
         quality: 80,
       );
-      if (result.isFailure) {
-        return Failure(result.error);
-      }
-      return Success(result.value);
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,

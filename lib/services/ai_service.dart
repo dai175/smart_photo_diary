@@ -33,25 +33,33 @@ class AiService implements IAiService {
 
   @override
   Future<bool> isOnline() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult.any(
-      (result) => result != ConnectivityResult.none,
-    );
+    try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      return connectivityResult.any(
+        (result) => result != ConnectivityResult.none,
+      );
+    } catch (_) {
+      return false; // Treat as offline on error
+    }
+  }
+
+  /// Best-effort monthly reset — failure is non-critical, only logged
+  Future<void> _tryResetMonthlyUsage(String caller) async {
+    final resetResult = await _subscriptionService!.resetMonthlyUsageIfNeeded();
+    if (resetResult.isFailure) {
+      _logger?.warning(
+        'Monthly usage reset failed',
+        context: 'AiService.$caller',
+        data: resetResult.error.toString(),
+      );
+    }
   }
 
   /// AI生成前の使用量チェック・月次リセット処理
   Future<Result<void>> _checkAiGenerationAllowed() async {
     if (_subscriptionService == null) return const Success(null);
 
-    // Best-effort monthly reset — failure is non-critical
-    final resetResult = await _subscriptionService.resetMonthlyUsageIfNeeded();
-    if (resetResult.isFailure) {
-      _logger?.warning(
-        'Monthly usage reset failed',
-        context: 'AiService._checkAiGenerationAllowed',
-        data: resetResult.error.toString(),
-      );
-    }
+    await _tryResetMonthlyUsage('_checkAiGenerationAllowed');
 
     final canUseResult = await _subscriptionService.canUseAiGeneration();
     if (canUseResult.isFailure) {
@@ -206,15 +214,7 @@ class AiService implements IAiService {
       );
     }
 
-    // Best-effort monthly reset — failure is non-critical
-    final resetResult = await _subscriptionService.resetMonthlyUsageIfNeeded();
-    if (resetResult.isFailure) {
-      _logger?.warning(
-        'Monthly usage reset failed',
-        context: 'AiService.canUseAiGeneration',
-        data: resetResult.error.toString(),
-      );
-    }
+    await _tryResetMonthlyUsage('canUseAiGeneration');
 
     return await _subscriptionService.canUseAiGeneration();
   }

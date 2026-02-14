@@ -10,6 +10,7 @@ import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
+import 'package:smart_photo_diary/ui/components/custom_dialog.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
@@ -391,7 +392,7 @@ class IntegrationTestHelpers {
 
   /// Verify error dialog appears
   static void verifyErrorDialog(String expectedMessage) {
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(CustomDialog), findsOneWidget);
     expect(find.textContaining(expectedMessage), findsOneWidget);
   }
 
