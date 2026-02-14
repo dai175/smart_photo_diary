@@ -163,12 +163,20 @@ class PhotoQueryService {
         caller: 'getTodayPhotos',
       );
 
+      final validAssets = _filterByDateRange(
+        assets,
+        startDate: startOfDay,
+        endDate: endOfDay,
+        caller: 'getTodayPhotos',
+      );
+
       _logger.info(
         'Retrieved photos for today',
         context: 'PhotoQueryService.getTodayPhotos',
-        data: 'Count: ${assets.length} photos',
+        data:
+            'Count: ${validAssets.length} photos (original: ${assets.length})',
       );
-      return assets;
+      return validAssets;
     } catch (e) {
       ErrorHandler.handleError(e, context: 'PhotoQueryService.getTodayPhotos');
       return [];
@@ -289,38 +297,12 @@ class PhotoQueryService {
         caller: 'getPhotosForDate',
       );
 
-      // タイムゾーン検証
-      final validAssets = <AssetEntity>[];
-      for (final asset in assets) {
-        try {
-          final createDate = asset.createDateTime;
-          final localCreateDate = DateTime(
-            createDate.year,
-            createDate.month,
-            createDate.day,
-          );
-
-          if (localCreateDate.year == date.year &&
-              localCreateDate.month == date.month &&
-              localCreateDate.day == date.day) {
-            validAssets.add(asset);
-          } else {
-            _logger.debug(
-              'Skipping photo with different date after timezone adjustment',
-              context: 'PhotoQueryService.getPhotosForDate',
-              data:
-                  'expected: ${date.toIso8601String()}, actual: ${localCreateDate.toIso8601String()}',
-            );
-          }
-        } catch (e) {
-          _logger.warning(
-            'Error during photo date verification',
-            context: 'PhotoQueryService.getPhotosForDate',
-            data: 'assetId: ${asset.id}, error: $e',
-          );
-          validAssets.add(asset);
-        }
-      }
+      final validAssets = _filterByDateRange(
+        assets,
+        startDate: startOfDay,
+        endDate: endOfDay,
+        caller: 'getPhotosForDate',
+      );
 
       _logger.info(
         'Retrieved photos for specified date',
@@ -354,7 +336,7 @@ class PhotoQueryService {
     if (!await _ensurePermission('getAllPhotos')) return [];
 
     try {
-      final filterOption = FilterOptionGroup(orders: [const OrderOption()]);
+      final filterOption = _buildDateFilter();
       final assets = await _fetchFromAlbum(
         filterOption,
         offset: 0,

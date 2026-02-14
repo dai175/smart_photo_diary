@@ -18,7 +18,8 @@ import '../../interfaces/settings_service_interface.dart';
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
 class XShareChannel {
   static const int _shareTimeoutSeconds = 60;
-  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
+  // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
+  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 100, 100);
 
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 

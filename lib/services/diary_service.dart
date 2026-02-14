@@ -47,6 +47,7 @@ class DiaryService implements IDiaryService {
   final _uuid = const Uuid();
   ILoggingService _loggingService = _NoOpLoggingService();
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
+  bool _disposed = false;
 
   // インデックス管理（DiaryIndexManagerに委譲）
   final _indexManager = DiaryIndexManager();
@@ -201,13 +202,14 @@ class DiaryService implements IDiaryService {
       _indexManager.insertEntry(_diaryBox!, entry);
 
       // 変更イベント（作成）を通知
-      _diaryChangeController.add(
-        DiaryChange(
-          type: DiaryChangeType.created,
-          entryId: entry.id,
-          addedPhotoIds: List<String>.from(photoIds),
-        ),
-      );
+      if (!_disposed)
+        _diaryChangeController.add(
+          DiaryChange(
+            type: DiaryChangeType.created,
+            entryId: entry.id,
+            addedPhotoIds: List<String>.from(photoIds),
+          ),
+        );
 
       // バックグラウンドでタグを生成（非同期、エラーが起きても日記保存は成功）
       _tagService.generateTagsInBackground(
@@ -248,14 +250,15 @@ class DiaryService implements IDiaryService {
         final newIds = Set<String>.from(entry.photoIds);
         final removed = oldIds.difference(newIds).toList();
         final added = newIds.difference(oldIds).toList();
-        _diaryChangeController.add(
-          DiaryChange(
-            type: DiaryChangeType.updated,
-            entryId: entry.id,
-            addedPhotoIds: added,
-            removedPhotoIds: removed,
-          ),
-        );
+        if (!_disposed)
+          _diaryChangeController.add(
+            DiaryChange(
+              type: DiaryChangeType.updated,
+              entryId: entry.id,
+              addedPhotoIds: added,
+              removedPhotoIds: removed,
+            ),
+          );
       }
       return const Success(null);
     } catch (e) {
@@ -277,13 +280,14 @@ class DiaryService implements IDiaryService {
         _indexManager.removeEntry(id);
       }
       if (existing != null) {
-        _diaryChangeController.add(
-          DiaryChange(
-            type: DiaryChangeType.deleted,
-            entryId: id,
-            removedPhotoIds: List<String>.from(existing.photoIds),
-          ),
-        );
+        if (!_disposed)
+          _diaryChangeController.add(
+            DiaryChange(
+              type: DiaryChangeType.deleted,
+              entryId: id,
+              removedPhotoIds: List<String>.from(existing.photoIds),
+            ),
+          );
       }
       return const Success(null);
     } catch (e) {
@@ -543,13 +547,14 @@ class DiaryService implements IDiaryService {
       _indexManager.insertEntry(_diaryBox!, entry);
 
       // 変更イベント（作成）を通知
-      _diaryChangeController.add(
-        DiaryChange(
-          type: DiaryChangeType.created,
-          entryId: entry.id,
-          addedPhotoIds: List<String>.from(photoIds),
-        ),
-      );
+      if (!_disposed)
+        _diaryChangeController.add(
+          DiaryChange(
+            type: DiaryChangeType.created,
+            entryId: entry.id,
+            addedPhotoIds: List<String>.from(photoIds),
+          ),
+        );
 
       // バックグラウンドでタグを生成（過去の日付コンテキストを含む）
       _tagService.generateTagsInBackgroundForPastPhoto(
@@ -607,6 +612,7 @@ class DiaryService implements IDiaryService {
   /// リソースを解放する
   @override
   void dispose() {
+    _disposed = true;
     _diaryChangeController.close();
   }
 

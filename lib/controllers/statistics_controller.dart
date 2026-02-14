@@ -80,7 +80,7 @@ class StatisticsController extends BaseErrorController {
   }
 
   /// 日記変更ストリームを購読する
-  void subscribeDiaryChanges() async {
+  Future<void> subscribeDiaryChanges() async {
     try {
       final diaryService = await ServiceLocator().getAsync<IDiaryService>();
       _diarySub = diaryService.changes.listen((_) {

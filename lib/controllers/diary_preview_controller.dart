@@ -152,8 +152,25 @@ class DiaryPreviewController extends BaseErrorController {
   }
 
   /// 写真リストの代表日時を算出（中央値）
+  ///
+  /// [AssetEntity.createDateTime] がエポック（1970年以前）の場合は無効とみなし、
+  /// [AssetEntity.modifiedDateTime] をフォールバックとして使用する。
   DateTime _resolvePhotoDateTime(List<AssetEntity> assets) {
-    final photoTimes = assets.map((a) => a.createDateTime).toList()..sort();
+    final epoch = DateTime(1970);
+    final photoTimes =
+        assets
+            .map((a) {
+              final createDate = a.createDateTime;
+              return createDate.isAfter(epoch)
+                  ? createDate
+                  : a.modifiedDateTime;
+            })
+            .where((dt) => dt.isAfter(epoch))
+            .toList()
+          ..sort();
+
+    if (photoTimes.isEmpty) return DateTime.now();
+
     return photoTimes.length == 1
         ? photoTimes.first
         : photoTimes[photoTimes.length ~/ 2];
@@ -161,9 +178,9 @@ class DiaryPreviewController extends BaseErrorController {
 
   /// AI生成結果のusage limitチェック。制限到達時は true を返す。
   bool _handleUsageLimitIfNeeded(Result<DiaryGenerationResult> resultFromAi) {
-    if (resultFromAi.isFailure &&
-        resultFromAi.error is AiProcessingException &&
-        (resultFromAi.error as AiProcessingException).isUsageLimitError) {
+    if (resultFromAi case Failure<DiaryGenerationResult>(
+      error: AiProcessingException(isUsageLimitError: true),
+    )) {
       _usageLimitReached = true;
       _isAnalyzingPhotos = false;
       setLoading(false);

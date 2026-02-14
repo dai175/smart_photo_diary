@@ -480,6 +480,13 @@ class InAppPurchaseService
               purchaseDate: DateTime.now(),
             ),
           );
+        } else {
+          log(
+            'Simulator mock: createStatusForPlan failed',
+            level: LogLevel.warning,
+            context: 'purchasePlan',
+            error: result.error,
+          );
         }
       }
     }
