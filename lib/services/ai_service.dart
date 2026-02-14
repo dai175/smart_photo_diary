@@ -45,7 +45,8 @@ class AiService implements IAiService {
 
   /// Best-effort monthly reset — failure is non-critical, only logged
   Future<void> _tryResetMonthlyUsage(String caller) async {
-    final resetResult = await _subscriptionService!.resetMonthlyUsageIfNeeded();
+    if (_subscriptionService == null) return;
+    final resetResult = await _subscriptionService.resetMonthlyUsageIfNeeded();
     if (resetResult.isFailure) {
       _logger?.warning(
         'Monthly usage reset failed',

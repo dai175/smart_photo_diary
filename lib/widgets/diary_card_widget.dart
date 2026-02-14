@@ -223,20 +223,8 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
         quality: AppConstants.diaryThumbnailQuality,
       ),
       builder: (context, thumbnailSnapshot) {
-        if (!thumbnailSnapshot.hasData) {
-          return Container(
-            width: AppConstants.diaryThumbnailSize,
-            height: AppConstants.diaryThumbnailSize,
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          );
-        }
-        if (thumbnailSnapshot.data!.isFailure) {
+        if (thumbnailSnapshot.hasError ||
+            (thumbnailSnapshot.hasData && thumbnailSnapshot.data!.isFailure)) {
           return Container(
             width: AppConstants.diaryThumbnailSize,
             height: AppConstants.diaryThumbnailSize,
@@ -249,6 +237,19 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
                 Icons.broken_image_outlined,
                 color: AppColors.onSurfaceVariant,
               ),
+            ),
+          );
+        }
+        if (!thumbnailSnapshot.hasData) {
+          return Container(
+            width: AppConstants.diaryThumbnailSize,
+            height: AppConstants.diaryThumbnailSize,
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: AppSpacing.photoRadius,
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           );
         }

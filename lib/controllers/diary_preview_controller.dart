@@ -181,7 +181,7 @@ class DiaryPreviewController extends BaseErrorController {
   /// AI生成結果のusage limitチェック。制限到達時は true を返す。
   bool _handleUsageLimitIfNeeded(Result<DiaryGenerationResult> resultFromAi) {
     if (resultFromAi case Failure<DiaryGenerationResult>(
-      error: AiProcessingException(isUsageLimitError: true),
+      exception: AiProcessingException(isUsageLimitError: true),
     )) {
       _usageLimitReached = true;
       _isAnalyzingPhotos = false;
