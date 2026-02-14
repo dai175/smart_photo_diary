@@ -32,7 +32,20 @@ class TimelinePhotoThumbnail extends StatelessWidget {
       // メモ化されたFutureを使用して再描画時の待機→ローディング表示を防止
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isSuccess) {
+        if (snapshot.hasError) {
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFBDBDBD),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.broken_image_outlined,
+                color: Color(0xFF9E9E9E),
+              ),
+            ),
+          );
+        } else if (snapshot.hasData && snapshot.data!.isSuccess) {
           final thumbnailData = snapshot.data!.value;
           final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
           return RepaintBoundary(
