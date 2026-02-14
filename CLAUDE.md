@@ -23,7 +23,7 @@ fvm flutter test test/integration/   # Integration tests only
 fvm flutter analyze                # Must show "No issues found!"
 fvm dart format .                  # ALWAYS run after code changes
 
-# Coverage measurement (threshold: 40%, enforced in CI)
+# Coverage measurement (threshold: 48%, enforced in CI)
 fvm flutter test --coverage
 lcov --summary coverage/lcov.info                                    # Summary
 genhtml coverage/lcov.info -o coverage/html && open coverage/html/index.html  # HTML report
@@ -79,24 +79,42 @@ lib/
 - **`Result<T>` pattern** for type-safe error handling (`sealed class` with `Success<T>` / `Failure<T>`) — new features MUST use this
 - **Exception hierarchy** — `AppException` base class with specific subtypes in `lib/core/errors/`
 - **State management** — `ChangeNotifier`-based controllers (no Provider/Riverpod/Bloc)
+- **Facade pattern** — large services (DiaryService, SubscriptionService, PhotoService) delegate to internal sub-services
+- **Constructor injection** — service dependencies injected via constructors
 - **`build_runner`** for generating Hive type adapters
 
 ### Registered Services
 
+#### Phase 1: Core Services
+
 | Service | Interface | Role |
 |---------|-----------|------|
 | LoggingService | ILoggingService | Unified logging |
-| DiaryService | IDiaryService | Diary CRUD, search, filter |
-| PhotoService | IPhotoService | Photo library access |
-| PhotoCacheService | IPhotoCacheService | Photo thumbnail caching |
-| PhotoAccessControlService | IPhotoAccessControlService | Premium photo access control |
-| AiService | IAiService | AI diary/tag generation |
-| SubscriptionService | ISubscriptionService | Subscription & usage tracking |
+| SubscriptionStateService | ISubscriptionStateService | Subscription state (Hive) |
+| AiUsageService | IAiUsageService | AI usage tracking |
+| FeatureAccessService | IFeatureAccessService | Feature access control |
+| InAppPurchaseService | IInAppPurchaseService | IAP processing |
+| SubscriptionService | ISubscriptionService | Subscription facade |
 | SettingsService | ISettingsService | App settings, theme, locale |
+| PhotoPermissionService | IPhotoPermissionService | Photo permission management |
+| PhotoCacheService | IPhotoCacheService | Photo thumbnail caching |
+| PhotoService | IPhotoService | Photo library access (facade) |
+| CameraService | ICameraService | Camera capture |
+| PhotoAccessControlService | IPhotoAccessControlService | Premium photo access control |
 | StorageService | IStorageService | Data export/import |
+| PromptUsageService | IPromptUsageService | Prompt usage history |
 | PromptService | IPromptService | Writing prompt management |
-| SocialShareService | ISocialShareService | X/Instagram sharing |
 | DiaryImageGenerator | (concrete) | Social share image generation |
+| SocialShareService | ISocialShareService | X/Instagram sharing |
+
+#### Phase 2: Dependent Services
+
+| Service | Interface | Role |
+|---------|-----------|------|
+| AiService | IAiService | AI diary/tag generation |
+| DiaryTagService | IDiaryTagService | Diary tag management |
+| DiaryStatisticsService | IDiaryStatisticsService | Diary statistics |
+| DiaryService | IDiaryService / IDiaryCrudService / IDiaryQueryService | Diary facade (CRUD, query, tags, stats) |
 | TimelineGroupingService | (static) | Date-based timeline grouping |
 
 ## Critical Development Guidelines
