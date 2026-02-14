@@ -423,6 +423,24 @@ class PhotoQueryService {
       caller: 'getPhotosEfficient',
     );
 
+    if (startDate != null && endDate != null) {
+      final validAssets = _filterByDateRange(
+        assets,
+        startDate: startDate,
+        endDate: endDate,
+        caller: 'getPhotosEfficient',
+      );
+
+      _logger.debug(
+        'Photos retrieved efficiently',
+        context: 'PhotoQueryService.getPhotosEfficient',
+        data:
+            'Count: ${validAssets.length} (original: ${assets.length}), offset: $offset, limit: $limit',
+      );
+
+      return validAssets;
+    }
+
     _logger.debug(
       'Photos retrieved efficiently',
       context: 'PhotoQueryService.getPhotosEfficient',

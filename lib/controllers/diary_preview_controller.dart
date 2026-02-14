@@ -151,21 +151,23 @@ class DiaryPreviewController extends BaseErrorController {
     }
   }
 
-  /// 写真リストの代表日時を算出（中央値）
+  static final _epoch = DateTime(1970);
+
+  /// アセットから有効な日時を取得する。
   ///
-  /// [AssetEntity.createDateTime] がエポック（1970年以前）の場合は無効とみなし、
+  /// [AssetEntity.createDateTime] がエポック（1970年以前）の場合は
   /// [AssetEntity.modifiedDateTime] をフォールバックとして使用する。
+  static DateTime _resolveAssetDateTime(AssetEntity asset) {
+    final createDate = asset.createDateTime;
+    return createDate.isAfter(_epoch) ? createDate : asset.modifiedDateTime;
+  }
+
+  /// 写真リストの代表日時を算出（中央値）
   DateTime _resolvePhotoDateTime(List<AssetEntity> assets) {
-    final epoch = DateTime(1970);
     final photoTimes =
         assets
-            .map((a) {
-              final createDate = a.createDateTime;
-              return createDate.isAfter(epoch)
-                  ? createDate
-                  : a.modifiedDateTime;
-            })
-            .where((dt) => dt.isAfter(epoch))
+            .map(_resolveAssetDateTime)
+            .where((dt) => dt.isAfter(_epoch))
             .toList()
           ..sort();
 
@@ -210,7 +212,7 @@ class DiaryPreviewController extends BaseErrorController {
     );
 
     if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
-    if (resultFromAi.isFailure) throw Exception(resultFromAi.error.message);
+    if (resultFromAi.isFailure) throw resultFromAi.error;
 
     return resultFromAi.value;
   }
@@ -230,7 +232,10 @@ class DiaryPreviewController extends BaseErrorController {
     for (final asset in assets) {
       final imageData = await _photoService.getOriginalFile(asset);
       if (imageData != null) {
-        imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
+        imagesWithTimes.add((
+          imageData: imageData,
+          time: _resolveAssetDateTime(asset),
+        ));
       }
     }
 
@@ -262,7 +267,7 @@ class DiaryPreviewController extends BaseErrorController {
     _isAnalyzingPhotos = false;
 
     if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
-    if (resultFromAi.isFailure) throw Exception(resultFromAi.error.message);
+    if (resultFromAi.isFailure) throw resultFromAi.error;
 
     return resultFromAi.value;
   }

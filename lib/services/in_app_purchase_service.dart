@@ -343,11 +343,10 @@ class InAppPurchaseService
       );
       _isPurchasing = true;
 
+      final productDetails = await _queryProductDetails(productId);
+      final purchaseParam = PurchaseParam(productDetails: productDetails);
+
       try {
-        final productDetails = await _queryProductDetails(productId);
-
-        final purchaseParam = PurchaseParam(productDetails: productDetails);
-
         log(
           'Calling buyNonConsumable...',
           level: LogLevel.info,
