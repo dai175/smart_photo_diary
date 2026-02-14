@@ -156,4 +156,7 @@ abstract class IDiaryService {
 
   /// データベースの最適化（断片化を解消）
   Future<void> compactDatabase();
+
+  /// リソースを解放する
+  void dispose();
 }
