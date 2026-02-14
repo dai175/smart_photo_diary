@@ -151,7 +151,6 @@ class SubscriptionStatus extends HiveObject {
 
   /// 今月のAI生成回数制限に達しているかどうか
   bool get hasReachedMonthlyLimit {
-    _resetMonthlyUsageIfNeeded();
     return monthlyUsageCount >= currentPlanClass.monthlyAiGenerationLimit;
   }
 
@@ -162,7 +161,6 @@ class SubscriptionStatus extends HiveObject {
 
   /// 残りAI生成回数を取得
   int get remainingGenerations {
-    _resetMonthlyUsageIfNeeded();
     final remaining =
         currentPlanClass.monthlyAiGenerationLimit - monthlyUsageCount;
     return remaining > 0 ? remaining : 0;
@@ -170,20 +168,8 @@ class SubscriptionStatus extends HiveObject {
 
   /// AI生成使用量をインクリメント
   void incrementAiUsage() {
-    _resetMonthlyUsageIfNeeded();
     monthlyUsageCount++;
     save();
-  }
-
-  /// 月が変わった場合に使用量をリセット
-  void _resetMonthlyUsageIfNeeded() {
-    final currentMonth = _getCurrentMonth();
-    if (usageMonth != currentMonth) {
-      monthlyUsageCount = 0;
-      usageMonth = currentMonth;
-      lastResetDate = DateTime.now();
-      save();
-    }
   }
 
   /// 使用量を手動でリセット（テスト用）
