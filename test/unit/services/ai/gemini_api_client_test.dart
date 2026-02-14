@@ -10,9 +10,6 @@ import 'package:smart_photo_diary/services/interfaces/logging_service_interface.
 
 import '../../../integration/mocks/mock_services.dart';
 
-/// EnvironmentConfig のモック用ヘルパー
-/// テスト内で有効な API キーをセットアップするために .env をロードしない代わりに
-/// 直接テスト用の値を使う
 void main() {
   late MockILoggingService mockLogger;
 
@@ -31,13 +28,17 @@ void main() {
     TestServiceSetup.clearAllMocks();
   });
 
-  /// 成功レスポンスのJSON
   String successResponseBody() {
-    return '{"candidates":[{"content":{"parts":[{"text":"Hello!"}],"role":"model"},"finishReason":"STOP"}]}';
+    return '{"candidates":[{"content":{"parts":[{"text":"Hello!"}],'
+        '"role":"model"},"finishReason":"STOP"}]}';
   }
 
-  group('GeminiApiClient retry logic', () {
-    group('_postWithRetry', () {
+  final testUrl = Uri.parse('https://example.com/api');
+  const testHeaders = {'Content-Type': 'application/json'};
+  const testBody = '{"test": true}';
+
+  group('GeminiApiClient', () {
+    group('postWithRetry', () {
       test('returns immediately on HTTP 200 without retry', () async {
         int callCount = 0;
         final mockClient = MockClient((request) async {
@@ -46,97 +47,56 @@ void main() {
         });
 
         final apiClient = GeminiApiClient(httpClient: mockClient);
-
-        // sendTextRequest は EnvironmentConfig.hasValidApiKey を要求するため
-        // _postWithRetry を間接的にテストするために直接的なHTTPレスポンスを検証
-        // ここでは低レベルのリトライロジックをテスト
-        final response = await mockClient.post(
-          Uri.parse('https://example.com'),
-          headers: {'Content-Type': 'application/json'},
-          body: '{}',
+        final response = await apiClient.postWithRetry(
+          testUrl,
+          headers: testHeaders,
+          body: testBody,
+          requestContext: 'test',
         );
 
         expect(response.statusCode, 200);
         expect(callCount, 1);
-
-        // apiClient が正しく生成されていることの確認
-        expect(apiClient, isNotNull);
       });
 
-      test('retries on HTTP 500 and succeeds on second attempt', () async {
+      test('returns immediately on non-retryable HTTP error (400)', () async {
         int callCount = 0;
         final mockClient = MockClient((request) async {
           callCount++;
-          if (callCount == 1) {
-            return http.Response('Server Error', 500);
-          }
-          return http.Response(successResponseBody(), 200);
-        });
-
-        final apiClient = GeminiApiClient(httpClient: mockClient);
-        // _postWithRetry を直接呼べないため、リフレクション的にテスト
-        // sendTextRequest は EnvironmentConfig が必要なので、
-        // テスト用に _postWithRetry の動作を検証するアプローチを取る
-        expect(apiClient, isNotNull);
-        expect(callCount, 0); // まだ呼ばれていない
-      });
-
-      test('retries on HTTP 429 (Rate Limit)', () async {
-        int callCount = 0;
-        final mockClient = MockClient((request) async {
-          callCount++;
-          if (callCount <= 2) {
-            return http.Response('Rate Limited', 429);
-          }
-          return http.Response(successResponseBody(), 200);
-        });
-
-        final apiClient = GeminiApiClient(httpClient: mockClient);
-        expect(apiClient, isNotNull);
-      });
-
-      test('does not retry on HTTP 400 (Bad Request)', () async {
-        final mockClient = MockClient((request) async {
           return http.Response('Bad Request', 400);
         });
 
         final apiClient = GeminiApiClient(httpClient: mockClient);
-        expect(apiClient, isNotNull);
+        final response = await apiClient.postWithRetry(
+          testUrl,
+          headers: testHeaders,
+          body: testBody,
+          requestContext: 'test',
+        );
+
+        expect(response.statusCode, 400);
+        expect(callCount, 1);
       });
 
-      test('does not retry on HTTP 401 (Unauthorized)', () async {
+      test('returns immediately on HTTP 401 without retry', () async {
+        int callCount = 0;
         final mockClient = MockClient((request) async {
+          callCount++;
           return http.Response('Unauthorized', 401);
         });
 
         final apiClient = GeminiApiClient(httpClient: mockClient);
-        expect(apiClient, isNotNull);
-      });
-    });
+        final response = await apiClient.postWithRetry(
+          testUrl,
+          headers: testHeaders,
+          body: testBody,
+          requestContext: 'test',
+        );
 
-    group('_isRetryableStatusCode', () {
-      test('429 is retryable', () {
-        // _isRetryableStatusCode はプライベートなので間接的に検証
-        // リトライ対象: 429, 500-599
-        // 非リトライ: 400, 401, 403, 404
-        expect(429 == 429 || (429 >= 500 && 429 <= 599), isTrue);
-      });
-
-      test('500-599 are retryable', () {
-        for (final code in [500, 502, 503, 504]) {
-          expect(code == 429 || (code >= 500 && code <= 599), isTrue);
-        }
+        expect(response.statusCode, 401);
+        expect(callCount, 1);
       });
 
-      test('400, 401, 403, 404 are not retryable', () {
-        for (final code in [400, 401, 403, 404]) {
-          expect(code == 429 || (code >= 500 && code <= 599), isFalse);
-        }
-      });
-    });
-
-    group('Integration-style retry tests', () {
-      test('retries on HTTP 500 and returns success response', () async {
+      test('retries on HTTP 500 and succeeds on second attempt', () async {
         int callCount = 0;
         final mockClient = MockClient((request) async {
           callCount++;
@@ -147,24 +107,63 @@ void main() {
         });
 
         final apiClient = GeminiApiClient(httpClient: mockClient);
-        // _postWithRetry を直接テストするために公開ラッパーを使う
-        // テスト対象は内部メソッドなので、extractTextFromResponse で間接テスト
-        final data = {
-          'candidates': [
-            {
-              'content': {
-                'parts': [
-                  {'text': 'Hello!'},
-                ],
-                'role': 'model',
-              },
-              'finishReason': 'STOP',
-            },
-          ],
-        };
-        final text = apiClient.extractTextFromResponse(data);
-        expect(text, 'Hello!');
+        final response = await apiClient.postWithRetry(
+          testUrl,
+          headers: testHeaders,
+          body: testBody,
+          requestContext: 'test',
+        );
+
+        expect(response.statusCode, 200);
+        expect(callCount, 2);
       });
+
+      test('retries on HTTP 429 and succeeds on third attempt', () async {
+        int callCount = 0;
+        final mockClient = MockClient((request) async {
+          callCount++;
+          if (callCount <= 2) {
+            return http.Response('Rate Limited', 429);
+          }
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final response = await apiClient.postWithRetry(
+          testUrl,
+          headers: testHeaders,
+          body: testBody,
+          requestContext: 'test',
+        );
+
+        expect(response.statusCode, 200);
+        expect(callCount, 3);
+      });
+
+      test(
+        'retries on SocketException and succeeds on second attempt',
+        () async {
+          int callCount = 0;
+          final mockClient = MockClient((request) async {
+            callCount++;
+            if (callCount == 1) {
+              throw const SocketException('Connection refused');
+            }
+            return http.Response(successResponseBody(), 200);
+          });
+
+          final apiClient = GeminiApiClient(httpClient: mockClient);
+          final response = await apiClient.postWithRetry(
+            testUrl,
+            headers: testHeaders,
+            body: testBody,
+            requestContext: 'test',
+          );
+
+          expect(response.statusCode, 200);
+          expect(callCount, 2);
+        },
+      );
 
       test(
         'throws NetworkException after all retries exhausted on SocketException',
@@ -175,13 +174,137 @@ void main() {
 
           final apiClient = GeminiApiClient(httpClient: mockClient);
 
-          // _postWithRetry が SocketException で全リトライ失敗すると
-          // NetworkException を throw する
-          // sendTextRequest は EnvironmentConfig のチェックがあるため
-          // ここではコンストラクタの正常性を確認
-          expect(apiClient, isNotNull);
+          expect(
+            () => apiClient.postWithRetry(
+              testUrl,
+              headers: testHeaders,
+              body: testBody,
+              requestContext: 'test',
+            ),
+            throwsA(isA<NetworkException>()),
+          );
         },
       );
+
+      test(
+        'throws NetworkException after all retries exhausted on HTTP 500',
+        () async {
+          final mockClient = MockClient((request) async {
+            return http.Response('Server Error', 500);
+          });
+
+          final apiClient = GeminiApiClient(httpClient: mockClient);
+
+          expect(
+            () => apiClient.postWithRetry(
+              testUrl,
+              headers: testHeaders,
+              body: testBody,
+              requestContext: 'test',
+            ),
+            throwsA(isA<NetworkException>()),
+          );
+        },
+      );
+
+      test(
+        'throws NetworkException after all retries exhausted on ClientException',
+        () async {
+          final mockClient = MockClient((request) async {
+            throw http.ClientException('Connection reset');
+          });
+
+          final apiClient = GeminiApiClient(httpClient: mockClient);
+
+          expect(
+            () => apiClient.postWithRetry(
+              testUrl,
+              headers: testHeaders,
+              body: testBody,
+              requestContext: 'test',
+            ),
+            throwsA(isA<NetworkException>()),
+          );
+        },
+      );
+
+      test(
+        'retries correct number of times (maxRetries + 1 total attempts)',
+        () async {
+          int callCount = 0;
+          final mockClient = MockClient((request) async {
+            callCount++;
+            return http.Response('Server Error', 503);
+          });
+
+          final apiClient = GeminiApiClient(httpClient: mockClient);
+
+          try {
+            await apiClient.postWithRetry(
+              testUrl,
+              headers: testHeaders,
+              body: testBody,
+              requestContext: 'test',
+            );
+          } on NetworkException {
+            // expected
+          }
+
+          // 初回 + maxRetries 回のリトライ = 4回
+          expect(callCount, GeminiApiClient.maxRetries + 1);
+        },
+      );
+
+      test('handles mixed errors across retries', () async {
+        int callCount = 0;
+        final mockClient = MockClient((request) async {
+          callCount++;
+          if (callCount == 1) {
+            throw const SocketException('No route to host');
+          }
+          if (callCount == 2) {
+            return http.Response('Bad Gateway', 502);
+          }
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final response = await apiClient.postWithRetry(
+          testUrl,
+          headers: testHeaders,
+          body: testBody,
+          requestContext: 'test',
+        );
+
+        expect(response.statusCode, 200);
+        expect(callCount, 3);
+      });
+    });
+
+    group('isRetryableStatusCode', () {
+      test('429 is retryable', () {
+        expect(GeminiApiClient.isRetryableStatusCode(429), isTrue);
+      });
+
+      test('500, 502, 503, 504 are retryable', () {
+        for (final code in [500, 502, 503, 504]) {
+          expect(GeminiApiClient.isRetryableStatusCode(code), isTrue);
+        }
+      });
+
+      test('599 is retryable', () {
+        expect(GeminiApiClient.isRetryableStatusCode(599), isTrue);
+      });
+
+      test('200 is not retryable', () {
+        expect(GeminiApiClient.isRetryableStatusCode(200), isFalse);
+      });
+
+      test('400, 401, 403, 404 are not retryable', () {
+        for (final code in [400, 401, 403, 404]) {
+          expect(GeminiApiClient.isRetryableStatusCode(code), isFalse);
+        }
+      });
     });
 
     group('Constructor', () {
@@ -194,7 +317,6 @@ void main() {
         final mockClient = MockClient((request) async {
           return http.Response(successResponseBody(), 200);
         });
-
         final apiClient = GeminiApiClient(httpClient: mockClient);
         expect(apiClient, isNotNull);
       });
@@ -306,8 +428,8 @@ void main() {
       });
 
       test('preserves original error', () {
-        final original = const SocketException('Connection refused');
-        final exception = NetworkException(
+        const original = SocketException('Connection refused');
+        const exception = NetworkException(
           'Network failed',
           originalError: original,
         );
@@ -321,6 +443,20 @@ void main() {
           details: 'After 3 retries',
         );
         expect(exception.details, 'After 3 retries');
+      });
+    });
+
+    group('Constants', () {
+      test('maxRetries is 3', () {
+        expect(GeminiApiClient.maxRetries, 3);
+      });
+
+      test('baseDelay is 1 second', () {
+        expect(GeminiApiClient.baseDelay, const Duration(seconds: 1));
+      });
+
+      test('requestTimeout is 30 seconds', () {
+        expect(GeminiApiClient.requestTimeout, const Duration(seconds: 30));
       });
     });
   });
