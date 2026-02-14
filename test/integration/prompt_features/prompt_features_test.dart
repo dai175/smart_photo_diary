@@ -62,7 +62,7 @@ class _MockLoggingService implements ILoggingService {
 /// ## 技術要件
 /// - MockSubscriptionServiceとPromptServiceの統合使用
 /// - ServiceLocatorを使った依存注入テスト
-/// - Result<T>パターンでのエラーハンドリング検証
+/// - `Result<T>`パターンでのエラーハンドリング検証
 /// - 各テストケースは独立して実行可能
 void main() {
   group('Phase 3.1.2: プロンプト機能統合テスト', () {

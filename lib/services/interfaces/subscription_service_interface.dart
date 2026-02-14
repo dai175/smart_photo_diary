@@ -13,7 +13,7 @@ export 'in_app_purchase_service_interface.dart'
 /// 内部的にはISubscriptionStateService、IAiUsageService、
 /// IFeatureAccessService、IInAppPurchaseServiceに委譲される。
 ///
-/// Result<T>パターンを使用して型安全なエラーハンドリングを実現します。
+/// `Result<T>`パターンを使用して型安全なエラーハンドリングを実現します。
 /// 委譲先サービスが返すエラーがそのまま伝播されます。
 abstract class ISubscriptionService {
   // ========================================

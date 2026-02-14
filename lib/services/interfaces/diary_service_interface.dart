@@ -6,7 +6,7 @@ import '../../core/result/result.dart';
 
 /// 日記サービスのインターフェース
 ///
-/// compactDatabase を除く全メソッドが Result<T> パターンで統一されています。
+/// compactDatabase を除く全メソッドが `Result<T>` パターンで統一されています。
 abstract class IDiaryService {
   /// 日記の変更ストリーム（作成/更新/削除）。broadcast。
   Stream<DiaryChange> get changes;

@@ -18,10 +18,6 @@ analyzer:
     # These rules provide style guidance but don't indicate actual problems
     prefer_const_declarations: ignore  # Use const for declarations when possible
     avoid_redundant_argument_values: ignore  # Style preference, not error
-    unintended_html_in_doc_comment: ignore  # Documentation formatting, not functional issue
-    # Migration-related suppressions
-    deprecated_member_use: ignore  # Ignore deprecation warnings during migration
-    deprecated_member_use_from_same_package: ignore  # Ignore deprecation warnings within the same package
 
 linter:
   # The lint rules applied to this project can be customized in the

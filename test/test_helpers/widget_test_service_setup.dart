@@ -45,7 +45,7 @@ class WidgetTestServiceSetup {
     return serviceLocator;
   }
 
-  /// Setup global ServiceRegistration with mocks for widgets that use ServiceRegistration.get<T>()
+  /// Setup global ServiceRegistration with mocks for widgets that use `ServiceRegistration.get<T>()`
   static void setupGlobalServiceRegistration() {
     // Clear any existing ServiceLocator
     final globalServiceLocator = ServiceLocator();

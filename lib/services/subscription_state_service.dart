@@ -457,7 +457,7 @@ class SubscriptionStateService
     }
   }
 
-  /// Result<T>パターンでのエラーハンドリングヘルパー
+  /// `Result<T>`パターンでのエラーハンドリングヘルパー
   Result<T> _handleError<T>(
     dynamic error,
     String operation, {

@@ -43,7 +43,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// ## 技術要件検証
 /// - MockSubscriptionServiceとPromptServiceの統合使用
 /// - ServiceLocatorを使った依存注入テスト
-/// - Result<T>パターンでのエラーハンドリング検証
+/// - `Result<T>`パターンでのエラーハンドリング検証
 /// - 各テストケースは独立して実行可能
 ///
 /// ## 期待される結果
