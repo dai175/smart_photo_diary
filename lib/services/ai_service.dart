@@ -9,6 +9,27 @@ import 'interfaces/logging_service_interface.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
+/// フォールバック用の無操作ロガー
+class _NoOpLogger implements ILoggingService {
+  @override
+  void debug(String message, {String? context, dynamic data}) {}
+  @override
+  void info(String message, {String? context, dynamic data}) {}
+  @override
+  void warning(String message, {String? context, dynamic data}) {}
+  @override
+  void error(
+    String message, {
+    String? context,
+    dynamic error,
+    StackTrace? stackTrace,
+  }) {}
+  @override
+  Stopwatch startTimer(String operation, {String? context}) => Stopwatch();
+  @override
+  void endTimer(Stopwatch stopwatch, String operation, {String? context}) {}
+}
+
 /// AIを使用して日記文を生成するサービスクラス（リファクタリング済み）
 ///
 /// Phase 1.7.1: SubscriptionService統合による使用量制限実装
@@ -26,8 +47,10 @@ class AiService implements IAiService {
     TagGenerator? tagGenerator,
     ISubscriptionService? subscriptionService,
     ILoggingService? logger,
-  }) : _diaryGenerator = diaryGenerator ?? DiaryGenerator(),
-       _tagGenerator = tagGenerator ?? TagGenerator(),
+  }) : _diaryGenerator =
+           diaryGenerator ?? DiaryGenerator(logger: logger ?? _NoOpLogger()),
+       _tagGenerator =
+           tagGenerator ?? TagGenerator(logger: logger ?? _NoOpLogger()),
        _subscriptionService = subscriptionService,
        _logger = logger;
 

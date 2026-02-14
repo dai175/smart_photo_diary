@@ -14,14 +14,26 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 
 class StorageService implements IStorageService {
-  /// DI用の公開コンストラクタ
-  StorageService();
+  final IDiaryService? _diaryService;
+  final ISettingsService? _settingsService;
+
+  StorageService({
+    IDiaryService? diaryService,
+    ISettingsService? settingsService,
+  }) : _diaryService = diaryService,
+       _settingsService = settingsService;
+
+  /// DiaryService を取得（コンストラクタ注入 or ServiceLocator フォールバック）
+  Future<IDiaryService> _getDiaryService() async {
+    return _diaryService ?? await ServiceLocator().getAsync<IDiaryService>();
+  }
 
   /// 現在のロケールを解決する
   Future<Locale> _resolveLocale() async {
     try {
-      final settingsService = await ServiceLocator()
-          .getAsync<ISettingsService>();
+      final settingsService =
+          _settingsService ??
+          await ServiceLocator().getAsync<ISettingsService>();
       return settingsService.locale ?? PlatformDispatcher.instance.locale;
     } catch (_) {
       return PlatformDispatcher.instance.locale;
@@ -51,7 +63,7 @@ class StorageService implements IStorageService {
   // データのエクスポート（保存先選択可能）
   @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
-    final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+    final diaryService = await _getDiaryService();
     final result = await diaryService.getSortedDiaryEntries();
 
     if (result.isFailure) {
@@ -218,7 +230,7 @@ class StorageService implements IStorageService {
     Map<String, dynamic> data,
   ) async {
     try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      final diaryService = await _getDiaryService();
       final entries = data['entries'] as List<dynamic>;
 
       int totalEntries = entries.length;
@@ -382,7 +394,7 @@ class StorageService implements IStorageService {
   // データの最適化
   @override
   Future<bool> optimizeDatabase() async {
-    final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+    final diaryService = await _getDiaryService();
 
     // Hiveデータベースのコンパクト（断片化を解消）
     await diaryService.compactDatabase();

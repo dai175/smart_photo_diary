@@ -72,13 +72,11 @@ void main() {
       ServiceLocator().clear();
 
       // LoggingServiceのモックを登録
-      ServiceLocator().registerFactory<ILoggingService>(
-        () => _MockLoggingService(),
-      );
+      final mockLogger = _MockLoggingService();
+      ServiceLocator().registerFactory<ILoggingService>(() => mockLogger);
 
-      // 各テスト前にインスタンスをリセット
-      PromptService.resetInstance();
-      promptService = PromptService.instance;
+      // コンストラクタ注入で新しいインスタンスを生成
+      promptService = PromptService(logger: mockLogger);
     });
 
     tearDown(() async {
@@ -95,24 +93,6 @@ void main() {
       } catch (e) {
         // テスト環境でのエラーは無視
       }
-    });
-
-    group('シングルトンパターン', () {
-      test('同じインスタンスが返される', () {
-        final instance1 = PromptService.instance;
-        final instance2 = PromptService.instance;
-
-        expect(instance1, same(instance2));
-      });
-
-      test('resetInstance()でインスタンスがリセットされる', () {
-        final instance1 = PromptService.instance;
-
-        PromptService.resetInstance();
-
-        final instance2 = PromptService.instance;
-        expect(instance1, isNot(same(instance2)));
-      });
     });
 
     group('初期化', () {

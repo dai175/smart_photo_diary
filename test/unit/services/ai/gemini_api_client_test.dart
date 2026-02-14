@@ -46,7 +46,10 @@ void main() {
           return http.Response(successResponseBody(), 200);
         });
 
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         final response = await apiClient.postWithRetry(
           testUrl,
           headers: testHeaders,
@@ -65,7 +68,10 @@ void main() {
           return http.Response('Bad Request', 400);
         });
 
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         final response = await apiClient.postWithRetry(
           testUrl,
           headers: testHeaders,
@@ -84,7 +90,10 @@ void main() {
           return http.Response('Unauthorized', 401);
         });
 
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         final response = await apiClient.postWithRetry(
           testUrl,
           headers: testHeaders,
@@ -106,7 +115,10 @@ void main() {
           return http.Response(successResponseBody(), 200);
         });
 
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         final response = await apiClient.postWithRetry(
           testUrl,
           headers: testHeaders,
@@ -128,7 +140,10 @@ void main() {
           return http.Response(successResponseBody(), 200);
         });
 
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         final response = await apiClient.postWithRetry(
           testUrl,
           headers: testHeaders,
@@ -152,7 +167,10 @@ void main() {
             return http.Response(successResponseBody(), 200);
           });
 
-          final apiClient = GeminiApiClient(httpClient: mockClient);
+          final apiClient = GeminiApiClient(
+            logger: mockLogger,
+            httpClient: mockClient,
+          );
           final response = await apiClient.postWithRetry(
             testUrl,
             headers: testHeaders,
@@ -172,7 +190,10 @@ void main() {
             throw const SocketException('Connection refused');
           });
 
-          final apiClient = GeminiApiClient(httpClient: mockClient);
+          final apiClient = GeminiApiClient(
+            logger: mockLogger,
+            httpClient: mockClient,
+          );
 
           expect(
             () => apiClient.postWithRetry(
@@ -193,7 +214,10 @@ void main() {
             return http.Response('Server Error', 500);
           });
 
-          final apiClient = GeminiApiClient(httpClient: mockClient);
+          final apiClient = GeminiApiClient(
+            logger: mockLogger,
+            httpClient: mockClient,
+          );
 
           expect(
             () => apiClient.postWithRetry(
@@ -214,7 +238,10 @@ void main() {
             throw http.ClientException('Connection reset');
           });
 
-          final apiClient = GeminiApiClient(httpClient: mockClient);
+          final apiClient = GeminiApiClient(
+            logger: mockLogger,
+            httpClient: mockClient,
+          );
 
           expect(
             () => apiClient.postWithRetry(
@@ -237,7 +264,10 @@ void main() {
             return http.Response('Server Error', 503);
           });
 
-          final apiClient = GeminiApiClient(httpClient: mockClient);
+          final apiClient = GeminiApiClient(
+            logger: mockLogger,
+            httpClient: mockClient,
+          );
 
           try {
             await apiClient.postWithRetry(
@@ -268,7 +298,10 @@ void main() {
           return http.Response(successResponseBody(), 200);
         });
 
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         final response = await apiClient.postWithRetry(
           testUrl,
           headers: testHeaders,
@@ -309,7 +342,7 @@ void main() {
 
     group('Constructor', () {
       test('creates with default http.Client when none provided', () {
-        final apiClient = GeminiApiClient();
+        final apiClient = GeminiApiClient(logger: mockLogger);
         expect(apiClient, isNotNull);
       });
 
@@ -317,7 +350,10 @@ void main() {
         final mockClient = MockClient((request) async {
           return http.Response(successResponseBody(), 200);
         });
-        final apiClient = GeminiApiClient(httpClient: mockClient);
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
         expect(apiClient, isNotNull);
       });
     });
@@ -326,7 +362,7 @@ void main() {
       late GeminiApiClient apiClient;
 
       setUp(() {
-        apiClient = GeminiApiClient();
+        apiClient = GeminiApiClient(logger: mockLogger);
       });
 
       test('extracts text from standard response format', () {

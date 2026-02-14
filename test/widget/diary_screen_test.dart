@@ -6,6 +6,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/screens/diary_screen.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_query_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
@@ -79,6 +81,8 @@ void main() {
   /// Helper to register IDiaryService as an immediately-resolved async factory.
   void registerDiaryServiceAsync() {
     serviceLocator.registerAsyncFactory<IDiaryService>(() async => mockDiary);
+    serviceLocator.registerSingleton<IDiaryQueryService>(mockDiary);
+    serviceLocator.registerSingleton<IDiaryTagService>(MockIDiaryTagService());
   }
 
   group('DiaryScreen', () {
@@ -129,6 +133,10 @@ void main() {
         final diaryCompleter = Completer<IDiaryService>();
         serviceLocator.registerAsyncFactory<IDiaryService>(
           () => diaryCompleter.future,
+        );
+        final queryCompleter = Completer<IDiaryQueryService>();
+        serviceLocator.registerAsyncFactory<IDiaryQueryService>(
+          () => queryCompleter.future,
         );
 
         await tester.pumpWidget(buildScreen());

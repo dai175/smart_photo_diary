@@ -13,15 +13,15 @@ import '../../core/service_locator.dart';
 /// Gemini APIクライアント - API通信を担当
 class GeminiApiClient {
   final http.Client _httpClient;
+  final ILoggingService _logger;
 
   static const int maxRetries = 3;
   static const Duration baseDelay = Duration(seconds: 1);
   static const Duration requestTimeout = Duration(seconds: 30);
 
-  GeminiApiClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
-
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  GeminiApiClient({required ILoggingService logger, http.Client? httpClient})
+    : _logger = logger,
+      _httpClient = httpClient ?? http.Client();
 
   // Google Gemini APIのエンドポイント
   static String get _apiUrl =>
@@ -31,11 +31,14 @@ class GeminiApiClient {
   static String get _apiKey {
     final key = EnvironmentConfig.geminiApiKey;
     if (key.isEmpty) {
-      final client = GeminiApiClient();
-      client._logger.warning(
-        'GEMINI_API_KEY is not configured',
-        context: 'GeminiApiClient._apiKey',
-      );
+      try {
+        serviceLocator.get<ILoggingService>().warning(
+          'GEMINI_API_KEY is not configured',
+          context: 'GeminiApiClient._apiKey',
+        );
+      } catch (_) {
+        // LoggingService unavailable in test
+      }
       EnvironmentConfig.printDebugInfo();
     }
     return key;

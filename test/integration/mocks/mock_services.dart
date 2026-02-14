@@ -6,6 +6,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_query_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_access_control_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
@@ -32,6 +34,12 @@ class MockIAiService extends Mock implements IAiService {}
 
 /// Mock DiaryService for integration testing
 class MockIDiaryService extends Mock implements IDiaryService {}
+
+/// Mock DiaryCrudService for integration testing
+class MockIDiaryCrudService extends Mock implements IDiaryCrudService {}
+
+/// Mock DiaryQueryService for integration testing
+class MockIDiaryQueryService extends Mock implements IDiaryQueryService {}
 
 /// Mock SubscriptionService for integration testing
 class MockSubscriptionServiceInterface extends Mock
@@ -310,15 +318,6 @@ class TestServiceSetup {
       () => mock.getDiaryEntry(any()),
     ).thenAnswer((_) async => const Success(null));
     when(
-      () => mock.getTotalDiaryCount(),
-    ).thenAnswer((_) async => const Success(0));
-    when(
-      () => mock.getAllTags(),
-    ).thenAnswer((_) async => const Success({'mock', 'test', 'tags'}));
-    when(
-      () => mock.getDiaryCountInPeriod(any(), any()),
-    ).thenAnswer((_) async => const Success(0));
-    when(
       () => mock.getFilteredDiaryEntries(any()),
     ).thenAnswer((_) async => const Success([]));
     when(
@@ -328,12 +327,6 @@ class TestServiceSetup {
         limit: any(named: 'limit'),
       ),
     ).thenAnswer((_) async => const Success([]));
-    when(
-      () => mock.getTagsForEntry(any()),
-    ).thenAnswer((_) async => const Success(['mock', 'test']));
-    when(
-      () => mock.getPopularTags(limit: any(named: 'limit')),
-    ).thenAnswer((_) async => const Success(['mock', 'test']));
     when(
       () => mock.saveDiaryEntry(
         date: any(named: 'date'),

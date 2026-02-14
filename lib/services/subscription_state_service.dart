@@ -13,7 +13,6 @@ import '../config/environment_config.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'mixins/service_logging.dart';
-import '../core/service_locator.dart';
 
 /// SubscriptionStateService
 ///
@@ -32,7 +31,7 @@ class SubscriptionStateService
   Stream<SubscriptionStatus>? _statusStream;
 
   // ロギングサービス
-  ILoggingService? _loggingService;
+  final ILoggingService? _loggingService;
 
   @override
   ILoggingService? get loggingService => _loggingService;
@@ -41,7 +40,8 @@ class SubscriptionStateService
   String get logTag => 'SubscriptionStateService';
 
   /// DI用の公開コンストラクタ
-  SubscriptionStateService();
+  SubscriptionStateService({ILoggingService? logger})
+    : _loggingService = logger;
 
   /// サービス初期化処理
   ///
@@ -57,13 +57,6 @@ class SubscriptionStateService
 
     try {
       log('Initializing SubscriptionStateService...', level: LogLevel.info);
-
-      // LoggingServiceを取得（ServiceLocator経由、未登録時はnullのまま）
-      try {
-        _loggingService = ServiceLocator().get<ILoggingService>();
-      } catch (_) {
-        // テスト環境など、LoggingServiceが未登録の場合はnullのまま
-      }
 
       // Hiveボックスを開く
       _subscriptionBox = await Hive.openBox<SubscriptionStatus>(

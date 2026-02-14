@@ -436,23 +436,8 @@ class IntegrationTestHelpers {
       ),
     ).thenAnswer((_) async => const Success([]));
     when(
-      () => mockDiaryService.getAllTags(),
-    ).thenAnswer((_) async => const Success(<String>{}));
-    when(
-      () => mockDiaryService.getTotalDiaryCount(),
-    ).thenAnswer((_) async => const Success(0));
-    when(
-      () => mockDiaryService.getDiaryCountInPeriod(any(), any()),
-    ).thenAnswer((_) async => const Success(0));
-    when(
       () => mockDiaryService.getDiaryEntry(any()),
     ).thenAnswer((_) async => const Success(null));
-    when(
-      () => mockDiaryService.getTagsForEntry(any()),
-    ).thenAnswer((_) async => const Success([]));
-    when(
-      () => mockDiaryService.getPopularTags(limit: any(named: 'limit')),
-    ).thenAnswer((_) async => const Success([]));
     when(
       () => mockDiaryService.getDiaryEntryByPhotoId(any()),
     ).thenAnswer((_) async => const Success(null));

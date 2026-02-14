@@ -8,7 +8,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
-import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -33,9 +32,6 @@ void main() {
     tearDown(() async {
       // 各テスト後にクリーンアップ
       ServiceRegistration.reset();
-
-      // PromptServiceのシングルトンもリセット
-      PromptService.resetInstance();
 
       // Hive使用履歴Boxをクリア（テストデータ残存を避ける）
       try {

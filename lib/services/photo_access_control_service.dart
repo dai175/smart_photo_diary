@@ -1,22 +1,14 @@
 import '../models/plans/plan.dart';
 import 'interfaces/photo_access_control_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 
 /// 写真アクセス制御サービスの実装
 ///
 /// プランに基づいた写真へのアクセス可否を判定する
 class PhotoAccessControlService implements IPhotoAccessControlService {
-  ILoggingService? _logger;
+  final ILoggingService? _logger;
 
-  /// DI用の公開コンストラクタ
-  PhotoAccessControlService();
-
-  /// LoggingServiceを取得（遅延初期化）
-  ILoggingService _getLogger() {
-    _logger ??= serviceLocator.get<ILoggingService>();
-    return _logger!;
-  }
+  PhotoAccessControlService({ILoggingService? logger}) : _logger = logger;
 
   /// 指定されたプランでアクセス可能な最古の日付を取得
   @override
@@ -30,17 +22,12 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
       Duration(days: plan.pastPhotoAccessDays),
     );
 
-    try {
-      final logger = _getLogger();
-      logger.info(
-        'Accessible range calculated: plan=${plan.displayName}, '
-        'pastDays=${plan.pastPhotoAccessDays}, '
-        'oldestAccessibleDate=$accessibleDate (local timezone)',
-        context: 'PhotoAccessControlService.getAccessibleDateForPlan',
-      );
-    } catch (e) {
-      // LoggingServiceが初期化されていない場合は無視
-    }
+    _logger?.info(
+      'Accessible range calculated: plan=${plan.displayName}, '
+      'pastDays=${plan.pastPhotoAccessDays}, '
+      'oldestAccessibleDate=$accessibleDate (local timezone)',
+      context: 'PhotoAccessControlService.getAccessibleDateForPlan',
+    );
 
     return accessibleDate;
   }
@@ -61,19 +48,14 @@ class PhotoAccessControlService implements IPhotoAccessControlService {
         photoDateOnly.isAfter(accessibleDate) ||
         photoDateOnly.isAtSameMomentAs(accessibleDate);
 
-    try {
-      final logger = _getLogger();
-      logger.info(
-        'Photo access check: '
-        'plan=${plan.displayName}, '
-        'photoDate=$photoDateOnly (local), '
-        'oldestAccessibleDate=$accessibleDate (local), '
-        'result=$isAccessible',
-        context: 'PhotoAccessControlService.isPhotoAccessible',
-      );
-    } catch (e) {
-      // LoggingServiceが初期化されていない場合は無視
-    }
+    _logger?.info(
+      'Photo access check: '
+      'plan=${plan.displayName}, '
+      'photoDate=$photoDateOnly (local), '
+      'oldestAccessibleDate=$accessibleDate (local), '
+      'result=$isAccessible',
+      context: 'PhotoAccessControlService.isPhotoAccessible',
+    );
 
     return isAccessible;
   }

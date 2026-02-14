@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/diary_filter.dart';
-import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_tag_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
@@ -10,13 +10,13 @@ import '../localization/localization_extensions.dart';
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
   final Function(DiaryFilter) onApply;
-  final IDiaryService? diaryService; // テスト用のオプショナル依存性注入
+  final IDiaryTagService? tagService; // テスト用のオプショナル依存性注入
 
   const FilterBottomSheet({
     super.key,
     required this.initialFilter,
     required this.onApply,
-    this.diaryService, // テスト時に外部からDiaryServiceを注入可能
+    this.tagService, // テスト時に外部からタグサービスを注入可能
   });
 
   @override
@@ -40,10 +40,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Future<void> _loadAvailableTags() async {
     try {
       // テスト時は注入されたサービスを使用、本番時はServiceLocator経由
-      final diaryService =
-          widget.diaryService ??
-          await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getPopularTags(limit: 20);
+      final tagService =
+          widget.tagService ??
+          await serviceLocator.getAsync<IDiaryTagService>();
+      final result = await tagService.getPopularTags(limit: 20);
       if (!mounted) return;
       if (result.isSuccess) {
         setState(() {

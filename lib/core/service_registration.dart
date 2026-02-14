@@ -4,6 +4,8 @@ import '../services/logging_service.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/diary_service.dart';
 import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_crud_service_interface.dart';
+import '../services/interfaces/diary_query_service_interface.dart';
 import '../services/interfaces/diary_tag_service_interface.dart';
 import '../services/interfaces/diary_statistics_service_interface.dart';
 import '../services/diary_tag_service.dart';
@@ -64,7 +66,8 @@ import 'service_locator.dart';
 /// 11. **StorageService** - ストレージ操作
 /// 12a. **PromptUsageService** - プロンプト使用履歴管理（Hive依存のみ）
 /// 12b. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み、PromptUsageServiceに依存）
-/// 13. **SocialShareService** - ソーシャル共有機能（LoggingServiceに依存）
+/// 13. **DiaryImageGenerator** - ソーシャル共有用画像生成（LoggingServiceに依存）
+/// 14. **SocialShareService** - ソーシャル共有機能（LoggingService, DiaryImageGenerator, PhotoServiceに依存）
 ///
 /// ### Phase 2: Dependent Services
 /// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
@@ -157,7 +160,7 @@ class ServiceRegistration {
 
     // 2. SubscriptionStateService (Hive依存のみ、基盤サブスクリプション状態管理)
     serviceLocator.registerAsyncFactory<ISubscriptionStateService>(() async {
-      final service = SubscriptionStateService();
+      final service = SubscriptionStateService(logger: loggingService);
       await service.initialize();
       return service;
     });
@@ -166,21 +169,27 @@ class ServiceRegistration {
     serviceLocator.registerAsyncFactory<IAiUsageService>(() async {
       final stateService = await serviceLocator
           .getAsync<ISubscriptionStateService>();
-      return AiUsageService(stateService: stateService);
+      return AiUsageService(stateService: stateService, logger: loggingService);
     });
 
     // 4. FeatureAccessService (SubscriptionStateServiceに依存)
     serviceLocator.registerAsyncFactory<IFeatureAccessService>(() async {
       final stateService = await serviceLocator
           .getAsync<ISubscriptionStateService>();
-      return FeatureAccessService(stateService: stateService);
+      return FeatureAccessService(
+        stateService: stateService,
+        logger: loggingService,
+      );
     });
 
     // 5. InAppPurchaseService (SubscriptionStateServiceに依存)
     serviceLocator.registerAsyncFactory<IInAppPurchaseService>(() async {
       final stateService = await serviceLocator
           .getAsync<ISubscriptionStateService>();
-      final service = InAppPurchaseService(stateService: stateService);
+      final service = InAppPurchaseService(
+        stateService: stateService,
+        logger: loggingService,
+      );
       await service.initialize();
       return service;
     });
@@ -211,33 +220,33 @@ class ServiceRegistration {
 
     // 7a. PhotoPermissionService (写真権限管理 - LoggingServiceに依存)
     serviceLocator.registerSingleton<IPhotoPermissionService>(
-      PhotoPermissionService(logger: serviceLocator.get<ILoggingService>()),
+      PhotoPermissionService(logger: loggingService),
     );
+
+    // 8. PhotoCacheService (LoggingServiceに依存 - PhotoServiceより先に登録)
+    final photoCacheService = PhotoCacheService(logger: loggingService);
+    serviceLocator.registerSingleton<IPhotoCacheService>(photoCacheService);
 
     // 7b. PhotoService (Facade - 写真クエリ/データ + 権限・カメラ委譲)
     final photoService = PhotoService(
-      logger: serviceLocator.get<ILoggingService>(),
+      logger: loggingService,
       permissionService: serviceLocator.get<IPhotoPermissionService>(),
+      cacheService: photoCacheService,
     );
     serviceLocator.registerSingleton<IPhotoService>(photoService);
 
     // 7c. CameraService (カメラ撮影 - LoggingService + PhotoService.getTodayPhotosに依存)
     serviceLocator.registerSingleton<ICameraService>(
       CameraService(
-        logger: serviceLocator.get<ILoggingService>(),
+        logger: loggingService,
         getTodayPhotos: ({int limit = 20}) =>
             photoService.getTodayPhotos(limit: limit),
       ),
     );
 
-    // 9. PhotoCacheService (LoggingServiceに依存)
-    serviceLocator.registerSingleton<IPhotoCacheService>(
-      PhotoCacheService(logger: serviceLocator.get<ILoggingService>()),
-    );
-
-    // 10. PhotoAccessControlService (依存なし)
+    // 10. PhotoAccessControlService (LoggingServiceに依存)
     serviceLocator.registerFactory<IPhotoAccessControlService>(
-      () => PhotoAccessControlService(),
+      () => PhotoAccessControlService(logger: loggingService),
     );
 
     // 11. StorageService (DiaryServiceに依存するが、最適化機能のみ)
@@ -252,21 +261,36 @@ class ServiceRegistration {
       return service;
     });
 
-    // 12b. PromptService (JSONアセット読み込み - PromptUsageServiceに依存)
+    // 12b. PromptService (JSONアセット読み込み - LoggingService, PromptUsageServiceに依存)
     serviceLocator.registerAsyncFactory<IPromptService>(() async {
-      final service = PromptService.instance;
+      IPromptUsageService? usageService;
+      try {
+        usageService = await serviceLocator.getAsync<IPromptUsageService>();
+      } on Exception catch (e) {
+        loggingService.debug(
+          'PromptUsageService not available, proceeding without it: $e',
+          context: 'ServiceRegistration._registerCoreServices',
+        );
+      }
+      final service = PromptService(
+        logger: loggingService,
+        usageService: usageService,
+      );
       await service.initialize();
       return service;
     });
 
-    // 13. SocialShareService (LoggingServiceに依存)
-    serviceLocator.registerFactory<ISocialShareService>(
-      () => SocialShareService(),
-    );
+    // 13. DiaryImageGenerator (ソーシャル共有用画像生成 - LoggingServiceに依存)
+    final imageGenerator = DiaryImageGenerator(logger: loggingService);
+    serviceLocator.registerSingleton<DiaryImageGenerator>(imageGenerator);
 
-    // 14. DiaryImageGenerator (ソーシャル共有用画像生成)
-    serviceLocator.registerFactory<DiaryImageGenerator>(
-      () => DiaryImageGenerator(),
+    // 14. SocialShareService (LoggingService, DiaryImageGenerator, PhotoServiceに依存)
+    serviceLocator.registerFactory<ISocialShareService>(
+      () => SocialShareService(
+        logger: loggingService,
+        imageGenerator: imageGenerator,
+        photoService: serviceLocator.get<IPhotoService>(),
+      ),
     );
 
     // X共有はSocialShareService内のチャネルで対応（別登録不要）
@@ -311,15 +335,26 @@ class ServiceRegistration {
     serviceLocator.registerAsyncFactory<IDiaryService>(() async {
       // DiaryTagServiceを事前解決（DiaryServiceからの同期アクセスのため）
       // ※ IDiaryTagService解決時にIAiServiceも連鎖的に解決される
-      await serviceLocator.getAsync<IDiaryTagService>();
+      final tagService = await serviceLocator.getAsync<IDiaryTagService>();
 
       // Create DiaryService with dependency injection
-      final diaryService = DiaryService.createWithDependencies();
+      final diaryService = DiaryService.createWithDependencies(
+        logger: serviceLocator.get<ILoggingService>(),
+        tagService: tagService,
+      );
 
       // Initialize the service
       await diaryService.initialize();
 
       return diaryService;
+    });
+
+    // 分割インターフェース（IDiaryService解決時に同一インスタンスを共有）
+    serviceLocator.registerAsyncFactory<IDiaryCrudService>(() async {
+      return await serviceLocator.getAsync<IDiaryService>();
+    });
+    serviceLocator.registerAsyncFactory<IDiaryQueryService>(() async {
+      return await serviceLocator.getAsync<IDiaryService>();
     });
   }
 

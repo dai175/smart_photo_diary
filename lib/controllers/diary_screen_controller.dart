@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_filter.dart';
-import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_query_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/errors/app_exceptions.dart';
 import 'base_error_controller.dart';
@@ -49,7 +49,8 @@ class DiaryScreenController extends BaseErrorController {
       // 初回および再読込時はローディング表示
       setLoading(true);
       _resetPaging();
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      final diaryService = await ServiceLocator()
+          .getAsync<IDiaryQueryService>();
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
@@ -85,7 +86,8 @@ class DiaryScreenController extends BaseErrorController {
     notifyListeners();
 
     try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      final diaryService = await ServiceLocator()
+          .getAsync<IDiaryQueryService>();
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
@@ -183,7 +185,8 @@ class DiaryScreenController extends BaseErrorController {
   // 検索で日記を絞り込み
   Future<void> _searchDiaryEntries(String query) async {
     try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      final diaryService = await ServiceLocator()
+          .getAsync<IDiaryQueryService>();
 
       final filter = query.isEmpty
           ? _currentFilter

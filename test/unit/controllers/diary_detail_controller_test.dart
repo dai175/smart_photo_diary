@@ -6,11 +6,11 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
-import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
-class MockDiaryService extends Mock implements IDiaryService {}
+class MockDiaryService extends Mock implements IDiaryCrudService {}
 
 class MockPhotoService extends Mock implements IPhotoService {}
 
@@ -49,7 +49,7 @@ void main() {
     mockDiaryService = MockDiaryService();
     mockPhotoService = MockPhotoService();
     mockLoggingService = MockLoggingService();
-    ServiceLocator().registerSingleton<IDiaryService>(mockDiaryService);
+    ServiceLocator().registerSingleton<IDiaryCrudService>(mockDiaryService);
     ServiceLocator().registerSingleton<IPhotoService>(mockPhotoService);
     ServiceLocator().registerSingleton<ILoggingService>(mockLoggingService);
 

@@ -6,7 +6,7 @@ import '../models/diary_entry.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
+import 'interfaces/photo_service_interface.dart';
 import 'interfaces/social_share_service_interface.dart';
 import 'diary_image_generator.dart';
 import 'social_share/channels/x_share_channel.dart';
@@ -14,19 +14,28 @@ import 'social_share/channels/instagram_share_channel.dart';
 
 /// ソーシャル共有サービスの実装クラス
 class SocialShareService implements ISocialShareService {
-  /// DI用の公開コンストラクタ
-  SocialShareService();
+  final ILoggingService _logger;
+  final DiaryImageGenerator _imageGenerator;
+  final XShareChannel _xChannel;
+  final InstagramShareChannel _igChannel;
 
-  /// ログサービスを取得
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
-
-  /// 画像生成サービス
-  DiaryImageGenerator get _imageGenerator =>
-      serviceLocator.get<DiaryImageGenerator>();
-
-  /// チャネル実装
-  final XShareChannel _xChannel = XShareChannel();
-  final InstagramShareChannel _igChannel = InstagramShareChannel();
+  SocialShareService({
+    required ILoggingService logger,
+    required DiaryImageGenerator imageGenerator,
+    required IPhotoService photoService,
+    XShareChannel? xChannel,
+    InstagramShareChannel? igChannel,
+  }) : _logger = logger,
+       _imageGenerator = imageGenerator,
+       _xChannel =
+           xChannel ??
+           XShareChannel(logger: logger, photoService: photoService),
+       _igChannel =
+           igChannel ??
+           InstagramShareChannel(
+             logger: logger,
+             imageGenerator: imageGenerator,
+           );
 
   @override
   Future<Result<void>> shareToSocialMedia({

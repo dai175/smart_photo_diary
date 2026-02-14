@@ -3,6 +3,9 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_query_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import '../integration/mocks/mock_services.dart';
@@ -32,9 +35,11 @@ class WidgetTestServiceSetup {
     serviceLocator.registerSingleton<IAiService>(
       TestServiceSetup.getAiService(),
     );
-    serviceLocator.registerSingleton<IDiaryService>(
-      TestServiceSetup.getDiaryService(),
-    );
+    final diaryService = TestServiceSetup.getDiaryService();
+    serviceLocator.registerSingleton<IDiaryService>(diaryService);
+    serviceLocator.registerSingleton<IDiaryCrudService>(diaryService);
+    serviceLocator.registerSingleton<IDiaryQueryService>(diaryService);
+    serviceLocator.registerSingleton<IDiaryTagService>(MockIDiaryTagService());
     serviceLocator.registerSingleton<ISettingsService>(
       TestServiceSetup.getSettingsService(),
     );
@@ -58,8 +63,12 @@ class WidgetTestServiceSetup {
     globalServiceLocator.registerSingleton<IAiService>(
       TestServiceSetup.getAiService(),
     );
-    globalServiceLocator.registerSingleton<IDiaryService>(
-      TestServiceSetup.getDiaryService(),
+    final diaryService = TestServiceSetup.getDiaryService();
+    globalServiceLocator.registerSingleton<IDiaryService>(diaryService);
+    globalServiceLocator.registerSingleton<IDiaryCrudService>(diaryService);
+    globalServiceLocator.registerSingleton<IDiaryQueryService>(diaryService);
+    globalServiceLocator.registerSingleton<IDiaryTagService>(
+      MockIDiaryTagService(),
     );
     globalServiceLocator.registerSingleton<ISettingsService>(
       TestServiceSetup.getSettingsService(),

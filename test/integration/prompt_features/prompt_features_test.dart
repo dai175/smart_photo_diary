@@ -105,8 +105,8 @@ void main() {
         mockSubscriptionService,
       );
 
-      // PromptServiceを取得・登録
-      promptService = PromptService.instance;
+      // PromptServiceを生成・登録
+      promptService = PromptService(logger: mockLoggingService);
       serviceLocator.registerSingleton<IPromptService>(promptService);
 
       // サービスを初期化
@@ -118,7 +118,6 @@ void main() {
       // テスト後のクリーンアップ
       mockSubscriptionService.resetToDefaults();
       promptService.reset();
-      PromptService.resetInstance();
       serviceLocator.clear();
 
       // Hiveボックスのクリーンアップ

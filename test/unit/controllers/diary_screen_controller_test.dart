@@ -6,9 +6,9 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
-import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_query_service_interface.dart';
 
-class MockDiaryService extends Mock implements IDiaryService {}
+class MockDiaryService extends Mock implements IDiaryQueryService {}
 
 /// テスト用の日記エントリーを生成
 DiaryEntry _createEntry(String id, {String title = 'Test', DateTime? date}) {
@@ -34,7 +34,7 @@ void main() {
   setUp(() {
     ServiceLocator().clear();
     mockDiaryService = MockDiaryService();
-    ServiceLocator().registerSingleton<IDiaryService>(mockDiaryService);
+    ServiceLocator().registerSingleton<IDiaryQueryService>(mockDiaryService);
   });
 
   tearDown(() {

@@ -8,7 +8,6 @@ import 'interfaces/feature_access_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'mixins/service_logging.dart';
-import '../core/service_locator.dart';
 
 /// FeatureAccessService
 ///
@@ -17,7 +16,7 @@ class FeatureAccessService
     with ServiceLogging
     implements IFeatureAccessService {
   final ISubscriptionStateService _stateService;
-  ILoggingService? _loggingService;
+  final ILoggingService? _loggingService;
 
   @override
   ILoggingService? get loggingService => _loggingService;
@@ -25,14 +24,11 @@ class FeatureAccessService
   @override
   String get logTag => 'FeatureAccessService';
 
-  FeatureAccessService({required ISubscriptionStateService stateService})
-    : _stateService = stateService {
-    try {
-      _loggingService = ServiceLocator().get<ILoggingService>();
-    } catch (_) {
-      // テスト環境など、LoggingServiceが未登録の場合はnullのまま
-    }
-  }
+  FeatureAccessService({
+    required ISubscriptionStateService stateService,
+    ILoggingService? logger,
+  }) : _stateService = stateService,
+       _loggingService = logger;
 
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
