@@ -20,7 +20,8 @@ import '../../../localization/localization_utils.dart';
 /// Instagram系（埋め込み画像を生成して共有）チャネル実装
 class InstagramShareChannel {
   static const int _shareTimeoutSeconds = 60;
-  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 1, 1);
+  // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
+  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 100, 100);
 
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
   DiaryImageGenerator get _imageGenerator =>
@@ -76,17 +77,6 @@ class InstagramShareChannel {
           .timeout(
             const Duration(seconds: _shareTimeoutSeconds),
             onTimeout: () {
-              // Get current locale for error message
-              Locale? locale;
-              try {
-                final settingsService =
-                    ServiceRegistration.get<ISettingsService>();
-                locale = settingsService.locale;
-              } catch (_) {
-                locale = null;
-              }
-              final resolvedLocale =
-                  locale ?? ui.PlatformDispatcher.instance.locale;
               final timeoutMessage = _getLocalizedMessage(
                 resolvedLocale,
                 (l10n) => l10n.commonShareTimeout,
@@ -108,17 +98,18 @@ class InstagramShareChannel {
         error: e,
         stackTrace: st,
       );
-      // Get current locale for error message
-      Locale? locale;
+      // catch ブロックでは try 内の resolvedLocale がスコープ外のため再取得
+      Locale? catchLocale;
       try {
         final settingsService = ServiceRegistration.get<ISettingsService>();
-        locale = settingsService.locale;
+        catchLocale = settingsService.locale;
       } catch (_) {
-        locale = null;
+        catchLocale = null;
       }
-      final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
+      final catchResolvedLocale =
+          catchLocale ?? ui.PlatformDispatcher.instance.locale;
       final errorMessage = _getLocalizedMessage(
-        resolvedLocale,
+        catchResolvedLocale,
         (l10n) => l10n.commonShareFailedWithReason('Image sharing failed'),
         'Image sharing failed',
       );

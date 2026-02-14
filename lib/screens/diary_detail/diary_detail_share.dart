@@ -310,6 +310,7 @@ class DiaryDetailShareHelper {
       final topLeft = renderBox.localToGlobal(Offset.zero);
       return topLeft & renderBox.size;
     }
-    return const Rect.fromLTWH(0, 0, 1, 1);
+    // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
+    return const Rect.fromLTWH(0, 0, 100, 100);
   }
 }
