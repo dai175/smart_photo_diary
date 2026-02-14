@@ -9,7 +9,7 @@ import 'package:smart_photo_diary/screens/diary_preview/diary_preview_screen.dar
 import 'package:smart_photo_diary/screens/diary_preview/diary_preview_body.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
-import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';

@@ -5,7 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
-import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 

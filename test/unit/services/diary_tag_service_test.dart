@@ -4,7 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_tag_service.dart';
-import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
