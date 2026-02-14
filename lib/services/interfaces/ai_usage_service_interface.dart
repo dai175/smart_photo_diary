@@ -42,8 +42,11 @@ abstract class IAiUsageService {
   /// 月次使用量を必要に応じてリセット（自動）
   ///
   /// 月が変わった場合に使用量カウンターを自動リセットする。
-  /// エラーが発生した場合はログ出力のみ行い、例外はスローしない。
-  Future<void> resetMonthlyUsageIfNeeded();
+  ///
+  /// Returns:
+  /// - Success: リセット処理完了（リセット不要の場合も含む）
+  /// - Failure: [ServiceException] 状態取得・更新中にエラーが発生した場合
+  Future<Result<void>> resetMonthlyUsageIfNeeded();
 
   /// 次の使用量リセット日を取得
   ///

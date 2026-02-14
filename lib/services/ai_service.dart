@@ -8,7 +8,6 @@ import 'interfaces/subscription_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../core/service_locator.dart';
 
 /// AIを使用して日記文を生成するサービスクラス（リファクタリング済み）
 ///
@@ -20,14 +19,17 @@ class AiService implements IAiService {
   final DiaryGenerator _diaryGenerator;
   final TagGenerator _tagGenerator;
   final ISubscriptionService? _subscriptionService;
+  final ILoggingService? _logger;
 
   AiService({
     DiaryGenerator? diaryGenerator,
     TagGenerator? tagGenerator,
     ISubscriptionService? subscriptionService,
+    ILoggingService? logger,
   }) : _diaryGenerator = diaryGenerator ?? DiaryGenerator(),
        _tagGenerator = tagGenerator ?? TagGenerator(),
-       _subscriptionService = subscriptionService;
+       _subscriptionService = subscriptionService,
+       _logger = logger;
 
   @override
   Future<bool> isOnline() async {
@@ -41,7 +43,15 @@ class AiService implements IAiService {
   Future<Result<void>> _checkAiGenerationAllowed() async {
     if (_subscriptionService == null) return const Success(null);
 
-    await _subscriptionService.resetMonthlyUsageIfNeeded();
+    // Best-effort monthly reset — failure is non-critical
+    final resetResult = await _subscriptionService.resetMonthlyUsageIfNeeded();
+    if (resetResult.isFailure) {
+      _logger?.warning(
+        'Monthly usage reset failed',
+        context: 'AiService._checkAiGenerationAllowed',
+        data: resetResult.error.toString(),
+      );
+    }
 
     final canUseResult = await _subscriptionService.canUseAiGeneration();
     if (canUseResult.isFailure) {
@@ -76,20 +86,12 @@ class AiService implements IAiService {
   Future<void> _recordAiUsage() async {
     if (_subscriptionService == null) return;
 
-    try {
-      final result = await _subscriptionService.incrementAiUsage();
-      if (result.isFailure) {
-        serviceLocator.get<ILoggingService>().warning(
-          'Failed to record AI usage',
-          context: 'AiService._recordAiUsage',
-          data: result.error.toString(),
-        );
-      }
-    } catch (e) {
-      serviceLocator.get<ILoggingService>().warning(
-        'Exception occurred while recording AI usage',
+    final result = await _subscriptionService.incrementAiUsage();
+    if (result.isFailure) {
+      _logger?.warning(
+        'Failed to record AI usage',
         context: 'AiService._recordAiUsage',
-        data: e.toString(),
+        data: result.error.toString(),
       );
     }
   }
@@ -204,8 +206,15 @@ class AiService implements IAiService {
       );
     }
 
-    // 月次リセット処理統合
-    await _subscriptionService.resetMonthlyUsageIfNeeded();
+    // Best-effort monthly reset — failure is non-critical
+    final resetResult = await _subscriptionService.resetMonthlyUsageIfNeeded();
+    if (resetResult.isFailure) {
+      _logger?.warning(
+        'Monthly usage reset failed',
+        context: 'AiService.canUseAiGeneration',
+        data: resetResult.error.toString(),
+      );
+    }
 
     return await _subscriptionService.canUseAiGeneration();
   }
