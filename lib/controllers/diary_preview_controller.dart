@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:photo_manager/photo_manager.dart';
 
+import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../core/service_locator.dart';
@@ -124,134 +125,20 @@ class DiaryPreviewController extends BaseErrorController {
 
     try {
       final aiService = await ServiceRegistration.getAsync<IAiService>();
-      // 写真の撮影日時を取得
-      List<DateTime> photoTimes = [];
-      for (final asset in assets) {
-        photoTimes.add(asset.createDateTime);
-      }
+      _photoDateTime = _resolvePhotoDateTime(assets);
 
-      DateTime photoDateTime;
-      if (photoTimes.length == 1) {
-        photoDateTime = photoTimes.first;
-      } else {
-        photoTimes.sort();
-        final middleIndex = photoTimes.length ~/ 2;
-        photoDateTime = photoTimes[middleIndex];
-      }
+      final aiResult = assets.length == 1
+          ? await _generateFromSinglePhoto(aiService, assets.first, locale)
+          : await _generateFromMultiplePhotos(aiService, assets, locale);
 
-      DiaryGenerationResult result;
+      if (aiResult == null) return; // error already handled
 
-      if (assets.length == 1) {
-        // 単一写真の場合
-        final firstAsset = assets.first;
-        final imageData = await _photoService.getOriginalFile(firstAsset);
-
-        if (imageData == null) {
-          _setErrorState(DiaryPreviewErrorType.generationFailed);
-          return;
-        }
-
-        final resultFromAi = await aiService.generateDiaryFromImage(
-          imageData: imageData,
-          date: photoDateTime,
-          prompt: _selectedPrompt?.text,
-          locale: locale,
-        );
-
-        if (resultFromAi.isFailure) {
-          if (resultFromAi.error is AiProcessingException &&
-              (resultFromAi.error as AiProcessingException).isUsageLimitError) {
-            _usageLimitReached = true;
-            setLoading(false);
-            notifyListeners();
-            return;
-          }
-          throw Exception(resultFromAi.error.message);
-        }
-
-        result = resultFromAi.value;
-      } else {
-        // 複数写真の場合
-        _logger.info(
-          'Starting sequential analysis of multiple photos',
-          context: 'DiaryPreviewController',
-        );
-
-        final List<({Uint8List imageData, DateTime time})> imagesWithTimes = [];
-
-        for (final asset in assets) {
-          final imageData = await _photoService.getOriginalFile(asset);
-          if (imageData != null) {
-            imagesWithTimes.add((
-              imageData: imageData,
-              time: asset.createDateTime,
-            ));
-          }
-        }
-
-        if (imagesWithTimes.isEmpty) {
-          _setErrorState(DiaryPreviewErrorType.generationFailed);
-          return;
-        }
-
-        _isAnalyzingPhotos = true;
-        _totalPhotos = imagesWithTimes.length;
-        _currentPhotoIndex = 0;
-        notifyListeners();
-
-        final resultFromAi = await aiService.generateDiaryFromMultipleImages(
-          imagesWithTimes: imagesWithTimes,
-          prompt: _selectedPrompt?.text,
-          onProgress: (current, total) {
-            _logger.info(
-              'Image analysis progress: $current/$total',
-              context: 'DiaryPreviewController',
-            );
-            _currentPhotoIndex = current;
-            _totalPhotos = total;
-            notifyListeners();
-          },
-          locale: locale,
-        );
-
-        if (resultFromAi.isFailure) {
-          if (resultFromAi.error is AiProcessingException &&
-              (resultFromAi.error as AiProcessingException).isUsageLimitError) {
-            _usageLimitReached = true;
-            _isAnalyzingPhotos = false;
-            setLoading(false);
-            notifyListeners();
-            return;
-          }
-          throw Exception(resultFromAi.error.message);
-        }
-
-        result = resultFromAi.value;
-
-        _isAnalyzingPhotos = false;
-      }
-
-      _generatedTitle = result.title;
-      _generatedContent = result.content;
+      _generatedTitle = aiResult.title;
+      _generatedContent = aiResult.content;
       _isSaving = true;
-      _photoDateTime = photoDateTime;
       setLoading(false);
 
-      // プロンプト使用履歴を記録
-      if (_selectedPrompt != null) {
-        try {
-          final promptService =
-              await ServiceRegistration.getAsync<IPromptService>();
-          await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
-        } catch (e) {
-          _logger.error(
-            'Prompt usage history recording error',
-            error: e,
-            context: 'DiaryPreviewController',
-          );
-        }
-      }
-
+      await _recordPromptUsage();
       await _autoSaveDiary(assets: assets);
     } catch (e, stackTrace) {
       _logger.error(
@@ -261,6 +148,121 @@ class DiaryPreviewController extends BaseErrorController {
         stackTrace: stackTrace,
       );
       _setErrorState(DiaryPreviewErrorType.generationFailed);
+    }
+  }
+
+  /// 写真リストの代表日時を算出（中央値）
+  DateTime _resolvePhotoDateTime(List<AssetEntity> assets) {
+    final photoTimes = assets.map((a) => a.createDateTime).toList()..sort();
+    return photoTimes.length == 1
+        ? photoTimes.first
+        : photoTimes[photoTimes.length ~/ 2];
+  }
+
+  /// AI生成結果のusage limitチェック。制限到達時は true を返す。
+  bool _handleUsageLimitIfNeeded(Result<DiaryGenerationResult> resultFromAi) {
+    if (resultFromAi.isFailure &&
+        resultFromAi.error is AiProcessingException &&
+        (resultFromAi.error as AiProcessingException).isUsageLimitError) {
+      _usageLimitReached = true;
+      _isAnalyzingPhotos = false;
+      setLoading(false);
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  /// 単一写真からAI日記を生成
+  Future<DiaryGenerationResult?> _generateFromSinglePhoto(
+    IAiService aiService,
+    AssetEntity asset,
+    Locale locale,
+  ) async {
+    final imageData = await _photoService.getOriginalFile(asset);
+    if (imageData == null) {
+      _setErrorState(DiaryPreviewErrorType.generationFailed);
+      return null;
+    }
+
+    final resultFromAi = await aiService.generateDiaryFromImage(
+      imageData: imageData,
+      date: _photoDateTime,
+      prompt: _selectedPrompt?.text,
+      locale: locale,
+    );
+
+    if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
+    if (resultFromAi.isFailure) throw Exception(resultFromAi.error.message);
+
+    return resultFromAi.value;
+  }
+
+  /// 複数写真からAI日記を生成
+  Future<DiaryGenerationResult?> _generateFromMultiplePhotos(
+    IAiService aiService,
+    List<AssetEntity> assets,
+    Locale locale,
+  ) async {
+    _logger.info(
+      'Starting sequential analysis of multiple photos',
+      context: 'DiaryPreviewController',
+    );
+
+    final imagesWithTimes = <({Uint8List imageData, DateTime time})>[];
+    for (final asset in assets) {
+      final imageData = await _photoService.getOriginalFile(asset);
+      if (imageData != null) {
+        imagesWithTimes.add((imageData: imageData, time: asset.createDateTime));
+      }
+    }
+
+    if (imagesWithTimes.isEmpty) {
+      _setErrorState(DiaryPreviewErrorType.generationFailed);
+      return null;
+    }
+
+    _isAnalyzingPhotos = true;
+    _totalPhotos = imagesWithTimes.length;
+    _currentPhotoIndex = 0;
+    notifyListeners();
+
+    final resultFromAi = await aiService.generateDiaryFromMultipleImages(
+      imagesWithTimes: imagesWithTimes,
+      prompt: _selectedPrompt?.text,
+      onProgress: (current, total) {
+        _logger.info(
+          'Image analysis progress: $current/$total',
+          context: 'DiaryPreviewController',
+        );
+        _currentPhotoIndex = current;
+        _totalPhotos = total;
+        notifyListeners();
+      },
+      locale: locale,
+    );
+
+    _isAnalyzingPhotos = false;
+
+    if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
+    if (resultFromAi.isFailure) throw Exception(resultFromAi.error.message);
+
+    return resultFromAi.value;
+  }
+
+  /// プロンプト使用履歴を記録（非クリティカル）
+  Future<void> _recordPromptUsage() async {
+    if (_selectedPrompt == null) return;
+    try {
+      final promptService =
+          await ServiceRegistration.getAsync<IPromptService>();
+      await promptService.recordPromptUsage(promptId: _selectedPrompt!.id);
+    } catch (e) {
+      _logger.error(
+        'Prompt usage history recording error',
+        error: e,
+        context: 'DiaryPreviewController',
+      );
     }
   }
 
