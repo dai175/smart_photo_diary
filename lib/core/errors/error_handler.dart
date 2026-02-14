@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'app_exceptions.dart';
 import '../../services/interfaces/logging_service_interface.dart';
+import '../result/result.dart';
 import '../service_locator.dart';
 
 /// アプリケーション全体のエラーハンドリングユーティリティ
@@ -67,6 +68,15 @@ class ErrorHandler {
         debugPrint('${contextMessage}StackTrace: $stackTrace');
       }
     }
+  }
+
+  /// エラーをハンドリングし、`Result<T>` の `Failure` として返す。
+  ///
+  /// [handleError] でエラーをログ記録・AppExceptionに変換した上で
+  /// `Failure<T>` にラップして返す。catch ブロック内での使用を想定。
+  static Failure<T> toFailure<T>(dynamic error, {String? context}) {
+    final appError = handleError(error, context: context);
+    return Failure(appError);
   }
 
   /// 安全にFutureを実行し、エラーをハンドリングする

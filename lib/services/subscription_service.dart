@@ -83,7 +83,7 @@ class SubscriptionService implements ISubscriptionService {
   Future<Result<void>> resetUsage() => _usageService.resetUsage();
 
   @override
-  Future<void> resetMonthlyUsageIfNeeded() =>
+  Future<Result<void>> resetMonthlyUsageIfNeeded() =>
       _usageService.resetMonthlyUsageIfNeeded();
 
   @override

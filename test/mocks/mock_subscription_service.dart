@@ -382,16 +382,18 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
-  Future<void> resetMonthlyUsageIfNeeded() async {
+  Future<Result<void>> resetMonthlyUsageIfNeeded() async {
     // Phase 1.7.1.4: 月次リセット処理統合（モック実装）
     if (!_isInitialized) {
-      return; // エラーは無視（内部メソッドのため）
+      return const Failure(
+        ServiceException('MockSubscriptionService is not initialized'),
+      );
     }
 
     final now = DateTime.now();
     if (_lastResetDate == null) {
       _lastResetDate = DateTime(now.year, now.month, 1);
-      return;
+      return const Success(null);
     }
 
     // 月が変わっていたらリセット
@@ -401,6 +403,8 @@ class MockSubscriptionService implements ISubscriptionService {
       _lastResetDate = DateTime(now.year, now.month, 1);
       _statusUpdates.add(_currentStatus);
     }
+
+    return const Success(null);
   }
 
   @override

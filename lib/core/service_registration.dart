@@ -286,7 +286,11 @@ class ServiceRegistration {
           .getAsync<ISubscriptionService>();
 
       // Create AiService with dependency injection
-      return AiService(subscriptionService: subscriptionService);
+      final logger = serviceLocator.get<ILoggingService>();
+      return AiService(
+        subscriptionService: subscriptionService,
+        logger: logger,
+      );
     });
 
     // DiaryTagService (タグ管理 - AiServiceに依存)

@@ -78,8 +78,8 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
-  Future<void> resetMonthlyUsageIfNeeded() async {
-    // テスト用のシンプルな実装
+  Future<Result<void>> resetMonthlyUsageIfNeeded() async {
+    return const Success(null);
   }
 
   @override

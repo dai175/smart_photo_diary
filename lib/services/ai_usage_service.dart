@@ -260,23 +260,30 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   }
 
   @override
-  Future<void> resetMonthlyUsageIfNeeded() async {
+  Future<Result<void>> resetMonthlyUsageIfNeeded() async {
     try {
       if (!_stateService.isInitialized) {
-        throw const ServiceException(
-          'SubscriptionStateService is not initialized',
+        return const Failure(
+          ServiceException('SubscriptionStateService is not initialized'),
         );
       }
 
       final statusResult = await _stateService.getCurrentStatus();
       if (statusResult.isFailure) {
-        throw statusResult.error;
+        return Failure(statusResult.error);
       }
 
       final status = statusResult.value;
       await _resetMonthlyUsageIfNeeded(status);
+      return const Success(null);
     } catch (e) {
       log('Error resetting monthly usage', level: LogLevel.error, error: e);
+      return Failure(
+        ServiceException(
+          'Failed to reset monthly usage',
+          details: e.toString(),
+        ),
+      );
     }
   }
 
