@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import 'dart:io';
 
@@ -18,8 +20,14 @@ class HiveTestHelpers {
     Hive.init(tempDir.path);
 
     // TypeAdapterを登録
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(DiaryEntryAdapter());
+    }
     if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(SubscriptionStatusAdapter());
+    }
+    if (!Hive.isAdapterRegistered(5)) {
+      Hive.registerAdapter(PromptUsageHistoryAdapter());
     }
 
     _isInitialized = true;
@@ -30,6 +38,30 @@ class HiveTestHelpers {
     try {
       final box = await Hive.openBox<SubscriptionStatus>(
         SubscriptionConstants.hiveBoxName,
+      );
+      await box.clear();
+      await box.close();
+    } catch (e) {
+      // ボックスが存在しない場合は無視
+    }
+  }
+
+  /// DiaryEntryボックスをクリア
+  static Future<void> clearDiaryBox() async {
+    try {
+      final box = await Hive.openBox<DiaryEntry>('diary_entries');
+      await box.clear();
+      await box.close();
+    } catch (e) {
+      // ボックスが存在しない場合は無視
+    }
+  }
+
+  /// PromptUsageHistoryボックスをクリア
+  static Future<void> clearPromptUsageBox() async {
+    try {
+      final box = await Hive.openBox<PromptUsageHistory>(
+        'prompt_usage_history',
       );
       await box.clear();
       await box.close();

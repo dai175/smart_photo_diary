@@ -75,7 +75,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
           path: coverage/lcov.info
-          min_coverage: 40
+          min_coverage: 48
 
   build-android:
     name: Build Android
