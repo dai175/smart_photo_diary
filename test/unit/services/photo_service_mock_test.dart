@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
@@ -135,13 +138,14 @@ void main() {
         // Arrange
         when(
           () => mockPhotoService.requestPermission(),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) async => const Success(true));
 
         // Act
         final result = await mockPhotoService.requestPermission();
 
         // Assert
-        expect(result, isTrue);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isTrue);
         verify(() => mockPhotoService.requestPermission()).called(1);
       });
 
@@ -149,13 +153,14 @@ void main() {
         // Arrange
         when(
           () => mockPhotoService.requestPermission(),
-        ).thenAnswer((_) async => false);
+        ).thenAnswer((_) async => const Success(false));
 
         // Act
         final result = await mockPhotoService.requestPermission();
 
         // Assert
-        expect(result, isFalse);
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isFalse);
         verify(() => mockPhotoService.requestPermission()).called(1);
       });
     });
@@ -258,31 +263,33 @@ void main() {
     group('Photo Data Access', () {
       test('should get photo data successfully', () async {
         // Arrange
-        final mockData = [1, 2, 3, 4, 5];
+        const mockData = [1, 2, 3, 4, 5];
         when(
           () => mockPhotoService.getPhotoData(any()),
-        ).thenAnswer((_) async => mockData);
+        ).thenAnswer((_) async => const Success(mockData));
 
         // Act
         final result = await mockPhotoService.getPhotoData(mockAssetEntity);
 
         // Assert
-        expect(result, equals(mockData));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockData));
         verify(() => mockPhotoService.getPhotoData(mockAssetEntity)).called(1);
       });
 
       test('should get thumbnail data successfully', () async {
         // Arrange
-        final mockThumbnailData = [10, 20, 30];
+        const mockThumbnailData = [10, 20, 30];
         when(
           () => mockPhotoService.getThumbnailData(any()),
-        ).thenAnswer((_) async => mockThumbnailData);
+        ).thenAnswer((_) async => const Success(mockThumbnailData));
 
         // Act
         final result = await mockPhotoService.getThumbnailData(mockAssetEntity);
 
         // Assert
-        expect(result, equals(mockThumbnailData));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockThumbnailData));
         verify(
           () => mockPhotoService.getThumbnailData(mockAssetEntity),
         ).called(1);
@@ -290,16 +297,17 @@ void main() {
 
       test('should get original file successfully', () async {
         // Arrange
-        const mockFile = 'path/to/original/file.jpg';
+        final mockFile = Uint8List.fromList([1, 2, 3, 4, 5]);
         when(
           () => mockPhotoService.getOriginalFile(any()),
-        ).thenAnswer((_) async => mockFile);
+        ).thenAnswer((_) async => Success(mockFile));
 
         // Act
         final result = await mockPhotoService.getOriginalFile(mockAssetEntity);
 
         // Assert
-        expect(result, equals(mockFile));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockFile));
         verify(
           () => mockPhotoService.getOriginalFile(mockAssetEntity),
         ).called(1);
@@ -307,20 +315,21 @@ void main() {
 
       test('should get thumbnail with default size', () async {
         // Arrange
-        const mockThumbnail = 'thumbnail_data';
+        final mockThumbnail = Uint8List.fromList([10, 20, 30]);
         when(
           () => mockPhotoService.getThumbnail(
             any(),
             width: any(named: 'width'),
             height: any(named: 'height'),
           ),
-        ).thenAnswer((_) async => mockThumbnail);
+        ).thenAnswer((_) async => Success(mockThumbnail));
 
         // Act
         final result = await mockPhotoService.getThumbnail(mockAssetEntity);
 
         // Assert
-        expect(result, equals(mockThumbnail));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockThumbnail));
         verify(
           () => mockPhotoService.getThumbnail(
             mockAssetEntity,
@@ -332,14 +341,14 @@ void main() {
 
       test('should get thumbnail with custom size', () async {
         // Arrange
-        const mockThumbnail = 'custom_thumbnail_data';
+        final mockThumbnail = Uint8List.fromList([10, 20, 30]);
         when(
           () => mockPhotoService.getThumbnail(
             any(),
             width: any(named: 'width'),
             height: any(named: 'height'),
           ),
-        ).thenAnswer((_) async => mockThumbnail);
+        ).thenAnswer((_) async => Success(mockThumbnail));
 
         // Act
         final result = await mockPhotoService.getThumbnail(
@@ -349,7 +358,8 @@ void main() {
         );
 
         // Assert
-        expect(result, equals(mockThumbnail));
+        expect(result.isSuccess, isTrue);
+        expect(result.value, equals(mockThumbnail));
         verify(
           () => mockPhotoService.getThumbnail(
             mockAssetEntity,
@@ -363,15 +373,17 @@ void main() {
     group('Error Handling', () {
       test('should handle permission request failure', () async {
         // Arrange
-        when(
-          () => mockPhotoService.requestPermission(),
-        ).thenThrow(Exception('Permission request failed'));
-
-        // Act & Assert
-        expect(
-          () => mockPhotoService.requestPermission(),
-          throwsA(isA<Exception>()),
+        when(() => mockPhotoService.requestPermission()).thenAnswer(
+          (_) async =>
+              const Failure(PhotoAccessException('Permission request failed')),
         );
+
+        // Act
+        final result = await mockPhotoService.requestPermission();
+
+        // Assert
+        expect(result.isFailure, isTrue);
+        expect(result.errorOrNull, isA<PhotoAccessException>());
       });
 
       test('should handle empty photo list', () async {
@@ -388,30 +400,36 @@ void main() {
         expect(result.value, isEmpty);
       });
 
-      test('should handle null photo data', () async {
+      test('should handle photo data retrieval failure', () async {
         // Arrange
-        when(
-          () => mockPhotoService.getPhotoData(any()),
-        ).thenAnswer((_) async => null);
+        when(() => mockPhotoService.getPhotoData(any())).thenAnswer(
+          (_) async => const Failure(
+            PhotoAccessException('Failed to retrieve photo data'),
+          ),
+        );
 
         // Act
         final result = await mockPhotoService.getPhotoData(mockAssetEntity);
 
         // Assert
-        expect(result, isNull);
+        expect(result.isFailure, isTrue);
+        expect(result.errorOrNull, isA<PhotoAccessException>());
       });
 
-      test('should handle null thumbnail data', () async {
+      test('should handle thumbnail data retrieval failure', () async {
         // Arrange
-        when(
-          () => mockPhotoService.getThumbnailData(any()),
-        ).thenAnswer((_) async => null);
+        when(() => mockPhotoService.getThumbnailData(any())).thenAnswer(
+          (_) async => const Failure(
+            PhotoAccessException('Failed to retrieve thumbnail data'),
+          ),
+        );
 
         // Act
         final result = await mockPhotoService.getThumbnailData(mockAssetEntity);
 
         // Assert
-        expect(result, isNull);
+        expect(result.isFailure, isTrue);
+        expect(result.errorOrNull, isA<PhotoAccessException>());
       });
 
       test('should handle invalid date ranges', () async {
@@ -561,7 +579,7 @@ void main() {
         final assets = List.generate(10, (index) => mockAssetEntity);
         when(
           () => mockPhotoService.getPhotoData(any()),
-        ).thenAnswer((_) async => [1, 2, 3]);
+        ).thenAnswer((_) async => const Success([1, 2, 3]));
 
         // Act
         final futures = assets.map(
@@ -571,6 +589,9 @@ void main() {
 
         // Assert
         expect(results.length, equals(10));
+        for (final result in results) {
+          expect(result.isSuccess, isTrue);
+        }
         verify(() => mockPhotoService.getPhotoData(any())).called(10);
       });
     });

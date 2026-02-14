@@ -6,6 +6,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 
@@ -272,7 +273,7 @@ class MockPromptService implements IPromptService {
   }
 
   @override
-  Future<bool> recordPromptUsage({
+  Future<Result<bool>> recordPromptUsage({
     required String promptId,
     String? diaryEntryId,
     bool wasHelpful = true,
@@ -286,7 +287,7 @@ class MockPromptService implements IPromptService {
     );
 
     _mockUsageHistory.add(usage);
-    return true;
+    return const Success(true);
   }
 
   @override
@@ -332,7 +333,7 @@ class MockPromptService implements IPromptService {
   }
 
   @override
-  Future<bool> clearUsageHistory({int? olderThanDays}) async {
+  Future<Result<bool>> clearUsageHistory({int? olderThanDays}) async {
     _ensureInitialized();
 
     if (olderThanDays == null) {
@@ -342,7 +343,7 @@ class MockPromptService implements IPromptService {
       _mockUsageHistory.removeWhere((h) => h.usedAt.isBefore(cutoffDate));
     }
 
-    return true;
+    return const Success(true);
   }
 
   @override
@@ -565,7 +566,7 @@ void main() {
           wasHelpful: true,
         );
 
-        expect(result, true);
+        expect(result, isA<Success<bool>>());
 
         final history = mockService.getUsageHistory();
         expect(history.length, 1);
@@ -634,7 +635,7 @@ void main() {
         expect(mockService.getUsageHistory().length, 1);
 
         final result = await mockService.clearUsageHistory();
-        expect(result, true);
+        expect(result, isA<Success<bool>>());
         expect(mockService.getUsageHistory(), isEmpty);
       });
 

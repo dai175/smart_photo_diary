@@ -5,6 +5,7 @@
 
 import 'dart:ui';
 
+import '../../core/result/result.dart';
 import '../../models/writing_prompt.dart';
 
 /// PromptServiceの抽象インターフェース
@@ -125,9 +126,9 @@ abstract class IPromptService {
   /// [promptId] 使用したプロンプトID
   /// [diaryEntryId] 関連する日記エントリID（省略可）
   /// [wasHelpful] プロンプトが役に立ったかどうか
-  /// 戻り値: 記録成功なら true。保存失敗時は false。
+  /// 戻り値: 記録成功の場合Success(true)。エラー時はFailure(ServiceException)。
   /// 未初期化の場合は [StateError] をスローします。
-  Future<bool> recordPromptUsage({
+  Future<Result<bool>> recordPromptUsage({
     required String promptId,
     String? diaryEntryId,
     bool wasHelpful = true,
@@ -152,9 +153,9 @@ abstract class IPromptService {
   /// 使用履歴をクリア
   ///
   /// [olderThanDays] 指定日数より古い履歴のみ削除（省略時は全削除）
-  /// 戻り値: クリア成功なら true。失敗時は false。
+  /// 戻り値: クリア成功の場合Success(true)。エラー時はFailure(ServiceException)。
   /// 未初期化の場合は [StateError] をスローします。
-  Future<bool> clearUsageHistory({int? olderThanDays});
+  Future<Result<bool>> clearUsageHistory({int? olderThanDays});
 
   /// プロンプト使用頻度統計を取得
   ///

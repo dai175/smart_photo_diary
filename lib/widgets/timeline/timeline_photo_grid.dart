@@ -5,6 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
 import '../../controllers/photo_selection_controller.dart';
+import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/timeline_photo_group.dart';
 import '../../ui/component_constants.dart';
@@ -258,7 +259,7 @@ class TimelinePhotoGrid extends StatelessWidget {
             alignment: Alignment.center,
             child: Hero(
               tag: tag,
-              child: FutureBuilder<Uint8List?>(
+              child: FutureBuilder<Result<Uint8List>>(
                 future: cacheManager.getLargePreviewFuture(asset),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -268,13 +269,16 @@ class TimelinePhotoGrid extends StatelessWidget {
                       ),
                     );
                   }
-                  if (!snapshot.hasData || snapshot.data == null) {
+                  if (!snapshot.hasData || snapshot.data!.isFailure) {
                     return const SizedBox.shrink();
                   }
                   return InteractiveViewer(
                     minScale: ViewerConstants.minScale,
                     maxScale: ViewerConstants.maxScale,
-                    child: Image.memory(snapshot.data!, fit: BoxFit.contain),
+                    child: Image.memory(
+                      snapshot.data!.value,
+                      fit: BoxFit.contain,
+                    ),
                   );
                 },
               ),

@@ -14,6 +14,7 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
@@ -158,7 +159,7 @@ class IntegrationTestHelpers {
     // Photo service defaults
     when(
       () => _mockPhotoService.requestPermission(),
-    ).thenAnswer((_) async => true);
+    ).thenAnswer((_) async => const Success(true));
     when(
       () => _mockPhotoService.getTodayPhotos(),
     ).thenAnswer((_) async => const Success([]));
@@ -170,20 +171,25 @@ class IntegrationTestHelpers {
     ).thenAnswer((_) async => const Success([]));
     when(
       () => _mockPhotoService.getPhotoData(any()),
-    ).thenAnswer((_) async => _createMockImageData().toList());
+    ).thenAnswer((_) async => Success(_createMockImageData().toList()));
     when(
       () => _mockPhotoService.getThumbnailData(any()),
-    ).thenAnswer((_) async => _createMockImageData().toList());
-    when(
-      () => _mockPhotoService.getOriginalFile(any()),
-    ).thenAnswer((_) async => null);
+    ).thenAnswer((_) async => Success(_createMockImageData().toList()));
+    when(() => _mockPhotoService.getOriginalFile(any())).thenAnswer(
+      (_) async => const Failure(
+        PhotoAccessException('No original file available in test'),
+      ),
+    );
     when(
       () => _mockPhotoService.getThumbnail(
         any(),
         width: any(named: 'width'),
         height: any(named: 'height'),
       ),
-    ).thenAnswer((_) async => null);
+    ).thenAnswer(
+      (_) async =>
+          const Failure(PhotoAccessException('No thumbnail available in test')),
+    );
 
     // AI service defaults
 
@@ -271,7 +277,7 @@ class IntegrationTestHelpers {
   static void setupMockPhotoPermission(bool hasPermission) {
     when(
       () => _mockPhotoService.requestPermission(),
-    ).thenAnswer((_) async => hasPermission);
+    ).thenAnswer((_) async => Success(hasPermission));
   }
 
   /// Setup mock AI diary generation

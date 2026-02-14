@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
+import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
 import '../../services/interfaces/photo_cache_service_interface.dart';
 import '../../ui/component_constants.dart';
@@ -18,7 +19,7 @@ import 'timeline_constants.dart';
 class TimelineCacheManager {
   late final IPhotoCacheService _cacheService = serviceLocator
       .get<IPhotoCacheService>();
-  final Map<String, Future<Uint8List?>> _thumbFutureCache = {};
+  final Map<String, Future<Result<Uint8List>>> _thumbFutureCache = {};
   final Map<String, int> _photoIndexCache = {};
 
   Timer? _prefetchDebounce;
@@ -31,7 +32,7 @@ class TimelineCacheManager {
   Map<String, int> get photoIndexCache => _photoIndexCache;
 
   /// 指定アセットのサムネイルFutureをサイズ/品質込みのキーでメモ化
-  Future<Uint8List?> getThumbnailFuture(AssetEntity asset) {
+  Future<Result<Uint8List>> getThumbnailFuture(AssetEntity asset) {
     final key =
         '${asset.id}:${TimelineLayoutConstants.thumbnailSize}x${TimelineLayoutConstants.thumbnailSize}:q${TimelineLayoutConstants.thumbnailQuality}';
     return _thumbFutureCache.putIfAbsent(
@@ -46,7 +47,7 @@ class TimelineCacheManager {
   }
 
   /// 拡大表示用の大きめプレビューを取得
-  Future<Uint8List?> getLargePreviewFuture(AssetEntity asset) {
+  Future<Result<Uint8List>> getLargePreviewFuture(AssetEntity asset) {
     const int size = PhotoPreviewConstants.previewSizePx;
     const int quality = PhotoPreviewConstants.previewQuality;
     return _cacheService.getThumbnail(

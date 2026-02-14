@@ -21,6 +21,7 @@ import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 
 /// Mock PhotoService for integration testing
@@ -179,7 +180,9 @@ class TestServiceSetup {
     final mock = MockIPhotoService();
 
     // Default mock behavior for PhotoService
-    when(() => mock.requestPermission()).thenAnswer((_) async => true);
+    when(
+      () => mock.requestPermission(),
+    ).thenAnswer((_) async => const Success(true));
     when(
       () => mock.getTodayPhotos(limit: any(named: 'limit')),
     ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
@@ -203,17 +206,22 @@ class TestServiceSetup {
         width: any(named: 'width'),
         height: any(named: 'height'),
       ),
-    ).thenAnswer((_) async => null); // Return null to avoid invalid image data
-    when(
-      () => mock.getPhotoData(any()),
-    ).thenAnswer((_) async => [1, 2, 3, 4, 5]); // Mock image data
+    ).thenAnswer(
+      (_) async =>
+          const Failure(PhotoAccessException('No thumbnail available in test')),
+    );
+    when(() => mock.getPhotoData(any())).thenAnswer(
+      (_) async => const Success([1, 2, 3, 4, 5]),
+    ); // Mock image data
     when(
       () => mock.getThumbnailData(any()),
-    ).thenAnswer((_) async => [1, 2, 3]); // Mock thumbnail data
+    ).thenAnswer((_) async => const Success([1, 2, 3])); // Mock thumbnail data
     when(
       () => mock.getOriginalFile(any()),
-    ).thenAnswer((_) async => 'mock_file_path');
-    when(() => mock.isLimitedAccess()).thenAnswer((_) async => false);
+    ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3, 4, 5])));
+    when(
+      () => mock.isLimitedAccess(),
+    ).thenAnswer((_) async => const Success(false));
     when(
       () => mock.getPhotosEfficient(
         startDate: any(named: 'startDate'),
@@ -224,7 +232,7 @@ class TestServiceSetup {
     ).thenAnswer((_) async => const Success<List<AssetEntity>>([]));
     when(
       () => mock.isPermissionPermanentlyDenied(),
-    ).thenAnswer((_) async => false);
+    ).thenAnswer((_) async => const Success(false));
     when(
       () => mock.capturePhoto(),
     ).thenAnswer((_) async => const Success(null));

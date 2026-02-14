@@ -19,7 +19,8 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
     try {
       final photoService = ServiceRegistration.get<IPhotoService>();
-      final hasPermission = await photoService.requestPermission();
+      final permissionResult = await photoService.requestPermission();
+      final hasPermission = permissionResult.getOrDefault(false);
 
       if (!mounted) return;
 
@@ -46,7 +47,9 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       if (!mounted) return;
 
       if (photos.isEmpty) {
-        final isLimited = await photoService.isLimitedAccess();
+        final isLimited = (await photoService.isLimitedAccess()).getOrDefault(
+          false,
+        );
         if (isLimited) {
           await _self._showLimitedAccessDialog();
         }

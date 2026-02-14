@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../core/result/result.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../core/service_registration.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -113,16 +116,17 @@ class PhotoGridWidget extends StatelessWidget {
   Widget _buildPhotoThumbnail(BuildContext context, int index) {
     return ClipRRect(
       borderRadius: AppSpacing.photoRadius,
-      child: FutureBuilder<dynamic>(
+      child: FutureBuilder<Result<Uint8List>>(
         future: ServiceRegistration.get<IPhotoService>().getThumbnail(
           controller.photoAssets[index],
         ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
+              snapshot.hasData &&
+              snapshot.data!.isSuccess) {
             return RepaintBoundary(
               child: Image.memory(
-                snapshot.data!,
+                snapshot.data!.value,
                 height: AppConstants.photoThumbnailSize,
                 width: AppConstants.photoThumbnailSize,
                 fit: BoxFit.cover,

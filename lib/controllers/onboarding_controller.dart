@@ -69,6 +69,7 @@ class OnboardingController extends ChangeNotifier {
       await settingsService.setFirstLaunchCompleted();
 
       final photoService = ServiceRegistration.get<IPhotoService>();
+      // Result is intentionally not checked here — permission is best-effort during onboarding
       await photoService.requestPermission();
 
       _logger.info('Onboarding completed', context: 'OnboardingScreen');

@@ -2,8 +2,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
-import '../services/interfaces/photo_cache_service_interface.dart';
+import '../core/result/result.dart';
 import '../core/service_locator.dart';
+import '../services/interfaces/photo_cache_service_interface.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../utils/performance_monitor.dart';
 import 'photo_grid_components.dart';
@@ -291,7 +292,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
 
     return ClipRRect(
       borderRadius: AppSpacing.photoRadius,
-      child: FutureBuilder<Uint8List?>(
+      child: FutureBuilder<Result<Uint8List>>(
         future: _cacheService.getThumbnail(
           asset,
           width: AppConstants.photoThumbnailSize.toInt(),
@@ -300,10 +301,11 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
         ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
+              snapshot.hasData &&
+              snapshot.data!.isSuccess) {
             return RepaintBoundary(
               child: Image.memory(
-                snapshot.data!,
+                snapshot.data!.value,
                 height: AppConstants.photoThumbnailSize,
                 width: AppConstants.photoThumbnailSize,
                 fit: BoxFit.cover,

@@ -36,18 +36,20 @@ class PhotoService implements IPhotoService {
   // =================================================================
 
   @override
-  Future<bool> requestPermission() => _permissionService.requestPermission();
+  Future<Result<bool>> requestPermission() =>
+      _permissionService.requestPermission();
 
   @override
-  Future<bool> isPermissionPermanentlyDenied() =>
+  Future<Result<bool>> isPermissionPermanentlyDenied() =>
       _permissionService.isPermissionPermanentlyDenied();
 
   @override
-  Future<bool> presentLimitedLibraryPicker() =>
+  Future<Result<bool>> presentLimitedLibraryPicker() =>
       _permissionService.presentLimitedLibraryPicker();
 
   @override
-  Future<bool> isLimitedAccess() => _permissionService.isLimitedAccess();
+  Future<Result<bool>> isLimitedAccess() =>
+      _permissionService.isLimitedAccess();
 
   // =================================================================
   // カメラ撮影メソッド（ICameraServiceへの委譲）
@@ -116,21 +118,21 @@ class PhotoService implements IPhotoService {
   // =================================================================
 
   @override
-  Future<List<int>?> getPhotoData(AssetEntity asset) =>
+  Future<Result<List<int>>> getPhotoData(AssetEntity asset) =>
       _dataService.getPhotoData(asset);
 
   @override
-  Future<List<int>?> getThumbnailData(AssetEntity asset) =>
+  Future<Result<List<int>>> getThumbnailData(AssetEntity asset) =>
       _dataService.getThumbnailData(asset);
 
   @override
-  Future<Uint8List?> getThumbnail(
+  Future<Result<Uint8List>> getThumbnail(
     AssetEntity asset, {
     int width = 200,
     int height = 200,
   }) => _dataService.getThumbnail(asset, width: width, height: height);
 
   @override
-  Future<Uint8List?> getOriginalFile(AssetEntity asset) =>
+  Future<Result<Uint8List>> getOriginalFile(AssetEntity asset) =>
       _dataService.getOriginalFile(asset);
 }

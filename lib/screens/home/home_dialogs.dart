@@ -77,6 +77,7 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 final photoService = ServiceRegistration.get<IPhotoService>();
+                // Result is intentionally not checked here — fire and forget
                 await photoService.presentLimitedLibraryPicker();
                 _self._loadTodayPhotos();
               },

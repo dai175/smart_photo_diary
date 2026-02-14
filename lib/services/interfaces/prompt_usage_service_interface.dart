@@ -2,6 +2,7 @@
 //
 // プロンプト使用履歴管理の抽象化レイヤー
 
+import '../../core/result/result.dart';
 import '../../models/writing_prompt.dart';
 
 /// プロンプト使用履歴管理サービスのインターフェース
@@ -23,8 +24,8 @@ abstract class IPromptUsageService {
   /// [promptId] 使用したプロンプトID
   /// [diaryEntryId] 関連する日記エントリID（省略可）
   /// [wasHelpful] プロンプトが役に立ったかどうか
-  /// 戻り値: 記録成功の場合true。エラー時はfalse。
-  Future<bool> recordPromptUsage({
+  /// 戻り値: 記録成功の場合Success(true)。エラー時はFailure(ServiceException)。
+  Future<Result<bool>> recordPromptUsage({
     required String promptId,
     String? diaryEntryId,
     bool wasHelpful = true,
@@ -47,8 +48,8 @@ abstract class IPromptUsageService {
   /// 使用履歴をクリア
   ///
   /// [olderThanDays] 指定日数より古い履歴のみ削除（省略時は全削除）
-  /// 戻り値: クリア成功の場合true。エラー時はfalse。
-  Future<bool> clearUsageHistory({int? olderThanDays});
+  /// 戻り値: クリア成功の場合Success(true)。エラー時はFailure(ServiceException)。
+  Future<Result<bool>> clearUsageHistory({int? olderThanDays});
 
   /// プロンプト使用頻度統計を取得
   ///

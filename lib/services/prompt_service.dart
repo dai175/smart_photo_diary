@@ -11,6 +11,8 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../models/writing_prompt.dart';
@@ -463,13 +465,15 @@ class PromptService implements IPromptService {
   // =================================================================
 
   @override
-  Future<bool> recordPromptUsage({
+  Future<Result<bool>> recordPromptUsage({
     required String promptId,
     String? diaryEntryId,
     bool wasHelpful = true,
   }) async {
     _ensureInitialized();
-    if (_usageService == null) return false;
+    if (_usageService == null) {
+      return const Failure(ServiceException('Usage service is not available'));
+    }
     return _usageService!.recordPromptUsage(
       promptId: promptId,
       diaryEntryId: diaryEntryId,
@@ -492,9 +496,11 @@ class PromptService implements IPromptService {
   }
 
   @override
-  Future<bool> clearUsageHistory({int? olderThanDays}) async {
+  Future<Result<bool>> clearUsageHistory({int? olderThanDays}) async {
     _ensureInitialized();
-    if (_usageService == null) return false;
+    if (_usageService == null) {
+      return const Failure(ServiceException('Usage service is not available'));
+    }
     return _usageService!.clearUsageHistory(olderThanDays: olderThanDays);
   }
 

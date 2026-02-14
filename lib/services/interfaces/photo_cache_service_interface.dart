@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:photo_manager/photo_manager.dart';
+import '../../core/result/result.dart';
 
 /// 写真キャッシュサービスのインターフェース
 abstract class IPhotoCacheService {
@@ -9,8 +10,8 @@ abstract class IPhotoCacheService {
   /// [width] サムネイル幅（デフォルト: 200）
   /// [height] サムネイル高さ（デフォルト: 200）
   /// [quality] JPEG品質（デフォルト: 80）
-  /// 戻り値: サムネイルのバイトデータ。エラー時は null。
-  Future<Uint8List?> getThumbnail(
+  /// 戻り値: サムネイルのバイトデータのResult。エラー時は Failure(PhotoAccessException)。
+  Future<Result<Uint8List>> getThumbnail(
     AssetEntity asset, {
     int width = 200,
     int height = 200,

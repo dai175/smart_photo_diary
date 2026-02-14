@@ -43,16 +43,16 @@ void main() {
       final mockPermissionService = MockPhotoPermissionService();
       when(
         () => mockPermissionService.requestPermission(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => const Success(false));
       when(
         () => mockPermissionService.isPermissionPermanentlyDenied(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => const Success(false));
       when(
         () => mockPermissionService.presentLimitedLibraryPicker(),
-      ).thenAnswer((_) async => true);
+      ).thenAnswer((_) async => const Success(true));
       when(
         () => mockPermissionService.isLimitedAccess(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => const Success(false));
       // PhotoServiceをコンストラクタインジェクションで作成
       photoService = PhotoService(
         logger: mockLogger,

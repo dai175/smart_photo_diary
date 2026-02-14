@@ -7,11 +7,11 @@ import '../core/result/result.dart';
 /// 写真のクエリ・日付フィルタリング・ページネーションを担当する内部サービス
 class PhotoQueryService {
   final ILoggingService _logger;
-  final Future<bool> Function() _requestPermission;
+  final Future<Result<bool>> Function() _requestPermission;
 
   PhotoQueryService({
     required ILoggingService logger,
-    required Future<bool> Function() requestPermission,
+    required Future<Result<bool>> Function() requestPermission,
   }) : _logger = logger,
        _requestPermission = requestPermission;
 
@@ -19,9 +19,10 @@ class PhotoQueryService {
   // 共通ヘルパー
   // =================================================================
 
-  /// 権限チェック。権限がない場合は null を返す。
+  /// 権限チェック。権限がない場合は false を返す。
   Future<bool> _ensurePermission(String caller) async {
-    final hasPermission = await _requestPermission();
+    final result = await _requestPermission();
+    final hasPermission = result.getOrDefault(false);
     if (!hasPermission) {
       _logger.info(
         'No photo access permission',

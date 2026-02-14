@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
+import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
+import '../core/result/result.dart';
 import '../constants/app_constants.dart';
 
 /// LRUキャッシュのエントリー
@@ -50,7 +52,7 @@ class PhotoCacheService implements IPhotoCacheService {
 
   /// サムネイルを取得（キャッシュがあればキャッシュから、なければ生成してキャッシュ）
   @override
-  Future<Uint8List?> getThumbnail(
+  Future<Result<Uint8List>> getThumbnail(
     AssetEntity asset, {
     int width = 200,
     int height = 200,
@@ -74,7 +76,7 @@ class PhotoCacheService implements IPhotoCacheService {
             context: 'PhotoCacheService.getThumbnail',
             data: 'assetId: ${asset.id}, size: ${width}x$height',
           );
-          return cachedEntry.data;
+          return Success(cachedEntry.data);
         } else {
           // 期限切れのキャッシュを削除
           _removeFromCache(cacheKey);
@@ -97,9 +99,15 @@ class PhotoCacheService implements IPhotoCacheService {
           data:
               'assetId: ${asset.id}, size: ${width}x$height, bytes: ${thumbnail.length}',
         );
+        return Success(thumbnail);
       }
 
-      return thumbnail;
+      return Failure(
+        PhotoAccessException(
+          'Failed to generate thumbnail',
+          details: 'assetId: ${asset.id}, size: ${width}x$height',
+        ),
+      );
     } catch (e) {
       final appError = ErrorHandler.handleError(
         e,
@@ -110,7 +118,9 @@ class PhotoCacheService implements IPhotoCacheService {
         context: 'PhotoCacheService.getThumbnail',
         error: appError,
       );
-      return null;
+      return Failure(
+        PhotoAccessException('Thumbnail retrieval error', originalError: e),
+      );
     }
   }
 

@@ -160,28 +160,16 @@ class AiService implements IAiService {
     required int photoCount,
     Locale? locale,
   }) async {
-    try {
-      // Phase 1.7.1: タグ生成は使用量にカウントしない
-      final online = await isOnline();
-      final result = await _tagGenerator.generateTags(
-        title: title,
-        content: content,
-        date: date,
-        photoCount: photoCount,
-        isOnline: online,
-        locale: locale ?? const Locale('ja'),
-      );
-
-      return Success(result);
-    } catch (e) {
-      return Failure(
-        AiProcessingException(
-          'Error occurred during tag generation',
-          details: e.toString(),
-          originalError: e,
-        ),
-      );
-    }
+    // Phase 1.7.1: タグ生成は使用量にカウントしない
+    final online = await isOnline();
+    return await _tagGenerator.generateTags(
+      title: title,
+      content: content,
+      date: date,
+      photoCount: photoCount,
+      isOnline: online,
+      locale: locale ?? const Locale('ja'),
+    );
   }
 
   // Phase 1.7.3: UI連携準備メソッド実装

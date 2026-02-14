@@ -179,7 +179,7 @@ void main() {
           // (avoids pending-timer issues from HomeScreen initialization).
           when(
             () => mockPhoto.requestPermission(),
-          ).thenAnswer((_) => Completer<bool>().future);
+          ).thenAnswer((_) => Completer<Result<bool>>().future);
 
           await tester.pumpWidget(buildOnboardingScreen());
           await tester.pumpAndSettle();
@@ -206,7 +206,7 @@ void main() {
         // Block requestPermission so navigation to HomeScreen never happens
         when(
           () => mockPhoto.requestPermission(),
-        ).thenAnswer((_) => Completer<bool>().future);
+        ).thenAnswer((_) => Completer<Result<bool>>().future);
 
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();

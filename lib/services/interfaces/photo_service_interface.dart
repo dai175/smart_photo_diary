@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:photo_manager/photo_manager.dart';
 import '../../core/result/result.dart';
 
@@ -12,15 +14,19 @@ abstract class IPhotoService {
   /// iOS 14以降で Limited Access が付与された場合も true を返す。
   /// Limited Access かどうかの判定は [isLimitedAccess] で確認すること。
   ///
-  /// 戻り値: 権限が許可された場合 true（Limited Access含む）、拒否された場合 false。
-  /// エラー時は false を返す（例外をスローしない）。
-  Future<bool> requestPermission();
+  /// Returns:
+  /// - Success(true): 権限が付与された（Limited Access含む）
+  /// - Success(false): 権限が拒否された
+  /// - Failure: [PhotoAccessException] 権限リクエスト処理でエラーが発生した場合
+  Future<Result<bool>> requestPermission();
 
   /// 権限が永続的に拒否されているかチェック
   ///
-  /// 戻り値: 永続的に拒否されている場合 true。
-  /// エラー時は false を返す（例外をスローしない）。
-  Future<bool> isPermissionPermanentlyDenied();
+  /// Returns:
+  /// - Success(true): 永続的に拒否されている
+  /// - Success(false): 永続的に拒否されていない
+  /// - Failure: [PhotoAccessException] 権限チェック処理でエラーが発生した場合
+  Future<Result<bool>> isPermissionPermanentlyDenied();
 
   /// 今日撮影された写真を取得する
   ///
@@ -57,25 +63,31 @@ abstract class IPhotoService {
 
   /// 写真のバイナリデータを取得する
   ///
-  /// 戻り値: バイトデータ。取得失敗時は null（ログ記録済み）。
-  Future<List<int>?> getPhotoData(AssetEntity asset);
+  /// Returns:
+  /// - Success: バイトデータ [List<int>]
+  /// - Failure: [PhotoAccessException] 取得失敗時
+  Future<Result<List<int>>> getPhotoData(AssetEntity asset);
 
   /// 写真のサムネイルデータを取得する
   ///
-  /// 戻り値: バイトデータ。取得失敗時は null（ログ記録済み）。
-  Future<List<int>?> getThumbnailData(AssetEntity asset);
+  /// Returns:
+  /// - Success: バイトデータ [List<int>]
+  /// - Failure: [PhotoAccessException] 取得失敗時
+  Future<Result<List<int>>> getThumbnailData(AssetEntity asset);
 
-  /// 写真の元画像を取得する（後方互換性）
+  /// 写真の元画像を取得する
   ///
-  /// 戻り値型は後方互換性のため dynamic だが、実際には Uint8List? を返す。
-  /// 取得失敗時は null（ログ記録済み）。
-  Future<dynamic> getOriginalFile(AssetEntity asset);
+  /// Returns:
+  /// - Success: 元画像データ [Uint8List]
+  /// - Failure: [PhotoAccessException] 取得失敗時
+  Future<Result<Uint8List>> getOriginalFile(AssetEntity asset);
 
-  /// 写真のサムネイルを取得する（後方互換性）
+  /// 写真のサムネイルを取得する
   ///
-  /// 戻り値型は後方互換性のため dynamic だが、実際には Uint8List? を返す。
-  /// 取得失敗時は null（ログ記録済み）。
-  Future<dynamic> getThumbnail(
+  /// Returns:
+  /// - Success: サムネイルデータ [Uint8List]
+  /// - Failure: [PhotoAccessException] 取得失敗時
+  Future<Result<Uint8List>> getThumbnail(
     AssetEntity asset, {
     int width = 200,
     int height = 200,
@@ -83,13 +95,19 @@ abstract class IPhotoService {
 
   /// Limited Photo Access時に写真選択画面を表示
   ///
-  /// 戻り値: 選択が行われた場合 true。エラー時は false。
-  Future<bool> presentLimitedLibraryPicker();
+  /// Returns:
+  /// - Success(true): 選択画面の表示に成功
+  /// - Success(false): 選択画面の表示に失敗
+  /// - Failure: [PhotoAccessException] 表示処理でエラーが発生した場合
+  Future<Result<bool>> presentLimitedLibraryPicker();
 
   /// 現在の権限状態が Limited Access かチェック
   ///
-  /// 戻り値: Limited Access の場合 true。エラー時は false。
-  Future<bool> isLimitedAccess();
+  /// Returns:
+  /// - Success(true): Limited Accessである
+  /// - Success(false): Limited Accessではない
+  /// - Failure: [PhotoAccessException] 権限チェック処理でエラーが発生した場合
+  Future<Result<bool>> isLimitedAccess();
 
   /// 効率的な写真取得（ページネーション対応）
   ///

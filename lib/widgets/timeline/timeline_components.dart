@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
+import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
 
 /// パフォーマンス最適化された写真サムネイルウィジェット
@@ -19,7 +20,7 @@ class TimelinePhotoThumbnail extends StatelessWidget {
   });
 
   final AssetEntity photo;
-  final Future<Uint8List?> future;
+  final Future<Result<Uint8List>> future;
   final int thumbnailSize;
   final int thumbnailQuality;
   final double borderRadius;
@@ -27,15 +28,16 @@ class TimelinePhotoThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
+    return FutureBuilder<Result<Uint8List>>(
       // メモ化されたFutureを使用して再描画時の待機→ローディング表示を防止
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
+        if (snapshot.hasData && snapshot.data!.isSuccess) {
+          final thumbnailData = snapshot.data!.value;
           final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
           return RepaintBoundary(
             child: Image.memory(
-              snapshot.data!,
+              thumbnailData,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
