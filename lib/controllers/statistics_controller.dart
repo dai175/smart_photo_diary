@@ -89,8 +89,12 @@ class StatisticsController extends BaseErrorController {
           loadStatistics();
         });
       });
-    } catch (_) {
-      // ignore
+    } catch (e) {
+      _logger.warning(
+        'Failed to subscribe to diary changes',
+        context: 'StatisticsController.subscribeDiaryChanges',
+        data: '$e',
+      );
     }
   }
 

@@ -81,7 +81,9 @@ class DiaryDetailController extends BaseErrorController {
                 data:
                     'diaryId: ${entry.id}, error: ${assetsResult.error.message}',
               );
-            } catch (_) {}
+            } catch (_) {
+              // LoggingService unavailable — non-critical, photo loading continues with fallback
+            }
           }
 
           _diaryEntry = entry;
