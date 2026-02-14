@@ -290,7 +290,7 @@ class FutureResultUIBuilder<T> extends StatelessWidget {
           final error = snapshot.error is AppException
               ? snapshot.error as AppException
               : ServiceException(
-                  'データの読み込み中にエラーが発生しました',
+                  'Failed to load data',
                   originalError: snapshot.error,
                 );
 

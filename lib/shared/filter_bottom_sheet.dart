@@ -143,12 +143,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     });
   }
 
-  void _toggleTimeOfDay(String time) {
-    final newTimeOfDay = Set<String>.from(_currentFilter.timeOfDay);
-    if (newTimeOfDay.contains(time)) {
-      newTimeOfDay.remove(time);
+  void _toggleTimeOfDay(TimeOfDayPeriod period) {
+    final newTimeOfDay = Set<TimeOfDayPeriod>.from(_currentFilter.timeOfDay);
+    if (newTimeOfDay.contains(period)) {
+      newTimeOfDay.remove(period);
     } else {
-      newTimeOfDay.add(time);
+      newTimeOfDay.add(period);
     }
 
     setState(() {
@@ -160,6 +160,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     setState(() {
       _currentFilter = DiaryFilter.empty;
     });
+  }
+
+  List<MapEntry<TimeOfDayPeriod, String>> _timeOfDayEntries(
+    BuildContext context,
+  ) {
+    return [
+      MapEntry(TimeOfDayPeriod.morning, context.l10n.filterTimeSlotMorning),
+      MapEntry(TimeOfDayPeriod.noon, context.l10n.filterTimeSlotNoon),
+      MapEntry(TimeOfDayPeriod.evening, context.l10n.filterTimeSlotEvening),
+      MapEntry(TimeOfDayPeriod.night, context.l10n.filterTimeSlotNight),
+    ];
   }
 
   String _formatDateRange(DateTimeRange dateRange) {
@@ -281,36 +292,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children:
-                        [
-                          {
-                            'key': '朝',
-                            'label': context.l10n.filterTimeSlotMorning,
-                          },
-                          {
-                            'key': '昼',
-                            'label': context.l10n.filterTimeSlotNoon,
-                          },
-                          {
-                            'key': '夕方',
-                            'label': context.l10n.filterTimeSlotEvening,
-                          },
-                          {
-                            'key': '夜',
-                            'label': context.l10n.filterTimeSlotNight,
-                          },
-                        ].map((timeSlot) {
-                          final timeKey = timeSlot['key'] as String;
-                          final timeLabel = timeSlot['label'] as String;
-                          final isSelected = _currentFilter.timeOfDay.contains(
-                            timeKey,
-                          );
-                          return FilterChip(
-                            label: Text(timeLabel),
-                            selected: isSelected,
-                            onSelected: (_) => _toggleTimeOfDay(timeKey),
-                          );
-                        }).toList(),
+                    children: _timeOfDayEntries(context).map((entry) {
+                      final isSelected = _currentFilter.timeOfDay.contains(
+                        entry.key,
+                      );
+                      return FilterChip(
+                        label: Text(entry.value),
+                        selected: isSelected,
+                        onSelected: (_) => _toggleTimeOfDay(entry.key),
+                      );
+                    }).toList(),
                   ),
                 ),
 
