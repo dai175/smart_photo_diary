@@ -7,12 +7,12 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
-import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/widgets/diary_card_widget.dart';
 
-class MockDiaryService extends Mock implements IDiaryService {}
+class MockDiaryTagService extends Mock implements IDiaryTagService {}
 
 class MockPhotoCacheService extends Mock implements IPhotoCacheService {}
 
@@ -59,16 +59,16 @@ Widget _wrapWithApp(Widget child) {
 }
 
 void main() {
-  late MockDiaryService mockDiaryService;
+  late MockDiaryTagService mockTagService;
   late MockPhotoCacheService mockPhotoCacheService;
   late MockPhotoService mockPhotoService;
 
   setUp(() {
     ServiceLocator().clear();
-    mockDiaryService = MockDiaryService();
+    mockTagService = MockDiaryTagService();
     mockPhotoCacheService = MockPhotoCacheService();
     mockPhotoService = MockPhotoService();
-    ServiceLocator().registerSingleton<IDiaryService>(mockDiaryService);
+    ServiceLocator().registerSingleton<IDiaryTagService>(mockTagService);
     ServiceLocator().registerSingleton<IPhotoCacheService>(
       mockPhotoCacheService,
     );
@@ -89,7 +89,7 @@ void main() {
       testWidgets('タイトルが表示される', (tester) async {
         final entry = _createEntry(title: 'My Diary', photoIds: []);
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
@@ -103,7 +103,7 @@ void main() {
       testWidgets('コンテンツが表示される', (tester) async {
         final entry = _createEntry(content: 'A beautiful day.', photoIds: []);
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
@@ -117,7 +117,7 @@ void main() {
       testWidgets('タイトル空時にUntitledフォールバック', (tester) async {
         final entry = _createEntry(title: '', photoIds: []);
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
@@ -136,7 +136,7 @@ void main() {
       testWidgets('日付が表示される', (tester) async {
         final entry = _createEntry(date: DateTime(2025, 6, 15), photoIds: []);
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
@@ -154,7 +154,7 @@ void main() {
         bool tapped = false;
         final entry = _createEntry(photoIds: []);
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
@@ -176,7 +176,7 @@ void main() {
       testWidgets('タグが正しく表示される', (tester) async {
         final entry = _createEntry(photoIds: []);
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenAnswer((_) async => const Success(['Morning', 'Happy']));
 
         await tester.pumpWidget(
@@ -195,7 +195,7 @@ void main() {
           photoIds: [],
         );
         when(
-          () => mockDiaryService.getTagsForEntry(entry),
+          () => mockTagService.getTagsForEntry(entry),
         ).thenThrow(Exception('error'));
 
         await tester.pumpWidget(

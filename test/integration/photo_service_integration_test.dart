@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_permission_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
@@ -44,6 +45,7 @@ void main() {
       photoService = PhotoService(
         logger: serviceLocator.get<ILoggingService>(),
         permissionService: mockPermissionService,
+        cacheService: serviceLocator.get<IPhotoCacheService>(),
       );
     });
 

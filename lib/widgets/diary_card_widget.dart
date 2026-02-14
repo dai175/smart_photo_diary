@@ -7,7 +7,8 @@ import '../core/service_locator.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../localization/localization_extensions.dart';
 import '../models/diary_entry.dart';
-import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_tag_service_interface.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../ui/components/custom_card.dart';
@@ -58,13 +59,18 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   // Returns null on failure to signal that l10n-dependent fallback is needed
   Future<List<String>?> _fetchTags() async {
     try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
-      final result = await diaryService.getTagsForEntry(widget.entry);
+      final tagService = await serviceLocator.getAsync<IDiaryTagService>();
+      final result = await tagService.getTagsForEntry(widget.entry);
       if (result.isSuccess) {
         return result.value;
       }
       return null;
     } catch (e) {
+      serviceLocator.get<ILoggingService>().error(
+        'Failed to fetch tags',
+        context: 'DiaryCardWidget._fetchTags',
+        error: e,
+      );
       return null;
     }
   }

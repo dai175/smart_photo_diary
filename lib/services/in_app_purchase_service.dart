@@ -13,7 +13,6 @@ import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'mixins/service_logging.dart';
 import 'mixins/purchase_event_handler.dart';
-import '../core/service_locator.dart';
 
 // 型エイリアスで名前衝突を解決
 import 'interfaces/in_app_purchase_service_interface.dart' as iapsi;
@@ -25,7 +24,7 @@ class InAppPurchaseService
     with ServiceLogging, PurchaseEventHandler
     implements IInAppPurchaseService {
   final ISubscriptionStateService _stateService;
-  ILoggingService? _loggingService;
+  final ILoggingService? _loggingService;
 
   @override
   ILoggingService? get loggingService => _loggingService;
@@ -61,14 +60,11 @@ class InAppPurchaseService
   // 購入処理中フラグ
   bool _isPurchasing = false;
 
-  InAppPurchaseService({required ISubscriptionStateService stateService})
-    : _stateService = stateService {
-    try {
-      _loggingService = ServiceLocator().get<ILoggingService>();
-    } catch (_) {
-      // テスト環境など、LoggingServiceが未登録の場合はnullのまま
-    }
-  }
+  InAppPurchaseService({
+    required ISubscriptionStateService stateService,
+    ILoggingService? logger,
+  }) : _stateService = stateService,
+       _loggingService = logger;
 
   @override
   Future<Result<void>> initialize() async {

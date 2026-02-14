@@ -3,7 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../models/plans/plan.dart';
 import '../services/interfaces/photo_service_interface.dart';
-import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_query_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/result/result.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -230,7 +230,8 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   /// 日記が存在する日付を読み込み
   Future<void> _loadDiaryDates() async {
     try {
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryService =
+          await ServiceRegistration.getAsync<IDiaryQueryService>();
       final result = await diaryService.getSortedDiaryEntries();
       if (!mounted) return;
 

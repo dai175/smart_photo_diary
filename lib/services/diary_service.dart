@@ -8,7 +8,6 @@ import '../models/diary_change.dart';
 import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/diary_tag_service_interface.dart';
-import 'interfaces/diary_statistics_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/result/result.dart';
@@ -53,11 +52,17 @@ class DiaryService implements IDiaryService {
   final _indexManager = DiaryIndexManager();
 
   // プライベートコンストラクタ（依存性注入用）
-  DiaryService._();
+  DiaryService._({ILoggingService? logger, IDiaryTagService? tagService})
+    : _injectedTagService = tagService {
+    if (logger != null) _loggingService = logger;
+  }
 
   // 依存性注入用のファクトリメソッド
-  static DiaryService createWithDependencies() {
-    return DiaryService._();
+  static DiaryService createWithDependencies({
+    ILoggingService? logger,
+    IDiaryTagService? tagService,
+  }) {
+    return DiaryService._(logger: logger, tagService: tagService);
   }
 
   // 初期化メソッド（外部から呼び出し可能）
@@ -69,39 +74,10 @@ class DiaryService implements IDiaryService {
   @override
   Stream<DiaryChange> get changes => _diaryChangeController.stream;
 
-  // =================================================================
-  // タグ管理メソッド（IDiaryTagServiceへの委譲）
-  // =================================================================
-
-  /// タグサービス（遅延解決）
-  IDiaryTagService get _tagService => serviceLocator.get<IDiaryTagService>();
-
-  @override
-  Future<Result<List<String>>> getTagsForEntry(DiaryEntry entry) =>
-      _tagService.getTagsForEntry(entry);
-
-  @override
-  Future<Result<Set<String>>> getAllTags() => _tagService.getAllTags();
-
-  @override
-  Future<Result<List<String>>> getPopularTags({int limit = 10}) =>
-      _tagService.getPopularTags(limit: limit);
-
-  // =================================================================
-  // 統計メソッド（IDiaryStatisticsServiceへの委譲）
-  // =================================================================
-
-  /// 統計サービス（遅延解決）
-  IDiaryStatisticsService get _statisticsService =>
-      serviceLocator.get<IDiaryStatisticsService>();
-
-  @override
-  Future<Result<int>> getTotalDiaryCount() =>
-      _statisticsService.getTotalDiaryCount();
-
-  @override
-  Future<Result<int>> getDiaryCountInPeriod(DateTime start, DateTime end) =>
-      _statisticsService.getDiaryCountInPeriod(start, end);
+  /// タグサービス（コンストラクタ注入 or 遅延解決）
+  final IDiaryTagService? _injectedTagService;
+  IDiaryTagService get _tagService =>
+      _injectedTagService ?? serviceLocator.get<IDiaryTagService>();
 
   // =================================================================
   // 初期化（本クラスに保持）
@@ -109,14 +85,6 @@ class DiaryService implements IDiaryService {
 
   // 初期化処理
   Future<void> _init() async {
-    // LoggingServiceの初期化（ServiceLocator経由、未登録時はフォールバック）
-    try {
-      _loggingService = ServiceLocator().get<ILoggingService>();
-    } catch (_) {
-      // テスト環境など、LoggingServiceが未登録の場合
-      _loggingService = _NoOpLoggingService();
-    }
-
     try {
       _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
       _loggingService.info(

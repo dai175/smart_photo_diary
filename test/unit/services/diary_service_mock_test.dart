@@ -423,7 +423,7 @@ void main() {
         // Assert
         expect(service.saveDiaryEntry, isA<Function>());
         expect(service.saveDiaryEntryWithPhotos, isA<Function>());
-        expect(service.getTagsForEntry, isA<Function>());
+        expect(service.getDiaryEntry, isA<Function>());
       });
     });
   });

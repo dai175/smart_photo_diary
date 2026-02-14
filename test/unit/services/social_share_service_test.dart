@@ -8,11 +8,15 @@ import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/interfaces/social_share_service_interface.dart';
 import 'package:smart_photo_diary/services/social_share_service.dart';
+import 'package:smart_photo_diary/services/diary_image_generator.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
 class MockSocialShareService extends Mock implements ISocialShareService {}
 
 class MockLoggingService extends Mock implements ILoggingService {}
+
+class MockPhotoService extends Mock implements IPhotoService {}
 
 void main() {
   late ISocialShareService shareService;
@@ -145,8 +149,20 @@ void main() {
       // LoggingServiceを登録
       testServiceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
+      // PhotoServiceのモックを作成
+      final mockPhotoService = MockPhotoService();
+
+      // DiaryImageGeneratorのモックを作成
+      final mockImageGenerator = DiaryImageGenerator(
+        logger: mockLoggingService,
+      );
+
       // SocialShareServiceのインスタンスを作成
-      actualService = SocialShareService();
+      actualService = SocialShareService(
+        logger: mockLoggingService,
+        imageGenerator: mockImageGenerator,
+        photoService: mockPhotoService,
+      );
 
       // モックの設定
       when(
@@ -171,8 +187,18 @@ void main() {
     });
 
     test('constructor returns new instance', () {
-      final instance1 = SocialShareService();
-      final instance2 = SocialShareService();
+      final imageGen = DiaryImageGenerator(logger: mockLoggingService);
+      final photoSvc = MockPhotoService();
+      final instance1 = SocialShareService(
+        logger: mockLoggingService,
+        imageGenerator: imageGen,
+        photoService: photoSvc,
+      );
+      final instance2 = SocialShareService(
+        logger: mockLoggingService,
+        imageGenerator: imageGen,
+        photoService: photoSvc,
+      );
 
       expect(instance1, isA<SocialShareService>());
       expect(instance2, isA<SocialShareService>());

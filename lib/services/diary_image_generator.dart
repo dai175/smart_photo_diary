@@ -8,7 +8,6 @@ import '../models/diary_entry.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 import 'interfaces/social_share_service_interface.dart';
 import 'diary_image/image_layout_calculator.dart';
 import 'diary_image/image_photo_renderer.dart';
@@ -19,11 +18,9 @@ import 'diary_image/image_text_renderer.dart';
 /// Canvas描画システムを使用して、日記の内容と写真を組み合わせた
 /// 美しいシェア用画像を生成します。
 class DiaryImageGenerator {
-  /// DI用の公開コンストラクタ
-  DiaryImageGenerator();
+  final ILoggingService _logger;
 
-  /// ログサービスを取得
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  DiaryImageGenerator({required ILoggingService logger}) : _logger = logger;
 
   /// 共有用画像を生成
   Future<Result<File>> generateImage({

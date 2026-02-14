@@ -4,7 +4,7 @@ import '../core/result/result.dart';
 import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/diary_entry.dart';
-import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_crud_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import 'base_error_controller.dart';
@@ -57,7 +57,8 @@ class DiaryDetailController extends BaseErrorController {
       _clearErrorState();
       setLoading(true);
 
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryService =
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
       final result = await diaryService.getDiaryEntry(diaryId);
 
       switch (result) {
@@ -110,7 +111,8 @@ class DiaryDetailController extends BaseErrorController {
       setLoading(true);
       _clearErrorState();
 
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryService =
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
 
       final updatedEntry = _diaryEntry!.copyWith(
         title: title,
@@ -143,7 +145,8 @@ class DiaryDetailController extends BaseErrorController {
       setLoading(true);
       _clearErrorState();
 
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryService =
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
       final deleteResult = await diaryService.deleteDiaryEntry(diaryId);
 
       switch (deleteResult) {

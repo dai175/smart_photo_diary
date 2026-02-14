@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
-import '../../../core/service_locator.dart';
 import '../../../core/service_registration.dart';
 import '../../../localization/localization_utils.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -21,7 +20,14 @@ class XShareChannel {
   // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 100, 100);
 
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  final ILoggingService _logger;
+  final IPhotoService _photoService;
+
+  XShareChannel({
+    required ILoggingService logger,
+    required IPhotoService photoService,
+  }) : _logger = logger,
+       _photoService = photoService;
 
   Future<Result<void>> share({
     required DiaryEntry diary,
@@ -40,8 +46,7 @@ class XShareChannel {
       if (photos != null) {
         assets = photos;
       } else {
-        final photoService = serviceLocator.get<IPhotoService>();
-        final result = await photoService.getAssetsByIds(diary.photoIds);
+        final result = await _photoService.getAssetsByIds(diary.photoIds);
         if (result.isFailure) {
           _logger.warning(
             'Failed to load photo assets for sharing',

@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_permission_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
@@ -16,6 +17,8 @@ class MockAssetEntity extends Mock implements AssetEntity {}
 class MockFilterOptionGroup extends Mock implements FilterOptionGroup {}
 
 class MockLoggingService extends Mock implements ILoggingService {}
+
+class MockPhotoCacheService extends Mock implements IPhotoCacheService {}
 
 class MockPhotoPermissionService extends Mock
     implements IPhotoPermissionService {}
@@ -54,9 +57,11 @@ void main() {
         () => mockPermissionService.isLimitedAccess(),
       ).thenAnswer((_) async => const Success(false));
       // PhotoServiceをコンストラクタインジェクションで作成
+      final mockCacheService = MockPhotoCacheService();
       photoService = PhotoService(
         logger: mockLogger,
         permissionService: mockPermissionService,
+        cacheService: mockCacheService,
       );
     });
 

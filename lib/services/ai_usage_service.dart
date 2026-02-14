@@ -6,14 +6,13 @@ import 'interfaces/ai_usage_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'mixins/service_logging.dart';
-import '../core/service_locator.dart';
 
 /// AiUsageService
 ///
 /// AI生成の使用量追跡、月次リセット、残回数計算を担当する。
 class AiUsageService with ServiceLogging implements IAiUsageService {
   final ISubscriptionStateService _stateService;
-  ILoggingService? _loggingService;
+  final ILoggingService? _loggingService;
 
   @override
   ILoggingService? get loggingService => _loggingService;
@@ -21,14 +20,11 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   String get logTag => 'AiUsageService';
 
-  AiUsageService({required ISubscriptionStateService stateService})
-    : _stateService = stateService {
-    try {
-      _loggingService = ServiceLocator().get<ILoggingService>();
-    } catch (_) {
-      // テスト環境など、LoggingServiceが未登録の場合はnullのまま
-    }
-  }
+  AiUsageService({
+    required ISubscriptionStateService stateService,
+    ILoggingService? logger,
+  }) : _stateService = stateService,
+       _loggingService = logger;
 
   @override
   Future<Result<bool>> canUseAiGeneration() async {

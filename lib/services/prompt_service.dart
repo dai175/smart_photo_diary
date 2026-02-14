@@ -1,15 +1,13 @@
 // PromptService実装
 //
 // ライティングプロンプトの管理を担当するサービス
-// シングルトンパターンでJSONデータの読み込み、キャッシュ、
-// フィルタリング機能を提供
+// JSONデータの読み込み、キャッシュ、フィルタリング機能を提供
 //
 // 使用履歴管理はPromptUsageServiceに委譲（Facadeパターン）
 
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
@@ -22,11 +20,10 @@ import 'interfaces/prompt_usage_service_interface.dart';
 
 /// ライティングプロンプト管理サービス
 ///
-/// シングルトンパターンでプロンプトデータの読み込み、
-/// キャッシュ管理、プラン別フィルタリング機能を提供。
+/// プロンプトデータの読み込み、キャッシュ管理、
+/// プラン別フィルタリング機能を提供。
 /// 使用履歴管理はIPromptUsageServiceに委譲。
 class PromptService implements IPromptService {
-  static PromptService? _instance;
   static const String _promptsAssetPath = 'assets/data/writing_prompts.json';
 
   // プロンプトデータとキャッシュ
@@ -35,7 +32,8 @@ class PromptService implements IPromptService {
   final Map<PromptCategory, List<WritingPrompt>> _categoryCache = {};
   final Map<String, WritingPrompt> _idCache = {};
 
-  // 使用履歴サービス（Facade委譲先）
+  // 依存サービス
+  final ILoggingService _logger;
   IPromptUsageService? _usageService;
 
   // 初期化状態管理
@@ -44,34 +42,23 @@ class PromptService implements IPromptService {
   // 乱数生成器（テスト可能性のため分離）
   final Random _random = Random();
 
-  // 内部コンストラクタ（シングルトン用）
-  PromptService._internal();
-
-  /// シングルトンインスタンス取得
-  static PromptService get instance {
-    _instance ??= PromptService._internal();
-    return _instance!;
-  }
-
-  /// テスト用インスタンスリセット
-  @visibleForTesting
-  static void resetInstance() {
-    _instance = null;
-  }
+  PromptService({
+    required ILoggingService logger,
+    IPromptUsageService? usageService,
+  }) : _logger = logger,
+       _usageService = usageService;
 
   @override
   bool get isInitialized => _isInitialized;
 
   @override
   Future<bool> initialize() async {
-    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-
     try {
-      loggingService.info('PromptService: Initialization started');
+      _logger.info('PromptService: Initialization started');
 
       // 既に初期化済みの場合はスキップ
       if (_isInitialized) {
-        loggingService.info('PromptService: Already initialized');
+        _logger.info('PromptService: Already initialized');
         return true;
       }
 
@@ -79,26 +66,29 @@ class PromptService implements IPromptService {
       await _loadPromptsFromAsset();
 
       // キャッシュを生成
-      await _buildCaches();
+      _buildCaches();
 
-      // 使用履歴サービスを取得（失敗してもPromptService自体は初期化完了とする）
-      try {
-        _usageService = await ServiceLocator().getAsync<IPromptUsageService>();
-      } catch (e) {
-        loggingService.warning(
-          'PromptService: Usage history feature disabled (${e.toString()})',
-        );
-        _usageService = null;
+      // 使用履歴サービスを取得（コンストラクタ未注入かつServiceLocator経由でも失敗時はnull）
+      if (_usageService == null) {
+        try {
+          _usageService = await ServiceLocator()
+              .getAsync<IPromptUsageService>();
+        } catch (e) {
+          _logger.warning(
+            'PromptService: Usage history feature disabled (${e.toString()})',
+          );
+          _usageService = null;
+        }
       }
 
       _isInitialized = true;
-      loggingService.info(
+      _logger.info(
         'PromptService: Initialization completed (prompt count: ${_allPrompts.length})',
       );
 
       return true;
     } catch (e, stackTrace) {
-      loggingService.error(
+      _logger.error(
         'PromptService: Initialization failed',
         error: e,
         stackTrace: stackTrace,
@@ -109,8 +99,6 @@ class PromptService implements IPromptService {
 
   /// JSONアセットからプロンプトデータを読み込み
   Future<void> _loadPromptsFromAsset() async {
-    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-
     try {
       // JSONファイルを読み込み
       final String jsonString = await rootBundle.loadString(_promptsAssetPath);
@@ -124,22 +112,20 @@ class PromptService implements IPromptService {
           .map((json) => WritingPrompt.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      loggingService.info(
+      _logger.info(
         'PromptService: JSON loading completed (${_allPrompts.length} prompts)',
       );
 
       // データ整合性チェック
-      await _validatePromptData(jsonData);
+      _validatePromptData(jsonData);
     } catch (e) {
-      loggingService.error('PromptService: JSON loading failed', error: e);
+      _logger.error('PromptService: JSON loading failed', error: e);
       rethrow;
     }
   }
 
   /// プロンプトデータの整合性をチェック
-  Future<void> _validatePromptData(Map<String, dynamic> jsonData) async {
-    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-
+  void _validatePromptData(Map<String, dynamic> jsonData) {
     // メタデータと実際のデータ数の整合性確認
     final int expectedTotal = jsonData['totalPrompts'] ?? 0;
     final int expectedBasic = jsonData['basicPrompts'] ?? 0;
@@ -156,21 +142,19 @@ class PromptService implements IPromptService {
           'Prompt data mismatch: '
           'expected(total:$expectedTotal, basic:$expectedBasic, premium:$expectedPremium) '
           'actual(total:$actualTotal, basic:$actualBasic, premium:$actualPremium)';
-      loggingService.warning('PromptService: $error');
+      _logger.warning('PromptService: $error');
     }
 
     // ID重複チェック
     final ids = _allPrompts.map((p) => p.id).toList();
     final uniqueIds = ids.toSet();
     if (ids.length != uniqueIds.length) {
-      loggingService.warning('PromptService: Duplicate prompt IDs found');
+      _logger.warning('PromptService: Duplicate prompt IDs found');
     }
   }
 
   /// 各種キャッシュを構築
-  Future<void> _buildCaches() async {
-    final loggingService = await ServiceLocator().getAsync<ILoggingService>();
-
+  void _buildCaches() {
     try {
       // プラン別キャッシュ
       _planFilterCache[false] = PromptCategoryUtils.filterPromptsByPlan(
@@ -194,9 +178,9 @@ class PromptService implements IPromptService {
         _idCache[prompt.id] = prompt;
       }
 
-      loggingService.info('PromptService: Cache build completed');
+      _logger.info('PromptService: Cache build completed');
     } catch (e) {
-      loggingService.error('PromptService: Cache build failed', error: e);
+      _logger.error('PromptService: Cache build failed', error: e);
       rethrow;
     }
   }

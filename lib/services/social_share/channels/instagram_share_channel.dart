@@ -7,7 +7,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
-import '../../../core/service_locator.dart';
 import '../../../core/service_registration.dart';
 import '../../../models/diary_entry.dart';
 import '../../interfaces/logging_service_interface.dart';
@@ -23,9 +22,14 @@ class InstagramShareChannel {
   // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 100, 100);
 
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
-  DiaryImageGenerator get _imageGenerator =>
-      serviceLocator.get<DiaryImageGenerator>();
+  final ILoggingService _logger;
+  final DiaryImageGenerator _imageGenerator;
+
+  InstagramShareChannel({
+    required ILoggingService logger,
+    required DiaryImageGenerator imageGenerator,
+  }) : _logger = logger,
+       _imageGenerator = imageGenerator;
 
   Future<Result<void>> share({
     required DiaryEntry diary,

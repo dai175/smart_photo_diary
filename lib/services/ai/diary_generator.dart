@@ -5,7 +5,6 @@ import 'gemini_api_client.dart';
 import '../interfaces/logging_service_interface.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
-import '../../core/service_locator.dart';
 import 'diary_locale_utils.dart';
 import 'diary_time_segment.dart';
 import 'diary_prompt_builder.dart';
@@ -13,11 +12,11 @@ import 'diary_prompt_builder.dart';
 /// 日記生成を担当するサービス
 class DiaryGenerator {
   final GeminiApiClient _apiClient;
+  final ILoggingService _logger;
 
-  DiaryGenerator({GeminiApiClient? apiClient})
-    : _apiClient = apiClient ?? GeminiApiClient();
-
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  DiaryGenerator({required ILoggingService logger, GeminiApiClient? apiClient})
+    : _logger = logger,
+      _apiClient = apiClient ?? GeminiApiClient(logger: logger);
 
   /// 画像から直接日記を生成
   Future<Result<DiaryGenerationResult>> generateFromImage({

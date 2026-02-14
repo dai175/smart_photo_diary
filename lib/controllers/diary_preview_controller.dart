@@ -10,7 +10,7 @@ import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/writing_prompt.dart';
 import '../services/ai/ai_service_interface.dart';
-import '../services/interfaces/diary_service_interface.dart';
+import '../services/interfaces/diary_crud_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/prompt_service_interface.dart';
@@ -310,7 +310,8 @@ class DiaryPreviewController extends BaseErrorController {
         context: 'DiaryPreviewController',
       );
 
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryService =
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
 
       final saveResult = await diaryService.saveDiaryEntryWithPhotos(
         date: _photoDateTime,
@@ -358,7 +359,8 @@ class DiaryPreviewController extends BaseErrorController {
         context: 'DiaryPreviewController',
       );
 
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
+      final diaryService =
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
 
       final manualSaveResult = await diaryService.saveDiaryEntryWithPhotos(
         date: _photoDateTime,

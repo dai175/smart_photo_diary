@@ -108,8 +108,8 @@ void main() {
       });
     });
 
-    group('Statistics Operations', () {
-      test('should return total diary count', () async {
+    group('Query Operations', () {
+      test('should return sorted diary entries', () async {
         // Arrange - Clear existing entries
         final allResult = await diaryService.getSortedDiaryEntries();
         expect(allResult.isSuccess, isTrue);
@@ -132,50 +132,11 @@ void main() {
         );
 
         // Act
-        final countResult = await diaryService.getTotalDiaryCount();
+        final sortedResult = await diaryService.getSortedDiaryEntries();
 
         // Assert
-        expect(countResult.isSuccess, isTrue);
-        expect(countResult.value, equals(2));
-      });
-
-      test('should return diary count in period', () async {
-        // Arrange
-        final start = DateTime(2024, 1, 1);
-        final end = DateTime(2024, 1, 31);
-
-        // Clear existing entries
-        final allResult = await diaryService.getSortedDiaryEntries();
-        expect(allResult.isSuccess, isTrue);
-        for (final entry in allResult.value) {
-          await diaryService.deleteDiaryEntry(entry.id);
-        }
-
-        // Add entries within period
-        await diaryService.saveDiaryEntry(
-          date: DateTime(2024, 1, 15),
-          title: 'Within Period',
-          content: 'Content',
-          photoIds: [],
-        );
-
-        // Add entry outside period
-        await diaryService.saveDiaryEntry(
-          date: DateTime(2024, 2, 1),
-          title: 'Outside Period',
-          content: 'Content',
-          photoIds: [],
-        );
-
-        // Act
-        final countResult = await diaryService.getDiaryCountInPeriod(
-          start,
-          end,
-        );
-
-        // Assert
-        expect(countResult.isSuccess, isTrue);
-        expect(countResult.value, equals(1));
+        expect(sortedResult.isSuccess, isTrue);
+        expect(sortedResult.value.length, equals(2));
       });
     });
 

@@ -11,6 +11,7 @@ import 'package:smart_photo_diary/services/interfaces/logging_service_interface.
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/ai/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
 import '../integration/mocks/mock_services.dart';
@@ -47,6 +48,10 @@ void main() {
     final diaryCompleter = Completer<IDiaryService>();
     serviceLocator.registerAsyncFactory<IDiaryService>(
       () => diaryCompleter.future,
+    );
+    final diaryCrudCompleter = Completer<IDiaryCrudService>();
+    serviceLocator.registerAsyncFactory<IDiaryCrudService>(
+      () => diaryCrudCompleter.future,
     );
 
     final subscriptionCompleter = Completer<ISubscriptionService>();

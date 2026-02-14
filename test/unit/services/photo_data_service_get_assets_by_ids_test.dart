@@ -1,17 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/photo_data_service.dart';
 
 class MockLoggingService extends Mock implements ILoggingService {}
 
+class MockPhotoCacheService extends Mock implements IPhotoCacheService {}
+
 void main() {
   late MockLoggingService mockLogger;
+  late MockPhotoCacheService mockCacheService;
   late PhotoDataService service;
 
   setUp(() {
     mockLogger = MockLoggingService();
-    service = PhotoDataService(logger: mockLogger);
+    mockCacheService = MockPhotoCacheService();
+    service = PhotoDataService(
+      logger: mockLogger,
+      cacheService: mockCacheService,
+    );
   });
 
   group('PhotoDataService.getAssetsByIds', () {

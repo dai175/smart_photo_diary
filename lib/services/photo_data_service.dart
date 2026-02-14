@@ -7,13 +7,17 @@ import '../core/result/result.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/errors/error_handler.dart';
-import '../core/service_locator.dart';
 
 /// 写真のバイナリデータ取得・サムネイル管理を担当する内部サービス
 class PhotoDataService {
   final ILoggingService _logger;
+  final IPhotoCacheService _cacheService;
 
-  PhotoDataService({required ILoggingService logger}) : _logger = logger;
+  PhotoDataService({
+    required ILoggingService logger,
+    required IPhotoCacheService cacheService,
+  }) : _logger = logger,
+       _cacheService = cacheService;
 
   /// 写真IDリストからAssetEntityを取得する
   Future<Result<List<AssetEntity>>> getAssetsByIds(
@@ -111,8 +115,7 @@ class PhotoDataService {
     int height = AppConstants.defaultThumbnailHeight,
   }) async {
     try {
-      final cacheService = serviceLocator.get<IPhotoCacheService>();
-      return await cacheService.getThumbnail(
+      return await _cacheService.getThumbnail(
         asset,
         width: width,
         height: height,
