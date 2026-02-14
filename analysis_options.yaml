@@ -38,6 +38,7 @@ linter:
     # Code Style Consistency
     prefer_single_quotes: true  # Prefer single quotes for strings
     prefer_const_constructors: true  # Flutter widget tree optimization
+    prefer_relative_imports: true  # Use relative imports within lib/ (Effective Dart)
     # prefer_const_declarations: suppressed in analyzer.errors
     unnecessary_this: true  # Avoid unnecessary use of 'this'
     
