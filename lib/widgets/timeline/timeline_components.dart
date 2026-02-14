@@ -58,7 +58,7 @@ class TimelinePhotoThumbnail extends StatelessWidget {
               },
             ),
           );
-        } else {
+        } else if (!snapshot.hasData) {
           return Container(
             decoration: BoxDecoration(
               color: const Color(0xFFBDBDBD),
@@ -68,6 +68,20 @@ class TimelinePhotoThumbnail extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: strokeWidth,
                 color: const Color(0xFF9E9E9E),
+              ),
+            ),
+          );
+        } else {
+          // Failure case
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFBDBDBD),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.broken_image_outlined,
+                color: Color(0xFF9E9E9E),
               ),
             ),
           );

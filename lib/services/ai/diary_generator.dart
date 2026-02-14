@@ -317,6 +317,13 @@ Describe the situation and mood you infer from the image, including any emotiona
       }
     }
 
+    _logger.warning(
+      'Image analysis failed, using fallback message',
+      context: 'DiaryGenerator._analyzeImage',
+      data: responseResult.isFailure
+          ? responseResult.error.toString()
+          : 'Empty content from API response',
+    );
     return '$timeLabel: ${DiaryLocaleUtils.analysisFailureMessage(locale)}';
   }
 

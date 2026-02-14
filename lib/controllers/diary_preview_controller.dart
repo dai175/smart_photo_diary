@@ -236,6 +236,11 @@ class DiaryPreviewController extends BaseErrorController {
           imageData: imageResult.value,
           time: _resolveAssetDateTime(asset),
         ));
+      } else {
+        _logger.warning(
+          'Failed to load image, skipping asset: ${asset.id}',
+          context: 'DiaryPreviewController._generateFromMultiplePhotos',
+        );
       }
     }
 
