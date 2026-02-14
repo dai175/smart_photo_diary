@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
@@ -13,8 +13,9 @@ import '../../core/service_locator.dart';
 class GeminiApiClient {
   final http.Client _httpClient;
 
-  static const int _maxRetries = 3;
-  static const Duration _baseDelay = Duration(seconds: 1);
+  static const int maxRetries = 3;
+  static const Duration baseDelay = Duration(seconds: 1);
+  static const Duration requestTimeout = Duration(seconds: 30);
 
   GeminiApiClient({http.Client? httpClient})
     : _httpClient = httpClient ?? http.Client();
@@ -56,7 +57,7 @@ class GeminiApiClient {
     }
 
     try {
-      final response = await _postWithRetry(
+      final response = await postWithRetry(
         Uri.parse('$_apiUrl?key=$_apiKey'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -77,7 +78,7 @@ class GeminiApiClient {
             'thinkingConfig': {'thinkingBudget': 0},
           },
         }),
-        context: 'sendTextRequest',
+        requestContext: 'sendTextRequest',
       );
 
       if (response.statusCode == 200) {
@@ -128,7 +129,7 @@ class GeminiApiClient {
       // Base64エンコード
       final base64Image = base64Encode(imageData);
 
-      final response = await _postWithRetry(
+      final response = await postWithRetry(
         Uri.parse('$_apiUrl?key=$_apiKey'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -152,7 +153,7 @@ class GeminiApiClient {
             'thinkingConfig': {'thinkingBudget': 0},
           },
         }),
-        context: 'sendVisionRequest',
+        requestContext: 'sendVisionRequest',
       );
 
       if (response.statusCode == 200) {
@@ -183,95 +184,86 @@ class GeminiApiClient {
   }
 
   /// 指数バックオフ付きリトライでHTTP POSTを実行
-  Future<http.Response> _postWithRetry(
+  ///
+  /// リトライ対象: SocketException, TimeoutException, ClientException,
+  /// HTTP 429 (Rate Limit), HTTP 5xx (サーバーエラー)
+  ///
+  /// 全リトライ耗尽時は常に [NetworkException] をスローする。
+  @visibleForTesting
+  Future<http.Response> postWithRetry(
     Uri url, {
     required Map<String, String> headers,
     required String body,
-    required String context,
+    required String requestContext,
   }) async {
     Object? lastError;
 
-    for (int attempt = 0; attempt <= _maxRetries; attempt++) {
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        final response = await _httpClient.post(
-          url,
-          headers: headers,
-          body: body,
-        );
+        final response = await _httpClient
+            .post(url, headers: headers, body: body)
+            .timeout(requestTimeout);
 
         if (response.statusCode == 200 ||
-            !_isRetryableStatusCode(response.statusCode)) {
+            !isRetryableStatusCode(response.statusCode)) {
           return response;
         }
 
         // リトライ対象のステータスコード
-        lastError = response;
-        if (attempt < _maxRetries) {
-          final delay = _baseDelay * (1 << attempt);
-          _logger.warning(
-            'Retryable HTTP ${response.statusCode}, '
-            'retrying in ${delay.inSeconds}s '
-            '(attempt ${attempt + 1}/$_maxRetries)',
-            context: 'GeminiApiClient.$context',
-          );
-          await Future<void>.delayed(delay);
-        }
+        lastError = 'HTTP ${response.statusCode}: ${response.body}';
+        await _waitForRetry(
+          'Retryable HTTP ${response.statusCode}',
+          attempt,
+          requestContext,
+        );
       } on SocketException catch (e) {
         lastError = e;
-        if (attempt < _maxRetries) {
-          final delay = _baseDelay * (1 << attempt);
-          _logger.warning(
-            'Network error (SocketException), '
-            'retrying in ${delay.inSeconds}s '
-            '(attempt ${attempt + 1}/$_maxRetries)',
-            context: 'GeminiApiClient.$context',
-          );
-          await Future<void>.delayed(delay);
-        }
+        await _waitForRetry(
+          'Network error (SocketException)',
+          attempt,
+          requestContext,
+        );
       } on TimeoutException catch (e) {
         lastError = e;
-        if (attempt < _maxRetries) {
-          final delay = _baseDelay * (1 << attempt);
-          _logger.warning(
-            'Request timed out, '
-            'retrying in ${delay.inSeconds}s '
-            '(attempt ${attempt + 1}/$_maxRetries)',
-            context: 'GeminiApiClient.$context',
-          );
-          await Future<void>.delayed(delay);
-        }
+        await _waitForRetry('Request timed out', attempt, requestContext);
       } on http.ClientException catch (e) {
         lastError = e;
-        if (attempt < _maxRetries) {
-          final delay = _baseDelay * (1 << attempt);
-          _logger.warning(
-            'HTTP client error, '
-            'retrying in ${delay.inSeconds}s '
-            '(attempt ${attempt + 1}/$_maxRetries)',
-            context: 'GeminiApiClient.$context',
-          );
-          await Future<void>.delayed(delay);
-        }
+        await _waitForRetry('HTTP client error', attempt, requestContext);
       }
     }
 
-    // 全リトライ失敗
-    if (lastError is http.Response) {
-      return lastError;
-    }
-
+    // 全リトライ失敗 — 常に NetworkException をスロー
     _logger.error(
-      'All $_maxRetries retries exhausted',
-      context: 'GeminiApiClient.$context',
+      'All $maxRetries retries exhausted',
+      context: 'GeminiApiClient.$requestContext',
       error: lastError,
     );
     throw NetworkException(
-      'Network request failed after $_maxRetries retries',
+      'Network request failed after $maxRetries retries',
       originalError: lastError,
     );
   }
 
-  bool _isRetryableStatusCode(int statusCode) {
+  /// リトライ待機のヘルパー（最終試行では待機しない）
+  Future<void> _waitForRetry(
+    String message,
+    int attempt,
+    String requestContext,
+  ) async {
+    if (attempt < maxRetries) {
+      final delay = baseDelay * (1 << attempt);
+      _logger.warning(
+        '$message, retrying in ${delay.inSeconds}s '
+        '(attempt ${attempt + 1}/$maxRetries)',
+        context: 'GeminiApiClient.$requestContext',
+      );
+      await Future<void>.delayed(delay);
+    }
+  }
+
+  /// ステータスコードがリトライ対象かどうかを判定
+  @visibleForTesting
+  static bool isRetryableStatusCode(int statusCode) {
     return statusCode == 429 || (statusCode >= 500 && statusCode <= 599);
   }
 
