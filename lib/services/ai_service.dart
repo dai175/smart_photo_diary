@@ -92,8 +92,8 @@ class AiService implements IAiService {
   }
 
   /// AI生成成功後の使用量記録
-  Future<void> _recordAiUsage() async {
-    if (_subscriptionService == null) return;
+  Future<Result<void>> _recordAiUsage() async {
+    if (_subscriptionService == null) return const Success(null);
 
     final result = await _subscriptionService.incrementAiUsage();
     if (result.isFailure) {
@@ -103,6 +103,7 @@ class AiService implements IAiService {
         data: result.error.toString(),
       );
     }
+    return result;
   }
 
   @override
