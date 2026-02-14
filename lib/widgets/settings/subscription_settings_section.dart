@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_icons.dart';
-import '../../constants/subscription_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/subscription_info_v2.dart';
 import '../../ui/animations/micro_interactions.dart';
@@ -8,9 +7,8 @@ import '../../ui/components/animated_button.dart';
 import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
-import '../../utils/dynamic_pricing_utils.dart';
 import '../../utils/upgrade_dialog_utils.dart';
-import '../../utils/url_launcher_utils.dart';
+import 'subscription_legal_info.dart';
 
 /// Subscription-related settings section.
 ///
@@ -252,7 +250,7 @@ class _SubscriptionSettingsSectionState
             _buildUpgradeButton(),
           ],
           const SizedBox(height: AppSpacing.lg),
-          _buildSubscriptionLegalInfo(),
+          const SubscriptionLegalInfo(),
         ],
       ),
     );
@@ -378,210 +376,5 @@ class _SubscriptionSettingsSectionState
     await UpgradeDialogUtils.showUpgradeDialog(context);
     if (!mounted) return;
     widget.onStateChanged();
-  }
-
-  Widget _buildSubscriptionLegalInfo() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.settingsSubscriptionInfoTitle,
-            style: AppTypography.titleSmall.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _buildDynamicSubscriptionPlanDetail(
-            context.l10n.settingsPremiumMonthlyTitle,
-            SubscriptionConstants.premiumMonthlyPlanId,
-            (price) => context.l10n.pricingPerMonthShort(price),
-            context.l10n.settingsPremiumPlanFeatures,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          _buildDynamicSubscriptionPlanDetail(
-            context.l10n.settingsPremiumYearlyTitle,
-            SubscriptionConstants.premiumYearlyPlanId,
-            (price) => context.l10n.pricingPerYearShort(price),
-            context.l10n.settingsPremiumPlanFeatures,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildAutoRenewNotice(),
-          const SizedBox(height: AppSpacing.md),
-          _buildLegalLinks(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAutoRenewNotice() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppSpacing.xs),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: AppSpacing.iconXs,
-                color: AppColors.info,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                context.l10n.settingsSubscriptionAutoRenewTitle,
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.info,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            context.l10n.settingsSubscriptionAutoRenewDescription,
-            style: AppTypography.bodySmall.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegalLinks() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildLegalLinkButton(
-            context.l10n.commonPrivacyPolicy,
-            Icons.privacy_tip_outlined,
-            () => UrlLauncherUtils.launchPrivacyPolicy(context: context),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _buildLegalLinkButton(
-            context.l10n.commonTermsOfUse,
-            Icons.article_outlined,
-            () => UrlLauncherUtils.launchTermsOfUse(context: context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDynamicSubscriptionPlanDetail(
-    String title,
-    String planId,
-    String Function(String) formatter,
-    String features,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 6,
-          height: 6,
-          margin: const EdgeInsets.only(top: 6),
-          decoration: const BoxDecoration(
-            color: AppColors.primary,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.labelLarge.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  DynamicPriceText(
-                    planId: planId,
-                    locale: context.l10n.localeName,
-                    formatter: formatter,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    loadingWidget: Container(
-                      width: 60,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              Text(
-                features,
-                style: AppTypography.bodySmall.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegalLinkButton(
-    String text,
-    IconData icon,
-    VoidCallback onPressed,
-  ) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: AppSpacing.iconXs, color: AppColors.primary),
-      label: Text(
-        text,
-        style: AppTypography.labelSmall.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        side: BorderSide(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.xs),
-        ),
-      ),
-    );
   }
 }
