@@ -604,6 +604,12 @@ class DiaryService implements IDiaryService {
     }
   }
 
+  /// リソースを解放する
+  @override
+  void dispose() {
+    _diaryChangeController.close();
+  }
+
   /// 写真IDから日記エントリーを取得
   @override
   Future<Result<DiaryEntry?>> getDiaryEntryByPhotoId(String photoId) async {
