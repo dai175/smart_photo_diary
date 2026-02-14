@@ -33,6 +33,16 @@ class InstagramShareChannel {
     List<AssetEntity>? photos,
     Rect? shareOrigin,
   }) async {
+    // ロケールを先に解決（catch でも使えるようスコープ外に）
+    Locale? locale;
+    try {
+      final settingsService = ServiceRegistration.get<ISettingsService>();
+      locale = settingsService.locale;
+    } catch (_) {
+      locale = null;
+    }
+    final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
+
     try {
       _logger.info(
         'Starting Instagram share: ${format.displayName}',
@@ -51,15 +61,6 @@ class InstagramShareChannel {
 
       final File imageFile = imageResult.value;
 
-      // Get current locale for share text
-      Locale? locale;
-      try {
-        final settingsService = ServiceRegistration.get<ISettingsService>();
-        locale = settingsService.locale;
-      } catch (_) {
-        locale = null;
-      }
-      final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
       final shareText = _getLocalizedMessage(
         resolvedLocale,
         (l10n) => l10n.shareCreatedWith,
@@ -98,18 +99,8 @@ class InstagramShareChannel {
         error: e,
         stackTrace: st,
       );
-      // catch ブロックでは try 内の resolvedLocale がスコープ外のため再取得
-      Locale? catchLocale;
-      try {
-        final settingsService = ServiceRegistration.get<ISettingsService>();
-        catchLocale = settingsService.locale;
-      } catch (_) {
-        catchLocale = null;
-      }
-      final catchResolvedLocale =
-          catchLocale ?? ui.PlatformDispatcher.instance.locale;
       final errorMessage = _getLocalizedMessage(
-        catchResolvedLocale,
+        resolvedLocale,
         (l10n) => l10n.commonShareFailedWithReason('Image sharing failed'),
         'Image sharing failed',
       );
