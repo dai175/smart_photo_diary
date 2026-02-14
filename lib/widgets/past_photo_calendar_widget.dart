@@ -14,6 +14,7 @@ import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 import '../core/errors/error_handler.dart';
 import '../localization/localization_extensions.dart';
+import 'past_photo_calendar_builders.dart';
 
 /// 過去の写真カレンダーウィジェット
 class PastPhotoCalendarWidget extends StatefulWidget {
@@ -340,104 +341,23 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                 },
                 calendarBuilders: CalendarBuilders(
                   defaultBuilder: (context, day, focusedDay) {
-                    final isAccessible = _isDateAccessible(day);
-                    final photoCount = _getPhotoCount(day);
-                    final hasDiary = _hasDiary(day);
-
-                    final hasPhoto = photoCount > 0;
-                    final hasPhotoAndAccessible = hasPhoto && isAccessible;
-
-                    return Container(
-                      margin: const EdgeInsets.all(4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: hasDiary && hasPhotoAndAccessible
-                            ? Border.all(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withValues(alpha: 0.4),
-                                width: 2,
-                              )
-                            : null,
-                      ),
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          color: hasPhotoAndAccessible
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.4),
-                          fontWeight: hasDiary && hasPhotoAndAccessible
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
+                    return PastPhotoCalendarBuilders.buildDefaultDay(
+                      context,
+                      day,
+                      focusedDay,
+                      isAccessible: _isDateAccessible(day),
+                      photoCount: _getPhotoCount(day),
+                      hasDiary: _hasDiary(day),
                     );
                   },
-                  disabledBuilder: (context, day, focusedDay) {
-                    return Container(
-                      margin: const EdgeInsets.all(4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.3),
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    );
-                  },
-                  selectedBuilder: (context, day, focusedDay) {
-                    return Container(
-                      margin: const EdgeInsets.all(4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    );
-                  },
+                  disabledBuilder: PastPhotoCalendarBuilders.buildDisabledDay,
+                  selectedBuilder: PastPhotoCalendarBuilders.buildSelectedDay,
                   outsideBuilder: (context, day, focusedDay) {
-                    final hasPhoto = _getPhotoCount(day) > 0;
-
-                    return Container(
-                      margin: const EdgeInsets.all(4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: hasPhoto
-                            ? Theme.of(
-                                context,
-                              ).colorScheme.secondary.withValues(alpha: 0.3)
-                            : null,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          color: hasPhoto
-                              ? Theme.of(context).colorScheme.secondary
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.4),
-                          fontWeight: hasPhoto
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
+                    return PastPhotoCalendarBuilders.buildOutsideDay(
+                      context,
+                      day,
+                      focusedDay,
+                      hasPhoto: _getPhotoCount(day) > 0,
                     );
                   },
                 ),
