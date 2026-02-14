@@ -1,13 +1,24 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
 import '../../constants/app_constants.dart';
+import '../../core/errors/app_exceptions.dart';
 import '../interfaces/logging_service_interface.dart';
 import '../../core/service_locator.dart';
 
 /// Gemini APIクライアント - API通信を担当
 class GeminiApiClient {
+  final http.Client _httpClient;
+
+  static const int _maxRetries = 3;
+  static const Duration _baseDelay = Duration(seconds: 1);
+
+  GeminiApiClient({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
+
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   // Google Gemini APIのエンドポイント
@@ -45,7 +56,7 @@ class GeminiApiClient {
     }
 
     try {
-      final response = await http.post(
+      final response = await _postWithRetry(
         Uri.parse('$_apiUrl?key=$_apiKey'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -66,6 +77,7 @@ class GeminiApiClient {
             'thinkingConfig': {'thinkingBudget': 0},
           },
         }),
+        context: 'sendTextRequest',
       );
 
       if (response.statusCode == 200) {
@@ -83,15 +95,13 @@ class GeminiApiClient {
         );
         return null;
       }
+    } on NetworkException {
+      rethrow;
     } catch (e) {
       _logger.error(
         'Gemini API request error',
         context: 'sendTextRequest',
         error: e,
-      );
-      _logger.debug(
-        'API connection info: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : 'empty'}',
-        context: 'sendTextRequest',
       );
       return null;
     }
@@ -118,7 +128,7 @@ class GeminiApiClient {
       // Base64エンコード
       final base64Image = base64Encode(imageData);
 
-      final response = await http.post(
+      final response = await _postWithRetry(
         Uri.parse('$_apiUrl?key=$_apiKey'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -142,6 +152,7 @@ class GeminiApiClient {
             'thinkingConfig': {'thinkingBudget': 0},
           },
         }),
+        context: 'sendVisionRequest',
       );
 
       if (response.statusCode == 200) {
@@ -159,18 +170,109 @@ class GeminiApiClient {
         );
         return null;
       }
+    } on NetworkException {
+      rethrow;
     } catch (e) {
       _logger.error(
         'Gemini Vision API request error',
         context: 'sendVisionRequest',
         error: e,
       );
-      _logger.debug(
-        'Vision API connection info: apiKeyPrefix=${_apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : 'empty'}',
-        context: 'sendVisionRequest',
-      );
       return null;
     }
+  }
+
+  /// 指数バックオフ付きリトライでHTTP POSTを実行
+  Future<http.Response> _postWithRetry(
+    Uri url, {
+    required Map<String, String> headers,
+    required String body,
+    required String context,
+  }) async {
+    Object? lastError;
+
+    for (int attempt = 0; attempt <= _maxRetries; attempt++) {
+      try {
+        final response = await _httpClient.post(
+          url,
+          headers: headers,
+          body: body,
+        );
+
+        if (response.statusCode == 200 ||
+            !_isRetryableStatusCode(response.statusCode)) {
+          return response;
+        }
+
+        // リトライ対象のステータスコード
+        lastError = response;
+        if (attempt < _maxRetries) {
+          final delay = _baseDelay * (1 << attempt);
+          _logger.warning(
+            'Retryable HTTP ${response.statusCode}, '
+            'retrying in ${delay.inSeconds}s '
+            '(attempt ${attempt + 1}/$_maxRetries)',
+            context: 'GeminiApiClient.$context',
+          );
+          await Future<void>.delayed(delay);
+        }
+      } on SocketException catch (e) {
+        lastError = e;
+        if (attempt < _maxRetries) {
+          final delay = _baseDelay * (1 << attempt);
+          _logger.warning(
+            'Network error (SocketException), '
+            'retrying in ${delay.inSeconds}s '
+            '(attempt ${attempt + 1}/$_maxRetries)',
+            context: 'GeminiApiClient.$context',
+          );
+          await Future<void>.delayed(delay);
+        }
+      } on TimeoutException catch (e) {
+        lastError = e;
+        if (attempt < _maxRetries) {
+          final delay = _baseDelay * (1 << attempt);
+          _logger.warning(
+            'Request timed out, '
+            'retrying in ${delay.inSeconds}s '
+            '(attempt ${attempt + 1}/$_maxRetries)',
+            context: 'GeminiApiClient.$context',
+          );
+          await Future<void>.delayed(delay);
+        }
+      } on http.ClientException catch (e) {
+        lastError = e;
+        if (attempt < _maxRetries) {
+          final delay = _baseDelay * (1 << attempt);
+          _logger.warning(
+            'HTTP client error, '
+            'retrying in ${delay.inSeconds}s '
+            '(attempt ${attempt + 1}/$_maxRetries)',
+            context: 'GeminiApiClient.$context',
+          );
+          await Future<void>.delayed(delay);
+        }
+      }
+    }
+
+    // 全リトライ失敗
+    if (lastError is http.Response) {
+      return lastError;
+    }
+
+    _logger.error(
+      'All $_maxRetries retries exhausted',
+      context: 'GeminiApiClient.$context',
+      error: lastError,
+    );
+    throw NetworkException(
+      'Network request failed after $_maxRetries retries',
+      originalError: lastError,
+    );
+  }
+
+  bool _isRetryableStatusCode(int statusCode) {
+    return statusCode == 429 || (statusCode >= 500 && statusCode <= 599);
   }
 
   /// APIキーの有効性をテスト
