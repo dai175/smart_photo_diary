@@ -62,7 +62,8 @@ class DiaryTagService implements IDiaryTagService {
         if (box != null && box.isOpen) {
           final latestEntry = box.get(entry.id);
           if (latestEntry != null) {
-            await latestEntry.updateTags(tagsResult.value);
+            latestEntry.updateTags(tagsResult.value);
+            await box.put(latestEntry.id, latestEntry);
           }
         }
         return Success(tagsResult.value);
@@ -136,8 +137,8 @@ class DiaryTagService implements IDiaryTagService {
       entry: entry,
       content: entry.content,
       logLabel: 'background',
-      onTagsGenerated: (latestEntry, tags) async {
-        await latestEntry.updateTags(tags);
+      onTagsGenerated: (latestEntry, tags) {
+        latestEntry.updateTags(tags);
         onSearchIndexUpdate?.call(
           latestEntry.id,
           _buildSearchableText(latestEntry),
@@ -186,8 +187,8 @@ class DiaryTagService implements IDiaryTagService {
       entry: entry,
       content: '$pastContext: ${entry.content}',
       logLabel: 'past-photo-diary',
-      onTagsGenerated: (latestEntry, tags) async {
-        await latestEntry.updateTags(tags);
+      onTagsGenerated: (latestEntry, tags) {
+        latestEntry.updateTags(tags);
         onSearchIndexUpdate?.call(
           latestEntry.id,
           _buildSearchableText(latestEntry),
@@ -201,7 +202,7 @@ class DiaryTagService implements IDiaryTagService {
     required DiaryEntry entry,
     required String content,
     required String logLabel,
-    required Future<void> Function(DiaryEntry latestEntry, List<String> tags)
+    required void Function(DiaryEntry latestEntry, List<String> tags)
     onTagsGenerated,
   }) {
     Future.delayed(Duration.zero, () async {
@@ -220,7 +221,8 @@ class DiaryTagService implements IDiaryTagService {
           if (box != null && box.isOpen) {
             final latestEntry = box.get(entry.id);
             if (latestEntry != null) {
-              await onTagsGenerated(latestEntry, tagsResult.value);
+              onTagsGenerated(latestEntry, tagsResult.value);
+              await box.put(latestEntry.id, latestEntry);
               _logger.debug(
                 '$logLabel tag generation completed: ${entry.id} -> ${tagsResult.value}',
               );

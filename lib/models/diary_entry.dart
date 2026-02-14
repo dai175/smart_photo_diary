@@ -59,14 +59,12 @@ class DiaryEntry extends HiveObject {
     title = newTitle;
     content = newContent;
     updatedAt = DateTime.now();
-    save(); // Hiveオブジェクトの保存メソッド
   }
 
-  // タグを更新してデータベースに保存
-  Future<void> updateTags(List<String> tags) async {
+  // タグを更新（永続化はサービス層が担当）
+  void updateTags(List<String> tags) {
     cachedTags = tags;
     tagsGeneratedAt = DateTime.now();
-    await save(); // Hiveのsaveメソッドでデータベースに保存
   }
 
   // タグが有効かどうかをチェック（7日間有効）

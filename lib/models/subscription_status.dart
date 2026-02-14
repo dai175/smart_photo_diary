@@ -126,8 +126,6 @@ class SubscriptionStatus extends HiveObject {
       isActive = true;
       autoRenewal = false;
     }
-
-    save();
   }
 
   /// サブスクリプションが有効かどうかをチェック
@@ -169,7 +167,6 @@ class SubscriptionStatus extends HiveObject {
   /// AI生成使用量をインクリメント
   void incrementAiUsage() {
     monthlyUsageCount++;
-    save();
   }
 
   /// 使用量を手動でリセット（テスト用）
@@ -177,7 +174,6 @@ class SubscriptionStatus extends HiveObject {
     monthlyUsageCount = 0;
     usageMonth = _getCurrentMonth();
     lastResetDate = DateTime.now();
-    save();
   }
 
   /// サブスクリプションをキャンセル
@@ -190,15 +186,12 @@ class SubscriptionStatus extends HiveObject {
       isActive = false;
       planId = SubscriptionConstants.basicPlanId;
     }
-
-    save();
   }
 
   /// サブスクリプションを復活
   void restore() {
     isActive = true;
     cancelDate = null;
-    save();
   }
 
   /// プレミアム機能にアクセスできるかどうか
