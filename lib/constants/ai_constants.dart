@@ -1,5 +1,7 @@
 /// AI関連の定数
 class AiConstants {
+  AiConstants._();
+
   // Gemini API設定
   static const String geminiModelName = 'gemini-2.5-flash';
   static const double defaultTemperature = 0.7;

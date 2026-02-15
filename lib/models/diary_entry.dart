@@ -2,6 +2,9 @@ import 'package:hive/hive.dart';
 
 part 'diary_entry.g.dart';
 
+/// copyWith で nullable フィールドを明示的に null に設定するための sentinel
+const _sentinel = Object();
+
 @HiveType(typeId: 0)
 class DiaryEntry extends HiveObject {
   @HiveField(0)
@@ -34,8 +37,12 @@ class DiaryEntry extends HiveObject {
   @HiveField(9)
   String? location; // 位置情報
 
-  /// タグを統一的に取得
-  List<String> get effectiveTags => tags ?? const [];
+  /// レガシーフィールド: 旧tagsデータの読み取り用（書き込みには使用しない）
+  @HiveField(10)
+  List<String>? legacyTags;
+
+  /// タグを統一的に取得（tags → legacyTags の順にフォールバック）
+  List<String> get effectiveTags => tags ?? legacyTags ?? const [];
 
   DiaryEntry({
     required this.id,
@@ -48,6 +55,7 @@ class DiaryEntry extends HiveObject {
     this.tags,
     this.tagsGeneratedAt,
     this.location,
+    this.legacyTags,
   });
 
   // 日記エントリーを更新するメソッド
@@ -74,6 +82,9 @@ class DiaryEntry extends HiveObject {
   }
 
   // 日記エントリーのコピーを作成するメソッド
+  //
+  // nullable フィールド (tags, tagsGeneratedAt, location) を明示的に null に
+  // リセットするには、copyWith(tags: null) のように渡す。
   DiaryEntry copyWith({
     String? id,
     DateTime? date,
@@ -82,9 +93,9 @@ class DiaryEntry extends HiveObject {
     List<String>? photoIds,
     DateTime? createdAt,
     DateTime? updatedAt,
-    List<String>? tags,
-    DateTime? tagsGeneratedAt,
-    String? location,
+    Object? tags = _sentinel,
+    Object? tagsGeneratedAt = _sentinel,
+    Object? location = _sentinel,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -94,9 +105,11 @@ class DiaryEntry extends HiveObject {
       photoIds: photoIds ?? this.photoIds,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      tags: tags ?? this.tags,
-      tagsGeneratedAt: tagsGeneratedAt ?? this.tagsGeneratedAt,
-      location: location ?? this.location,
+      tags: tags == _sentinel ? this.tags : tags as List<String>?,
+      tagsGeneratedAt: tagsGeneratedAt == _sentinel
+          ? this.tagsGeneratedAt
+          : tagsGeneratedAt as DateTime?,
+      location: location == _sentinel ? this.location : location as String?,
     );
   }
 }
