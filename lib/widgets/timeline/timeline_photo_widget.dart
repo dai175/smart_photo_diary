@@ -405,9 +405,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             ),
             curve: Curves.easeInOut,
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFE0E0E0), // 固定値でパフォーマンス最適化
-                borderRadius: BorderRadius.all(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: const BorderRadius.all(
                   Radius.circular(TimelineLayoutConstants.borderRadius),
                 ),
               ),
