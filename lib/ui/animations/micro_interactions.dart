@@ -127,7 +127,7 @@ class MicroInteractions {
   static Widget scaleTransition({
     required Widget child,
     Duration duration = AppConstants.defaultAnimationDuration,
-    Curve curve = Curves.easeOutBack,
+    Curve curve = Curves.easeOutCubic,
   }) {
     return TweenAnimationBuilder<double>(
       duration: duration,
@@ -228,7 +228,7 @@ class PulseWidget extends StatefulWidget {
     required this.child,
     this.duration = AppConstants.longAnimationDuration,
     this.minScale = AppConstants.scalePressed,
-    this.maxScale = 1.05,
+    this.maxScale = 1.03,
     this.enabled = true,
   });
 
@@ -305,7 +305,7 @@ class FloatingWidget extends StatefulWidget {
     super.key,
     required this.child,
     this.duration = AppConstants.xLongAnimationDuration,
-    this.offset = 10.0,
+    this.offset = 6.0,
     this.enabled = true,
   });
 
