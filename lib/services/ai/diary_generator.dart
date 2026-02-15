@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui';
+import '../../models/diary_length.dart';
 import '../interfaces/ai_service_interface.dart';
 import 'gemini_api_client.dart';
 import '../interfaces/logging_service_interface.dart';
@@ -27,6 +28,7 @@ class DiaryGenerator {
     String? prompt,
     required bool isOnline,
     required Locale locale,
+    DiaryLength diaryLength = DiaryLength.standard,
   }) async {
     if (!isOnline) {
       return Failure(
@@ -44,6 +46,7 @@ class DiaryGenerator {
       final optimParams = DiaryPromptBuilder.getOptimizationParams(
         promptType,
         locale,
+        diaryLength: diaryLength,
       );
       final emphasis = optimParams['emphasis'] as String;
       final maxTokens = optimParams['maxTokens'] as int;
@@ -54,6 +57,7 @@ class DiaryGenerator {
         location: location,
         customPrompt: prompt,
         emphasis: emphasis,
+        diaryLength: diaryLength,
       );
 
       // デバッグログ: プロンプト統合確認（感情深掘り型対応）
@@ -116,6 +120,7 @@ class DiaryGenerator {
     Function(int current, int total)? onProgress,
     required bool isOnline,
     required Locale locale,
+    DiaryLength diaryLength = DiaryLength.standard,
   }) async {
     if (imagesWithTimes.isEmpty) {
       return Failure(
@@ -175,6 +180,7 @@ class DiaryGenerator {
         location,
         prompt,
         locale,
+        diaryLength: diaryLength,
       );
     } catch (e) {
       _logger.error(
@@ -332,8 +338,9 @@ Describe the situation and mood you infer from the image, including any emotiona
     List<DateTime> photoTimes,
     String? location,
     String? customPrompt,
-    Locale locale,
-  ) async {
+    Locale locale, {
+    DiaryLength diaryLength = DiaryLength.standard,
+  }) async {
     if (photoAnalyses.isEmpty) {
       return Failure(
         AiProcessingException(
@@ -348,11 +355,20 @@ Describe the situation and mood you infer from the image, including any emotiona
     final optimParams = DiaryPromptBuilder.getOptimizationParams(
       promptType,
       locale,
+      diaryLength: diaryLength,
     );
     final emphasis = optimParams['emphasis'] as String;
     final baseMaxTokens = optimParams['maxTokens'] as int;
+    final isShort = diaryLength == DiaryLength.short;
     final multiImageMaxTokens =
-        baseMaxTokens + (DiaryLocaleUtils.isJapanese(locale) ? 50 : 60);
+        baseMaxTokens +
+        (DiaryLocaleUtils.isJapanese(locale)
+            ? (isShort
+                  ? DiaryPromptBuilder.multiImageExtraTokensJaShort
+                  : DiaryPromptBuilder.multiImageExtraTokensJaStandard)
+            : (isShort
+                  ? DiaryPromptBuilder.multiImageExtraTokensEnShort
+                  : DiaryPromptBuilder.multiImageExtraTokensEnStandard));
 
     final prompt = DiaryPromptBuilder.buildMultiImagePrompt(
       locale: locale,
@@ -361,6 +377,7 @@ Describe the situation and mood you infer from the image, including any emotiona
       location: location,
       customPrompt: customPrompt,
       emphasis: emphasis,
+      diaryLength: diaryLength,
     );
 
     _logger.debug(

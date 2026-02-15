@@ -25,6 +25,7 @@ import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/models/diary_length.dart';
 
 /// Mock PhotoService for integration testing
 class MockIPhotoService extends Mock implements IPhotoService {}
@@ -437,9 +438,10 @@ class TestServiceSetup {
     final mock = MockSettingsService();
 
     // Default mock behavior for SettingsService
-    // Note: Basic setup, tests should specify their own behavior
-    // Most settings services have getBool, getString, getInt, set methods
-    // We'll set up basic fallbacks here
+    when(() => mock.diaryLength).thenReturn(DiaryLength.standard);
+    when(
+      () => mock.setDiaryLength(any()),
+    ).thenAnswer((_) async => const Success(null));
 
     return mock;
   }
@@ -562,6 +564,7 @@ void registerMockFallbacks() {
   registerFallbackValue(Uint8List(0));
   registerFallbackValue(<({Uint8List imageData, DateTime time})>[]);
   registerFallbackValue(const Locale('ja'));
+  registerFallbackValue(DiaryLength.standard);
   registerFallbackValue(const DiaryFilter());
   registerFallbackValue(
     DiaryEntry(

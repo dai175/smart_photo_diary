@@ -1516,5 +1516,25 @@
   "loadingPrices": "Loading prices...",
   "@loadingPrices": {
     "description": "Text shown while loading prices in upgrade dialog"
+  },
+  "diaryLengthShort": "Short (for X posts)",
+  "@diaryLengthShort": {
+    "description": "Diary length: short option"
+  },
+  "diaryLengthStandard": "Standard",
+  "@diaryLengthStandard": {
+    "description": "Diary length: standard option"
+  },
+  "diaryLengthDialogTitle": "Diary length",
+  "@diaryLengthDialogTitle": {
+    "description": "Title for the diary length selection dialog"
+  },
+  "settingsDiaryLengthTitle": "Diary length",
+  "@settingsDiaryLengthTitle": {
+    "description": "Title for the diary length section in settings"
+  },
+  "settingsDiaryLengthDialogTitle": "Default diary length",
+  "@settingsDiaryLengthDialogTitle": {
+    "description": "Title for the default diary length selection dialog in settings"
   }
 }

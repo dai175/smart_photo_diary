@@ -11,6 +11,7 @@ import '../constants/app_constants.dart';
 import '../localization/localization_extensions.dart';
 import '../controllers/scroll_signal.dart';
 import '../widgets/settings/appearance_settings_section.dart';
+import '../widgets/settings/diary_settings_section.dart';
 import '../widgets/settings/settings_row.dart';
 import '../widgets/settings/storage_settings_section.dart';
 import '../widgets/settings/subscription_settings_section.dart';
@@ -164,6 +165,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(),
               SlideInWidget(
                 delay: const Duration(milliseconds: 50),
+                child: DiarySettingsSection(
+                  settingsService: _controller.settingsService!,
+                  logger: _controller.logger,
+                  onStateChanged: _controller.notifyStateChanged,
+                ),
+              ),
+              _buildDivider(),
+              SlideInWidget(
+                delay: const Duration(milliseconds: 75),
                 child: SubscriptionSettingsSection(
                   subscriptionInfo: _controller.subscriptionInfo,
                   onStateChanged: _controller.notifyStateChanged,
@@ -171,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               _buildDivider(),
               SlideInWidget(
-                delay: const Duration(milliseconds: 100),
+                delay: const Duration(milliseconds: 125),
                 child: StorageSettingsSection(
                   storageInfo: _controller.storageInfo,
                   onReloadSettings: _controller.loadSettings,
@@ -179,11 +189,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               _buildDivider(),
               SlideInWidget(
-                delay: const Duration(milliseconds: 175),
+                delay: const Duration(milliseconds: 200),
                 child: _buildVersionInfo(),
               ),
               SlideInWidget(
-                delay: const Duration(milliseconds: 200),
+                delay: const Duration(milliseconds: 225),
                 child: _buildLicenseInfo(),
               ),
             ],

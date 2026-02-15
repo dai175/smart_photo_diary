@@ -7,11 +7,13 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/screens/diary_preview/diary_preview_screen.dart';
 import 'package:smart_photo_diary/screens/diary_preview/diary_preview_body.dart';
+import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 
 import '../integration/mocks/mock_services.dart';
@@ -39,6 +41,11 @@ void main() {
     // Synchronous services required by DiaryPreviewController constructor
     serviceLocator.registerSingleton<ILoggingService>(mockLogger);
     serviceLocator.registerSingleton<IPhotoService>(mockPhoto);
+
+    // ISettingsService is resolved asynchronously in DiaryPreviewScreen
+    final mockSettings = MockSettingsService();
+    when(() => mockSettings.diaryLength).thenReturn(DiaryLength.standard);
+    serviceLocator.registerSingleton<ISettingsService>(mockSettings);
 
     // Async services — register factories that never complete so the screen
     // stays in loading/initializing state by default.

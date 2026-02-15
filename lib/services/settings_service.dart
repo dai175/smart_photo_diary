@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
+import '../models/diary_length.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -36,6 +37,9 @@ class SettingsService implements ISettingsService {
         .getAsync<ISubscriptionService>();
   }
 
+  // 日記の長さ設定のキー
+  static const String _diaryLengthKey = 'diary_length';
+
   // テーマ設定のキー
   static const String _themeKey = 'theme_mode';
 
@@ -44,6 +48,32 @@ class SettingsService implements ISettingsService {
 
   @override
   ValueNotifier<Locale?> get localeNotifier => _localeNotifier;
+
+  // 日記の長さ
+  @override
+  DiaryLength get diaryLength {
+    return ErrorHandler.safeExecuteSync(
+          () {
+            final index = _preferences?.getInt(_diaryLengthKey);
+            if (index == null ||
+                index < 0 ||
+                index >= DiaryLength.values.length) {
+              return DiaryLength.standard;
+            }
+            return DiaryLength.values[index];
+          },
+          context: 'SettingsService.diaryLength',
+          fallbackValue: DiaryLength.standard,
+        ) ??
+        DiaryLength.standard;
+  }
+
+  @override
+  Future<Result<void>> setDiaryLength(DiaryLength length) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      await _preferences?.setInt(_diaryLengthKey, length.index);
+    }, context: 'SettingsService.setDiaryLength');
+  }
 
   // テーマモード
   @override

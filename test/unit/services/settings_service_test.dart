@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
@@ -103,6 +104,28 @@ void main() {
         final locale = service.locale;
         expect(locale?.languageCode, 'en');
         expect(locale?.countryCode, 'US');
+      });
+    });
+
+    group('diaryLength / setDiaryLength', () {
+      test('デフォルト値 → DiaryLength.standard', () {
+        expect(service.diaryLength, DiaryLength.standard);
+      });
+
+      test('short設定 → 正しく永続化・取得', () async {
+        await service.setDiaryLength(DiaryLength.short);
+        expect(service.diaryLength, DiaryLength.short);
+      });
+
+      test('standard設定 → 正しく永続化・取得', () async {
+        await service.setDiaryLength(DiaryLength.short);
+        await service.setDiaryLength(DiaryLength.standard);
+        expect(service.diaryLength, DiaryLength.standard);
+      });
+
+      test('setDiaryLengthはSuccessを返す', () async {
+        final result = await service.setDiaryLength(DiaryLength.short);
+        expect(result.isSuccess, isTrue);
       });
     });
 

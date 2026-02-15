@@ -1,10 +1,57 @@
 import 'dart:ui';
+import '../../models/diary_length.dart';
 import 'diary_locale_utils.dart';
 import 'diary_time_segment.dart';
 
 /// 日記生成プロンプトの構築を担当
 class DiaryPromptBuilder {
   DiaryPromptBuilder._();
+
+  // ── Max token constants per prompt type ──
+
+  // Standard max tokens: {ja, en}
+  static const int emotionTokensJaStandard = 300;
+  static const int emotionTokensEnStandard = 360;
+  static const int growthTokensJaStandard = 320;
+  static const int growthTokensEnStandard = 380;
+  static const int connectionTokensJaStandard = 310;
+  static const int connectionTokensEnStandard = 370;
+  static const int healingTokensJaStandard = 290;
+  static const int healingTokensEnStandard = 360;
+
+  // Short max tokens: {ja, en}
+  static const int emotionTokensJaShort = 190;
+  static const int emotionTokensEnShort = 230;
+  static const int growthTokensJaShort = 200;
+  static const int growthTokensEnShort = 240;
+  static const int connectionTokensJaShort = 195;
+  static const int connectionTokensEnShort = 235;
+  static const int healingTokensJaShort = 185;
+  static const int healingTokensEnShort = 225;
+
+  // Additional tokens for multi-image generation
+  static const int multiImageExtraTokensJaStandard = 50;
+  static const int multiImageExtraTokensEnStandard = 60;
+  static const int multiImageExtraTokensJaShort = 25;
+  static const int multiImageExtraTokensEnShort = 30;
+
+  // ── Length constants for prompt instructions ──
+
+  // Japanese
+  static const _jaTitleStandard = '5-10文字程度';
+  static const _jaTitleShort = '3-8文字程度';
+  static const _jaSingleBodyStandard = '150-200文字程度';
+  static const _jaSingleBodyShort = '80-110文字程度';
+  static const _jaMultiBodyStandard = '150-220文字程度';
+  static const _jaMultiBodyShort = '80-120文字程度';
+
+  // English
+  static const _enTitleStandard = '3-6 word';
+  static const _enTitleShort = '2-4 word';
+  static const _enSingleBodyStandard = '70-90 words';
+  static const _enSingleBodyShort = '35-50 words';
+  static const _enMultiBodyStandard = '80-100 words';
+  static const _enMultiBodyShort = '40-55 words';
 
   /// プロンプト種別を分析
   static String analyzePromptType(String? prompt) {
@@ -66,27 +113,37 @@ class DiaryPromptBuilder {
   /// プロンプト種別に応じた最適化パラメータを取得
   static Map<String, dynamic> getOptimizationParams(
     String promptType,
-    Locale locale,
-  ) {
+    Locale locale, {
+    DiaryLength diaryLength = DiaryLength.standard,
+  }) {
     final isJapanese = DiaryLocaleUtils.isJapanese(locale);
+    final isShort = diaryLength == DiaryLength.short;
     switch (promptType) {
       case 'growth':
         return {
-          'maxTokens': isJapanese ? 320 : 380,
+          'maxTokens': isJapanese
+              ? (isShort ? growthTokensJaShort : growthTokensJaStandard)
+              : (isShort ? growthTokensEnShort : growthTokensEnStandard),
           'emphasis': isJapanese
               ? '成長と変化に焦点を当てて'
               : 'highlights personal growth and change',
         };
       case 'connection':
         return {
-          'maxTokens': isJapanese ? 310 : 370,
+          'maxTokens': isJapanese
+              ? (isShort ? connectionTokensJaShort : connectionTokensJaStandard)
+              : (isShort
+                    ? connectionTokensEnShort
+                    : connectionTokensEnStandard),
           'emphasis': isJapanese
               ? '人とのつながりや関係性を重視して'
               : 'emphasises meaningful relationships and connection',
         };
       case 'healing':
         return {
-          'maxTokens': isJapanese ? 290 : 360,
+          'maxTokens': isJapanese
+              ? (isShort ? healingTokensJaShort : healingTokensJaStandard)
+              : (isShort ? healingTokensEnShort : healingTokensEnStandard),
           'emphasis': isJapanese
               ? '穏やかで心安らぐ文体で'
               : 'feels calm, gentle, and restorative',
@@ -94,7 +151,9 @@ class DiaryPromptBuilder {
       case 'emotion':
       default:
         return {
-          'maxTokens': isJapanese ? 300 : 360,
+          'maxTokens': isJapanese
+              ? (isShort ? emotionTokensJaShort : emotionTokensJaStandard)
+              : (isShort ? emotionTokensEnShort : emotionTokensEnStandard),
           'emphasis': isJapanese
               ? '感情の深みを大切にして'
               : 'captures emotional depth and nuance',
@@ -109,12 +168,16 @@ class DiaryPromptBuilder {
     String? location,
     String? customPrompt,
     required String emphasis,
+    DiaryLength diaryLength = DiaryLength.standard,
   }) {
     final isJapanese = DiaryLocaleUtils.isJapanese(locale);
     final locationLine = DiaryLocaleUtils.locationLine(location, locale);
     final hasMultiplePhotos = photoTimes != null && photoTimes.length > 1;
+    final isShort = diaryLength == DiaryLength.short;
 
     if (isJapanese) {
+      final titleLength = isShort ? _jaTitleShort : _jaTitleStandard;
+      final bodyLength = isShort ? _jaSingleBodyShort : _jaSingleBodyStandard;
       final basePrompt =
           '''
 あなたは感情豊かな日記作成の専門家です。提示されたシーンや場面をもとに、その瞬間の感情や心の動きを中心とした日記を日本語で作成してください。
@@ -123,10 +186,10 @@ class DiaryPromptBuilder {
 タイトルと本文を分けて、以下の形式で出力してください。
 
 【タイトル】
-（5-10文字程度で感情や印象を表現する簡潔なタイトル）
+（$titleLengthで感情や印象を表現する簡潔なタイトル）
 
 【本文】
-（150-200文字程度で、感情や心の動きを中心とした自然で個人的な文体の本文${hasMultiplePhotos ? '。時系列に沿って感情の変化を描写してください' : ''}）
+（$bodyLengthで、感情や心の動きを中心とした自然で個人的な文体の本文${hasMultiplePhotos ? '。時系列に沿って感情の変化を描写してください' : ''}）
 
 $locationLine''';
 
@@ -160,6 +223,8 @@ $emphasis、個人的で心に響く日記を作成してください。''';
         ? ' and traces how the feelings shift across the moments.'
         : '.';
 
+    final titleLength = isShort ? _enTitleShort : _enTitleStandard;
+    final bodyLength = isShort ? _enSingleBodyShort : _enSingleBodyStandard;
     final basePrompt =
         '''
 You are an empathetic journaling companion. Using the scene details, craft a reflective diary entry in natural English that centres on the writer's emotions.
@@ -168,10 +233,10 @@ The photo represents a real lived experience—explore the personal meaning behi
 Write the output using the following format. Do not include any explanatory text in parentheses:
 
 [Title]
-A concise 3-6 word phrase capturing the emotional tone
+A concise $titleLength phrase capturing the emotional tone
 
 [Body]
-Approximately 70-90 words in a warm, personal voice that explores the emotions$multiPhotoHint
+Approximately $bodyLength in a warm, personal voice that explores the emotions$multiPhotoHint
 
 $locationLine''';
 
@@ -209,6 +274,7 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
     String? location,
     String? customPrompt,
     required String emphasis,
+    DiaryLength diaryLength = DiaryLength.standard,
   }) {
     final isJapanese = DiaryLocaleUtils.isJapanese(locale);
     final locationLine = DiaryLocaleUtils.locationLine(location, locale);
@@ -220,7 +286,11 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
       locale,
     );
 
+    final isShort = diaryLength == DiaryLength.short;
+
     if (isJapanese) {
+      final titleLength = isShort ? _jaTitleShort : _jaTitleStandard;
+      final bodyLength = isShort ? _jaMultiBodyShort : _jaMultiBodyStandard;
       final basePrompt =
           '''以下のシーン分析結果から、その日の感情や心の動きを中心とした日記を日本語で作成してください。
 単なる出来事の記録ではなく、一日を通して体験したシーンで感じた気持ちや感情の変化を深く掘り下げた個人的な日記を書いてください。
@@ -228,10 +298,10 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
 タイトルと本文を分けて、以下の形式で出力してください。
 
 【タイトル】
-（5-10文字程度でその日の感情や印象を表現する簡潔なタイトル）
+（$titleLengthでその日の感情や印象を表現する簡潔なタイトル）
 
 【本文】
-（150-220文字程度で、感情や心の動きを中心とした自然で個人的な文体の本文。時系列に沿って感情の変化や発見を描写してください）
+（$bodyLengthで、感情や心の動きを中心とした自然で個人的な文体の本文。時系列に沿って感情の変化や発見を描写してください）
 
 日付: $dateLabel
 時間帯: $timeRange
@@ -267,6 +337,8 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
 感情豊かで個人的な日記を作成してください。''';
     }
 
+    final enTitleLength = isShort ? _enTitleShort : _enTitleStandard;
+    final enBodyLength = isShort ? _enMultiBodyShort : _enMultiBodyStandard;
     final basePrompt =
         '''Using the scene analyses below, craft a reflective diary entry in natural English that traces how the writer's emotions evolved throughout the day.
 Do not simply list events—explore the inner experience and personal meaning behind each moment.
@@ -274,10 +346,10 @@ Do not simply list events—explore the inner experience and personal meaning be
 Write the output using the following format. Do not include any explanatory text in parentheses:
 
 [Title]
-A concise 3-6 word phrase that captures the day's emotional theme
+A concise $enTitleLength phrase that captures the day's emotional theme
 
 [Body]
-Approximately 80-100 words that follow the flow of the day and emphasise emotional insights and discoveries
+Approximately $enBodyLength, following the flow of the day and emphasising emotional insights and discoveries
 
 Date: $dateLabel
 Time span: $timeRange
