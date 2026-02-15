@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:photo_manager/photo_manager.dart';
+import 'package:characters/characters.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/errors/app_exceptions.dart';
@@ -17,6 +18,7 @@ import '../../interfaces/settings_service_interface.dart';
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
 class XShareChannel {
   static const int _shareTimeoutSeconds = 60;
+  static const int _xCharLimit = 280;
   // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
   static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 100, 100);
 
@@ -78,17 +80,19 @@ class XShareChannel {
       final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
       final appName = LocalizationUtils.appTitleFor(resolvedLocale);
 
-      // シンプルなテキスト生成（文字数制限なし）
-      final parts = <String>[];
+      // テキスト生成（280文字以内ならアプリ名を付与、超える場合は省略）
+      final bodyParts = <String>[];
       if (diary.title.isNotEmpty) {
-        parts.add(diary.title);
+        bodyParts.add(diary.title);
       }
       if (diary.content.isNotEmpty) {
-        parts.add(diary.content);
+        bodyParts.add(diary.content);
       }
-      parts.add(appName);
-
-      final text = parts.join('\n\n');
+      final bodyText = bodyParts.join('\n\n');
+      final textWithAppName = '$bodyText\n\n$appName';
+      final text = textWithAppName.characters.length <= _xCharLimit
+          ? textWithAppName
+          : bodyText;
 
       await SharePlus.instance
           .share(

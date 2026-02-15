@@ -20,38 +20,38 @@ class DiaryPromptBuilder {
   static const int healingTokensEnStandard = 360;
 
   // Short max tokens: {ja, en}
-  static const int emotionTokensJaShort = 190;
-  static const int emotionTokensEnShort = 230;
-  static const int growthTokensJaShort = 200;
-  static const int growthTokensEnShort = 240;
-  static const int connectionTokensJaShort = 195;
-  static const int connectionTokensEnShort = 235;
-  static const int healingTokensJaShort = 185;
-  static const int healingTokensEnShort = 225;
+  static const int emotionTokensJaShort = 115;
+  static const int emotionTokensEnShort = 145;
+  static const int growthTokensJaShort = 125;
+  static const int growthTokensEnShort = 155;
+  static const int connectionTokensJaShort = 120;
+  static const int connectionTokensEnShort = 150;
+  static const int healingTokensJaShort = 110;
+  static const int healingTokensEnShort = 140;
 
   // Additional tokens for multi-image generation
   static const int multiImageExtraTokensJaStandard = 50;
   static const int multiImageExtraTokensEnStandard = 60;
-  static const int multiImageExtraTokensJaShort = 25;
-  static const int multiImageExtraTokensEnShort = 30;
+  static const int multiImageExtraTokensJaShort = 15;
+  static const int multiImageExtraTokensEnShort = 20;
 
   // ── Length constants for prompt instructions ──
 
   // Japanese
   static const _jaTitleStandard = '5-10文字程度';
-  static const _jaTitleShort = '3-8文字程度';
+  static const _jaTitleShort = '3-6文字程度';
   static const _jaSingleBodyStandard = '150-200文字程度';
-  static const _jaSingleBodyShort = '80-110文字程度';
+  static const _jaSingleBodyShort = '40-70文字程度';
   static const _jaMultiBodyStandard = '150-220文字程度';
-  static const _jaMultiBodyShort = '80-120文字程度';
+  static const _jaMultiBodyShort = '50-80文字程度';
 
   // English
   static const _enTitleStandard = '3-6 word';
-  static const _enTitleShort = '2-4 word';
+  static const _enTitleShort = '2-3 word';
   static const _enSingleBodyStandard = '70-90 words';
-  static const _enSingleBodyShort = '35-50 words';
+  static const _enSingleBodyShort = '15-25 words';
   static const _enMultiBodyStandard = '80-100 words';
-  static const _enMultiBodyShort = '40-55 words';
+  static const _enMultiBodyShort = '20-30 words';
 
   /// プロンプト種別を分析
   static String analyzePromptType(String? prompt) {
@@ -190,7 +190,7 @@ class DiaryPromptBuilder {
 
 【本文】
 （$bodyLengthで、感情や心の動きを中心とした自然で個人的な文体の本文${hasMultiplePhotos ? '。時系列に沿って感情の変化を描写してください' : ''}）
-
+${isShort ? '\n※この日記はX（旧Twitter）投稿用です。タイトル＋本文の合計を必ず100文字以内に収めてください。' : ''}
 $locationLine''';
 
       if (customPrompt != null) {
@@ -237,7 +237,7 @@ A concise $titleLength phrase capturing the emotional tone
 
 [Body]
 Approximately $bodyLength in a warm, personal voice that explores the emotions$multiPhotoHint
-
+${isShort ? '\nNote: This diary is for an X (Twitter) post. The combined title + body MUST fit within 240 characters total.' : ''}
 $locationLine''';
 
     if (customPrompt != null) {
@@ -302,7 +302,7 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
 
 【本文】
 （$bodyLengthで、感情や心の動きを中心とした自然で個人的な文体の本文。時系列に沿って感情の変化や発見を描写してください）
-
+${isShort ? '\n※この日記はX（旧Twitter）投稿用です。タイトル＋本文の合計を必ず100文字以内に収めてください。' : ''}
 日付: $dateLabel
 時間帯: $timeRange
 $locationLine
@@ -350,7 +350,7 @@ A concise $enTitleLength phrase that captures the day's emotional theme
 
 [Body]
 Approximately $enBodyLength, following the flow of the day and emphasising emotional insights and discoveries
-
+${isShort ? '\nNote: This diary is for an X (Twitter) post. The combined title + body MUST fit within 240 characters total.' : ''}
 Date: $dateLabel
 Time span: $timeRange
 $locationLine
