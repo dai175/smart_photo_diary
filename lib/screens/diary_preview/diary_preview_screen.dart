@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../controllers/diary_preview_controller.dart';
+import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
+import '../../models/diary_length.dart';
 import '../../models/writing_prompt.dart';
+import '../../services/interfaces/logging_service_interface.dart';
+import '../../services/interfaces/settings_service_interface.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/animations/list_animations.dart';
@@ -42,12 +46,36 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     _contentController = TextEditingController();
     _controller.addListener(_onControllerChanged);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      // Load default diary length from settings (async-safe)
+      var defaultLength = DiaryLength.standard;
+      try {
+        final settingsService =
+            await ServiceRegistration.getAsync<ISettingsService>();
+        defaultLength = settingsService.diaryLength;
+      } catch (e) {
+        // Fall back to standard if settings service is unavailable
+        try {
+          final logger = await ServiceRegistration.getAsync<ILoggingService>();
+          logger.warning(
+            'Failed to load diary length from settings, using standard',
+            context: 'DiaryPreviewScreen.initState',
+            data: e,
+          );
+        } catch (_) {
+          // LoggingService also unavailable — silent fallback acceptable
+        }
+      }
+      _controller.setDiaryLength(defaultLength);
+
       if (mounted) {
         _controller.initializeAndGenerate(
           assets: widget.selectedAssets,
           prompt: widget.selectedPrompt,
           locale: Localizations.localeOf(context),
+          diaryLength: defaultLength,
         );
       }
     });

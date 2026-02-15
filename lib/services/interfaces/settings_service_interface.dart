@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/result/result.dart';
+import '../../models/diary_length.dart';
 import '../../models/subscription_info_v2.dart';
 import '../../models/plans/plan.dart';
 
@@ -11,6 +12,16 @@ import '../../models/plans/plan.dart';
 abstract class ISettingsService {
   /// ロケール変更通知用のValueNotifier
   ValueNotifier<Locale?> get localeNotifier;
+
+  /// 現在の日記の長さ設定
+  DiaryLength get diaryLength;
+
+  /// 日記の長さを設定
+  ///
+  /// Returns:
+  /// - Success: void（設定完了）
+  /// - Failure: [ServiceException] SharedPreferences書き込み失敗時
+  Future<Result<void>> setDiaryLength(DiaryLength length);
 
   /// 現在のテーマモード
   ThemeMode get themeMode;

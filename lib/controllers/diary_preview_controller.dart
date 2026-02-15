@@ -8,6 +8,7 @@ import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../core/service_locator.dart';
 import '../core/service_registration.dart';
+import '../models/diary_length.dart';
 import '../models/writing_prompt.dart';
 import '../services/interfaces/ai_service_interface.dart';
 import '../services/interfaces/diary_crud_service_interface.dart';
@@ -36,6 +37,16 @@ class DiaryPreviewController extends BaseErrorController {
   DiaryPreviewErrorType? _errorType;
   String? _savedDiaryId;
   bool _usageLimitReached = false;
+  DiaryLength _diaryLength = DiaryLength.standard;
+
+  /// 現在の日記の長さ設定
+  DiaryLength get diaryLength => _diaryLength;
+
+  /// 日記の長さを設定
+  void setDiaryLength(DiaryLength length) {
+    _diaryLength = length;
+    notifyListeners();
+  }
 
   /// 初期化中か
   bool get isInitializing => _isInitializing;
@@ -99,7 +110,11 @@ class DiaryPreviewController extends BaseErrorController {
     required List<AssetEntity> assets,
     WritingPrompt? prompt,
     required Locale locale,
+    DiaryLength? diaryLength,
   }) async {
+    if (diaryLength != null) {
+      _diaryLength = diaryLength;
+    }
     _selectedPrompt = prompt;
 
     await Future.delayed(const Duration(milliseconds: 100));
@@ -209,6 +224,7 @@ class DiaryPreviewController extends BaseErrorController {
       date: _photoDateTime,
       prompt: _selectedPrompt?.text,
       locale: locale,
+      diaryLength: _diaryLength,
     );
 
     if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
@@ -267,6 +283,7 @@ class DiaryPreviewController extends BaseErrorController {
         notifyListeners();
       },
       locale: locale,
+      diaryLength: _diaryLength,
     );
 
     _isAnalyzingPhotos = false;

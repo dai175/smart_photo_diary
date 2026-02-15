@@ -5,7 +5,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/ai/diary_generator.dart';
+import 'package:smart_photo_diary/services/ai/diary_prompt_builder.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
 
 import '../../../../test/integration/mocks/mock_services.dart';
@@ -419,5 +421,140 @@ void main() {
       expect(result.isSuccess, isTrue);
       expect(result.value.title, isNotEmpty);
     });
+  });
+
+  group('diaryLength propagation', () {
+    test('generateFromImage with short → uses reduced maxTokens', () async {
+      final mockResponse = {
+        'candidates': [
+          {
+            'content': {
+              'parts': [
+                {'text': '【タイトル】\n短い日記\n\n【本文】\n短い本文。'},
+              ],
+            },
+          },
+        ],
+      };
+
+      int? capturedMaxTokens;
+      when(
+        () => mockApiClient.sendVisionRequest(
+          prompt: any(named: 'prompt'),
+          imageData: any(named: 'imageData'),
+          maxOutputTokens: any(named: 'maxOutputTokens'),
+        ),
+      ).thenAnswer((invocation) async {
+        capturedMaxTokens =
+            invocation.namedArguments[const Symbol('maxOutputTokens')] as int;
+        return Success(mockResponse);
+      });
+
+      when(
+        () => mockApiClient.extractTextFromResponse(any()),
+      ).thenReturn('【タイトル】\n短い日記\n\n【本文】\n短い本文。');
+
+      await diaryGenerator.generateFromImage(
+        imageData: testImageData,
+        date: testDate,
+        isOnline: true,
+        locale: const Locale('ja'),
+        diaryLength: DiaryLength.short,
+      );
+
+      expect(capturedMaxTokens, DiaryPromptBuilder.emotionTokensJaShort);
+    });
+
+    test('generateFromImage with standard → uses standard maxTokens', () async {
+      final mockResponse = {
+        'candidates': [
+          {
+            'content': {
+              'parts': [
+                {'text': '【タイトル】\n通常日記\n\n【本文】\n通常の本文。'},
+              ],
+            },
+          },
+        ],
+      };
+
+      int? capturedMaxTokens;
+      when(
+        () => mockApiClient.sendVisionRequest(
+          prompt: any(named: 'prompt'),
+          imageData: any(named: 'imageData'),
+          maxOutputTokens: any(named: 'maxOutputTokens'),
+        ),
+      ).thenAnswer((invocation) async {
+        capturedMaxTokens =
+            invocation.namedArguments[const Symbol('maxOutputTokens')] as int;
+        return Success(mockResponse);
+      });
+
+      when(
+        () => mockApiClient.extractTextFromResponse(any()),
+      ).thenReturn('【タイトル】\n通常日記\n\n【本文】\n通常の本文。');
+
+      await diaryGenerator.generateFromImage(
+        imageData: testImageData,
+        date: testDate,
+        isOnline: true,
+        locale: const Locale('ja'),
+        diaryLength: DiaryLength.standard,
+      );
+
+      expect(capturedMaxTokens, DiaryPromptBuilder.emotionTokensJaStandard);
+    });
+
+    test(
+      'generateFromMultipleImages with short → uses reduced maxTokens',
+      () async {
+        when(
+          () => mockApiClient.sendVisionRequest(
+            prompt: any(named: 'prompt'),
+            imageData: any(named: 'imageData'),
+            maxOutputTokens: any(named: 'maxOutputTokens'),
+          ),
+        ).thenAnswer((_) async => const Success({'type': 'vision'}));
+
+        int? capturedTextMaxTokens;
+        when(
+          () => mockApiClient.sendTextRequest(
+            prompt: any(named: 'prompt'),
+            maxOutputTokens: any(named: 'maxOutputTokens'),
+          ),
+        ).thenAnswer((invocation) async {
+          capturedTextMaxTokens =
+              invocation.namedArguments[const Symbol('maxOutputTokens')] as int;
+          return const Success({'type': 'text'});
+        });
+
+        var extractCallCount = 0;
+        when(() => mockApiClient.extractTextFromResponse(any())).thenAnswer((
+          _,
+        ) {
+          extractCallCount++;
+          if (extractCallCount <= 2) {
+            return 'Analysis $extractCallCount';
+          }
+          return '【タイトル】\n短い日記\n\n【本文】\n短い本文。';
+        });
+
+        await diaryGenerator.generateFromMultipleImages(
+          imagesWithTimes: [
+            (imageData: testImageData, time: DateTime(2025, 3, 15, 8)),
+            (imageData: testImageData, time: DateTime(2025, 3, 15, 14)),
+          ],
+          isOnline: true,
+          locale: const Locale('ja'),
+          diaryLength: DiaryLength.short,
+        );
+
+        final expectedTokens =
+            DiaryPromptBuilder.emotionTokensJaShort +
+            DiaryPromptBuilder.multiImageExtraTokensJaShort;
+        expect(capturedTextMaxTokens, expectedTokens);
+      },
+    );
   });
 }

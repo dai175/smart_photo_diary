@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../models/diary_length.dart';
 import 'interfaces/ai_service_interface.dart';
 import 'ai/diary_generator.dart';
 import 'ai/tag_generator.dart';
@@ -137,6 +138,7 @@ class AiService implements IAiService {
     List<DateTime>? photoTimes,
     String? prompt,
     Locale? locale,
+    DiaryLength? diaryLength,
   }) async {
     final checkResult = await _checkAiGenerationAllowed();
     if (checkResult.isFailure) return Failure(checkResult.error);
@@ -150,6 +152,7 @@ class AiService implements IAiService {
       prompt: prompt,
       isOnline: online,
       locale: locale ?? const Locale('ja'),
+      diaryLength: diaryLength ?? DiaryLength.standard,
     );
 
     if (result.isSuccess) {
@@ -166,6 +169,7 @@ class AiService implements IAiService {
     String? prompt,
     Function(int current, int total)? onProgress,
     Locale? locale,
+    DiaryLength? diaryLength,
   }) async {
     final checkResult = await _checkAiGenerationAllowed();
     if (checkResult.isFailure) return Failure(checkResult.error);
@@ -178,6 +182,7 @@ class AiService implements IAiService {
       onProgress: onProgress,
       isOnline: online,
       locale: locale ?? const Locale('ja'),
+      diaryLength: diaryLength ?? DiaryLength.standard,
     );
 
     if (result.isSuccess) {

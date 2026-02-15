@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/ai/diary_prompt_builder.dart';
 
 void main() {
@@ -309,6 +310,171 @@ void main() {
         emphasis: 'captures emotional depth',
       );
       expect(result, contains('Location: Tokyo'));
+    });
+  });
+
+  group('getOptimizationParams (DiaryLength)', () {
+    test('short + emotion + ja → reduced maxTokens', () {
+      final params = DiaryPromptBuilder.getOptimizationParams(
+        'emotion',
+        const Locale('ja'),
+        diaryLength: DiaryLength.short,
+      );
+      expect(params['maxTokens'], DiaryPromptBuilder.emotionTokensJaShort);
+    });
+
+    test('short + emotion + en → reduced maxTokens', () {
+      final params = DiaryPromptBuilder.getOptimizationParams(
+        'emotion',
+        const Locale('en'),
+        diaryLength: DiaryLength.short,
+      );
+      expect(params['maxTokens'], DiaryPromptBuilder.emotionTokensEnShort);
+    });
+
+    test('short + growth + ja → reduced maxTokens', () {
+      final params = DiaryPromptBuilder.getOptimizationParams(
+        'growth',
+        const Locale('ja'),
+        diaryLength: DiaryLength.short,
+      );
+      expect(params['maxTokens'], DiaryPromptBuilder.growthTokensJaShort);
+    });
+
+    test('short + connection + en → reduced maxTokens', () {
+      final params = DiaryPromptBuilder.getOptimizationParams(
+        'connection',
+        const Locale('en'),
+        diaryLength: DiaryLength.short,
+      );
+      expect(params['maxTokens'], DiaryPromptBuilder.connectionTokensEnShort);
+    });
+
+    test('short + healing + ja → reduced maxTokens', () {
+      final params = DiaryPromptBuilder.getOptimizationParams(
+        'healing',
+        const Locale('ja'),
+        diaryLength: DiaryLength.short,
+      );
+      expect(params['maxTokens'], DiaryPromptBuilder.healingTokensJaShort);
+    });
+
+    test('standard maxTokens > short maxTokens for all types', () {
+      for (final type in ['emotion', 'growth', 'connection', 'healing']) {
+        for (final locale in [const Locale('ja'), const Locale('en')]) {
+          final standard = DiaryPromptBuilder.getOptimizationParams(
+            type,
+            locale,
+            diaryLength: DiaryLength.standard,
+          );
+          final short = DiaryPromptBuilder.getOptimizationParams(
+            type,
+            locale,
+            diaryLength: DiaryLength.short,
+          );
+          expect(
+            standard['maxTokens'] as int,
+            greaterThan(short['maxTokens'] as int),
+            reason: '$type/$locale: standard should > short',
+          );
+        }
+      }
+    });
+  });
+
+  group('buildSingleImagePrompt (DiaryLength)', () {
+    test('short + ja → shorter body instruction', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        diaryLength: DiaryLength.short,
+      );
+      expect(result, contains('80-110文字程度'));
+      expect(result, contains('3-8文字程度'));
+    });
+
+    test('standard + ja → standard body instruction', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        diaryLength: DiaryLength.standard,
+      );
+      expect(result, contains('150-200文字程度'));
+      expect(result, contains('5-10文字程度'));
+    });
+
+    test('short + en → shorter word count instruction', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('en'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: 'captures emotional depth',
+        diaryLength: DiaryLength.short,
+      );
+      expect(result, contains('35-50 words'));
+      expect(result, contains('2-4 word'));
+    });
+
+    test('standard + en → standard word count instruction', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('en'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: 'captures emotional depth',
+        diaryLength: DiaryLength.standard,
+      );
+      expect(result, contains('70-90 words'));
+      expect(result, contains('3-6 word'));
+    });
+  });
+
+  group('buildMultiImagePrompt (DiaryLength)', () {
+    test('short + ja → shorter body instruction', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('ja'),
+        analyses: ['分析結果'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: '感情の深みを大切にして',
+        diaryLength: DiaryLength.short,
+      );
+      expect(result, contains('80-120文字程度'));
+      expect(result, contains('3-8文字程度'));
+    });
+
+    test('standard + ja → standard body instruction', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('ja'),
+        analyses: ['分析結果'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: '感情の深みを大切にして',
+        diaryLength: DiaryLength.standard,
+      );
+      expect(result, contains('150-220文字程度'));
+      expect(result, contains('5-10文字程度'));
+    });
+
+    test('short + en → shorter word count instruction', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('en'),
+        analyses: ['Analysis'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: 'captures emotional depth',
+        diaryLength: DiaryLength.short,
+      );
+      expect(result, contains('40-55 words'));
+      expect(result, contains('2-4 word'));
+    });
+
+    test('standard + en → standard word count instruction', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('en'),
+        analyses: ['Analysis'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: 'captures emotional depth',
+        diaryLength: DiaryLength.standard,
+      );
+      expect(result, contains('80-100 words'));
+      expect(result, contains('3-6 word'));
     });
   });
 }
