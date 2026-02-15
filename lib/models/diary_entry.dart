@@ -37,7 +37,7 @@ class DiaryEntry extends HiveObject {
   @HiveField(9)
   String? location; // 位置情報
 
-  /// レガシーフィールド: 旧tagsデータの読み取り用（書き込みには使用しない）
+  /// レガシーフィールド: 旧tagsデータとの後方互換性のために保持
   @HiveField(10)
   List<String>? legacyTags;
 
@@ -110,6 +110,7 @@ class DiaryEntry extends HiveObject {
           ? this.tagsGeneratedAt
           : tagsGeneratedAt as DateTime?,
       location: location == _sentinel ? this.location : location as String?,
+      legacyTags: legacyTags,
     );
   }
 }
