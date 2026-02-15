@@ -105,13 +105,13 @@ class StatisticsCards extends StatelessWidget {
     Color color,
   ) {
     return CustomCard(
-      elevation: AppSpacing.elevationSm,
+      elevation: AppSpacing.elevationXs,
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
             child: Icon(icon, color: color, size: AppSpacing.iconSm),
