@@ -352,14 +352,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                   },
                   disabledBuilder: PastPhotoCalendarBuilders.buildDisabledDay,
                   selectedBuilder: PastPhotoCalendarBuilders.buildSelectedDay,
-                  outsideBuilder: (context, day, focusedDay) {
-                    return PastPhotoCalendarBuilders.buildOutsideDay(
-                      context,
-                      day,
-                      focusedDay,
-                      hasPhoto: _getPhotoCount(day) > 0,
-                    );
-                  },
                 ),
                 calendarStyle: CalendarStyle(
                   outsideDaysVisible: false,

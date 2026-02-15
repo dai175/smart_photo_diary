@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 class PastPhotoCalendarBuilders {
   PastPhotoCalendarBuilders._();
 
+  static const _cellMargin = EdgeInsets.all(4);
+  static const _cellBorderRadius = BorderRadius.all(Radius.circular(8));
+
   /// デフォルトの日付セル
   ///
   /// 写真の有無・アクセス可否・日記の有無に応じて表示を変える。
@@ -22,10 +25,10 @@ class PastPhotoCalendarBuilders {
     final hasPhotoAndAccessible = hasPhoto && isAccessible;
 
     return Container(
-      margin: const EdgeInsets.all(4),
+      margin: _cellMargin,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: _cellBorderRadius,
         border: hasDiary && hasPhotoAndAccessible
             ? Border.all(
                 color: Theme.of(
@@ -56,9 +59,9 @@ class PastPhotoCalendarBuilders {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(4),
+      margin: _cellMargin,
       alignment: Alignment.center,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+      decoration: const BoxDecoration(borderRadius: _cellBorderRadius),
       child: Text(
         '${day.day}',
         style: TextStyle(
@@ -76,45 +79,17 @@ class PastPhotoCalendarBuilders {
     DateTime focusedDay,
   ) {
     return Container(
-      margin: const EdgeInsets.all(4),
+      margin: _cellMargin,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: _cellBorderRadius,
       ),
       child: Text(
         '${day.day}',
         style: TextStyle(
           color: Theme.of(context).colorScheme.onPrimary,
           fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  /// 月外の日付セル
-  static Widget buildOutsideDay(
-    BuildContext context,
-    DateTime day,
-    DateTime focusedDay, {
-    required bool hasPhoto,
-  }) {
-    return Container(
-      margin: const EdgeInsets.all(4),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: hasPhoto
-            ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)
-            : null,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '${day.day}',
-        style: TextStyle(
-          color: hasPhoto
-              ? Theme.of(context).colorScheme.secondary
-              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-          fontWeight: hasPhoto ? FontWeight.bold : FontWeight.normal,
         ),
       ),
     );

@@ -19,76 +19,45 @@ class PromptSelectionItems {
     required VoidCallback onTap,
   }) {
     final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = colorScheme.primary;
 
-    return InkWell(
+    return _SelectableCard(
+      isSelected: isSelected,
+      accentColor: accentColor,
       onTap: onTap,
-      borderRadius: AppSpacing.cardRadius,
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
-              : null,
-          borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
+      child: Row(
+        children: [
+          _CircleIcon(
+            isSelected: isSelected,
+            accentColor: accentColor,
+            icon: Icons.edit_off_rounded,
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.edit_off_rounded,
-                color: isSelected
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.promptOptionNone,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                    ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.promptOptionNone,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: isSelected ? accentColor : colorScheme.onSurface,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    l10n.promptOptionNoneDescription,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.promptOptionNoneDescription,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-          ],
-        ),
+          ),
+          if (isSelected)
+            Icon(Icons.check_circle, color: accentColor, size: 20),
+        ],
       ),
     );
   }
@@ -101,84 +70,54 @@ class PromptSelectionItems {
     required VoidCallback? onTap,
   }) {
     final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = colorScheme.primary;
 
-    return InkWell(
+    return _SelectableCard(
+      isSelected: isSelected,
+      accentColor: accentColor,
+      unselectedBackgroundColor: accentColor.withValues(alpha: 0.05),
       onTap: onTap,
-      borderRadius: AppSpacing.cardRadius,
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
-              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-          borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
-                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
+      child: Row(
+        children: [
+          _CircleIcon(
+            isSelected: isSelected,
+            accentColor: accentColor,
+            icon: Icons.shuffle_rounded,
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.shuffle_rounded,
-                color: isSelected
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.promptOptionRandom,
-                    style: AppTypography.titleSmall.copyWith(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.promptOptionRandom,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: isSelected ? accentColor : colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    isLoading
-                        ? l10n.promptLoadingMessage
-                        : l10n.promptRandomDescription,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  isLoading
+                      ? l10n.promptLoadingMessage
+                      : l10n.promptRandomDescription,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              )
-            else
-              Icon(
-                Icons.auto_awesome_rounded,
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.7),
-                size: 20,
-              ),
-          ],
-        ),
+          ),
+          if (isSelected)
+            Icon(Icons.check_circle, color: accentColor, size: 20)
+          else
+            Icon(
+              Icons.auto_awesome_rounded,
+              color: accentColor.withValues(alpha: 0.7),
+              size: 20,
+            ),
+        ],
       ),
     );
   }
@@ -190,6 +129,88 @@ class PromptSelectionItems {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = PromptCategoryUtils.getCategoryColor(prompt.category);
+
+    return _SelectableCard(
+      isSelected: isSelected,
+      accentColor: accentColor,
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? accentColor
+                      : accentColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppSpacing.xs),
+                ),
+                child: Text(
+                  PromptCategoryUtils.getCategoryDisplayName(
+                    prompt.category,
+                    locale: Localizations.localeOf(context),
+                  ),
+                  style: AppTypography.labelSmall.copyWith(
+                    color: isSelected ? colorScheme.onPrimary : accentColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              if (isSelected)
+                Icon(Icons.check_circle, color: accentColor, size: 20),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            prompt.text,
+            style: isSelected
+                ? AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)
+                : AppTypography.bodyMedium,
+          ),
+          if (prompt.description != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              prompt.description!,
+              style: AppTypography.bodySmall.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// 選択可能なカードの共通デコレーション
+///
+/// 選択状態に応じて背景色・ボーダーを切り替える。
+class _SelectableCard extends StatelessWidget {
+  final bool isSelected;
+  final Color accentColor;
+  final Color? unselectedBackgroundColor;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  const _SelectableCard({
+    required this.isSelected,
+    required this.accentColor,
+    this.unselectedBackgroundColor,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: AppSpacing.cardRadius,
@@ -197,85 +218,50 @@ class PromptSelectionItems {
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
           color: isSelected
-              ? PromptCategoryUtils.getCategoryColor(
-                  prompt.category,
-                ).withValues(alpha: 0.15)
-              : null,
+              ? accentColor.withValues(alpha: 0.15)
+              : unselectedBackgroundColor,
           borderRadius: AppSpacing.cardRadius,
           border: Border.all(
             color: isSelected
-                ? PromptCategoryUtils.getCategoryColor(
-                    prompt.category,
-                  ).withValues(alpha: 0.5)
+                ? accentColor.withValues(alpha: 0.5)
                 : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? PromptCategoryUtils.getCategoryColor(prompt.category)
-                        : PromptCategoryUtils.getCategoryColor(
-                            prompt.category,
-                          ).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSpacing.xs),
-                  ),
-                  child: Text(
-                    PromptCategoryUtils.getCategoryDisplayName(
-                      prompt.category,
-                      locale: Localizations.localeOf(context),
-                    ),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: isSelected
-                          ? Colors.white
-                          : PromptCategoryUtils.getCategoryColor(
-                              prompt.category,
-                            ),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle,
-                    color: PromptCategoryUtils.getCategoryColor(
-                      prompt.category,
-                    ),
-                    size: 20,
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              prompt.text,
-              style: isSelected
-                  ? AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w500,
-                    )
-                  : AppTypography.bodyMedium,
-            ),
-            if (prompt.description != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                prompt.description!,
-                style: AppTypography.bodySmall.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
-        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// 円形アイコン（プロンプトなし・ランダム選択で使用）
+class _CircleIcon extends StatelessWidget {
+  final bool isSelected;
+  final Color accentColor;
+  final IconData icon;
+
+  const _CircleIcon({
+    required this.isSelected,
+    required this.accentColor,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? accentColor
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        icon,
+        color: isSelected
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+        size: 20,
       ),
     );
   }
