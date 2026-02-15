@@ -263,13 +263,13 @@ void main() {
           photoIds: ['photo1'],
           createdAt: DateTime(2024, 1, 15, 14),
           updatedAt: DateTime(2024, 1, 15, 14),
-          cachedTags: ['cached-tag1', 'cached-tag2'],
+          tags: ['cached-tag1', 'cached-tag2'],
           tagsGeneratedAt: validTagsDate,
         );
 
         // Act & Assert
         expect(entry.hasValidTags, isTrue);
-        expect(entry.cachedTags, equals(['cached-tag1', 'cached-tag2']));
+        expect(entry.tags, equals(['cached-tag1', 'cached-tag2']));
       });
 
       test('should identify invalid cached tags', () {
@@ -283,13 +283,13 @@ void main() {
           photoIds: ['photo1'],
           createdAt: DateTime(2024, 1, 15, 14),
           updatedAt: DateTime(2024, 1, 15, 14),
-          cachedTags: ['old-tag'],
+          tags: ['old-tag'],
           tagsGeneratedAt: oldTagsDate,
         );
 
         // Act & Assert
         expect(entry.hasValidTags, isFalse);
-        expect(entry.cachedTags, equals(['old-tag']));
+        expect(entry.tags, equals(['old-tag']));
       });
 
       test('should identify missing tags', () {
@@ -306,7 +306,7 @@ void main() {
 
         // Act & Assert
         expect(entry.hasValidTags, isFalse);
-        expect(entry.cachedTags, isNull);
+        expect(entry.tags, isNull);
         expect(entry.tagsGeneratedAt, isNull);
       });
     });

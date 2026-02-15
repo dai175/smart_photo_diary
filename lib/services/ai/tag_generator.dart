@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:intl/intl.dart';
-import '../../constants/app_constants.dart';
+import '../../constants/ai_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../interfaces/logging_service_interface.dart';

@@ -27,7 +27,7 @@ DiaryEntry _createEntry({
   String content = 'Test content for diary card.',
   DateTime? date,
   List<String> photoIds = const [],
-  List<String>? cachedTags,
+  List<String>? tags,
 }) {
   final d = date ?? DateTime(2025, 6, 15, 10, 30);
   return DiaryEntry(
@@ -38,7 +38,7 @@ DiaryEntry _createEntry({
     photoIds: photoIds,
     createdAt: d,
     updatedAt: d,
-    cachedTags: cachedTags,
+    tags: tags,
   );
 }
 

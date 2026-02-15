@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../config/environment_config.dart';
-import '../../constants/app_constants.dart';
+import '../../constants/ai_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../interfaces/logging_service_interface.dart';
