@@ -35,13 +35,13 @@ class TimelinePhotoThumbnail extends StatelessWidget {
         if (snapshot.hasError) {
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFBDBDBD),
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(
                 Icons.broken_image_outlined,
-                color: Color(0xFF9E9E9E),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           );
@@ -76,7 +76,7 @@ class TimelinePhotoThumbnail extends StatelessWidget {
           // SliverGridの遅延構築でオフスクリーンに大量生成される可能性があるため
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFE0E0E0),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
             ),
           );
@@ -84,13 +84,13 @@ class TimelinePhotoThumbnail extends StatelessWidget {
           // Failure case
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFBDBDBD),
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(
                 Icons.broken_image_outlined,
-                color: Color(0xFF9E9E9E),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           );
@@ -191,7 +191,7 @@ class TimelineSkeletonTile extends StatelessWidget {
       container: true,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFE6E6E6),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
         ),
       ),
