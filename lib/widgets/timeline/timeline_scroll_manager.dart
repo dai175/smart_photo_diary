@@ -117,7 +117,7 @@ class TimelineScrollManager {
               TimelineScrollConstants.scrollCheckIntervalMs) {
         _lastPreloadCall = now;
         logger.info(
-          '先読みトリガー: pixels=$pixels, realContentEnd=${realContentEnd.toStringAsFixed(0)}, threshold=${TimelineScrollConstants.preloadThreshold}',
+          'Preload trigger: pixels=$pixels, realContentEnd=${realContentEnd.toStringAsFixed(0)}, threshold=${TimelineScrollConstants.preloadThreshold}',
           context: 'TimelineScrollManager.onScroll',
         );
         onPreloadMorePhotos?.call();
@@ -132,7 +132,7 @@ class TimelineScrollManager {
                   TimelineScrollConstants.scrollCheckIntervalMs)) {
         _lastLoadMoreCall = now;
         logger.info(
-          '追加読み込みトリガー: pixels=$pixels, realContentEnd=${realContentEnd.toStringAsFixed(0)}, threshold=${TimelineScrollConstants.loadMoreThreshold}',
+          'Load more trigger: pixels=$pixels, realContentEnd=${realContentEnd.toStringAsFixed(0)}, threshold=${TimelineScrollConstants.loadMoreThreshold}',
           context: 'TimelineScrollManager.onScroll',
         );
         requestMorePhotos();
@@ -206,7 +206,7 @@ class TimelineScrollManager {
     // 実写真がビューポートに収まる（スクロール不要）場合は自動読み込み
     if (count > 0 && count < TimelineScrollConstants.maxPhotosForAutoLoad) {
       logger.info(
-        '写真数不足のため追加読み込み要求: photoCount=$count',
+        'Insufficient photos, requesting more: photoCount=$count',
         context: 'TimelineScrollManager._performPhotoCheck',
       );
 
