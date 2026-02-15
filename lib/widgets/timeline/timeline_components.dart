@@ -72,16 +72,12 @@ class TimelinePhotoThumbnail extends StatelessWidget {
             ),
           );
         } else if (!snapshot.hasData) {
+          // ローディング中は軽量なプレースホルダーのみ（アニメーションなし）
+          // SliverGridの遅延構築でオフスクリーンに大量生成される可能性があるため
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFBDBDBD),
+              color: const Color(0xFFE0E0E0),
               borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-            ),
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: strokeWidth,
-                color: const Color(0xFF9E9E9E),
-              ),
             ),
           );
         } else {
@@ -197,16 +193,6 @@ class TimelineSkeletonTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFE6E6E6),
           borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-        ),
-        child: Center(
-          child: SizedBox(
-            width: indicatorSize,
-            height: indicatorSize,
-            child: CircularProgressIndicator(
-              strokeWidth: strokeWidth,
-              color: const Color(0xFFBDBDBD),
-            ),
-          ),
         ),
       ),
     );
