@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 /// テーマ関連の定数
 class ThemeConstants {
+  ThemeConstants._();
+
   static const double borderRadius = 16.0;
   static const double smallBorderRadius = 8.0;
   static const double mediumBorderRadius = 12.0;
