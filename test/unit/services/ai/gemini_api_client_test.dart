@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
@@ -15,6 +18,9 @@ void main() {
 
   setUpAll(() {
     registerMockFallbacks();
+    // sendTextRequest/sendVisionRequest/testApiKey が EnvironmentConfig.printDebugInfo() 経由で
+    // dotenv.env にアクセスするため、テスト用に空のdotenvを初期化
+    dotenv.loadFromString(envString: 'DUMMY_KEY=test');
   });
 
   setUp(() {
@@ -493,6 +499,106 @@ void main() {
 
       test('requestTimeout is 30 seconds', () {
         expect(GeminiApiClient.requestTimeout, const Duration(seconds: 30));
+      });
+    });
+
+    group('sendTextRequest', () {
+      test('APIキー未設定 → Failure(AiProcessingException)', () async {
+        // テスト環境ではEnvironmentConfig未初期化のためhasValidApiKeyがfalse
+        final mockClient = MockClient((request) async {
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final result = await apiClient.sendTextRequest(prompt: 'Test prompt');
+
+        // APIキー未設定のためFailureを返す
+        expect(result.isFailure, isTrue);
+        expect(result.error, isA<AiProcessingException>());
+      });
+
+      test('Failure時にエラーログが出力される', () async {
+        final mockClient = MockClient((request) async {
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        await apiClient.sendTextRequest(prompt: 'Test prompt');
+
+        verify(
+          () => mockLogger.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(greaterThanOrEqualTo(1));
+      });
+    });
+
+    group('sendVisionRequest', () {
+      test('APIキー未設定 → Failure(AiProcessingException)', () async {
+        final mockClient = MockClient((request) async {
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final imageData = Uint8List.fromList([1, 2, 3, 4, 5]);
+        final result = await apiClient.sendVisionRequest(
+          prompt: 'Describe this image',
+          imageData: imageData,
+        );
+
+        expect(result.isFailure, isTrue);
+        expect(result.error, isA<AiProcessingException>());
+      });
+
+      test('Failure時にエラーログが出力される', () async {
+        final mockClient = MockClient((request) async {
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final imageData = Uint8List.fromList([1, 2, 3]);
+        await apiClient.sendVisionRequest(prompt: 'Test', imageData: imageData);
+
+        verify(
+          () => mockLogger.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(greaterThanOrEqualTo(1));
+      });
+    });
+
+    group('testApiKey', () {
+      test('APIキー未設定 → false', () async {
+        final mockClient = MockClient((request) async {
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final result = await apiClient.testApiKey();
+
+        // EnvironmentConfig未初期化のためhasValidApiKeyがfalseでfalseを返す
+        expect(result, isFalse);
       });
     });
   });
