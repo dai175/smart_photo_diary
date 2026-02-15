@@ -99,7 +99,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
@@ -191,10 +191,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTap: widget.onPressed, // メインのタップイベント
                 borderRadius: borderRadius,
                 splashColor: widget.enableSplashEffect
-                    ? foregroundColor.withValues(alpha: 0.2)
+                    ? foregroundColor.withValues(alpha: 0.12)
                     : Colors.transparent,
                 highlightColor: widget.enableSplashEffect
-                    ? foregroundColor.withValues(alpha: 0.1)
+                    ? foregroundColor.withValues(alpha: 0.06)
                     : Colors.transparent,
                 child: Container(
                   padding: widget.padding ?? AppSpacing.buttonPaddingSmall,

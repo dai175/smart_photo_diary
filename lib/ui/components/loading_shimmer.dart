@@ -13,7 +13,7 @@ class LoadingShimmer extends StatefulWidget {
     this.highlightColor,
     this.enabled = true,
     this.direction = ShimmerDirection.ltr,
-    this.period = const Duration(milliseconds: 1500),
+    this.period = const Duration(milliseconds: 1800),
   });
 
   /// シマー効果を適用する子ウィジェット
@@ -84,9 +84,15 @@ class _LoadingShimmerState extends State<LoadingShimmer>
       return widget.child;
     }
 
-    final baseColor = widget.baseColor ?? AppColors.surfaceVariant;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor =
+        widget.baseColor ??
+        (isDark ? const Color(0xFF2E2A27) : AppColors.surfaceVariant);
     final highlightColor =
-        widget.highlightColor ?? Colors.white.withValues(alpha: 0.8);
+        widget.highlightColor ??
+        (isDark
+            ? const Color(0xFF3A3633)
+            : Colors.white.withValues(alpha: 0.8));
 
     return AnimatedBuilder(
       animation: _animation,

@@ -87,7 +87,7 @@ class _CustomCardState extends State<CustomCard>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.99).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
@@ -146,8 +146,9 @@ class _CustomCardState extends State<CustomCard>
   @override
   Widget build(BuildContext context) {
     final borderRadius = widget.borderRadius ?? AppSpacing.cardRadius;
-    final elevation = widget.elevation ?? AppSpacing.elevationSm;
+    final elevation = widget.elevation ?? AppSpacing.elevationXs;
     final shadowColor = widget.shadowColor ?? AppColors.shadow;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor =
         widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
 
@@ -174,19 +175,30 @@ class _CustomCardState extends State<CustomCard>
                     color: widget.gradient == null ? backgroundColor : null,
                     gradient: widget.gradient,
                     borderRadius: borderRadius,
-                    border: widget.border,
-                    boxShadow: [
-                      BoxShadow(
-                        color: shadowColor,
-                        blurRadius: _isHovered && widget.enableHoverEffect
-                            ? _elevationAnimation.value
-                            : elevation,
-                        offset: Offset(
-                          0,
-                          _isHovered && widget.enableHoverEffect ? 4 : 2,
-                        ),
-                      ),
-                    ],
+                    border:
+                        widget.border ??
+                        (isDark
+                            ? Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outlineVariant,
+                                width: 0.5,
+                              )
+                            : null),
+                    boxShadow: isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: shadowColor,
+                              blurRadius: _isHovered && widget.enableHoverEffect
+                                  ? _elevationAnimation.value
+                                  : elevation,
+                              offset: Offset(
+                                0,
+                                _isHovered && widget.enableHoverEffect ? 3 : 2,
+                              ),
+                            ),
+                          ],
                   ),
                   child: ClipRRect(
                     borderRadius: borderRadius,

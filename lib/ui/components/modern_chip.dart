@@ -80,7 +80,7 @@ class _ModernChipState extends State<ModernChip>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }

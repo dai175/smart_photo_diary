@@ -47,17 +47,17 @@ class CustomDialog extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(AppSpacing.lg),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: Color(0x14231E1A),
+                blurRadius: 16,
+                offset: Offset(0, 6),
                 spreadRadius: 0,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 40,
-                offset: const Offset(0, 16),
+                color: Color(0x0A231E1A),
+                blurRadius: 32,
+                offset: Offset(0, 12),
                 spreadRadius: 0,
               ),
             ],
@@ -91,7 +91,7 @@ class CustomDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(
             context,
-          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+          ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(AppSpacing.lg),
             topRight: Radius.circular(AppSpacing.lg),
@@ -128,7 +128,7 @@ class CustomDialog extends StatelessWidget {
                 builder: (context) => Text(
                   title!,
                   style: AppTypography.headlineSmall.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.left,

@@ -52,7 +52,7 @@ class PageTransitions {
               begin: AppConstants.scaleEntranceStart,
               end: 1.0,
             ).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
             );
 
         final fadeAnimation = Tween<double>(
