@@ -25,7 +25,7 @@ abstract class ISocialShareService {
 
   /// X（旧Twitter）に共有する（画像とテキストを別々に渡す）
   /// - 画像: 元の写真 最大3枚
-  /// - テキスト: タイトル+本文+アプリ名（XShareTextBuilderで整形）
+  /// - テキスト: タイトル+本文+アプリ名（280文字以内ならアプリ名付与）
   ///
   /// Returns:
   /// - Success: X共有処理が正常に完了

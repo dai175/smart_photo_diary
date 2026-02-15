@@ -390,8 +390,8 @@ void main() {
         emphasis: '感情の深みを大切にして',
         diaryLength: DiaryLength.short,
       );
-      expect(result, contains('80-110文字程度'));
-      expect(result, contains('3-8文字程度'));
+      expect(result, contains('40-70文字程度'));
+      expect(result, contains('3-6文字程度'));
     });
 
     test('standard + ja → standard body instruction', () {
@@ -412,8 +412,8 @@ void main() {
         emphasis: 'captures emotional depth',
         diaryLength: DiaryLength.short,
       );
-      expect(result, contains('35-50 words'));
-      expect(result, contains('2-4 word'));
+      expect(result, contains('15-25 words'));
+      expect(result, contains('2-3 word'));
     });
 
     test('standard + en → standard word count instruction', () {
@@ -437,8 +437,8 @@ void main() {
         emphasis: '感情の深みを大切にして',
         diaryLength: DiaryLength.short,
       );
-      expect(result, contains('80-120文字程度'));
-      expect(result, contains('3-8文字程度'));
+      expect(result, contains('50-80文字程度'));
+      expect(result, contains('3-6文字程度'));
     });
 
     test('standard + ja → standard body instruction', () {
@@ -461,8 +461,8 @@ void main() {
         emphasis: 'captures emotional depth',
         diaryLength: DiaryLength.short,
       );
-      expect(result, contains('40-55 words'));
-      expect(result, contains('2-4 word'));
+      expect(result, contains('20-30 words'));
+      expect(result, contains('2-3 word'));
     });
 
     test('standard + en → standard word count instruction', () {
