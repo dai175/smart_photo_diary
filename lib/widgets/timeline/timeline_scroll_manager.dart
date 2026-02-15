@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../../constants/app_constants.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import 'timeline_constants.dart';
 
@@ -29,15 +28,19 @@ class TimelineScrollManager {
   /// 追加写真があるかどうか
   bool Function() hasMorePhotos = () => false;
 
-  /// 現在の写真数
+  /// 現在の実写真数
   int Function() photoCount = () => 0;
+
+  /// プレースホルダー込みの総アイテム数
+  int Function() totalItemCount = () => 0;
+
+  /// ビューポート幅（タイルサイズ算出用）
+  double Function() viewportWidth = () => 0;
 
   // 無限スクロール用状態
   bool isLoadingMore = false;
-  int placeholderPages = 0;
   int lastAssetsCount = 0;
   bool isInitialLoad = true;
-  DateTime? _lastPlaceholderIncrease;
   DateTime? _lastPreloadCall;
   DateTime? _lastLoadMoreCall;
 
@@ -50,13 +53,6 @@ class TimelineScrollManager {
 
   /// 外部指示で先頭へスクロール
   void scrollToTop() {
-    // スクロール中にスケルトンが視界に入らないよう一時的に最小化
-    if (placeholderPages > TimelineScrollConstants.scrollTopPlaceholderLimit) {
-      updateState(() {
-        placeholderPages = TimelineScrollConstants.scrollTopPlaceholderLimit;
-      });
-    }
-
     if (!scrollController.hasClients) return;
     scrollController.animateTo(
       0,
@@ -65,102 +61,87 @@ class TimelineScrollManager {
     );
   }
 
-  /// スクロール検知（2段階先読み版）
+  /// 実写真の末端に対応するスクロール位置を推定
+  ///
+  /// プレースホルダーは最後のグループにのみ追加されるため、
+  /// プレースホルダーのスクロール高さを算出し maxScrollExtent から差し引く。
+  /// ヘッダーや余白はプレースホルダーの有無に関わらず同じなので影響しない。
+  double _estimateRealContentEnd() {
+    final position = scrollController.position;
+    final total = totalItemCount();
+    final real = photoCount();
+    if (total <= 0 || real <= 0) return position.maxScrollExtent;
+
+    final placeholderCount = total - real;
+    if (placeholderCount <= 0) return position.maxScrollExtent;
+
+    final vw = viewportWidth();
+    if (vw <= 0) return position.maxScrollExtent;
+
+    // タイルサイズ算出（aspectRatio=1.0 なので幅=高さ）
+    const cols = TimelineLayoutConstants.crossAxisCount;
+    const spacing = TimelineLayoutConstants.crossAxisSpacing;
+    final tileSize = (vw - spacing * (cols - 1)) / cols;
+
+    const mainSpacing = TimelineLayoutConstants.mainAxisSpacing;
+    final placeholderRows = (placeholderCount / cols).ceil();
+    final placeholderHeight =
+        placeholderRows * tileSize + (placeholderRows - 1) * mainSpacing;
+
+    return position.maxScrollExtent - placeholderHeight;
+  }
+
+  /// スクロール検知（実写真末端基準の2段階先読み）
   void onScroll() {
     if (!scrollController.hasClients) return;
-
-    // これ以上読み込む写真がない場合は、段階的にスケルトンを減らす
-    if (!hasMorePhotos()) {
-      decreasePlaceholderPages();
-      return;
-    }
 
     final position = scrollController.position;
     final pixels = position.pixels;
     final maxScrollExtent = position.maxScrollExtent;
 
-    if (maxScrollExtent <= 0) return;
+    // ビューポート先読み（サムネイル）— データ追加読み込みとは独立
+    onViewportPrefetch?.call();
+
+    if (!hasMorePhotos() || maxScrollExtent <= 0) return;
+
+    // 実写真の末端位置を基準に閾値を判定
+    final realContentEnd = _estimateRealContentEnd();
 
     final now = DateTime.now();
 
     // 段階1: 先読み開始（UIブロッキングなし）
-    if (pixels >= maxScrollExtent - TimelineScrollConstants.preloadThreshold) {
+    if (pixels >= realContentEnd - TimelineScrollConstants.preloadThreshold) {
       // 短時間の重複呼び出しを防ぐ
       if (_lastPreloadCall == null ||
           now.difference(_lastPreloadCall!).inMilliseconds >
               TimelineScrollConstants.scrollCheckIntervalMs) {
         _lastPreloadCall = now;
         logger.info(
-          '先読みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=${TimelineScrollConstants.preloadThreshold}',
-          context: 'TimelinePhotoWidget._onScroll',
+          '先読みトリガー: pixels=$pixels, realContentEnd=${realContentEnd.toStringAsFixed(0)}, threshold=${TimelineScrollConstants.preloadThreshold}',
+          context: 'TimelineScrollManager.onScroll',
         );
         onPreloadMorePhotos?.call();
-        increasePlaceholderPages();
       }
-
-      // 底付き状態なら継続的に先読みを試みる
-      ensureProgressiveLoadingIfPinned();
     }
 
-    // ビューポート先読み（サムネイル）
-    onViewportPrefetch?.call();
-
     // 段階2: 確実な読み込み（UIフィードバックあり）
-    if (pixels >= maxScrollExtent - TimelineScrollConstants.loadMoreThreshold) {
+    if (pixels >= realContentEnd - TimelineScrollConstants.loadMoreThreshold) {
       if (!isLoadingMore &&
           (_lastLoadMoreCall == null ||
               now.difference(_lastLoadMoreCall!).inMilliseconds >
                   TimelineScrollConstants.scrollCheckIntervalMs)) {
         _lastLoadMoreCall = now;
         logger.info(
-          '追加読み込みトリガー: pixels=$pixels, max=$maxScrollExtent, threshold=${TimelineScrollConstants.loadMoreThreshold}',
-          context: 'TimelinePhotoWidget._onScroll',
+          '追加読み込みトリガー: pixels=$pixels, realContentEnd=${realContentEnd.toStringAsFixed(0)}, threshold=${TimelineScrollConstants.loadMoreThreshold}',
+          context: 'TimelineScrollManager.onScroll',
         );
         requestMorePhotos();
       }
     }
   }
 
-  /// スクロール末端に張り付いたままでも先読みを進める
-  void ensureProgressiveLoadingIfPinned() {
-    if (!scrollController.hasClients) return;
-    if (!hasMorePhotos()) {
-      return;
-    }
-
-    final pos = scrollController.position;
-    final isPinned = (pos.maxScrollExtent - pos.pixels).abs() < 4.0;
-    if (!isPinned) {
-      return;
-    }
-
-    // 連続トリガー（軽いデバウンス）
-    Timer(
-      const Duration(
-        milliseconds: TimelineScrollConstants.scrollCheckIntervalMs ~/ 2,
-      ),
-      () {
-        if (!isMounted()) return;
-        if (!scrollController.hasClients) return;
-        final againPinned =
-            (scrollController.position.maxScrollExtent -
-                    scrollController.position.pixels)
-                .abs() <
-            4.0;
-        if (againPinned && hasMorePhotos()) {
-          onPreloadMorePhotos?.call();
-          increasePlaceholderPages();
-          // 次も必要かもしれないので再スケジュール
-          ensureProgressiveLoadingIfPinned();
-        }
-      },
-    );
-  }
-
   /// 追加写真読み込み要求（HomeScreenに委譲）
   void requestMorePhotos() {
-    // スケルトンを先に表示してから読み込み開始
-    increasePlaceholderPages();
     updateState(() {
       isLoadingMore = true;
     });
@@ -213,23 +194,20 @@ class TimelineScrollManager {
       return;
     }
 
-    final position = scrollController.position;
     final count = photoCount();
 
-    logger.info(
-      'スクロール可能性チェック: maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(1)}, '
-      'photoCount=$count, hasMorePhotos=${hasMorePhotos()}',
-      context: 'TimelinePhotoWidget._performPhotoCheck',
-    );
+    // 実写真だけでスクロール可能なら追加読み込み不要
+    // realContentEnd ≈ realContentHeight - viewportDimension なので > 0 で判定
+    final realContentEnd = _estimateRealContentEnd();
+    if (realContentEnd > 0) {
+      return;
+    }
 
-    // 条件を緩和：スクロール範囲が閾値以下で写真が上限未満の場合
-    if (position.maxScrollExtent <=
-            TimelineScrollConstants.scrollCheckThreshold &&
-        count > 0 &&
-        count < TimelineScrollConstants.maxPhotosForAutoLoad) {
+    // 実写真がビューポートに収まる（スクロール不要）場合は自動読み込み
+    if (count > 0 && count < TimelineScrollConstants.maxPhotosForAutoLoad) {
       logger.info(
-        'スクロール不可のため追加読み込み要求: maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(1)}, threshold=${TimelineScrollConstants.scrollCheckThreshold}',
-        context: 'TimelinePhotoWidget._performPhotoCheck',
+        '写真数不足のため追加読み込み要求: photoCount=$count',
+        context: 'TimelineScrollManager._performPhotoCheck',
       );
 
       if (onLoadMorePhotos != null && !isLoadingMore) {
@@ -238,72 +216,10 @@ class TimelineScrollManager {
     }
   }
 
-  /// スケルトンページ数を増加
-  void increasePlaceholderPages() {
-    if (placeholderPages >= AppConstants.timelinePlaceholderMaxPages) return;
-
-    // 短時間での連続増加を防ぐ（スムーズなUX）
-    final now = DateTime.now();
-    if (_lastPlaceholderIncrease != null &&
-        now.difference(_lastPlaceholderIncrease!).inMilliseconds <
-            TimelineScrollConstants.placeholderIncreaseDebounceMs) {
-      return;
-    }
-
-    updateState(() {
-      // 最低でも1ページは表示する
-      if (placeholderPages == 0) {
-        placeholderPages = 1;
-      } else {
-        placeholderPages += 1;
-      }
-    });
-    _lastPlaceholderIncrease = now;
-  }
-
-  /// スケルトンページ数を段階的に減らす
-  void decreasePlaceholderPages() {
-    if (placeholderPages <= 0) return;
-
-    updateState(() {
-      placeholderPages = (placeholderPages - 1).clamp(
-        0,
-        AppConstants.timelinePlaceholderMaxPages,
-      );
-    });
-
-    logger.info(
-      'スケルトンページ数を減少: $placeholderPages',
-      context: 'TimelinePhotoWidget._decreasePlaceholderPages',
-    );
-  }
-
   /// 写真数増加時の処理
   void handlePhotoCountIncrease(int currentCount) {
-    // 初回読み込み完了時
     if (isInitialLoad) {
       isInitialLoad = false;
-      // 初回はスケルトンを段階的に減らす（急激な変化を避ける）
-      if (placeholderPages >
-          TimelineScrollConstants.initialLoadPlaceholderLimit) {
-        placeholderPages = TimelineScrollConstants.initialLoadPlaceholderLimit;
-      }
-      return;
-    }
-
-    // 継続的な先読み時は、大幅な増加時のみスケルトンを調整
-    final increaseAmount = currentCount - lastAssetsCount;
-
-    // 大量の写真が一度に読み込まれた場合のみスケルトンを減らす
-    if (increaseAmount >= TimelineScrollConstants.bulkLoadThreshold) {
-      placeholderPages = (placeholderPages - 1).clamp(
-        1,
-        AppConstants.timelinePlaceholderMaxPages,
-      );
-      logger.info(
-        '大量読み込み完了でスケルトン調整: 増加数=$increaseAmount, 新スケルトン数=$placeholderPages',
-        context: 'TimelinePhotoWidget._handlePhotoCountIncrease',
-      );
     }
   }
 }

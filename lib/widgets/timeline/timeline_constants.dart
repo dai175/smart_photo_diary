@@ -61,10 +61,4 @@ class TimelineScrollConstants {
 
   // 自動読み込み
   static const int maxPhotosForAutoLoad = 60;
-
-  // スケルトン制御
-  static const int placeholderIncreaseDebounceMs = 500;
-  static const int initialLoadPlaceholderLimit = 2;
-  static const int bulkLoadThreshold = 20;
-  static const int scrollTopPlaceholderLimit = 1;
 }
