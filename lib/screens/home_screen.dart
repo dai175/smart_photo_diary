@@ -103,9 +103,14 @@ class _HomeScreenState extends State<HomeScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // アプリがフォアグラウンドに戻った時に権限状態をチェック
-      _refreshHome();
+      _onResumed();
     }
+  }
+
+  Future<void> _onResumed() async {
+    // 使用済み写真IDのみ更新（日記が他画面で変更された可能性に対応）
+    // スクロール位置・読み込み済み写真データ・オフセットはすべて保持
+    await _loadUsedPhotoIds();
   }
 
   /// 日記詳細画面を開いた結果を共通で処理
