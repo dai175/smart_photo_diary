@@ -26,6 +26,8 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       secondaryContainer: AppColors.secondaryDark,
       onSecondaryContainer: AppColors.secondaryLight,
       surface: AppColors.surfaceDark,
+      surfaceContainerHighest: Color(0xFF2C2C2C),
+      surfaceContainerHigh: Color(0xFF383838),
       onSurface: AppColors.onSurfaceDark,
       error: AppColors.error,
       onError: AppColors.onError,
