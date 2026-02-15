@@ -131,35 +131,3 @@ class AppConstants {
     BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
   ];
 }
-
-/// テーマ関連の定数
-class ThemeConstants {
-  static const double borderRadius = 16.0;
-  static const double smallBorderRadius = 8.0;
-  static const double mediumBorderRadius = 12.0;
-  static const double largeBorderRadius = 24.0;
-  static const double extraSmallBorderRadius = 4.0;
-
-  static const EdgeInsets defaultCardPadding = EdgeInsets.all(14.0);
-  static const EdgeInsets defaultScreenPadding = EdgeInsets.symmetric(
-    horizontal: 20.0,
-    vertical: 12.0,
-  );
-}
-
-/// AI関連の定数
-class AiConstants {
-  // Gemini API設定
-  static const String geminiModelName = 'gemini-2.5-flash';
-  static const double defaultTemperature = 0.7;
-  static const int defaultMaxOutputTokens = 1000;
-  static const double defaultTopP = 0.8;
-  static const int defaultTopK = 10;
-  static const double tagGenerationTemperature = 0.3;
-
-  // 時間帯判定
-  static const int morningStartHour = 5;
-  static const int afternoonStartHour = 12;
-  static const int eveningStartHour = 18;
-  static const int nightStartHour = 22;
-}

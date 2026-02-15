@@ -51,7 +51,7 @@ void main() {
     DateTime? date,
     String title = 'Test Title',
     String content = 'Test Content',
-    List<String>? cachedTags,
+    List<String>? tags,
     DateTime? tagsGeneratedAt,
   }) {
     return DiaryEntry(
@@ -62,7 +62,7 @@ void main() {
       photoIds: ['photo_1'],
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      cachedTags: cachedTags,
+      tags: tags,
       tagsGeneratedAt: tagsGeneratedAt,
     );
   }
@@ -71,7 +71,7 @@ void main() {
     test('キャッシュ有効時はキャッシュを返す（AI呼び出しなし）', () async {
       final entry = createEntry(
         id: 'cached_entry',
-        cachedTags: ['タグ1', 'タグ2'],
+        tags: ['タグ1', 'タグ2'],
         tagsGeneratedAt: DateTime.now(),
       );
 
@@ -138,14 +138,8 @@ void main() {
 
   group('getAllTags', () {
     test('全エントリーのユニークタグを集計', () async {
-      await diaryBox.put(
-        'e1',
-        createEntry(id: 'e1', cachedTags: ['タグA', 'タグB']),
-      );
-      await diaryBox.put(
-        'e2',
-        createEntry(id: 'e2', cachedTags: ['タグB', 'タグC']),
-      );
+      await diaryBox.put('e1', createEntry(id: 'e1', tags: ['タグA', 'タグB']));
+      await diaryBox.put('e2', createEntry(id: 'e2', tags: ['タグB', 'タグC']));
 
       final result = await tagService.getAllTags();
       expect(result.isSuccess, isTrue);
@@ -168,12 +162,9 @@ void main() {
 
   group('getPopularTags', () {
     test('頻度順にソート', () async {
-      await diaryBox.put('e1', createEntry(id: 'e1', cachedTags: ['日常', '散歩']));
-      await diaryBox.put('e2', createEntry(id: 'e2', cachedTags: ['日常', '食事']));
-      await diaryBox.put(
-        'e3',
-        createEntry(id: 'e3', cachedTags: ['日常', '散歩', '食事']),
-      );
+      await diaryBox.put('e1', createEntry(id: 'e1', tags: ['日常', '散歩']));
+      await diaryBox.put('e2', createEntry(id: 'e2', tags: ['日常', '食事']));
+      await diaryBox.put('e3', createEntry(id: 'e3', tags: ['日常', '散歩', '食事']));
 
       final result = await tagService.getPopularTags();
       expect(result.isSuccess, isTrue);
@@ -184,7 +175,7 @@ void main() {
     test('limit パラメータで件数制限', () async {
       await diaryBox.put(
         'e1',
-        createEntry(id: 'e1', cachedTags: ['A', 'B', 'C', 'D']),
+        createEntry(id: 'e1', tags: ['A', 'B', 'C', 'D']),
       );
 
       final result = await tagService.getPopularTags(limit: 2);
@@ -220,7 +211,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 100));
 
       final updated = diaryBox.get('bg_entry');
-      expect(updated?.cachedTags, equals(['背景タグ']));
+      expect(updated?.tags, equals(['背景タグ']));
       expect(callbackCalled, isTrue);
     });
 
@@ -275,7 +266,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 100));
 
       final updated = diaryBox.get('fail_bg');
-      expect(updated?.cachedTags, isNull);
+      expect(updated?.tags, isNull);
     });
   });
 

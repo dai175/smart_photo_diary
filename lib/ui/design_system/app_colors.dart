@@ -100,18 +100,7 @@ class AppColors {
     colors: [accent, accentLight],
   );
 
-  /// ホーム画面用グラデーション（既存デザインとの互換性）
-  static const LinearGradient homeGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFFE1BEE7), // 薄紫
-      Color(0xFFFFCDD2), // 薄ピンク
-      Color(0xFFFFF9C4), // 薄黄
-    ],
-  );
-
-  /// より複雑で美しいホームグラデーション
+  /// ホーム画面用グラデーション
   static const LinearGradient modernHomeGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

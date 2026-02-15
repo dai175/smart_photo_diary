@@ -1,5 +1,5 @@
 import 'dart:ui';
-import '../../constants/app_constants.dart';
+import '../../constants/ai_constants.dart';
 import 'diary_locale_utils.dart';
 
 /// 時間帯判定ユーティリティ

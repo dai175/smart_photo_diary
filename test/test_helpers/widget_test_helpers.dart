@@ -49,7 +49,6 @@ class WidgetTestHelpers {
     DateTime? updatedAt,
     String? location,
     List<String>? tags,
-    List<String>? cachedTags,
     DateTime? tagsGeneratedAt,
   }) {
     final now = DateTime.now();
@@ -63,7 +62,6 @@ class WidgetTestHelpers {
       updatedAt: updatedAt ?? now,
       location: location,
       tags: tags,
-      cachedTags: cachedTags,
       tagsGeneratedAt: tagsGeneratedAt,
     );
   }
@@ -80,7 +78,7 @@ class WidgetTestHelpers {
         createdAt: date,
         updatedAt: date,
         photoIds: ['photo${index}_1', 'photo${index}_2'],
-        cachedTags: ['tag$index', 'test'],
+        tags: ['tag$index', 'test'],
       );
     });
   }

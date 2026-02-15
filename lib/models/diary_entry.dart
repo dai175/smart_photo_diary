@@ -26,7 +26,7 @@ class DiaryEntry extends HiveObject {
   DateTime updatedAt;
 
   @HiveField(7)
-  List<String>? cachedTags; // 生成されたタグのキャッシュ
+  List<String>? tags; // AI生成またはインポートされたタグ
 
   @HiveField(8)
   DateTime? tagsGeneratedAt; // タグ生成日時
@@ -34,11 +34,8 @@ class DiaryEntry extends HiveObject {
   @HiveField(9)
   String? location; // 位置情報
 
-  @HiveField(10)
-  List<String>? tags; // 初期タグ（キャッシュとは別）
-
-  /// タグを統一的に取得（cachedTagsを優先、なければtagsにフォールバック）
-  List<String> get effectiveTags => cachedTags ?? tags ?? const [];
+  /// タグを統一的に取得
+  List<String> get effectiveTags => tags ?? const [];
 
   DiaryEntry({
     required this.id,
@@ -48,10 +45,9 @@ class DiaryEntry extends HiveObject {
     required this.photoIds,
     required this.createdAt,
     required this.updatedAt,
-    this.cachedTags,
+    this.tags,
     this.tagsGeneratedAt,
     this.location,
-    this.tags,
   });
 
   // 日記エントリーを更新するメソッド
@@ -62,14 +58,14 @@ class DiaryEntry extends HiveObject {
   }
 
   // タグを更新（永続化はサービス層が担当）
-  void updateTags(List<String> tags) {
-    cachedTags = tags;
+  void updateTags(List<String> newTags) {
+    tags = newTags;
     tagsGeneratedAt = DateTime.now();
   }
 
   // タグが有効かどうかをチェック（7日間有効）
   bool get hasValidTags {
-    if (cachedTags == null || tagsGeneratedAt == null) return false;
+    if (tags == null || tagsGeneratedAt == null) return false;
 
     final daysSinceGeneration = DateTime.now()
         .difference(tagsGeneratedAt!)
@@ -86,10 +82,9 @@ class DiaryEntry extends HiveObject {
     List<String>? photoIds,
     DateTime? createdAt,
     DateTime? updatedAt,
-    List<String>? cachedTags,
+    List<String>? tags,
     DateTime? tagsGeneratedAt,
     String? location,
-    List<String>? tags,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -99,10 +94,9 @@ class DiaryEntry extends HiveObject {
       photoIds: photoIds ?? this.photoIds,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      cachedTags: cachedTags ?? this.cachedTags,
+      tags: tags ?? this.tags,
       tagsGeneratedAt: tagsGeneratedAt ?? this.tagsGeneratedAt,
       location: location ?? this.location,
-      tags: tags ?? this.tags,
     );
   }
 }

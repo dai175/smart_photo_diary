@@ -43,7 +43,7 @@ class DiaryTagService implements IDiaryTagService {
     try {
       // 有効なキャッシュがあればそれを返す
       if (entry.hasValidTags) {
-        return Success(entry.cachedTags!);
+        return Success(entry.tags!);
       }
 
       // キャッシュが無効または存在しない場合は新しく生成

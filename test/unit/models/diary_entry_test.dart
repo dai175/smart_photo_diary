@@ -34,10 +34,9 @@ void main() {
         expect(entry.photoIds, equals(['photo1', 'photo2']));
         expect(entry.createdAt, equals(testCreatedAt));
         expect(entry.updatedAt, equals(testUpdatedAt));
-        expect(entry.cachedTags, isNull);
+        expect(entry.tags, isNull);
         expect(entry.tagsGeneratedAt, isNull);
         expect(entry.location, isNull);
-        expect(entry.tags, isNull);
       });
 
       test('should create diary entry with optional fields', () {
@@ -50,22 +49,20 @@ void main() {
           photoIds: ['photo1'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: ['tag1', 'tag2'],
+          tags: ['tag1', 'tag2'],
           tagsGeneratedAt: testDate,
           location: 'Test Location',
-          tags: ['initial-tag'],
         );
 
         // Assert
-        expect(entry.cachedTags, equals(['tag1', 'tag2']));
+        expect(entry.tags, equals(['tag1', 'tag2']));
         expect(entry.tagsGeneratedAt, equals(testDate));
         expect(entry.location, equals('Test Location'));
-        expect(entry.tags, equals(['initial-tag']));
       });
     });
 
     group('hasValidTags', () {
-      test('should return false when cachedTags is null', () {
+      test('should return false when tags is null', () {
         // Arrange
         final entry = DiaryEntry(
           id: 'test-id',
@@ -75,7 +72,7 @@ void main() {
           photoIds: ['photo1'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: null,
+          tags: null,
           tagsGeneratedAt: DateTime.now(),
         );
 
@@ -93,7 +90,7 @@ void main() {
           photoIds: ['photo1'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: ['tag1'],
+          tags: ['tag1'],
           tagsGeneratedAt: null,
         );
 
@@ -112,7 +109,7 @@ void main() {
           photoIds: ['photo1'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: ['tag1'],
+          tags: ['tag1'],
           tagsGeneratedAt: recentTagsDate,
         );
 
@@ -133,7 +130,7 @@ void main() {
             photoIds: ['photo1'],
             createdAt: testCreatedAt,
             updatedAt: testUpdatedAt,
-            cachedTags: ['tag1'],
+            tags: ['tag1'],
             tagsGeneratedAt: oldTagsDate,
           );
 
@@ -153,7 +150,7 @@ void main() {
           photoIds: ['photo1'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: ['tag1'],
+          tags: ['tag1'],
           tagsGeneratedAt: exactDate,
         );
 
@@ -163,7 +160,7 @@ void main() {
     });
 
     group('effectiveTags', () {
-      test('should return cachedTags when both cachedTags and tags exist', () {
+      test('should return tags when tags exist', () {
         final entry = DiaryEntry(
           id: 'test-id',
           date: testDate,
@@ -172,29 +169,13 @@ void main() {
           photoIds: ['photo1'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: ['cached1', 'cached2'],
-          tags: ['initial1'],
+          tags: ['tag1', 'tag2'],
         );
 
-        expect(entry.effectiveTags, equals(['cached1', 'cached2']));
+        expect(entry.effectiveTags, equals(['tag1', 'tag2']));
       });
 
-      test('should return tags when cachedTags is null', () {
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: testDate,
-          title: 'Test',
-          content: 'Test',
-          photoIds: ['photo1'],
-          createdAt: testCreatedAt,
-          updatedAt: testUpdatedAt,
-          tags: ['initial1', 'initial2'],
-        );
-
-        expect(entry.effectiveTags, equals(['initial1', 'initial2']));
-      });
-
-      test('should return empty list when both are null', () {
+      test('should return empty list when tags is null', () {
         final entry = DiaryEntry(
           id: 'test-id',
           date: testDate,
@@ -221,10 +202,9 @@ void main() {
           photoIds: ['photo1', 'photo2'],
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
-          cachedTags: ['original-tag'],
+          tags: ['original-tag'],
           tagsGeneratedAt: testDate,
           location: 'Original Location',
-          tags: ['initial-tag'],
         );
       });
 
@@ -242,10 +222,9 @@ void main() {
           expect(copy.photoIds, equals(originalEntry.photoIds));
           expect(copy.createdAt, equals(originalEntry.createdAt));
           expect(copy.updatedAt, equals(originalEntry.updatedAt));
-          expect(copy.cachedTags, equals(originalEntry.cachedTags));
+          expect(copy.tags, equals(originalEntry.tags));
           expect(copy.tagsGeneratedAt, equals(originalEntry.tagsGeneratedAt));
           expect(copy.location, equals(originalEntry.location));
-          expect(copy.tags, equals(originalEntry.tags));
         },
       );
 
@@ -286,10 +265,9 @@ void main() {
           photoIds: ['new-photo1'],
           createdAt: newCreatedAt,
           updatedAt: newUpdatedAt,
-          cachedTags: ['new-tag1', 'new-tag2'],
+          tags: ['new-tag1', 'new-tag2'],
           tagsGeneratedAt: newTagsGeneratedAt,
           location: 'New Location',
-          tags: ['new-initial-tag'],
         );
 
         // Assert
@@ -300,10 +278,9 @@ void main() {
         expect(copy.photoIds, equals(['new-photo1']));
         expect(copy.createdAt, equals(newCreatedAt));
         expect(copy.updatedAt, equals(newUpdatedAt));
-        expect(copy.cachedTags, equals(['new-tag1', 'new-tag2']));
+        expect(copy.tags, equals(['new-tag1', 'new-tag2']));
         expect(copy.tagsGeneratedAt, equals(newTagsGeneratedAt));
         expect(copy.location, equals('New Location'));
-        expect(copy.tags, equals(['new-initial-tag']));
       });
 
       test('should create different instances', () {
