@@ -93,39 +93,18 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
 
     return CustomCard(
       onTap: widget.onTap,
-      elevation: AppSpacing.elevationSm,
+      elevation: AppSpacing.elevationXs,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ヘッダー（日付とアイコン）
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: AppSpacing.chipRadius,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: AppSpacing.iconXs,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                    const SizedBox(width: AppSpacing.xxs),
-                    Text(
-                      l10n.formatMonthDay(widget.entry.date),
-                      style: AppTypography.withColor(
-                        AppTypography.labelSmall,
-                        Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ],
+              Text(
+                l10n.formatMonthDay(widget.entry.date),
+                style: AppTypography.withColor(
+                  AppTypography.labelSmall,
+                  Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const Spacer(),
@@ -263,16 +242,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
         final thumbnailData = thumbnailSnapshot.data!.value;
         final dpr = MediaQuery.of(context).devicePixelRatio;
         return Container(
-          decoration: BoxDecoration(
-            borderRadius: AppSpacing.photoRadius,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+          decoration: const BoxDecoration(borderRadius: AppSpacing.photoRadius),
           child: ClipRRect(
             borderRadius: AppSpacing.photoRadius,
             child: Image.memory(
