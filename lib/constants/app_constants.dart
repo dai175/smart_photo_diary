@@ -123,8 +123,8 @@ class AppConstants {
 
   // タイムライン・プレースホルダー
   // 追加読み込み中/先読み中に末尾へ表示するスケルトン行数（4列×行）
-  static const int timelinePlaceholderRows = 6; // 4列×6行=24タイル分
-  static const int timelinePlaceholderMaxPages = 8; // スクロールに応じて増やす最大ページ数
+  static const int timelinePlaceholderRows = 8; // 4列×8行=32タイル分
+  static const int timelinePlaceholderMaxPages = 30; // 高速スクロールでも追いつかれない十分な余裕
 
   // 影
   static const List<BoxShadow> cardShadow = [

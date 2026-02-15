@@ -110,6 +110,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _scrollManager.onViewportPrefetch = _scheduleViewportPrefetch;
     _scrollManager.hasMorePhotos = () => widget.controller.hasMorePhotos;
     _scrollManager.photoCount = () => widget.controller.photoAssets.length;
+    _scrollManager.totalItemCount = () => _totalItemCount();
+    _scrollManager.viewportWidth =
+        () => MediaQuery.sizeOf(context).width;
 
     widget.controller.addListener(_onControllerChanged);
     _scrollController.addListener(_scrollManager.onScroll);
@@ -144,6 +147,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _scrollManager.onPreloadMorePhotos = widget.onPreloadMorePhotos;
     _scrollManager.hasMorePhotos = () => widget.controller.hasMorePhotos;
     _scrollManager.photoCount = () => widget.controller.photoAssets.length;
+    _scrollManager.totalItemCount = () => _totalItemCount();
+    _scrollManager.viewportWidth =
+        () => MediaQuery.sizeOf(context).width;
   }
 
   /// ビューポート先読みをキャッシュマネージャーに委譲
@@ -184,14 +190,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       // キャッシュ再構築完了後に安全にUI更新
       setState(() {
         _photoGroups = groups;
-        // 取得枚数が増えた場合の処理を改善
         final currentCount = widget.controller.photoAssets.length;
         if (currentCount > _scrollManager.lastAssetsCount) {
           _scrollManager.handlePhotoCountIncrease(currentCount);
-        }
-        // これ以上読み込む写真がないなら段階的にスケルトンを減らす
-        if (!widget.controller.hasMorePhotos) {
-          _scrollManager.decreasePlaceholderPages();
         }
         _scrollManager.lastAssetsCount = currentCount;
       });
@@ -200,8 +201,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollManager.checkIfNeedsMorePhotos();
         _scheduleViewportPrefetch();
-        // 底付き時の保険をもう一度
-        _scrollManager.ensureProgressiveLoadingIfPinned();
       });
     }
   }
@@ -253,10 +252,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        ...localizedGroups.map((group) {
-          if (group.photos.isEmpty) {
-            return SliverStickyHeader(
-              header: _buildStickyHeader(group),
+        for (var i = 0; i < localizedGroups.length; i++) ...[
+          if (localizedGroups[i].photos.isEmpty)
+            SliverStickyHeader(
+              header: _buildStickyHeader(localizedGroups[i]),
               sliver: SliverToBoxAdapter(
                 child: SizedBox(
                   height: TimelineLayoutConstants.emptyStateHeight,
@@ -268,33 +267,44 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   ),
                 ),
               ),
-            );
-          }
-
-          return SliverStickyHeader(
-            header: _buildStickyHeader(group),
-            sliver: SliverMainAxisGroup(
-              slivers: [
-                SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: TimelineLayoutConstants.crossAxisCount,
-                    crossAxisSpacing: TimelineLayoutConstants.crossAxisSpacing,
-                    mainAxisSpacing: TimelineLayoutConstants.mainAxisSpacing,
-                    childAspectRatio: TimelineLayoutConstants.childAspectRatio,
+            )
+          else
+            SliverStickyHeader(
+              header: _buildStickyHeader(localizedGroups[i]),
+              sliver: SliverMainAxisGroup(
+                slivers: [
+                  SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                              TimelineLayoutConstants.crossAxisCount,
+                          crossAxisSpacing:
+                              TimelineLayoutConstants.crossAxisSpacing,
+                          mainAxisSpacing:
+                              TimelineLayoutConstants.mainAxisSpacing,
+                          childAspectRatio:
+                              TimelineLayoutConstants.childAspectRatio,
+                        ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildPhotoTile(
+                        context,
+                        localizedGroups[i],
+                        index,
+                        selectedDate,
+                      ),
+                      childCount: _calculateChildCount(
+                        localizedGroups[i],
+                        isLastGroup: i == localizedGroups.length - 1,
+                      ),
+                    ),
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        _buildPhotoTile(context, group, index, selectedDate),
-                    childCount: _calculateChildCount(group),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: AppSpacing.md),
                   ),
-                ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.md),
-                ),
-              ],
+                ],
+              ),
             ),
-          );
-        }),
+        ],
         // 追加読み込みインジケーター（追加写真がある場合のみ）
         if (_scrollManager.isLoadingMore && widget.controller.hasMorePhotos)
           const SliverToBoxAdapter(
@@ -317,22 +327,35 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   /// グループ内の表示アイテム数を計算（スケルトン含む）
-  int _calculateChildCount(TimelinePhotoGroup group) {
-    final isLastGroup = identical(
-      group,
-      _photoGroups.isNotEmpty ? _photoGroups.last : group,
-    );
-    final showPlaceholders =
-        isLastGroup &&
-        widget.controller.hasMorePhotos &&
-        _scrollManager.placeholderPages > 0;
-    final placeholderCountPerPage =
+  ///
+  /// hasMorePhotosがtrueの場合、末尾グループに常に固定の大量プレースホルダーを表示。
+  /// プレースホルダーは軽量コンテナのため、大量でもパフォーマンスに影響しない。
+  /// これにより高速スクロールでもプレースホルダーに追いつかない。
+  int _calculateChildCount(
+    TimelinePhotoGroup group, {
+    required bool isLastGroup,
+  }) {
+    if (!isLastGroup || !widget.controller.hasMorePhotos) {
+      return group.photos.length;
+    }
+    // 4列 × 8行 × 30ページ = 960タイル（240行分のスクロール余地）
+    const placeholderCount =
         TimelineLayoutConstants.crossAxisCount *
-        AppConstants.timelinePlaceholderRows;
-    return group.photos.length +
-        (showPlaceholders
-            ? (placeholderCountPerPage * _scrollManager.placeholderPages)
-            : 0);
+        AppConstants.timelinePlaceholderRows *
+        AppConstants.timelinePlaceholderMaxPages;
+    return group.photos.length + placeholderCount;
+  }
+
+  /// 全グループの総アイテム数（実写真+プレースホルダー）
+  int _totalItemCount() {
+    var total = 0;
+    for (var i = 0; i < _photoGroups.length; i++) {
+      total += _calculateChildCount(
+        _photoGroups[i],
+        isLastGroup: i == _photoGroups.length - 1,
+      );
+    }
+    return total;
   }
 
   /// 個別の写真タイルを構築
