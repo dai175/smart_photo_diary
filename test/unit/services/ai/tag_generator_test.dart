@@ -5,7 +5,6 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
 import 'package:smart_photo_diary/services/ai/tag_generator.dart';
-import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 
 import '../../../../test/integration/mocks/mock_services.dart';
 
@@ -134,7 +133,7 @@ void main() {
       );
 
       // 基本タグ（時間帯）のみ
-      expect(result.value!.length, 1);
+      expect(result.value.length, 1);
       expect(result.value, contains('朝'));
     });
 
@@ -148,7 +147,7 @@ void main() {
         locale: const Locale('ja'),
       );
 
-      expect(result.value!.length, lessThanOrEqualTo(5));
+      expect(result.value.length, lessThanOrEqualTo(5));
     });
   });
 
@@ -221,7 +220,9 @@ void main() {
           temperature: any(named: 'temperature'),
           maxOutputTokens: any(named: 'maxOutputTokens'),
         ),
-      ).thenAnswer((_) async => Failure(AiProcessingException('API error')));
+      ).thenAnswer(
+        (_) async => const Failure(AiProcessingException('API error')),
+      );
 
       final result = await tagGenerator.generateTags(
         title: 'テスト',

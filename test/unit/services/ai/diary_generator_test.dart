@@ -7,7 +7,6 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/ai/diary_generator.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
-import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 
 import '../../../../test/integration/mocks/mock_services.dart';
 
@@ -98,8 +97,8 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.value!.title, '春の訪れ');
-      expect(result.value!.content, '暖かい日差しの中で過ごした一日。');
+      expect(result.value.title, '春の訪れ');
+      expect(result.value.content, '暖かい日差しの中で過ごした一日。');
     });
 
     test('API成功 + 英語フォーマット → Success(title, content)', () async {
@@ -138,8 +137,8 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.value!.title, 'A Warm Day');
-      expect(result.value!.content, 'Spent a lovely day in the sunshine.');
+      expect(result.value.title, 'A Warm Day');
+      expect(result.value.content, 'Spent a lovely day in the sunshine.');
     });
 
     test('API成功 + extractTextがnull → Failure', () async {
@@ -172,7 +171,9 @@ void main() {
           imageData: any(named: 'imageData'),
           maxOutputTokens: any(named: 'maxOutputTokens'),
         ),
-      ).thenAnswer((_) async => Failure(AiProcessingException('API error')));
+      ).thenAnswer(
+        (_) async => const Failure(AiProcessingException('API error')),
+      );
 
       final result = await diaryGenerator.generateFromImage(
         imageData: testImageData,
@@ -246,7 +247,7 @@ void main() {
           imageData: any(named: 'imageData'),
           maxOutputTokens: any(named: 'maxOutputTokens'),
         ),
-      ).thenAnswer((_) async => Success({'type': 'vision'}));
+      ).thenAnswer((_) async => const Success({'type': 'vision'}));
 
       // _generateDiaryFromAnalyses用のモック（Text API）
       when(
@@ -254,7 +255,7 @@ void main() {
           prompt: any(named: 'prompt'),
           maxOutputTokens: any(named: 'maxOutputTokens'),
         ),
-      ).thenAnswer((_) async => Success({'type': 'text'}));
+      ).thenAnswer((_) async => const Success({'type': 'text'}));
 
       // extractTextFromResponse は呼ばれるたびに異なる値を返す
       var extractCallCount = 0;
@@ -276,7 +277,7 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.value!.title, '一日の思い出');
+      expect(result.value.title, '一日の思い出');
     });
 
     test('onProgressコールバックが正しく呼ばれる', () async {
@@ -286,14 +287,14 @@ void main() {
           imageData: any(named: 'imageData'),
           maxOutputTokens: any(named: 'maxOutputTokens'),
         ),
-      ).thenAnswer((_) async => Success({'type': 'vision'}));
+      ).thenAnswer((_) async => const Success({'type': 'vision'}));
 
       when(
         () => mockApiClient.sendTextRequest(
           prompt: any(named: 'prompt'),
           maxOutputTokens: any(named: 'maxOutputTokens'),
         ),
-      ).thenAnswer((_) async => Success({'type': 'text'}));
+      ).thenAnswer((_) async => const Success({'type': 'text'}));
 
       var extractCallCount = 0;
       when(() => mockApiClient.extractTextFromResponse(any())).thenAnswer((_) {
@@ -373,8 +374,8 @@ void main() {
         locale: const Locale('ja'),
       );
 
-      expect(result.value!.title, '春の訪れ');
-      expect(result.value!.content, '暖かい一日でした。');
+      expect(result.value.title, '春の訪れ');
+      expect(result.value.content, '暖かい一日でした。');
     });
 
     test('[Title]/[Body]形式 → 正しく分割', () async {
@@ -387,8 +388,8 @@ void main() {
         locale: const Locale('en'),
       );
 
-      expect(result.value!.title, 'Sunny Day');
-      expect(result.value!.content, 'A beautiful sunny day.');
+      expect(result.value.title, 'Sunny Day');
+      expect(result.value.content, 'A beautiful sunny day.');
     });
 
     test('形式不明 → 最初の行がタイトル、残りが本文', () async {
@@ -401,8 +402,8 @@ void main() {
         locale: const Locale('ja'),
       );
 
-      expect(result.value!.title, 'First Line');
-      expect(result.value!.content, contains('Second Line'));
+      expect(result.value.title, 'First Line');
+      expect(result.value.content, contains('Second Line'));
     });
 
     test('空レスポンス(1行のみ) → タイトルのみ、本文は全体テキスト', () async {
@@ -416,7 +417,7 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.value!.title, isNotEmpty);
+      expect(result.value.title, isNotEmpty);
     });
   });
 }
