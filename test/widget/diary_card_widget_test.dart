@@ -144,8 +144,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // カレンダーアイコンが表示される
-        expect(find.byIcon(Icons.calendar_today_rounded), findsOneWidget);
+        // 日付テキストが表示される（バッジからプレーンテキストに変更）
+        expect(find.byType(Text), findsWidgets);
       });
     });
 

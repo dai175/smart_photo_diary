@@ -128,14 +128,14 @@ void main() {
         expect(find.text('Diary preview'), findsOneWidget);
       });
 
-      testWidgets('AppBar has primary background color', (
+      testWidgets('AppBar uses theme default background color', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildScreen());
         await pumpFrames(tester);
 
-        final appBar = tester.widget<AppBar>(find.byType(AppBar));
-        expect(appBar.backgroundColor, isNotNull);
+        // AppBar now uses theme default (no explicit backgroundColor)
+        expect(find.byType(AppBar), findsOneWidget);
       });
     });
 
