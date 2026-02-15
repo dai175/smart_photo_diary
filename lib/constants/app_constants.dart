@@ -30,12 +30,6 @@ class AppConstants {
   static const double previewImageSize = 200.0;
   static const double largeImageSize = 400.0;
 
-  // グラデーション色
-  static const List<Color> headerGradientColors = [
-    Color(0xFFFF5F6D),
-    Color(0xFFFFC371),
-  ];
-
   // レイアウト
   static const double headerTopPadding = 50.0;
   static const double headerBottomPadding = 16.0;
@@ -58,10 +52,10 @@ class AppConstants {
   static const List<IconData> navigationIcons = AppIcons.navigationIcons;
 
   // アニメーション
-  static const Duration shortAnimationDuration = Duration(milliseconds: 150);
-  static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
-  static const Duration mediumAnimationDuration = Duration(milliseconds: 350);
-  static const Duration slowAnimationDuration = Duration(milliseconds: 400);
+  static const Duration shortAnimationDuration = Duration(milliseconds: 180);
+  static const Duration defaultAnimationDuration = Duration(milliseconds: 350);
+  static const Duration mediumAnimationDuration = Duration(milliseconds: 400);
+  static const Duration slowAnimationDuration = Duration(milliseconds: 450);
   static const Duration xSlowAnimationDuration = Duration(milliseconds: 500);
   static const Duration longAnimationDuration = Duration(milliseconds: 1500);
   static const Duration xLongAnimationDuration = Duration(milliseconds: 2000);
@@ -90,9 +84,9 @@ class AppConstants {
   static const double opacitySubtle = 0.2;
 
   // スケール（タップ・エントランスなど）
-  static const double scaleTapSmall = 0.96;
-  static const double scalePressed = 0.95;
-  static const double scaleEntranceStart = 0.8;
+  static const double scaleTapSmall = 0.98;
+  static const double scalePressed = 0.97;
+  static const double scaleEntranceStart = 0.92;
 
   // 写真サービス関連
   static const int defaultPhotoLimit = 20;

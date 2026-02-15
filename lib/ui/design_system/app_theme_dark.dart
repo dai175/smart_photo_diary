@@ -15,7 +15,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     useMaterial3: true,
     brightness: Brightness.dark,
 
-    // Color Scheme
+    // Color Scheme — 温かみのあるダークパレット
     colorScheme: const ColorScheme.dark(
       primary: AppColors.primaryLight,
       onPrimary: AppColors.onBackground,
@@ -26,23 +26,27 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       secondaryContainer: AppColors.secondaryDark,
       onSecondaryContainer: AppColors.secondaryLight,
       surface: AppColors.surfaceDark,
-      surfaceContainerHighest: Color(0xFF2C2C2C),
-      surfaceContainerHigh: Color(0xFF383838),
+      surfaceContainerHighest: Color(0xFF2E2A27),
+      surfaceContainerHigh: Color(0xFF3A3633),
       onSurface: AppColors.onSurfaceDark,
       error: AppColors.error,
       onError: AppColors.onError,
       errorContainer: AppColors.errorContainer,
       onErrorContainer: AppColors.onErrorContainer,
-      outline: AppColors.outline,
-      outlineVariant: AppColors.outlineVariant,
+      outline: Color(0xFF3D3833),
+      outlineVariant: Color(0xFF2E2A27),
       shadow: AppColors.shadow,
     ),
 
-    // App Bar Theme
+    // Scaffold background
+    scaffoldBackgroundColor: AppColors.backgroundDark,
+
+    // App Bar Theme — 背景と一体化
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.surfaceDark,
+      backgroundColor: AppColors.backgroundDark,
       foregroundColor: AppColors.onSurfaceDark,
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle: AppTypography.withColor(
         AppTypography.appTitle,
@@ -90,12 +94,14 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
               ),
             ),
 
-    // Card Theme
+    // Card Theme — ボーダーベース（シャドウなし）
     cardTheme: const CardThemeData(
       color: AppColors.surfaceDark,
-      elevation: AppSpacing.elevationSm,
-      shadowColor: Colors.black54,
-      shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.cardRadius,
+        side: BorderSide(color: Color(0xFF3D3833), width: 0.5),
+      ),
       margin: AppSpacing.cardMargin,
     ),
 
@@ -104,8 +110,8 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryLight,
         foregroundColor: AppColors.onBackground,
-        elevation: AppSpacing.elevationSm,
-        shadowColor: Colors.black54,
+        elevation: AppSpacing.elevationXs,
+        shadowColor: Colors.black26,
         shape: const RoundedRectangleBorder(
           borderRadius: AppSpacing.buttonRadius,
         ),
@@ -145,21 +151,21 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.primaryLight,
       foregroundColor: AppColors.onBackground,
-      elevation: AppSpacing.elevationMd,
+      elevation: AppSpacing.elevationSm,
       shape: CircleBorder(),
     ),
 
-    // Input Decoration Theme (Dark)
+    // Input Decoration Theme (Dark) — 温かみのあるサーフェス
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.primaryDark,
+      fillColor: const Color(0xFF2A2623),
       border: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: Color(0xFF3D3833)),
       ),
       enabledBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: Color(0xFF3D3833)),
       ),
       focusedBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
@@ -197,12 +203,12 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       size: AppSpacing.iconMd,
     ),
 
-    // Chip Theme (Dark)
+    // Chip Theme (Dark) — 温かみのあるサーフェス
     chipTheme: ChipThemeData(
-      backgroundColor: AppColors.primaryDark,
+      backgroundColor: const Color(0xFF2A2623),
       labelStyle: AppTypography.withColor(
         AppTypography.tag,
-        AppColors.primaryLight,
+        AppColors.onSurfaceDark,
       ),
       shape: const RoundedRectangleBorder(borderRadius: AppSpacing.chipRadius),
       padding: const EdgeInsets.symmetric(
@@ -211,11 +217,10 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       ),
     ),
 
-    // Bottom Navigation Bar Theme (Dark)
+    // Bottom Navigation Bar Theme (Dark) — 控えめな選択色
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: AppColors.surfaceDark,
-      selectedItemColor: AppColors.primaryLight,
-      // ダークは onSurfaceVariant だと暗すぎるため、基準色を onSurfaceDark に変更
+      backgroundColor: AppColors.backgroundDark,
+      selectedItemColor: AppColors.onSurfaceDark,
       unselectedItemColor: AppColors.onSurfaceDark.withValues(
         alpha: LabelConstants.unselectedOpacity,
       ),
@@ -229,7 +234,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
 
     // Tab Bar Theme (Dark)
     tabBarTheme: const TabBarThemeData(
-      labelColor: AppColors.primaryLight,
+      labelColor: AppColors.onSurfaceDark,
       unselectedLabelColor: AppColors.onSurfaceVariant,
       labelStyle: AppTypography.labelLarge,
       unselectedLabelStyle: AppTypography.labelLarge,
@@ -243,8 +248,8 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
 
     // Dialog Theme (Dark)
     dialogTheme: DialogThemeData(
-      backgroundColor: AppColors.surfaceDark,
-      elevation: AppSpacing.elevationLg,
+      backgroundColor: const Color(0xFF2A2623),
+      elevation: AppSpacing.elevationMd,
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
       ),

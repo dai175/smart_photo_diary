@@ -219,13 +219,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     return AppBar(
       title: Text(context.l10n.diaryPreviewAppBarTitle),
       centerTitle: false,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-        color: Theme.of(context).colorScheme.onPrimary,
-      ),
-      iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
-      elevation: 2,
       actions: [
         // 再生成ボタン（プロンプトをスキップ）
         if (!_controller.isInitializing &&
@@ -237,7 +230,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             child: IconButton(
               icon: Icon(
                 Icons.refresh_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               onPressed: () {
                 _controller.clearPrompt();
@@ -259,7 +252,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             child: IconButton(
               icon: Icon(
                 Icons.save_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               onPressed: _saveDiary,
               tooltip: context.l10n.diaryPreviewSaveButton,

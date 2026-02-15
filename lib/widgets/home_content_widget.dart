@@ -67,25 +67,16 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   PreferredSizeWidget _buildHeader(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       automaticallyImplyLeading: false,
       title: Text(context.l10n.formatFullDate(DateTime.now())),
       centerTitle: false,
-      // ダークテーマ時は primary が淡色のため、タイトル/アイコンは onPrimary を明示
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-      titleTextStyle: Theme.of(
-        context,
-      ).textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
-      iconTheme: IconThemeData(color: colorScheme.onPrimary),
-      elevation: 2,
       actions: [
         // 使用量カウンター表示ボタン
         Container(
           margin: const EdgeInsets.only(right: AppSpacing.xs),
           child: IconButton(
-            icon: Icon(Icons.analytics_rounded, color: colorScheme.onPrimary),
+            icon: const Icon(Icons.analytics_rounded),
             onPressed: () => _showUsageStatus(context),
             tooltip: context.l10n.usageStatusDialogTitle,
           ),

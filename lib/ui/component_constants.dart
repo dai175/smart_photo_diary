@@ -17,8 +17,8 @@ class ChipConstants {
   static const double iconMd = 16.0;
   static const double iconLg = 18.0;
 
-  // 枠線の太さ
-  static const double borderWidth = 1.5;
+  // 枠線の太さ — 繊細なボーダー
+  static const double borderWidth = 1.0;
 
   // ホバー時の影/オフセット
   static const double blurRadiusNormal = 2.0;
@@ -94,5 +94,5 @@ class NavBarConstants {
 class LabelConstants {
   /// 未選択アイテムの不透明度（ライト/ダーク共通）
   /// 基準色は Light: onSurfaceVariant / Dark: onSurfaceDark を使用
-  static const double unselectedOpacity = 0.65;
+  static const double unselectedOpacity = 0.45;
 }
