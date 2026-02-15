@@ -10,9 +10,9 @@ class ThemeConstants {
   static const double largeBorderRadius = 24.0;
   static const double extraSmallBorderRadius = 4.0;
 
-  static const EdgeInsets defaultCardPadding = EdgeInsets.all(14.0);
+  static const EdgeInsets defaultCardPadding = EdgeInsets.all(20.0);
   static const EdgeInsets defaultScreenPadding = EdgeInsets.symmetric(
     horizontal: 20.0,
-    vertical: 12.0,
+    vertical: 16.0,
   );
 }

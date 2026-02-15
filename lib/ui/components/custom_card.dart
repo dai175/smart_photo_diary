@@ -304,7 +304,7 @@ class GradientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomCard(
       onTap: onTap,
-      gradient: gradient ?? AppColors.primaryGradient,
+      gradient: gradient,
       elevation: AppSpacing.elevationMd,
       shadowColor: AppColors.primary.withValues(
         alpha: AppConstants.opacityXLow,

@@ -71,19 +71,19 @@ class AppSpacing {
   static const double minTouchTarget = 44.0;
 
   // ============= PADDING PRESETS =============
-  /// 画面端のパディング
-  static const EdgeInsets screenPadding = EdgeInsets.all(lg);
+  /// 画面端のパディング — ゆとりのある余白
+  static const EdgeInsets screenPadding = EdgeInsets.all(xl);
   static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(
-    horizontal: lg,
+    horizontal: xl,
   );
   static const EdgeInsets screenPaddingVertical = EdgeInsets.symmetric(
-    vertical: lg,
+    vertical: xl,
   );
 
-  /// カードのパディング
-  static const EdgeInsets cardPadding = EdgeInsets.all(lg);
-  static const EdgeInsets cardPaddingSmall = EdgeInsets.all(md);
-  static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xl);
+  /// カードのパディング — ゆとりのある内部余白
+  static const EdgeInsets cardPadding = EdgeInsets.all(xl);
+  static const EdgeInsets cardPaddingSmall = EdgeInsets.all(lg);
+  static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xxl);
 
   /// ボタンのパディング
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
@@ -118,8 +118,8 @@ class AppSpacing {
   static const EdgeInsets appBarPadding = EdgeInsets.symmetric(horizontal: sm);
 
   // ============= MARGIN PRESETS =============
-  /// セクション間のマージン
-  static const EdgeInsets sectionMargin = EdgeInsets.only(bottom: xl);
+  /// セクション間のマージン — 広めの余白
+  static const EdgeInsets sectionMargin = EdgeInsets.only(bottom: xxl);
 
   /// カード間のマージン
   static const EdgeInsets cardMargin = EdgeInsets.only(bottom: lg);
@@ -169,22 +169,14 @@ class AppSpacing {
   );
 
   // ============= SHADOW PRESETS =============
-  /// カード用のシャドウ
+  /// カード用のシャドウ — 温かみのある色合い
   static const List<BoxShadow> cardShadow = [
-    BoxShadow(
-      color: Color(0x1A000000),
-      blurRadius: elevationMd,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: Color(0x14231E1A), blurRadius: 6.0, offset: Offset(0, 3)),
   ];
 
   /// 浮上したカード用のシャドウ
   static const List<BoxShadow> elevatedCardShadow = [
-    BoxShadow(
-      color: Color(0x1F000000),
-      blurRadius: elevationLg,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: Color(0x1A231E1A), blurRadius: 10.0, offset: Offset(0, 4)),
   ];
 
   /// ボタン用のシャドウ

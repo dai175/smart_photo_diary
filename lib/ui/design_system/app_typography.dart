@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Smart Photo Diary アプリケーションのタイポグラフィシステム
-/// Material Design 3 の Type Scale に基づいて設計
+/// Quiet Luxury — 軽やかなウェイトとゆとりのあるレタースペーシング
 /// Google Fontsによる日本語フォント対応はAppThemeで実装
 class AppTypography {
   AppTypography._();
@@ -10,7 +10,7 @@ class AppTypography {
   /// Display Large - 最大の見出し（57sp）
   static const TextStyle displayLarge = TextStyle(
     fontSize: 57,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w300,
     letterSpacing: -0.25,
     height: 1.12,
   );
@@ -18,7 +18,7 @@ class AppTypography {
   /// Display Medium - 大きな見出し（45sp）
   static const TextStyle displayMedium = TextStyle(
     fontSize: 45,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w300,
     letterSpacing: 0,
     height: 1.16,
   );
@@ -26,7 +26,7 @@ class AppTypography {
   /// Display Small - 中程度の見出し（36sp）
   static const TextStyle displaySmall = TextStyle(
     fontSize: 36,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w300,
     letterSpacing: 0,
     height: 1.22,
   );
@@ -35,24 +35,24 @@ class AppTypography {
   /// Headline Large - 主要見出し（32sp）
   static const TextStyle headlineLarge = TextStyle(
     fontSize: 32,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.3,
     height: 1.25,
   );
 
   /// Headline Medium - セカンダリ見出し（28sp）
   static const TextStyle headlineMedium = TextStyle(
     fontSize: 28,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.3,
     height: 1.29,
   );
 
   /// Headline Small - 小見出し（24sp）
   static const TextStyle headlineSmall = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.3,
     height: 1.33,
   );
 
@@ -94,7 +94,7 @@ class AppTypography {
   static const TextStyle labelMedium = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     height: 1.33,
   );
 
@@ -102,7 +102,7 @@ class AppTypography {
   static const TextStyle labelSmall = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     height: 1.45,
   );
 
@@ -135,8 +135,8 @@ class AppTypography {
   /// 日本語用の見出しスタイル
   static const TextStyle japaneseHeadline = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.3,
     height: 1.40,
   );
 
@@ -157,18 +157,18 @@ class AppTypography {
   );
 
   // ============= SPECIAL STYLES =============
-  /// アプリタイトル用スタイル
+  /// アプリタイトル用スタイル — ゆとりのあるスペーシング
   static const TextStyle appTitle = TextStyle(
     fontSize: 20,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.15,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.8,
     height: 1.20,
   );
 
   /// 日記タイトル用スタイル
   static const TextStyle diaryTitle = TextStyle(
     fontSize: 18,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: 0,
     height: 1.40,
   );
@@ -181,18 +181,18 @@ class AppTypography {
     height: 1.70,
   );
 
-  /// タグ用スタイル
+  /// タグ用スタイル — 広めのスペーシング
   static const TextStyle tag = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.4,
+    letterSpacing: 0.8,
     height: 1.20,
   );
 
-  /// 統計数値用スタイル
+  /// 統計数値用スタイル — エディトリアルな軽さ
   static const TextStyle statisticsNumber = TextStyle(
     fontSize: 32,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w300,
     letterSpacing: -0.5,
     height: 1.00,
   );

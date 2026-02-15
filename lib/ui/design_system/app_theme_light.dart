@@ -27,8 +27,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       onSecondaryContainer: AppColors.onSecondaryContainer,
       surface: AppColors.surface,
       onSurface: AppColors.onSurface,
-      surfaceContainerHighest: Color(0xFFE0E0E0),
-      surfaceContainerHigh: Color(0xFFBDBDBD),
+      surfaceContainerHighest: Color(0xFFDDD8D2),
+      surfaceContainerHigh: Color(0xFFC4BEB7),
       onSurfaceVariant: AppColors.onSurfaceVariant,
       error: AppColors.error,
       onError: AppColors.onError,
@@ -39,19 +39,23 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       shadow: AppColors.shadow,
     ),
 
-    // App Bar Theme
+    // Scaffold background
+    scaffoldBackgroundColor: AppColors.background,
+
+    // App Bar Theme — surface ベース（べた塗り primary を廃止）
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.onSurface,
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle: AppTypography.withColor(
         AppTypography.appTitle,
-        Colors.white,
+        AppColors.onSurface,
       ),
       systemOverlayStyle: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
       ),
     ),
 
@@ -70,10 +74,10 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
               bodyMedium: AppTypography.bodyMedium,
             ),
 
-    // Card Theme
+    // Card Theme — 控えめなエレベーション
     cardTheme: const CardThemeData(
       color: AppColors.surface,
-      elevation: AppSpacing.elevationSm,
+      elevation: AppSpacing.elevationXs,
       shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
       margin: AppSpacing.cardMargin,
@@ -84,7 +88,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        elevation: AppSpacing.elevationSm,
+        elevation: AppSpacing.elevationXs,
         shadowColor: AppColors.shadow,
         shape: const RoundedRectangleBorder(
           borderRadius: AppSpacing.buttonRadius,
@@ -123,9 +127,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
 
     // Floating Action Button Theme
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.primaryDark,
       foregroundColor: Colors.white,
-      elevation: AppSpacing.elevationMd,
+      elevation: AppSpacing.elevationSm,
       shape: CircleBorder(),
     ),
 
@@ -186,10 +190,10 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       ),
     ),
 
-    // Bottom Navigation Bar Theme
+    // Bottom Navigation Bar Theme — 控えめな選択色
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: AppColors.surface,
-      selectedItemColor: AppColors.primary,
+      selectedItemColor: AppColors.onSurface,
       unselectedItemColor: AppColors.onSurfaceVariant.withValues(
         alpha: LabelConstants.unselectedOpacity,
       ),
@@ -203,7 +207,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
 
     // Tab Bar Theme
     tabBarTheme: const TabBarThemeData(
-      labelColor: AppColors.primary,
+      labelColor: AppColors.onSurface,
       unselectedLabelColor: AppColors.onSurfaceVariant,
       labelStyle: AppTypography.labelLarge,
       unselectedLabelStyle: AppTypography.labelLarge,
@@ -218,7 +222,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     // Dialog Theme
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surface,
-      elevation: AppSpacing.elevationLg,
+      elevation: AppSpacing.elevationMd,
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
       ),

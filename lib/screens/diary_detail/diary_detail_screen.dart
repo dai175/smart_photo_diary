@@ -176,13 +176,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             ? l10n.diaryDetailEditTitle
             : l10n.diaryDetailViewTitle,
       ),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-        color: Theme.of(context).colorScheme.onPrimary,
-      ),
-      iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
-      elevation: 2,
       actions: [
         // 共有ボタン
         if (!_controller.isLoading &&
@@ -200,7 +193,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             },
             icon: Icon(
               Icons.share_rounded,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             tooltip: l10n.commonShare,
           ),
@@ -219,7 +212,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             },
             icon: Icon(
               _controller.isEditing ? Icons.check_rounded : Icons.edit_rounded,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             tooltip: _controller.isEditing ? l10n.commonSave : l10n.commonEdit,
           ),
@@ -234,7 +227,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             },
             icon: Icon(
               Icons.delete_rounded,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             tooltip: l10n.commonDelete,
           ),

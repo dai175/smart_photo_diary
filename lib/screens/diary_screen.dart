@@ -226,33 +226,21 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ? TextField(
               controller: _controller.searchController,
               autofocus: true,
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: context.l10n.diarySearchHint,
                 hintStyle: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onPrimary.withValues(alpha: 0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 border: InputBorder.none,
-                prefixIcon: Icon(
-                  AppIcons.search,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
+                prefixIcon: Icon(AppIcons.search, color: colorScheme.onSurface),
               ),
               onChanged: _controller.performSearch,
             )
           : Text(context.l10n.diaryListTitle),
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-      titleTextStyle: Theme.of(
-        context,
-      ).textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
-      iconTheme: IconThemeData(color: colorScheme.onPrimary),
-      elevation: 2,
       leading: _controller.isSearching
           ? IconButton(
-              icon: Icon(AppIcons.actionBack, color: colorScheme.onPrimary),
+              icon: const Icon(AppIcons.actionBack),
               onPressed: _controller.stopSearch,
             )
           : null,
@@ -260,19 +248,13 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ? [
               if (_controller.searchQuery.isNotEmpty)
                 IconButton(
-                  icon: Icon(
-                    AppIcons.searchClear,
-                    color: colorScheme.onPrimary,
-                  ),
+                  icon: const Icon(AppIcons.searchClear),
                   onPressed: _controller.clearSearch,
                 ),
             ]
           : [
               IconButton(
-                icon: Icon(
-                  AppIcons.search,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
+                icon: const Icon(AppIcons.search),
                 onPressed: _controller.startSearch,
               ),
               Container(
@@ -283,8 +265,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         ? AppIcons.filterActive
                         : AppIcons.filter,
                     color: _controller.currentFilter.isActive
-                        ? Theme.of(context).colorScheme.inversePrimary
-                        : colorScheme.onPrimary,
+                        ? colorScheme.primary
+                        : null,
                   ),
                   onPressed: _showFilterBottomSheet,
                 ),

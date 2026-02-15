@@ -56,12 +56,10 @@ class AppTheme {
   /// グラデーション背景を作成
   static Widget createGradientBackground({
     required Widget child,
-    Gradient? gradient,
+    required Gradient gradient,
   }) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: gradient ?? AppColors.modernHomeGradient,
-      ),
+      decoration: BoxDecoration(gradient: gradient),
       child: child,
     );
   }
