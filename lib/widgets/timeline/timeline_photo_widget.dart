@@ -111,8 +111,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _scrollManager.hasMorePhotos = () => widget.controller.hasMorePhotos;
     _scrollManager.photoCount = () => widget.controller.photoAssets.length;
     _scrollManager.totalItemCount = () => _totalItemCount();
-    _scrollManager.viewportWidth =
-        () => MediaQuery.sizeOf(context).width;
+    _scrollManager.viewportWidth = () => MediaQuery.sizeOf(context).width;
 
     widget.controller.addListener(_onControllerChanged);
     _scrollController.addListener(_scrollManager.onScroll);
@@ -148,8 +147,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _scrollManager.hasMorePhotos = () => widget.controller.hasMorePhotos;
     _scrollManager.photoCount = () => widget.controller.photoAssets.length;
     _scrollManager.totalItemCount = () => _totalItemCount();
-    _scrollManager.viewportWidth =
-        () => MediaQuery.sizeOf(context).width;
+    _scrollManager.viewportWidth = () => MediaQuery.sizeOf(context).width;
   }
 
   /// ビューポート先読みをキャッシュマネージャーに委譲
@@ -467,6 +465,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     if (mainIndex < 0) return;
 
     if (widget.controller.isPhotoUsed(mainIndex)) {
+      widget.onUsedPhotoSelected?.call();
       return;
     }
 
@@ -479,6 +478,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
     if (!widget.controller.canSelectPhoto(mainIndex)) {
       if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection) {
+        widget.onSelectionLimitReached?.call();
         return;
       }
       widget.onDifferentDateSelected?.call();
@@ -556,7 +556,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }) {
     if (isSelected) return false;
     if (selectedDate == null) return false;
-    if (widget.controller.selectedCount >= 3) return true;
+    if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection)
+      return true;
     return !_isSameDateAsPhoto(selectedDate, photo);
   }
 
