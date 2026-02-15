@@ -615,10 +615,6 @@
   "@commonPrivacyPolicy": {
     "description": "プライバシーポリシーリンクのラベル"
   },
-  "commonTermsOfUse": "利用規約",
-  "@commonTermsOfUse": {
-    "description": "利用規約リンクのラベル"
-  },
   "urlLauncherErrorTitle": "リンクエラー",
   "@urlLauncherErrorTitle": {
     "description": "リンク起動エラーダイアログのタイトル"

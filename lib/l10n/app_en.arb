@@ -615,10 +615,6 @@
   "@commonPrivacyPolicy": {
     "description": "Label for privacy policy link"
   },
-  "commonTermsOfUse": "Terms of use",
-  "@commonTermsOfUse": {
-    "description": "Label for terms of use link"
-  },
   "urlLauncherErrorTitle": "Link error",
   "@urlLauncherErrorTitle": {
     "description": "Title for link launch error dialog"
