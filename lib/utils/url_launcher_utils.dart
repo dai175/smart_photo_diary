@@ -37,15 +37,11 @@ class UrlLauncherUtils {
 
   /// プライバシーポリシーを開く
   static Future<void> launchPrivacyPolicy({BuildContext? context}) async {
-    const url =
-        'https://titanium-crane-239.notion.site/Smart-Photo-Diary-2339724fbaba8040b797c52bcc314943';
-    await launchExternalUrl(url, context: context);
-  }
-
-  /// 利用規約を開く
-  static Future<void> launchTermsOfUse({BuildContext? context}) async {
-    const url =
-        'https://titanium-crane-239.notion.site/Smart-Photo-Diary-2399724fbaba80619c7af22bd048a37c';
+    final isJapanese =
+        context != null && Localizations.localeOf(context).languageCode == 'ja';
+    final url = isJapanese
+        ? 'https://focuswave.cc/ja/privacy/'
+        : 'https://focuswave.cc/privacy/';
     await launchExternalUrl(url, context: context);
   }
 

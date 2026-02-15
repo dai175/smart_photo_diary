@@ -99,26 +99,10 @@ class SubscriptionLegalInfo extends StatelessWidget {
   }
 
   Widget _buildLegalLinks(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _LegalLinkButton(
-            text: context.l10n.commonPrivacyPolicy,
-            icon: Icons.privacy_tip_outlined,
-            onPressed: () =>
-                UrlLauncherUtils.launchPrivacyPolicy(context: context),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _LegalLinkButton(
-            text: context.l10n.commonTermsOfUse,
-            icon: Icons.article_outlined,
-            onPressed: () =>
-                UrlLauncherUtils.launchTermsOfUse(context: context),
-          ),
-        ),
-      ],
+    return _LegalLinkButton(
+      text: context.l10n.commonPrivacyPolicy,
+      icon: Icons.privacy_tip_outlined,
+      onPressed: () => UrlLauncherUtils.launchPrivacyPolicy(context: context),
     );
   }
 }
