@@ -72,9 +72,9 @@ class AppSpacing {
 
   // ============= PADDING PRESETS =============
   /// 画面端のパディング — ゆとりのある余白
-  static const EdgeInsets screenPadding = EdgeInsets.all(xl);
+  static const EdgeInsets screenPadding = EdgeInsets.all(lg);
   static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(
-    horizontal: xl,
+    horizontal: lg,
   );
   static const EdgeInsets screenPaddingVertical = EdgeInsets.symmetric(
     vertical: xl,
