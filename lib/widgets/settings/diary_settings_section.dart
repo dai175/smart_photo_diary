@@ -32,7 +32,7 @@ class DiarySettingsSection extends StatelessWidget {
     );
 
     return SettingsRow(
-      icon: Icons.text_fields_rounded,
+      icon: Icons.short_text_rounded,
 
       title: context.l10n.settingsDiaryLengthTitle,
       subtitle: currentLabel,
