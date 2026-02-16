@@ -35,7 +35,7 @@ class CustomCard extends StatefulWidget {
   /// カード外のマージン
   final EdgeInsetsGeometry? margin;
 
-  /// 背景色（グラデーションが設定されている場合は無視）
+  /// 背景色
   final Color? backgroundColor;
 
   /// 角丸の半径

@@ -26,15 +26,15 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       secondaryContainer: AppColors.secondaryDark,
       onSecondaryContainer: AppColors.secondaryLight,
       surface: AppColors.surfaceDark,
-      surfaceContainerHighest: Color(0xFF2E2A27),
-      surfaceContainerHigh: Color(0xFF3A3633),
+      surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
+      surfaceContainerHigh: AppColors.surfaceContainerHighDark,
       onSurface: AppColors.onSurfaceDark,
       error: AppColors.error,
       onError: AppColors.onError,
       errorContainer: AppColors.errorContainer,
       onErrorContainer: AppColors.onErrorContainer,
-      outline: Color(0xFF3D3833),
-      outlineVariant: Color(0xFF2E2A27),
+      outline: AppColors.outlineDark,
+      outlineVariant: AppColors.surfaceContainerHighestDark,
       shadow: AppColors.shadow,
     ),
 
@@ -100,7 +100,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadius,
-        side: BorderSide(color: Color(0xFF3D3833), width: 0.5),
+        side: BorderSide(color: AppColors.outlineDark, width: 0.5),
       ),
       margin: AppSpacing.cardMargin,
     ),
@@ -158,14 +158,14 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     // Input Decoration Theme (Dark) — 温かみのあるサーフェス
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF2A2623),
+      fillColor: AppColors.surfaceContainerDark,
       border: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: BorderSide(color: Color(0xFF3D3833)),
+        borderSide: BorderSide(color: AppColors.outlineDark),
       ),
       enabledBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: BorderSide(color: Color(0xFF3D3833)),
+        borderSide: BorderSide(color: AppColors.outlineDark),
       ),
       focusedBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
@@ -205,7 +205,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
 
     // Chip Theme (Dark) — 温かみのあるサーフェス
     chipTheme: ChipThemeData(
-      backgroundColor: const Color(0xFF2A2623),
+      backgroundColor: AppColors.surfaceContainerDark,
       labelStyle: AppTypography.withColor(
         AppTypography.tag,
         AppColors.onSurfaceDark,
@@ -248,7 +248,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
 
     // Dialog Theme (Dark)
     dialogTheme: DialogThemeData(
-      backgroundColor: const Color(0xFF2A2623),
+      backgroundColor: AppColors.surfaceContainerDark,
       elevation: AppSpacing.elevationMd,
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
