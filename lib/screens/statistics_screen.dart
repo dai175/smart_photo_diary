@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/statistics_controller.dart';
 import 'diary_detail_screen.dart';
-import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
@@ -91,7 +90,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 )
               : MicroInteractions.pullToRefresh(
                   onRefresh: _controller.loadStatistics,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: AppSpacing.screenPadding,

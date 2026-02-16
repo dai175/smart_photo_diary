@@ -241,20 +241,17 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
 
         final thumbnailData = thumbnailSnapshot.data!.value;
         final dpr = MediaQuery.of(context).devicePixelRatio;
-        return Container(
-          decoration: const BoxDecoration(borderRadius: AppSpacing.photoRadius),
-          child: ClipRRect(
-            borderRadius: AppSpacing.photoRadius,
-            child: Image.memory(
-              thumbnailData,
-              height: AppConstants.diaryThumbnailSize,
-              width: AppConstants.diaryThumbnailSize,
-              fit: BoxFit.cover,
-              cacheWidth: (AppConstants.diaryThumbnailSize * dpr).round(),
-              cacheHeight: (AppConstants.diaryThumbnailSize * dpr).round(),
-              gaplessPlayback: true,
-              filterQuality: FilterQuality.low,
-            ),
+        return ClipRRect(
+          borderRadius: AppSpacing.photoRadius,
+          child: Image.memory(
+            thumbnailData,
+            height: AppConstants.diaryThumbnailSize,
+            width: AppConstants.diaryThumbnailSize,
+            fit: BoxFit.cover,
+            cacheWidth: (AppConstants.diaryThumbnailSize * dpr).round(),
+            cacheHeight: (AppConstants.diaryThumbnailSize * dpr).round(),
+            gaplessPlayback: true,
+            filterQuality: FilterQuality.low,
           ),
         );
       },

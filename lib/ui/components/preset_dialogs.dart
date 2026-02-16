@@ -285,9 +285,11 @@ class PresetDialogs {
                           child: Container(
                             height: 8,
                             decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: usagePercentage >= 0.8
+                                  ? Theme.of(context).colorScheme.error
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
