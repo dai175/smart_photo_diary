@@ -90,7 +90,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       children: [
         Expanded(
           child: Padding(
-            padding: AppSpacing.screenPadding,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: FadeInWidget(
               delay: const Duration(milliseconds: 100),
               child: _buildTimelineSection(context),
