@@ -213,6 +213,7 @@ class PresetDialogs {
   static CustomDialog usageStatus({
     required BuildContext context,
     required String planName,
+    required String planId,
     required int used,
     required int limit,
     required int remaining,
@@ -348,7 +349,7 @@ class PresetDialogs {
                 ),
               ),
             ),
-            if (planName == SubscriptionConstants.basicDisplayName) ...[
+            if (planId == SubscriptionConstants.basicPlanId) ...[
               const SizedBox(height: AppSpacing.md),
               Text(
                 l10n.usageStatusPremiumUpsell(
@@ -366,8 +367,7 @@ class PresetDialogs {
       ),
       actions: [
         CustomDialogAction(text: l10n.commonClose, onPressed: onDismiss),
-        if (planName == SubscriptionConstants.basicDisplayName &&
-            onUpgrade != null)
+        if (planId == SubscriptionConstants.basicPlanId && onUpgrade != null)
           CustomDialogAction(
             text: l10n.commonUpgrade,
             isPrimary: true,

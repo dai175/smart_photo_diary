@@ -41,9 +41,15 @@ class AppColors {
   static const Color surfaceDark = Color(0xFF221F1D);
   static const Color surfaceVariant = Color(0xFFF0EDE8);
 
+  /// ダークモード用サーフェスコンテナ
+  static const Color surfaceContainerHighestDark = Color(0xFF2E2A27);
+  static const Color surfaceContainerHighDark = Color(0xFF3A3633);
+  static const Color surfaceContainerDark = Color(0xFF2A2623);
+
   /// アウトライン — 温かみのあるグレー
   static const Color outline = Color(0xFFDDD8D2);
   static const Color outlineVariant = Color(0xFFEDE9E4);
+  static const Color outlineDark = Color(0xFF3D3833);
 
   // ============= TEXT COLORS =============
   /// 温かみのあるダークトーン（純黒を避ける）

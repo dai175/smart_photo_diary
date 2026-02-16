@@ -195,6 +195,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           builder: (context) => PresetDialogs.usageStatus(
             context: context,
             planName: _getLocalizedPlanName(context, plan.id),
+            planId: plan.id,
             used: used.clamp(0, limit),
             limit: limit,
             remaining: remaining.clamp(0, limit),
