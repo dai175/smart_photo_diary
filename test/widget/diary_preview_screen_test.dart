@@ -135,7 +135,8 @@ void main() {
         await pumpFrames(tester);
 
         // AppBar now uses theme default (no explicit backgroundColor)
-        expect(find.byType(AppBar), findsOneWidget);
+        final appBar = tester.widget<AppBar>(find.byType(AppBar));
+        expect(appBar.backgroundColor, isNull);
       });
     });
 

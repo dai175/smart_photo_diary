@@ -12,7 +12,7 @@ import '../../utils/upgrade_dialog_utils.dart';
 /// Subscription-related settings section.
 ///
 /// Displays current plan status, usage statistics, warnings,
-/// upgrade button, and legal information.
+/// and upgrade button.
 class SubscriptionSettingsSection extends StatefulWidget {
   final SubscriptionInfoV2? subscriptionInfo;
   final VoidCallback onStateChanged;

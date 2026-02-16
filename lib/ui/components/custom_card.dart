@@ -93,8 +93,8 @@ class _CustomCardState extends State<CustomCard>
 
     _elevationAnimation =
         Tween<double>(
-          begin: widget.elevation ?? AppSpacing.elevationSm,
-          end: (widget.elevation ?? AppSpacing.elevationSm) + 2,
+          begin: widget.elevation ?? AppSpacing.elevationXs,
+          end: (widget.elevation ?? AppSpacing.elevationXs) + 2,
         ).animate(
           CurvedAnimation(
             parent: _animationController,
@@ -294,33 +294,6 @@ class ElevatedCard extends StatelessWidget {
       backgroundColor: backgroundColor,
       elevation: AppSpacing.elevationLg,
       enableHoverEffect: true,
-      child: child,
-    );
-  }
-}
-
-/// グラデーション付きカード
-class GradientCard extends StatelessWidget {
-  const GradientCard({
-    super.key,
-    required this.child,
-    this.onTap,
-    this.gradient,
-  });
-
-  final Widget child;
-  final VoidCallback? onTap;
-  final Gradient? gradient;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomCard(
-      onTap: onTap,
-      gradient: gradient,
-      elevation: AppSpacing.elevationMd,
-      shadowColor: AppColors.primary.withValues(
-        alpha: AppConstants.opacityXLow,
-      ),
       child: child,
     );
   }
