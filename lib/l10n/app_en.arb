@@ -478,6 +478,10 @@
   "@settingsLicenseSubtitle": {
     "description": "Subtitle for the licenses section"
   },
+  "settingsPrivacyPolicySubtitle": "How your data is handled",
+  "@settingsPrivacyPolicySubtitle": {
+    "description": "Subtitle for the privacy policy row in settings"
+  },
   "settingsBackupInProgress": "Backing up...",
   "@settingsBackupInProgress": {
     "description": "Message shown while backup is running"

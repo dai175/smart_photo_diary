@@ -478,6 +478,10 @@
   "@settingsLicenseSubtitle": {
     "description": "オープンソースライセンスセクションの補足"
   },
+  "settingsPrivacyPolicySubtitle": "データの取り扱いについて",
+  "@settingsPrivacyPolicySubtitle": {
+    "description": "設定画面のプライバシーポリシー行の補足"
+  },
   "settingsBackupInProgress": "バックアップ中...",
   "@settingsBackupInProgress": {
     "description": "バックアップ実行中に表示するメッセージ"
