@@ -175,12 +175,12 @@ class AppearanceSettingsSection extends StatelessWidget {
     return [
       LocaleChoice(locale: null, title: context.l10n.settingsLanguageSystem),
       LocaleChoice(
-        locale: const Locale('ja', 'JP'),
-        title: context.l10n.settingsLanguageJapanese,
-      ),
-      LocaleChoice(
         locale: const Locale('en', 'US'),
         title: context.l10n.settingsLanguageEnglish,
+      ),
+      LocaleChoice(
+        locale: const Locale('ja', 'JP'),
+        title: context.l10n.settingsLanguageJapanese,
       ),
     ];
   }
