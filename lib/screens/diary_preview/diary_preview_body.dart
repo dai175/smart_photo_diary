@@ -113,7 +113,7 @@ class DiaryPreviewBody extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
                 shape: BoxShape.circle,
               ),
               child: Icon(

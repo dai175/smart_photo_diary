@@ -145,7 +145,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // 日付テキストが表示される（バッジからプレーンテキストに変更）
-        expect(find.byType(Text), findsWidgets);
+        expect(find.textContaining('6/15'), findsOneWidget);
       });
     });
 
