@@ -95,7 +95,7 @@ class StorageSettingsSection extends StatelessWidget {
 
     return SettingsRow(
       icon: AppIcons.settingsStorage,
-      iconColor: AppColors.info,
+
       title: context.l10n.settingsStorageAppDataTitle,
       subtitle: context.l10n.settingsStorageUsageValue(
         storageInfo!.formattedTotalSize,
@@ -106,7 +106,7 @@ class StorageSettingsSection extends StatelessWidget {
   Widget _buildBackupAction(BuildContext context) {
     return SettingsRow(
       icon: AppIcons.settingsExport,
-      iconColor: AppColors.success,
+
       title: context.l10n.settingsBackupTitle,
       subtitle: context.l10n.settingsBackupSubtitle,
       onTap: () => _exportData(context),
@@ -116,7 +116,7 @@ class StorageSettingsSection extends StatelessWidget {
   Widget _buildRestoreAction(BuildContext context) {
     return SettingsRow(
       icon: AppIcons.settingsImport,
-      iconColor: AppColors.primary,
+
       title: context.l10n.settingsRestoreTitle,
       subtitle: context.l10n.settingsRestoreSubtitle,
       onTap: () => _restoreData(context),
@@ -126,7 +126,7 @@ class StorageSettingsSection extends StatelessWidget {
   Widget _buildOptimizeAction(BuildContext context) {
     return SettingsRow(
       icon: AppIcons.settingsCleanup,
-      iconColor: AppColors.error,
+
       title: context.l10n.settingsCleanupTitle,
       subtitle: context.l10n.settingsCleanupSubtitle,
       onTap: () => _optimizeDatabase(context),

@@ -82,19 +82,10 @@ class _SubscriptionSettingsSectionState
       padding: AppSpacing.cardPadding,
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
-            child: Icon(
-              Icons.card_membership_rounded,
-              color: Theme.of(context).colorScheme.primary,
-              size: AppSpacing.iconSm,
-            ),
+          Icon(
+            Icons.card_membership_rounded,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: AppSpacing.iconMd,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -136,21 +127,12 @@ class _SubscriptionSettingsSectionState
         padding: AppSpacing.cardPadding,
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: info.isPremium
-                    ? AppColors.success.withValues(alpha: 0.2)
-                    : AppColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                info.isPremium
-                    ? Icons.star_rounded
-                    : Icons.card_membership_rounded,
-                color: info.isPremium ? AppColors.success : AppColors.primary,
-                size: AppSpacing.iconSm,
-              ),
+            Icon(
+              info.isPremium
+                  ? Icons.star_rounded
+                  : Icons.card_membership_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconMd,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -213,28 +195,22 @@ class _SubscriptionSettingsSectionState
           _buildSubscriptionItem(
             context.l10n.settingsSubscriptionUsageLabel,
             displayData.usageText,
-            displayData.isNearLimit ? AppColors.warning : AppColors.primary,
           ),
           const SizedBox(height: AppSpacing.md),
           _buildSubscriptionItem(
             context.l10n.settingsSubscriptionRemainingLabel,
             displayData.remainingText,
-            info.usageStats.remainingCount > 0
-                ? AppColors.success
-                : AppColors.error,
           ),
           const SizedBox(height: AppSpacing.md),
           _buildSubscriptionItem(
             context.l10n.settingsSubscriptionResetLabel,
             displayData.resetDateText,
-            AppColors.info,
           ),
           if (displayData.expiryText != null) ...[
             const SizedBox(height: AppSpacing.md),
             _buildSubscriptionItem(
               context.l10n.settingsSubscriptionExpiryLabel,
               displayData.expiryText!,
-              displayData.isExpiryNear ? AppColors.warning : AppColors.success,
             ),
           ],
           if (displayData.warningMessage != null) ...[
@@ -256,22 +232,15 @@ class _SubscriptionSettingsSectionState
     );
   }
 
-  Widget _buildSubscriptionItem(String label, String value, Color color) {
+  Widget _buildSubscriptionItem(String label, String value) {
     return Row(
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: 6,
+          height: 6,
           decoration: BoxDecoration(
-            color: color,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 4,
-                spreadRadius: 1,
-              ),
-            ],
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -286,7 +255,7 @@ class _SubscriptionSettingsSectionState
         Text(
           value,
           style: AppTypography.labelLarge.copyWith(
-            color: color,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),

@@ -7,7 +7,6 @@ import '../../ui/design_system/app_typography.dart';
 /// Reusable settings row widget used across all settings sections.
 class SettingsRow extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
@@ -17,7 +16,6 @@ class SettingsRow extends StatelessWidget {
   const SettingsRow({
     super.key,
     required this.icon,
-    required this.iconColor,
     required this.title,
     required this.subtitle,
     this.onTap,
@@ -31,13 +29,10 @@ class SettingsRow extends StatelessWidget {
       padding: AppSpacing.cardPadding,
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
-            child: Icon(icon, color: iconColor, size: AppSpacing.iconSm),
+          Icon(
+            icon,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: AppSpacing.iconMd,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

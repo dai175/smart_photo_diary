@@ -67,7 +67,7 @@ class AppearanceSettingsSection extends StatelessWidget {
   Widget _buildThemeSelector(BuildContext context) {
     return SettingsRow(
       icon: AppIcons.settingsTheme,
-      iconColor: AppColors.warning,
+
       title: context.l10n.settingsThemeSectionTitle,
       subtitle: _getThemeModeLabel(context, settingsService.themeMode),
       onTap: () => _showThemeDialog(context),
@@ -87,7 +87,7 @@ class AppearanceSettingsSection extends StatelessWidget {
 
     return SettingsRow(
       icon: AppIcons.settingsLanguage,
-      iconColor: AppColors.info,
+
       title: context.l10n.settingsLanguageSectionTitle,
       subtitle: currentChoice.title,
       onTap: () => _showLanguageDialog(context),
