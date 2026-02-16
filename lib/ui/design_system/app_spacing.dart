@@ -81,8 +81,8 @@ class AppSpacing {
   );
 
   /// カードのパディング
-  static const EdgeInsets cardPadding = EdgeInsets.all(lg);
-  static const EdgeInsets cardPaddingSmall = EdgeInsets.all(md);
+  static const EdgeInsets cardPadding = EdgeInsets.all(md);
+  static const EdgeInsets cardPaddingSmall = EdgeInsets.all(sm);
   static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xl);
 
   /// ボタンのパディング
