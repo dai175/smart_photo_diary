@@ -136,6 +136,8 @@ class UpgradeDialogUtils {
                   priceStrings[plan.id],
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+              _buildAutoRenewNotice(dialogContext),
             ],
           ),
         ),
@@ -229,6 +231,47 @@ class UpgradeDialogUtils {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// 自動更新に関する注意事項（Apple ガイドライン 3.1.2 準拠）
+  static Widget _buildAutoRenewNotice(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.xs),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: AppSpacing.iconXs,
+                color: AppColors.info,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                context.l10n.settingsSubscriptionAutoRenewTitle,
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.info,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            context.l10n.settingsSubscriptionAutoRenewDescription,
+            style: AppTypography.bodySmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }

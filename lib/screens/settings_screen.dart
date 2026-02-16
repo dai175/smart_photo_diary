@@ -15,6 +15,7 @@ import '../widgets/settings/diary_settings_section.dart';
 import '../widgets/settings/settings_row.dart';
 import '../widgets/settings/storage_settings_section.dart';
 import '../widgets/settings/subscription_settings_section.dart';
+import '../utils/url_launcher_utils.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -188,6 +189,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 delay: const Duration(milliseconds: 225),
                 child: _buildLicenseInfo(),
               ),
+              SlideInWidget(
+                delay: const Duration(milliseconds: 250),
+                child: _buildPrivacyPolicyInfo(),
+              ),
             ],
           ),
         ),
@@ -262,6 +267,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       subtitle: _controller.packageInfo != null
           ? '${_controller.packageInfo!.version} (${_controller.packageInfo!.buildNumber})'
           : context.l10n.commonLoading,
+    );
+  }
+
+  Widget _buildPrivacyPolicyInfo() {
+    return SettingsRow(
+      icon: Icons.privacy_tip_outlined,
+      title: context.l10n.commonPrivacyPolicy,
+      subtitle: context.l10n.settingsPrivacyPolicySubtitle,
+      onTap: () => UrlLauncherUtils.launchPrivacyPolicy(context: context),
     );
   }
 

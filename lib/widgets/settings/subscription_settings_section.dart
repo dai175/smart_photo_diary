@@ -8,7 +8,6 @@ import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../utils/upgrade_dialog_utils.dart';
-import 'subscription_legal_info.dart';
 
 /// Subscription-related settings section.
 ///
@@ -225,8 +224,6 @@ class _SubscriptionSettingsSectionState
             const SizedBox(height: AppSpacing.lg),
             _buildUpgradeButton(),
           ],
-          const SizedBox(height: AppSpacing.lg),
-          const SubscriptionLegalInfo(),
         ],
       ),
     );
