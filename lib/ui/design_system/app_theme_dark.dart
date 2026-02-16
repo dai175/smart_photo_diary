@@ -39,11 +39,11 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     ),
 
     // Scaffold background
-    scaffoldBackgroundColor: AppColors.backgroundDark,
+    scaffoldBackgroundColor: AppColors.surfaceDark,
 
     // App Bar Theme — 背景と一体化
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.surfaceDark,
       foregroundColor: AppColors.onSurfaceDark,
       elevation: 0,
       scrolledUnderElevation: 0,
