@@ -42,8 +42,8 @@ class AppColors {
   static const Color surfaceVariant = Color(0xFFF0EDE8);
 
   /// ダークモード用サーフェスコンテナ
-  static const Color surfaceContainerHighestDark = Color(0xFF2E2A27);
-  static const Color surfaceContainerHighDark = Color(0xFF3A3633);
+  static const Color surfaceContainerHighestDark = Color(0xFF3A3633);
+  static const Color surfaceContainerHighDark = Color(0xFF2E2A27);
   static const Color surfaceContainerDark = Color(0xFF2A2623);
 
   /// アウトライン — 温かみのあるグレー

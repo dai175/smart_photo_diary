@@ -9,6 +9,7 @@ import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
+import '../constants/subscription_constants.dart';
 import '../controllers/scroll_signal.dart';
 
 /// ホーム画面のメインコンテンツウィジェット
@@ -133,15 +134,15 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   /// プランIDに基づいて多言語化されたプラン名を取得
   String _getLocalizedPlanName(BuildContext context, String planId) {
     switch (planId) {
-      case 'basic':
+      case SubscriptionConstants.basicPlanId:
         return context
             .l10n
             .onboardingPlanBasicSubtitle; // "Free plan" / "無料プラン"
-      case 'premium_monthly':
+      case SubscriptionConstants.premiumMonthlyPlanId:
         return context
             .l10n
             .settingsPremiumMonthlyTitle; // "Premium (monthly)" / "プレミアム（月額）"
-      case 'premium_yearly':
+      case SubscriptionConstants.premiumYearlyPlanId:
         return context
             .l10n
             .settingsPremiumYearlyTitle; // "Premium (yearly)" / "プレミアム（年額）"
