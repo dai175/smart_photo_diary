@@ -103,9 +103,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Container(
                     padding: AppSpacing.cardPadding,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryContainer.withValues(
-                        alpha: AppConstants.opacityXLow,
-                      ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: AppConstants.opacityXLow),
                       shape: BoxShape.circle,
                     ),
                     child: const CircularProgressIndicator(strokeWidth: 3),

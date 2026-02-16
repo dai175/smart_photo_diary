@@ -57,9 +57,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           Container(
                             padding: AppSpacing.cardPadding,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryContainer.withValues(
-                                alpha: 0.3,
-                              ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.3),
                               shape: BoxShape.circle,
                             ),
                             child: const CircularProgressIndicator(
