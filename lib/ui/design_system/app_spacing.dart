@@ -80,10 +80,10 @@ class AppSpacing {
     vertical: xl,
   );
 
-  /// カードのパディング — ゆとりのある内部余白
-  static const EdgeInsets cardPadding = EdgeInsets.all(xl);
-  static const EdgeInsets cardPaddingSmall = EdgeInsets.all(lg);
-  static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xxl);
+  /// カードのパディング
+  static const EdgeInsets cardPadding = EdgeInsets.all(lg);
+  static const EdgeInsets cardPaddingSmall = EdgeInsets.all(md);
+  static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xl);
 
   /// ボタンのパディング
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
