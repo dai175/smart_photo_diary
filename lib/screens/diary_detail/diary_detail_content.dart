@@ -90,7 +90,7 @@ class DiaryDetailContent extends StatelessWidget {
         width: double.infinity,
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: AppSpacing.cardRadius,
           boxShadow: AppSpacing.cardShadow,
         ),
@@ -99,12 +99,12 @@ class DiaryDetailContent extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.calendar_today_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconMd,
               ),
             ),
@@ -117,14 +117,14 @@ class DiaryDetailContent extends StatelessWidget {
                     l10n.diaryDetailDateLabel,
                     style: AppTypography.withColor(
                       AppTypography.labelMedium,
-                      Theme.of(context).colorScheme.onPrimaryContainer,
+                      Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Text(
                     context.l10n.formatFullDate(diaryEntry.date),
                     style: AppTypography.withColor(
                       AppTypography.titleLarge,
-                      Theme.of(context).colorScheme.onPrimaryContainer,
+                      Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ],
@@ -137,7 +137,7 @@ class DiaryDetailContent extends StatelessWidget {
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.outline,
                   borderRadius: AppSpacing.chipRadius,
                 ),
                 child: Row(
@@ -145,14 +145,14 @@ class DiaryDetailContent extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.tag_rounded,
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: AppSpacing.iconXs,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       l10n.diaryDetailTagCount(diaryEntry.effectiveTags.length),
                       style: AppTypography.labelSmall.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],

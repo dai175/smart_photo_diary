@@ -222,12 +222,11 @@ class PresetDialogs {
   }) {
     final l10n = context.l10n;
     final usagePercentage = limit == 0 ? 0.0 : used / limit;
-    final isNearLimit = usagePercentage >= 0.8;
     final resetDateText = l10n.formatMonthDayLong(nextResetDate);
 
     return CustomDialog(
       icon: Icons.analytics_rounded,
-      iconColor: isNearLimit ? AppColors.warning : AppColors.info,
+      iconColor: null,
       title: l10n.usageStatusDialogTitle,
       content: SingleChildScrollView(
         child: Column(
@@ -286,9 +285,9 @@ class PresetDialogs {
                           child: Container(
                             height: 8,
                             decoration: BoxDecoration(
-                              color: isNearLimit
-                                  ? AppColors.warning
-                                  : AppColors.primary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -309,9 +308,7 @@ class PresetDialogs {
                           l10n.usageStatusRemainingValue(remaining),
                           style: AppTypography.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: remaining > 0
-                                ? AppColors.success
-                                : AppColors.error,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -327,7 +324,7 @@ class PresetDialogs {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(AppSpacing.xs),
                 ),
                 child: Row(
@@ -336,13 +333,13 @@ class PresetDialogs {
                     Icon(
                       Icons.refresh_rounded,
                       size: AppSpacing.iconSm,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       l10n.usageStatusResetInfo(resetDateText),
                       style: AppTypography.labelSmall.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -356,7 +353,7 @@ class PresetDialogs {
                   SubscriptionConstants.premiumMonthlyAiLimit,
                 ),
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.left,

@@ -128,13 +128,13 @@ class RecentDiariesWidget extends StatelessWidget {
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: AppSpacing.chipRadius,
       ),
       child: Text(
         context.l10n.formatMonthDay(date),
         style: AppTypography.labelSmall.copyWith(
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );

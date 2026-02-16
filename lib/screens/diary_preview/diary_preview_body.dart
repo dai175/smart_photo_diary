@@ -104,7 +104,7 @@ class DiaryPreviewBody extends StatelessWidget {
       child: Container(
         padding: AppSpacing.cardPadding,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: AppSpacing.cardRadius,
           boxShadow: AppSpacing.cardShadow,
         ),
@@ -113,12 +113,12 @@ class DiaryPreviewBody extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.calendar_today_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: AppSpacing.iconMd,
               ),
             ),
@@ -130,14 +130,14 @@ class DiaryPreviewBody extends StatelessWidget {
                   context.l10n.diaryPreviewDateLabel,
                   style: AppTypography.withColor(
                     AppTypography.labelMedium,
-                    Theme.of(context).colorScheme.onPrimaryContainer,
+                    Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   context.l10n.formatFullDate(photoDateTime),
                   style: AppTypography.withColor(
                     AppTypography.titleLarge,
-                    Theme.of(context).colorScheme.onPrimaryContainer,
+                    Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -160,7 +160,7 @@ class DiaryPreviewBody extends StatelessWidget {
               children: [
                 Icon(
                   Icons.photo_library_rounded,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   size: AppSpacing.iconMd,
                 ),
                 const SizedBox(width: AppSpacing.sm),
