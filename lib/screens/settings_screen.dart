@@ -187,11 +187,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               SlideInWidget(
                 delay: const Duration(milliseconds: 225),
-                child: _buildLicenseInfo(),
+                child: _buildPrivacyPolicyInfo(),
               ),
               SlideInWidget(
                 delay: const Duration(milliseconds: 250),
-                child: _buildPrivacyPolicyInfo(),
+                child: _buildLicenseInfo(),
               ),
             ],
           ),
