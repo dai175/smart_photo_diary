@@ -276,7 +276,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
                 l10n.diaryCardGeneratingTags,
                 style: AppTypography.withColor(
                   AppTypography.labelSmall,
-                  AppColors.onSurfaceVariant,
+                  Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

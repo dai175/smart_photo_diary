@@ -348,7 +348,7 @@ class PresetDialogs {
                 ),
               ),
             ),
-            if (planName == 'Basic') ...[
+            if (planName == SubscriptionConstants.basicDisplayName) ...[
               const SizedBox(height: AppSpacing.md),
               Text(
                 l10n.usageStatusPremiumUpsell(
@@ -366,7 +366,8 @@ class PresetDialogs {
       ),
       actions: [
         CustomDialogAction(text: l10n.commonClose, onPressed: onDismiss),
-        if (planName == 'Basic' && onUpgrade != null)
+        if (planName == SubscriptionConstants.basicDisplayName &&
+            onUpgrade != null)
           CustomDialogAction(
             text: l10n.commonUpgrade,
             isPrimary: true,
