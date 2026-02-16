@@ -18,7 +18,6 @@ class CustomCard extends StatefulWidget {
     this.shadowColor,
     this.enableHoverEffect = true,
     this.enableTapAnimation = true,
-    this.gradient,
     this.border,
     this.width,
     this.height,
@@ -54,9 +53,6 @@ class CustomCard extends StatefulWidget {
   /// タップアニメーションを有効にするか
   final bool enableTapAnimation;
 
-  /// グラデーション背景
-  final Gradient? gradient;
-
   /// ボーダー
   final Border? border;
 
@@ -77,7 +73,6 @@ class _CustomCardState extends State<CustomCard>
   late Animation<double> _elevationAnimation;
 
   bool _isHovered = false;
-  // bool _isPressed = false; // 将来的に使用予定
 
   @override
   void initState() {
@@ -111,14 +106,12 @@ class _CustomCardState extends State<CustomCard>
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.enableTapAnimation) {
-      // setState(() => _isPressed = true);
       _animationController.forward();
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.enableTapAnimation) {
-      // setState(() => _isPressed = false);
       _animationController.reverse();
     }
     widget.onTap?.call();
@@ -126,7 +119,6 @@ class _CustomCardState extends State<CustomCard>
 
   void _handleTapCancel() {
     if (widget.enableTapAnimation) {
-      // setState(() => _isPressed = false);
       _animationController.reverse();
     }
   }
@@ -172,8 +164,7 @@ class _CustomCardState extends State<CustomCard>
                   duration: AppConstants.quickAnimationDuration,
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
-                    color: widget.gradient == null ? backgroundColor : null,
-                    gradient: widget.gradient,
+                    color: backgroundColor,
                     borderRadius: borderRadius,
                     border:
                         widget.border ??
@@ -252,20 +243,17 @@ class LargeCard extends StatelessWidget {
     required this.child,
     this.onTap,
     this.backgroundColor,
-    this.gradient,
   });
 
   final Widget child;
   final VoidCallback? onTap;
   final Color? backgroundColor;
-  final Gradient? gradient;
 
   @override
   Widget build(BuildContext context) {
     return CustomCard(
       onTap: onTap,
       backgroundColor: backgroundColor,
-      gradient: gradient,
       padding: AppSpacing.cardPaddingLarge,
       elevation: AppSpacing.elevationMd,
       borderRadius: AppSpacing.cardRadiusLarge,
