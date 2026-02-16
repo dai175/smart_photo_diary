@@ -257,7 +257,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildVersionInfo() {
     return SettingsRow(
       icon: AppIcons.settingsInfo,
-      iconColor: AppColors.primary,
       title: context.l10n.settingsVersionTitle,
       subtitle: _controller.packageInfo != null
           ? '${_controller.packageInfo!.version} (${_controller.packageInfo!.buildNumber})'
@@ -268,7 +267,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildLicenseInfo() {
     return SettingsRow(
       icon: Icons.article_outlined,
-      iconColor: Theme.of(context).colorScheme.secondary,
       title: context.l10n.settingsLicenseTitle,
       subtitle: context.l10n.settingsLicenseSubtitle,
       onTap: () => showLicensePage(

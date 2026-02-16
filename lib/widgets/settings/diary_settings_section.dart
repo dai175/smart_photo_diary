@@ -3,7 +3,7 @@ import '../../localization/localization_extensions.dart';
 import '../../models/diary_length.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/interfaces/settings_service_interface.dart';
-import '../../ui/design_system/app_colors.dart';
+
 import '../../utils/dialog_utils.dart';
 import 'settings_row.dart';
 
@@ -33,7 +33,7 @@ class DiarySettingsSection extends StatelessWidget {
 
     return SettingsRow(
       icon: Icons.text_fields_rounded,
-      iconColor: AppColors.primary,
+
       title: context.l10n.settingsDiaryLengthTitle,
       subtitle: currentLabel,
       onTap: () => _showDiaryLengthDialog(context),

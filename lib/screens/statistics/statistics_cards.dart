@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_icons.dart';
 import '../../localization/localization_extensions.dart';
 import '../../ui/components/custom_card.dart';
-import '../../ui/design_system/app_colors.dart';
+
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -40,7 +40,6 @@ class StatisticsCards extends StatelessWidget {
                   '$totalEntries',
                   l10n.statisticsUnitDiary,
                   AppIcons.statisticsTotal,
-                  AppColors.primary,
                 ),
               ),
             ),
@@ -54,7 +53,6 @@ class StatisticsCards extends StatelessWidget {
                   '$currentStreak',
                   l10n.statisticsUnitDay,
                   AppIcons.statisticsStreak,
-                  AppColors.error,
                 ),
               ),
             ),
@@ -72,7 +70,6 @@ class StatisticsCards extends StatelessWidget {
                   '$longestStreak',
                   l10n.statisticsUnitDay,
                   AppIcons.statisticsRecord,
-                  AppColors.warning,
                 ),
               ),
             ),
@@ -86,7 +83,6 @@ class StatisticsCards extends StatelessWidget {
                   '$monthlyCount',
                   l10n.statisticsUnitDiary,
                   AppIcons.statisticsMonth,
-                  AppColors.success,
                 ),
               ),
             ),
@@ -102,7 +98,6 @@ class StatisticsCards extends StatelessWidget {
     String value,
     String unit,
     IconData icon,
-    Color color,
   ) {
     return CustomCard(
       elevation: AppSpacing.elevationXs,
@@ -111,10 +106,14 @@ class StatisticsCards extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
-            child: Icon(icon, color: color, size: AppSpacing.iconSm),
+            child: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppSpacing.iconSm,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -139,7 +138,7 @@ class StatisticsCards extends StatelessWidget {
                       child: Text(
                         value,
                         style: AppTypography.headlineSmall.copyWith(
-                          color: color,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
