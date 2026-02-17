@@ -227,7 +227,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             },
             icon: Icon(
               Icons.delete_rounded,
-              color: Theme.of(context).colorScheme.error,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             tooltip: l10n.commonDelete,
           ),
