@@ -58,6 +58,7 @@ class AppColors {
   static const Color onSurface = Color(0xFF2C2825);
   static const Color onSurfaceDark = Color(0xFFE8E2DC);
   static const Color onSurfaceVariant = Color(0xFF6B6560);
+  static const Color onSurfaceVariantDark = Color(0xFF9E9891);
 
   // ============= STATE COLORS =============
   /// エラー色 — 落ち着いたレッド
