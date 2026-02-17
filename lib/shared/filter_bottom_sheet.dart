@@ -319,11 +319,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Navigator.pop(context);
               },
               width: double.infinity,
-              text: _currentFilter.isActive
-                  ? context.l10n.filterApplyWithCount(
-                      _currentFilter.activeFilterCount,
-                    )
-                  : context.l10n.filterApply,
+              text: context.l10n.filterApply,
             ),
           ),
         ],
