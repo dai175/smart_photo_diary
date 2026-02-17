@@ -90,16 +90,6 @@
   "@filterApply": {
     "description": "Apply filter button text"
   },
-  "filterApplyWithCount": "Apply Filter ({count})",
-  "@filterApplyWithCount": {
-    "description": "Apply filter button text with active filter count",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "description": "Number of active filters"
-      }
-    }
-  },
   "filterTimeSlotMorning": "Morning",
   "@filterTimeSlotMorning": {
     "description": "Time of day filter: Morning"
