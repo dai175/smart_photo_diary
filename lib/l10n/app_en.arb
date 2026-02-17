@@ -494,11 +494,7 @@
   "@settingsBackupSuccessMessage": {
     "description": "Message shown when backup completed successfully"
   },
-  "settingsBackupCancelledMessage": "The backup was cancelled or failed.",
-  "@settingsBackupCancelledMessage": {
-    "description": "Message shown when backup is cancelled or fails"
-  },
-  "settingsBackupErrorWithDetails": "Backup error: {details}",
+  "settingsBackupErrorWithDetails": "Backup failed: {details}",
   "@settingsBackupErrorWithDetails": {
     "description": "Error message shown when backup fails",
     "placeholders": {
@@ -519,7 +515,7 @@
   "@settingsRestoreInProgress": {
     "description": "Message shown while restore is running"
   },
-  "settingsRestoreErrorWithDetails": "Restore error: {details}",
+  "settingsRestoreErrorWithDetails": "Restore failed: {details}",
   "@settingsRestoreErrorWithDetails": {
     "description": "Error message shown when restore fails",
     "placeholders": {
