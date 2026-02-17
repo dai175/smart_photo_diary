@@ -301,7 +301,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               child: PrimaryButton(
                 onPressed: _updateDiary,
                 text: l10n.commonSave,
-                icon: Icons.save_rounded,
               ),
             ),
           ],
@@ -384,7 +383,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               PrimaryButton(
                 onPressed: () => Navigator.pop(context),
                 text: l10n.commonBack,
-                icon: Icons.arrow_back_rounded,
               ),
             ],
           ),
@@ -429,7 +427,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               PrimaryButton(
                 onPressed: () => Navigator.pop(context),
                 text: l10n.commonBack,
-                icon: Icons.arrow_back_rounded,
               ),
             ],
           ),

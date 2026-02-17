@@ -234,7 +234,6 @@ class DiaryPreviewBody extends StatelessWidget {
               PrimaryButton(
                 onPressed: () => Navigator.pop(context),
                 text: context.l10n.commonBack,
-                icon: Icons.arrow_back_rounded,
               ),
             ],
           ),

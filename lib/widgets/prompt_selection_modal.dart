@@ -122,11 +122,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       ),
       CustomDialogAction(
         text: primaryText,
-        icon: _isRandomSelected
-            ? Icons.shuffle_rounded
-            : (_selectedPrompt != null
-                  ? Icons.auto_awesome_rounded
-                  : Icons.photo_camera_rounded),
         isPrimary: true,
         onPressed: () {
           if (_isRandomSelected) {

@@ -41,7 +41,6 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
             CustomDialogAction(
               text: context.l10n.commonOpenSettings,
               isPrimary: true,
-              icon: Icons.settings_rounded,
               onPressed: () async {
                 Navigator.of(context).pop();
                 await openAppSettings();
@@ -73,7 +72,6 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
             CustomDialogAction(
               text: context.l10n.photoSelectAction,
               isPrimary: true,
-              icon: Icons.add_photo_alternate_rounded,
               onPressed: () async {
                 Navigator.of(context).pop();
                 final photoService = ServiceRegistration.get<IPhotoService>();
