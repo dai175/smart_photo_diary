@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../constants/subscription_constants.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../utils/locale_format_utils.dart';
 import 'plans/plan.dart';
@@ -69,7 +70,7 @@ class PurchaseProductV2 {
 
   /// プラン別の価格表示テキスト生成
   String get priceDisplay {
-    if (plan.id == 'premium_yearly') {
+    if (plan.id == SubscriptionConstants.premiumYearlyPlanId) {
       // 年額プランの場合、月額換算も表示
       final monthlyEquivalent = (priceAmount / 12).round();
       final locale = Intl.getCurrentLocale().isEmpty
