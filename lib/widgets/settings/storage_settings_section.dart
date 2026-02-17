@@ -95,6 +95,7 @@ class StorageSettingsSection extends StatelessWidget {
 
       if (exportResult.isSuccess) {
         final filePath = exportResult.value;
+        // filePath == null means user cancelled the file picker; no action needed.
         if (filePath != null) {
           DialogUtils.showSuccessDialog(
             context,

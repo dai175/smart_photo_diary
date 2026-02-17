@@ -133,8 +133,7 @@ class DiaryDetailContent extends StatelessWidget {
             ),
             if (diaryEntry.effectiveTags.isNotEmpty) ...[
               () {
-                final isDark =
-                    Theme.of(context).brightness == Brightness.dark;
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 final foreground = isDark
                     ? AppColors.primaryLight
                     : AppColors.primary;
