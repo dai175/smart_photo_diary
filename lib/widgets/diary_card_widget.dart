@@ -295,43 +295,11 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
                 (tag) => CategoryChip(
                   label: tag,
                   selected: false,
-                  category: _getCategoryForTag(tag),
                 ),
               )
               .toList(),
         );
       },
     );
-  }
-
-  ChipCategory _getCategoryForTag(String tag) {
-    // タグの内容に基づいてカテゴリを判定
-    if (tag.contains('朝') ||
-        tag.contains('昼') ||
-        tag.contains('夕') ||
-        tag.contains('夜')) {
-      return ChipCategory.general;
-    } else if (tag.contains('楽し') ||
-        tag.contains('嬉し') ||
-        tag.contains('悲し') ||
-        tag.contains('怒り')) {
-      return ChipCategory.emotion;
-    } else if (tag.contains('料理') ||
-        tag.contains('食事') ||
-        tag.contains('食べ') ||
-        tag.contains('グルメ')) {
-      return ChipCategory.food;
-    } else if (tag.contains('公園') ||
-        tag.contains('家') ||
-        tag.contains('店') ||
-        tag.contains('場所')) {
-      return ChipCategory.location;
-    } else if (tag.contains('運動') ||
-        tag.contains('散歩') ||
-        tag.contains('スポーツ') ||
-        tag.contains('旅行')) {
-      return ChipCategory.activity;
-    }
-    return ChipCategory.general;
   }
 }

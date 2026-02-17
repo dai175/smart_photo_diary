@@ -337,13 +337,11 @@ class CategoryChip extends StatelessWidget {
     required this.label,
     this.onTap,
     this.selected = false,
-    this.category = ChipCategory.general,
   });
 
   final String label;
   final VoidCallback? onTap;
   final bool selected;
-  final ChipCategory category;
 
   @override
   Widget build(BuildContext context) {
