@@ -33,6 +33,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       onError: AppColors.onError,
       errorContainer: AppColors.errorContainer,
       onErrorContainer: AppColors.onErrorContainer,
+      onSurfaceVariant: AppColors.onSurfaceVariantDark,
       outline: AppColors.outlineDark,
       outlineVariant: AppColors.surfaceContainerHighestDark,
       shadow: AppColors.shadow,
