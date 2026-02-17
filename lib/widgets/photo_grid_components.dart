@@ -209,7 +209,6 @@ class PhotoGridPermissionRequest extends StatelessWidget {
         PrimaryButton(
           onPressed: onRequestPermission,
           text: context.l10n.photoRequestPermission,
-          icon: Icons.camera_alt,
         ),
       ],
     );

@@ -333,7 +333,6 @@ class _SubscriptionSettingsSectionState
         _showUpgradeDialog();
       },
       text: context.l10n.settingsUpgradeToPremium,
-      icon: Icons.auto_awesome_rounded,
       width: double.infinity,
     );
   }

@@ -324,7 +324,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       _currentFilter.activeFilterCount,
                     )
                   : context.l10n.filterApply,
-              icon: Icons.filter_list,
             ),
           ),
         ],

@@ -357,7 +357,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 PrimaryButton(
                   onPressed: _controller.clearAllFilters,
                   text: context.l10n.commonClearFilters,
-                  icon: Icons.clear_all_rounded,
                 ),
               ],
             ],

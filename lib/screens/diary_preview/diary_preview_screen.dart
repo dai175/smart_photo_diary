@@ -290,7 +290,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           child: PrimaryButton(
             onPressed: _saveDiary,
             text: context.l10n.diaryPreviewSaveButton,
-            icon: Icons.save_rounded,
             width: double.infinity,
           ),
         ),
