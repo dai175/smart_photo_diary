@@ -347,53 +347,17 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _getCategoryColors(category);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ModernChip(
       label: label,
       onTap: onTap,
       selected: selected,
-      backgroundColor: colors.backgroundColor,
-      foregroundColor: colors.foregroundColor,
+      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+      foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
       size: ChipSize.medium,
       style: ChipStyle.filled,
     );
-  }
-
-  _CategoryColors _getCategoryColors(ChipCategory category) {
-    switch (category) {
-      case ChipCategory.general:
-        return const _CategoryColors(
-          backgroundColor: AppColors.primaryContainer,
-          foregroundColor: AppColors.onPrimaryContainer,
-        );
-      case ChipCategory.emotion:
-        return const _CategoryColors(
-          backgroundColor: AppColors.secondaryContainer,
-          foregroundColor: AppColors.onSecondaryContainer,
-        );
-      case ChipCategory.activity:
-        return _CategoryColors(
-          backgroundColor: AppColors.secondary.withValues(
-            alpha: AppConstants.opacitySubtle,
-          ),
-          foregroundColor: AppColors.secondaryDark,
-        );
-      case ChipCategory.location:
-        return _CategoryColors(
-          backgroundColor: AppColors.success.withValues(
-            alpha: AppConstants.opacitySubtle,
-          ),
-          foregroundColor: AppColors.success,
-        );
-      case ChipCategory.food:
-        return _CategoryColors(
-          backgroundColor: AppColors.warning.withValues(
-            alpha: AppConstants.opacitySubtle,
-          ),
-          foregroundColor: AppColors.warning,
-        );
-    }
   }
 }
 
@@ -455,14 +419,3 @@ class DeletableChip extends StatelessWidget {
 
 /// チップのカテゴリー
 enum ChipCategory { general, emotion, activity, location, food }
-
-/// カテゴリー色データ
-class _CategoryColors {
-  const _CategoryColors({
-    required this.backgroundColor,
-    required this.foregroundColor,
-  });
-
-  final Color backgroundColor;
-  final Color foregroundColor;
-}
