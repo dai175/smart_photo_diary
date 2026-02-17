@@ -494,11 +494,7 @@
   "@settingsBackupSuccessMessage": {
     "description": "バックアップ成功時のメッセージ"
   },
-  "settingsBackupCancelledMessage": "バックアップがキャンセルされたか、失敗しました。",
-  "@settingsBackupCancelledMessage": {
-    "description": "バックアップがキャンセルまたは失敗した際のメッセージ"
-  },
-  "settingsBackupErrorWithDetails": "バックアップエラー: {details}",
+  "settingsBackupErrorWithDetails": "バックアップに失敗しました: {details}",
   "@settingsBackupErrorWithDetails": {
     "description": "バックアップ失敗時のエラーメッセージ",
     "placeholders": {
@@ -519,7 +515,7 @@
   "@settingsRestoreInProgress": {
     "description": "リストア実行中に表示するメッセージ"
   },
-  "settingsRestoreErrorWithDetails": "リストアエラー: {details}",
+  "settingsRestoreErrorWithDetails": "リストアに失敗しました: {details}",
   "@settingsRestoreErrorWithDetails": {
     "description": "リストア失敗時のエラーメッセージ",
     "placeholders": {

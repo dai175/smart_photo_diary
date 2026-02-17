@@ -200,7 +200,7 @@ class StorageSettingsSection extends StatelessWidget {
         (error) {
           DialogUtils.showErrorDialog(
             context,
-            context.l10n.commonErrorWithMessage(error.message),
+            context.l10n.settingsRestoreErrorWithDetails(error.message),
           );
         },
       );
