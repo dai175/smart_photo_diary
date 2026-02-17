@@ -7,7 +7,6 @@ import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/storage_service.dart';
 import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
-import '../../ui/design_system/app_typography.dart';
 import '../../utils/dialog_utils.dart';
 import 'settings_row.dart';
 import 'storage_import_result_dialog.dart';
@@ -30,8 +29,6 @@ class StorageSettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildStorageInfo(context),
-        _buildDivider(),
         _buildBackupAction(context),
         _buildDivider(),
         _buildRestoreAction(context),
@@ -46,60 +43,6 @@ class StorageSettingsSection extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       color: AppColors.outline.withValues(alpha: 0.1),
-    );
-  }
-
-  Widget _buildStorageInfo(BuildContext context) {
-    if (storageInfo == null) {
-      return Container(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-              ),
-              child: Icon(
-                Icons.storage_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: AppSpacing.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.settingsStorageSectionTitle,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    context.l10n.commonLoading,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return SettingsRow(
-      icon: AppIcons.settingsStorage,
-
-      title: context.l10n.settingsStorageAppDataTitle,
-      subtitle: context.l10n.settingsStorageUsageValue(
-        storageInfo!.formattedTotalSize,
-      ),
     );
   }
 
@@ -124,11 +67,15 @@ class StorageSettingsSection extends StatelessWidget {
   }
 
   Widget _buildOptimizeAction(BuildContext context) {
+    final subtitle = storageInfo != null
+        ? context.l10n.settingsStorageUsageValue(
+            storageInfo!.formattedTotalSize,
+          )
+        : context.l10n.settingsCleanupSubtitle;
     return SettingsRow(
       icon: AppIcons.settingsCleanup,
-
       title: context.l10n.settingsCleanupTitle,
-      subtitle: context.l10n.settingsCleanupSubtitle,
+      subtitle: subtitle,
       onTap: () => _optimizeDatabase(context),
     );
   }
