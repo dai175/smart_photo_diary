@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -22,6 +23,12 @@ class DiaryDetailPhotoSection extends StatelessWidget {
   final List<AssetEntity> photoAssets;
   final AppLocalizations l10n;
 
+  /// 写真の表示高さを計算する（幅に応じたアスペクト比計算）
+  double _calcPhotoHeight(AssetEntity asset, double displayWidth) {
+    if (asset.width == 0 || asset.height == 0) return displayWidth;
+    return displayWidth * asset.height / asset.width;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SlideInWidget(
@@ -45,28 +52,62 @@ class DiaryDetailPhotoSection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: photoAssets.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      right: index == photoAssets.length - 1
-                          ? 0
-                          : AppSpacing.md,
-                    ),
-                    child: _PhotoItem(
-                      asset: photoAssets[index],
-                      onTap: _showPhotoDialog,
-                    ),
-                  );
-                },
-              ),
-            ),
+            if (photoAssets.length == 1)
+              _buildSinglePhoto(context)
+            else
+              _buildMultiplePhotos(context),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 写真1枚: アスペクト比に応じた表示
+  Widget _buildSinglePhoto(BuildContext context) {
+    final asset = photoAssets.first;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth;
+        final height = _calcPhotoHeight(asset, cardWidth).clamp(120.0, 240.0);
+        final actualWidth = (asset.width > 0 && asset.height > 0)
+            ? math.min(cardWidth, height * asset.width / asset.height)
+            : cardWidth;
+        return Center(
+          child: SizedBox(
+            height: height,
+            child: _PhotoItem(
+              asset: asset,
+              onTap: _showPhotoDialog,
+              displayWidth: actualWidth,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 複数写真: 正方形サムネイルで水平スクロール
+  Widget _buildMultiplePhotos(BuildContext context) {
+    const itemSize = 200.0;
+
+    return SizedBox(
+      height: itemSize,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: photoAssets.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.only(
+              right: index == photoAssets.length - 1 ? 0 : AppSpacing.md,
+            ),
+            child: _PhotoItem(
+              asset: photoAssets[index],
+              onTap: _showPhotoDialog,
+              displayWidth: itemSize,
+              fit: BoxFit.cover,
+            ),
+          );
+        },
       ),
     );
   }
@@ -76,14 +117,15 @@ class DiaryDetailPhotoSection extends StatelessWidget {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
         child: Center(
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                  maxHeight: 600,
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.9,
+                  maxHeight: MediaQuery.of(context).size.height * 0.7,
                 ),
                 decoration: BoxDecoration(
                   borderRadius: AppSpacing.cardRadiusLarge,
@@ -99,7 +141,11 @@ class DiaryDetailPhotoSection extends StatelessWidget {
                   borderRadius: AppSpacing.cardRadiusLarge,
                   child: Container(
                     color: Theme.of(context).colorScheme.surface,
-                    child: Image.memory(imageData, fit: BoxFit.contain),
+                    child: Image.memory(
+                      imageData,
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                    ),
                   ),
                 ),
               ),
@@ -139,10 +185,17 @@ class DiaryDetailPhotoSection extends StatelessWidget {
 
 /// 写真アイテム（FutureをStatefulWidgetでキャッシュ）
 class _PhotoItem extends StatefulWidget {
-  const _PhotoItem({required this.asset, required this.onTap});
+  const _PhotoItem({
+    required this.asset,
+    required this.onTap,
+    this.displayWidth = 200,
+    this.fit = BoxFit.contain,
+  });
 
   final AssetEntity asset;
   final void Function(BuildContext context, Uint8List imageData) onTap;
+  final double displayWidth;
+  final BoxFit fit;
 
   @override
   State<_PhotoItem> createState() => _PhotoItemState();
@@ -181,8 +234,8 @@ class _PhotoItemState extends State<_PhotoItem> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(
-            width: 200,
-            height: 200,
+            width: widget.displayWidth,
+            height: widget.displayWidth,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: AppSpacing.photoRadius,
@@ -208,8 +261,7 @@ class _PhotoItemState extends State<_PhotoItem> {
             widget.onTap(context, snapshot.data!);
           },
           child: Container(
-            width: 200,
-            constraints: const BoxConstraints(minHeight: 150, maxHeight: 300),
+            width: widget.displayWidth,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: AppSpacing.photoRadius,
@@ -219,10 +271,15 @@ class _PhotoItemState extends State<_PhotoItem> {
               child: RepaintBoundary(
                 child: Image.memory(
                   snapshot.data!,
-                  width: 200,
-                  fit: BoxFit.contain,
-                  cacheWidth: (200 * MediaQuery.of(context).devicePixelRatio)
-                      .round(),
+                  width: widget.displayWidth,
+                  height: widget.fit == BoxFit.cover
+                      ? widget.displayWidth
+                      : null,
+                  fit: widget.fit,
+                  cacheWidth:
+                      (widget.displayWidth *
+                              MediaQuery.of(context).devicePixelRatio)
+                          .round(),
                   gaplessPlayback: true,
                   filterQuality: FilterQuality.medium,
                 ),
