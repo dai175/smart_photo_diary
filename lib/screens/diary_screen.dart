@@ -177,19 +177,13 @@ class _DiaryScreenState extends State<DiaryScreen> {
               slivers: [
                 // アクティブフィルタ表示（AppBar直下に固定されないようスリバーとして配置）
                 SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
-                    ),
-                    child: ActiveFiltersDisplay(
-                      filter: _controller.currentFilter,
-                      onClear: _controller.clearAllFilters,
-                      onRemoveTag: _controller.removeTagFilter,
-                      onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
-                      onRemoveDateRange: _controller.removeDateRangeFilter,
-                      onRemoveSearch: _controller.removeSearchFilter,
-                    ),
+                  child: ActiveFiltersDisplay(
+                    filter: _controller.currentFilter,
+                    onClear: _controller.clearAllFilters,
+                    onRemoveTag: _controller.removeTagFilter,
+                    onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
+                    onRemoveDateRange: _controller.removeDateRangeFilter,
+                    onRemoveSearch: _controller.removeSearchFilter,
                   ),
                 ),
 
