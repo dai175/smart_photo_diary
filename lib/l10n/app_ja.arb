@@ -90,16 +90,6 @@
   "@filterApply": {
     "description": "フィルタ適用ボタンのテキスト"
   },
-  "filterApplyWithCount": "フィルタを適用 ({count})",
-  "@filterApplyWithCount": {
-    "description": "アクティブなフィルタ数を表示するフィルタ適用ボタンのテキスト",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "description": "アクティブなフィルタの数"
-      }
-    }
-  },
   "filterTimeSlotMorning": "朝",
   "@filterTimeSlotMorning": {
     "description": "時間帯フィルタ: 朝"
