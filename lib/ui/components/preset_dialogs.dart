@@ -369,7 +369,6 @@ class PresetDialogs {
           CustomDialogAction(
             text: l10n.commonUpgrade,
             isPrimary: true,
-            icon: Icons.auto_awesome_rounded,
             onPressed: onUpgrade,
           ),
       ],

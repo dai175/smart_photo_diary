@@ -152,6 +152,8 @@ void main() {
         // the controller stays in loading state.
         await pumpFrames(tester);
 
+        // PhotoGallery's PhotoThumbnailWidget also shows a loading indicator,
+        // so multiple CircularProgressIndicators may exist simultaneously.
         expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
       });
 

@@ -46,7 +46,8 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
   @override
   void didUpdateWidget(PhotoThumbnailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.asset.id != widget.asset.id) {
+    if (oldWidget.asset.id != widget.asset.id ||
+        oldWidget.size != widget.size) {
       _thumbnailFuture = _loadThumbnail();
     }
   }
@@ -66,6 +67,23 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
     return FutureBuilder<Uint8List?>(
       future: _thumbnailFuture,
       builder: (context, snapshot) {
+        if (snapshot.hasError ||
+            (snapshot.connectionState == ConnectionState.done &&
+                !snapshot.hasData)) {
+          return Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: AppSpacing.photoRadius,
+            ),
+            child: Icon(
+              Icons.broken_image_outlined,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          );
+        }
+
         if (!snapshot.hasData) {
           return Container(
             width: widget.size,

@@ -291,12 +291,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
           runSpacing: AppSpacing.xs,
           children: tags
               .take(4) // 最大4つまで表示
-              .map(
-                (tag) => CategoryChip(
-                  label: tag,
-                  selected: false,
-                ),
-              )
+              .map((tag) => CategoryChip(label: tag, selected: false))
               .toList(),
         );
       },
