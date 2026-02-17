@@ -82,6 +82,8 @@ void main() {
     when(() => mockAsset.id).thenReturn(id);
     when(() => mockAsset.createDateTime).thenReturn(DateTime(2025, 6, 15));
     when(() => mockAsset.type).thenReturn(AssetType.image);
+    when(() => mockAsset.width).thenReturn(1080);
+    when(() => mockAsset.height).thenReturn(1920);
     when(
       () => mockAsset.thumbnailDataWithSize(
         any(),
@@ -150,7 +152,7 @@ void main() {
         // the controller stays in loading state.
         await pumpFrames(tester);
 
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
       });
 
       testWidgets('shows generating text after initialization phase', (

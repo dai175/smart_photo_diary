@@ -5,12 +5,12 @@ import '../../localization/localization_extensions.dart';
 import '../../models/writing_prompt.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/components/custom_card.dart';
+import '../../ui/components/photo_gallery.dart';
 import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
 import 'diary_preview_prompt_display.dart';
-import 'diary_preview_photo_thumbnail.dart';
 import 'diary_preview_loading_states.dart';
 import 'diary_preview_editor.dart';
 
@@ -173,23 +173,7 @@ class DiaryPreviewBody extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              height: 120,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: selectedAssets.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      right: index < selectedAssets.length - 1
-                          ? AppSpacing.sm
-                          : 0,
-                    ),
-                    child: PhotoThumbnailWidget(asset: selectedAssets[index]),
-                  );
-                },
-              ),
-            ),
+            PhotoGallery(assets: selectedAssets, multiplePhotoSize: 120),
           ],
         ),
       ),

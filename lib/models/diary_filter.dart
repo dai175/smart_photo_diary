@@ -112,8 +112,8 @@ class DiaryFilter {
   int get activeFilterCount {
     int count = 0;
     if (dateRange != null) count++;
-    if (selectedTags.isNotEmpty) count++;
-    if (timeOfDay.isNotEmpty) count++;
+    count += selectedTags.length;
+    count += timeOfDay.length;
     if (searchText != null && searchText!.isNotEmpty) count++;
     return count;
   }
