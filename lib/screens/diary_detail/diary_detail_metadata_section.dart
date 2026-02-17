@@ -104,6 +104,8 @@ class DiaryDetailMetadataSection extends StatelessWidget {
   }
 
   Widget _buildTagsRow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tagForeground = isDark ? AppColors.primaryLight : AppColors.primary;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -124,7 +126,6 @@ class DiaryDetailMetadataSection extends StatelessWidget {
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: diaryEntry.effectiveTags.map((tag) {
-              final isDark = Theme.of(context).brightness == Brightness.dark;
               return Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
@@ -138,7 +139,7 @@ class DiaryDetailMetadataSection extends StatelessWidget {
                   tag,
                   style: AppTypography.withColor(
                     AppTypography.labelSmall,
-                    isDark ? AppColors.primaryLight : AppColors.primary,
+                    tagForeground,
                   ),
                 ),
               );
