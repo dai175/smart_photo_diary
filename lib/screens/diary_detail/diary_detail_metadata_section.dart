@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../models/diary_entry.dart';
 import '../../ui/components/custom_card.dart';
+import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -122,27 +123,26 @@ class DiaryDetailMetadataSection extends StatelessWidget {
           child: Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
-            children: diaryEntry.effectiveTags
-                .map(
-                  (tag) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: AppSpacing.chipRadius,
-                    ),
-                    child: Text(
-                      tag,
-                      style: AppTypography.withColor(
-                        AppTypography.labelSmall,
-                        Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
+            children: diaryEntry.effectiveTags.map((tag) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: AppSpacing.chipRadius,
+                ),
+                child: Text(
+                  tag,
+                  style: AppTypography.withColor(
+                    AppTypography.labelSmall,
+                    isDark ? AppColors.primaryLight : AppColors.primary,
                   ),
-                )
-                .toList(),
+                ),
+              );
+            }).toList(),
           ),
         ),
       ],
