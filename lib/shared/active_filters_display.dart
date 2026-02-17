@@ -52,12 +52,9 @@ class ActiveFiltersDisplay extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              SmallButton(
+              TextOnlyButton(
                 onPressed: onClear,
-                child: Text(
-                  context.l10n.filterActiveClearAll,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                text: context.l10n.filterActiveClearAll,
               ),
             ],
           ),
