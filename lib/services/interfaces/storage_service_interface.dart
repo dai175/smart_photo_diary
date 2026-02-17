@@ -28,11 +28,12 @@ abstract class IStorageService {
   /// ファイル選択ダイアログを表示し、JSONバックアップファイルを読み込む。
   ///
   /// Returns:
+  /// - Success(null): ユーザーがファイル選択をキャンセルした場合
   /// - Success: [ImportResult]（成功/スキップ/失敗件数、エラー詳細）
-  /// - Failure: [ServiceException] ファイル未選択、ファイル不存在、
+  /// - Failure: [ServiceException] ファイル不存在、
   ///   JSON解析エラー、バックアップ形式不正、バージョン非互換時
   /// - Failure: [StorageException] 既存データ取得失敗、エントリー保存失敗時
-  Future<Result<ImportResult>> importData();
+  Future<Result<ImportResult?>> importData();
 
   /// データベースの最適化
   ///

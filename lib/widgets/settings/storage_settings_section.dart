@@ -154,11 +154,6 @@ class StorageSettingsSection extends StatelessWidget {
             context.l10n.settingsBackupSuccessTitle,
             context.l10n.settingsBackupSuccessMessage,
           );
-        } else {
-          DialogUtils.showErrorDialog(
-            context,
-            context.l10n.settingsBackupCancelledMessage,
-          );
         }
       } else {
         DialogUtils.showErrorDialog(
@@ -198,6 +193,7 @@ class StorageSettingsSection extends StatelessWidget {
 
       result.fold(
         (importResult) {
+          if (importResult == null) return;
           onReloadSettings();
           StorageImportResultDialog.show(context, importResult);
         },

@@ -123,7 +123,7 @@ class StorageService implements IStorageService {
 
   // データのインポート（リストア機能）
   @override
-  Future<Result<ImportResult>> importData() async {
+  Future<Result<ImportResult?>> importData() async {
     try {
       // ファイル選択
       final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
@@ -134,7 +134,7 @@ class StorageService implements IStorageService {
       );
 
       if (result == null || result.files.single.path == null) {
-        return const Failure(ServiceException('No file was selected'));
+        return const Success(null);
       }
 
       final filePath = result.files.single.path!;
