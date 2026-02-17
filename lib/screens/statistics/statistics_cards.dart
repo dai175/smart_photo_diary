@@ -103,17 +103,10 @@ class StatisticsCards extends StatelessWidget {
       elevation: AppSpacing.elevationXs,
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
-            child: Icon(
-              icon,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: AppSpacing.iconSm,
-            ),
+          Icon(
+            icon,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: AppSpacing.iconMd,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
