@@ -288,9 +288,8 @@ class PresetDialogs {
                             decoration: BoxDecoration(
                               color: usagePercentage >= 0.8
                                   ? Theme.of(context).colorScheme.error
-                                  : Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
+                                  : Theme.of(context).colorScheme.primary
+                                        .withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
