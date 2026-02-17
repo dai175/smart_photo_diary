@@ -429,10 +429,6 @@
   "@settingsStorageSectionTitle": {
     "description": "Title for the storage information section"
   },
-  "settingsStorageAppDataTitle": "App data",
-  "@settingsStorageAppDataTitle": {
-    "description": "Title for the app data storage card"
-  },
   "settingsStorageUsageValue": "Used storage: {size}",
   "@settingsStorageUsageValue": {
     "description": "Displays formatted storage usage",

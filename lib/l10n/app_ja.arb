@@ -429,10 +429,6 @@
   "@settingsStorageSectionTitle": {
     "description": "ストレージ情報セクションのタイトル"
   },
-  "settingsStorageAppDataTitle": "アプリデータ",
-  "@settingsStorageAppDataTitle": {
-    "description": "アプリデータストレージカードのタイトル"
-  },
   "settingsStorageUsageValue": "使用容量: {size}",
   "@settingsStorageUsageValue": {
     "description": "フォーマット済みのストレージ使用量",
