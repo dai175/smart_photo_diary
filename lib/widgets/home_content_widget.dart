@@ -201,7 +201,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             limit: limit,
             remaining: remaining.clamp(0, limit),
             nextResetDate: nextResetDate,
-            onUpgrade: plan.id == 'basic'
+            onUpgrade: plan.id == SubscriptionConstants.basicPlanId
                 ? () {
                     Navigator.of(context).pop();
                     _navigateToUpgrade(context);

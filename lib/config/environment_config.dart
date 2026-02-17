@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../constants/subscription_constants.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
 
@@ -166,7 +167,7 @@ class EnvironmentConfig {
 
   /// Basicプランが強制されているかどうか
   static bool get forceBasic {
-    return forcePlan == 'basic';
+    return forcePlan == SubscriptionConstants.basicPlanId;
   }
 
   /// デバッグモードかどうかを確認

@@ -94,5 +94,5 @@ class NavBarConstants {
 class LabelConstants {
   /// 未選択アイテムの不透明度（ライト/ダーク共通）
   /// 基準色は Light: onSurfaceVariant / Dark: onSurfaceDark を使用
-  static const double unselectedOpacity = 0.45;
+  static const double unselectedOpacity = 0.55;
 }
