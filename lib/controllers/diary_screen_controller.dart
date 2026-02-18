@@ -221,6 +221,37 @@ class DiaryScreenController extends BaseErrorController {
     }
   }
 
+  // シマーを表示せずにデータを再読み込み（スクロール位置維持）
+  Future<void> silentRefresh() async {
+    try {
+      final diaryService = await ServiceLocator()
+          .getAsync<IDiaryQueryService>();
+      final fetchCount = _offset > 0 ? _offset : _pageSize;
+      final result = await diaryService.getFilteredDiaryEntriesPage(
+        _currentFilter,
+        offset: 0,
+        limit: fetchCount,
+      );
+
+      result.fold(
+        (entries) {
+          _diaryEntries = entries;
+          _offset = entries.length;
+          if (entries.length < fetchCount) {
+            _hasMore = false;
+          }
+          clearError();
+          notifyListeners();
+        },
+        (_) {
+          // サイレントリフレッシュのエラーは無視（既存リストを表示し続ける）
+        },
+      );
+    } catch (_) {
+      // サイレントリフレッシュのエラーは無視
+    }
+  }
+
   // リフレッシュ
   Future<void> refresh() async {
     setLoading(true);

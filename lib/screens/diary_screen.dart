@@ -133,13 +133,15 @@ class _DiaryScreenState extends State<DiaryScreen> {
       context,
       DiaryDetailScreen(diaryId: diaryId).customRoute(),
     ).then((result) {
-      // 詳細画面から戻ってきたときに日記一覧を再読み込み
-      _controller.loadDiaryEntries();
-
-      // 削除された場合の追加処理（必要に応じて）
       if (result == true) {
+        // 削除された場合：フルリロード
         _logger.info('Diary deleted', context: 'DiaryScreen');
+        _controller.loadDiaryEntries();
+      } else if (result == 'updated') {
+        // 編集された場合：スクロール位置を維持してデータ更新
+        _controller.silentRefresh();
       }
+      // result == null：変更なし、スクロール位置を保持
     });
   }
 

@@ -321,6 +321,62 @@ void main() {
       });
     });
 
+    group('wasModified', () {
+      test('初期状態は false', () {
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        expect(controller.wasModified, isFalse);
+      });
+
+      test('updateDiary 成功後に true になる', () async {
+        final entry = _createEntry();
+        when(
+          () => mockDiaryService.getDiaryEntry('test-id'),
+        ).thenAnswer((_) async => Success(entry));
+        when(
+          () => mockDiaryService.updateDiaryEntry(any()),
+        ).thenAnswer((_) async => const Success(null));
+
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        await controller.loadDiaryEntry('test-id');
+        expect(controller.wasModified, isFalse);
+
+        await controller.updateDiary(
+          'test-id',
+          title: 'New Title',
+          content: 'New Content',
+        );
+
+        expect(controller.wasModified, isTrue);
+      });
+
+      test('updateDiary 失敗時は false のまま', () async {
+        final entry = _createEntry();
+        when(
+          () => mockDiaryService.getDiaryEntry('test-id'),
+        ).thenAnswer((_) async => Success(entry));
+        when(() => mockDiaryService.updateDiaryEntry(any())).thenAnswer(
+          (_) async => const Failure(DatabaseException('Update failed')),
+        );
+
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        await controller.loadDiaryEntry('test-id');
+
+        await controller.updateDiary(
+          'test-id',
+          title: 'New Title',
+          content: 'New Content',
+        );
+
+        expect(controller.wasModified, isFalse);
+      });
+    });
+
     group('editing', () {
       test('startEditing で isEditing が true になる', () {
         final controller = DiaryDetailController();

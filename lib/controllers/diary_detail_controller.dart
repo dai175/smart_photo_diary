@@ -17,6 +17,7 @@ class DiaryDetailController extends BaseErrorController {
   DiaryEntry? _diaryEntry;
   List<AssetEntity> _photoAssets = [];
   bool _isEditing = false;
+  bool _wasModified = false;
   DiaryDetailErrorType? _errorType;
   String _rawErrorDetail = '';
 
@@ -28,6 +29,9 @@ class DiaryDetailController extends BaseErrorController {
 
   /// 編集モードか
   bool get isEditing => _isEditing;
+
+  /// 日記が更新されたか（詳細画面から戻る際の判定用）
+  bool get wasModified => _wasModified;
 
   /// エラー種別
   DiaryDetailErrorType? get errorType => _errorType;
@@ -124,6 +128,7 @@ class DiaryDetailController extends BaseErrorController {
       switch (updateResult) {
         case Success():
           _isEditing = false;
+          _wasModified = true;
           // リロードして最新データを取得
           await loadDiaryEntry(diaryId);
           return true;
