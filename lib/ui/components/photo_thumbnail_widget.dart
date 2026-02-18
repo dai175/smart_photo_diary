@@ -17,6 +17,7 @@ class PhotoThumbnailWidget extends StatefulWidget {
     this.size = 120,
     this.fit = BoxFit.cover,
     this.onTap,
+    this.heroTag,
   });
 
   final AssetEntity asset;
@@ -27,8 +28,16 @@ class PhotoThumbnailWidget extends StatefulWidget {
   /// 画像のフィット方法
   final BoxFit fit;
 
-  /// タップ時のコールバック（画像データを渡す）
-  final void Function(BuildContext context, Uint8List imageData)? onTap;
+  /// タップ時のコールバック（AssetEntityと画像データを渡す）
+  final void Function(
+    BuildContext context,
+    AssetEntity asset,
+    Uint8List imageData,
+  )?
+  onTap;
+
+  /// Hero アニメーション用のタグ（指定時に Hero でラップ）
+  final String? heroTag;
 
   @override
   State<PhotoThumbnailWidget> createState() => _PhotoThumbnailWidgetState();
@@ -107,7 +116,7 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
           );
         }
 
-        final imageWidget = Container(
+        Widget imageWidget = Container(
           width: widget.size,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
@@ -131,11 +140,15 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
           ),
         );
 
+        if (widget.heroTag != null) {
+          imageWidget = Hero(tag: widget.heroTag!, child: imageWidget);
+        }
+
         if (widget.onTap != null) {
           return MicroInteractions.bounceOnTap(
             onTap: () {
               MicroInteractions.hapticTap();
-              widget.onTap!(context, snapshot.data!);
+              widget.onTap!(context, widget.asset, snapshot.data!);
             },
             child: imageWidget,
           );

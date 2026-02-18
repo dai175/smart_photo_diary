@@ -17,15 +17,24 @@ class PhotoGallery extends StatelessWidget {
     required this.assets,
     this.onPhotoTap,
     this.multiplePhotoSize = 200,
+    this.heroTagPrefix,
   });
 
   final List<AssetEntity> assets;
 
   /// 写真タップ時のコールバック
-  final void Function(BuildContext context, Uint8List imageData)? onPhotoTap;
+  final void Function(
+    BuildContext context,
+    AssetEntity asset,
+    Uint8List imageData,
+  )?
+  onPhotoTap;
 
   /// 複数写真表示時の正方形サイズ
   final double multiplePhotoSize;
+
+  /// Hero アニメーション用タグのプレフィックス（指定時に各サムネイルを Hero でラップ）
+  final String? heroTagPrefix;
 
   /// 写真の表示高さを計算する（幅に応じたアスペクト比計算）
   double _calcPhotoHeight(AssetEntity asset, double displayWidth) {
@@ -41,6 +50,12 @@ class PhotoGallery extends StatelessWidget {
       return _buildSinglePhoto(context);
     }
     return _buildMultiplePhotos(context);
+  }
+
+  /// Hero タグを生成（プレフィックスが指定されている場合のみ）
+  String? _heroTag(AssetEntity asset) {
+    if (heroTagPrefix == null) return null;
+    return '$heroTagPrefix-${asset.id}';
   }
 
   /// 写真1枚: アスペクト比に応じた表示
@@ -61,6 +76,7 @@ class PhotoGallery extends StatelessWidget {
               onTap: onPhotoTap,
               size: actualWidth,
               fit: BoxFit.contain,
+              heroTag: _heroTag(asset),
             ),
           ),
         );
@@ -85,6 +101,7 @@ class PhotoGallery extends StatelessWidget {
               onTap: onPhotoTap,
               size: multiplePhotoSize,
               fit: BoxFit.cover,
+              heroTag: _heroTag(assets[index]),
             ),
           );
         },

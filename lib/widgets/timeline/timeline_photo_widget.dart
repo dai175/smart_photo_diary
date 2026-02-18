@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -7,13 +5,12 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../constants/app_constants.dart';
 import '../../controllers/photo_selection_controller.dart';
 import '../../controllers/scroll_signal.dart';
-import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
 import '../../localization/localization_extensions.dart';
+import '../../ui/components/fullscreen_photo_viewer.dart';
 import '../../models/timeline_photo_group.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/timeline_grouping_service.dart';
-import '../../ui/component_constants.dart';
 import '../../ui/design_system/app_spacing.dart';
 import 'timeline_cache_manager.dart';
 import 'timeline_constants.dart';
@@ -504,48 +501,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// 長押しで拡大プレビューを表示
   void _showPhotoPreview(BuildContext context, AssetEntity asset, String tag) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: context.l10n.commonClose,
-      barrierColor: Colors.black.withValues(alpha: AppConstants.opacityHigh),
-      transitionDuration: AppConstants.defaultAnimationDuration,
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return GestureDetector(
-          onTap: () => Navigator.of(context).maybePop(),
-          child: Container(
-            color: Colors.transparent,
-            alignment: Alignment.center,
-            child: Hero(
-              tag: tag,
-              child: FutureBuilder<Result<Uint8List>>(
-                future: _cacheManager.getLargePreviewFuture(asset),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: PhotoPreviewConstants.progressStrokeWidth,
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isFailure) {
-                    return const SizedBox.shrink();
-                  }
-                  return InteractiveViewer(
-                    minScale: ViewerConstants.minScale,
-                    maxScale: ViewerConstants.maxScale,
-                    child: Image.memory(
-                      snapshot.data!.value,
-                      fit: BoxFit.contain,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    FullscreenPhotoViewer.show(context, asset: asset, heroTag: tag);
   }
 
   /// 写真を薄く表示するかどうかを判定

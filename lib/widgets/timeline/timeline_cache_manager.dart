@@ -8,7 +8,6 @@ import '../../constants/app_constants.dart';
 import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
 import '../../services/interfaces/photo_cache_service_interface.dart';
-import '../../ui/component_constants.dart';
 import 'timeline_constants.dart';
 
 /// タイムラインのサムネイルキャッシュ・先読み管理ヘルパー
@@ -43,18 +42,6 @@ class TimelineCacheManager {
         height: TimelineLayoutConstants.thumbnailSize,
         quality: TimelineLayoutConstants.thumbnailQuality,
       ),
-    );
-  }
-
-  /// 拡大表示用の大きめプレビューを取得
-  Future<Result<Uint8List>> getLargePreviewFuture(AssetEntity asset) {
-    const int size = PhotoPreviewConstants.previewSizePx;
-    const int quality = PhotoPreviewConstants.previewQuality;
-    return _cacheService.getThumbnail(
-      asset,
-      width: size,
-      height: size,
-      quality: quality,
     );
   }
 
