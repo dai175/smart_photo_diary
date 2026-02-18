@@ -384,6 +384,168 @@ void main() {
       });
     });
 
+    group('silentRefresh', () {
+      test('isLoading を true にせずデータが更新される', () async {
+        final initialEntries = List.generate(5, (i) => _createEntry('init_$i'));
+        final refreshedEntries = List.generate(
+          5,
+          (i) => _createEntry('refresh_$i'),
+        );
+        int callCount = 0;
+
+        when(
+          () => mockDiaryService.getFilteredDiaryEntriesPage(
+            any(),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async {
+          callCount++;
+          return callCount == 1
+              ? Success(initialEntries)
+              : Success(refreshedEntries);
+        });
+
+        final controller = createController();
+        await Future.delayed(Duration.zero);
+        expect(controller.diaryEntries.length, 5);
+        expect(controller.diaryEntries.first.id, 'init_0');
+
+        // silentRefresh 中に isLoading が true にならないことを確認
+        bool wasLoadingDuringSilentRefresh = false;
+        controller.addListener(() {
+          if (controller.isLoading) {
+            wasLoadingDuringSilentRefresh = true;
+          }
+        });
+
+        await controller.silentRefresh();
+
+        expect(wasLoadingDuringSilentRefresh, isFalse);
+        expect(controller.diaryEntries.first.id, 'refresh_0');
+        expect(controller.diaryEntries.length, 5);
+
+        controller.dispose();
+      });
+
+      test('エラー時は既存データが維持される', () async {
+        final entries = List.generate(3, (i) => _createEntry('entry_$i'));
+        int callCount = 0;
+
+        when(
+          () => mockDiaryService.getFilteredDiaryEntriesPage(
+            any(),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async {
+          callCount++;
+          if (callCount == 1) return Success(entries);
+          return const Failure(ServiceException('Network error'));
+        });
+
+        final controller = createController();
+        await Future.delayed(Duration.zero);
+        expect(controller.diaryEntries.length, 3);
+
+        await controller.silentRefresh();
+
+        // エラー時も既存データが保持される
+        expect(controller.diaryEntries.length, 3);
+        expect(controller.diaryEntries.first.id, 'entry_0');
+
+        controller.dispose();
+      });
+
+      test('pageSize未満の一覧でhasMoreがfalseのまま維持される', () async {
+        // 5件（< pageSize=20）→ hasMore=false のはず
+        final entries = List.generate(5, (i) => _createEntry('entry_$i'));
+        when(
+          () => mockDiaryService.getFilteredDiaryEntriesPage(
+            any(),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => Success(entries));
+
+        final controller = createController();
+        await Future.delayed(Duration.zero);
+        expect(controller.hasMore, isFalse);
+
+        await controller.silentRefresh();
+
+        // silentRefresh後もhasMoreはfalseのまま
+        expect(controller.hasMore, isFalse);
+
+        controller.dispose();
+      });
+
+      test('複数ページ読み込み後のhasMore=falseが維持される', () async {
+        // 1ページ目: 20件（hasMore=true）、2ページ目: 15件（hasMore=false）
+        final firstPage = List.generate(20, (i) => _createEntry('p1_$i'));
+        final secondPage = List.generate(15, (i) => _createEntry('p2_$i'));
+        final allEntries = [...firstPage, ...secondPage];
+        int callCount = 0;
+
+        when(
+          () => mockDiaryService.getFilteredDiaryEntriesPage(
+            any(),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async {
+          callCount++;
+          if (callCount == 1) return Success(firstPage);
+          if (callCount == 2) return Success(secondPage);
+          // silentRefresh: 35件要求 → 35件返却
+          return Success(allEntries);
+        });
+
+        final controller = createController();
+        await Future.delayed(Duration.zero);
+        expect(controller.hasMore, isTrue);
+
+        await controller.loadMore();
+        expect(controller.diaryEntries.length, 35);
+        expect(controller.hasMore, isFalse);
+
+        await controller.silentRefresh();
+
+        // silentRefresh後もhasMoreはfalseのまま
+        expect(controller.hasMore, isFalse);
+        expect(controller.diaryEntries.length, 35);
+
+        controller.dispose();
+      });
+
+      test('例外スロー時も既存データが維持される', () async {
+        final entries = [_createEntry('1')];
+        int callCount = 0;
+
+        when(
+          () => mockDiaryService.getFilteredDiaryEntriesPage(
+            any(),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async {
+          callCount++;
+          if (callCount == 1) return Success(entries);
+          throw Exception('unexpected');
+        });
+
+        final controller = createController();
+        await Future.delayed(Duration.zero);
+        expect(controller.diaryEntries.length, 1);
+
+        await controller.silentRefresh();
+
+        expect(controller.diaryEntries.length, 1);
+
+        controller.dispose();
+      });
+    });
+
     group('getLocalizedEmptyStateMessage', () {
       test('検索中は検索結果なしメッセージを返す', () async {
         when(

@@ -155,16 +155,23 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return ListenableBuilder(
-      listenable: _controller,
-      builder: (context, child) {
-        return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          appBar: _buildAppBar(l10n),
-          body: _buildBody(l10n),
-          bottomNavigationBar: _buildBottomBar(l10n),
-        );
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        Navigator.of(context).pop(_controller.wasModified ? 'updated' : null);
       },
+      child: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, child) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            appBar: _buildAppBar(l10n),
+            body: _buildBody(l10n),
+            bottomNavigationBar: _buildBottomBar(l10n),
+          );
+        },
+      ),
     );
   }
 
