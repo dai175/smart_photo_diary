@@ -12,12 +12,12 @@ import '../component_constants.dart';
 
 /// フルスクリーン写真ビューアー
 ///
-/// Hero アニメーション + ピンチズーム + 高解像度画像を表示する。
+/// Hero アニメーション + ピンチズーム + 大サイズプレビュー画像（1200px）を表示する。
 /// ホーム画面・日記詳細画面で共通使用する。
 class FullscreenPhotoViewer {
   FullscreenPhotoViewer._();
 
-  /// フルスクリーンで高解像度写真を表示する
+  /// フルスクリーンで大サイズプレビュー写真を表示する
   static void show(
     BuildContext context, {
     required AssetEntity asset,
@@ -32,40 +32,44 @@ class FullscreenPhotoViewer {
       barrierColor: Colors.black.withValues(alpha: AppConstants.opacityHigh),
       transitionDuration: AppConstants.defaultAnimationDuration,
       pageBuilder: (context, animation, secondaryAnimation) {
+        final screenSize = MediaQuery.of(context).size;
         return GestureDetector(
           onTap: () => Navigator.of(context).maybePop(),
-          child: Container(
-            color: Colors.transparent,
-            alignment: Alignment.center,
-            child: Hero(
-              tag: heroTag,
-              child: FutureBuilder<Result<Uint8List>>(
-                future: cacheService.getThumbnail(
-                  asset,
-                  width: PhotoPreviewConstants.previewSizePx,
-                  height: PhotoPreviewConstants.previewSizePx,
-                  quality: PhotoPreviewConstants.previewQuality,
-                ),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: PhotoPreviewConstants.progressStrokeWidth,
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isFailure) {
-                    return const SizedBox.shrink();
-                  }
-                  return InteractiveViewer(
-                    minScale: ViewerConstants.minScale,
-                    maxScale: ViewerConstants.maxScale,
-                    child: Image.memory(
-                      snapshot.data!.value,
-                      fit: BoxFit.contain,
+          child: InteractiveViewer(
+            minScale: ViewerConstants.minScale,
+            maxScale: ViewerConstants.maxScale,
+            child: SizedBox(
+              width: screenSize.width,
+              height: screenSize.height,
+              child: Center(
+                child: Hero(
+                  tag: heroTag,
+                  child: FutureBuilder<Result<Uint8List>>(
+                    future: cacheService.getThumbnail(
+                      asset,
+                      width: PhotoPreviewConstants.previewSizePx,
+                      height: PhotoPreviewConstants.previewSizePx,
+                      quality: PhotoPreviewConstants.previewQuality,
                     ),
-                  );
-                },
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth:
+                                PhotoPreviewConstants.progressStrokeWidth,
+                          ),
+                        );
+                      }
+                      if (!snapshot.hasData || snapshot.data!.isFailure) {
+                        return const SizedBox.shrink();
+                      }
+                      return Image.memory(
+                        snapshot.data!.value,
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
