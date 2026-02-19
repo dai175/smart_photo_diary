@@ -304,7 +304,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             delegate: SliverChildBuilderDelegate((context, index) {
               final entry = _controller.diaryEntries[index];
               return SlideInWidget(
-                key: ValueKey(entry.id),
+                key: ValueKey('${_controller.currentFilter.hashCode}_${entry.id}'),
                 // 大量件数でのオーバーヘッドを避けるため先頭数件のみ遅延を付与
                 delay: Duration(
                   milliseconds:
