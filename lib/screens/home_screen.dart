@@ -72,6 +72,9 @@ class _HomeScreenState extends State<HomeScreen>
   // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
 
+  // タブ切り替えフェードアニメーション
+  late final AnimationController _tabFadeController;
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +82,11 @@ class _HomeScreenState extends State<HomeScreen>
     _logger = serviceLocator.get<ILoggingService>();
     _homeController = HomeController();
     _photoController = PhotoSelectionController();
+    _tabFadeController = AnimationController(
+      duration: AppConstants.shortAnimationDuration,
+      vsync: this,
+      value: 1.0,
+    );
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);
 
@@ -94,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _diarySub?.cancel();
+    _tabFadeController.dispose();
     _homeController.dispose();
     _photoController.dispose();
     super.dispose();
@@ -251,6 +260,13 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  /// フェードアニメーション付きでタブを切り替える
+  Future<void> _switchTabWithFade(VoidCallback switchAction) async {
+    await _tabFadeController.reverse();
+    switchAction();
+    _tabFadeController.forward();
+  }
+
   // 画面一覧を取得するメソッド
   List<Widget> _getScreens() {
     final screens = [
@@ -296,9 +312,12 @@ class _HomeScreenState extends State<HomeScreen>
 
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          body: IndexedStack(
-            index: _homeController.currentIndex,
-            children: screens,
+          body: FadeTransition(
+            opacity: _tabFadeController,
+            child: IndexedStack(
+              index: _homeController.currentIndex,
+              children: screens,
+            ),
           ),
           floatingActionButton: null,
           bottomNavigationBar: Column(
@@ -331,16 +350,20 @@ class _HomeScreenState extends State<HomeScreen>
                     return;
                   }
 
-                  // フォールバック: タブ切替時に必要な再同期を実施
+                  // フェードアニメーション付きでタブ切替
                   if (index == AppConstants.homeTabIndex) {
-                    // Home を表示する際に使用済みIDを再同期
-                    _loadUsedPhotoIds();
-                    _homeController.setCurrentIndex(index);
+                    _switchTabWithFade(() {
+                      _loadUsedPhotoIds();
+                      _homeController.setCurrentIndex(index);
+                    });
                   } else if (index == AppConstants.statisticsTabIndex) {
-                    // Statistics を表示する直前に再構築し再計算を促す
-                    _homeController.refreshStatsAndSwitchTab(index);
+                    _switchTabWithFade(() {
+                      _homeController.refreshStatsAndSwitchTab(index);
+                    });
                   } else {
-                    _homeController.setCurrentIndex(index);
+                    _switchTabWithFade(() {
+                      _homeController.setCurrentIndex(index);
+                    });
                   }
                 },
                 items: _buildNavigationItems(),
