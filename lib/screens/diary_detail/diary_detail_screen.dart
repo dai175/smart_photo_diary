@@ -198,10 +198,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 photoAssets: _controller.photoAssets,
               );
             },
-            icon: Icon(
-              Icons.share_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+            icon: const Icon(Icons.share_rounded),
             tooltip: l10n.commonShare,
           ),
         // 編集モード切替ボタン
@@ -219,7 +216,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             },
             icon: Icon(
               _controller.isEditing ? Icons.check_rounded : Icons.edit_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
             ),
             tooltip: _controller.isEditing ? l10n.commonSave : l10n.commonEdit,
           ),
@@ -232,10 +228,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               MicroInteractions.hapticTap(intensity: VibrationIntensity.medium);
               _deleteDiary();
             },
-            icon: Icon(
-              Icons.delete_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+            icon: const Icon(Icons.delete_rounded),
             tooltip: l10n.commonDelete,
           ),
       ],
