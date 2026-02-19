@@ -113,11 +113,11 @@ class StatisticsController extends BaseErrorController {
         _selectedDay!.month == normalizedDay.month &&
         _selectedDay!.day == normalizedDay.day;
 
-    if (isSameDay) return null;
-
-    _selectedDay = normalizedDay;
-    _focusedDay = focusedDay;
-    notifyListeners();
+    if (!isSameDay) {
+      _selectedDay = normalizedDay;
+      _focusedDay = focusedDay;
+      notifyListeners();
+    }
 
     return _stats.diaryMap[normalizedDay];
   }
