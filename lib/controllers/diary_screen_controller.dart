@@ -121,7 +121,7 @@ class DiaryScreenController extends BaseErrorController {
     _isLoadingMore = false;
   }
 
-  // フィルタを適用
+  // フィルタを適用（シマー表示あり、FilterBottomSheet用）
   void applyFilter(DiaryFilter filter) {
     _currentFilter = filter;
     setLoading(true);
@@ -129,29 +129,67 @@ class DiaryScreenController extends BaseErrorController {
     loadDiaryEntries();
   }
 
+  // フィルタを適用（シマー表示なし、フィルタチップ操作用）
+  void _applyFilterSilently(DiaryFilter filter) {
+    _currentFilter = filter;
+    notifyListeners();
+    _loadEntriesWithoutShimmer();
+  }
+
+  // シマーなしでエントリーを読み込む
+  Future<void> _loadEntriesWithoutShimmer() async {
+    try {
+      _resetPaging();
+      final diaryService = await ServiceLocator()
+          .getAsync<IDiaryQueryService>();
+      final result = await diaryService.getFilteredDiaryEntriesPage(
+        _currentFilter,
+        offset: _offset,
+        limit: _pageSize,
+      );
+
+      result.fold(
+        (entries) {
+          _diaryEntries = entries;
+          _offset = entries.length;
+          _hasMore = entries.length == _pageSize;
+          clearError();
+          notifyListeners();
+        },
+        (error) {
+          setError(error);
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      setError(ServiceException('Failed to load diaries: $e'));
+      notifyListeners();
+    }
+  }
+
   // フィルタをクリア
   void clearAllFilters() {
-    applyFilter(DiaryFilter.empty);
+    _applyFilterSilently(DiaryFilter.empty);
   }
 
   // 個別フィルタを削除
   void removeTagFilter(String tag) {
     final newTags = Set<String>.from(_currentFilter.selectedTags)..remove(tag);
-    applyFilter(_currentFilter.copyWith(selectedTags: newTags));
+    _applyFilterSilently(_currentFilter.copyWith(selectedTags: newTags));
   }
 
   void removeTimeOfDayFilter(TimeOfDayPeriod period) {
     final newTimeOfDay = Set<TimeOfDayPeriod>.from(_currentFilter.timeOfDay)
       ..remove(period);
-    applyFilter(_currentFilter.copyWith(timeOfDay: newTimeOfDay));
+    _applyFilterSilently(_currentFilter.copyWith(timeOfDay: newTimeOfDay));
   }
 
   void removeDateRangeFilter() {
-    applyFilter(_currentFilter.copyWith(clearDateRange: true));
+    _applyFilterSilently(_currentFilter.copyWith(clearDateRange: true));
   }
 
   void removeSearchFilter() {
-    applyFilter(_currentFilter.copyWith(clearSearchText: true));
+    _applyFilterSilently(_currentFilter.copyWith(clearSearchText: true));
   }
 
   // 検索開始
