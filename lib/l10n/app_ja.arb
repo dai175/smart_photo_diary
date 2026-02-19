@@ -227,6 +227,19 @@
   "@homeLimitedAccessMessage": {
     "description": "限定的な写真アクセス時に表示するダイアログ本文"
   },
+  "homeSelectionCount": "{count}枚選択中",
+  "@homeSelectionCount": {
+    "description": "ホーム画面で選択中の写真数を表示",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSelectionClearAll": "選択解除",
+  "@homeSelectionClearAll": {
+    "description": "ホーム画面の写真選択を全解除するボタン"
+  },
   "commonCancel": "キャンセル",
   "@commonCancel": {
     "description": "キャンセルボタン共通文言"
