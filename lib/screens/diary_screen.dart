@@ -157,7 +157,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
       ),
       builder: (context) => FilterBottomSheet(
         initialFilter: _controller.currentFilter,
-        onApply: _controller.applyFilter,
+        onApply: (filter) {
+          _controller.applyFilter(filter);
+          _scrollController.jumpTo(0);
+        },
       ),
     );
   }
