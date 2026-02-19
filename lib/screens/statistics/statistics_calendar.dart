@@ -7,6 +7,7 @@ import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
 import '../../ui/components/custom_card.dart';
 import '../../ui/components/custom_dialog.dart';
+import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/component_constants.dart';
@@ -247,17 +248,19 @@ class StatisticsCalendar extends StatelessWidget {
                                     vertical: AppSpacing.xxs,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primaryContainer,
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.12,
+                                    ),
                                     borderRadius: AppSpacing.chipRadius,
                                   ),
                                   child: Text(
                                     '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
                                     style: AppTypography.labelSmall.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? AppColors.primaryLight
+                                          : AppColors.primary,
                                     ),
                                   ),
                                 ),

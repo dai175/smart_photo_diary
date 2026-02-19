@@ -53,6 +53,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         AppTypography.appTitle,
         AppColors.onSurfaceDark,
       ),
+      actionsIconTheme: const IconThemeData(
+        color: AppColors.onSurfaceVariantDark,
+      ),
       systemOverlayStyle: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
