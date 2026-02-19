@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
+import '../ui/components/buttons/text_only_button.dart';
 import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -111,6 +113,48 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 選択解除バー
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: ListenableBuilder(
+              listenable: widget.photoController,
+              builder: (context, _) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: widget.photoController.selectedCount > 0
+                      ? Padding(
+                          key: const ValueKey('selection-bar'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                context.l10n.homeSelectionCount(
+                                  widget.photoController.selectedCount,
+                                ),
+                                style: AppTypography.labelMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              TextOnlyButton(
+                                onPressed:
+                                    widget.photoController.clearSelection,
+                                text: context.l10n.homeSelectionClearAll,
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(key: ValueKey('empty')),
+                );
+              },
+            ),
+          ),
           // 統合されたタイムラインFAB表示
           Expanded(
             child: TimelineFABIntegration(

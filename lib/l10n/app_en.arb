@@ -227,6 +227,19 @@
   "@homeLimitedAccessMessage": {
     "description": "Dialog body shown when limited photo access is granted"
   },
+  "homeSelectionCount": "{count} selected",
+  "@homeSelectionCount": {
+    "description": "Number of selected photos on home screen",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSelectionClearAll": "Clear All",
+  "@homeSelectionClearAll": {
+    "description": "Button to clear all photo selections on home screen"
+  },
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Generic cancel button label"
