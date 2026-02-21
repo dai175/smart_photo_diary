@@ -80,6 +80,9 @@ class AppConstants {
   /// 統計データ変更ハンドラーのデバウンス時間
   static const Duration statisticsDebounce = Duration(milliseconds: 350);
 
+  /// スクロール位置に基づくプリフェッチデバウンス遅延
+  static const Duration prefetchDebounceDelay = Duration(milliseconds: 200);
+
   /// iOS パーミッション状態の安定化待機時間
   static const Duration platformPermissionSettleDelay = Duration(
     milliseconds: 100,

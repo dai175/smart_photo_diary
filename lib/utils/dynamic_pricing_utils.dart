@@ -103,11 +103,7 @@ class DynamicPricingUtils {
       // 並列で価格を取得
       final priceResults = await Future.wait(
         planIds.map(
-          (planId) => getPlanPrice(
-            planId,
-            locale: locale,
-            timeout: Duration(seconds: timeout.inSeconds ~/ planIds.length),
-          ),
+          (planId) => getPlanPrice(planId, locale: locale, timeout: timeout),
         ),
       );
 

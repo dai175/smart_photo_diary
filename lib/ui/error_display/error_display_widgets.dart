@@ -345,7 +345,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
               ),
             ),
           ),
-        if (config.showRetryButton && onRetry != null)
+        if (config.showRetryButton && onRetry != null && config.dismissible)
           const SizedBox(height: AppSpacing.md),
         if (config.dismissible)
           SizedBox(

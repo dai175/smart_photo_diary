@@ -70,7 +70,6 @@ class _ModernChipState extends State<ModernChip>
   late Animation<double> _scaleAnimation;
 
   bool _isHovered = false;
-  // bool _isPressed = false; // 将来的に使用予定
 
   @override
   void initState() {
@@ -97,14 +96,12 @@ class _ModernChipState extends State<ModernChip>
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.enabled && widget.onTap != null) {
-      // setState(() => _isPressed = true);
       _animationController.forward();
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.enabled && widget.onTap != null) {
-      // setState(() => _isPressed = false);
       _animationController.reverse();
       widget.onTap?.call();
     }
@@ -112,7 +109,6 @@ class _ModernChipState extends State<ModernChip>
 
   void _handleTapCancel() {
     if (widget.enabled && widget.onTap != null) {
-      // setState(() => _isPressed = false);
       _animationController.reverse();
     }
   }
@@ -281,7 +277,6 @@ class _ModernChipState extends State<ModernChip>
       );
     }
 
-    // final theme = Theme.of(context); // 将来的に使用予定
     return _ChipColorData(
       backgroundColor: widget.backgroundColor ?? AppColors.primaryContainer,
       foregroundColor: widget.foregroundColor ?? AppColors.onPrimaryContainer,

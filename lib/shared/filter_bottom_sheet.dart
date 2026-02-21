@@ -119,7 +119,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.filterDateSelectionError),
-            duration: const Duration(seconds: 2),
+            duration: AppConstants.snackBarInfoDuration,
           ),
         );
       }
