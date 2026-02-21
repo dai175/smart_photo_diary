@@ -20,7 +20,7 @@ class ErrorSnackBarContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(_getIconForSeverity(severity), color: Colors.white),
+        Icon(ErrorSeverityHelper.getIcon(severity), color: Colors.white),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
@@ -30,19 +30,6 @@ class ErrorSnackBarContent extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  IconData _getIconForSeverity(ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return Icons.info_outline;
-      case ErrorSeverity.warning:
-        return Icons.warning_amber;
-      case ErrorSeverity.error:
-        return Icons.error_outline;
-      case ErrorSeverity.critical:
-        return Icons.dangerous;
-    }
   }
 }
 
@@ -65,11 +52,11 @@ class ErrorDialogWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       icon: Icon(
-        _getIconForSeverity(config.severity),
-        color: _getColorForSeverity(context, config.severity),
+        ErrorSeverityHelper.getIcon(config.severity),
+        color: ErrorSeverityHelper.getColor(context, config.severity),
         size: 32,
       ),
-      title: Text(_getTitleForSeverity(context, config.severity)),
+      title: Text(ErrorSeverityHelper.getTitle(context, config.severity)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,46 +121,6 @@ class ErrorDialogWidget extends StatelessWidget {
     return actions;
   }
 
-  IconData _getIconForSeverity(ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return Icons.info_outline;
-      case ErrorSeverity.warning:
-        return Icons.warning_amber;
-      case ErrorSeverity.error:
-        return Icons.error_outline;
-      case ErrorSeverity.critical:
-        return Icons.dangerous;
-    }
-  }
-
-  String _getTitleForSeverity(BuildContext context, ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return context.l10n.errorSeverityInfo;
-      case ErrorSeverity.warning:
-        return context.l10n.errorSeverityWarning;
-      case ErrorSeverity.error:
-        return context.l10n.errorSeverityError;
-      case ErrorSeverity.critical:
-        return context.l10n.errorSeverityCritical;
-    }
-  }
-
-  Color _getColorForSeverity(BuildContext context, ErrorSeverity severity) {
-    final colorScheme = Theme.of(context).colorScheme;
-    switch (severity) {
-      case ErrorSeverity.info:
-        return colorScheme.primary;
-      case ErrorSeverity.warning:
-        return const Color(0xFFFF9800);
-      case ErrorSeverity.error:
-        return colorScheme.error;
-      case ErrorSeverity.critical:
-        return const Color(0xFFD32F2F);
-    }
-  }
-
   bool _shouldShowDetails(ErrorSeverity severity) {
     return severity == ErrorSeverity.critical;
   }
@@ -196,6 +143,10 @@ class ErrorInlineWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final severityColor = ErrorSeverityHelper.getColor(
+      context,
+      config.severity,
+    );
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -204,13 +155,8 @@ class ErrorInlineWidget extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: _getColorForSeverity(
-          context,
-          config.severity,
-        ).withValues(alpha: 0.1),
-        border: Border.all(
-          color: _getColorForSeverity(context, config.severity),
-        ),
+        color: severityColor.withValues(alpha: 0.1),
+        border: Border.all(color: severityColor),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
       ),
       child: Column(
@@ -220,8 +166,8 @@ class ErrorInlineWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                _getIconForSeverity(config.severity),
-                color: _getColorForSeverity(context, config.severity),
+                ErrorSeverityHelper.getIcon(config.severity),
+                color: severityColor,
                 size: 20,
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -230,10 +176,10 @@ class ErrorInlineWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _getTitleForSeverity(context, config.severity),
+                      ErrorSeverityHelper.getTitle(context, config.severity),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _getColorForSeverity(context, config.severity),
+                        color: severityColor,
                         fontSize: AppConstants.bodyFontSize,
                       ),
                     ),
@@ -241,7 +187,7 @@ class ErrorInlineWidget extends StatelessWidget {
                     Text(
                       error.userMessage,
                       style: TextStyle(
-                        color: _getColorForSeverity(context, config.severity),
+                        color: severityColor,
                         fontSize: AppConstants.captionFontSize,
                       ),
                     ),
@@ -251,13 +197,13 @@ class ErrorInlineWidget extends StatelessWidget {
             ],
           ),
           if (config.showRetryButton && onRetry != null)
-            ..._buildRetryButton(context),
+            ..._buildRetryButton(context, severityColor),
         ],
       ),
     );
   }
 
-  List<Widget> _buildRetryButton(BuildContext context) {
+  List<Widget> _buildRetryButton(BuildContext context, Color severityColor) {
     return [
       const SizedBox(height: AppSpacing.md),
       Align(
@@ -270,52 +216,10 @@ class ErrorInlineWidget extends StatelessWidget {
                 config.retryButtonText ??
                 context.l10n.commonRetry,
           ),
-          style: TextButton.styleFrom(
-            foregroundColor: _getColorForSeverity(context, config.severity),
-          ),
+          style: TextButton.styleFrom(foregroundColor: severityColor),
         ),
       ),
     ];
-  }
-
-  IconData _getIconForSeverity(ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return Icons.info_outline;
-      case ErrorSeverity.warning:
-        return Icons.warning_amber;
-      case ErrorSeverity.error:
-        return Icons.error_outline;
-      case ErrorSeverity.critical:
-        return Icons.dangerous;
-    }
-  }
-
-  String _getTitleForSeverity(BuildContext context, ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return context.l10n.errorSeverityInfo;
-      case ErrorSeverity.warning:
-        return context.l10n.errorSeverityWarning;
-      case ErrorSeverity.error:
-        return context.l10n.errorSeverityError;
-      case ErrorSeverity.critical:
-        return context.l10n.errorSeverityCritical;
-    }
-  }
-
-  Color _getColorForSeverity(BuildContext context, ErrorSeverity severity) {
-    final colorScheme = Theme.of(context).colorScheme;
-    switch (severity) {
-      case ErrorSeverity.info:
-        return colorScheme.primary;
-      case ErrorSeverity.warning:
-        return const Color(0xFFFF9800);
-      case ErrorSeverity.error:
-        return colorScheme.error;
-      case ErrorSeverity.critical:
-        return const Color(0xFFD32F2F);
-    }
   }
 }
 
@@ -336,10 +240,14 @@ class ErrorFullScreenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final severityColor = ErrorSeverityHelper.getColor(
+      context,
+      config.severity,
+    );
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getTitleForSeverity(context, config.severity)),
-        backgroundColor: _getColorForSeverity(context, config.severity),
+        title: Text(ErrorSeverityHelper.getTitle(context, config.severity)),
+        backgroundColor: severityColor,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -351,15 +259,15 @@ class ErrorFullScreenWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    _getIconForSeverity(config.severity),
+                    ErrorSeverityHelper.getIcon(config.severity),
                     size: 80,
-                    color: _getColorForSeverity(context, config.severity),
+                    color: severityColor,
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text(
-                    _getTitleForSeverity(context, config.severity),
+                    ErrorSeverityHelper.getTitle(context, config.severity),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: _getColorForSeverity(context, config.severity),
+                      color: severityColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -374,7 +282,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
                 ],
               ),
             ),
-            _buildActionButtons(context),
+            _buildActionButtons(context, severityColor),
           ],
         ),
       ),
@@ -413,7 +321,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
     ];
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, Color severityColor) {
     return Column(
       children: [
         if (config.showRetryButton && onRetry != null)
@@ -432,7 +340,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
                     context.l10n.commonRetry,
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _getColorForSeverity(context, config.severity),
+                backgroundColor: severityColor,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -450,46 +358,6 @@ class ErrorFullScreenWidget extends StatelessWidget {
           ),
       ],
     );
-  }
-
-  IconData _getIconForSeverity(ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return Icons.info_outline;
-      case ErrorSeverity.warning:
-        return Icons.warning_amber;
-      case ErrorSeverity.error:
-        return Icons.error_outline;
-      case ErrorSeverity.critical:
-        return Icons.dangerous;
-    }
-  }
-
-  String _getTitleForSeverity(BuildContext context, ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return context.l10n.errorSeverityInfo;
-      case ErrorSeverity.warning:
-        return context.l10n.errorSeverityWarning;
-      case ErrorSeverity.error:
-        return context.l10n.errorSeverityError;
-      case ErrorSeverity.critical:
-        return context.l10n.errorSeverityCritical;
-    }
-  }
-
-  Color _getColorForSeverity(BuildContext context, ErrorSeverity severity) {
-    final colorScheme = Theme.of(context).colorScheme;
-    switch (severity) {
-      case ErrorSeverity.info:
-        return colorScheme.primary;
-      case ErrorSeverity.warning:
-        return const Color(0xFFFF9800);
-      case ErrorSeverity.error:
-        return colorScheme.error;
-      case ErrorSeverity.critical:
-        return const Color(0xFFD32F2F);
-    }
   }
 
   bool _shouldShowDetails(ErrorSeverity severity) {
