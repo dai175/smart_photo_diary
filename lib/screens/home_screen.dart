@@ -40,11 +40,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with
-        WidgetsBindingObserver,
-        SingleTickerProviderStateMixin,
-        _HomeDialogsMixin,
-        _HomeDataLoaderMixin {
+    with WidgetsBindingObserver, _HomeDialogsMixin, _HomeDataLoaderMixin {
   // サービス
   late final ILoggingService _logger;
 
@@ -72,9 +68,6 @@ class _HomeScreenState extends State<HomeScreen>
   // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
 
-  // タブ切り替えフェードアニメーション
-  late final AnimationController _tabFadeController;
-
   @override
   void initState() {
     super.initState();
@@ -82,11 +75,6 @@ class _HomeScreenState extends State<HomeScreen>
     _logger = serviceLocator.get<ILoggingService>();
     _homeController = HomeController();
     _photoController = PhotoSelectionController();
-    _tabFadeController = AnimationController(
-      duration: AppConstants.shortAnimationDuration,
-      vsync: this,
-      value: 1.0,
-    );
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);
 
@@ -102,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _diarySub?.cancel();
-    _tabFadeController.dispose();
     _homeController.dispose();
     _photoController.dispose();
     super.dispose();
@@ -260,15 +247,6 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  /// フェードアニメーション付きでタブを切り替える
-  Future<void> _switchTabWithFade(VoidCallback switchAction) async {
-    await _tabFadeController.reverse();
-    if (!mounted) return;
-    switchAction();
-    if (!mounted) return;
-    _tabFadeController.forward();
-  }
-
   // 画面一覧を取得するメソッド
   List<Widget> _getScreens() {
     final screens = [
@@ -314,12 +292,9 @@ class _HomeScreenState extends State<HomeScreen>
 
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          body: FadeTransition(
-            opacity: _tabFadeController,
-            child: IndexedStack(
-              index: _homeController.currentIndex,
-              children: screens,
-            ),
+          body: IndexedStack(
+            index: _homeController.currentIndex,
+            children: screens,
           ),
           floatingActionButton: null,
           bottomNavigationBar: Column(
@@ -352,17 +327,10 @@ class _HomeScreenState extends State<HomeScreen>
                     return;
                   }
 
-                  // フェードアニメーション付きでタブ切替
                   if (index == AppConstants.homeTabIndex) {
-                    _switchTabWithFade(() {
-                      _loadUsedPhotoIds();
-                      _homeController.setCurrentIndex(index);
-                    });
-                  } else {
-                    _switchTabWithFade(() {
-                      _homeController.setCurrentIndex(index);
-                    });
+                    _loadUsedPhotoIds();
                   }
+                  _homeController.setCurrentIndex(index);
                 },
                 items: _buildNavigationItems(),
               ),
