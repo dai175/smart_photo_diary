@@ -366,15 +366,17 @@ Describe the situation and mood you infer from the image, including any emotiona
     final emphasis = optimParams['emphasis'] as String;
     final baseMaxTokens = optimParams['maxTokens'] as int;
     final isShort = diaryLength == DiaryLength.short;
-    final multiImageMaxTokens =
-        baseMaxTokens +
-        (DiaryLocaleUtils.isJapanese(locale)
-            ? (isShort
-                  ? DiaryPromptBuilder.multiImageExtraTokensJaShort
-                  : DiaryPromptBuilder.multiImageExtraTokensJaStandard)
-            : (isShort
-                  ? DiaryPromptBuilder.multiImageExtraTokensEnShort
-                  : DiaryPromptBuilder.multiImageExtraTokensEnStandard));
+    final int extraTokens;
+    if (DiaryLocaleUtils.isJapanese(locale)) {
+      extraTokens = isShort
+          ? DiaryPromptBuilder.multiImageExtraTokensJaShort
+          : DiaryPromptBuilder.multiImageExtraTokensJaStandard;
+    } else {
+      extraTokens = isShort
+          ? DiaryPromptBuilder.multiImageExtraTokensEnShort
+          : DiaryPromptBuilder.multiImageExtraTokensEnStandard;
+    }
+    final multiImageMaxTokens = baseMaxTokens + extraTokens;
 
     final prompt = DiaryPromptBuilder.buildMultiImagePrompt(
       locale: locale,

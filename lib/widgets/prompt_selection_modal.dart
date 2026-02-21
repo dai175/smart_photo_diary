@@ -122,11 +122,14 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
 
   List<CustomDialogAction> _buildActions() {
     final l10n = context.l10n;
-    final primaryText = _isRandomSelected
-        ? l10n.promptCreateRandom
-        : (_selectedPrompt != null
-              ? l10n.promptCreateWithSelected
-              : l10n.promptCreateWithout);
+    final String primaryText;
+    if (_isRandomSelected) {
+      primaryText = l10n.promptCreateRandom;
+    } else if (_selectedPrompt != null) {
+      primaryText = l10n.promptCreateWithSelected;
+    } else {
+      primaryText = l10n.promptCreateWithout;
+    }
 
     return [
       CustomDialogAction(
