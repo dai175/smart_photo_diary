@@ -358,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen>
                     });
                   } else if (index == AppConstants.statisticsTabIndex) {
                     _switchTabWithFade(() {
-                      _homeController.refreshStatsAndSwitchTab(index);
+                      _homeController.setCurrentIndex(index);
                     });
                   } else {
                     _switchTabWithFade(() {

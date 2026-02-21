@@ -70,27 +70,5 @@ void main() {
         expect(notified, isTrue);
       });
     });
-
-    group('refreshStatsAndSwitchTab', () {
-      test('statsScreenKeyが更新されcurrentIndexが変更される', () {
-        final oldStatsKey = controller.statsScreenKey;
-        final oldDiaryKey = controller.diaryScreenKey;
-
-        controller.refreshStatsAndSwitchTab(2);
-
-        expect(controller.statsScreenKey, isNot(oldStatsKey));
-        expect(controller.diaryScreenKey, oldDiaryKey);
-        expect(controller.currentIndex, 2);
-      });
-
-      test('notifyListenersが呼ばれる', () {
-        var notified = false;
-        controller.addListener(() => notified = true);
-
-        controller.refreshStatsAndSwitchTab(3);
-
-        expect(notified, isTrue);
-      });
-    });
   });
 }
