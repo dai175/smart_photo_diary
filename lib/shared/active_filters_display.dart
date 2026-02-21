@@ -28,7 +28,10 @@ class ActiveFiltersDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
@@ -56,8 +59,12 @@ class ActiveFiltersDisplay extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Wrap(spacing: 8, runSpacing: 4, children: _buildFilterChips(context)),
+          const SizedBox(height: AppSpacing.xxs),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xxs,
+            children: _buildFilterChips(context),
+          ),
         ],
       ),
     );

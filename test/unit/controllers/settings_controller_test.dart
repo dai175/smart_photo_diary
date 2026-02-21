@@ -38,7 +38,8 @@ void main() {
       (_) async => const Failure(ServiceException('Not available in test')),
     );
     when(() => mockStorage.getStorageInfoResult()).thenAnswer(
-      (_) async => Success(StorageInfo(totalSize: 1024, diaryDataSize: 512)),
+      (_) async =>
+          const Success(StorageInfo(totalSize: 1024, diaryDataSize: 512)),
     );
   });
 
