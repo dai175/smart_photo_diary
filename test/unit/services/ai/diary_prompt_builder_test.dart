@@ -570,7 +570,8 @@ void main() {
         contextText: '友達と\n花見に\r\n行った',
       );
       expect(result, contains('友達と 花見に 行った'));
-      expect(result, isNot(contains('\n友達と')));
+      expect(result, isNot(contains('友達と\n')));
+      expect(result, isNot(contains('\r')));
     });
   });
 
