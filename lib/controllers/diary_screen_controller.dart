@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_filter.dart';
@@ -130,7 +132,7 @@ class DiaryScreenController extends BaseErrorController {
   void _applyFilterSilently(DiaryFilter filter) {
     _currentFilter = filter;
     notifyListeners();
-    loadDiaryEntries(showShimmer: false);
+    unawaited(loadDiaryEntries(showShimmer: false));
   }
 
   // フィルタをクリア
