@@ -866,7 +866,7 @@
   "@diaryPreviewPhotoDataError": {
     "description": "写真データの読み込みに失敗した場合のエラーメッセージ"
   },
-  "diaryPreviewGenerationError": "日記の生成中にエラーが発生しました。\\n時間を空けてもう一度お試しください。",
+  "diaryPreviewGenerationError": "日記の生成中にエラーが発生しました。\n時間を空けてもう一度お試しください。",
   "@diaryPreviewGenerationError": {
     "description": "日記生成に失敗した際に表示するメッセージ"
   },
@@ -874,7 +874,7 @@
   "@diaryPreviewSaveSuccess": {
     "description": "日記保存成功時のスナックバー表示"
   },
-  "diaryPreviewSaveError": "日記の保存に失敗しました。\\n時間を空けてもう一度お試しください。",
+  "diaryPreviewSaveError": "日記の保存に失敗しました。\n時間を空けてもう一度お試しください。",
   "@diaryPreviewSaveError": {
     "description": "日記保存に失敗した際に表示するエラーメッセージ"
   },
