@@ -32,7 +32,7 @@ class OnboardingWelcomePage extends StatelessWidget {
       // アプリアイコン
       MicroInteractions.scaleTransition(
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXxl),
           child: Image.asset(
             'assets/images/app_icon.png',
             width: 120,

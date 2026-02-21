@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/design_system/app_spacing.dart';
+
 /// 過去の写真カレンダーの日付セルビルダー集
 ///
 /// [PastPhotoCalendarWidget] の calendarBuilders で使用する
@@ -7,8 +9,10 @@ import 'package:flutter/material.dart';
 class PastPhotoCalendarBuilders {
   PastPhotoCalendarBuilders._();
 
-  static const _cellMargin = EdgeInsets.all(4);
-  static const _cellBorderRadius = BorderRadius.all(Radius.circular(8));
+  static const _cellMargin = EdgeInsets.all(AppSpacing.xs);
+  static const _cellBorderRadius = BorderRadius.all(
+    Radius.circular(AppSpacing.borderRadiusSm),
+  );
 
   /// デフォルトの日付セル
   ///

@@ -4,6 +4,7 @@ import '../../localization/localization_extensions.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/interfaces/settings_service_interface.dart';
 import '../../ui/design_system/app_colors.dart';
+import '../../ui/design_system/app_spacing.dart';
 import '../../utils/dialog_utils.dart';
 import 'settings_row.dart';
 
@@ -59,7 +60,7 @@ class AppearanceSettingsSection extends StatelessWidget {
   Widget _buildDivider() {
     return Container(
       height: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       color: AppColors.outline.withValues(alpha: 0.1),
     );
   }

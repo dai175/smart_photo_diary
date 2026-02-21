@@ -74,7 +74,9 @@ class OnboardingDynamicPlanCard extends StatelessWidget {
                                 .colorScheme
                                 .onSurfaceVariant
                                 .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.borderRadiusXs,
+                            ),
                           ),
                         ),
                       ),

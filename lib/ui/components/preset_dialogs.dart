@@ -276,7 +276,9 @@ class PresetDialogs {
                         color: Theme.of(
                           context,
                         ).colorScheme.outline.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadiusXs,
+                        ),
                       ),
                       child: Align(
                         alignment: Alignment.centerLeft,
@@ -289,7 +291,9 @@ class PresetDialogs {
                                   ? Theme.of(context).colorScheme.error
                                   : Theme.of(context).colorScheme.primary
                                         .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.borderRadiusXs,
+                              ),
                             ),
                           ),
                         ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
-import '../../constants/theme_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../localization/localization_extensions.dart';
+import '../../ui/design_system/app_spacing.dart';
 import 'error_severity.dart';
 
 /// SnackBar用エラーコンテンツ
@@ -21,7 +21,7 @@ class ErrorSnackBarContent extends StatelessWidget {
     return Row(
       children: [
         Icon(_getIconForSeverity(severity), color: Colors.white),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             error.userMessage,
@@ -85,9 +85,9 @@ class ErrorDialogWidget extends StatelessWidget {
 
   List<Widget> _buildErrorDetails(BuildContext context) {
     return [
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.lg),
       const Divider(),
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpacing.sm),
       Text(
         context.l10n.errorDetailsLabel,
         style: TextStyle(
@@ -96,7 +96,7 @@ class ErrorDialogWidget extends StatelessWidget {
           color: Colors.grey[600],
         ),
       ),
-      const SizedBox(height: 4),
+      const SizedBox(height: AppSpacing.xs),
       Text(
         error.message,
         style: TextStyle(
@@ -198,10 +198,10 @@ class ErrorInlineWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       margin: const EdgeInsets.symmetric(
         horizontal: AppConstants.defaultPadding,
-        vertical: AppConstants.smallPadding,
+        vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: _getColorForSeverity(
@@ -211,7 +211,7 @@ class ErrorInlineWidget extends StatelessWidget {
         border: Border.all(
           color: _getColorForSeverity(context, config.severity),
         ),
-        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +224,7 @@ class ErrorInlineWidget extends StatelessWidget {
                 color: _getColorForSeverity(context, config.severity),
                 size: 20,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,7 +237,7 @@ class ErrorInlineWidget extends StatelessWidget {
                         fontSize: AppConstants.bodyFontSize,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       error.userMessage,
                       style: TextStyle(
@@ -259,7 +259,7 @@ class ErrorInlineWidget extends StatelessWidget {
 
   List<Widget> _buildRetryButton(BuildContext context) {
     return [
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.md),
       Align(
         alignment: Alignment.centerRight,
         child: TextButton.icon(
@@ -343,7 +343,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(AppConstants.largePadding),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
             Expanded(
@@ -355,7 +355,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
                     size: 80,
                     color: _getColorForSeverity(context, config.severity),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xl),
                   Text(
                     _getTitleForSeverity(context, config.severity),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -363,7 +363,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     error.userMessage,
                     style: Theme.of(context).textTheme.bodyLarge,
@@ -383,13 +383,13 @@ class ErrorFullScreenWidget extends StatelessWidget {
 
   List<Widget> _buildErrorDetails(BuildContext context) {
     return [
-      const SizedBox(height: 24),
+      const SizedBox(height: AppSpacing.xl),
       Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +400,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               error.message,
               style: Theme.of(
@@ -438,7 +438,7 @@ class ErrorFullScreenWidget extends StatelessWidget {
             ),
           ),
         if (config.showRetryButton && onRetry != null)
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
         if (config.dismissible)
           SizedBox(
             width: double.infinity,
@@ -516,7 +516,7 @@ class SimpleErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -525,7 +525,7 @@ class SimpleErrorWidget extends StatelessWidget {
               size: 64,
               color: Colors.grey[400],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               message,
               style: Theme.of(
@@ -534,7 +534,7 @@ class SimpleErrorWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),

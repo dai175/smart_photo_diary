@@ -60,7 +60,7 @@ class DiaryPreviewEditor extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.xs,
-              vertical: 2,
+              vertical: AppSpacing.xxs,
             ),
             decoration: BoxDecoration(
               color: PromptCategoryUtils.getCategoryColor(
@@ -78,7 +78,7 @@ class DiaryPreviewEditor extends StatelessWidget {
                     selectedPrompt!.category,
                   ),
                 ),
-                const SizedBox(width: 2),
+                const SizedBox(width: AppSpacing.xxs),
                 Text(
                   context.l10n.diaryPreviewPromptTag,
                   style: AppTypography.labelSmall.copyWith(

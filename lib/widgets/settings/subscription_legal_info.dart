@@ -163,7 +163,9 @@ class _PlanDetailRow extends StatelessWidget {
                       height: 16,
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadiusXs,
+                        ),
                       ),
                     ),
                   ),

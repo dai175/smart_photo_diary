@@ -77,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   )
                 else
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                 // ページビュー
                 Expanded(
@@ -124,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   : Theme.of(
                       context,
                     ).colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXs),
             ),
           );
         }),
