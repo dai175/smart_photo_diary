@@ -234,7 +234,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
               borderRadius: AppSpacing.photoRadius,
             ),
             child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(
+                strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+              ),
             ),
           );
         }
@@ -269,7 +271,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
               const SizedBox(
                 width: 16,
                 height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(

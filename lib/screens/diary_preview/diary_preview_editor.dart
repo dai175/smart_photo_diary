@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/writing_prompt.dart';
 import '../../ui/components/custom_card.dart';
@@ -25,7 +26,7 @@ class DiaryPreviewEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SlideInWidget(
-      delay: const Duration(milliseconds: 200),
+      delay: AppConstants.quickAnimationDuration,
       child: CustomCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

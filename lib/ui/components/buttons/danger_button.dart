@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/app_constants.dart';
 import '../../design_system/app_spacing.dart';
 import 'animated_button_base.dart';
 
@@ -33,7 +34,7 @@ class DangerButton extends StatelessWidget {
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: AppConstants.progressIndicatorStrokeWidth,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   theme.colorScheme.onError,
                 ),

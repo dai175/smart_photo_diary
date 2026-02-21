@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../constants/app_constants.dart';
 import '../../controllers/diary_preview_controller.dart';
 import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
@@ -148,7 +149,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
             ),
           ),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
+          duration: AppConstants.snackBarErrorDuration,
         ),
       );
     }

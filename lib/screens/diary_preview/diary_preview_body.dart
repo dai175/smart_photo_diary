@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/writing_prompt.dart';
 import '../../ui/components/animated_button.dart';
@@ -151,7 +152,7 @@ class DiaryPreviewBody extends StatelessWidget {
   /// 写真プレビューセクションを構築
   Widget _buildPhotoPreview(BuildContext context) {
     return FadeInWidget(
-      delay: const Duration(milliseconds: 100),
+      delay: AppConstants.microStaggerUnit,
       child: CustomCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,6 +1,7 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../constants/app_constants.dart';
 import '../core/errors/error_handler.dart';
 import '../core/errors/photo_error.dart';
 import '../core/result/result.dart';
@@ -36,7 +37,7 @@ class CameraService implements ICameraService {
 
       // 権限状態の詳細チェック
       await Future.delayed(
-        const Duration(milliseconds: 100),
+        AppConstants.microStaggerUnit,
       ); // 少し待機してiOSの権限状態が更新されるのを待つ
       final cameraStatus = await Permission.camera.status;
       _logger.debug(

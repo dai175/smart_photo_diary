@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../core/service_locator.dart';
@@ -184,7 +185,7 @@ class UpgradeDialogUtils {
             Navigator.of(dialogContext).pop();
 
             // 少し待機してUI安定化
-            await Future.delayed(const Duration(milliseconds: 200));
+            await Future.delayed(AppConstants.quickAnimationDuration);
 
             // 購入処理を開始
             await _startPurchaseWithoutContext(plan);

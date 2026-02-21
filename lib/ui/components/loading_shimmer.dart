@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_constants.dart';
 import '../component_constants.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
@@ -13,7 +14,7 @@ class LoadingShimmer extends StatefulWidget {
     this.highlightColor,
     this.enabled = true,
     this.direction = ShimmerDirection.ltr,
-    this.period = const Duration(milliseconds: 1800),
+    this.period = AppConstants.shimmerAnimationPeriod,
   });
 
   /// シマー効果を適用する子ウィジェット

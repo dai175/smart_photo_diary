@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../constants/app_constants.dart';
 import '../models/plans/plan.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/diary_query_service_interface.dart';
@@ -399,13 +400,15 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         if (_isLoading)
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: const CircularProgressIndicator(strokeWidth: 2),
+            child: const CircularProgressIndicator(
+              strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+            ),
           ),
 
         // 選択された日付の情報
         if (_selectedDay != null && !_isLoading)
           SlideInWidget(
-            delay: const Duration(milliseconds: 200),
+            delay: AppConstants.quickAnimationDuration,
             child: Container(
               margin: const EdgeInsets.only(top: AppSpacing.sm),
               padding: AppSpacing.cardPadding,

@@ -230,7 +230,7 @@ class ErrorDisplayService {
           Expanded(child: Text(message)),
         ],
       ),
-      duration: duration ?? const Duration(seconds: 3),
+      duration: duration ?? AppConstants.snackBarInfoDuration,
       backgroundColor: Colors.green,
       behavior: SnackBarBehavior.floating,
     );
@@ -254,7 +254,7 @@ class ErrorDisplayService {
           Expanded(child: Text(message)),
         ],
       ),
-      duration: duration ?? const Duration(seconds: 3),
+      duration: duration ?? AppConstants.snackBarInfoDuration,
       backgroundColor: Theme.of(context).colorScheme.primary,
       behavior: SnackBarBehavior.floating,
     );

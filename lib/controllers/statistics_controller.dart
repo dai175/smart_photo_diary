@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../constants/app_constants.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/service_locator.dart';
 import '../models/diary_change.dart';
@@ -85,7 +86,7 @@ class StatisticsController extends BaseErrorController {
       final diaryService = await serviceLocator.getAsync<IDiaryService>();
       _diarySub = diaryService.changes.listen((_) {
         _debounce?.cancel();
-        _debounce = Timer(const Duration(milliseconds: 350), () {
+        _debounce = Timer(AppConstants.defaultAnimationDuration, () {
           loadStatistics();
         });
       });
