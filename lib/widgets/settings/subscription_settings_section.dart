@@ -118,6 +118,7 @@ class _SubscriptionSettingsSectionState
     final displayData = _getLocalizedDisplayData();
 
     return MicroInteractions.bounceOnTap(
+      enableHaptic: true,
       onTap: () {
         setState(() {
           _subscriptionExpanded = !_subscriptionExpanded;
@@ -330,7 +331,6 @@ class _SubscriptionSettingsSectionState
   Widget _buildUpgradeButton() {
     return PrimaryButton(
       onPressed: () {
-        MicroInteractions.hapticTap();
         _showUpgradeDialog();
       },
       text: context.l10n.settingsUpgradeToPremium,

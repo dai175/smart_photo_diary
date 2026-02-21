@@ -68,13 +68,7 @@ class SettingsRow extends StatelessWidget {
     );
 
     Widget result = onTap != null
-        ? MicroInteractions.bounceOnTap(
-            onTap: () {
-              MicroInteractions.hapticTap();
-              onTap!();
-            },
-            child: row,
-          )
+        ? MicroInteractions.bounceOnTap(onTap: onTap!, child: row)
         : row;
 
     if (semanticLabel != null) {

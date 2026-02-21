@@ -147,7 +147,6 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
         if (widget.onTap != null) {
           return MicroInteractions.bounceOnTap(
             onTap: () {
-              MicroInteractions.hapticTap();
               widget.onTap!(context, widget.asset, snapshot.data!);
             },
             child: imageWidget,

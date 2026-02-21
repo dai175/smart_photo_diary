@@ -32,7 +32,7 @@ class MicroInteractions {
   static Widget bounceOnTap({
     required Widget child,
     required VoidCallback onTap,
-    bool enableHaptic = true,
+    bool enableHaptic = false,
     double scaleFactor = AppConstants.scaleTapSmall,
     Duration duration = AppConstants.microFastAnimationDuration,
   }) {
@@ -49,7 +49,7 @@ class MicroInteractions {
   static Widget scaleOnTap({
     required Widget child,
     required VoidCallback onTap,
-    bool enableHaptic = true,
+    bool enableHaptic = false,
     double scaleFactor = AppConstants.scaleTapSmall,
     Duration duration = AppConstants.microFastAnimationDuration,
   }) {

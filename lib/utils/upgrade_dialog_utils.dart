@@ -13,7 +13,6 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/custom_dialog.dart';
-import '../ui/animations/micro_interactions.dart';
 import '../localization/localization_extensions.dart';
 import '../constants/subscription_constants.dart';
 import 'dynamic_pricing_utils.dart';
@@ -172,8 +171,6 @@ class UpgradeDialogUtils {
       child: CustomCard(
         child: InkWell(
           onTap: () async {
-            MicroInteractions.hapticTap();
-
             _logger.debug(
               'Plan option tapped: ${plan.id}',
               context: 'UpgradeDialogUtils._buildPlanOption',
