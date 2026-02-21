@@ -866,7 +866,7 @@
   "@diaryPreviewPhotoDataError": {
     "description": "Error message when photo data cannot be loaded"
   },
-  "diaryPreviewGenerationError": "We ran into an issue while generating your diary.\\nPlease try again in a moment.",
+  "diaryPreviewGenerationError": "We ran into an issue while generating your diary.\nPlease try again in a moment.",
   "@diaryPreviewGenerationError": {
     "description": "Message shown when diary generation fails"
   },
@@ -874,7 +874,7 @@
   "@diaryPreviewSaveSuccess": {
     "description": "Snack bar message shown after a diary is saved successfully"
   },
-  "diaryPreviewSaveError": "We couldn't save the diary.\\nPlease try again later.",
+  "diaryPreviewSaveError": "We couldn't save the diary.\nPlease try again later.",
   "@diaryPreviewSaveError": {
     "description": "Error message shown when diary saving fails"
   },
