@@ -70,7 +70,8 @@ void main() {
 
     // Stub StorageService
     when(() => mockStorage.getStorageInfoResult()).thenAnswer(
-      (_) async => Success(StorageInfo(totalSize: 1024, diaryDataSize: 512)),
+      (_) async =>
+          const Success(StorageInfo(totalSize: 1024, diaryDataSize: 512)),
     );
 
     // Register synchronous logger service (always needed by constructor)

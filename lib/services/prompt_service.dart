@@ -257,12 +257,6 @@ class PromptService implements IPromptService {
           .toList();
     }
 
-    // 履歴ベースの重複回避は無効化（ユーザー要望により）
-    // final recentlyUsedIds = getRecentlyUsedPromptIds();
-    // if (recentlyUsedIds.isNotEmpty) {
-    //   candidates = candidates.where((prompt) => !recentlyUsedIds.contains(prompt.id)).toList();
-    // }
-
     if (candidates.isEmpty) {
       return null;
     }

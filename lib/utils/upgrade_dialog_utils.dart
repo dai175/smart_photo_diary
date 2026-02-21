@@ -312,24 +312,16 @@ class UpgradeDialogUtils {
     Plan plan,
     String? priceString,
   ) {
-    // 共通ユーティリティから取得した価格を使用（既にフォーマット済み）
-    final priceText = priceString != null
-        ? (plan.isMonthly
-              ? context.l10n.pricingPerMonthShort(priceString)
-              : context.l10n.pricingPerYearShort(priceString))
-        : (plan.isMonthly
-              ? context.l10n.pricingPerMonthShort(
-                  SubscriptionConstants.formatPriceForPlan(
-                    plan.id,
-                    context.l10n.localeName,
-                  ),
-                )
-              : context.l10n.pricingPerYearShort(
-                  SubscriptionConstants.formatPriceForPlan(
-                    plan.id,
-                    context.l10n.localeName,
-                  ),
-                ));
+    // 動的価格またはフォールバック価格を解決
+    final price =
+        priceString ??
+        SubscriptionConstants.formatPriceForPlan(
+          plan.id,
+          context.l10n.localeName,
+        );
+    final priceText = plan.isMonthly
+        ? context.l10n.pricingPerMonthShort(price)
+        : context.l10n.pricingPerYearShort(price);
 
     _logger.debug(
       priceString != null

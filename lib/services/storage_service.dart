@@ -487,7 +487,7 @@ class StorageInfo {
   final int totalSize;
   final int diaryDataSize;
 
-  StorageInfo({required this.totalSize, required this.diaryDataSize});
+  const StorageInfo({required this.totalSize, required this.diaryDataSize});
 
   String get formattedTotalSize => _formatBytes(totalSize);
   String get formattedDiaryDataSize => _formatBytes(diaryDataSize);

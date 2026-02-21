@@ -19,10 +19,10 @@ void main() {
     group('getStorageInfoResult', () {
       test('成功時にResult<StorageInfo>を返す', () async {
         // Arrange
-        final storageInfo = StorageInfo(totalSize: 1024, diaryDataSize: 512);
+        const storageInfo = StorageInfo(totalSize: 1024, diaryDataSize: 512);
         when(
           () => mockStorageService.getStorageInfoResult(),
-        ).thenAnswer((_) async => Success(storageInfo));
+        ).thenAnswer((_) async => const Success(storageInfo));
 
         // Act
         final result = await mockStorageService.getStorageInfoResult();
