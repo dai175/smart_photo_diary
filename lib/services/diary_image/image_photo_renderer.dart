@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../../core/service_locator.dart';
+import '../interfaces/logging_service_interface.dart';
 import '../interfaces/social_share_service_interface.dart';
 import 'image_layout_calculator.dart';
 
@@ -96,19 +98,32 @@ class ImagePhotoRenderer {
     Rect rect,
   ) async {
     final bytes = await _getImageBytes(asset, rect);
-    if (bytes == null) return;
+    if (bytes == null) {
+      ServiceLocator().get<ILoggingService>().warning(
+        'Failed to obtain thumbnail bytes for asset',
+        context: 'ImagePhotoRenderer._drawAssetIntoRect',
+        data: 'asset_id: ${asset.id}',
+      );
+      return;
+    }
     final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    final image = frame.image;
-    final src = ImageLayoutCalculator.calculateCropRect(
-      image.width.toDouble(),
-      image.height.toDouble(),
-      rect.width,
-      rect.height,
-    );
-    canvas.drawImageRect(image, src, rect, _drawPaint);
-    image.dispose();
-    codec.dispose();
+    try {
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+      try {
+        final src = ImageLayoutCalculator.calculateCropRect(
+          image.width.toDouble(),
+          image.height.toDouble(),
+          rect.width,
+          rect.height,
+        );
+        canvas.drawImageRect(image, src, rect, _drawPaint);
+      } finally {
+        image.dispose();
+      }
+    } finally {
+      codec.dispose();
+    }
   }
 
   /// 個々のアセットを指定矩形に描画
