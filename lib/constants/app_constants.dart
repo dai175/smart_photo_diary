@@ -76,6 +76,15 @@ class AppConstants {
   static const Duration snackBarWarningDuration = Duration(seconds: 4);
   static const Duration snackBarErrorDuration = Duration(seconds: 5);
 
+  // 機能的ディレイ（UIアニメーションとは独立）
+  /// 統計データ変更ハンドラーのデバウンス時間
+  static const Duration statisticsDebounce = Duration(milliseconds: 350);
+
+  /// iOS パーミッション状態の安定化待機時間
+  static const Duration platformPermissionSettleDelay = Duration(
+    milliseconds: 100,
+  );
+
   // インジケーター
   static const double progressIndicatorStrokeWidth = 2.0;
 
