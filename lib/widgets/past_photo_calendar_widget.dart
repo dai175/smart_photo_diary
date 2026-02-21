@@ -361,7 +361,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
                   holidayTextStyle: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  cellMargin: const EdgeInsets.all(2),
+                  cellMargin: const EdgeInsets.all(AppSpacing.xxs),
                   cellPadding: const EdgeInsets.all(0),
                 ),
                 rowHeight: 42,

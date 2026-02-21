@@ -361,7 +361,9 @@ class ListItemShimmer extends StatelessWidget {
                 height: 24,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusXs,
+                  ),
                 ),
               ),
             ],
@@ -428,7 +430,9 @@ class DiaryCardShimmer extends StatelessWidget {
                   height: 24,
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusMd,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -437,7 +441,9 @@ class DiaryCardShimmer extends StatelessWidget {
                   height: 24,
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusMd,
+                    ),
                   ),
                 ),
               ],

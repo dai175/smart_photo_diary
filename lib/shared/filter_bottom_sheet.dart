@@ -5,6 +5,7 @@ import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/design_system/app_spacing.dart';
 import '../localization/localization_extensions.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -195,10 +196,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Container(
             width: 40,
             height: 4,
-            margin: const EdgeInsets.symmetric(vertical: 12),
+            margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             decoration: BoxDecoration(
               color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(AppSpacing.xxs),
             ),
           ),
 
@@ -272,8 +273,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           ),
                         )
                       : Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
                           children: _availableTags.map((tag) {
                             final isSelected = _currentFilter.selectedTags
                                 .contains(tag);
@@ -290,8 +291,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 _buildSection(
                   title: context.l10n.filterTimeOfDay,
                   child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
                     children: _timeOfDayEntries(context).map((entry) {
                       final isSelected = _currentFilter.timeOfDay.contains(
                         entry.key,
@@ -332,7 +333,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Text(
             title,
             style: Theme.of(
@@ -341,7 +342,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
         ),
         child,
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
       ],
     );
   }

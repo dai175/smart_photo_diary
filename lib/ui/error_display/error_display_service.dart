@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../core/errors/app_exceptions.dart';
+import '../../ui/design_system/app_spacing.dart';
 import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
 import '../../services/interfaces/logging_service_interface.dart';
@@ -254,7 +255,7 @@ class ErrorDisplayService {
       content: Row(
         children: [
           const Icon(Icons.check_circle, color: Colors.white),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(child: Text(message)),
         ],
       ),
@@ -278,7 +279,7 @@ class ErrorDisplayService {
       content: Row(
         children: [
           const Icon(Icons.info, color: Colors.white),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(child: Text(message)),
         ],
       ),
