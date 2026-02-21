@@ -161,6 +161,15 @@ class DiaryPromptBuilder {
     }
   }
 
+  /// contextText をプロンプトに注入するための行を構築
+  static String _buildContextLine(String? contextText, Locale locale) {
+    if (contextText == null || contextText.trim().isEmpty) return '';
+    final trimmed = contextText.trim();
+    return DiaryLocaleUtils.isJapanese(locale)
+        ? '\n状況・背景：「$trimmed」\n上記の状況を踏まえて、'
+        : '\nContext: "$trimmed"\nWith this context in mind,';
+  }
+
   /// 単一画像用プロンプトを構築
   static String buildSingleImagePrompt({
     required Locale locale,
@@ -179,9 +188,7 @@ class DiaryPromptBuilder {
     if (isJapanese) {
       final titleLength = isShort ? _jaTitleShort : _jaTitleStandard;
       final bodyLength = isShort ? _jaSingleBodyShort : _jaSingleBodyStandard;
-      final contextLine = contextText != null && contextText.trim().isNotEmpty
-          ? '\n状況・背景：「${contextText.trim()}」\n上記の状況を踏まえて、'
-          : '';
+      final contextLine = _buildContextLine(contextText, locale);
       final basePrompt =
           '''
 あなたは感情豊かな日記作成の専門家です。提示されたシーンや場面をもとに、その瞬間の感情や心の動きを中心とした日記を日本語で作成してください。
@@ -229,9 +236,7 @@ $emphasis、個人的で心に響く日記を作成してください。''';
 
     final titleLength = isShort ? _enTitleShort : _enTitleStandard;
     final bodyLength = isShort ? _enSingleBodyShort : _enSingleBodyStandard;
-    final contextLineEn = contextText != null && contextText.trim().isNotEmpty
-        ? '\nContext: "${contextText.trim()}"\nWith this context in mind,'
-        : '';
+    final contextLine = _buildContextLine(contextText, locale);
     final basePrompt =
         '''
 You are an empathetic journaling companion. Using the scene details, craft a reflective diary entry in natural English that centres on the writer's emotions.
@@ -248,7 +253,7 @@ ${isShort ? '\nNote: This diary is for an X (Twitter) post. The combined title +
 $locationLine''';
 
     if (customPrompt != null) {
-      return '''$basePrompt$contextLineEn
+      return '''$basePrompt$contextLine
 Use the following writing prompt as additional inspiration:
 
 "$customPrompt"
@@ -263,7 +268,7 @@ When writing the diary, reflect on:
 Use a tone that $emphasis and keep the entry personal and heartfelt. Do not include parenthetical explanations or meta-commentary in the title or body.''';
     }
 
-    return '''$basePrompt$contextLineEn
+    return '''$basePrompt$contextLine
 Consider the scene carefully and describe:
 - The emotions you genuinely felt in that moment
 - The atmosphere and sensory details you noticed
@@ -299,9 +304,7 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
     if (isJapanese) {
       final titleLength = isShort ? _jaTitleShort : _jaTitleStandard;
       final bodyLength = isShort ? _jaMultiBodyShort : _jaMultiBodyStandard;
-      final contextLine = contextText != null && contextText.trim().isNotEmpty
-          ? '\n状況・背景：「${contextText.trim()}」\n上記の状況を踏まえて、'
-          : '';
+      final contextLine = _buildContextLine(contextText, locale);
       final basePrompt =
           '''以下のシーン分析結果から、その日の感情や心の動きを中心とした日記を日本語で作成してください。
 単なる出来事の記録ではなく、一日を通して体験したシーンで感じた気持ちや感情の変化を深く掘り下げた個人的な日記を書いてください。
@@ -350,9 +353,7 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
 
     final enTitleLength = isShort ? _enTitleShort : _enTitleStandard;
     final enBodyLength = isShort ? _enMultiBodyShort : _enMultiBodyStandard;
-    final contextLineEn = contextText != null && contextText.trim().isNotEmpty
-        ? '\nContext: "${contextText.trim()}"\nWith this context in mind,'
-        : '';
+    final contextLine = _buildContextLine(contextText, locale);
     final basePrompt =
         '''Using the scene analyses below, craft a reflective diary entry in natural English that traces how the writer's emotions evolved throughout the day.
 Do not simply list events—explore the inner experience and personal meaning behind each moment.
@@ -372,7 +373,7 @@ Scene analyses:
 $analysesText''';
 
     if (customPrompt != null) {
-      return '''$basePrompt$contextLineEn
+      return '''$basePrompt$contextLine
 
 Use the following writing prompt as additional inspiration:
 
@@ -388,7 +389,7 @@ When crafting the diary, be sure to cover:
 Use a tone that $emphasis and keep the writing personal and genuine. Do not include parenthetical explanations or meta-commentary in the title or body.''';
     }
 
-    return '''$basePrompt$contextLineEn
+    return '''$basePrompt$contextLine
 
 Reflect on the day by describing:
 - The emotional flow from scene to scene
