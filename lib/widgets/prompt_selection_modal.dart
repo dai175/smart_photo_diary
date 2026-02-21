@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/ai_constants.dart';
 import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -223,7 +224,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                           child: TextField(
                             controller: _contextController,
                             maxLines: 2,
-                            maxLength: 100,
+                            maxLength: AiConstants.contextTextMaxLength,
                             decoration: InputDecoration(
                               labelText: l10n.promptContextInputLabel,
                               hintText: l10n.promptContextInputHint,

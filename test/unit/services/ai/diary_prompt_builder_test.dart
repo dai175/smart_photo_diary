@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:smart_photo_diary/constants/ai_constants.dart';
 import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/ai/diary_prompt_builder.dart';
 
@@ -547,8 +548,9 @@ void main() {
       expect(result, isNot(contains('状況・背景')));
     });
 
-    test('100文字超のcontextText → 切り詰められる', () {
-      final longText = 'A' * 150;
+    test('contextTextMaxLength超のcontextText → 切り詰められる', () {
+      const maxLen = AiConstants.contextTextMaxLength;
+      final longText = 'A' * (maxLen + 90);
       final result = DiaryPromptBuilder.buildSingleImagePrompt(
         locale: const Locale('en'),
         photoTimes: [DateTime(2025, 1, 1, 10)],
@@ -556,8 +558,8 @@ void main() {
         contextText: longText,
       );
       expect(result, contains('Context:'));
-      expect(result, contains('A' * 100));
-      expect(result, isNot(contains('A' * 101)));
+      expect(result, contains('A' * maxLen));
+      expect(result, isNot(contains('A' * (maxLen + 1))));
     });
 
     test('改行を含むcontextText → スペースに正規化される', () {

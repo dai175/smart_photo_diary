@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../../constants/ai_constants.dart';
 import '../../models/diary_length.dart';
 import 'diary_locale_utils.dart';
 import 'diary_time_segment.dart';
@@ -165,7 +166,7 @@ class DiaryPromptBuilder {
   static String _buildContextLine(String? contextText, Locale locale) {
     if (contextText == null || contextText.trim().isEmpty) return '';
     // Defense in depth: sanitize length and newlines at service layer
-    const maxLength = 100;
+    const maxLength = AiConstants.contextTextMaxLength;
     var safe = contextText.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
     if (safe.length > maxLength) safe = safe.substring(0, maxLength);
     return DiaryLocaleUtils.isJapanese(locale)

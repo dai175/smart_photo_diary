@@ -14,6 +14,9 @@ class AiConstants {
   static const int aiImageMaxSize = 1536;
   static const int aiImageQuality = 85;
 
+  // コンテキストテキストの最大文字数
+  static const int contextTextMaxLength = 60;
+
   // 時間帯判定
   static const int morningStartHour = 5;
   static const int afternoonStartHour = 12;
