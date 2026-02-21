@@ -133,7 +133,7 @@ class ErrorDisplayService {
       content: ErrorSnackBarContent(error: error, severity: config.severity),
       duration: config.duration ?? AppConstants.defaultAnimationDuration,
       behavior: SnackBarBehavior.floating,
-      backgroundColor: _getColorForSeverity(context, config.severity),
+      backgroundColor: ErrorSeverityHelper.getColor(context, config.severity),
       action: config.showRetryButton && onRetry != null
           ? SnackBarAction(
               label:
@@ -211,35 +211,6 @@ class ErrorDisplayService {
         return ErrorDisplayConfig.criticalWithRetry;
       default:
         return ErrorDisplayConfig.error;
-    }
-  }
-
-  /// 重要度に応じた色を取得
-  Color _getColorForSeverity(BuildContext context, ErrorSeverity severity) {
-    final colorScheme = Theme.of(context).colorScheme;
-    switch (severity) {
-      case ErrorSeverity.info:
-        return colorScheme.primary;
-      case ErrorSeverity.warning:
-        return const Color(0xFFFF9800); // オレンジ
-      case ErrorSeverity.error:
-        return colorScheme.error;
-      case ErrorSeverity.critical:
-        return const Color(0xFFD32F2F); // 濃い赤
-    }
-  }
-
-  /// 重要度に応じたアイコンを取得
-  IconData getIconForSeverity(ErrorSeverity severity) {
-    switch (severity) {
-      case ErrorSeverity.info:
-        return Icons.info_outline;
-      case ErrorSeverity.warning:
-        return Icons.warning_amber;
-      case ErrorSeverity.error:
-        return Icons.error_outline;
-      case ErrorSeverity.critical:
-        return Icons.dangerous;
     }
   }
 

@@ -21,7 +21,7 @@ class ModernChip extends StatefulWidget {
     this.enabled = true,
     this.size = ChipSize.medium,
     this.style = ChipStyle.filled,
-    this.animationDuration = const Duration(milliseconds: 200),
+    this.animationDuration = AppConstants.quickAnimationDuration,
   });
 
   /// チップのラベルテキスト

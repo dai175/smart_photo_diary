@@ -1,3 +1,51 @@
+import 'package:flutter/material.dart';
+import '../../localization/localization_extensions.dart';
+
+/// ErrorSeverity に基づく表示属性のヘルパー
+class ErrorSeverityHelper {
+  ErrorSeverityHelper._();
+
+  static Color getColor(BuildContext context, ErrorSeverity severity) {
+    final colorScheme = Theme.of(context).colorScheme;
+    switch (severity) {
+      case ErrorSeverity.info:
+        return colorScheme.primary;
+      case ErrorSeverity.warning:
+        return const Color(0xFFFF9800);
+      case ErrorSeverity.error:
+        return colorScheme.error;
+      case ErrorSeverity.critical:
+        return const Color(0xFFD32F2F);
+    }
+  }
+
+  static IconData getIcon(ErrorSeverity severity) {
+    switch (severity) {
+      case ErrorSeverity.info:
+        return Icons.info_outline;
+      case ErrorSeverity.warning:
+        return Icons.warning_amber;
+      case ErrorSeverity.error:
+        return Icons.error_outline;
+      case ErrorSeverity.critical:
+        return Icons.dangerous;
+    }
+  }
+
+  static String getTitle(BuildContext context, ErrorSeverity severity) {
+    switch (severity) {
+      case ErrorSeverity.info:
+        return context.l10n.errorSeverityInfo;
+      case ErrorSeverity.warning:
+        return context.l10n.errorSeverityWarning;
+      case ErrorSeverity.error:
+        return context.l10n.errorSeverityError;
+      case ErrorSeverity.critical:
+        return context.l10n.errorSeverityCritical;
+    }
+  }
+}
+
 /// エラー表示の重要度レベル
 enum ErrorSeverity {
   /// 情報レベル - ユーザーが知っておくべき情報

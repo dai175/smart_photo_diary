@@ -57,7 +57,7 @@ class AnimatedListBuilder extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.physics,
-    this.staggerDelay = const Duration(milliseconds: 100),
+    this.staggerDelay = AppConstants.microStaggerUnit,
     this.animationDuration = const Duration(milliseconds: 500),
   });
 
