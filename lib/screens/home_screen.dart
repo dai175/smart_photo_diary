@@ -356,10 +356,6 @@ class _HomeScreenState extends State<HomeScreen>
                       _loadUsedPhotoIds();
                       _homeController.setCurrentIndex(index);
                     });
-                  } else if (index == AppConstants.statisticsTabIndex) {
-                    _switchTabWithFade(() {
-                      _homeController.setCurrentIndex(index);
-                    });
                   } else {
                     _switchTabWithFade(() {
                       _homeController.setCurrentIndex(index);
