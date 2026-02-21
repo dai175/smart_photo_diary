@@ -127,6 +127,7 @@ void main() {
 
         await tester.tap(find.text('Diary'));
         await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final navBar = tester.widget<BottomNavigationBar>(
           find.byType(BottomNavigationBar),
@@ -142,6 +143,7 @@ void main() {
 
         await tester.tap(find.text('Statistics'));
         await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final navBar = tester.widget<BottomNavigationBar>(
           find.byType(BottomNavigationBar),
@@ -157,6 +159,7 @@ void main() {
 
         await tester.tap(find.text('Settings'));
         await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final navBar = tester.widget<BottomNavigationBar>(
           find.byType(BottomNavigationBar),
