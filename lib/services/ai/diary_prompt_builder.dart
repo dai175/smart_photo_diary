@@ -164,10 +164,13 @@ class DiaryPromptBuilder {
   /// contextText をプロンプトに注入するための行を構築
   static String _buildContextLine(String? contextText, Locale locale) {
     if (contextText == null || contextText.trim().isEmpty) return '';
-    final trimmed = contextText.trim();
+    // Defense in depth: sanitize length and newlines at service layer
+    const maxLength = 100;
+    var safe = contextText.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
+    if (safe.length > maxLength) safe = safe.substring(0, maxLength);
     return DiaryLocaleUtils.isJapanese(locale)
-        ? '\n状況・背景：「$trimmed」\n上記の状況を踏まえて、'
-        : '\nContext: "$trimmed"\nWith this context in mind,';
+        ? '\n状況・背景：「$safe」\n上記の状況を踏まえて、'
+        : '\nContext: "$safe"\nWith this context in mind,';
   }
 
   /// 単一画像用プロンプトを構築

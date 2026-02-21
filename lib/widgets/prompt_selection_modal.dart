@@ -183,7 +183,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
               labelText: l10n.promptContextInputLabel,
               hintText: l10n.promptContextInputHint,
               helperText: l10n.promptContextInputHelper,
-              border: const OutlineInputBorder(),
             ),
           ),
         ),

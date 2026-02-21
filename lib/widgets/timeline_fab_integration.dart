@@ -159,7 +159,7 @@ class TimelineFABIntegration extends StatelessWidget {
       'Navigating to diary preview screen',
       context: 'TimelineFABIntegration._navigateToDiaryPreview',
       data:
-          'Prompt: ${selectedPrompt?.text ?? "none"}, contextText: ${contextText ?? "none"}, Photos: ${selectedPhotos.length}',
+          'Prompt: ${selectedPrompt?.text ?? "none"}, hasContext: ${contextText != null}, Photos: ${selectedPhotos.length}',
     );
 
     Navigator.push<bool>(

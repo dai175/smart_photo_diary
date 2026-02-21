@@ -572,6 +572,29 @@ void main() {
       expect(result, contains('子どもの運動会'));
     });
 
+    test('en + contextTextのみ → Context ブロックを含む', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('en'),
+        analyses: ['Analysis'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: 'captures emotional depth',
+        contextText: 'School sports day',
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('School sports day'));
+    });
+
+    test('空文字のcontextText → 状況・背景ブロックを含まない', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('ja'),
+        analyses: ['分析結果'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '   ',
+      );
+      expect(result, isNot(contains('状況・背景')));
+    });
+
     test('en + contextText + customPrompt → 両方含む', () {
       final result = DiaryPromptBuilder.buildMultiImagePrompt(
         locale: const Locale('en'),
