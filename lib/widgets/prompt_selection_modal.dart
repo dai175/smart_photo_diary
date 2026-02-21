@@ -83,11 +83,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         context: 'PromptSelectionModal',
       );
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     } catch (e) {
       _logger.error(
         'Prompt service initialization error',
@@ -233,7 +231,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                             ),
                           ),
                         )
-                      : const SizedBox(width: double.infinity, height: 0),
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),

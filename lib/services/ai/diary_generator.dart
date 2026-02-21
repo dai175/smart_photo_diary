@@ -75,7 +75,6 @@ class DiaryGenerator {
           'emphasis': emphasis,
           'locale': locale.toLanguageTag(),
           'mergedPromptLength': finalPrompt.length,
-          'emotionDeepDiveIntegration': prompt != null ? 'success' : 'none',
         },
       );
 
@@ -149,8 +148,8 @@ class DiaryGenerator {
 
     try {
       // 時刻順にソート
-      final sortedImages = List.from(imagesWithTimes);
-      sortedImages.sort((a, b) => a.time.compareTo(b.time));
+      final sortedImages = [...imagesWithTimes]
+        ..sort((a, b) => a.time.compareTo(b.time));
 
       // 各画像を順次分析
       final List<String> photoAnalyses = [];
@@ -176,9 +175,7 @@ class DiaryGenerator {
       }
 
       // 全分析結果を統合して日記を生成
-      final List<DateTime> photoTimesList = sortedImages
-          .map<DateTime>((e) => e.time)
-          .toList();
+      final photoTimesList = sortedImages.map((e) => e.time).toList();
       return await _generateDiaryFromAnalyses(
         photoAnalyses,
         photoTimesList,

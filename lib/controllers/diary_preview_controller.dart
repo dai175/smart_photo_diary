@@ -118,9 +118,7 @@ class DiaryPreviewController extends BaseErrorController {
     if (diaryLength != null) {
       _diaryLength = diaryLength;
     }
-    if (contextText != null) {
-      _contextText = contextText;
-    }
+    _contextText = contextText;
     _selectedPrompt = prompt;
 
     await Future.delayed(AppConstants.microStaggerUnit);
