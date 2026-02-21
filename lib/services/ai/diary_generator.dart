@@ -68,7 +68,8 @@ class DiaryGenerator {
         context: 'generateFromImage',
         data: {
           'customPrompt': prompt ?? 'none',
-          'contextText': contextText ?? 'none',
+          'hasContext': contextText != null,
+          'contextLength': contextText?.length ?? 0,
           'promptType': promptType,
           'maxTokens': maxTokens,
           'emphasis': emphasis,
@@ -394,7 +395,8 @@ Describe the situation and mood you infer from the image, including any emotiona
       context: '_generateDiaryFromAnalyses',
       data: {
         'customPrompt': customPrompt ?? 'none',
-        'contextText': contextText ?? 'none',
+        'hasContext': contextText != null,
+        'contextLength': contextText?.length ?? 0,
         'promptType': promptType,
         'maxTokens': multiImageMaxTokens,
         'emphasis': emphasis,

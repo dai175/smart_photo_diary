@@ -546,6 +546,30 @@ void main() {
       );
       expect(result, isNot(contains('状況・背景')));
     });
+
+    test('100文字超のcontextText → 切り詰められる', () {
+      final longText = 'A' * 150;
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('en'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: 'captures emotional depth',
+        contextText: longText,
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('A' * 100));
+      expect(result, isNot(contains('A' * 101)));
+    });
+
+    test('改行を含むcontextText → スペースに正規化される', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '友達と\n花見に\r\n行った',
+      );
+      expect(result, contains('友達と 花見に 行った'));
+      expect(result, isNot(contains('\n友達と')));
+    });
   });
 
   group('buildMultiImagePrompt (contextText)', () {

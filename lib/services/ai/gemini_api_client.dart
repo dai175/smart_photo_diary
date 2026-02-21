@@ -37,6 +37,10 @@ class GeminiApiClient {
       'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
       'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
     },
+    {
+      'category': 'HARM_CATEGORY_CIVIC_INTEGRITY',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
+    },
   ];
 
   GeminiApiClient({required ILoggingService logger, http.Client? httpClient})

@@ -13,8 +13,8 @@ import 'prompt_selection_items.dart';
 
 /// プロンプト選択モーダル
 class PromptSelectionModal extends StatefulWidget {
-  final Function(WritingPrompt?, String?) onPromptSelected;
-  final Function(String?) onSkip;
+  final void Function(WritingPrompt?, String?) onPromptSelected;
+  final void Function(String?) onSkip;
 
   const PromptSelectionModal({
     super.key,
