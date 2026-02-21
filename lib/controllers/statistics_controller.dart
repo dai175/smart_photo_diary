@@ -86,7 +86,7 @@ class StatisticsController extends BaseErrorController {
       final diaryService = await serviceLocator.getAsync<IDiaryService>();
       _diarySub = diaryService.changes.listen((_) {
         _debounce?.cancel();
-        _debounce = Timer(AppConstants.defaultAnimationDuration, () {
+        _debounce = Timer(AppConstants.statisticsDebounce, () {
           loadStatistics();
         });
       });

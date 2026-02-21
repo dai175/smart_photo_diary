@@ -37,7 +37,7 @@ class CameraService implements ICameraService {
 
       // 権限状態の詳細チェック
       await Future.delayed(
-        AppConstants.microStaggerUnit,
+        AppConstants.platformPermissionSettleDelay,
       ); // 少し待機してiOSの権限状態が更新されるのを待つ
       final cameraStatus = await Permission.camera.status;
       _logger.debug(
