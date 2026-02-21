@@ -75,6 +75,13 @@ abstract class IPhotoService {
   /// - Failure: [PhotoAccessException] 取得失敗時
   Future<Result<List<int>>> getThumbnailData(AssetEntity asset);
 
+  /// AI送信用にリサイズした画像を取得する
+  ///
+  /// Returns:
+  /// - Success: リサイズ済み画像データ [Uint8List]
+  /// - Failure: [PhotoAccessException] 取得失敗時
+  Future<Result<Uint8List>> getImageForAi(AssetEntity asset);
+
   /// 写真の元画像を取得する
   ///
   /// Returns:

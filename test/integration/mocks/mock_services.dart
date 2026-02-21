@@ -226,6 +226,9 @@ class TestServiceSetup {
       () => mock.getThumbnailData(any()),
     ).thenAnswer((_) async => const Success([1, 2, 3])); // Mock thumbnail data
     when(
+      () => mock.getImageForAi(any()),
+    ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3, 4, 5])));
+    when(
       () => mock.getOriginalFile(any()),
     ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3, 4, 5])));
     when(

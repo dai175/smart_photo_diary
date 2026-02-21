@@ -497,8 +497,8 @@ void main() {
         expect(GeminiApiClient.baseDelay, const Duration(seconds: 1));
       });
 
-      test('requestTimeout is 30 seconds', () {
-        expect(GeminiApiClient.requestTimeout, const Duration(seconds: 30));
+      test('requestTimeout is 60 seconds', () {
+        expect(GeminiApiClient.requestTimeout, const Duration(seconds: 60));
       });
     });
 

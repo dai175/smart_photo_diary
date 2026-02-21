@@ -81,12 +81,12 @@ void main() {
       });
 
       test('初期化後に isInitializing が false になる', () async {
-        // getOriginalFile で null を返してエラー終了させる
+        // getImageForAi で null を返してエラー終了させる
         final mockAsset = MockAssetEntity();
         when(() => mockAsset.createDateTime).thenReturn(DateTime(2025, 1, 15));
-        when(() => mockPhotoService.getOriginalFile(mockAsset)).thenAnswer(
+        when(() => mockPhotoService.getImageForAi(mockAsset)).thenAnswer(
           (_) async =>
-              const Failure(PhotoAccessException('No original file available')),
+              const Failure(PhotoAccessException('No AI image available')),
         );
 
         final controller = createController();

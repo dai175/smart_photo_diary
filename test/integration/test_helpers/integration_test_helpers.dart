@@ -176,6 +176,10 @@ class IntegrationTestHelpers {
     when(
       () => _mockPhotoService.getThumbnailData(any()),
     ).thenAnswer((_) async => Success(_createMockImageData().toList()));
+    when(() => _mockPhotoService.getImageForAi(any())).thenAnswer(
+      (_) async =>
+          const Failure(PhotoAccessException('No AI image available in test')),
+    );
     when(() => _mockPhotoService.getOriginalFile(any())).thenAnswer(
       (_) async => const Failure(
         PhotoAccessException('No original file available in test'),

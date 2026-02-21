@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:photo_manager/photo_manager.dart';
+import '../constants/ai_constants.dart';
 import '../constants/app_constants.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
@@ -133,6 +135,49 @@ class PhotoDataService {
       );
       return Failure(
         PhotoAccessException('Failed to retrieve thumbnail', originalError: e),
+      );
+    }
+  }
+
+  /// AI送信用にリサイズした画像を取得する
+  ///
+  /// 元画像をプラットフォームネイティブのパイプラインで最大 [AiConstants.aiImageMaxSize] px に
+  /// リサイズし、JPEG として返す。モバイル通信でのアップロードサイズを大幅に削減する。
+  Future<Result<Uint8List>> getImageForAi(AssetEntity asset) async {
+    try {
+      const size = ThumbnailSize.square(AiConstants.aiImageMaxSize);
+      final option = Platform.isIOS || Platform.isMacOS
+          ? ThumbnailOption.ios(
+              size: size,
+              format: ThumbnailFormat.jpeg,
+              quality: AiConstants.aiImageQuality,
+              resizeContentMode: ResizeContentMode.fit,
+            )
+          // Android: Glide のデフォルトが FitCenter のため明示指定不要
+          : const ThumbnailOption(
+              size: size,
+              format: ThumbnailFormat.jpeg,
+              quality: AiConstants.aiImageQuality,
+            );
+      final data = await asset.thumbnailDataWithOption(option);
+      if (data == null) {
+        return const Failure(
+          PhotoAccessException('Failed to retrieve AI image: data is null'),
+        );
+      }
+      return Success(data);
+    } catch (e) {
+      final appError = ErrorHandler.handleError(
+        e,
+        context: 'PhotoDataService.getImageForAi',
+      );
+      _logger.error(
+        'AI image retrieval error',
+        context: 'PhotoDataService.getImageForAi',
+        error: appError,
+      );
+      return Failure(
+        PhotoAccessException('Failed to retrieve AI image', originalError: e),
       );
     }
   }
