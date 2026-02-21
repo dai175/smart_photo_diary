@@ -182,15 +182,31 @@ class _DiaryScreenState extends State<DiaryScreen> {
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                // アクティブフィルタ表示（AppBar直下に固定されないようスリバーとして配置）
+                // アクティブフィルタ表示（AnimatedSize + AnimatedSwitcherで表示/非表示をアニメーション）
                 SliverToBoxAdapter(
-                  child: ActiveFiltersDisplay(
-                    filter: _controller.currentFilter,
-                    onClear: _controller.clearAllFilters,
-                    onRemoveTag: _controller.removeTagFilter,
-                    onRemoveTimeOfDay: _controller.removeTimeOfDayFilter,
-                    onRemoveDateRange: _controller.removeDateRangeFilter,
-                    onRemoveSearch: _controller.removeSearchFilter,
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: _controller.currentFilter.isActive
+                          ? ActiveFiltersDisplay(
+                              key: const ValueKey('active-filters'),
+                              filter: _controller.currentFilter,
+                              onClear: _controller.clearAllFilters,
+                              onRemoveTag: _controller.removeTagFilter,
+                              onRemoveTimeOfDay:
+                                  _controller.removeTimeOfDayFilter,
+                              onRemoveDateRange:
+                                  _controller.removeDateRangeFilter,
+                              onRemoveSearch: _controller.removeSearchFilter,
+                            )
+                          : const SizedBox(
+                              width: double.infinity,
+                              key: ValueKey('empty-filters'),
+                            ),
+                    ),
                   ),
                 ),
 
