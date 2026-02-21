@@ -117,4 +117,26 @@ class DiaryFilter {
     if (searchText != null && searchText!.isNotEmpty) count++;
     return count;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DiaryFilter &&
+          dateRange == other.dateRange &&
+          _setEquals(selectedTags, other.selectedTags) &&
+          _setEquals(timeOfDay, other.timeOfDay) &&
+          searchText == other.searchText;
+
+  @override
+  int get hashCode => Object.hash(
+    dateRange,
+    Object.hashAll(selectedTags.toList()..sort()),
+    Object.hashAll(
+      timeOfDay.toList()..sort((a, b) => a.index.compareTo(b.index)),
+    ),
+    searchText,
+  );
+
+  static bool _setEquals<T>(Set<T> a, Set<T> b) =>
+      a.length == b.length && a.containsAll(b);
 }
