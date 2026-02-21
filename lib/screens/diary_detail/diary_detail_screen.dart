@@ -191,7 +191,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             !_controller.isEditing)
           IconButton(
             onPressed: () {
-              MicroInteractions.hapticTap();
               DiaryDetailShareHelper.showShareDialog(
                 context: context,
                 diaryEntry: _controller.diaryEntry!,
@@ -207,7 +206,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             _controller.diaryEntry != null)
           IconButton(
             onPressed: () {
-              MicroInteractions.hapticTap();
               if (_controller.isEditing) {
                 _updateDiary();
               } else {
