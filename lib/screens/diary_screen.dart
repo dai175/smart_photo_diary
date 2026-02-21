@@ -159,7 +159,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
         initialFilter: _controller.currentFilter,
         onApply: (filter) {
           _controller.applyFilter(filter);
-          _scrollController.jumpTo(0);
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(0);
+          }
         },
       ),
     );
@@ -304,7 +306,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
             delegate: SliverChildBuilderDelegate((context, index) {
               final entry = _controller.diaryEntries[index];
               return SlideInWidget(
-                key: ValueKey('${_controller.currentFilter.hashCode}_${entry.id}'),
+                key: ValueKey(
+                  '${_controller.currentFilter.hashCode}_${entry.id}',
+                ),
                 // 大量件数でのオーバーヘッドを避けるため先頭数件のみ遅延を付与
                 delay: Duration(
                   milliseconds:

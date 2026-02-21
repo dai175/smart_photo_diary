@@ -265,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen>
     await _tabFadeController.reverse();
     if (!mounted) return;
     switchAction();
+    if (!mounted) return;
     _tabFadeController.forward();
   }
 
