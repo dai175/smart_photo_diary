@@ -263,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen>
   /// フェードアニメーション付きでタブを切り替える
   Future<void> _switchTabWithFade(VoidCallback switchAction) async {
     await _tabFadeController.reverse();
+    if (!mounted) return;
     switchAction();
     _tabFadeController.forward();
   }
