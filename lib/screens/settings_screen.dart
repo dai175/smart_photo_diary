@@ -4,7 +4,6 @@ import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
-import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
@@ -96,39 +95,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppConstants.loadingCenterHeightRatio,
         ),
         Center(
-          child: FadeInWidget(
-            child: CustomCard(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: AppSpacing.cardPadding,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest
-                          .withValues(alpha: AppConstants.opacityXLow),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const CircularProgressIndicator(strokeWidth: 3),
+          child: CustomCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: AppSpacing.cardPadding,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: AppConstants.opacityXLow),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    context.l10n.settingsLoadingTitle,
-                    style: AppTypography.titleLarge.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  child: const CircularProgressIndicator(strokeWidth: 3),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  context.l10n.settingsLoadingTitle,
+                  style: AppTypography.titleLarge.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    context.l10n.settingsLoadingSubtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  context.l10n.settingsLoadingSubtitle,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
@@ -143,56 +138,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
           elevation: AppSpacing.elevationMd,
           child: Column(
             children: [
-              FadeInWidget(
-                child: AppearanceSettingsSection(
-                  settingsService: _controller.settingsService!,
-                  logger: _controller.logger,
-                  selectedLocale: _controller.selectedLocale,
-                  onThemeChanged: widget.onThemeChanged,
-                  onLocaleChanged: (locale) {
-                    _controller.onLocaleChanged(locale);
-                  },
-                  onStateChanged: _controller.notifyStateChanged,
-                ),
+              AppearanceSettingsSection(
+                settingsService: _controller.settingsService!,
+                logger: _controller.logger,
+                selectedLocale: _controller.selectedLocale,
+                onThemeChanged: widget.onThemeChanged,
+                onLocaleChanged: (locale) {
+                  _controller.onLocaleChanged(locale);
+                },
+                onStateChanged: _controller.notifyStateChanged,
               ),
               _buildDivider(),
-              SlideInWidget(
-                delay: const Duration(milliseconds: 50),
-                child: DiarySettingsSection(
-                  settingsService: _controller.settingsService!,
-                  logger: _controller.logger,
-                  onStateChanged: _controller.notifyStateChanged,
-                ),
+              DiarySettingsSection(
+                settingsService: _controller.settingsService!,
+                logger: _controller.logger,
+                onStateChanged: _controller.notifyStateChanged,
               ),
               _buildDivider(),
-              SlideInWidget(
-                delay: const Duration(milliseconds: 75),
-                child: SubscriptionSettingsSection(
-                  subscriptionInfo: _controller.subscriptionInfo,
-                  onStateChanged: _controller.notifyStateChanged,
-                ),
+              SubscriptionSettingsSection(
+                subscriptionInfo: _controller.subscriptionInfo,
+                onStateChanged: _controller.notifyStateChanged,
               ),
               _buildDivider(),
-              SlideInWidget(
-                delay: const Duration(milliseconds: 125),
-                child: StorageSettingsSection(
-                  storageInfo: _controller.storageInfo,
-                  onReloadSettings: _controller.loadSettings,
-                ),
+              StorageSettingsSection(
+                storageInfo: _controller.storageInfo,
+                onReloadSettings: _controller.loadSettings,
               ),
               _buildDivider(),
-              SlideInWidget(
-                delay: const Duration(milliseconds: 200),
-                child: _buildVersionInfo(),
-              ),
-              SlideInWidget(
-                delay: const Duration(milliseconds: 225),
-                child: _buildPrivacyPolicyInfo(),
-              ),
-              SlideInWidget(
-                delay: const Duration(milliseconds: 250),
-                child: _buildLicenseInfo(),
-              ),
+              _buildVersionInfo(),
+              _buildPrivacyPolicyInfo(),
+              _buildLicenseInfo(),
             ],
           ),
         ),
@@ -210,41 +185,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppConstants.loadingCenterHeightRatio,
         ),
         Center(
-          child: FadeInWidget(
-            child: CustomCard(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: AppSpacing.cardPadding,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.errorContainer
-                          .withValues(alpha: AppConstants.opacityXLow),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.error_outline_rounded,
-                      color: Theme.of(context).colorScheme.error,
-                      size: AppSpacing.iconLg,
-                    ),
+          child: CustomCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: AppSpacing.cardPadding,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.errorContainer
+                        .withValues(alpha: AppConstants.opacityXLow),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    context.l10n.commonErrorOccurred,
-                    style: AppTypography.titleLarge.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                    size: AppSpacing.iconLg,
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    context.l10n.settingsLoadErrorSubtitle,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  context.l10n.commonErrorOccurred,
+                  style: AppTypography.titleLarge.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  context.l10n.settingsLoadErrorSubtitle,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),

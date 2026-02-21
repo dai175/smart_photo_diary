@@ -4,7 +4,6 @@ import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/buttons/text_only_button.dart';
-import '../ui/animations/list_animations.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
@@ -94,10 +93,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: FadeInWidget(
-              delay: const Duration(milliseconds: 100),
-              child: _buildTimelineSection(context),
-            ),
+            child: _buildTimelineSection(context),
           ),
         ),
       ],
