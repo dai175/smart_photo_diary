@@ -1532,6 +1532,10 @@
   "@settingsDiaryLengthDialogTitle": {
     "description": "設定画面の日記の長さ選択ダイアログタイトル"
   },
+  "promptContextToggle": "状況・背景を追加",
+  "@promptContextToggle": {
+    "description": "コンテキスト入力欄の展開トグルボタンテキスト"
+  },
   "promptContextInputLabel": "状況・背景（任意）",
   "@promptContextInputLabel": {
     "description": "プロンプト選択モーダルの状況テキスト入力ラベル"

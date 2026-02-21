@@ -1532,6 +1532,10 @@
   "@settingsDiaryLengthDialogTitle": {
     "description": "Title for the default diary length selection dialog in settings"
   },
+  "promptContextToggle": "Add context",
+  "@promptContextToggle": {
+    "description": "Toggle button text to expand the context input field"
+  },
   "promptContextInputLabel": "Context (optional)",
   "@promptContextInputLabel": {
     "description": "Label for the context text input in prompt selection modal"

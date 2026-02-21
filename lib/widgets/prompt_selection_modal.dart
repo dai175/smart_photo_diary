@@ -36,6 +36,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   List<WritingPrompt> _availablePrompts = [];
   WritingPrompt? _selectedPrompt;
   bool _isRandomSelected = false;
+  bool _showContextInput = false;
   late final TextEditingController _contextController;
 
   @override
@@ -178,14 +179,62 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
             AppSpacing.md,
             AppSpacing.sm,
           ),
-          child: TextField(
-            controller: _contextController,
-            maxLines: 2,
-            maxLength: 100,
-            decoration: InputDecoration(
-              labelText: l10n.promptContextInputLabel,
-              hintText: l10n.promptContextInputHint,
-              helperText: l10n.promptContextInputHelper,
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => setState(() {
+                    _showContextInput = !_showContextInput;
+                  }),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showContextInput
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          l10n.promptContextToggle,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  alignment: Alignment.topCenter,
+                  child: _showContextInput
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xs),
+                          child: TextField(
+                            controller: _contextController,
+                            maxLines: 2,
+                            maxLength: 100,
+                            decoration: InputDecoration(
+                              labelText: l10n.promptContextInputLabel,
+                              hintText: l10n.promptContextInputHint,
+                              helperText: l10n.promptContextInputHelper,
+                              helperMaxLines: 2,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(width: double.infinity, height: 0),
+                ),
+              ],
             ),
           ),
         ),
