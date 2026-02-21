@@ -214,7 +214,7 @@ class DiaryPreviewController extends BaseErrorController {
     AssetEntity asset,
     Locale locale,
   ) async {
-    final imageResult = await _photoService.getOriginalFile(asset);
+    final imageResult = await _photoService.getImageForAi(asset);
     if (imageResult.isFailure) {
       _setErrorState(DiaryPreviewErrorType.generationFailed);
       return null;
@@ -247,7 +247,7 @@ class DiaryPreviewController extends BaseErrorController {
 
     final imagesWithTimes = <({Uint8List imageData, DateTime time})>[];
     for (final asset in assets) {
-      final imageResult = await _photoService.getOriginalFile(asset);
+      final imageResult = await _photoService.getImageForAi(asset);
       if (imageResult.isSuccess) {
         imagesWithTimes.add((
           imageData: imageResult.value,

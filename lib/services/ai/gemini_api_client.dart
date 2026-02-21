@@ -17,7 +17,7 @@ class GeminiApiClient {
 
   static const int maxRetries = 3;
   static const Duration baseDelay = Duration(seconds: 1);
-  static const Duration requestTimeout = Duration(seconds: 30);
+  static const Duration requestTimeout = Duration(seconds: 60);
 
   GeminiApiClient({required ILoggingService logger, http.Client? httpClient})
     : _logger = logger,

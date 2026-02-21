@@ -138,6 +138,10 @@ class PhotoService implements IPhotoService {
   }) => _dataService.getThumbnail(asset, width: width, height: height);
 
   @override
+  Future<Result<Uint8List>> getImageForAi(AssetEntity asset) =>
+      _dataService.getImageForAi(asset);
+
+  @override
   Future<Result<Uint8List>> getOriginalFile(AssetEntity asset) =>
       _dataService.getOriginalFile(asset);
 }

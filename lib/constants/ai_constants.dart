@@ -10,6 +10,10 @@ class AiConstants {
   static const int defaultTopK = 10;
   static const double tagGenerationTemperature = 0.3;
 
+  // AI送信用画像設定
+  static const int aiImageMaxSize = 1536;
+  static const int aiImageQuality = 85;
+
   // 時間帯判定
   static const int morningStartHour = 5;
   static const int afternoonStartHour = 12;
