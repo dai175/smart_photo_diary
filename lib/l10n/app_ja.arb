@@ -1531,5 +1531,21 @@
   "settingsDiaryLengthDialogTitle": "デフォルトの日記の長さ",
   "@settingsDiaryLengthDialogTitle": {
     "description": "設定画面の日記の長さ選択ダイアログタイトル"
+  },
+  "promptContextToggle": "状況・背景を追加",
+  "@promptContextToggle": {
+    "description": "コンテキスト入力欄の展開トグルボタンテキスト"
+  },
+  "promptContextInputLabel": "状況・背景（任意）",
+  "@promptContextInputLabel": {
+    "description": "プロンプト選択モーダルの状況テキスト入力ラベル"
+  },
+  "promptContextInputHint": "例：友達と花見に行った、子どもの運動会",
+  "@promptContextInputHint": {
+    "description": "状況テキスト入力のヒント"
+  },
+  "promptContextInputHelper": "AIが写真の状況をより深く理解できます",
+  "@promptContextInputHelper": {
+    "description": "状況テキスト入力のヘルパーテキスト"
   }
 }

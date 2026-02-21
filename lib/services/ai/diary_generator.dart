@@ -26,6 +26,7 @@ class DiaryGenerator {
     String? location,
     List<DateTime>? photoTimes,
     String? prompt,
+    String? contextText,
     required bool isOnline,
     required Locale locale,
     DiaryLength diaryLength = DiaryLength.standard,
@@ -56,6 +57,7 @@ class DiaryGenerator {
         photoTimes: photoTimes,
         location: location,
         customPrompt: prompt,
+        contextText: contextText,
         emphasis: emphasis,
         diaryLength: diaryLength,
       );
@@ -66,12 +68,13 @@ class DiaryGenerator {
         context: 'generateFromImage',
         data: {
           'customPrompt': prompt ?? 'none',
+          'hasContext': contextText != null,
+          'contextLength': contextText?.length ?? 0,
           'promptType': promptType,
           'maxTokens': maxTokens,
           'emphasis': emphasis,
           'locale': locale.toLanguageTag(),
           'mergedPromptLength': finalPrompt.length,
-          'emotionDeepDiveIntegration': prompt != null ? 'success' : 'none',
         },
       );
 
@@ -117,6 +120,7 @@ class DiaryGenerator {
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
     String? prompt,
+    String? contextText,
     Function(int current, int total)? onProgress,
     required bool isOnline,
     required Locale locale,
@@ -144,8 +148,8 @@ class DiaryGenerator {
 
     try {
       // 時刻順にソート
-      final sortedImages = List.from(imagesWithTimes);
-      sortedImages.sort((a, b) => a.time.compareTo(b.time));
+      final sortedImages = [...imagesWithTimes]
+        ..sort((a, b) => a.time.compareTo(b.time));
 
       // 各画像を順次分析
       final List<String> photoAnalyses = [];
@@ -171,15 +175,14 @@ class DiaryGenerator {
       }
 
       // 全分析結果を統合して日記を生成
-      final List<DateTime> photoTimesList = sortedImages
-          .map<DateTime>((e) => e.time)
-          .toList();
+      final photoTimesList = sortedImages.map((e) => e.time).toList();
       return await _generateDiaryFromAnalyses(
         photoAnalyses,
         photoTimesList,
         location,
         prompt,
         locale,
+        contextText: contextText,
         diaryLength: diaryLength,
       );
     } catch (e) {
@@ -339,6 +342,7 @@ Describe the situation and mood you infer from the image, including any emotiona
     String? location,
     String? customPrompt,
     Locale locale, {
+    String? contextText,
     DiaryLength diaryLength = DiaryLength.standard,
   }) async {
     if (photoAnalyses.isEmpty) {
@@ -360,15 +364,17 @@ Describe the situation and mood you infer from the image, including any emotiona
     final emphasis = optimParams['emphasis'] as String;
     final baseMaxTokens = optimParams['maxTokens'] as int;
     final isShort = diaryLength == DiaryLength.short;
-    final multiImageMaxTokens =
-        baseMaxTokens +
-        (DiaryLocaleUtils.isJapanese(locale)
-            ? (isShort
-                  ? DiaryPromptBuilder.multiImageExtraTokensJaShort
-                  : DiaryPromptBuilder.multiImageExtraTokensJaStandard)
-            : (isShort
-                  ? DiaryPromptBuilder.multiImageExtraTokensEnShort
-                  : DiaryPromptBuilder.multiImageExtraTokensEnStandard));
+    final int extraTokens;
+    if (DiaryLocaleUtils.isJapanese(locale)) {
+      extraTokens = isShort
+          ? DiaryPromptBuilder.multiImageExtraTokensJaShort
+          : DiaryPromptBuilder.multiImageExtraTokensJaStandard;
+    } else {
+      extraTokens = isShort
+          ? DiaryPromptBuilder.multiImageExtraTokensEnShort
+          : DiaryPromptBuilder.multiImageExtraTokensEnStandard;
+    }
+    final multiImageMaxTokens = baseMaxTokens + extraTokens;
 
     final prompt = DiaryPromptBuilder.buildMultiImagePrompt(
       locale: locale,
@@ -376,6 +382,7 @@ Describe the situation and mood you infer from the image, including any emotiona
       photoTimes: photoTimes,
       location: location,
       customPrompt: customPrompt,
+      contextText: contextText,
       emphasis: emphasis,
       diaryLength: diaryLength,
     );
@@ -385,6 +392,8 @@ Describe the situation and mood you infer from the image, including any emotiona
       context: '_generateDiaryFromAnalyses',
       data: {
         'customPrompt': customPrompt ?? 'none',
+        'hasContext': contextText != null,
+        'contextLength': contextText?.length ?? 0,
         'promptType': promptType,
         'maxTokens': multiImageMaxTokens,
         'emphasis': emphasis,

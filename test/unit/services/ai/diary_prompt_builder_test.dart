@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:smart_photo_diary/constants/ai_constants.dart';
 import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/ai/diary_prompt_builder.dart';
 
@@ -475,6 +476,164 @@ void main() {
       );
       expect(result, contains('80-100 words'));
       expect(result, contains('3-6 word'));
+    });
+  });
+
+  group('buildSingleImagePrompt (contextText)', () {
+    test('contextText=null → 状況・背景ブロックを含まない', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        contextText: null,
+      );
+      expect(result, isNot(contains('状況・背景')));
+    });
+
+    test('ja + contextTextのみ → 状況・背景ブロックを含む', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '友達と花見に行った',
+      );
+      expect(result, contains('状況・背景'));
+      expect(result, contains('友達と花見に行った'));
+    });
+
+    test('ja + contextText + customPrompt → 両方含む', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        customPrompt: '感情を書いて',
+        emphasis: '感情の深みを大切にして',
+        contextText: '友達と花見に行った',
+      );
+      expect(result, contains('状況・背景'));
+      expect(result, contains('友達と花見に行った'));
+      expect(result, contains('「感情を書いて」'));
+    });
+
+    test('en + contextTextのみ → Context ブロックを含む', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('en'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: 'captures emotional depth',
+        contextText: 'Cherry blossom viewing with friends',
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('Cherry blossom viewing with friends'));
+    });
+
+    test('en + contextText + customPrompt → 両方含む', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('en'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        customPrompt: 'About growth',
+        emphasis: 'captures emotional depth',
+        contextText: 'Cherry blossom viewing with friends',
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('Cherry blossom viewing with friends'));
+      expect(result, contains('"About growth"'));
+    });
+
+    test('空文字のcontextText → 状況・背景ブロックを含まない', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '   ',
+      );
+      expect(result, isNot(contains('状況・背景')));
+    });
+
+    test('contextTextMaxLength超のcontextText → 切り詰められる', () {
+      const maxLen = AiConstants.contextTextMaxLength;
+      final longText = 'A' * (maxLen + 90);
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('en'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: 'captures emotional depth',
+        contextText: longText,
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('A' * maxLen));
+      expect(result, isNot(contains('A' * (maxLen + 1))));
+    });
+
+    test('改行を含むcontextText → スペースに正規化される', () {
+      final result = DiaryPromptBuilder.buildSingleImagePrompt(
+        locale: const Locale('ja'),
+        photoTimes: [DateTime(2025, 1, 1, 10)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '友達と\n花見に\r\n行った',
+      );
+      expect(result, contains('友達と 花見に 行った'));
+      expect(result, isNot(contains('友達と\n')));
+      expect(result, isNot(contains('\r')));
+    });
+  });
+
+  group('buildMultiImagePrompt (contextText)', () {
+    test('contextText=null → 状況・背景ブロックを含まない', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('ja'),
+        analyses: ['分析結果'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: '感情の深みを大切にして',
+        contextText: null,
+      );
+      expect(result, isNot(contains('状況・背景')));
+    });
+
+    test('ja + contextTextのみ → 状況・背景ブロックを含む', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('ja'),
+        analyses: ['分析結果'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '子どもの運動会',
+      );
+      expect(result, contains('状況・背景'));
+      expect(result, contains('子どもの運動会'));
+    });
+
+    test('en + contextTextのみ → Context ブロックを含む', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('en'),
+        analyses: ['Analysis'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: 'captures emotional depth',
+        contextText: 'School sports day',
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('School sports day'));
+    });
+
+    test('空文字のcontextText → 状況・背景ブロックを含まない', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('ja'),
+        analyses: ['分析結果'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        emphasis: '感情の深みを大切にして',
+        contextText: '   ',
+      );
+      expect(result, isNot(contains('状況・背景')));
+    });
+
+    test('en + contextText + customPrompt → 両方含む', () {
+      final result = DiaryPromptBuilder.buildMultiImagePrompt(
+        locale: const Locale('en'),
+        analyses: ['Analysis'],
+        photoTimes: [DateTime(2025, 3, 15, 8)],
+        customPrompt: 'Time with friends',
+        emphasis: 'captures emotional depth',
+        contextText: 'School sports day',
+      );
+      expect(result, contains('Context:'));
+      expect(result, contains('School sports day'));
+      expect(result, contains('"Time with friends"'));
     });
   });
 }

@@ -24,10 +24,14 @@ class DiaryPreviewScreen extends StatefulWidget {
   /// 選択されたプロンプト（オプション）
   final WritingPrompt? selectedPrompt;
 
+  /// 状況補足テキスト（オプション）
+  final String? contextText;
+
   const DiaryPreviewScreen({
     super.key,
     required this.selectedAssets,
     this.selectedPrompt,
+    this.contextText,
   });
 
   @override
@@ -75,6 +79,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         _controller.initializeAndGenerate(
           assets: widget.selectedAssets,
           prompt: widget.selectedPrompt,
+          contextText: widget.contextText,
           locale: Localizations.localeOf(context),
           diaryLength: defaultLength,
         );
@@ -237,6 +242,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
                 _controller.clearPrompt();
                 _controller.initializeAndGenerate(
                   assets: widget.selectedAssets,
+                  contextText: widget.contextText,
                   locale: Localizations.localeOf(context),
                 );
               },

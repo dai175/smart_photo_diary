@@ -19,6 +19,30 @@ class GeminiApiClient {
   static const Duration baseDelay = Duration(seconds: 1);
   static const Duration requestTimeout = Duration(seconds: 60);
 
+  /// Gemini API safety settings — block medium-and-above for all harm categories
+  static const List<Map<String, String>> _safetySettings = [
+    {
+      'category': 'HARM_CATEGORY_HARASSMENT',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
+    },
+    {
+      'category': 'HARM_CATEGORY_HATE_SPEECH',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
+    },
+    {
+      'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
+    },
+    {
+      'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
+    },
+    {
+      'category': 'HARM_CATEGORY_CIVIC_INTEGRITY',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
+    },
+  ];
+
   GeminiApiClient({required ILoggingService logger, http.Client? httpClient})
     : _logger = logger,
       _httpClient = httpClient ?? http.Client();
@@ -83,6 +107,7 @@ class GeminiApiClient {
             'topK': AiConstants.defaultTopK,
             'thinkingConfig': {'thinkingBudget': 0},
           },
+          'safetySettings': _safetySettings,
         }),
         requestContext: 'sendTextRequest',
       );
@@ -167,6 +192,7 @@ class GeminiApiClient {
             'topK': AiConstants.defaultTopK,
             'thinkingConfig': {'thinkingBudget': 0},
           },
+          'safetySettings': _safetySettings,
         }),
         requestContext: 'sendVisionRequest',
       );

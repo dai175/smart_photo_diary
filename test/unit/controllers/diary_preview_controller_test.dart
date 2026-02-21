@@ -148,6 +148,24 @@ void main() {
       });
     });
 
+    group('contextText の受け渡し', () {
+      test('initializeAndGenerate に contextText を渡せる', () async {
+        final controller = createController();
+        addTearDown(controller.dispose);
+
+        // 空アセットでエラー終了するが、contextText パラメータが受け付けられることを確認
+        await controller.initializeAndGenerate(
+          assets: [],
+          contextText: '友達と花見',
+          locale: const Locale('ja'),
+        );
+
+        expect(controller.isInitializing, isFalse);
+        expect(controller.hasError, isTrue);
+        expect(controller.errorType, DiaryPreviewErrorType.noPhotos);
+      });
+    });
+
     group('dispose', () {
       test('dispose で例外が発生しない', () {
         final controller = createController();

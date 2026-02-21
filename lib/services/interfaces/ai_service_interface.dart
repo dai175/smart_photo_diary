@@ -34,6 +34,7 @@ abstract class IAiService {
     String? location,
     List<DateTime>? photoTimes,
     String? prompt,
+    String? contextText,
     Locale? locale,
     DiaryLength? diaryLength,
   });
@@ -50,6 +51,7 @@ abstract class IAiService {
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
     String? prompt,
+    String? contextText,
     Function(int current, int total)? onProgress,
     Locale? locale,
     DiaryLength? diaryLength,

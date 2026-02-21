@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/ai_constants.dart';
 import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -13,8 +14,8 @@ import 'prompt_selection_items.dart';
 
 /// プロンプト選択モーダル
 class PromptSelectionModal extends StatefulWidget {
-  final Function(WritingPrompt?) onPromptSelected;
-  final VoidCallback onSkip;
+  final void Function(WritingPrompt?, String?) onPromptSelected;
+  final void Function(String?) onSkip;
 
   const PromptSelectionModal({
     super.key,
@@ -36,12 +37,21 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   List<WritingPrompt> _availablePrompts = [];
   WritingPrompt? _selectedPrompt;
   bool _isRandomSelected = false;
+  bool _showContextInput = false;
+  late final TextEditingController _contextController;
 
   @override
   void initState() {
     super.initState();
     _logger = serviceLocator.get<ILoggingService>();
+    _contextController = TextEditingController();
     _initializeServices();
+  }
+
+  @override
+  void dispose() {
+    _contextController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeServices() async {
@@ -73,11 +83,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         context: 'PromptSelectionModal',
       );
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     } catch (e) {
       _logger.error(
         'Prompt service initialization error',
@@ -100,20 +108,28 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
       iconColor: Theme.of(context).colorScheme.primary,
       maxWidth: 420,
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 400),
+        constraints: const BoxConstraints(maxHeight: 480),
         child: _isLoading ? _buildLoadingContent() : _buildContent(context),
       ),
       actions: _buildActions(),
     );
   }
 
+  String? _getContextText() {
+    final text = _contextController.text.trim();
+    return text.isEmpty ? null : text;
+  }
+
   List<CustomDialogAction> _buildActions() {
     final l10n = context.l10n;
-    final primaryText = _isRandomSelected
-        ? l10n.promptCreateRandom
-        : (_selectedPrompt != null
-              ? l10n.promptCreateWithSelected
-              : l10n.promptCreateWithout);
+    final String primaryText;
+    if (_isRandomSelected) {
+      primaryText = l10n.promptCreateRandom;
+    } else if (_selectedPrompt != null) {
+      primaryText = l10n.promptCreateWithSelected;
+    } else {
+      primaryText = l10n.promptCreateWithout;
+    }
 
     return [
       CustomDialogAction(
@@ -124,17 +140,18 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
         text: primaryText,
         isPrimary: true,
         onPressed: () {
+          final contextText = _getContextText();
           if (_isRandomSelected) {
             // ランダム選択の場合は実際のプロンプトを取得して渡す
             final randomPrompt = _promptService.getRandomPrompt(
               isPremium: _isPremium,
               locale: Localizations.localeOf(context),
             );
-            widget.onPromptSelected(randomPrompt);
+            widget.onPromptSelected(randomPrompt, contextText);
           } else if (_selectedPrompt != null) {
-            widget.onPromptSelected(_selectedPrompt);
+            widget.onPromptSelected(_selectedPrompt, contextText);
           } else {
-            widget.onSkip();
+            widget.onSkip(contextText);
           }
         },
       ),
@@ -150,7 +167,83 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   }
 
   Widget _buildContent(BuildContext context) {
-    return _availablePrompts.isEmpty ? _buildEmptyState() : _buildPromptList();
+    final l10n = context.l10n;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.xs,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => setState(() {
+                    _showContextInput = !_showContextInput;
+                  }),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showContextInput
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          l10n.promptContextToggle,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  alignment: Alignment.topCenter,
+                  child: _showContextInput
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xs),
+                          child: TextField(
+                            controller: _contextController,
+                            maxLines: 2,
+                            maxLength: AiConstants.contextTextMaxLength,
+                            decoration: InputDecoration(
+                              labelText: l10n.promptContextInputLabel,
+                              hintText: l10n.promptContextInputHint,
+                              helperText: l10n.promptContextInputHelper,
+                              helperMaxLines: 2,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Flexible(
+          child: _availablePrompts.isEmpty
+              ? _buildEmptyState()
+              : _buildPromptList(),
+        ),
+      ],
+    );
   }
 
   Widget _buildPromptList() {
