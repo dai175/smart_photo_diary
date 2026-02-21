@@ -4,6 +4,7 @@ import '../services/interfaces/diary_tag_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
+import '../constants/theme_constants.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../localization/localization_extensions.dart';
@@ -187,9 +188,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       height:
           MediaQuery.of(context).size.height *
           AppConstants.bottomSheetHeightRatio,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      decoration: const BoxDecoration(borderRadius: AppSpacing.modalRadius),
       child: Column(
         children: [
           // ハンドル
@@ -205,7 +204,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
           // ヘッダー
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.largePadding,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -228,7 +229,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // フィルタオプション
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.largePadding,
+              ),
               children: [
                 // 日付範囲
                 _buildSection(
@@ -261,12 +264,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   title: context.l10n.filterTags,
                   child: _isLoadingTags
                       ? const Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: ThemeConstants.defaultCardPadding,
                           child: Center(child: CircularProgressIndicator()),
                         )
                       : _availableTags.isEmpty
                       ? Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: ThemeConstants.defaultCardPadding,
                           child: Text(
                             context.l10n.filterNoTags,
                             style: const TextStyle(color: Colors.grey),
@@ -313,7 +316,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
           // 適用ボタン
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: ThemeConstants.defaultCardPadding,
             child: PrimaryButton(
               onPressed: () {
                 widget.onApply(_currentFilter);

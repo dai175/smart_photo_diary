@@ -258,7 +258,9 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
           itemBuilder: (context, index) {
             if (index >= itemCount) {
               return const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+                ),
               );
             }
             return _buildPhotoItem(index);

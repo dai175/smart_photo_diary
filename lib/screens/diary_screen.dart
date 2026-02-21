@@ -222,7 +222,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
                             child: SizedBox(
                               width: AppConstants.diaryListFooterSpinnerSize,
                               height: AppConstants.diaryListFooterSpinnerSize,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                strokeWidth:
+                                    AppConstants.progressIndicatorStrokeWidth,
+                              ),
                             ),
                           ),
                         )

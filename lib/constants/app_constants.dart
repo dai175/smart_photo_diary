@@ -68,6 +68,16 @@ class AppConstants {
   static const Duration standardTransitionDuration = Duration(
     milliseconds: 300,
   );
+  static const Duration fastAnimationDuration = Duration(milliseconds: 150);
+  static const Duration shimmerAnimationPeriod = Duration(milliseconds: 1800);
+
+  // SnackBar 表示時間
+  static const Duration snackBarInfoDuration = Duration(seconds: 3);
+  static const Duration snackBarWarningDuration = Duration(seconds: 4);
+  static const Duration snackBarErrorDuration = Duration(seconds: 5);
+
+  // インジケーター
+  static const double progressIndicatorStrokeWidth = 2.0;
 
   // ナビゲーションタブインデックス
   static const int homeTabIndex = 0;

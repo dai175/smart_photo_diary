@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../constants/app_constants.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../ui/components/custom_card.dart';
 import '../../ui/components/fullscreen_photo_viewer.dart';
@@ -27,7 +28,7 @@ class DiaryDetailPhotoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SlideInWidget(
-      delay: const Duration(milliseconds: 100),
+      delay: AppConstants.microStaggerUnit,
       child: CustomCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

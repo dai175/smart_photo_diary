@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_constants.dart';
 import '../../constants/app_icons.dart';
 import '../../localization/localization_extensions.dart';
 import '../../ui/components/custom_card.dart';
@@ -33,7 +34,7 @@ class StatisticsCards extends StatelessWidget {
           children: [
             Expanded(
               child: SlideInWidget(
-                delay: const Duration(milliseconds: 100),
+                delay: AppConstants.microStaggerUnit,
                 child: _buildStatCard(
                   context,
                   l10n.statisticsTotalEntriesTitle,
@@ -46,7 +47,7 @@ class StatisticsCards extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: SlideInWidget(
-                delay: const Duration(milliseconds: 150),
+                delay: AppConstants.fastAnimationDuration,
                 child: _buildStatCard(
                   context,
                   l10n.statisticsCurrentStreakTitle,
@@ -63,7 +64,7 @@ class StatisticsCards extends StatelessWidget {
           children: [
             Expanded(
               child: SlideInWidget(
-                delay: const Duration(milliseconds: 200),
+                delay: AppConstants.quickAnimationDuration,
                 child: _buildStatCard(
                   context,
                   l10n.statisticsLongestStreakTitle,

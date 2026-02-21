@@ -553,7 +553,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// シンプルなローディング状態を構築（スケルトンなし）
   Widget _buildSimpleLoadingState() {
-    return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
+    return const Center(
+      child: CircularProgressIndicator(
+        strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+      ),
+    );
   }
 
   /// 権限拒否状態を構築

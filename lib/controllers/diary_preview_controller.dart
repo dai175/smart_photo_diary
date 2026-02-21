@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:photo_manager/photo_manager.dart';
 
+import '../constants/app_constants.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
@@ -117,7 +118,7 @@ class DiaryPreviewController extends BaseErrorController {
     }
     _selectedPrompt = prompt;
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(AppConstants.microStaggerUnit);
 
     _isInitializing = false;
     notifyListeners();

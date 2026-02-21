@@ -347,7 +347,7 @@ class PhotoThumbnailPlaceholder extends StatelessWidget {
           width: 20,
           height: 20,
           child: CircularProgressIndicator(
-            strokeWidth: 2,
+            strokeWidth: AppConstants.progressIndicatorStrokeWidth,
             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
         ),
@@ -392,7 +392,7 @@ class PhotoGridItemWrapper extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+            duration: AppConstants.fastAnimationDuration,
             curve: Curves.easeOutCubic,
             decoration: const BoxDecoration(
               color: Colors.transparent,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 
 /// ErrorSeverity に基づく表示属性のヘルパー
@@ -100,7 +101,7 @@ class ErrorDisplayConfig {
   static const ErrorDisplayConfig info = ErrorDisplayConfig(
     severity: ErrorSeverity.info,
     method: ErrorDisplayMethod.snackBar,
-    duration: Duration(seconds: 3),
+    duration: AppConstants.snackBarInfoDuration,
     logError: false,
   );
 
@@ -108,7 +109,7 @@ class ErrorDisplayConfig {
   static const ErrorDisplayConfig warning = ErrorDisplayConfig(
     severity: ErrorSeverity.warning,
     method: ErrorDisplayMethod.snackBar,
-    duration: Duration(seconds: 4),
+    duration: AppConstants.snackBarWarningDuration,
   );
 
   /// エラーレベルのダイアログ設定

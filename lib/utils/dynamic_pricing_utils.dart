@@ -5,6 +5,7 @@ import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../models/plans/plan_factory.dart';
+import '../constants/app_constants.dart';
 import '../constants/subscription_constants.dart';
 
 /// 動的価格取得のユーティリティクラス
@@ -314,7 +315,9 @@ class _DynamicPriceTextState extends State<DynamicPriceText> {
           const SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+            ),
           );
     }
 

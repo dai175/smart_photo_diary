@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/app_constants.dart';
 import '../../design_system/app_spacing.dart';
 import '../../design_system/app_typography.dart';
 
@@ -36,7 +37,7 @@ class AnimatedButton extends StatefulWidget {
     this.border,
     this.enableSplashEffect = true,
     this.enableScaleAnimation = true,
-    this.animationDuration = const Duration(milliseconds: 150),
+    this.animationDuration = AppConstants.fastAnimationDuration,
   });
 
   /// ボタンが押された時のコールバック
@@ -99,9 +100,13 @@ class _AnimatedButtonState extends State<AnimatedButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: AppConstants.scalePressed)
+        .animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     _elevationAnimation =
         Tween<double>(
