@@ -1531,5 +1531,17 @@
   "settingsDiaryLengthDialogTitle": "Default diary length",
   "@settingsDiaryLengthDialogTitle": {
     "description": "Title for the default diary length selection dialog in settings"
+  },
+  "promptContextInputLabel": "Context (optional)",
+  "@promptContextInputLabel": {
+    "description": "Label for the context text input in prompt selection modal"
+  },
+  "promptContextInputHint": "e.g. Cherry blossom viewing with friends",
+  "@promptContextInputHint": {
+    "description": "Hint for the context text input"
+  },
+  "promptContextInputHelper": "Helps the AI understand the situation beyond the photo",
+  "@promptContextInputHelper": {
+    "description": "Helper text for the context text input"
   }
 }

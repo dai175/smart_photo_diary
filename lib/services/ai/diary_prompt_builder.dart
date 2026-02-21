@@ -167,6 +167,7 @@ class DiaryPromptBuilder {
     required List<DateTime>? photoTimes,
     String? location,
     String? customPrompt,
+    String? contextText,
     required String emphasis,
     DiaryLength diaryLength = DiaryLength.standard,
   }) {
@@ -178,6 +179,9 @@ class DiaryPromptBuilder {
     if (isJapanese) {
       final titleLength = isShort ? _jaTitleShort : _jaTitleStandard;
       final bodyLength = isShort ? _jaSingleBodyShort : _jaSingleBodyStandard;
+      final contextLine = contextText != null && contextText.trim().isNotEmpty
+          ? '\n状況・背景：「${contextText.trim()}」\n上記の状況を踏まえて、'
+          : '';
       final basePrompt =
           '''
 あなたは感情豊かな日記作成の専門家です。提示されたシーンや場面をもとに、その瞬間の感情や心の動きを中心とした日記を日本語で作成してください。
@@ -194,7 +198,7 @@ ${isShort ? '\n※この日記はX（旧Twitter）投稿用です。タイトル
 $locationLine''';
 
       if (customPrompt != null) {
-        return '''$basePrompt
+        return '''$basePrompt$contextLine
 以下のライティングプロンプトを参考にして、このシーンで体験したことを深く掘り下げて日記を作成してください：
 
 「$customPrompt」
@@ -209,7 +213,7 @@ $locationLine''';
 $emphasis、個人的で心に響く日記を作成してください。''';
       }
 
-      return '''$basePrompt
+      return '''$basePrompt$contextLine
 このシーンの詳細を把握して、以下の点を意識して日記を書いてください：
 - そのシーンで実際に感じた気持ちや感情
 - その瞬間の心の状態や印象
@@ -225,6 +229,9 @@ $emphasis、個人的で心に響く日記を作成してください。''';
 
     final titleLength = isShort ? _enTitleShort : _enTitleStandard;
     final bodyLength = isShort ? _enSingleBodyShort : _enSingleBodyStandard;
+    final contextLineEn = contextText != null && contextText.trim().isNotEmpty
+        ? '\nContext: "${contextText.trim()}"\nWith this context in mind,'
+        : '';
     final basePrompt =
         '''
 You are an empathetic journaling companion. Using the scene details, craft a reflective diary entry in natural English that centres on the writer's emotions.
@@ -241,7 +248,7 @@ ${isShort ? '\nNote: This diary is for an X (Twitter) post. The combined title +
 $locationLine''';
 
     if (customPrompt != null) {
-      return '''$basePrompt
+      return '''$basePrompt$contextLineEn
 Use the following writing prompt as additional inspiration:
 
 "$customPrompt"
@@ -256,7 +263,7 @@ When writing the diary, reflect on:
 Use a tone that $emphasis and keep the entry personal and heartfelt. Do not include parenthetical explanations or meta-commentary in the title or body.''';
     }
 
-    return '''$basePrompt
+    return '''$basePrompt$contextLineEn
 Consider the scene carefully and describe:
 - The emotions you genuinely felt in that moment
 - The atmosphere and sensory details you noticed
@@ -273,6 +280,7 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
     required List<DateTime> photoTimes,
     String? location,
     String? customPrompt,
+    String? contextText,
     required String emphasis,
     DiaryLength diaryLength = DiaryLength.standard,
   }) {
@@ -291,6 +299,9 @@ Use a tone that $emphasis and keep the diary intimate and emotionally resonant. 
     if (isJapanese) {
       final titleLength = isShort ? _jaTitleShort : _jaTitleStandard;
       final bodyLength = isShort ? _jaMultiBodyShort : _jaMultiBodyStandard;
+      final contextLine = contextText != null && contextText.trim().isNotEmpty
+          ? '\n状況・背景：「${contextText.trim()}」\n上記の状況を踏まえて、'
+          : '';
       final basePrompt =
           '''以下のシーン分析結果から、その日の感情や心の動きを中心とした日記を日本語で作成してください。
 単なる出来事の記録ではなく、一日を通して体験したシーンで感じた気持ちや感情の変化を深く掘り下げた個人的な日記を書いてください。
@@ -310,7 +321,7 @@ $locationLine
 $analysesText''';
 
       if (customPrompt != null) {
-        return '''$basePrompt
+        return '''$basePrompt$contextLine
 
 以下のライティングプロンプトを参考にして、このシーンで体験したことを深く掘り下げて日記を作成してください：
 
@@ -326,7 +337,7 @@ $analysesText''';
 $emphasis、時系列に沿って個人的で心に響く日記を作成してください。''';
       }
 
-      return '''$basePrompt
+      return '''$basePrompt$contextLine
 
 これらのシーンから読み取れる一日の流れや体験を、以下の点を意識して日記に表現してください：
 - 一日を通して感じた感情の変化
@@ -339,6 +350,9 @@ $emphasis、時系列に沿って個人的で心に響く日記を作成して�
 
     final enTitleLength = isShort ? _enTitleShort : _enTitleStandard;
     final enBodyLength = isShort ? _enMultiBodyShort : _enMultiBodyStandard;
+    final contextLineEn = contextText != null && contextText.trim().isNotEmpty
+        ? '\nContext: "${contextText.trim()}"\nWith this context in mind,'
+        : '';
     final basePrompt =
         '''Using the scene analyses below, craft a reflective diary entry in natural English that traces how the writer's emotions evolved throughout the day.
 Do not simply list events—explore the inner experience and personal meaning behind each moment.
@@ -358,7 +372,7 @@ Scene analyses:
 $analysesText''';
 
     if (customPrompt != null) {
-      return '''$basePrompt
+      return '''$basePrompt$contextLineEn
 
 Use the following writing prompt as additional inspiration:
 
@@ -374,7 +388,7 @@ When crafting the diary, be sure to cover:
 Use a tone that $emphasis and keep the writing personal and genuine. Do not include parenthetical explanations or meta-commentary in the title or body.''';
     }
 
-    return '''$basePrompt
+    return '''$basePrompt$contextLineEn
 
 Reflect on the day by describing:
 - The emotional flow from scene to scene

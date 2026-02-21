@@ -38,6 +38,7 @@ class DiaryPreviewController extends BaseErrorController {
   DiaryPreviewErrorType? _errorType;
   String? _savedDiaryId;
   bool _usageLimitReached = false;
+  String? _contextText;
   DiaryLength _diaryLength = DiaryLength.standard;
 
   /// 現在の日記の長さ設定
@@ -110,11 +111,15 @@ class DiaryPreviewController extends BaseErrorController {
   Future<void> initializeAndGenerate({
     required List<AssetEntity> assets,
     WritingPrompt? prompt,
+    String? contextText,
     required Locale locale,
     DiaryLength? diaryLength,
   }) async {
     if (diaryLength != null) {
       _diaryLength = diaryLength;
+    }
+    if (contextText != null) {
+      _contextText = contextText;
     }
     _selectedPrompt = prompt;
 
@@ -224,6 +229,7 @@ class DiaryPreviewController extends BaseErrorController {
       imageData: imageResult.value,
       date: _photoDateTime,
       prompt: _selectedPrompt?.text,
+      contextText: _contextText,
       locale: locale,
       diaryLength: _diaryLength,
     );
@@ -274,6 +280,7 @@ class DiaryPreviewController extends BaseErrorController {
     final resultFromAi = await aiService.generateDiaryFromMultipleImages(
       imagesWithTimes: imagesWithTimes,
       prompt: _selectedPrompt?.text,
+      contextText: _contextText,
       onProgress: (current, total) {
         _logger.info(
           'Image analysis progress: $current/$total',

@@ -26,6 +26,7 @@ class DiaryGenerator {
     String? location,
     List<DateTime>? photoTimes,
     String? prompt,
+    String? contextText,
     required bool isOnline,
     required Locale locale,
     DiaryLength diaryLength = DiaryLength.standard,
@@ -56,6 +57,7 @@ class DiaryGenerator {
         photoTimes: photoTimes,
         location: location,
         customPrompt: prompt,
+        contextText: contextText,
         emphasis: emphasis,
         diaryLength: diaryLength,
       );
@@ -66,6 +68,7 @@ class DiaryGenerator {
         context: 'generateFromImage',
         data: {
           'customPrompt': prompt ?? 'none',
+          'contextText': contextText ?? 'none',
           'promptType': promptType,
           'maxTokens': maxTokens,
           'emphasis': emphasis,
@@ -117,6 +120,7 @@ class DiaryGenerator {
     required List<({Uint8List imageData, DateTime time})> imagesWithTimes,
     String? location,
     String? prompt,
+    String? contextText,
     Function(int current, int total)? onProgress,
     required bool isOnline,
     required Locale locale,
@@ -180,6 +184,7 @@ class DiaryGenerator {
         location,
         prompt,
         locale,
+        contextText: contextText,
         diaryLength: diaryLength,
       );
     } catch (e) {
@@ -339,6 +344,7 @@ Describe the situation and mood you infer from the image, including any emotiona
     String? location,
     String? customPrompt,
     Locale locale, {
+    String? contextText,
     DiaryLength diaryLength = DiaryLength.standard,
   }) async {
     if (photoAnalyses.isEmpty) {
@@ -376,6 +382,7 @@ Describe the situation and mood you infer from the image, including any emotiona
       photoTimes: photoTimes,
       location: location,
       customPrompt: customPrompt,
+      contextText: contextText,
       emphasis: emphasis,
       diaryLength: diaryLength,
     );
@@ -385,6 +392,7 @@ Describe the situation and mood you infer from the image, including any emotiona
       context: '_generateDiaryFromAnalyses',
       data: {
         'customPrompt': customPrompt ?? 'none',
+        'contextText': contextText ?? 'none',
         'promptType': promptType,
         'maxTokens': multiImageMaxTokens,
         'emphasis': emphasis,

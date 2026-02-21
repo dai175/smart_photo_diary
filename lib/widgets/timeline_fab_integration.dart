@@ -117,13 +117,23 @@ class TimelineFABIntegration extends StatelessWidget {
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) => PromptSelectionModal(
-          onPromptSelected: (prompt) {
+          onPromptSelected: (prompt, contextText) {
             Navigator.of(dialogContext).pop();
-            _navigateToDiaryPreview(context, selectedPhotos, prompt);
+            _navigateToDiaryPreview(
+              context,
+              selectedPhotos,
+              prompt,
+              contextText: contextText,
+            );
           },
-          onSkip: () {
+          onSkip: (contextText) {
             Navigator.of(dialogContext).pop();
-            _navigateToDiaryPreview(context, selectedPhotos, null);
+            _navigateToDiaryPreview(
+              context,
+              selectedPhotos,
+              null,
+              contextText: contextText,
+            );
           },
         ),
       );
@@ -140,15 +150,16 @@ class TimelineFABIntegration extends StatelessWidget {
   void _navigateToDiaryPreview(
     BuildContext context,
     List<AssetEntity> selectedPhotos,
-    WritingPrompt? selectedPrompt,
-  ) {
+    WritingPrompt? selectedPrompt, {
+    String? contextText,
+  }) {
     final logger = ServiceRegistration.get<ILoggingService>();
 
     logger.info(
       'Navigating to diary preview screen',
       context: 'TimelineFABIntegration._navigateToDiaryPreview',
       data:
-          'Prompt: ${selectedPrompt?.text ?? "none"}, Photos: ${selectedPhotos.length}',
+          'Prompt: ${selectedPrompt?.text ?? "none"}, contextText: ${contextText ?? "none"}, Photos: ${selectedPhotos.length}',
     );
 
     Navigator.push<bool>(
@@ -157,6 +168,7 @@ class TimelineFABIntegration extends StatelessWidget {
         builder: (context) => DiaryPreviewScreen(
           selectedAssets: selectedPhotos,
           selectedPrompt: selectedPrompt,
+          contextText: contextText,
         ),
       ),
     ).then((created) {
