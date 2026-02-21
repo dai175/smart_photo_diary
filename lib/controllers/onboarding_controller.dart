@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_constants.dart';
 import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../services/interfaces/logging_service_interface.dart';
@@ -43,7 +44,7 @@ class OnboardingController extends ChangeNotifier {
   void nextPage(PageController controller) {
     if (_currentPage < _lastPageIndex) {
       controller.nextPage(
-        duration: const Duration(milliseconds: 300),
+        duration: AppConstants.standardTransitionDuration,
         curve: Curves.easeInOut,
       );
     }
@@ -52,7 +53,7 @@ class OnboardingController extends ChangeNotifier {
   void previousPage(PageController controller) {
     if (_currentPage > 0) {
       controller.previousPage(
-        duration: const Duration(milliseconds: 300),
+        duration: AppConstants.standardTransitionDuration,
         curve: Curves.easeInOut,
       );
     }

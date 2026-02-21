@@ -58,7 +58,7 @@ class AnimatedListBuilder extends StatefulWidget {
     this.padding,
     this.physics,
     this.staggerDelay = AppConstants.microStaggerUnit,
-    this.animationDuration = const Duration(milliseconds: 500),
+    this.animationDuration = AppConstants.xSlowAnimationDuration,
   });
 
   final int itemCount;

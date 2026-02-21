@@ -70,7 +70,6 @@ class UpgradeDialogUtils {
         final priceStrings = await DynamicPricingUtils.getMultiplePlanPrices(
           planIds,
           locale: context.l10n.localeName,
-          timeout: const Duration(seconds: 10),
         );
 
         _logger.debug(

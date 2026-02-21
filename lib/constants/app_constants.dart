@@ -65,6 +65,9 @@ class AppConstants {
   );
   static const Duration microStaggerUnit = Duration(milliseconds: 100);
   static const Duration quickAnimationDuration = Duration(milliseconds: 200);
+  static const Duration standardTransitionDuration = Duration(
+    milliseconds: 300,
+  );
 
   // ナビゲーションタブインデックス
   static const int homeTabIndex = 0;

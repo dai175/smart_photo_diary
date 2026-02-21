@@ -58,7 +58,7 @@ class _SmartFABWidgetState extends State<SmartFABWidget> {
       animation: _fabController,
       builder: (context, child) {
         return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: AppConstants.standardTransitionDuration,
           transitionBuilder: (Widget child, Animation<double> animation) {
             return FadeTransition(
               opacity: animation,

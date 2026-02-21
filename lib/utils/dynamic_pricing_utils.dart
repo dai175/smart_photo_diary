@@ -13,6 +13,12 @@ import '../constants/subscription_constants.dart';
 class DynamicPricingUtils {
   DynamicPricingUtils._(); // プライベートコンストラクタ
 
+  /// 単一プラン価格取得のデフォルトタイムアウト
+  static const Duration singlePlanTimeout = Duration(seconds: 5);
+
+  /// 複数プラン価格取得のデフォルトタイムアウト
+  static const Duration multiplePlanTimeout = Duration(seconds: 10);
+
   // LoggingServiceのゲッター
   static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
@@ -25,7 +31,7 @@ class DynamicPricingUtils {
   static Future<String> getPlanPrice(
     String planId, {
     String? locale,
-    Duration timeout = const Duration(seconds: 5),
+    Duration timeout = singlePlanTimeout,
   }) async {
     try {
       _logger.debug(
@@ -84,7 +90,7 @@ class DynamicPricingUtils {
   static Future<Map<String, String>> getMultiplePlanPrices(
     List<String> planIds, {
     String? locale,
-    Duration timeout = const Duration(seconds: 10),
+    Duration timeout = multiplePlanTimeout,
   }) async {
     try {
       _logger.debug(
@@ -179,7 +185,7 @@ class DynamicPriceManager {
   Future<String> fetchAndCachePrice(
     String planId, {
     String? locale,
-    Duration timeout = const Duration(seconds: 5),
+    Duration timeout = DynamicPricingUtils.singlePlanTimeout,
   }) async {
     if (_priceCache.containsKey(planId)) {
       return _priceCache[planId]!;
@@ -203,7 +209,7 @@ class DynamicPriceManager {
   Future<Map<String, String>> fetchAndCacheMultiplePrices(
     List<String> planIds, {
     String? locale,
-    Duration timeout = const Duration(seconds: 10),
+    Duration timeout = DynamicPricingUtils.multiplePlanTimeout,
   }) async {
     _isLoading = true;
     try {
@@ -245,7 +251,7 @@ class DynamicPriceText extends StatefulWidget {
     this.locale,
     this.style,
     this.formatter,
-    this.timeout = const Duration(seconds: 5),
+    this.timeout = DynamicPricingUtils.singlePlanTimeout,
     this.loadingWidget,
   });
 
