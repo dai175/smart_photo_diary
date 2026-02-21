@@ -44,10 +44,9 @@ class DiaryScreenController extends BaseErrorController {
   }
 
   // 日記エントリーを読み込む（初期ページ）
-  Future<void> loadDiaryEntries() async {
+  Future<void> loadDiaryEntries({bool showShimmer = true}) async {
     try {
-      // 初回および再読込時はローディング表示
-      setLoading(true);
+      if (showShimmer) setLoading(true);
       _resetPaging();
       final diaryService = await ServiceLocator()
           .getAsync<IDiaryQueryService>();
@@ -63,18 +62,18 @@ class DiaryScreenController extends BaseErrorController {
           _offset = entries.length;
           _hasMore = entries.length == _pageSize;
           clearError();
-          setLoading(false);
+          if (showShimmer) setLoading(false);
           notifyListeners();
         },
         (error) {
           setError(error);
-          setLoading(false);
+          if (showShimmer) setLoading(false);
           notifyListeners();
         },
       );
     } catch (e) {
       setError(ServiceException('Failed to load diaries: $e'));
-      setLoading(false);
+      if (showShimmer) setLoading(false);
       notifyListeners();
     }
   }
@@ -124,8 +123,6 @@ class DiaryScreenController extends BaseErrorController {
   // フィルタを適用（シマー表示あり、FilterBottomSheet用）
   void applyFilter(DiaryFilter filter) {
     _currentFilter = filter;
-    setLoading(true);
-    notifyListeners();
     loadDiaryEntries();
   }
 
@@ -133,38 +130,7 @@ class DiaryScreenController extends BaseErrorController {
   void _applyFilterSilently(DiaryFilter filter) {
     _currentFilter = filter;
     notifyListeners();
-    _loadEntriesWithoutShimmer();
-  }
-
-  // シマーなしでエントリーを読み込む
-  Future<void> _loadEntriesWithoutShimmer() async {
-    try {
-      _resetPaging();
-      final diaryService = await ServiceLocator()
-          .getAsync<IDiaryQueryService>();
-      final result = await diaryService.getFilteredDiaryEntriesPage(
-        _currentFilter,
-        offset: _offset,
-        limit: _pageSize,
-      );
-
-      result.fold(
-        (entries) {
-          _diaryEntries = entries;
-          _offset = entries.length;
-          _hasMore = entries.length == _pageSize;
-          clearError();
-          notifyListeners();
-        },
-        (error) {
-          setError(error);
-          notifyListeners();
-        },
-      );
-    } catch (e) {
-      setError(ServiceException('Failed to load diaries: $e'));
-      notifyListeners();
-    }
+    loadDiaryEntries(showShimmer: false);
   }
 
   // フィルタをクリア
