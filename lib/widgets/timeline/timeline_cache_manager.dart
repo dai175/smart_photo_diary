@@ -76,7 +76,7 @@ class TimelineCacheManager {
     required List<AssetEntity> Function() getAssets,
   }) {
     _prefetchDebounce?.cancel();
-    _prefetchDebounce = Timer(AppConstants.quickAnimationDuration, () async {
+    _prefetchDebounce = Timer(AppConstants.prefetchDebounceDelay, () async {
       if (!isMounted() || _isViewportPrefetching) return;
       final assets = getAssets();
       if (assets.isEmpty) return;
