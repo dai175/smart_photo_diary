@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../constants/app_constants.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import 'timeline_constants.dart';
 
@@ -56,7 +57,7 @@ class TimelineScrollManager {
     if (!scrollController.hasClients) return;
     scrollController.animateTo(
       0,
-      duration: const Duration(milliseconds: 300),
+      duration: AppConstants.standardTransitionDuration,
       curve: Curves.easeOut,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_constants.dart';
 import '../../controllers/onboarding_controller.dart';
 import '../../localization/localization_extensions.dart';
 import '../../ui/components/animated_button.dart';
@@ -114,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(5, (index) {
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+            duration: AppConstants.standardTransitionDuration,
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             width: _controller.currentPage == index ? 24 : 8,
             height: 8,
