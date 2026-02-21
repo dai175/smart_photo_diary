@@ -328,7 +328,7 @@ class _OptimizedPhotoGridWidgetState extends State<OptimizedPhotoGridWidget> {
                         }
                         return AnimatedOpacity(
                           opacity: frame == null ? 0 : 1,
-                          duration: const Duration(milliseconds: 200),
+                          duration: AppConstants.quickAnimationDuration,
                           curve: Curves.easeOut,
                           child: child,
                         );

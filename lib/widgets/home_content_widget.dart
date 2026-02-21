@@ -10,6 +10,7 @@ import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
+import '../constants/app_constants.dart';
 import '../constants/subscription_constants.dart';
 import '../controllers/scroll_signal.dart';
 
@@ -111,14 +112,14 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         children: [
           // 選択解除バー
           AnimatedSize(
-            duration: const Duration(milliseconds: 200),
+            duration: AppConstants.quickAnimationDuration,
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
             child: ListenableBuilder(
               listenable: widget.photoController,
               builder: (context, _) {
                 return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
+                  duration: AppConstants.quickAnimationDuration,
                   child: widget.photoController.selectedCount > 0
                       ? Padding(
                           key: const ValueKey('selection-bar'),

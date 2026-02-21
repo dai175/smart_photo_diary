@@ -47,7 +47,7 @@ class StatisticsController extends BaseErrorController {
     setLoading(true);
 
     try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      final diaryService = await serviceLocator.getAsync<IDiaryService>();
       final result = await diaryService.getSortedDiaryEntries();
 
       if (result.isSuccess) {
@@ -82,7 +82,7 @@ class StatisticsController extends BaseErrorController {
   /// 日記変更ストリームを購読する
   Future<void> subscribeDiaryChanges() async {
     try {
-      final diaryService = await ServiceLocator().getAsync<IDiaryService>();
+      final diaryService = await serviceLocator.getAsync<IDiaryService>();
       _diarySub = diaryService.changes.listen((_) {
         _debounce?.cancel();
         _debounce = Timer(const Duration(milliseconds: 350), () {

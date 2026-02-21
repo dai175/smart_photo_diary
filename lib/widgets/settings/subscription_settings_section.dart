@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_constants.dart';
 import '../../constants/app_icons.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/subscription_info_v2.dart';
@@ -163,7 +164,7 @@ class _SubscriptionSettingsSectionState
             ),
             AnimatedRotation(
               turns: _subscriptionExpanded ? 0.25 : 0.0,
-              duration: const Duration(milliseconds: 200),
+              duration: AppConstants.quickAnimationDuration,
               child: Icon(
                 AppIcons.actionForward,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

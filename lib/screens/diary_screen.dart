@@ -185,11 +185,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 // アクティブフィルタ表示（AnimatedSize + AnimatedSwitcherで表示/非表示をアニメーション）
                 SliverToBoxAdapter(
                   child: AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
+                    duration: AppConstants.quickAnimationDuration,
                     curve: Curves.easeInOut,
                     alignment: Alignment.topCenter,
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
+                      duration: AppConstants.quickAnimationDuration,
                       child: _controller.currentFilter.isActive
                           ? ActiveFiltersDisplay(
                               key: const ValueKey('active-filters'),

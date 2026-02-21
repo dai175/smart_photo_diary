@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/smart_fab_controller.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../constants/app_constants.dart';
 import '../localization/localization_extensions.dart';
 
 /// スマートFABウィジェット
@@ -94,7 +95,7 @@ class _SmartFABWidgetState extends State<SmartFABWidget> {
       ),
       shape: const CircleBorder(),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
+        duration: AppConstants.quickAnimationDuration,
         transitionBuilder: (Widget child, Animation<double> animation) {
           return RotationTransition(
             turns: Tween<double>(begin: 0.8, end: 1.0).animate(

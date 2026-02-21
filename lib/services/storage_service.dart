@@ -25,15 +25,14 @@ class StorageService implements IStorageService {
 
   /// DiaryService を取得（コンストラクタ注入 or ServiceLocator フォールバック）
   Future<IDiaryService> _getDiaryService() async {
-    return _diaryService ?? await ServiceLocator().getAsync<IDiaryService>();
+    return _diaryService ?? await serviceLocator.getAsync<IDiaryService>();
   }
 
   /// 現在のロケールを解決する
   Future<Locale> _resolveLocale() async {
     try {
       final settingsService =
-          _settingsService ??
-          await ServiceLocator().getAsync<ISettingsService>();
+          _settingsService ?? await serviceLocator.getAsync<ISettingsService>();
       return settingsService.locale ?? PlatformDispatcher.instance.locale;
     } catch (_) {
       return PlatformDispatcher.instance.locale;

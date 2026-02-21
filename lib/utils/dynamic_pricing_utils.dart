@@ -34,7 +34,7 @@ class DynamicPricingUtils {
       );
 
       // SubscriptionServiceを取得
-      final subscriptionService = await ServiceLocator()
+      final subscriptionService = await serviceLocator
           .getAsync<ISubscriptionService>();
 
       // 動的価格を取得（タイムアウト付き）

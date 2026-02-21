@@ -372,7 +372,7 @@ class UpgradeDialogUtils {
         'Resolving subscription service via ServiceLocator',
         context: 'UpgradeDialogUtils._startPurchaseWithoutContext',
       );
-      final subscriptionService = await ServiceLocator()
+      final subscriptionService = await serviceLocator
           .getAsync<ISubscriptionService>();
 
       _logger.debug(

@@ -82,7 +82,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _loadSettings() async {
     try {
-      _settingsService = await ServiceLocator().getAsync<ISettingsService>();
+      _settingsService = await serviceLocator.getAsync<ISettingsService>();
       final notifier = _settingsService!.localeNotifier;
       if (_localeNotifier != notifier) {
         _localeNotifier?.removeListener(_handleLocaleChanged);

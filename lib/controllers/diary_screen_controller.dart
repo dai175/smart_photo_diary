@@ -50,8 +50,7 @@ class DiaryScreenController extends BaseErrorController {
     try {
       if (showShimmer) setLoading(true);
       _resetPaging();
-      final diaryService = await ServiceLocator()
-          .getAsync<IDiaryQueryService>();
+      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
@@ -87,8 +86,7 @@ class DiaryScreenController extends BaseErrorController {
     notifyListeners();
 
     try {
-      final diaryService = await ServiceLocator()
-          .getAsync<IDiaryQueryService>();
+      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
@@ -191,8 +189,7 @@ class DiaryScreenController extends BaseErrorController {
   // 検索で日記を絞り込み
   Future<void> _searchDiaryEntries(String query) async {
     try {
-      final diaryService = await ServiceLocator()
-          .getAsync<IDiaryQueryService>();
+      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
 
       final filter = query.isEmpty
           ? _currentFilter
@@ -230,8 +227,7 @@ class DiaryScreenController extends BaseErrorController {
   // シマーを表示せずにデータを再読み込み（スクロール位置維持）
   Future<void> silentRefresh() async {
     try {
-      final diaryService = await ServiceLocator()
-          .getAsync<IDiaryQueryService>();
+      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
       final fetchCount = _offset > 0 ? _offset : _pageSize;
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,

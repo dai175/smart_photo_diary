@@ -71,8 +71,7 @@ class PromptService implements IPromptService {
       // 使用履歴サービスを取得（コンストラクタ未注入かつServiceLocator経由でも失敗時はnull）
       if (_usageService == null) {
         try {
-          _usageService = await ServiceLocator()
-              .getAsync<IPromptUsageService>();
+          _usageService = await serviceLocator.getAsync<IPromptUsageService>();
         } catch (e) {
           _logger.warning(
             'PromptService: Usage history feature disabled (${e.toString()})',
