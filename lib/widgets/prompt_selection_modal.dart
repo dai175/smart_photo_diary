@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/ai_constants.dart';
+import '../constants/app_constants.dart';
 import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
@@ -27,7 +28,8 @@ class PromptSelectionModal extends StatefulWidget {
   State<PromptSelectionModal> createState() => _PromptSelectionModalState();
 }
 
-class _PromptSelectionModalState extends State<PromptSelectionModal> {
+class _PromptSelectionModalState extends State<PromptSelectionModal>
+    with SingleTickerProviderStateMixin {
   late final ILoggingService _logger;
   late final IPromptService _promptService;
   late final ISubscriptionService _subscriptionService;
@@ -39,17 +41,28 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
   bool _isRandomSelected = false;
   bool _showContextInput = false;
   late final TextEditingController _contextController;
+  late final AnimationController _contextAnimationController;
+  late final Animation<double> _contextAnimation;
 
   @override
   void initState() {
     super.initState();
     _logger = serviceLocator.get<ILoggingService>();
     _contextController = TextEditingController();
+    _contextAnimationController = AnimationController(
+      duration: AppConstants.quickAnimationDuration,
+      vsync: this,
+    );
+    _contextAnimation = CurvedAnimation(
+      parent: _contextAnimationController,
+      curve: Curves.easeInOut,
+    );
     _initializeServices();
   }
 
   @override
   void dispose() {
+    _contextAnimationController.dispose();
     _contextController.dispose();
     super.dispose();
   }
@@ -185,9 +198,16 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
               children: [
                 InkWell(
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () => setState(() {
-                    _showContextInput = !_showContextInput;
-                  }),
+                  onTap: () {
+                    setState(() {
+                      _showContextInput = !_showContextInput;
+                    });
+                    if (_showContextInput) {
+                      _contextAnimationController.forward();
+                    } else {
+                      _contextAnimationController.reverse();
+                    }
+                  },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.xs,
@@ -213,25 +233,23 @@ class _PromptSelectionModalState extends State<PromptSelectionModal> {
                     ),
                   ),
                 ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 200),
-                  alignment: Alignment.topCenter,
-                  child: _showContextInput
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.xs),
-                          child: TextField(
-                            controller: _contextController,
-                            maxLines: 2,
-                            maxLength: AiConstants.contextTextMaxLength,
-                            decoration: InputDecoration(
-                              labelText: l10n.promptContextInputLabel,
-                              hintText: l10n.promptContextInputHint,
-                              helperText: l10n.promptContextInputHelper,
-                              helperMaxLines: 2,
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+                SizeTransition(
+                  sizeFactor: _contextAnimation,
+                  axisAlignment: -1.0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: TextField(
+                      controller: _contextController,
+                      maxLines: 2,
+                      maxLength: AiConstants.contextTextMaxLength,
+                      decoration: InputDecoration(
+                        labelText: l10n.promptContextInputLabel,
+                        hintText: l10n.promptContextInputHint,
+                        helperText: l10n.promptContextInputHelper,
+                        helperMaxLines: 2,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
