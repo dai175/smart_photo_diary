@@ -1488,7 +1488,7 @@
       }
     }
   },
-  "shareCreatedWith": "Created with #SmartPhotoDiary",
+  "shareCreatedWith": "#SmartPhotoDiary",
   "@shareCreatedWith": {
     "description": "Credit text used when sharing"
   },

@@ -68,7 +68,7 @@ class InstagramShareChannel {
       final shareText = _getLocalizedMessage(
         resolvedLocale,
         (l10n) => l10n.shareCreatedWith,
-        '#SmartPhotoDiary で生成',
+        '#SmartPhotoDiary',
       );
 
       await SharePlus.instance
