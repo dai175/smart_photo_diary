@@ -190,7 +190,7 @@ class DiaryDetailContentEditor extends StatelessWidget {
   /// 日記内容をクリップボードにコピーする
   void _copyDiaryToClipboard(BuildContext context) {
     final title = diaryEntry.title.isNotEmpty ? '${diaryEntry.title}\n\n' : '';
-    final text = '$title${diaryEntry.content}\n\n#SmartPhotoDiary';
+    final text = '$title${diaryEntry.content}\n\n${l10n.shareCreatedWith}';
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(
