@@ -1037,124 +1037,61 @@
   "@onboardingSkip": {
     "description": "Skip button shown on onboarding pages"
   },
-  "onboardingWelcomeTitle": "Welcome to\nSmart Photo Diary",
-  "@onboardingWelcomeTitle": {
-    "description": "Headline shown on the first onboarding page"
+  "onboardingPhilosophyTitle": "Your photos\nalready hold the story.",
+  "@onboardingPhilosophyTitle": {
+    "description": "Title for the philosophy onboarding page"
   },
-  "onboardingWelcomeSubtitle": "Turn each day into a beautiful story. Simply pick your photos and let the diary come to life.",
-  "@onboardingWelcomeSubtitle": {
-    "description": "Subheading explaining the app concept"
+  "onboardingPhilosophySubtitle": "We help you put it into words.",
+  "@onboardingPhilosophySubtitle": {
+    "description": "Subtitle for the philosophy onboarding page"
   },
-  "onboardingThreeStepsTitle": "Create your diary in three steps",
-  "@onboardingThreeStepsTitle": {
-    "description": "Title introducing the three-step process"
+  "onboardingPhilosophyCta": "Begin",
+  "@onboardingPhilosophyCta": {
+    "description": "CTA button on the philosophy onboarding page"
   },
-  "onboardingStepTitle": "Step {step}",
-  "@onboardingStepTitle": {
-    "description": "Label for each onboarding step",
-    "placeholders": {
-      "step": {
-        "type": "int"
-      }
-    }
+  "onboardingExperienceTitle": "Relive your day in seconds.",
+  "@onboardingExperienceTitle": {
+    "description": "Title for the experience onboarding page"
   },
-  "onboardingStep1Description": "Pick the photos you took today",
-  "@onboardingStep1Description": {
-    "description": "Description for step 1 on the onboarding flow"
+  "onboardingExperienceSubtitle": "Select a photo.\nWatch your memory unfold.",
+  "@onboardingExperienceSubtitle": {
+    "description": "Subtitle for the experience onboarding page"
   },
-  "onboardingStep2Description": "AI crafts a heartwarming diary from your photos",
-  "@onboardingStep2Description": {
-    "description": "Description for step 2 on the onboarding flow"
+  "onboardingExperienceCta": "Next",
+  "@onboardingExperienceCta": {
+    "description": "CTA button on the experience onboarding page"
   },
-  "onboardingStep3Description": "Save, edit, and reflect on your memories",
-  "@onboardingStep3Description": {
-    "description": "Description for step 3 on the onboarding flow"
+  "onboardingTrustTitle": "Private by design.",
+  "@onboardingTrustTitle": {
+    "description": "Title for the trust onboarding page"
   },
-  "onboardingShareTitle": "Share your diary instantly",
-  "@onboardingShareTitle": {
-    "description": "Title for the sharing onboarding page"
+  "onboardingTrustSubtitle": "Your photos never leave your device.\nNothing is stored on external servers.",
+  "@onboardingTrustSubtitle": {
+    "description": "Subtitle for the trust onboarding page"
   },
-  "onboardingShareFormatTitle": "Choose your format",
-  "@onboardingShareFormatTitle": {
-    "description": "Title describing sharing format choices"
+  "onboardingTrustCta": "Continue",
+  "@onboardingTrustCta": {
+    "description": "CTA button on the trust onboarding page"
   },
-  "onboardingShareFormatDescription": "Select vertical or square layouts",
-  "@onboardingShareFormatDescription": {
-    "description": "Description for selecting share formats"
-  },
-  "onboardingShareMultipleTitle": "Made for multiple photos",
-  "@onboardingShareMultipleTitle": {
-    "description": "Title for multi-photo support on onboarding"
-  },
-  "onboardingShareMultipleDescription": "Balanced layouts even with several images",
-  "@onboardingShareMultipleDescription": {
-    "description": "Description for multi-photo layouts"
-  },
-  "onboardingPlansTitle": "Choose the plan that fits",
-  "@onboardingPlansTitle": {
-    "description": "Title introducing subscription plans on onboarding"
-  },
-  "onboardingPlanBasicSubtitle": "Free plan",
-  "@onboardingPlanBasicSubtitle": {
-    "description": "Subtitle for the Basic plan card"
-  },
-  "onboardingPlanFeatureMonthlyLimit": "Generate up to {count} diaries per month",
-  "@onboardingPlanFeatureMonthlyLimit": {
-    "description": "Feature text describing the monthly AI generation limit",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingPlanFeatureRecentPhotos": "Select from photos taken today or yesterday",
-  "@onboardingPlanFeatureRecentPhotos": {
-    "description": "Feature text for recent photo access"
-  },
-  "onboardingPlanFeatureBasicPrompts": "Includes essential writing prompts",
-  "@onboardingPlanFeatureBasicPrompts": {
-    "description": "Feature text for basic prompt availability"
-  },
-  "onboardingPlanFeaturePastDays": "Pick from photos taken within the last {days} days",
-  "@onboardingPlanFeaturePastDays": {
-    "description": "Feature text for historical photo access",
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingPlanFeatureRichPrompts": "Unlock an expanded prompt library",
-  "@onboardingPlanFeatureRichPrompts": {
-    "description": "Feature text for rich prompt availability"
-  },
-  "onboardingPlanStartFree": "Start for free",
-  "@onboardingPlanStartFree": {
-    "description": "Message indicating the app can be started for free"
-  },
-  "onboardingPermissionTitle": "Allow photo access",
-  "@onboardingPermissionTitle": {
+  "onboardingPermissionNewTitle": "Start with today.",
+  "@onboardingPermissionNewTitle": {
     "description": "Title for the permission onboarding page"
   },
-  "onboardingPermissionDescription": "We need access to your photo library to craft your diary entries.",
-  "@onboardingPermissionDescription": {
-    "description": "Description explaining why photo access is required"
+  "onboardingPermissionNewSubtitle": "We need access to your photos\nto craft your first story.",
+  "@onboardingPermissionNewSubtitle": {
+    "description": "Subtitle for the permission onboarding page"
   },
-  "onboardingPrivacyTitle": "Privacy first",
-  "@onboardingPrivacyTitle": {
-    "description": "Title highlighting privacy guidance"
-  },
-  "onboardingPrivacyDescription": "Your photos are used only when generating diaries and never stored on external servers.",
-  "@onboardingPrivacyDescription": {
-    "description": "Description assuring users about privacy"
+  "onboardingPermissionCta": "Create my first diary",
+  "@onboardingPermissionCta": {
+    "description": "CTA button on the permission onboarding page"
   },
   "onboardingProcessing": "Preparing...",
   "@onboardingProcessing": {
     "description": "Label shown while onboarding completion is processing"
   },
-  "onboardingStart": "Get started",
-  "@onboardingStart": {
-    "description": "Button label to finish onboarding"
+  "planBasicSubtitle": "Free plan",
+  "@planBasicSubtitle": {
+    "description": "Subtitle for the Basic plan"
   },
   "commonSave": "Save",
   "@commonSave": {

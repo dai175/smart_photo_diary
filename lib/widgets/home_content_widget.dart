@@ -179,9 +179,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   String _getLocalizedPlanName(BuildContext context, String planId) {
     switch (planId) {
       case SubscriptionConstants.basicPlanId:
-        return context
-            .l10n
-            .onboardingPlanBasicSubtitle; // "Free plan" / "無料プラン"
+        return context.l10n.planBasicSubtitle; // "Free plan" / "無料プラン"
       case SubscriptionConstants.premiumMonthlyPlanId:
         return context
             .l10n

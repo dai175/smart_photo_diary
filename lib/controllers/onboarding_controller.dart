@@ -9,7 +9,7 @@ import '../services/interfaces/settings_service_interface.dart';
 
 /// OnboardingScreen の状態管理コントローラー
 class OnboardingController extends ChangeNotifier {
-  static const int _lastPageIndex = 4;
+  static const int _lastPageIndex = 3;
 
   int _currentPage = 0;
   bool _isProcessing = false;

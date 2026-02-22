@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../controllers/onboarding_controller.dart';
 import '../../localization/localization_extensions.dart';
-import '../../ui/components/animated_button.dart';
+import '../../ui/components/buttons/primary_button.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../home_screen.dart';
@@ -48,6 +48,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  String _getCtaText(BuildContext context) {
+    final l10n = context.l10n;
+    switch (_controller.currentPage) {
+      case 0:
+        return l10n.onboardingPhilosophyCta;
+      case 1:
+        return l10n.onboardingExperienceCta;
+      case 2:
+        return l10n.onboardingTrustCta;
+      case 3:
+        return _controller.isProcessing
+            ? l10n.onboardingProcessing
+            : l10n.onboardingPermissionCta;
+      default:
+        return l10n.onboardingPhilosophyCta;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -70,8 +88,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             : _completeOnboarding,
                         child: Text(
                           context.l10n.onboardingSkip,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -86,10 +106,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     controller: _pageController,
                     onPageChanged: _controller.setCurrentPage,
                     children: const [
-                      OnboardingWelcomePage(),
-                      OnboardingFeaturesPage(),
-                      OnboardingSharePage(),
-                      OnboardingPlansPage(),
+                      OnboardingPhilosophyPage(),
+                      OnboardingExperiencePage(),
+                      OnboardingTrustPage(),
                       OnboardingPermissionPage(),
                     ],
                   ),
@@ -98,8 +117,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 // ページインジケーター
                 _buildPageIndicator(),
 
-                // ナビゲーションボタン
-                _buildNavigationButtons(),
+                // CTAボタン
+                _buildCtaButton(),
               ],
             ),
           ),
@@ -113,19 +132,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(5, (index) {
+        children: List.generate(4, (index) {
           return AnimatedContainer(
             duration: AppConstants.standardTransitionDuration,
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            width: _controller.currentPage == index ? 24 : 8,
-            height: 8,
+            width: 6,
+            height: 6,
             decoration: BoxDecoration(
               color: _controller.currentPage == index
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(
                       context,
                     ).colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXs),
+              shape: BoxShape.circle,
             ),
           );
         }),
@@ -133,37 +152,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildNavigationButtons() {
+  Widget _buildCtaButton() {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (!_controller.isFirstPage)
-            SecondaryButton(
-              onPressed: _controller.isProcessing
-                  ? null
-                  : () => _controller.previousPage(_pageController),
-              text: context.l10n.commonBack,
-            )
-          else
-            const SizedBox(width: 100),
-
-          if (!_controller.isLastPage)
-            PrimaryButton(
-              onPressed: _controller.isProcessing
-                  ? null
-                  : () => _controller.nextPage(_pageController),
-              text: context.l10n.commonNext,
-            )
-          else
-            PrimaryButton(
-              onPressed: _controller.isProcessing ? null : _completeOnboarding,
-              text: _controller.isProcessing
-                  ? context.l10n.onboardingProcessing
-                  : context.l10n.onboardingStart,
-            ),
-        ],
+      child: SizedBox(
+        width: double.infinity,
+        child: PrimaryButton(
+          onPressed: _controller.isProcessing
+              ? null
+              : _controller.isLastPage
+              ? _completeOnboarding
+              : () => _controller.nextPage(_pageController),
+          text: _getCtaText(context),
+        ),
       ),
     );
   }

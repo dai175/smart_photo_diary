@@ -100,7 +100,7 @@ class DiaryPreviewDialogHelper {
   static String getLocalizedPlanName(BuildContext context, String planId) {
     switch (planId) {
       case 'basic':
-        return context.l10n.onboardingPlanBasicSubtitle;
+        return context.l10n.planBasicSubtitle;
       case 'premium_monthly':
         return context.l10n.settingsPremiumMonthlyTitle;
       case 'premium_yearly':

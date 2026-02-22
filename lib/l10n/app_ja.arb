@@ -1037,124 +1037,61 @@
   "@onboardingSkip": {
     "description": "オンボーディングで表示するスキップボタン"
   },
-  "onboardingWelcomeTitle": "Smart Photo Diary\nへようこそ",
-  "@onboardingWelcomeTitle": {
-    "description": "オンボーディング初回ページの見出し"
+  "onboardingPhilosophyTitle": "あなたの写真には、\nもう物語がある。",
+  "@onboardingPhilosophyTitle": {
+    "description": "フィロソフィーページのタイトル"
   },
-  "onboardingWelcomeSubtitle": "毎日の思い出を美しい文章に。写真を選ぶだけで素敵な日記が完成します。",
-  "@onboardingWelcomeSubtitle": {
-    "description": "アプリ概要を説明するサブヘッダー"
+  "onboardingPhilosophySubtitle": "私たちは、それを言葉にするお手伝いをします。",
+  "@onboardingPhilosophySubtitle": {
+    "description": "フィロソフィーページのサブタイトル"
   },
-  "onboardingThreeStepsTitle": "3ステップで簡単日記作成",
-  "@onboardingThreeStepsTitle": {
-    "description": "3ステップの流れを紹介するタイトル"
+  "onboardingPhilosophyCta": "はじめる",
+  "@onboardingPhilosophyCta": {
+    "description": "フィロソフィーページのCTAボタン"
   },
-  "onboardingStepTitle": "ステップ{step}",
-  "@onboardingStepTitle": {
-    "description": "各ステップのラベル",
-    "placeholders": {
-      "step": {
-        "type": "int"
-      }
-    }
+  "onboardingExperienceTitle": "一日を、数秒で振り返る。",
+  "@onboardingExperienceTitle": {
+    "description": "体験ページのタイトル"
   },
-  "onboardingStep1Description": "今日撮った写真を選択",
-  "@onboardingStep1Description": {
-    "description": "ステップ1の説明文"
+  "onboardingExperienceSubtitle": "写真を選ぶだけ。\n思い出がよみがえります。",
+  "@onboardingExperienceSubtitle": {
+    "description": "体験ページのサブタイトル"
   },
-  "onboardingStep2Description": "AIが写真から心温まる日記を作成",
-  "@onboardingStep2Description": {
-    "description": "ステップ2の説明文"
+  "onboardingExperienceCta": "次へ",
+  "@onboardingExperienceCta": {
+    "description": "体験ページのCTAボタン"
   },
-  "onboardingStep3Description": "保存・編集して思い出を振り返り",
-  "@onboardingStep3Description": {
-    "description": "ステップ3の説明文"
+  "onboardingTrustTitle": "プライバシーを最優先に。",
+  "@onboardingTrustTitle": {
+    "description": "信頼ページのタイトル"
   },
-  "onboardingShareTitle": "写真と日記をすぐ共有",
-  "@onboardingShareTitle": {
-    "description": "共有紹介ページのタイトル"
+  "onboardingTrustSubtitle": "写真が端末の外に出ることはありません。\n外部サーバーへの保存も一切ありません。",
+  "@onboardingTrustSubtitle": {
+    "description": "信頼ページのサブタイトル"
   },
-  "onboardingShareFormatTitle": "フォーマットを選択",
-  "@onboardingShareFormatTitle": {
-    "description": "共有フォーマットのタイトル"
+  "onboardingTrustCta": "続ける",
+  "@onboardingTrustCta": {
+    "description": "信頼ページのCTAボタン"
   },
-  "onboardingShareFormatDescription": "縦長・正方形レイアウトに対応",
-  "@onboardingShareFormatDescription": {
-    "description": "共有フォーマットの説明文"
-  },
-  "onboardingShareMultipleTitle": "複数写真にも対応",
-  "@onboardingShareMultipleTitle": {
-    "description": "複数写真対応を説明するタイトル"
-  },
-  "onboardingShareMultipleDescription": "複数枚でもバランスよく配置",
-  "@onboardingShareMultipleDescription": {
-    "description": "複数写真対応の説明文"
-  },
-  "onboardingPlansTitle": "ライフスタイルに合わせてプランを選択",
-  "@onboardingPlansTitle": {
-    "description": "プラン紹介ページのタイトル"
-  },
-  "onboardingPlanBasicSubtitle": "無料プラン",
-  "@onboardingPlanBasicSubtitle": {
-    "description": "Basicプランカードのサブタイトル"
-  },
-  "onboardingPlanFeatureMonthlyLimit": "月{count}回まで日記を生成",
-  "@onboardingPlanFeatureMonthlyLimit": {
-    "description": "月間AI生成上限を説明する文",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingPlanFeatureRecentPhotos": "当日・前日の写真から選べる",
-  "@onboardingPlanFeatureRecentPhotos": {
-    "description": "直近写真を選択できることを説明する文"
-  },
-  "onboardingPlanFeatureBasicPrompts": "基本的なライティングプロンプト付き",
-  "@onboardingPlanFeatureBasicPrompts": {
-    "description": "基本プロンプトが利用可能なことを説明する文"
-  },
-  "onboardingPlanFeaturePastDays": "過去{days}日以内の写真から選択可能",
-  "@onboardingPlanFeaturePastDays": {
-    "description": "過去日数の写真から選べることを説明する文",
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingPlanFeatureRichPrompts": "豊富なライティングプロンプトを利用",
-  "@onboardingPlanFeatureRichPrompts": {
-    "description": "Premiumで利用できるプロンプトを説明する文"
-  },
-  "onboardingPlanStartFree": "まずは無料で始められます",
-  "@onboardingPlanStartFree": {
-    "description": "無料で始められることを伝えるメッセージ"
-  },
-  "onboardingPermissionTitle": "写真へのアクセス許可",
-  "@onboardingPermissionTitle": {
+  "onboardingPermissionNewTitle": "今日からはじめよう。",
+  "@onboardingPermissionNewTitle": {
     "description": "権限ページのタイトル"
   },
-  "onboardingPermissionDescription": "日記を作成するために写真ライブラリへのアクセスが必要です。",
-  "@onboardingPermissionDescription": {
-    "description": "写真アクセス権限の必要理由を説明する文"
+  "onboardingPermissionNewSubtitle": "最初の日記を作るために\n写真へのアクセスが必要です。",
+  "@onboardingPermissionNewSubtitle": {
+    "description": "権限ページのサブタイトル"
   },
-  "onboardingPrivacyTitle": "プライバシーを最優先",
-  "@onboardingPrivacyTitle": {
-    "description": "プライバシー保護を説明するタイトル"
-  },
-  "onboardingPrivacyDescription": "写真は日記生成時にのみ使用され、外部サーバーに保存されることはありません。",
-  "@onboardingPrivacyDescription": {
-    "description": "プライバシー保護方針の説明文"
+  "onboardingPermissionCta": "最初の日記を作る",
+  "@onboardingPermissionCta": {
+    "description": "権限ページのCTAボタン"
   },
   "onboardingProcessing": "準備中...",
   "@onboardingProcessing": {
     "description": "オンボーディング完了処理中の表示文"
   },
-  "onboardingStart": "始める",
-  "@onboardingStart": {
-    "description": "オンボーディングを完了するボタン"
+  "planBasicSubtitle": "無料プラン",
+  "@planBasicSubtitle": {
+    "description": "Basicプランのサブタイトル"
   },
   "commonSave": "保存",
   "@commonSave": {
