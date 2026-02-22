@@ -1488,7 +1488,7 @@
       }
     }
   },
-  "shareCreatedWith": "#SmartPhotoDiary で生成",
+  "shareCreatedWith": "#SmartPhotoDiary",
   "@shareCreatedWith": {
     "description": "共有時に使用するクレジットテキスト"
   },
