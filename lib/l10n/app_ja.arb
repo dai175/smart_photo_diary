@@ -1547,5 +1547,9 @@
   "promptContextInputHelper": "AIが写真の状況をより深く理解できます",
   "@promptContextInputHelper": {
     "description": "状況テキスト入力のヘルパーテキスト"
+  },
+  "diaryDetailCopiedToClipboard": "日記をコピーしました",
+  "@diaryDetailCopiedToClipboard": {
+    "description": "日記コンテンツをクリップボードにコピーした際のスナックバーメッセージ"
   }
 }

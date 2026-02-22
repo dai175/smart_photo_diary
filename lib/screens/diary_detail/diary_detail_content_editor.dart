@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../l10n/generated/app_localizations.dart';
@@ -30,44 +31,61 @@ class DiaryDetailContentEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final card = CustomCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isEditing ? Icons.edit_rounded : Icons.article_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: AppSpacing.iconMd,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                isEditing
+                    ? l10n.diaryDetailEditTitle
+                    : l10n.diaryDetailContentHeading,
+                style: AppTypography.titleLarge,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // タイトルセクション
+          isEditing
+              ? _buildEditableTitle(context)
+              : _buildReadOnlyTitle(context),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // 本文セクション
+          isEditing
+              ? _buildEditableContent(context)
+              : _buildReadOnlyContent(context),
+        ],
+      ),
+    );
+
     return SlideInWidget(
       delay: Duration(milliseconds: photoAssets.isNotEmpty ? 200 : 100),
-      child: CustomCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isEditing ? Icons.edit_rounded : Icons.article_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: AppSpacing.iconMd,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  isEditing
-                      ? l10n.diaryDetailEditTitle
-                      : l10n.diaryDetailContentHeading,
-                  style: AppTypography.titleLarge,
-                ),
-              ],
+      child: isEditing
+          ? card
+          : GestureDetector(
+              onLongPress: () {
+                final title = diaryEntry.title.isNotEmpty
+                    ? '${diaryEntry.title}\n\n'
+                    : '';
+                final text = '$title${diaryEntry.content}\n\n#SmartPhotoDiary';
+                Clipboard.setData(ClipboardData(text: text));
+                HapticFeedback.mediumImpact();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.diaryDetailCopiedToClipboard)),
+                );
+              },
+              child: card,
             ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // タイトルセクション
-            isEditing
-                ? _buildEditableTitle(context)
-                : _buildReadOnlyTitle(context),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // 本文セクション
-            isEditing
-                ? _buildEditableContent(context)
-                : _buildReadOnlyContent(context),
-          ],
-        ),
-      ),
     );
   }
 

@@ -1547,5 +1547,9 @@
   "promptContextInputHelper": "Helps the AI understand the situation beyond the photo",
   "@promptContextInputHelper": {
     "description": "Helper text for the context text input"
+  },
+  "diaryDetailCopiedToClipboard": "Diary copied to clipboard",
+  "@diaryDetailCopiedToClipboard": {
+    "description": "Snack bar message when diary content is copied to clipboard"
   }
 }
