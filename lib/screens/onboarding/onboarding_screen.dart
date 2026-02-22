@@ -132,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(4, (index) {
+        children: List.generate(_controller.pageCount, (index) {
           return AnimatedContainer(
             duration: AppConstants.standardTransitionDuration,
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),

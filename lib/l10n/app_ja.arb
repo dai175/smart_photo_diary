@@ -1041,7 +1041,7 @@
   "@onboardingPhilosophyTitle": {
     "description": "フィロソフィーページのタイトル"
   },
-  "onboardingPhilosophySubtitle": "私たちは、それを言葉にするお手伝いをします。",
+  "onboardingPhilosophySubtitle": "それを言葉にするお手伝いをします。",
   "@onboardingPhilosophySubtitle": {
     "description": "フィロソフィーページのサブタイトル"
   },
@@ -1060,6 +1060,18 @@
   "onboardingExperienceCta": "次へ",
   "@onboardingExperienceCta": {
     "description": "体験ページのCTAボタン"
+  },
+  "onboardingExperienceSampleDate": "2026年2月22日",
+  "@onboardingExperienceSampleDate": {
+    "description": "体験ページのサンプル日記の日付"
+  },
+  "onboardingExperienceSampleTitle": "静かな午後",
+  "@onboardingExperienceSampleTitle": {
+    "description": "体験ページのサンプル日記のタイトル"
+  },
+  "onboardingExperienceSampleBody": "差し込む光の中で丸くなって、\nそっと息をしていた。\n部屋は静まり返り、\nしばらくの間、\n何も気にならなかった。",
+  "@onboardingExperienceSampleBody": {
+    "description": "体験ページのサンプル日記の本文"
   },
   "onboardingTrustTitle": "プライバシーを最優先に。",
   "@onboardingTrustTitle": {

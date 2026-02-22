@@ -21,6 +21,7 @@ class OnboardingController extends ChangeNotifier {
   bool get isProcessing => _isProcessing;
   bool get isLastPage => _currentPage == _lastPageIndex;
   bool get isFirstPage => _currentPage == 0;
+  int get pageCount => _lastPageIndex + 1;
 
   @override
   void dispose() {

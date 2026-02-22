@@ -57,7 +57,7 @@ class DiaryPreviewDialogHelper {
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
             context: context,
-            planName: getLocalizedPlanName(context, plan.id),
+            planName: context.l10n.localizedPlanName(plan.id),
             limit: limit,
             nextResetDate: nextResetDate,
             onUpgrade: () {
@@ -93,20 +93,6 @@ class DiaryPreviewDialogHelper {
           Navigator.of(context).pop(); // 前の画面に戻る
         }
       }
-    }
-  }
-
-  /// プランIDに基づいて多言語化されたプラン名を取得
-  static String getLocalizedPlanName(BuildContext context, String planId) {
-    switch (planId) {
-      case 'basic':
-        return context.l10n.planBasicSubtitle;
-      case 'premium_monthly':
-        return context.l10n.settingsPremiumMonthlyTitle;
-      case 'premium_yearly':
-        return context.l10n.settingsPremiumYearlyTitle;
-      default:
-        return planId;
     }
   }
 

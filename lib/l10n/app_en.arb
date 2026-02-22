@@ -1061,6 +1061,18 @@
   "@onboardingExperienceCta": {
     "description": "CTA button on the experience onboarding page"
   },
+  "onboardingExperienceSampleDate": "February 22, 2026",
+  "@onboardingExperienceSampleDate": {
+    "description": "Sample diary date on the experience onboarding page"
+  },
+  "onboardingExperienceSampleTitle": "A Quiet Afternoon",
+  "@onboardingExperienceSampleTitle": {
+    "description": "Sample diary title on the experience onboarding page"
+  },
+  "onboardingExperienceSampleBody": "He curled up in the fading light,\nbreathing softly beside me.\nThe room grew still,\nand for a while,\nnothing else seemed to matter.",
+  "@onboardingExperienceSampleBody": {
+    "description": "Sample diary body on the experience onboarding page"
+  },
   "onboardingTrustTitle": "Private by design.",
   "@onboardingTrustTitle": {
     "description": "Title for the trust onboarding page"

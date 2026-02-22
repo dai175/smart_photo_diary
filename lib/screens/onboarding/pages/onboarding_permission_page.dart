@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../localization/localization_extensions.dart';
 import '../../../ui/design_system/app_spacing.dart';
 import '../../../ui/design_system/app_typography.dart';
+import '../components/onboarding_page_layout.dart';
 
 /// オンボーディング: 権限リクエストページ
 class OnboardingPermissionPage extends StatelessWidget {
@@ -10,43 +11,25 @@ class OnboardingPermissionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
-
-    if (isPortrait) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _buildContent(context),
-        ),
-      );
-    } else {
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(children: _buildContent(context)),
-      );
-    }
-  }
-
-  List<Widget> _buildContent(BuildContext context) {
     final l10n = context.l10n;
 
-    return [
-      Text(
-        l10n.onboardingPermissionNewTitle,
-        style: AppTypography.headlineSmall,
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: AppSpacing.lg),
-
-      Text(
-        l10n.onboardingPermissionNewSubtitle,
-        style: AppTypography.bodyLarge.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return OnboardingPageLayout(
+      children: [
+        Text(
+          l10n.onboardingPermissionNewTitle,
+          style: AppTypography.headlineSmall,
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
-      ),
-    ];
+        const SizedBox(height: AppSpacing.lg),
+
+        Text(
+          l10n.onboardingPermissionNewSubtitle,
+          style: AppTypography.bodyLarge.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
   }
 }
