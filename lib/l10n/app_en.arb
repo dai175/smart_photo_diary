@@ -1488,10 +1488,6 @@
       }
     }
   },
-  "shareCreatedWith": "#SmartPhotoDiary",
-  "@shareCreatedWith": {
-    "description": "Credit text used when sharing"
-  },
   "tagMorning": "Morning",
   "@tagMorning": {
     "description": "Fallback tag: morning time period"

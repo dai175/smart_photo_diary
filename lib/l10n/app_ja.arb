@@ -1488,10 +1488,6 @@
       }
     }
   },
-  "shareCreatedWith": "#SmartPhotoDiary",
-  "@shareCreatedWith": {
-    "description": "共有時に使用するクレジットテキスト"
-  },
   "tagMorning": "朝",
   "@tagMorning": {
     "description": "フォールバックタグ: 朝の時間帯"

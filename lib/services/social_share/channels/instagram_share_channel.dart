@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../constants/app_constants.dart';
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
 import '../../../core/service_registration.dart';
@@ -65,17 +66,11 @@ class InstagramShareChannel {
 
       final File imageFile = imageResult.value;
 
-      final shareText = _getLocalizedMessage(
-        resolvedLocale,
-        (l10n) => l10n.shareCreatedWith,
-        '#SmartPhotoDiary',
-      );
-
       await SharePlus.instance
           .share(
             ShareParams(
               files: [XFile(imageFile.path)],
-              text: '${diary.title}\n\n$shareText',
+              text: '${diary.title}\n\n${AppConstants.shareHashtag}',
               sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
             ),
           )

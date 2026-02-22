@@ -145,6 +145,9 @@ class AppConstants {
   static const int timelinePlaceholderRows = 8; // 4列×8行=32タイル分
   static const int timelinePlaceholderMaxPages = 30; // 高速スクロールでも追いつかれない十分な余裕
 
+  // 共有ハッシュタグ
+  static const String shareHashtag = '#SmartPhotoDiary';
+
   // 影
   static const List<BoxShadow> cardShadow = [
     BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../constants/app_constants.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
@@ -190,7 +191,7 @@ class DiaryDetailContentEditor extends StatelessWidget {
   /// 日記内容をクリップボードにコピーする
   void _copyDiaryToClipboard(BuildContext context) {
     final title = diaryEntry.title.isNotEmpty ? '${diaryEntry.title}\n\n' : '';
-    final text = '$title${diaryEntry.content}\n\n${l10n.shareCreatedWith}';
+    final text = '$title${diaryEntry.content}\n\n${AppConstants.shareHashtag}';
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(
