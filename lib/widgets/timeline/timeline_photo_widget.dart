@@ -469,14 +469,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     TimelineLayoutConstants.lockedIconPadding,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.scrim.withValues(alpha: 0.5),
+                    color: Colors.black.withValues(alpha: 0.45),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.lock_rounded,
-                    color: Theme.of(context).colorScheme.onInverseSurface,
+                    color: Colors.white.withValues(alpha: 0.9),
                     size: TimelineLayoutConstants.lockedIconSize,
                   ),
                 ),
