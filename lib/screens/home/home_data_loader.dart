@@ -252,7 +252,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final planResult = await subscriptionService.getCurrentPlanClass();
       if (planResult.isSuccess) {
         final plan = planResult.value;
-        accessDays = plan.isPremium ? 365 : 1;
+        accessDays = plan.pastPhotoAccessDays;
       }
     } catch (e) {
       _self._logger.error(

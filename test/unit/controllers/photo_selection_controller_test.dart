@@ -523,9 +523,28 @@ void main() {
         controller.setAccessibleDays(365);
         final photo = createMockAsset(
           '1',
-          createDateTime: DateTime.now().subtract(const Duration(days: 400)),
+          createDateTime: DateTime.now().subtract(const Duration(days: 366)),
         );
         expect(controller.isPhotoLocked(photo), isTrue);
+      });
+
+      test('ちょうど365日前の写真はロックされない', () {
+        controller.setAccessibleDays(365);
+        final now = DateTime.now();
+        final exactlyBoundary = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 365));
+        final photo = createMockAsset('1', createDateTime: exactlyBoundary);
+        expect(controller.isPhotoLocked(photo), isFalse);
+      });
+
+      test('setAccessibleDaysがnotifyListenersを呼ぶ', () {
+        var notified = false;
+        controller.addListener(() => notified = true);
+        controller.setAccessibleDays(365);
+        expect(notified, isTrue);
       });
     });
   });

@@ -124,7 +124,6 @@ class PresetDialogs {
   /// 使用量制限エラー専用ダイアログ
   static CustomDialog usageLimitReached({
     required BuildContext context,
-    required String planName,
     required int limit,
     required DateTime nextResetDate,
     VoidCallback? onUpgrade,
@@ -156,9 +155,7 @@ class PresetDialogs {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              l10n.usageLimitDialogBody(
-                SubscriptionConstants.premiumMonthlyAiLimit,
-              ),
+              l10n.usageLimitDialogBody(limit),
               style: AppTypography.bodyMedium.copyWith(height: 1.4),
               textAlign: TextAlign.left,
             ),

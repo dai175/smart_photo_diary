@@ -688,18 +688,6 @@
       }
     }
   },
-  "usageLimitDialogReachedMessage": "The {planName} plan has reached its monthly limit of {limit} generations.",
-  "@usageLimitDialogReachedMessage": {
-    "description": "Body text explaining that the plan has reached the limit",
-    "placeholders": {
-      "planName": {
-        "type": "String"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
   "usageLimitDialogResetLabel": "Reset date:",
   "@usageLimitDialogResetLabel": {
     "description": "Label shown before the plan reset date"
@@ -710,15 +698,6 @@
     "placeholders": {
       "date": {
         "type": "String"
-      }
-    }
-  },
-  "usageLimitDialogPremiumHint": "Unlock Premium for up to {limit} stories per month.",
-  "@usageLimitDialogPremiumHint": {
-    "description": "Hint encouraging upgrade to Premium plan",
-    "placeholders": {
-      "limit": {
-        "type": "int"
       }
     }
   },
@@ -803,7 +782,7 @@
       }
     }
   },
-  "usageStatusPremiumUpsell": "With the Premium plan you can use up to {limit} generations per month.",
+  "usageStatusPremiumUpsell": "With the Premium plan you can create up to {limit} stories per month.",
   "@usageStatusPremiumUpsell": {
     "description": "Upsell message for the Premium plan",
     "placeholders": {
@@ -970,7 +949,7 @@
   "@diaryPreviewSaveButton": {
     "description": "Label for the save diary button on the preview screen"
   },
-  "diaryPreviewUsageLimitTitle": "AI generation limit reached",
+  "diaryPreviewUsageLimitTitle": "Story limit reached",
   "@diaryPreviewUsageLimitTitle": {
     "description": "Fallback dialog title shown when the AI monthly limit is reached"
   },
@@ -1018,7 +997,7 @@
   "@diaryPreviewDiscardDialogTitle": {
     "description": "Confirmation dialog title shown when leaving the preview"
   },
-  "diaryPreviewDiscardDialogMessage": "An AI generation credit has already been used.",
+  "diaryPreviewDiscardDialogMessage": "A story credit has already been used.",
   "@diaryPreviewDiscardDialogMessage": {
     "description": "Confirmation dialog message explaining the consequence of discarding"
   },
@@ -1385,7 +1364,7 @@
       }
     }
   },
-  "subscriptionUsageWarningRemaining": "You have {remaining} AI generations remaining.",
+  "subscriptionUsageWarningRemaining": "You have {remaining} stories remaining.",
   "@subscriptionUsageWarningRemaining": {
     "description": "Warning message shown when AI generation usage is near limit",
     "placeholders": {
@@ -1394,7 +1373,7 @@
       }
     }
   },
-  "subscriptionUsageWarningLimitReached": "AI generation limit reached.",
+  "subscriptionUsageWarningLimitReached": "Story limit reached.",
   "@subscriptionUsageWarningLimitReached": {
     "description": "Warning message shown when AI generation limit is reached"
   },

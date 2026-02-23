@@ -27,7 +27,7 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
             isPrimary: true,
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              UpgradeDialogUtils.showUpgradeDialog(context);
+              unawaited(UpgradeDialogUtils.showUpgradeDialog(context));
             },
           ),
         ],

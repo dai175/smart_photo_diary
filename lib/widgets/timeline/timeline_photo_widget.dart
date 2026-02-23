@@ -439,7 +439,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   tag: heroTag,
                   child: isLocked
                       ? ImageFiltered(
-                          imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                          imageFilter: ImageFilter.blur(
+                            sigmaX: TimelineLayoutConstants.lockedBlurSigma,
+                            sigmaY: TimelineLayoutConstants.lockedBlurSigma,
+                          ),
                           child: thumbnail,
                         )
                       : thumbnail,
@@ -452,7 +455,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             Positioned.fill(
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(
+                    TimelineLayoutConstants.lockedIconPadding,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
@@ -460,7 +465,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   child: const Icon(
                     Icons.lock_rounded,
                     color: Colors.white,
-                    size: 16,
+                    size: TimelineLayoutConstants.lockedIconSize,
                   ),
                 ),
               ),

@@ -688,18 +688,6 @@
       }
     }
   },
-  "usageLimitDialogReachedMessage": "{planName}プランの月間{limit}回の制限に達しました。",
-  "@usageLimitDialogReachedMessage": {
-    "description": "プランの上限に達したことを説明する本文",
-    "placeholders": {
-      "planName": {
-        "type": "String"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
   "usageLimitDialogResetLabel": "リセット日:",
   "@usageLimitDialogResetLabel": {
     "description": "リセット日を示すラベル"
@@ -710,15 +698,6 @@
     "placeholders": {
       "date": {
         "type": "String"
-      }
-    }
-  },
-  "usageLimitDialogPremiumHint": "Premiumを解放すると月{limit}件の日記を作成できます",
-  "@usageLimitDialogPremiumHint": {
-    "description": "Premiumプランへのアップグレードを促す一文",
-    "placeholders": {
-      "limit": {
-        "type": "int"
       }
     }
   },
@@ -803,7 +782,7 @@
       }
     }
   },
-  "usageStatusPremiumUpsell": "Premiumプランなら月間{limit}回まで利用可能です",
+  "usageStatusPremiumUpsell": "Premiumプランなら月{limit}件の日記を作成できます",
   "@usageStatusPremiumUpsell": {
     "description": "Premiumプランの利用回数を案内する文",
     "placeholders": {
@@ -970,7 +949,7 @@
   "@diaryPreviewSaveButton": {
     "description": "日記プレビュー画面の保存ボタンラベル"
   },
-  "diaryPreviewUsageLimitTitle": "AI生成の制限に達しました",
+  "diaryPreviewUsageLimitTitle": "日記の上限に達しました",
   "@diaryPreviewUsageLimitTitle": {
     "description": "AI月間制限到達時のフォールバックダイアログタイトル"
   },
@@ -1018,7 +997,7 @@
   "@diaryPreviewDiscardDialogTitle": {
     "description": "日記を破棄する際の確認ダイアログタイトル"
   },
-  "diaryPreviewDiscardDialogMessage": "AI生成回数は既に消費されています。",
+  "diaryPreviewDiscardDialogMessage": "日記作成回数は既に消費されています。",
   "@diaryPreviewDiscardDialogMessage": {
     "description": "日記破棄時の注意文"
   },
@@ -1385,7 +1364,7 @@
       }
     }
   },
-  "subscriptionUsageWarningRemaining": "AI生成の残り回数が{remaining}回です",
+  "subscriptionUsageWarningRemaining": "残りの日記が{remaining}件です",
   "@subscriptionUsageWarningRemaining": {
     "description": "AI生成使用量が制限に近づいた時の警告メッセージ",
     "placeholders": {
@@ -1394,7 +1373,7 @@
       }
     }
   },
-  "subscriptionUsageWarningLimitReached": "AI生成の制限に達しました",
+  "subscriptionUsageWarningLimitReached": "日記の上限に達しました",
   "@subscriptionUsageWarningLimitReached": {
     "description": "AI生成制限に達した時の警告メッセージ"
   },

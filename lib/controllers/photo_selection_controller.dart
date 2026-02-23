@@ -43,6 +43,7 @@ class PhotoSelectionController extends ChangeNotifier {
       now.month,
       now.day,
     ).subtract(Duration(days: days));
+    notifyListeners();
   }
 
   /// 写真がロック状態かどうかを判定（プランのアクセス範囲外）

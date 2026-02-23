@@ -40,6 +40,11 @@ class TimelineLayoutConstants {
   static const double usedLabelLeft = 4.0;
   static const double usedLabelHorizontalPadding = 4.0;
   static const double usedLabelVerticalPadding = 2.0;
+
+  // ロックオーバーレイ
+  static const double lockedBlurSigma = 3.0;
+  static const double lockedIconPadding = 6.0;
+  static const double lockedIconSize = 16.0;
 }
 
 /// タイムラインスクロール関連の定数
