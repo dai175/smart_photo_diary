@@ -481,7 +481,10 @@ void main() {
 
     group('isPhotoLocked / setAccessibleDays', () {
       test('accessCutoffDate未設定の場合はfalse', () {
-        final photo = createMockAsset('1', createDateTime: DateTime(2024, 1, 1));
+        final photo = createMockAsset(
+          '1',
+          createDateTime: DateTime(2024, 1, 1),
+        );
         expect(controller.isPhotoLocked(photo), isFalse);
       });
 

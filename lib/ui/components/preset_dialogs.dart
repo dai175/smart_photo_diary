@@ -264,18 +264,11 @@ class PresetDialogs {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.currentPlanStoriesLabel(limit),
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      l10n.currentPlanStoriesLabel(limit),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ],
                 ),

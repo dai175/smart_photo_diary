@@ -5,6 +5,9 @@ part of '../home_screen.dart';
 // ---------------------------------------------------------------------------
 
 mixin _HomeDataLoaderMixin on State<HomeScreen> {
+  /// タイムラインに読み込む最大日数（ロック写真はぼかし表示）
+  static const _loadDays = 365;
+
   _HomeScreenState get _self => this as _HomeScreenState;
 
   Future<void> _loadTodayPhotos() async {
@@ -35,15 +38,12 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // Always load 365 days of photos (locked photos shown as blurred)
-      const loadDays = 365;
-
       // Determine actual plan access days for lock state
       final planAccessDays = await _getPlanAccessDays();
       _self._photoController.setAccessibleDays(planAccessDays);
 
       final photosResult = await photoService.getPhotosInDateRange(
-        startDate: todayStart.subtract(const Duration(days: loadDays)),
+        startDate: todayStart.subtract(const Duration(days: _loadDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         limit: _HomeScreenState._photosPerPage,
       );
@@ -127,14 +127,11 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // Always load 365 days of photos (locked photos shown as blurred)
-      const loadDays = 365;
-
       final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
       final requested = _HomeScreenState._photosPerPage * preloadPages;
 
       final newPhotosResult = await photoService.getPhotosEfficient(
-        startDate: todayStart.subtract(const Duration(days: loadDays)),
+        startDate: todayStart.subtract(const Duration(days: _loadDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         offset: _self._currentPhotoOffset,
         limit: requested,

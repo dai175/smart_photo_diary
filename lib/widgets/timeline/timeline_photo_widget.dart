@@ -398,10 +398,20 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         );
 
     final heroTag = 'asset-${photo.id}';
+    final thumbnail = TimelinePhotoThumbnail(
+      photo: photo,
+      future: _cacheManager.getThumbnailFuture(photo),
+      thumbnailSize: TimelineLayoutConstants.thumbnailSize,
+      thumbnailQuality: TimelineLayoutConstants.thumbnailQuality,
+      borderRadius: TimelineLayoutConstants.borderRadius,
+      strokeWidth: TimelineLayoutConstants.loadingIndicatorStrokeWidth,
+      key: ValueKey(photo.id),
+    );
+
     return GestureDetector(
-      onTap: () => isLocked
-          ? widget.onLockedPhotoTapped?.call()
-          : _handlePhotoTap(mainIndex),
+      onTap: isLocked
+          ? () => widget.onLockedPhotoTapped?.call()
+          : () => _handlePhotoTap(mainIndex),
       onLongPress: isLocked
           ? () => widget.onLockedPhotoTapped?.call()
           : () => _handlePhotoLongPress(context, photo, heroTag, isUsed),
@@ -430,30 +440,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   child: isLocked
                       ? ImageFiltered(
                           imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                          child: TimelinePhotoThumbnail(
-                            photo: photo,
-                            future: _cacheManager.getThumbnailFuture(photo),
-                            thumbnailSize:
-                                TimelineLayoutConstants.thumbnailSize,
-                            thumbnailQuality:
-                                TimelineLayoutConstants.thumbnailQuality,
-                            borderRadius: TimelineLayoutConstants.borderRadius,
-                            strokeWidth: TimelineLayoutConstants
-                                .loadingIndicatorStrokeWidth,
-                            key: ValueKey(photo.id),
-                          ),
+                          child: thumbnail,
                         )
-                      : TimelinePhotoThumbnail(
-                          photo: photo,
-                          future: _cacheManager.getThumbnailFuture(photo),
-                          thumbnailSize: TimelineLayoutConstants.thumbnailSize,
-                          thumbnailQuality:
-                              TimelineLayoutConstants.thumbnailQuality,
-                          borderRadius: TimelineLayoutConstants.borderRadius,
-                          strokeWidth: TimelineLayoutConstants
-                              .loadingIndicatorStrokeWidth,
-                          key: ValueKey(photo.id),
-                        ),
+                      : thumbnail,
                 ),
               ),
             ),
