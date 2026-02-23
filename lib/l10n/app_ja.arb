@@ -735,7 +735,7 @@
   "@currentPlanPhotosLabel": {
     "description": "写真アクセス範囲のラベル"
   },
-  "currentPlanPhotosBasicValue": "今日と昨日",
+  "currentPlanPhotosBasicValue": "今日・昨日",
   "@currentPlanPhotosBasicValue": {
     "description": "Basicプランの写真アクセス範囲"
   },
