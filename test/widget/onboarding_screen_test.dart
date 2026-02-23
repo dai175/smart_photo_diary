@@ -151,8 +151,14 @@ void main() {
           await tester.pumpAndSettle();
         }
 
-        // Skip should be hidden on last page
-        expect(find.text('Skip'), findsNothing);
+        // Skip should be visually hidden on last page (Visibility with maintainSize)
+        final visibilityWidget = tester.widget<Visibility>(
+          find.ancestor(
+            of: find.text('Skip'),
+            matching: find.byType(Visibility),
+          ),
+        );
+        expect(visibilityWidget.visible, isFalse);
       });
     });
 
