@@ -1077,7 +1077,7 @@
   "@onboardingTrustTitle": {
     "description": "信頼ページのタイトル"
   },
-  "onboardingTrustSubtitle": "写真が端末の外に出ることはありません。\n外部サーバーへの保存も一切ありません。",
+  "onboardingTrustSubtitle": "日記データは端末内に保存。\nアカウント登録も不要です。",
   "@onboardingTrustSubtitle": {
     "description": "信頼ページのサブタイトル"
   },
@@ -1085,12 +1085,12 @@
   "@onboardingTrustCta": {
     "description": "信頼ページのCTAボタン"
   },
-  "onboardingPermissionNewTitle": "今日からはじめよう。",
-  "@onboardingPermissionNewTitle": {
+  "onboardingPermissionTitle": "今日からはじめよう。",
+  "@onboardingPermissionTitle": {
     "description": "権限ページのタイトル"
   },
-  "onboardingPermissionNewSubtitle": "最初の日記を作るために\n写真へのアクセスが必要です。",
-  "@onboardingPermissionNewSubtitle": {
+  "onboardingPermissionSubtitle": "最初の日記を作るために\n写真へのアクセスが必要です。",
+  "@onboardingPermissionSubtitle": {
     "description": "権限ページのサブタイトル"
   },
   "onboardingPermissionCta": "最初の日記を作る",

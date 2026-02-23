@@ -1077,7 +1077,7 @@
   "@onboardingTrustTitle": {
     "description": "Title for the trust onboarding page"
   },
-  "onboardingTrustSubtitle": "Your photos never leave your device.\nNothing is stored on external servers.",
+  "onboardingTrustSubtitle": "Your diary stays on your device.\nNo account required.",
   "@onboardingTrustSubtitle": {
     "description": "Subtitle for the trust onboarding page"
   },
@@ -1085,12 +1085,12 @@
   "@onboardingTrustCta": {
     "description": "CTA button on the trust onboarding page"
   },
-  "onboardingPermissionNewTitle": "Start with today.",
-  "@onboardingPermissionNewTitle": {
+  "onboardingPermissionTitle": "Start with today.",
+  "@onboardingPermissionTitle": {
     "description": "Title for the permission onboarding page"
   },
-  "onboardingPermissionNewSubtitle": "We need access to your photos\nto craft your first story.",
-  "@onboardingPermissionNewSubtitle": {
+  "onboardingPermissionSubtitle": "We need access to your photos\nto craft your first story.",
+  "@onboardingPermissionSubtitle": {
     "description": "Subtitle for the permission onboarding page"
   },
   "onboardingPermissionCta": "Create my first diary",

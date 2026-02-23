@@ -16,14 +16,14 @@ class OnboardingPermissionPage extends StatelessWidget {
     return OnboardingPageLayout(
       children: [
         Text(
-          l10n.onboardingPermissionNewTitle,
+          l10n.onboardingPermissionTitle,
           style: AppTypography.headlineSmall,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.lg),
 
         Text(
-          l10n.onboardingPermissionNewSubtitle,
+          l10n.onboardingPermissionSubtitle,
           style: AppTypography.bodyLarge.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
