@@ -27,6 +27,13 @@ class OnboardingPhilosophyPage extends StatelessWidget {
               width: 120,
               height: 120,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 120,
+                  height: 120,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                );
+              },
             ),
           ),
         ),

@@ -1061,7 +1061,7 @@
   "@onboardingExperienceCta": {
     "description": "CTA button on the experience onboarding page"
   },
-  "onboardingExperienceSampleDate": "February 22, 2026",
+  "onboardingExperienceSampleDate": "April 15",
   "@onboardingExperienceSampleDate": {
     "description": "Sample diary date on the experience onboarding page"
   },

@@ -40,11 +40,32 @@ class OnboardingPageLayout extends StatelessWidget {
     }
 
     if (scrollableInPortrait) {
-      final scrollView = SingleChildScrollView(
+      if (centerInPortrait) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: portraitPadding,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      constraints.maxHeight -
+                      portraitPadding
+                          .resolve(Directionality.of(context))
+                          .vertical,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: children,
+                ),
+              ),
+            );
+          },
+        );
+      }
+      return SingleChildScrollView(
         padding: portraitPadding,
         child: Column(children: children),
       );
-      return centerInPortrait ? Center(child: scrollView) : scrollView;
     }
 
     return Padding(

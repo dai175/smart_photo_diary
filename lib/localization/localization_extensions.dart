@@ -61,16 +61,11 @@ extension LocalizationFormattingX on AppLocalizations {
       );
 
   /// プランIDに基づいてローカライズされたプラン名を取得
-  String localizedPlanName(String planId) {
-    switch (planId) {
-      case SubscriptionConstants.basicPlanId:
-        return planBasicSubtitle;
-      case SubscriptionConstants.premiumMonthlyPlanId:
-        return settingsPremiumMonthlyTitle;
-      case SubscriptionConstants.premiumYearlyPlanId:
-        return settingsPremiumYearlyTitle;
-      default:
-        return planId;
-    }
-  }
+  String localizedPlanName(String planId) => switch (planId) {
+    SubscriptionConstants.basicPlanId => planBasicSubtitle,
+    SubscriptionConstants.premiumMonthlyPlanId => settingsPremiumMonthlyTitle,
+    SubscriptionConstants.premiumYearlyPlanId => settingsPremiumYearlyTitle,
+    // Unknown plan ID. Update this method when new plans are added.
+    _ => planId,
+  };
 }

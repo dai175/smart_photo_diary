@@ -1061,7 +1061,7 @@
   "@onboardingExperienceCta": {
     "description": "体験ページのCTAボタン"
   },
-  "onboardingExperienceSampleDate": "2026年2月22日",
+  "onboardingExperienceSampleDate": "4月15日",
   "@onboardingExperienceSampleDate": {
     "description": "体験ページのサンプル日記の日付"
   },

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../localization/localization_extensions.dart';
-import '../../../ui/design_system/app_colors.dart';
 import '../../../ui/design_system/app_spacing.dart';
 import '../../../ui/design_system/app_typography.dart';
 import '../components/onboarding_page_layout.dart';
@@ -13,6 +12,7 @@ class OnboardingTrustPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return OnboardingPageLayout(
       children: [
@@ -21,13 +21,13 @@ class OnboardingTrustPage extends StatelessWidget {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: AppColors.success.withValues(alpha: 0.08),
+            color: colorScheme.primary.withValues(alpha: 0.08),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.shield_outlined,
             size: 40,
-            color: AppColors.success.withValues(alpha: 0.6),
+            color: colorScheme.primary.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
