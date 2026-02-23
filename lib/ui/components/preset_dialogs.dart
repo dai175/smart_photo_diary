@@ -243,12 +243,15 @@ class PresetDialogs {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          l10n.currentPlanPhotosLabel,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
+                        Flexible(
+                          child: Text(
+                            l10n.currentPlanPhotosLabel,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: AppSpacing.xs),
                         Text(
                           photosValue,
                           style: AppTypography.labelLarge.copyWith(

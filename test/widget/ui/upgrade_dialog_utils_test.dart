@@ -321,11 +321,11 @@ Widget _buildPlanOptionForTest(
 Widget _buildAutoRenewNoticeForTest(BuildContext context) {
   return Container(
     padding: const EdgeInsets.all(8),
-    child: Row(
+    child: const Row(
       children: [
-        const Icon(Icons.info_outline_rounded, size: 16),
-        const SizedBox(width: 4),
-        const Expanded(child: Text('Auto-renewal notice')),
+        Icon(Icons.info_outline_rounded, size: 16),
+        SizedBox(width: 4),
+        Expanded(child: Text('Auto-renewal notice')),
       ],
     ),
   );

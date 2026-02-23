@@ -252,7 +252,7 @@ void main() {
                       context: context,
                       builder: (_) => PresetDialogs.confirmation(
                         context: context,
-                        title: 'Confirm',
+                        title: 'Confirm Action',
                         message: 'Message',
                         onConfirm: () {
                           confirmed = true;
@@ -462,9 +462,7 @@ void main() {
                         context: context,
                         planName: 'Basic',
                         planId: 'basic',
-                        used: 3,
                         limit: 10,
-                        remaining: 7,
                         nextResetDate: nextReset,
                         onUpgrade: () {},
                       ),
@@ -503,9 +501,7 @@ void main() {
                         context: context,
                         planName: 'Premium',
                         planId: 'premium_monthly',
-                        used: 5,
                         limit: 100,
-                        remaining: 95,
                         nextResetDate: nextReset,
                       ),
                     );
