@@ -408,10 +408,6 @@
       }
     }
   },
-  "settingsSubscriptionUsageLabel": "今月の日記",
-  "@settingsSubscriptionUsageLabel": {
-    "description": "日記利用量のラベル"
-  },
   "settingsSubscriptionRemainingLabel": "残り回数",
   "@settingsSubscriptionRemainingLabel": {
     "description": "残り利用回数のラベル"
@@ -682,7 +678,7 @@
   },
   "usageLimitDialogTitle": "今月の上限に達しました。",
   "@usageLimitDialogTitle": {
-    "description": "AI利用上限に達した際のダイアログタイトル"
+    "description": "今月の日記上限に達した際のダイアログタイトル"
   },
   "usageLimitDialogBody": "もっと書きたいですか？Premiumを解放すると月{limit}件の日記作成と過去1年の写真が利用できます。",
   "@usageLimitDialogBody": {
@@ -1371,7 +1367,7 @@
   },
   "subscriptionUsageWarningRemaining": "残りの日記が{remaining}件です",
   "@subscriptionUsageWarningRemaining": {
-    "description": "AI生成使用量が制限に近づいた時の警告メッセージ",
+    "description": "日記残数が制限に近づいた時の警告メッセージ",
     "placeholders": {
       "remaining": {
         "type": "int"
@@ -1380,7 +1376,7 @@
   },
   "subscriptionUsageWarningLimitReached": "日記の上限に達しました",
   "@subscriptionUsageWarningLimitReached": {
-    "description": "AI生成制限に達した時の警告メッセージ"
+    "description": "日記の月間制限に達した時の警告メッセージ"
   },
   "subscriptionUpgradeRecommendationLimit": "Premiumを解放すると月{limit}件の日記を作成できます",
   "@subscriptionUpgradeRecommendationLimit": {

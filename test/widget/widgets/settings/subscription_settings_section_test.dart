@@ -105,9 +105,7 @@ void main() {
     });
 
     group('expanded content', () {
-      testWidgets('expands and collapses on tap', (
-        WidgetTester tester,
-      ) async {
+      testWidgets('expands and collapses on tap', (WidgetTester tester) async {
         final info = buildBasicInfo();
         await tester.pumpWidget(buildWidget(subscriptionInfo: info));
         await tester.pumpAndSettle();

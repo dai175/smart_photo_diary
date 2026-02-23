@@ -408,10 +408,6 @@
       }
     }
   },
-  "settingsSubscriptionUsageLabel": "Stories this month",
-  "@settingsSubscriptionUsageLabel": {
-    "description": "Label for story usage amount"
-  },
   "settingsSubscriptionRemainingLabel": "Remaining",
   "@settingsSubscriptionRemainingLabel": {
     "description": "Label for remaining AI usage count"
@@ -682,7 +678,7 @@
   },
   "usageLimitDialogTitle": "You've reached this month's limit.",
   "@usageLimitDialogTitle": {
-    "description": "Title for the dialog shown when AI usage has reached the monthly limit"
+    "description": "Title for the dialog shown when the monthly story limit is reached"
   },
   "usageLimitDialogBody": "Want to keep writing? Unlock Premium to create up to {limit} stories per month and revisit the past year.",
   "@usageLimitDialogBody": {
@@ -1371,7 +1367,7 @@
   },
   "subscriptionUsageWarningRemaining": "You have {remaining} stories remaining.",
   "@subscriptionUsageWarningRemaining": {
-    "description": "Warning message shown when AI generation usage is near limit",
+    "description": "Warning message shown when story usage is near the monthly limit",
     "placeholders": {
       "remaining": {
         "type": "int"
@@ -1380,7 +1376,7 @@
   },
   "subscriptionUsageWarningLimitReached": "Story limit reached.",
   "@subscriptionUsageWarningLimitReached": {
-    "description": "Warning message shown when AI generation limit is reached"
+    "description": "Warning message shown when the monthly story limit is reached"
   },
   "subscriptionUpgradeRecommendationLimit": "Unlock Premium to create up to {limit} stories per month.",
   "@subscriptionUpgradeRecommendationLimit": {

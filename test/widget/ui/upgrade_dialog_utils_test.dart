@@ -9,7 +9,6 @@ import '../../test_helpers/widget_test_helpers.dart';
 
 /// Tests for upgrade dialog UI structure and plan display.
 void main() {
-
   group('UpgradeDialogUtils._showPremiumPlanDialog', () {
     /// Shows the premium plan dialog by calling the internal static directly
     /// through reflection-like trick: we invoke the public entry point with
@@ -29,11 +28,8 @@ void main() {
                   // a CustomDialog that mirrors what _showPremiumPlanDialog builds
                   showDialog<void>(
                     context: context,
-                    builder: (dialogContext) => _buildPlanDialogForTest(
-                      dialogContext,
-                      plans,
-                      prices,
-                    ),
+                    builder: (dialogContext) =>
+                        _buildPlanDialogForTest(dialogContext, plans, prices),
                   );
                 },
                 child: const Text('Open'),
@@ -51,9 +47,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final plans = <Plan>[PremiumMonthlyPlan()];
-      final prices = <String, String>{
-        PremiumMonthlyPlan().id: '¥300',
-      };
+      final prices = <String, String>{PremiumMonthlyPlan().id: '¥300'};
 
       await showPlanDialog(tester, plans, prices);
 
@@ -67,9 +61,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final plans = <Plan>[PremiumYearlyPlan()];
-      final prices = <String, String>{
-        PremiumYearlyPlan().id: '¥2,800',
-      };
+      final prices = <String, String>{PremiumYearlyPlan().id: '¥2,800'};
 
       await showPlanDialog(tester, plans, prices);
 
@@ -117,9 +109,7 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
     });
 
-    testWidgets('cancel button dismisses dialog', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('cancel button dismisses dialog', (WidgetTester tester) async {
       final plans = <Plan>[PremiumMonthlyPlan()];
       final prices = <String, String>{PremiumMonthlyPlan().id: '¥300'};
 
@@ -151,10 +141,7 @@ void main() {
       await showPlanDialog(tester, plans, prices);
 
       // Yearly plan should show discount percentage
-      expect(
-        find.textContaining('%'),
-        findsWidgets,
-      );
+      expect(find.textContaining('%'), findsWidgets);
     });
   });
 
@@ -174,11 +161,8 @@ void main() {
                 onPressed: () {
                   showDialog<void>(
                     context: context,
-                    builder: (dialogContext) => _buildPlanDialogForTest(
-                      dialogContext,
-                      plans,
-                      prices,
-                    ),
+                    builder: (dialogContext) =>
+                        _buildPlanDialogForTest(dialogContext, plans, prices),
                   );
                 },
                 child: const Text('Open'),
@@ -279,8 +263,8 @@ Widget _buildPlanOptionForTest(
   final localizedName = plan.isMonthly
       ? 'Premium (monthly)'
       : plan.isYearly
-          ? 'Premium (yearly)'
-          : plan.displayName;
+      ? 'Premium (yearly)'
+      : plan.displayName;
 
   final price = priceString ?? '¥${plan.price}';
   final priceText = plan.isMonthly ? '$price/mo' : '$price/yr';

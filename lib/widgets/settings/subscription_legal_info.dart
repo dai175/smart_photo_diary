@@ -40,14 +40,18 @@ class SubscriptionLegalInfo extends StatelessWidget {
             title: context.l10n.settingsPremiumMonthlyTitle,
             planId: SubscriptionConstants.premiumMonthlyPlanId,
             formatter: (price) => context.l10n.pricingPerMonthShort(price),
-            features: context.l10n.settingsPremiumPlanFeatures(SubscriptionConstants.premiumMonthlyAiLimit),
+            features: context.l10n.settingsPremiumPlanFeatures(
+              SubscriptionConstants.premiumMonthlyAiLimit,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           _PlanDetailRow(
             title: context.l10n.settingsPremiumYearlyTitle,
             planId: SubscriptionConstants.premiumYearlyPlanId,
             formatter: (price) => context.l10n.pricingPerYearShort(price),
-            features: context.l10n.settingsPremiumPlanFeatures(SubscriptionConstants.premiumMonthlyAiLimit),
+            features: context.l10n.settingsPremiumPlanFeatures(
+              SubscriptionConstants.premiumMonthlyAiLimit,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           _buildAutoRenewNotice(context),

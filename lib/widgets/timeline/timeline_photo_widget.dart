@@ -191,7 +191,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     // グループごとの全ロック判定をキャッシュ
     final lockedCache = <DateTime, bool>{};
     for (final group in groups) {
-      lockedCache[group.groupDate] = group.photos.isNotEmpty &&
+      lockedCache[group.groupDate] =
+          group.photos.isNotEmpty &&
           group.photos.every((photo) => widget.controller.isPhotoLocked(photo));
     }
 
@@ -468,7 +469,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     TimelineLayoutConstants.lockedIconPadding,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
