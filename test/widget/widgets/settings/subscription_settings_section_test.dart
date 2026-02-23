@@ -142,7 +142,7 @@ void main() {
         // Photos label
         expect(find.text('Available photos'), findsOneWidget);
         // Stories label
-        expect(find.text('This month'), findsOneWidget);
+        expect(find.text('Stories this month'), findsOneWidget);
         // Reset label
         expect(find.text('Resets on'), findsOneWidget);
       });

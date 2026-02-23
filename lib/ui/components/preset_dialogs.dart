@@ -201,6 +201,7 @@ class PresetDialogs {
     required BuildContext context,
     required String planName,
     required String planId,
+    required int usageCount,
     required int limit,
     required DateTime nextResetDate,
     VoidCallback? onUpgrade,
@@ -273,7 +274,7 @@ class PresetDialogs {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
-                          l10n.currentPlanStoriesValue(limit),
+                          l10n.currentPlanStoriesValue(usageCount, limit),
                           style: AppTypography.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.onSurface,

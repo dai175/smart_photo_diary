@@ -205,6 +205,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         return;
       }
 
+      final status = statusResult.value;
       final plan = planResult.value;
       final nextResetDate = resetDateResult.isSuccess
           ? resetDateResult.value
@@ -220,6 +221,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             context: context,
             planName: context.l10n.localizedPlanName(plan.id),
             planId: plan.id,
+            usageCount: status.monthlyUsageCount,
             limit: limit,
             nextResetDate: nextResetDate,
             onUpgrade: plan.id == SubscriptionConstants.basicPlanId

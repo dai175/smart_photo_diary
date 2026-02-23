@@ -715,14 +715,17 @@
       }
     }
   },
-  "currentPlanStoriesLabel": "This month",
+  "currentPlanStoriesLabel": "Stories this month",
   "@currentPlanStoriesLabel": {
     "description": "Label for the monthly story limit row"
   },
-  "currentPlanStoriesValue": "{limit} stories",
+  "currentPlanStoriesValue": "{used} / {limit}",
   "@currentPlanStoriesValue": {
-    "description": "Value showing the monthly story limit count",
+    "description": "Value showing the monthly story usage and limit",
     "placeholders": {
+      "used": {
+        "type": "int"
+      },
       "limit": {
         "type": "int"
       }
@@ -753,7 +756,7 @@
   "@usageStatusUsageLabel": {
     "description": "Label for the usage amount section"
   },
-  "usageStatusUsageValue": "{used} / {limit} stories",
+  "usageStatusUsageValue": "{used} / {limit}",
   "@usageStatusUsageValue": {
     "description": "Displays how many generations were used versus the limit",
     "placeholders": {
@@ -1553,7 +1556,7 @@
   "@settingsSubscriptionPhotosLabel": {
     "description": "Label for photo access range in settings"
   },
-  "settingsSubscriptionStoriesLabel": "This month",
+  "settingsSubscriptionStoriesLabel": "Stories this month",
   "@settingsSubscriptionStoriesLabel": {
     "description": "Label for monthly story count in settings"
   },

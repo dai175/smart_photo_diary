@@ -715,14 +715,17 @@
       }
     }
   },
-  "currentPlanStoriesLabel": "今月",
+  "currentPlanStoriesLabel": "今月の日記",
   "@currentPlanStoriesLabel": {
     "description": "月間日記制限行のラベル"
   },
-  "currentPlanStoriesValue": "{limit}件の日記",
+  "currentPlanStoriesValue": "{used} / {limit}",
   "@currentPlanStoriesValue": {
-    "description": "月間日記制限の件数表示",
+    "description": "月間日記の使用量と制限の表示",
     "placeholders": {
+      "used": {
+        "type": "int"
+      },
       "limit": {
         "type": "int"
       }
@@ -753,7 +756,7 @@
   "@usageStatusUsageLabel": {
     "description": "使用量セクションのラベル"
   },
-  "usageStatusUsageValue": "{used} / {limit}件",
+  "usageStatusUsageValue": "{used} / {limit}",
   "@usageStatusUsageValue": {
     "description": "使用済み回数と上限回数を表示する文",
     "placeholders": {
@@ -1553,7 +1556,7 @@
   "@settingsSubscriptionPhotosLabel": {
     "description": "設定画面の写真アクセス範囲ラベル"
   },
-  "settingsSubscriptionStoriesLabel": "今月",
+  "settingsSubscriptionStoriesLabel": "今月の日記",
   "@settingsSubscriptionStoriesLabel": {
     "description": "設定画面の月間日記数ラベル"
   },
