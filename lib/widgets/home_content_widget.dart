@@ -187,8 +187,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       // 使用量情報を取得
       final statusResult = await subscriptionService.getCurrentStatus();
       final planResult = await subscriptionService.getCurrentPlanClass();
-      final remainingResult = await subscriptionService
-          .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
 
       if (statusResult.isFailure || planResult.isFailure) {
@@ -208,13 +206,11 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       }
 
       final plan = planResult.value;
-      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final nextResetDate = resetDateResult.isSuccess
           ? resetDateResult.value
           : DateTime.now().add(const Duration(days: 30));
 
       final limit = plan.monthlyAiGenerationLimit;
-      final used = limit - remaining;
 
       if (context.mounted) {
         await showDialog<void>(
@@ -224,9 +220,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             context: context,
             planName: context.l10n.localizedPlanName(plan.id),
             planId: plan.id,
-            used: used.clamp(0, limit),
             limit: limit,
-            remaining: remaining.clamp(0, limit),
             nextResetDate: nextResetDate,
             onUpgrade: plan.id == SubscriptionConstants.basicPlanId
                 ? () {

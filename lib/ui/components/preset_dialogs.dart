@@ -139,7 +139,7 @@ class PresetDialogs {
     if (onUpgrade != null) {
       actions.add(
         CustomDialogAction(
-          text: l10n.lockedPhotoDialogCta,
+          text: l10n.settingsUpgradeToPremium,
           isPrimary: true,
           onPressed: onUpgrade,
         ),
@@ -201,9 +201,7 @@ class PresetDialogs {
     required BuildContext context,
     required String planName,
     required String planId,
-    required int used,
     required int limit,
-    required int remaining,
     required DateTime nextResetDate,
     VoidCallback? onUpgrade,
     VoidCallback? onDismiss,

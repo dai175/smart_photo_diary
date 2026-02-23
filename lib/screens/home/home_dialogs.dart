@@ -23,7 +23,7 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           CustomDialogAction(
-            text: dialogContext.l10n.lockedPhotoDialogCta,
+            text: dialogContext.l10n.settingsUpgradeToPremium,
             isPrimary: true,
             onPressed: () {
               Navigator.of(dialogContext).pop();

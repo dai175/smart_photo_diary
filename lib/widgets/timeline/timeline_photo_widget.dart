@@ -87,6 +87,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   final ScrollController _scrollController = ScrollController();
   List<TimelinePhotoGroup> _photoGroups = [];
+  Map<DateTime, bool> _groupFullyLockedCache = {};
 
   // ログサービス
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
@@ -187,10 +188,18 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final visibleIds = groups.expand((g) => g.photos).map((a) => a.id).toSet();
     _cacheManager.pruneThumbFutureCache(visibleIds);
 
+    // グループごとの全ロック判定をキャッシュ
+    final lockedCache = <DateTime, bool>{};
+    for (final group in groups) {
+      lockedCache[group.groupDate] = group.photos.isNotEmpty &&
+          group.photos.every((photo) => widget.controller.isPhotoLocked(photo));
+    }
+
     if (mounted) {
       // キャッシュ再構築完了後に安全にUI更新
       setState(() {
         _photoGroups = groups;
+        _groupFullyLockedCache = lockedCache;
         final currentCount = widget.controller.photoAssets.length;
         if (currentCount > _scrollManager.lastAssetsCount) {
           _scrollManager.handlePhotoCountIncrease(currentCount);
@@ -459,12 +468,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                     TimelineLayoutConstants.lockedIconPadding,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onInverseSurface,
                     size: TimelineLayoutConstants.lockedIconSize,
                   ),
                 ),
@@ -570,9 +579,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// スティッキーヘッダーを構築
   Widget _buildStickyHeader(TimelinePhotoGroup group) {
-    final isFullyLocked =
-        group.photos.isNotEmpty &&
-        group.photos.every((photo) => widget.controller.isPhotoLocked(photo));
+    final isFullyLocked = _groupFullyLockedCache[group.groupDate] ?? false;
 
     return Container(
       height: TimelineLayoutConstants.stickyHeaderHeight,
