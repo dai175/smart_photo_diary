@@ -715,9 +715,13 @@
       }
     }
   },
-  "currentPlanStoriesLabel": "今月: {limit}件の日記",
+  "currentPlanStoriesLabel": "今月",
   "@currentPlanStoriesLabel": {
-    "description": "月間日記制限の表示",
+    "description": "月間日記制限行のラベル"
+  },
+  "currentPlanStoriesValue": "{limit}件の日記",
+  "@currentPlanStoriesValue": {
+    "description": "月間日記制限の件数表示",
     "placeholders": {
       "limit": {
         "type": "int"
@@ -1120,7 +1124,7 @@
   "@onboardingProcessing": {
     "description": "オンボーディング完了処理中の表示文"
   },
-  "planBasicSubtitle": "無料プラン",
+  "planBasicSubtitle": "ベーシック",
   "@planBasicSubtitle": {
     "description": "Basicプランのサブタイトル"
   },
@@ -1549,7 +1553,7 @@
   "@settingsSubscriptionPhotosLabel": {
     "description": "設定画面の写真アクセス範囲ラベル"
   },
-  "settingsSubscriptionStoriesLabel": "今月の日記",
+  "settingsSubscriptionStoriesLabel": "今月",
   "@settingsSubscriptionStoriesLabel": {
     "description": "設定画面の月間日記数ラベル"
   },

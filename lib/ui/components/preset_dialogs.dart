@@ -241,7 +241,6 @@ class PresetDialogs {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Flexible(
                           child: Text(
@@ -251,7 +250,7 @@ class PresetDialogs {
                             ),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.xs),
+                        const SizedBox(width: AppSpacing.sm),
                         Text(
                           photosValue,
                           style: AppTypography.labelLarge.copyWith(
@@ -262,11 +261,25 @@ class PresetDialogs {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      l10n.currentPlanStoriesLabel(limit),
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.currentPlanStoriesLabel,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          l10n.currentPlanStoriesValue(limit),
+                          style: AppTypography.labelLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

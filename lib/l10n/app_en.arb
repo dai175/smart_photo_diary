@@ -715,9 +715,13 @@
       }
     }
   },
-  "currentPlanStoriesLabel": "This month: {limit} stories",
+  "currentPlanStoriesLabel": "This month",
   "@currentPlanStoriesLabel": {
-    "description": "Shows the monthly story limit",
+    "description": "Label for the monthly story limit row"
+  },
+  "currentPlanStoriesValue": "{limit} stories",
+  "@currentPlanStoriesValue": {
+    "description": "Value showing the monthly story limit count",
     "placeholders": {
       "limit": {
         "type": "int"
@@ -1120,7 +1124,7 @@
   "@onboardingProcessing": {
     "description": "Label shown while onboarding completion is processing"
   },
-  "planBasicSubtitle": "Free plan",
+  "planBasicSubtitle": "Basic",
   "@planBasicSubtitle": {
     "description": "Subtitle for the Basic plan"
   },
@@ -1549,7 +1553,7 @@
   "@settingsSubscriptionPhotosLabel": {
     "description": "Label for photo access range in settings"
   },
-  "settingsSubscriptionStoriesLabel": "Stories this month",
+  "settingsSubscriptionStoriesLabel": "This month",
   "@settingsSubscriptionStoriesLabel": {
     "description": "Label for monthly story count in settings"
   },
