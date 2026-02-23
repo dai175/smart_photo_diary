@@ -11,6 +11,7 @@ class PhotoSelectionController extends ChangeNotifier {
   bool _hasPermission = false;
   bool _hasMorePhotos = true; // 追加写真が存在するかのフラグ
   DateTime? _selectedDate; // 選択された写真の日付を保持
+  DateTime? _accessCutoffDate; // プランに基づくアクセス可能期限
 
   // ゲッター
   List<AssetEntity> get photoAssets => _photoAssets;
@@ -32,6 +33,25 @@ class PhotoSelectionController extends ChangeNotifier {
       }
     }
     return result;
+  }
+
+  /// プランのアクセス可能日数を設定し、カットオフ日を計算
+  void setAccessibleDays(int days) {
+    final now = DateTime.now();
+    _accessCutoffDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: days));
+    notifyListeners();
+  }
+
+  /// 写真がロック状態かどうかを判定（プランのアクセス範囲外）
+  bool isPhotoLocked(AssetEntity photo) {
+    if (_accessCutoffDate == null) return false;
+    final photoDate = photo.createDateTime;
+    final photoDay = DateTime(photoDate.year, photoDate.month, photoDate.day);
+    return photoDay.isBefore(_accessCutoffDate!);
   }
 
   /// 写真選択の切り替え

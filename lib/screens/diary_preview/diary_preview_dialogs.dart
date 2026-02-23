@@ -57,7 +57,6 @@ class DiaryPreviewDialogHelper {
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageLimitReached(
             context: context,
-            planName: context.l10n.localizedPlanName(plan.id),
             limit: limit,
             nextResetDate: nextResetDate,
             onUpgrade: () {

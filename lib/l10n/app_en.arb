@@ -408,23 +408,19 @@
       }
     }
   },
-  "settingsSubscriptionUsageLabel": "AI usage",
-  "@settingsSubscriptionUsageLabel": {
-    "description": "Label for AI usage amount"
-  },
   "settingsSubscriptionRemainingLabel": "Remaining",
   "@settingsSubscriptionRemainingLabel": {
-    "description": "Label for remaining AI usage count"
+    "description": "Label for remaining diary generation usage count"
   },
   "settingsSubscriptionResetLabel": "Resets on",
   "@settingsSubscriptionResetLabel": {
-    "description": "Label for the reset date of AI usage"
+    "description": "Label for the reset date of diary generation usage"
   },
   "settingsSubscriptionExpiryLabel": "Expires on",
   "@settingsSubscriptionExpiryLabel": {
     "description": "Label for subscription expiry date"
   },
-  "settingsUpgradeToPremium": "Upgrade to Premium",
+  "settingsUpgradeToPremium": "Unlock Premium",
   "@settingsUpgradeToPremium": {
     "description": "Button text for upgrading to the Premium plan"
   },
@@ -598,9 +594,14 @@
   "@settingsPremiumYearlyTitle": {
     "description": "Label for the yearly premium plan"
   },
-  "settingsPremiumPlanFeatures": "Includes 100 AI diary generations per month, access to the past year of photos, and all 20 writing prompts.",
+  "settingsPremiumPlanFeatures": "Includes {limit} stories per month, access to the past year of photos, and all writing styles.",
   "@settingsPremiumPlanFeatures": {
-    "description": "Description of premium plan benefits"
+    "description": "Description of premium plan benefits",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "settingsSubscriptionAutoRenewTitle": "About auto-renewal",
   "@settingsSubscriptionAutoRenewTitle": {
@@ -622,7 +623,7 @@
   "@urlLauncherOpenFailed": {
     "description": "Message shown when a link cannot be opened"
   },
-  "upgradeDialogTitle": "Premium plan",
+  "upgradeDialogTitle": "Revisit more of your life.",
   "@upgradeDialogTitle": {
     "description": "Title for the premium upgrade dialog"
   },
@@ -667,7 +668,7 @@
   "@errorSeverityCritical": {
     "description": "Error severity label for critical errors"
   },
-  "commonUpgrade": "Upgrade",
+  "commonUpgrade": "Unlock",
   "@commonUpgrade": {
     "description": "Generic upgrade button label"
   },
@@ -675,17 +676,14 @@
   "@commonErrorTitle": {
     "description": "Generic error dialog title"
   },
-  "usageLimitDialogTitle": "AI generation limit reached",
+  "usageLimitDialogTitle": "You've reached this month's limit.",
   "@usageLimitDialogTitle": {
-    "description": "Title for the dialog shown when AI usage has reached the monthly limit"
+    "description": "Title for the dialog shown when the monthly story limit is reached"
   },
-  "usageLimitDialogReachedMessage": "The {planName} plan has reached its monthly limit of {limit} generations.",
-  "@usageLimitDialogReachedMessage": {
-    "description": "Body text explaining that the plan has reached the limit",
+  "usageLimitDialogBody": "Want to keep writing? Unlock Premium to create up to {limit} stories per month and revisit the past year.",
+  "@usageLimitDialogBody": {
+    "description": "Body text encouraging upgrade when limit is reached",
     "placeholders": {
-      "planName": {
-        "type": "String"
-      },
       "limit": {
         "type": "int"
       }
@@ -704,18 +702,9 @@
       }
     }
   },
-  "usageLimitDialogPremiumHint": "The Premium plan allows up to {limit} generations per month.",
-  "@usageLimitDialogPremiumHint": {
-    "description": "Hint encouraging upgrade to Premium plan",
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "usageStatusDialogTitle": "AI usage status",
+  "usageStatusDialogTitle": "Your current plan",
   "@usageStatusDialogTitle": {
-    "description": "Title for the AI usage status dialog"
+    "description": "Title for the usage status dialog"
   },
   "usageStatusCurrentPlan": "Current plan: {planName}",
   "@usageStatusCurrentPlan": {
@@ -726,11 +715,41 @@
       }
     }
   },
+  "currentPlanStoriesLabel": "This month: {limit} stories",
+  "@currentPlanStoriesLabel": {
+    "description": "Shows the monthly story limit",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "currentPlanPhotosLabel": "Available photos",
+  "@currentPlanPhotosLabel": {
+    "description": "Label for photo access range"
+  },
+  "currentPlanPhotosBasicValue": "Today & Yesterday",
+  "@currentPlanPhotosBasicValue": {
+    "description": "Photo access range for Basic plan"
+  },
+  "currentPlanPhotosPremiumValue": "Past year",
+  "@currentPlanPhotosPremiumValue": {
+    "description": "Photo access range for Premium plan"
+  },
+  "currentPlanPremiumPitch": "Revisit the past year of your life. Create up to {limit} stories each month.",
+  "@currentPlanPremiumPitch": {
+    "description": "Premium upsell pitch in current plan dialog",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
   "usageStatusUsageLabel": "Usage",
   "@usageStatusUsageLabel": {
     "description": "Label for the usage amount section"
   },
-  "usageStatusUsageValue": "{used} / {limit} times",
+  "usageStatusUsageValue": "{used} / {limit} stories",
   "@usageStatusUsageValue": {
     "description": "Displays how many generations were used versus the limit",
     "placeholders": {
@@ -746,7 +765,7 @@
   "@usageStatusRemainingLabel": {
     "description": "Label for remaining counts"
   },
-  "usageStatusRemainingValue": "{remaining} times",
+  "usageStatusRemainingValue": "{remaining} stories",
   "@usageStatusRemainingValue": {
     "description": "Displays the remaining generation count",
     "placeholders": {
@@ -764,7 +783,7 @@
       }
     }
   },
-  "usageStatusPremiumUpsell": "With the Premium plan you can use up to {limit} generations per month.",
+  "usageStatusPremiumUpsell": "With the Premium plan you can create up to {limit} stories per month.",
   "@usageStatusPremiumUpsell": {
     "description": "Upsell message for the Premium plan",
     "placeholders": {
@@ -931,13 +950,13 @@
   "@diaryPreviewSaveButton": {
     "description": "Label for the save diary button on the preview screen"
   },
-  "diaryPreviewUsageLimitTitle": "AI generation limit reached",
+  "diaryPreviewUsageLimitTitle": "Story limit reached",
   "@diaryPreviewUsageLimitTitle": {
-    "description": "Fallback dialog title shown when the AI monthly limit is reached"
+    "description": "Fallback dialog title shown when the monthly generation limit is reached"
   },
-  "diaryPreviewUsageLimitMessage": "You've reached the monthly AI generation limit. Please try again after the cycle resets or upgrade your plan.",
+  "diaryPreviewUsageLimitMessage": "You've reached the monthly limit. Please try again after the cycle resets or unlock Premium.",
   "@diaryPreviewUsageLimitMessage": {
-    "description": "Fallback dialog message shown when the AI monthly limit is reached"
+    "description": "Fallback dialog message shown when the monthly generation limit is reached"
   },
   "diaryPreviewAppBarTitle": "Diary preview",
   "@diaryPreviewAppBarTitle": {
@@ -965,11 +984,11 @@
   },
   "diaryPreviewGeneratingDiaryTitle": "Creating your diary...",
   "@diaryPreviewGeneratingDiaryTitle": {
-    "description": "Title shown while the AI is generating the diary"
+    "description": "Title shown while the diary is being generated"
   },
-  "diaryPreviewGeneratingDiaryDescription": "AI is analyzing your photos",
+  "diaryPreviewGeneratingDiaryDescription": "Writing your memory…",
   "@diaryPreviewGeneratingDiaryDescription": {
-    "description": "Description shown while the AI is generating the diary"
+    "description": "Description shown while the diary is being generated"
   },
   "diaryPreviewContentSectionTitle": "Diary content",
   "@diaryPreviewContentSectionTitle": {
@@ -979,7 +998,7 @@
   "@diaryPreviewDiscardDialogTitle": {
     "description": "Confirmation dialog title shown when leaving the preview"
   },
-  "diaryPreviewDiscardDialogMessage": "An AI generation credit has already been used.",
+  "diaryPreviewDiscardDialogMessage": "A story credit has already been used.",
   "@diaryPreviewDiscardDialogMessage": {
     "description": "Confirmation dialog message explaining the consequence of discarding"
   },
@@ -1346,20 +1365,20 @@
       }
     }
   },
-  "subscriptionUsageWarningRemaining": "You have {remaining} AI generations remaining.",
+  "subscriptionUsageWarningRemaining": "You have {remaining} stories remaining.",
   "@subscriptionUsageWarningRemaining": {
-    "description": "Warning message shown when AI generation usage is near limit",
+    "description": "Warning message shown when story usage is near the monthly limit",
     "placeholders": {
       "remaining": {
         "type": "int"
       }
     }
   },
-  "subscriptionUsageWarningLimitReached": "AI generation limit reached.",
+  "subscriptionUsageWarningLimitReached": "Story limit reached.",
   "@subscriptionUsageWarningLimitReached": {
-    "description": "Warning message shown when AI generation limit is reached"
+    "description": "Warning message shown when the monthly story limit is reached"
   },
-  "subscriptionUpgradeRecommendationLimit": "Upgrade to Premium to use up to {limit} generations per month.",
+  "subscriptionUpgradeRecommendationLimit": "Unlock Premium to create up to {limit} stories per month.",
   "@subscriptionUpgradeRecommendationLimit": {
     "description": "Upgrade recommendation message with specific limit",
     "placeholders": {
@@ -1368,7 +1387,7 @@
       }
     }
   },
-  "subscriptionUpgradeRecommendationGeneral": "For more AI generations, we recommend the Premium plan.",
+  "subscriptionUpgradeRecommendationGeneral": "Unlock Premium for more stories and the past year of photos.",
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "General upgrade recommendation message"
   },
@@ -1489,12 +1508,62 @@
   "@promptContextInputHint": {
     "description": "Hint for the context text input"
   },
-  "promptContextInputHelper": "Helps the AI understand the situation beyond the photo",
+  "promptContextInputHelper": "Your words make the story richer",
   "@promptContextInputHelper": {
     "description": "Helper text for the context text input"
   },
   "diaryDetailCopiedToClipboard": "Diary copied to clipboard",
   "@diaryDetailCopiedToClipboard": {
     "description": "Snack bar message when diary content is copied to clipboard"
+  },
+  "lockedPhotoDialogTitle": "Revisit the past year.",
+  "@lockedPhotoDialogTitle": {
+    "description": "Title for the locked photo upgrade dialog"
+  },
+  "lockedPhotoDialogMessage": "Unlock Premium to access the past year of your photos and turn them into stories.",
+  "@lockedPhotoDialogMessage": {
+    "description": "Message for the locked photo upgrade dialog"
+  },
+  "commonNotNow": "Not now",
+  "@commonNotNow": {
+    "description": "Generic dismiss button label"
+  },
+  "premiumBulletPhotos": "Photos from the past year",
+  "@premiumBulletPhotos": {
+    "description": "Premium bullet point: photo access"
+  },
+  "premiumBulletStories": "{limit} stories per month",
+  "@premiumBulletStories": {
+    "description": "Premium bullet point: story limit",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumBulletStyles": "All writing styles",
+  "@premiumBulletStyles": {
+    "description": "Premium bullet point: writing styles"
+  },
+  "settingsSubscriptionPhotosLabel": "Available photos",
+  "@settingsSubscriptionPhotosLabel": {
+    "description": "Label for photo access range in settings"
+  },
+  "settingsSubscriptionStoriesLabel": "Stories this month",
+  "@settingsSubscriptionStoriesLabel": {
+    "description": "Label for monthly story count in settings"
+  },
+  "subscriptionUpgradeRecommendationTimeAccess": "Unlock Premium to revisit the past year and create up to {limit} stories per month.",
+  "@subscriptionUpgradeRecommendationTimeAccess": {
+    "description": "Time-access focused upgrade recommendation",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "timelineLockedGroupLabel": "Available with Premium",
+  "@timelineLockedGroupLabel": {
+    "description": "Label shown on timeline headers for locked photo groups"
   }
 }

@@ -5,6 +5,9 @@ part of '../home_screen.dart';
 // ---------------------------------------------------------------------------
 
 mixin _HomeDataLoaderMixin on State<HomeScreen> {
+  /// タイムラインに読み込む最大日数（ロック写真はぼかし表示）
+  static const _loadDays = 365;
+
   _HomeScreenState get _self => this as _HomeScreenState;
 
   Future<void> _loadTodayPhotos() async {
@@ -35,10 +38,12 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      final allowedDays = await _getAllowedDays();
+      // Determine actual plan access days for lock state
+      final planAccessDays = await _getPlanAccessDays();
+      _self._photoController.setAccessibleDays(planAccessDays);
 
       final photosResult = await photoService.getPhotosInDateRange(
-        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        startDate: todayStart.subtract(const Duration(days: _loadDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         limit: _HomeScreenState._photosPerPage,
       );
@@ -122,13 +127,11 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      final allowedDays = await _getAllowedDays();
-
       final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
       final requested = _HomeScreenState._photosPerPage * preloadPages;
 
       final newPhotosResult = await photoService.getPhotosEfficient(
-        startDate: todayStart.subtract(Duration(days: allowedDays)),
+        startDate: todayStart.subtract(const Duration(days: _loadDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         offset: _self._currentPhotoOffset,
         limit: requested,
@@ -241,24 +244,24 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
     await _loadUsedPhotoIds();
   }
 
-  Future<int> _getAllowedDays() async {
-    int allowedDays = 1;
+  Future<int> _getPlanAccessDays() async {
+    int accessDays = 1;
     try {
       final subscriptionService =
           await ServiceRegistration.getAsync<ISubscriptionService>();
       final planResult = await subscriptionService.getCurrentPlanClass();
       if (planResult.isSuccess) {
         final plan = planResult.value;
-        allowedDays = plan.isPremium ? 365 : 1;
+        accessDays = plan.pastPhotoAccessDays;
       }
     } catch (e) {
       _self._logger.error(
         'Failed to get plan info',
         error: e,
-        context: 'HomeScreen._getCachedAllowedDays',
+        context: 'HomeScreen._getPlanAccessDays',
       );
     }
 
-    return allowedDays;
+    return accessDays;
   }
 }

@@ -18,6 +18,7 @@ import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/upgrade_dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
 import '../ui/components/custom_dialog.dart';
 import '../controllers/scroll_signal.dart';
@@ -257,6 +258,7 @@ class _HomeScreenState extends State<HomeScreen>
         onSelectionLimitReached: _showSelectionLimitModal,
         onUsedPhotoSelected: _showUsedPhotoModal,
         onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,
+        onLockedPhotoTapped: _showLockedPhotoModal,
         onRefresh: _refreshHome,
         onCameraPressed: _capturePhoto,
         onDiaryCreated: _onDiaryCreated,

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -43,6 +45,9 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 異なる日付選択時のコールバック
   final VoidCallback? onDifferentDateSelected;
 
+  /// ロック写真タップ時のコールバック
+  final VoidCallback? onLockedPhotoTapped;
+
   /// カメラ撮影コールバック
   final VoidCallback? onCameraPressed;
 
@@ -66,6 +71,7 @@ class TimelinePhotoWidget extends StatefulWidget {
     this.onUsedPhotoDetail,
     this.onRequestPermission,
     this.onDifferentDateSelected,
+    this.onLockedPhotoTapped,
     this.onCameraPressed,
     this.onLoadMorePhotos,
     this.onPreloadMorePhotos,
@@ -81,6 +87,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   final TimelineGroupingService _groupingService = TimelineGroupingService();
   final ScrollController _scrollController = ScrollController();
   List<TimelinePhotoGroup> _photoGroups = [];
+  Map<DateTime, bool> _groupFullyLockedCache = {};
 
   // ログサービス
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
@@ -181,10 +188,19 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final visibleIds = groups.expand((g) => g.photos).map((a) => a.id).toSet();
     _cacheManager.pruneThumbFutureCache(visibleIds);
 
+    // グループごとの全ロック判定をキャッシュ
+    final lockedCache = <DateTime, bool>{};
+    for (final group in groups) {
+      lockedCache[group.groupDate] =
+          group.photos.isNotEmpty &&
+          group.photos.every((photo) => widget.controller.isPhotoLocked(photo));
+    }
+
     if (mounted) {
       // キャッシュ再構築完了後に安全にUI更新
       setState(() {
         _photoGroups = groups;
+        _groupFullyLockedCache = lockedCache;
         final currentCount = widget.controller.photoAssets.length;
         if (currentCount > _scrollManager.lastAssetsCount) {
           _scrollManager.handlePhotoCountIncrease(currentCount);
@@ -380,18 +396,35 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final isUsed = mainIndex >= 0
         ? widget.controller.isPhotoUsed(mainIndex)
         : false;
+    final isLocked = widget.controller.isPhotoLocked(photo);
 
     // キャッシュを使用した薄化判定（パフォーマンス最適化）
-    final shouldDimPhoto = _shouldDimPhoto(
-      photo: photo,
-      isSelected: isSelected,
-      selectedDate: selectedDate,
-    );
+    final shouldDimPhoto =
+        !isLocked &&
+        _shouldDimPhoto(
+          photo: photo,
+          isSelected: isSelected,
+          selectedDate: selectedDate,
+        );
 
     final heroTag = 'asset-${photo.id}';
+    final thumbnail = TimelinePhotoThumbnail(
+      photo: photo,
+      future: _cacheManager.getThumbnailFuture(photo),
+      thumbnailSize: TimelineLayoutConstants.thumbnailSize,
+      thumbnailQuality: TimelineLayoutConstants.thumbnailQuality,
+      borderRadius: TimelineLayoutConstants.borderRadius,
+      strokeWidth: TimelineLayoutConstants.loadingIndicatorStrokeWidth,
+      key: ValueKey(photo.id),
+    );
+
     return GestureDetector(
-      onTap: () => _handlePhotoTap(mainIndex),
-      onLongPress: () => _handlePhotoLongPress(context, photo, heroTag, isUsed),
+      onTap: isLocked
+          ? () => widget.onLockedPhotoTapped?.call()
+          : () => _handlePhotoTap(mainIndex),
+      onLongPress: isLocked
+          ? () => widget.onLockedPhotoTapped?.call()
+          : () => _handlePhotoLongPress(context, photo, heroTag, isUsed),
       child: Stack(
         children: [
           // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
@@ -414,36 +447,58 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 ),
                 child: Hero(
                   tag: heroTag,
-                  child: TimelinePhotoThumbnail(
-                    photo: photo,
-                    future: _cacheManager.getThumbnailFuture(photo),
-                    thumbnailSize: TimelineLayoutConstants.thumbnailSize,
-                    thumbnailQuality: TimelineLayoutConstants.thumbnailQuality,
-                    borderRadius: TimelineLayoutConstants.borderRadius,
-                    strokeWidth:
-                        TimelineLayoutConstants.loadingIndicatorStrokeWidth,
-                    key: ValueKey(photo.id),
-                  ),
+                  child: isLocked
+                      ? ImageFiltered(
+                          imageFilter: ImageFilter.blur(
+                            sigmaX: TimelineLayoutConstants.lockedBlurSigma,
+                            sigmaY: TimelineLayoutConstants.lockedBlurSigma,
+                          ),
+                          child: thumbnail,
+                        )
+                      : thumbnail,
                 ),
               ),
             ),
           ),
-          // パフォーマンス最適化された選択インジケーター
-          Positioned(
-            top: TimelineLayoutConstants.selectionIndicatorTop,
-            right: TimelineLayoutConstants.selectionIndicatorRight,
-            child: TimelineSelectionIndicator(
-              isSelected: isSelected,
-              isUsed: isUsed,
-              shouldDimPhoto: shouldDimPhoto,
-              primaryColor: Theme.of(context).colorScheme.primary,
-              indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
-              iconSize: TimelineLayoutConstants.selectionIconSize,
-              borderWidth: TimelineLayoutConstants.selectionBorderWidth,
+          // ロック写真のロックアイコンオーバーレイ
+          if (isLocked)
+            Positioned.fill(
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(
+                    TimelineLayoutConstants.lockedIconPadding,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.lock_rounded,
+                    color: Theme.of(context).colorScheme.onInverseSurface,
+                    size: TimelineLayoutConstants.lockedIconSize,
+                  ),
+                ),
+              ),
             ),
-          ),
-          // パフォーマンス最適化された使用済みラベル
-          if (isUsed)
+          // パフォーマンス最適化された選択インジケーター（ロック時は非表示）
+          if (!isLocked)
+            Positioned(
+              top: TimelineLayoutConstants.selectionIndicatorTop,
+              right: TimelineLayoutConstants.selectionIndicatorRight,
+              child: TimelineSelectionIndicator(
+                isSelected: isSelected,
+                isUsed: isUsed,
+                shouldDimPhoto: shouldDimPhoto,
+                primaryColor: Theme.of(context).colorScheme.primary,
+                indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
+                iconSize: TimelineLayoutConstants.selectionIconSize,
+                borderWidth: TimelineLayoutConstants.selectionBorderWidth,
+              ),
+            ),
+          // パフォーマンス最適化された使用済みラベル（ロック時は非表示）
+          if (isUsed && !isLocked)
             const TimelineUsedLabel(
               bottom: TimelineLayoutConstants.usedLabelBottom,
               left: TimelineLayoutConstants.usedLabelLeft,
@@ -527,6 +582,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// スティッキーヘッダーを構築
   Widget _buildStickyHeader(TimelinePhotoGroup group) {
+    final isFullyLocked = _groupFullyLockedCache[group.groupDate] ?? false;
+
     return Container(
       height: TimelineLayoutConstants.stickyHeaderHeight,
       width: double.infinity,
@@ -537,16 +594,26 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
       ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          group.displayName,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
+      child: Row(
+        children: [
+          Text(
+            group.displayName,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.left,
           ),
-          textAlign: TextAlign.left,
-        ),
+          if (isFullyLocked) ...[
+            const Spacer(),
+            Text(
+              context.l10n.timelineLockedGroupLabel,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

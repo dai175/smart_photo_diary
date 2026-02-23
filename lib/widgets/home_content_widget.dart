@@ -26,6 +26,7 @@ class HomeContentWidget extends StatefulWidget {
   final VoidCallback onSelectionLimitReached;
   final VoidCallback onUsedPhotoSelected;
   final Function(String photoId)? onUsedPhotoDetail;
+  final VoidCallback? onLockedPhotoTapped;
   final VoidCallback onCameraPressed;
   final Function(String) onDiaryTap;
   final Future<void> Function()? onRefresh;
@@ -41,6 +42,7 @@ class HomeContentWidget extends StatefulWidget {
     required this.onSelectionLimitReached,
     required this.onUsedPhotoSelected,
     this.onUsedPhotoDetail,
+    this.onLockedPhotoTapped,
     required this.onCameraPressed,
     required this.onDiaryTap,
     this.onRefresh,
@@ -163,6 +165,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
               onUsedPhotoSelected: widget.onUsedPhotoSelected,
               onUsedPhotoDetail: widget.onUsedPhotoDetail,
               onRequestPermission: widget.onRequestPermission,
+              onLockedPhotoTapped: widget.onLockedPhotoTapped,
               onCameraPressed: widget.onCameraPressed,
               onDiaryCreated: widget.onDiaryCreated,
               onLoadMorePhotos: widget.onLoadMorePhotos,
@@ -184,8 +187,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       // 使用量情報を取得
       final statusResult = await subscriptionService.getCurrentStatus();
       final planResult = await subscriptionService.getCurrentPlanClass();
-      final remainingResult = await subscriptionService
-          .getRemainingGenerations();
       final resetDateResult = await subscriptionService.getNextResetDate();
 
       if (statusResult.isFailure || planResult.isFailure) {
@@ -205,13 +206,11 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
       }
 
       final plan = planResult.value;
-      final remaining = remainingResult.isSuccess ? remainingResult.value : 0;
       final nextResetDate = resetDateResult.isSuccess
           ? resetDateResult.value
           : DateTime.now().add(const Duration(days: 30));
 
       final limit = plan.monthlyAiGenerationLimit;
-      final used = limit - remaining;
 
       if (context.mounted) {
         await showDialog<void>(
@@ -221,9 +220,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             context: context,
             planName: context.l10n.localizedPlanName(plan.id),
             planId: plan.id,
-            used: used.clamp(0, limit),
             limit: limit,
-            remaining: remaining.clamp(0, limit),
             nextResetDate: nextResetDate,
             onUpgrade: plan.id == SubscriptionConstants.basicPlanId
                 ? () {
