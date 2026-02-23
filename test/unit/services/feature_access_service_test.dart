@@ -27,7 +27,10 @@ void main() {
     ServiceLocator().clear();
     ServiceLocator().registerSingleton<ILoggingService>(mockLoggingService);
 
-    service = FeatureAccessService(stateService: mockStateService);
+    service = FeatureAccessService(
+      stateService: mockStateService,
+      logger: mockLoggingService,
+    );
   });
 
   tearDown(() {
