@@ -408,9 +408,9 @@
       }
     }
   },
-  "settingsSubscriptionUsageLabel": "AI usage",
+  "settingsSubscriptionUsageLabel": "Stories this month",
   "@settingsSubscriptionUsageLabel": {
-    "description": "Label for AI usage amount"
+    "description": "Label for story usage amount"
   },
   "settingsSubscriptionRemainingLabel": "Remaining",
   "@settingsSubscriptionRemainingLabel": {
@@ -598,7 +598,7 @@
   "@settingsPremiumYearlyTitle": {
     "description": "Label for the yearly premium plan"
   },
-  "settingsPremiumPlanFeatures": "Includes 100 AI diary generations per month, access to the past year of photos, and all 20 writing prompts.",
+  "settingsPremiumPlanFeatures": "Includes 100 stories per month, access to the past year of photos, and all writing styles.",
   "@settingsPremiumPlanFeatures": {
     "description": "Description of premium plan benefits"
   },
@@ -622,7 +622,7 @@
   "@urlLauncherOpenFailed": {
     "description": "Message shown when a link cannot be opened"
   },
-  "upgradeDialogTitle": "Premium plan",
+  "upgradeDialogTitle": "Revisit more of your life.",
   "@upgradeDialogTitle": {
     "description": "Title for the premium upgrade dialog"
   },
@@ -675,9 +675,18 @@
   "@commonErrorTitle": {
     "description": "Generic error dialog title"
   },
-  "usageLimitDialogTitle": "AI generation limit reached",
+  "usageLimitDialogTitle": "You've reached this month's limit.",
   "@usageLimitDialogTitle": {
     "description": "Title for the dialog shown when AI usage has reached the monthly limit"
+  },
+  "usageLimitDialogBody": "Want to keep writing? Upgrade to create up to {limit} stories per month and revisit the past year.",
+  "@usageLimitDialogBody": {
+    "description": "Body text encouraging upgrade when limit is reached",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "usageLimitDialogReachedMessage": "The {planName} plan has reached its monthly limit of {limit} generations.",
   "@usageLimitDialogReachedMessage": {
@@ -713,9 +722,9 @@
       }
     }
   },
-  "usageStatusDialogTitle": "AI usage status",
+  "usageStatusDialogTitle": "Your current plan",
   "@usageStatusDialogTitle": {
-    "description": "Title for the AI usage status dialog"
+    "description": "Title for the usage status dialog"
   },
   "usageStatusCurrentPlan": "Current plan: {planName}",
   "@usageStatusCurrentPlan": {
@@ -723,6 +732,36 @@
     "placeholders": {
       "planName": {
         "type": "String"
+      }
+    }
+  },
+  "currentPlanStoriesLabel": "This month: {limit} stories",
+  "@currentPlanStoriesLabel": {
+    "description": "Shows the monthly story limit",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "currentPlanPhotosLabel": "Available photos",
+  "@currentPlanPhotosLabel": {
+    "description": "Label for photo access range"
+  },
+  "currentPlanPhotosBasicValue": "Today & Yesterday",
+  "@currentPlanPhotosBasicValue": {
+    "description": "Photo access range for Basic plan"
+  },
+  "currentPlanPhotosPremiumValue": "Past year",
+  "@currentPlanPhotosPremiumValue": {
+    "description": "Photo access range for Premium plan"
+  },
+  "currentPlanPremiumPitch": "Revisit the past year of your life. Create up to {limit} stories each month.",
+  "@currentPlanPremiumPitch": {
+    "description": "Premium upsell pitch in current plan dialog",
+    "placeholders": {
+      "limit": {
+        "type": "int"
       }
     }
   },
@@ -1496,5 +1535,50 @@
   "diaryDetailCopiedToClipboard": "Diary copied to clipboard",
   "@diaryDetailCopiedToClipboard": {
     "description": "Snack bar message when diary content is copied to clipboard"
+  },
+  "lockedPhotoDialogTitle": "Revisit earlier days.",
+  "@lockedPhotoDialogTitle": {
+    "description": "Title for the locked photo upgrade dialog"
+  },
+  "lockedPhotoDialogMessage": "Upgrade to access the past year of your photos and turn them into stories.",
+  "@lockedPhotoDialogMessage": {
+    "description": "Message for the locked photo upgrade dialog"
+  },
+  "lockedPhotoDialogCta": "Unlock Premium",
+  "@lockedPhotoDialogCta": {
+    "description": "CTA button text for the locked photo upgrade dialog"
+  },
+  "commonNotNow": "Not now",
+  "@commonNotNow": {
+    "description": "Generic dismiss button label"
+  },
+  "premiumBulletPhotos": "Photos from the past year",
+  "@premiumBulletPhotos": {
+    "description": "Premium bullet point: photo access"
+  },
+  "premiumBulletStories": "100 stories per month",
+  "@premiumBulletStories": {
+    "description": "Premium bullet point: story limit"
+  },
+  "premiumBulletStyles": "All writing styles",
+  "@premiumBulletStyles": {
+    "description": "Premium bullet point: writing styles"
+  },
+  "settingsSubscriptionPhotosLabel": "Available photos",
+  "@settingsSubscriptionPhotosLabel": {
+    "description": "Label for photo access range in settings"
+  },
+  "settingsSubscriptionStoriesLabel": "Stories this month",
+  "@settingsSubscriptionStoriesLabel": {
+    "description": "Label for monthly story count in settings"
+  },
+  "subscriptionUpgradeRecommendationTimeAccess": "Upgrade to Premium to revisit the past year and create up to {limit} stories per month.",
+  "@subscriptionUpgradeRecommendationTimeAccess": {
+    "description": "Time-access focused upgrade recommendation",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   }
 }

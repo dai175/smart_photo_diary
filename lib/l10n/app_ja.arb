@@ -408,9 +408,9 @@
       }
     }
   },
-  "settingsSubscriptionUsageLabel": "AI生成使用量",
+  "settingsSubscriptionUsageLabel": "今月の日記",
   "@settingsSubscriptionUsageLabel": {
-    "description": "AI利用量のラベル"
+    "description": "日記利用量のラベル"
   },
   "settingsSubscriptionRemainingLabel": "残り回数",
   "@settingsSubscriptionRemainingLabel": {
@@ -598,7 +598,7 @@
   "@settingsPremiumYearlyTitle": {
     "description": "年額プレミアムプランのラベル"
   },
-  "settingsPremiumPlanFeatures": "月100回のAI日記生成、過去1年の写真、全20種類のライティングプロンプトが利用できます。",
+  "settingsPremiumPlanFeatures": "月100件の日記作成、過去1年の写真、全ライティングスタイルが利用できます。",
   "@settingsPremiumPlanFeatures": {
     "description": "プレミアムプランの特典説明"
   },
@@ -622,7 +622,7 @@
   "@urlLauncherOpenFailed": {
     "description": "リンクが開けなかった際のメッセージ"
   },
-  "upgradeDialogTitle": "Premiumプラン",
+  "upgradeDialogTitle": "もっと思い出を振り返ろう。",
   "@upgradeDialogTitle": {
     "description": "Premiumアップグレードダイアログのタイトル"
   },
@@ -675,9 +675,18 @@
   "@commonErrorTitle": {
     "description": "汎用的なエラーダイアログのタイトル"
   },
-  "usageLimitDialogTitle": "AI生成の制限に達しました",
+  "usageLimitDialogTitle": "今月の上限に達しました。",
   "@usageLimitDialogTitle": {
     "description": "AI利用上限に達した際のダイアログタイトル"
+  },
+  "usageLimitDialogBody": "もっと書きたいですか？アップグレードすると月{limit}件の日記作成と過去1年の写真が利用できます。",
+  "@usageLimitDialogBody": {
+    "description": "制限到達時のアップグレード誘導本文",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "usageLimitDialogReachedMessage": "{planName}プランの月間{limit}回の制限に達しました。",
   "@usageLimitDialogReachedMessage": {
@@ -713,9 +722,9 @@
       }
     }
   },
-  "usageStatusDialogTitle": "AI生成の使用状況",
+  "usageStatusDialogTitle": "現在のプラン",
   "@usageStatusDialogTitle": {
-    "description": "AI使用状況ダイアログのタイトル"
+    "description": "使用状況ダイアログのタイトル"
   },
   "usageStatusCurrentPlan": "現在のプラン: {planName}",
   "@usageStatusCurrentPlan": {
@@ -723,6 +732,36 @@
     "placeholders": {
       "planName": {
         "type": "String"
+      }
+    }
+  },
+  "currentPlanStoriesLabel": "今月: {limit}件の日記",
+  "@currentPlanStoriesLabel": {
+    "description": "月間日記制限の表示",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "currentPlanPhotosLabel": "利用可能な写真",
+  "@currentPlanPhotosLabel": {
+    "description": "写真アクセス範囲のラベル"
+  },
+  "currentPlanPhotosBasicValue": "今日と昨日",
+  "@currentPlanPhotosBasicValue": {
+    "description": "Basicプランの写真アクセス範囲"
+  },
+  "currentPlanPhotosPremiumValue": "過去1年",
+  "@currentPlanPhotosPremiumValue": {
+    "description": "Premiumプランの写真アクセス範囲"
+  },
+  "currentPlanPremiumPitch": "過去1年の思い出を振り返ろう。毎月{limit}件の日記を作成できます。",
+  "@currentPlanPremiumPitch": {
+    "description": "現在のプランダイアログでのPremium訴求文",
+    "placeholders": {
+      "limit": {
+        "type": "int"
       }
     }
   },
@@ -1496,5 +1535,50 @@
   "diaryDetailCopiedToClipboard": "日記をコピーしました",
   "@diaryDetailCopiedToClipboard": {
     "description": "日記コンテンツをクリップボードにコピーした際のスナックバーメッセージ"
+  },
+  "lockedPhotoDialogTitle": "過去の日記を振り返ろう。",
+  "@lockedPhotoDialogTitle": {
+    "description": "ロック写真タップ時のアップグレードダイアログタイトル"
+  },
+  "lockedPhotoDialogMessage": "アップグレードすると過去1年の写真にアクセスし、日記を作成できます。",
+  "@lockedPhotoDialogMessage": {
+    "description": "ロック写真タップ時のアップグレードダイアログ本文"
+  },
+  "lockedPhotoDialogCta": "Premiumを解放",
+  "@lockedPhotoDialogCta": {
+    "description": "ロック写真タップ時のアップグレードダイアログCTAボタン"
+  },
+  "commonNotNow": "今はしない",
+  "@commonNotNow": {
+    "description": "後回しにするボタンの共通ラベル"
+  },
+  "premiumBulletPhotos": "過去1年分の写真",
+  "@premiumBulletPhotos": {
+    "description": "Premium箇条書き: 写真アクセス"
+  },
+  "premiumBulletStories": "月100件の日記",
+  "@premiumBulletStories": {
+    "description": "Premium箇条書き: 日記制限"
+  },
+  "premiumBulletStyles": "全ライティングスタイル",
+  "@premiumBulletStyles": {
+    "description": "Premium箇条書き: ライティングスタイル"
+  },
+  "settingsSubscriptionPhotosLabel": "利用可能な写真",
+  "@settingsSubscriptionPhotosLabel": {
+    "description": "設定画面の写真アクセス範囲ラベル"
+  },
+  "settingsSubscriptionStoriesLabel": "今月の日記",
+  "@settingsSubscriptionStoriesLabel": {
+    "description": "設定画面の月間日記数ラベル"
+  },
+  "subscriptionUpgradeRecommendationTimeAccess": "Premiumにアップグレードすると過去1年の写真にアクセスし、月{limit}件の日記を作成できます。",
+  "@subscriptionUpgradeRecommendationTimeAccess": {
+    "description": "時間軸フォーカスのアップグレード推奨メッセージ",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   }
 }

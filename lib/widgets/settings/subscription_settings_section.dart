@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../constants/app_icons.dart';
+import '../../constants/subscription_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/subscription_info_v2.dart';
 import '../../ui/animations/micro_interactions.dart';
@@ -45,9 +46,11 @@ class _SubscriptionSettingsSectionState
       warningRemainingFormatter: (remaining) =>
           context.l10n.subscriptionUsageWarningRemaining(remaining),
       upgradeRecommendationLimitFormatter: (limit) =>
-          context.l10n.subscriptionUpgradeRecommendationLimit(limit),
+          context.l10n.subscriptionUpgradeRecommendationTimeAccess(limit),
       upgradeRecommendationGeneralFormatter: () =>
-          context.l10n.subscriptionUpgradeRecommendationGeneral,
+          context.l10n.subscriptionUpgradeRecommendationTimeAccess(
+            SubscriptionConstants.premiumMonthlyAiLimit,
+          ),
       expiredText: context.l10n.subscriptionExpired,
       todayText: context.l10n.subscriptionResetToday,
       tomorrowText: context.l10n.subscriptionResetTomorrow,
@@ -194,13 +197,15 @@ class _SubscriptionSettingsSectionState
       child: Column(
         children: [
           _buildSubscriptionItem(
-            context.l10n.settingsSubscriptionUsageLabel,
-            displayData.usageText,
+            context.l10n.settingsSubscriptionPhotosLabel,
+            info.isPremium
+                ? context.l10n.currentPlanPhotosPremiumValue
+                : context.l10n.currentPlanPhotosBasicValue,
           ),
           const SizedBox(height: AppSpacing.md),
           _buildSubscriptionItem(
-            context.l10n.settingsSubscriptionRemainingLabel,
-            displayData.remainingText,
+            context.l10n.settingsSubscriptionStoriesLabel,
+            displayData.usageText,
           ),
           const SizedBox(height: AppSpacing.md),
           _buildSubscriptionItem(

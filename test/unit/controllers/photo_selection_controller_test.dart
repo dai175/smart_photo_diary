@@ -478,5 +478,52 @@ void main() {
         );
       });
     });
+
+    group('isPhotoLocked / setAccessibleDays', () {
+      test('accessCutoffDate未設定の場合はfalse', () {
+        final photo = createMockAsset('1', createDateTime: DateTime(2024, 1, 1));
+        expect(controller.isPhotoLocked(photo), isFalse);
+      });
+
+      test('アクセス範囲内の写真はロックされない', () {
+        // setAccessibleDays(1) → 今日と昨日がアクセス可能
+        controller.setAccessibleDays(1);
+        final today = DateTime.now();
+        final photo = createMockAsset(
+          '1',
+          createDateTime: DateTime(today.year, today.month, today.day),
+        );
+        expect(controller.isPhotoLocked(photo), isFalse);
+      });
+
+      test('アクセス範囲外の写真はロックされる', () {
+        controller.setAccessibleDays(1);
+        // 10日前の写真はBasicプランではロック
+        final photo = createMockAsset(
+          '1',
+          createDateTime: DateTime.now().subtract(const Duration(days: 10)),
+        );
+        expect(controller.isPhotoLocked(photo), isTrue);
+      });
+
+      test('Premium（365日）設定時は過去1年の写真がアンロック', () {
+        controller.setAccessibleDays(365);
+        // 100日前の写真はPremiumではアンロック
+        final photo = createMockAsset(
+          '1',
+          createDateTime: DateTime.now().subtract(const Duration(days: 100)),
+        );
+        expect(controller.isPhotoLocked(photo), isFalse);
+      });
+
+      test('Premium（365日）設定時でも366日前はロック', () {
+        controller.setAccessibleDays(365);
+        final photo = createMockAsset(
+          '1',
+          createDateTime: DateTime.now().subtract(const Duration(days: 400)),
+        );
+        expect(controller.isPhotoLocked(photo), isTrue);
+      });
+    });
   });
 }

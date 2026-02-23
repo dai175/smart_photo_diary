@@ -30,6 +30,9 @@ class TimelineFABIntegration extends StatelessWidget {
   /// 異なる日付選択時のコールバック
   final VoidCallback? onDifferentDateSelected;
 
+  /// ロック写真タップ時のコールバック
+  final VoidCallback? onLockedPhotoTapped;
+
   /// カメラ撮影コールバック
   final VoidCallback? onCameraPressed;
 
@@ -53,6 +56,7 @@ class TimelineFABIntegration extends StatelessWidget {
     this.onUsedPhotoDetail,
     this.onRequestPermission,
     this.onDifferentDateSelected,
+    this.onLockedPhotoTapped,
     this.onCameraPressed,
     this.onDiaryCreated,
     this.onLoadMorePhotos,
@@ -71,6 +75,7 @@ class TimelineFABIntegration extends StatelessWidget {
           onUsedPhotoDetail: onUsedPhotoDetail,
           onRequestPermission: onRequestPermission,
           onDifferentDateSelected: onDifferentDateSelected,
+          onLockedPhotoTapped: onLockedPhotoTapped,
           onCameraPressed: onCameraPressed,
           onLoadMorePhotos: onLoadMorePhotos,
           onPreloadMorePhotos: onPreloadMorePhotos,

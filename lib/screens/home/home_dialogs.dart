@@ -7,6 +7,34 @@ part of '../home_screen.dart';
 mixin _HomeDialogsMixin on State<HomeScreen> {
   _HomeScreenState get _self => this as _HomeScreenState;
 
+  void _showLockedPhotoModal() {
+    if (!mounted) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => CustomDialog(
+        icon: Icons.lock_open_rounded,
+        iconColor: Theme.of(dialogContext).colorScheme.primary,
+        title: dialogContext.l10n.lockedPhotoDialogTitle,
+        message: dialogContext.l10n.lockedPhotoDialogMessage,
+        actions: [
+          CustomDialogAction(
+            text: dialogContext.l10n.commonNotNow,
+            onPressed: () => Navigator.of(dialogContext).pop(),
+          ),
+          CustomDialogAction(
+            text: dialogContext.l10n.lockedPhotoDialogCta,
+            isPrimary: true,
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              UpgradeDialogUtils.showUpgradeDialog(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showSelectionLimitModal() {
     _showSimpleDialog(
       context.l10n.photoSelectionLimitMessage(AppConstants.maxPhotosSelection),

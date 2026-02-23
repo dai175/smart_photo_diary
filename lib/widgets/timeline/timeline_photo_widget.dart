@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -43,6 +45,9 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 異なる日付選択時のコールバック
   final VoidCallback? onDifferentDateSelected;
 
+  /// ロック写真タップ時のコールバック
+  final VoidCallback? onLockedPhotoTapped;
+
   /// カメラ撮影コールバック
   final VoidCallback? onCameraPressed;
 
@@ -66,6 +71,7 @@ class TimelinePhotoWidget extends StatefulWidget {
     this.onUsedPhotoDetail,
     this.onRequestPermission,
     this.onDifferentDateSelected,
+    this.onLockedPhotoTapped,
     this.onCameraPressed,
     this.onLoadMorePhotos,
     this.onPreloadMorePhotos,
@@ -380,18 +386,25 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     final isUsed = mainIndex >= 0
         ? widget.controller.isPhotoUsed(mainIndex)
         : false;
+    final isLocked = widget.controller.isPhotoLocked(photo);
 
     // キャッシュを使用した薄化判定（パフォーマンス最適化）
-    final shouldDimPhoto = _shouldDimPhoto(
-      photo: photo,
-      isSelected: isSelected,
-      selectedDate: selectedDate,
-    );
+    final shouldDimPhoto =
+        !isLocked &&
+        _shouldDimPhoto(
+          photo: photo,
+          isSelected: isSelected,
+          selectedDate: selectedDate,
+        );
 
     final heroTag = 'asset-${photo.id}';
     return GestureDetector(
-      onTap: () => _handlePhotoTap(mainIndex),
-      onLongPress: () => _handlePhotoLongPress(context, photo, heroTag, isUsed),
+      onTap: () => isLocked
+          ? widget.onLockedPhotoTapped?.call()
+          : _handlePhotoTap(mainIndex),
+      onLongPress: isLocked
+          ? () => widget.onLockedPhotoTapped?.call()
+          : () => _handlePhotoLongPress(context, photo, heroTag, isUsed),
       child: Stack(
         children: [
           // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
@@ -414,36 +427,72 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 ),
                 child: Hero(
                   tag: heroTag,
-                  child: TimelinePhotoThumbnail(
-                    photo: photo,
-                    future: _cacheManager.getThumbnailFuture(photo),
-                    thumbnailSize: TimelineLayoutConstants.thumbnailSize,
-                    thumbnailQuality: TimelineLayoutConstants.thumbnailQuality,
-                    borderRadius: TimelineLayoutConstants.borderRadius,
-                    strokeWidth:
-                        TimelineLayoutConstants.loadingIndicatorStrokeWidth,
-                    key: ValueKey(photo.id),
-                  ),
+                  child: isLocked
+                      ? ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                          child: TimelinePhotoThumbnail(
+                            photo: photo,
+                            future: _cacheManager.getThumbnailFuture(photo),
+                            thumbnailSize:
+                                TimelineLayoutConstants.thumbnailSize,
+                            thumbnailQuality:
+                                TimelineLayoutConstants.thumbnailQuality,
+                            borderRadius: TimelineLayoutConstants.borderRadius,
+                            strokeWidth: TimelineLayoutConstants
+                                .loadingIndicatorStrokeWidth,
+                            key: ValueKey(photo.id),
+                          ),
+                        )
+                      : TimelinePhotoThumbnail(
+                          photo: photo,
+                          future: _cacheManager.getThumbnailFuture(photo),
+                          thumbnailSize: TimelineLayoutConstants.thumbnailSize,
+                          thumbnailQuality:
+                              TimelineLayoutConstants.thumbnailQuality,
+                          borderRadius: TimelineLayoutConstants.borderRadius,
+                          strokeWidth: TimelineLayoutConstants
+                              .loadingIndicatorStrokeWidth,
+                          key: ValueKey(photo.id),
+                        ),
                 ),
               ),
             ),
           ),
-          // パフォーマンス最適化された選択インジケーター
-          Positioned(
-            top: TimelineLayoutConstants.selectionIndicatorTop,
-            right: TimelineLayoutConstants.selectionIndicatorRight,
-            child: TimelineSelectionIndicator(
-              isSelected: isSelected,
-              isUsed: isUsed,
-              shouldDimPhoto: shouldDimPhoto,
-              primaryColor: Theme.of(context).colorScheme.primary,
-              indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
-              iconSize: TimelineLayoutConstants.selectionIconSize,
-              borderWidth: TimelineLayoutConstants.selectionBorderWidth,
+          // ロック写真のロックアイコンオーバーレイ
+          if (isLocked)
+            Positioned.fill(
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
             ),
-          ),
-          // パフォーマンス最適化された使用済みラベル
-          if (isUsed)
+          // パフォーマンス最適化された選択インジケーター（ロック時は非表示）
+          if (!isLocked)
+            Positioned(
+              top: TimelineLayoutConstants.selectionIndicatorTop,
+              right: TimelineLayoutConstants.selectionIndicatorRight,
+              child: TimelineSelectionIndicator(
+                isSelected: isSelected,
+                isUsed: isUsed,
+                shouldDimPhoto: shouldDimPhoto,
+                primaryColor: Theme.of(context).colorScheme.primary,
+                indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
+                iconSize: TimelineLayoutConstants.selectionIconSize,
+                borderWidth: TimelineLayoutConstants.selectionBorderWidth,
+              ),
+            ),
+          // パフォーマンス最適化された使用済みラベル（ロック時は非表示）
+          if (isUsed && !isLocked)
             const TimelineUsedLabel(
               bottom: TimelineLayoutConstants.usedLabelBottom,
               left: TimelineLayoutConstants.usedLabelLeft,

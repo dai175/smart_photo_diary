@@ -134,13 +134,13 @@ class PresetDialogs {
     final resetDateText = l10n.formatMonthDayLong(nextResetDate);
 
     final actions = <CustomDialogAction>[
-      CustomDialogAction(text: l10n.commonLater, onPressed: onDismiss),
+      CustomDialogAction(text: l10n.commonNotNow, onPressed: onDismiss),
     ];
 
     if (onUpgrade != null) {
       actions.add(
         CustomDialogAction(
-          text: l10n.commonUpgrade,
+          text: l10n.lockedPhotoDialogCta,
           isPrimary: true,
           onPressed: onUpgrade,
         ),
@@ -156,7 +156,9 @@ class PresetDialogs {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              l10n.usageLimitDialogReachedMessage(planName, limit),
+              l10n.usageLimitDialogBody(
+                SubscriptionConstants.premiumMonthlyAiLimit,
+              ),
               style: AppTypography.bodyMedium.copyWith(height: 1.4),
               textAlign: TextAlign.left,
             ),
@@ -190,17 +192,6 @@ class PresetDialogs {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.usageLimitDialogPremiumHint(
-                SubscriptionConstants.premiumMonthlyAiLimit,
-              ),
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.left,
-            ),
           ],
         ),
       ),
@@ -208,7 +199,7 @@ class PresetDialogs {
     );
   }
 
-  /// 使用量カウンター表示ダイアログ
+  /// 使用量カウンター表示ダイアログ（「Your current plan」モーダル）
   static CustomDialog usageStatus({
     required BuildContext context,
     required String planName,
@@ -221,8 +212,11 @@ class PresetDialogs {
     VoidCallback? onDismiss,
   }) {
     final l10n = context.l10n;
-    final usagePercentage = limit == 0 ? 0.0 : used / limit;
     final resetDateText = l10n.formatMonthDayLong(nextResetDate);
+    final isBasic = planId == SubscriptionConstants.basicPlanId;
+    final photosValue = isBasic
+        ? l10n.currentPlanPhotosBasicValue
+        : l10n.currentPlanPhotosPremiumValue;
 
     return CustomDialog(
       icon: Icons.analytics_rounded,
@@ -254,63 +248,28 @@ class PresetDialogs {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          l10n.usageStatusUsageLabel,
-                          style: AppTypography.labelMedium.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          l10n.usageStatusUsageValue(used, limit),
-                          style: AppTypography.labelLarge.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadiusXs,
-                        ),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: FractionallySizedBox(
-                          widthFactor: usagePercentage.clamp(0.0, 1.0),
-                          child: Container(
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: usagePercentage >= 0.8
-                                  ? Theme.of(context).colorScheme.error
-                                  : Theme.of(context).colorScheme.primary
-                                        .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.borderRadiusXs,
-                              ),
+                        Expanded(
+                          child: Text(
+                            l10n.currentPlanStoriesLabel(limit),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.usageStatusRemainingLabel,
-                          style: AppTypography.labelMedium.copyWith(
+                          l10n.currentPlanPhotosLabel,
+                          style: AppTypography.bodyMedium.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Text(
-                          l10n.usageStatusRemainingValue(remaining),
+                          photosValue,
                           style: AppTypography.labelLarge.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -351,14 +310,14 @@ class PresetDialogs {
                 ),
               ),
             ),
-            if (planId == SubscriptionConstants.basicPlanId) ...[
+            if (isBasic) ...[
               const SizedBox(height: AppSpacing.md),
               Text(
-                l10n.usageStatusPremiumUpsell(
+                l10n.currentPlanPremiumPitch(
                   SubscriptionConstants.premiumMonthlyAiLimit,
                 ),
                 style: AppTypography.bodySmall.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.left,
@@ -368,10 +327,13 @@ class PresetDialogs {
         ),
       ),
       actions: [
-        CustomDialogAction(text: l10n.commonClose, onPressed: onDismiss),
-        if (planId == SubscriptionConstants.basicPlanId && onUpgrade != null)
+        CustomDialogAction(
+          text: isBasic ? l10n.commonNotNow : l10n.commonClose,
+          onPressed: onDismiss,
+        ),
+        if (isBasic && onUpgrade != null)
           CustomDialogAction(
-            text: l10n.commonUpgrade,
+            text: l10n.settingsUpgradeToPremium,
             isPrimary: true,
             onPressed: onUpgrade,
           ),
