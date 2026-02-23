@@ -410,11 +410,11 @@
   },
   "settingsSubscriptionRemainingLabel": "Remaining",
   "@settingsSubscriptionRemainingLabel": {
-    "description": "Label for remaining AI usage count"
+    "description": "Label for remaining diary generation usage count"
   },
   "settingsSubscriptionResetLabel": "Resets on",
   "@settingsSubscriptionResetLabel": {
-    "description": "Label for the reset date of AI usage"
+    "description": "Label for the reset date of diary generation usage"
   },
   "settingsSubscriptionExpiryLabel": "Expires on",
   "@settingsSubscriptionExpiryLabel": {
@@ -952,11 +952,11 @@
   },
   "diaryPreviewUsageLimitTitle": "Story limit reached",
   "@diaryPreviewUsageLimitTitle": {
-    "description": "Fallback dialog title shown when the AI monthly limit is reached"
+    "description": "Fallback dialog title shown when the monthly generation limit is reached"
   },
   "diaryPreviewUsageLimitMessage": "You've reached the monthly limit. Please try again after the cycle resets or unlock Premium.",
   "@diaryPreviewUsageLimitMessage": {
-    "description": "Fallback dialog message shown when the AI monthly limit is reached"
+    "description": "Fallback dialog message shown when the monthly generation limit is reached"
   },
   "diaryPreviewAppBarTitle": "Diary preview",
   "@diaryPreviewAppBarTitle": {
@@ -984,11 +984,11 @@
   },
   "diaryPreviewGeneratingDiaryTitle": "Creating your diary...",
   "@diaryPreviewGeneratingDiaryTitle": {
-    "description": "Title shown while the AI is generating the diary"
+    "description": "Title shown while the diary is being generated"
   },
   "diaryPreviewGeneratingDiaryDescription": "Writing your memory…",
   "@diaryPreviewGeneratingDiaryDescription": {
-    "description": "Description shown while the AI is generating the diary"
+    "description": "Description shown while the diary is being generated"
   },
   "diaryPreviewContentSectionTitle": "Diary content",
   "@diaryPreviewContentSectionTitle": {

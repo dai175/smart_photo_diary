@@ -952,11 +952,11 @@
   },
   "diaryPreviewUsageLimitTitle": "日記の上限に達しました",
   "@diaryPreviewUsageLimitTitle": {
-    "description": "AI月間制限到達時のフォールバックダイアログタイトル"
+    "description": "月間生成制限到達時のフォールバックダイアログタイトル"
   },
   "diaryPreviewUsageLimitMessage": "今月の上限に達しました。次回のリセットまでお待ちいただくか、Premiumを解放してください。",
   "@diaryPreviewUsageLimitMessage": {
-    "description": "AI月間制限到達時のフォールバックダイアログ本文"
+    "description": "月間生成制限到達時のフォールバックダイアログ本文"
   },
   "diaryPreviewAppBarTitle": "日記プレビュー",
   "@diaryPreviewAppBarTitle": {
