@@ -175,26 +175,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     );
   }
 
-  /// プランIDに基づいて多言語化されたプラン名を取得
-  String _getLocalizedPlanName(BuildContext context, String planId) {
-    switch (planId) {
-      case SubscriptionConstants.basicPlanId:
-        return context
-            .l10n
-            .onboardingPlanBasicSubtitle; // "Free plan" / "無料プラン"
-      case SubscriptionConstants.premiumMonthlyPlanId:
-        return context
-            .l10n
-            .settingsPremiumMonthlyTitle; // "Premium (monthly)" / "プレミアム（月額）"
-      case SubscriptionConstants.premiumYearlyPlanId:
-        return context
-            .l10n
-            .settingsPremiumYearlyTitle; // "Premium (yearly)" / "プレミアム（年額）"
-      default:
-        return planId; // フォールバック
-    }
-  }
-
   /// 使用量状況表示メソッド
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
@@ -239,7 +219,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           barrierDismissible: true,
           builder: (context) => PresetDialogs.usageStatus(
             context: context,
-            planName: _getLocalizedPlanName(context, plan.id),
+            planName: context.l10n.localizedPlanName(plan.id),
             planId: plan.id,
             used: used.clamp(0, limit),
             limit: limit,

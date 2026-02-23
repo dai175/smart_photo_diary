@@ -59,4 +59,13 @@ extension LocalizationFormattingX on AppLocalizations {
         locale: localeName,
         decimalDigits: decimalDigits,
       );
+
+  /// プランIDに基づいてローカライズされたプラン名を取得
+  String localizedPlanName(String planId) => switch (planId) {
+    SubscriptionConstants.basicPlanId => planBasicSubtitle,
+    SubscriptionConstants.premiumMonthlyPlanId => settingsPremiumMonthlyTitle,
+    SubscriptionConstants.premiumYearlyPlanId => settingsPremiumYearlyTitle,
+    // Unknown plan ID. Update this method when new plans are added.
+    _ => planId,
+  };
 }

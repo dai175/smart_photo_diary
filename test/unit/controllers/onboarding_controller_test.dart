@@ -33,6 +33,10 @@ void main() {
       test('isLastPageはfalse', () {
         expect(controller.isLastPage, isFalse);
       });
+
+      test('pageCountは4', () {
+        expect(controller.pageCount, 4);
+      });
     });
 
     group('setCurrentPage', () {
@@ -59,14 +63,14 @@ void main() {
     });
 
     group('isLastPage', () {
-      test('ページ4でtrueを返す', () {
-        controller.setCurrentPage(4);
+      test('ページ3でtrueを返す', () {
+        controller.setCurrentPage(3);
 
         expect(controller.isLastPage, isTrue);
       });
 
-      test('ページ3でfalseを返す', () {
-        controller.setCurrentPage(3);
+      test('ページ2でfalseを返す', () {
+        controller.setCurrentPage(2);
 
         expect(controller.isLastPage, isFalse);
       });

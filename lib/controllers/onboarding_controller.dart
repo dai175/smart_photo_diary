@@ -9,7 +9,7 @@ import '../services/interfaces/settings_service_interface.dart';
 
 /// OnboardingScreen の状態管理コントローラー
 class OnboardingController extends ChangeNotifier {
-  static const int _lastPageIndex = 4;
+  static const int _lastPageIndex = 3;
 
   int _currentPage = 0;
   bool _isProcessing = false;
@@ -21,6 +21,7 @@ class OnboardingController extends ChangeNotifier {
   bool get isProcessing => _isProcessing;
   bool get isLastPage => _currentPage == _lastPageIndex;
   bool get isFirstPage => _currentPage == 0;
+  int get pageCount => _lastPageIndex + 1;
 
   @override
   void dispose() {

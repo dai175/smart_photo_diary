@@ -55,84 +55,68 @@ void main() {
 
   group('OnboardingScreen', () {
     group('Initial display', () {
-      testWidgets('shows welcome page (first page) on launch', (
+      testWidgets('shows philosophy page (first page) on launch', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Welcome page should be visible
-        expect(find.text('Welcome to\nSmart Photo Diary'), findsOneWidget);
+        // Philosophy page should be visible
+        expect(
+          find.text('Your photos\nalready hold the story.'),
+          findsOneWidget,
+        );
       });
 
-      testWidgets('shows page indicator with 5 dots', (
+      testWidgets('shows page indicator with 4 dots', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // 5 AnimatedContainers for the page indicator dots
-        expect(find.byType(AnimatedContainer), findsNWidgets(5));
+        // 4 AnimatedContainers for the page indicator dots
+        expect(find.byType(AnimatedContainer), findsNWidgets(4));
       });
     });
 
     group('Page navigation', () {
-      testWidgets('tapping Next navigates to page 2', (
+      testWidgets('tapping Begin navigates to experience page', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Tap Next button
-        await tester.tap(find.text('Next'));
+        // Tap Begin button
+        await tester.tap(find.text('Begin'));
         await tester.pumpAndSettle();
 
-        // Page 2 shows the three-steps content
-        expect(find.text('Create your diary in three steps'), findsOneWidget);
+        // Experience page should be visible
+        expect(find.text('Relive your day in seconds.'), findsOneWidget);
       });
 
-      testWidgets('Back button appears from page 2 onwards', (
+      testWidgets('can navigate through all 4 pages', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Initially no Back button
-        expect(find.text('Back'), findsNothing);
+        // Page 1: Philosophy -> tap Begin
+        await tester.tap(find.text('Begin'));
+        await tester.pumpAndSettle();
 
-        // Navigate to page 2
+        // Page 2: Experience -> tap Next
+        expect(find.text('Relive your day in seconds.'), findsOneWidget);
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
 
-        // Back button should appear
-        expect(find.text('Back'), findsOneWidget);
-      });
-
-      testWidgets('can navigate through all 5 pages with Next', (
-        WidgetTester tester,
-      ) async {
-        await tester.pumpWidget(buildOnboardingScreen());
+        // Page 3: Trust -> tap Continue
+        expect(find.text('Private by design.'), findsOneWidget);
+        await tester.tap(find.text('Continue'));
         await tester.pumpAndSettle();
 
-        // Page 1 -> 2
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-
-        // Page 2 -> 3
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-
-        // Page 3 -> 4
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-
-        // Page 4 -> 5 (last page)
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-
-        // Last page shows "Get started" instead of "Next"
-        expect(find.text('Get started'), findsOneWidget);
-        expect(find.text('Next'), findsNothing);
+        // Page 4: Permission (last page)
+        expect(find.text('Start with today.'), findsOneWidget);
+        expect(find.text('Create my first diary'), findsOneWidget);
       });
 
       testWidgets('swipe gesture navigates between pages', (
@@ -145,13 +129,13 @@ void main() {
         await tester.drag(find.byType(PageView), const Offset(-400, 0));
         await tester.pumpAndSettle();
 
-        // Should now see page 2 content
-        expect(find.text('Create your diary in three steps'), findsOneWidget);
+        // Should now see experience page content
+        expect(find.text('Relive your day in seconds.'), findsOneWidget);
       });
     });
 
     group('Skip button', () {
-      testWidgets('is visible on pages 0-3 but not on page 4', (
+      testWidgets('is visible on pages 0-2 but not on page 3', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
@@ -160,9 +144,10 @@ void main() {
         // Skip visible on page 0
         expect(find.text('Skip'), findsOneWidget);
 
-        // Navigate to page 4 (last page)
-        for (int i = 0; i < 4; i++) {
-          await tester.tap(find.text('Next'));
+        // Navigate to page 3 (last page)
+        final ctaTexts = ['Begin', 'Next', 'Continue'];
+        for (int i = 0; i < 3; i++) {
+          await tester.tap(find.text(ctaTexts[i]));
           await tester.pumpAndSettle();
         }
 
@@ -173,7 +158,7 @@ void main() {
 
     group('Completion flow', () {
       testWidgets(
-        'tapping Get started on last page calls completion services',
+        'tapping Create my first diary on last page calls completion services',
         (WidgetTester tester) async {
           // Block requestPermission so navigation to HomeScreen never happens
           // (avoids pending-timer issues from HomeScreen initialization).
@@ -185,13 +170,14 @@ void main() {
           await tester.pumpAndSettle();
 
           // Navigate to last page
-          for (int i = 0; i < 4; i++) {
-            await tester.tap(find.text('Next'));
+          final ctaTexts = ['Begin', 'Next', 'Continue'];
+          for (int i = 0; i < 3; i++) {
+            await tester.tap(find.text(ctaTexts[i]));
             await tester.pumpAndSettle();
           }
 
-          // Tap Get started
-          await tester.tap(find.text('Get started'));
+          // Tap Create my first diary
+          await tester.tap(find.text('Create my first diary'));
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
@@ -218,24 +204,6 @@ void main() {
 
         // Settings service should be called
         verify(() => mockSettings.setFirstLaunchCompleted()).called(1);
-      });
-
-      testWidgets('Back button navigates to previous page', (
-        WidgetTester tester,
-      ) async {
-        await tester.pumpWidget(buildOnboardingScreen());
-        await tester.pumpAndSettle();
-
-        // Navigate to page 2
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-
-        // Tap Back
-        await tester.tap(find.text('Back'));
-        await tester.pumpAndSettle();
-
-        // Should return to page 1
-        expect(find.text('Welcome to\nSmart Photo Diary'), findsOneWidget);
       });
     });
   });
