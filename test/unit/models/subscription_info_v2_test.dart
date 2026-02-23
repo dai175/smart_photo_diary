@@ -276,7 +276,7 @@ void main() {
       );
       final info = SubscriptionInfoV2.fromStatus(status);
 
-      expect(info.getLocalizedPlanDisplayName('ja'), 'ベーシック');
+      expect(info.getLocalizedPlanDisplayName('ja'), 'Basic');
       expect(info.getLocalizedPlanDisplayName('en'), 'Basic');
     });
 
@@ -289,7 +289,7 @@ void main() {
       );
       final info = SubscriptionInfoV2.fromStatus(status);
 
-      expect(info.getLocalizedPlanDisplayName('ja'), 'プレミアム（月額）');
+      expect(info.getLocalizedPlanDisplayName('ja'), 'Premium（月額）');
       expect(info.getLocalizedPlanDisplayName('en'), 'Premium (monthly)');
     });
 

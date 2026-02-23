@@ -236,11 +236,11 @@ class SubscriptionInfoV2 {
     // PlanFactoryで作られたプランのIDに基づいて適切な表示名を返す
     switch (currentPlan.id) {
       case 'basic':
-        return locale == 'ja' ? 'ベーシック' : 'Basic';
+        return 'Basic';
       case 'premium_monthly':
-        return locale == 'ja' ? 'プレミアム（月額）' : 'Premium (monthly)';
+        return locale == 'ja' ? 'Premium（月額）' : 'Premium (monthly)';
       case 'premium_yearly':
-        return locale == 'ja' ? 'プレミアム（年額）' : 'Premium (yearly)';
+        return locale == 'ja' ? 'Premium（年額）' : 'Premium (yearly)';
       default:
         return currentPlan.displayName; // フォールバック
     }
