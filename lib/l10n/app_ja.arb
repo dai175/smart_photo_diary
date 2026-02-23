@@ -715,10 +715,17 @@
       }
     }
   },
-  "currentPlanStoriesLabel": "今月: {limit}件の日記",
+  "currentPlanStoriesLabel": "今月の日記",
   "@currentPlanStoriesLabel": {
-    "description": "月間日記制限の表示",
+    "description": "月間日記制限行のラベル"
+  },
+  "currentPlanStoriesValue": "{used} / {limit}",
+  "@currentPlanStoriesValue": {
+    "description": "月間日記の使用量と制限の表示",
     "placeholders": {
+      "used": {
+        "type": "int"
+      },
       "limit": {
         "type": "int"
       }
@@ -749,7 +756,7 @@
   "@usageStatusUsageLabel": {
     "description": "使用量セクションのラベル"
   },
-  "usageStatusUsageValue": "{used} / {limit}件",
+  "usageStatusUsageValue": "{used} / {limit}",
   "@usageStatusUsageValue": {
     "description": "使用済み回数と上限回数を表示する文",
     "placeholders": {
@@ -1120,7 +1127,7 @@
   "@onboardingProcessing": {
     "description": "オンボーディング完了処理中の表示文"
   },
-  "planBasicSubtitle": "無料プラン",
+  "planBasicSubtitle": "ベーシック",
   "@planBasicSubtitle": {
     "description": "Basicプランのサブタイトル"
   },

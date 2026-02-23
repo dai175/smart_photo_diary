@@ -715,10 +715,17 @@
       }
     }
   },
-  "currentPlanStoriesLabel": "This month: {limit} stories",
+  "currentPlanStoriesLabel": "Stories this month",
   "@currentPlanStoriesLabel": {
-    "description": "Shows the monthly story limit",
+    "description": "Label for the monthly story limit row"
+  },
+  "currentPlanStoriesValue": "{used} / {limit}",
+  "@currentPlanStoriesValue": {
+    "description": "Value showing the monthly story usage and limit",
     "placeholders": {
+      "used": {
+        "type": "int"
+      },
       "limit": {
         "type": "int"
       }
@@ -749,7 +756,7 @@
   "@usageStatusUsageLabel": {
     "description": "Label for the usage amount section"
   },
-  "usageStatusUsageValue": "{used} / {limit} stories",
+  "usageStatusUsageValue": "{used} / {limit}",
   "@usageStatusUsageValue": {
     "description": "Displays how many generations were used versus the limit",
     "placeholders": {
@@ -1120,7 +1127,7 @@
   "@onboardingProcessing": {
     "description": "Label shown while onboarding completion is processing"
   },
-  "planBasicSubtitle": "Free plan",
+  "planBasicSubtitle": "Basic",
   "@planBasicSubtitle": {
     "description": "Subtitle for the Basic plan"
   },
