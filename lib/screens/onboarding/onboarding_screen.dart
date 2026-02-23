@@ -76,9 +76,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // スキップボタン（最後のページ以外で表示）
-                if (!_controller.isLastPage)
-                  Align(
+                // スキップボタン（最後のページ以外で表示、空間は常に確保）
+                Visibility(
+                  visible: !_controller.isLastPage,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: Align(
                     alignment: Alignment.topRight,
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.md),
@@ -96,9 +100,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                     ),
-                  )
-                else
-                  const SizedBox(height: AppSpacing.xxxl),
+                  ),
+                ),
 
                 // ページビュー
                 Expanded(
