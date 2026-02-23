@@ -986,7 +986,7 @@
   "@diaryPreviewGeneratingDiaryTitle": {
     "description": "Title shown while the AI is generating the diary"
   },
-  "diaryPreviewGeneratingDiaryDescription": "AI is analyzing your photos",
+  "diaryPreviewGeneratingDiaryDescription": "Writing your memory…",
   "@diaryPreviewGeneratingDiaryDescription": {
     "description": "Description shown while the AI is generating the diary"
   },
@@ -1508,7 +1508,7 @@
   "@promptContextInputHint": {
     "description": "Hint for the context text input"
   },
-  "promptContextInputHelper": "Helps the AI understand the situation beyond the photo",
+  "promptContextInputHelper": "Your words make the story richer",
   "@promptContextInputHelper": {
     "description": "Helper text for the context text input"
   },

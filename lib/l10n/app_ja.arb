@@ -986,7 +986,7 @@
   "@diaryPreviewGeneratingDiaryTitle": {
     "description": "日記生成中に表示するタイトル"
   },
-  "diaryPreviewGeneratingDiaryDescription": "AIがあなたの写真を分析しています",
+  "diaryPreviewGeneratingDiaryDescription": "思い出を言葉にしています…",
   "@diaryPreviewGeneratingDiaryDescription": {
     "description": "日記生成中に表示する説明文"
   },
@@ -1508,7 +1508,7 @@
   "@promptContextInputHint": {
     "description": "状況テキスト入力のヒント"
   },
-  "promptContextInputHelper": "AIが写真の状況をより深く理解できます",
+  "promptContextInputHelper": "あなたの言葉が物語をより豊かにします",
   "@promptContextInputHelper": {
     "description": "状況テキスト入力のヘルパーテキスト"
   },
