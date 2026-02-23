@@ -598,9 +598,14 @@
   "@settingsPremiumYearlyTitle": {
     "description": "Label for the yearly premium plan"
   },
-  "settingsPremiumPlanFeatures": "Includes 100 stories per month, access to the past year of photos, and all writing styles.",
+  "settingsPremiumPlanFeatures": "Includes {limit} stories per month, access to the past year of photos, and all writing styles.",
   "@settingsPremiumPlanFeatures": {
-    "description": "Description of premium plan benefits"
+    "description": "Description of premium plan benefits",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "settingsSubscriptionAutoRenewTitle": "About auto-renewal",
   "@settingsSubscriptionAutoRenewTitle": {
@@ -1523,10 +1528,6 @@
   "@lockedPhotoDialogMessage": {
     "description": "Message for the locked photo upgrade dialog"
   },
-  "lockedPhotoDialogCta": "Unlock Premium",
-  "@lockedPhotoDialogCta": {
-    "description": "CTA button text for the locked photo upgrade dialog"
-  },
   "commonNotNow": "Not now",
   "@commonNotNow": {
     "description": "Generic dismiss button label"
@@ -1535,9 +1536,14 @@
   "@premiumBulletPhotos": {
     "description": "Premium bullet point: photo access"
   },
-  "premiumBulletStories": "100 stories per month",
+  "premiumBulletStories": "{limit} stories per month",
   "@premiumBulletStories": {
-    "description": "Premium bullet point: story limit"
+    "description": "Premium bullet point: story limit",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "premiumBulletStyles": "All writing styles",
   "@premiumBulletStyles": {

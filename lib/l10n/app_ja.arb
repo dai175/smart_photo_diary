@@ -598,9 +598,14 @@
   "@settingsPremiumYearlyTitle": {
     "description": "年額プレミアムプランのラベル"
   },
-  "settingsPremiumPlanFeatures": "月100件の日記作成、過去1年の写真、全ライティングスタイルが利用できます。",
+  "settingsPremiumPlanFeatures": "月{limit}件の日記作成、過去1年の写真、全ライティングスタイルが利用できます。",
   "@settingsPremiumPlanFeatures": {
-    "description": "プレミアムプランの特典説明"
+    "description": "プレミアムプランの特典説明",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "settingsSubscriptionAutoRenewTitle": "自動更新について",
   "@settingsSubscriptionAutoRenewTitle": {
@@ -1523,10 +1528,6 @@
   "@lockedPhotoDialogMessage": {
     "description": "ロック写真タップ時のアップグレードダイアログ本文"
   },
-  "lockedPhotoDialogCta": "Premiumを解放",
-  "@lockedPhotoDialogCta": {
-    "description": "ロック写真タップ時のアップグレードダイアログCTAボタン"
-  },
   "commonNotNow": "今はしない",
   "@commonNotNow": {
     "description": "後回しにするボタンの共通ラベル"
@@ -1535,9 +1536,14 @@
   "@premiumBulletPhotos": {
     "description": "Premium箇条書き: 写真アクセス"
   },
-  "premiumBulletStories": "月100件の日記",
+  "premiumBulletStories": "月{limit}件の日記",
   "@premiumBulletStories": {
-    "description": "Premium箇条書き: 日記制限"
+    "description": "Premium箇条書き: 日記制限",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
   },
   "premiumBulletStyles": "全ライティングスタイル",
   "@premiumBulletStyles": {

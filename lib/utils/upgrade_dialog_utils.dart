@@ -150,7 +150,7 @@ class UpgradeDialogUtils {
   static Widget _buildPremiumBulletList(BuildContext context) {
     final bullets = [
       context.l10n.premiumBulletPhotos,
-      context.l10n.premiumBulletStories,
+      context.l10n.premiumBulletStories(SubscriptionConstants.premiumMonthlyAiLimit),
       context.l10n.premiumBulletStyles,
     ];
 
