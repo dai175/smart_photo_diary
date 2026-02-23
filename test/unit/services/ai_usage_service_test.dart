@@ -1,13 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/ai_usage_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import '../helpers/hive_test_helpers.dart';
 
+class MockLoggingService extends Mock implements ILoggingService {}
+
 void main() {
   late AiUsageService usageService;
   late SubscriptionStateService stateService;
+  late MockLoggingService mockLogger;
 
   setUpAll(() async {
     await HiveTestHelpers.setupHiveForTesting();
@@ -15,9 +20,13 @@ void main() {
 
   setUp(() async {
     await HiveTestHelpers.clearSubscriptionBox();
-    stateService = SubscriptionStateService();
+    mockLogger = MockLoggingService();
+    stateService = SubscriptionStateService(logger: mockLogger);
     await stateService.initialize();
-    usageService = AiUsageService(stateService: stateService);
+    usageService = AiUsageService(
+      stateService: stateService,
+      logger: mockLogger,
+    );
   });
 
   tearDown(() async {

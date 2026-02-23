@@ -1,8 +1,12 @@
+import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
 import 'package:smart_photo_diary/services/ai_usage_service.dart';
 import 'package:smart_photo_diary/services/feature_access_service.dart';
 import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+
+class _MockLoggingService extends Mock implements ILoggingService {}
 
 /// テスト用のサブスクリプションサービス構築結果
 ///
@@ -35,13 +39,23 @@ class SubscriptionTestHelpers {
   /// 各サブサービスを構築し、Facade に注入する。
   static Future<SubscriptionServiceTestBundle> createInitializedBundle() async {
     // 1. SubscriptionStateService を構築・初期化
-    final stateService = SubscriptionStateService();
+    final mockLogger = _MockLoggingService();
+    final stateService = SubscriptionStateService(logger: mockLogger);
     await stateService.initialize();
 
     // 2. 各サブサービスを構築（全て stateService に依存）
-    final usageService = AiUsageService(stateService: stateService);
-    final accessService = FeatureAccessService(stateService: stateService);
-    final purchaseService = InAppPurchaseService(stateService: stateService);
+    final usageService = AiUsageService(
+      stateService: stateService,
+      logger: mockLogger,
+    );
+    final accessService = FeatureAccessService(
+      stateService: stateService,
+      logger: mockLogger,
+    );
+    final purchaseService = InAppPurchaseService(
+      stateService: stateService,
+      logger: mockLogger,
+    );
 
     // 3. Facade を構築
     final subscriptionService = SubscriptionService(

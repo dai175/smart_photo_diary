@@ -1,15 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
+import 'package:smart_photo_diary/core/service_locator.dart';
 import '../helpers/hive_test_helpers.dart';
+
+class MockLoggingService extends Mock implements ILoggingService {}
 
 void main() {
   late SubscriptionStateService stateService;
+  late MockLoggingService mockLogger;
 
   setUpAll(() async {
     await HiveTestHelpers.setupHiveForTesting();
@@ -17,13 +23,17 @@ void main() {
 
   setUp(() async {
     await HiveTestHelpers.clearSubscriptionBox();
-    stateService = SubscriptionStateService();
+    mockLogger = MockLoggingService();
+    ServiceLocator().clear();
+    ServiceLocator().registerSingleton<ILoggingService>(mockLogger);
+    stateService = SubscriptionStateService(logger: mockLogger);
   });
 
   tearDown(() async {
     if (stateService.isInitialized) {
       await stateService.dispose();
     }
+    ServiceLocator().clear();
   });
 
   tearDownAll(() async {
@@ -114,7 +124,7 @@ void main() {
     });
 
     test('未初期化時は Failure を返す', () async {
-      final uninitService = SubscriptionStateService();
+      final uninitService = SubscriptionStateService(logger: mockLogger);
       final result = await uninitService.updateStatus(
         SubscriptionStatus(planId: 'basic'),
       );
