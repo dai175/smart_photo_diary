@@ -586,11 +586,11 @@
   "@settingsSubscriptionInfoTitle": {
     "description": "サブスクリプション法的情報セクションのタイトル"
   },
-  "settingsPremiumMonthlyTitle": "プレミアム（月額）",
+  "settingsPremiumMonthlyTitle": "Premium（月額）",
   "@settingsPremiumMonthlyTitle": {
     "description": "月額プレミアムプランのラベル"
   },
-  "settingsPremiumYearlyTitle": "プレミアム（年額）",
+  "settingsPremiumYearlyTitle": "Premium（年額）",
   "@settingsPremiumYearlyTitle": {
     "description": "年額プレミアムプランのラベル"
   },
@@ -1127,7 +1127,7 @@
   "@onboardingProcessing": {
     "description": "オンボーディング完了処理中の表示文"
   },
-  "planBasicSubtitle": "ベーシック",
+  "planBasicSubtitle": "Basic",
   "@planBasicSubtitle": {
     "description": "Basicプランのサブタイトル"
   },
