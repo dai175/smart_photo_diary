@@ -424,7 +424,7 @@
   "@settingsSubscriptionExpiryLabel": {
     "description": "サブスクリプションの有効期限ラベル"
   },
-  "settingsUpgradeToPremium": "Premiumにアップグレード",
+  "settingsUpgradeToPremium": "Premiumを解放",
   "@settingsUpgradeToPremium": {
     "description": "Premiumプランへアップグレードするボタン文言"
   },
@@ -667,7 +667,7 @@
   "@errorSeverityCritical": {
     "description": "重大レベルのエラー種別ラベル"
   },
-  "commonUpgrade": "アップグレード",
+  "commonUpgrade": "解放",
   "@commonUpgrade": {
     "description": "アップグレードボタン共通文言"
   },
@@ -679,7 +679,7 @@
   "@usageLimitDialogTitle": {
     "description": "AI利用上限に達した際のダイアログタイトル"
   },
-  "usageLimitDialogBody": "もっと書きたいですか？アップグレードすると月{limit}件の日記作成と過去1年の写真が利用できます。",
+  "usageLimitDialogBody": "もっと書きたいですか？Premiumを解放すると月{limit}件の日記作成と過去1年の写真が利用できます。",
   "@usageLimitDialogBody": {
     "description": "制限到達時のアップグレード誘導本文",
     "placeholders": {
@@ -713,7 +713,7 @@
       }
     }
   },
-  "usageLimitDialogPremiumHint": "Premiumプランなら月間{limit}回まで利用できます",
+  "usageLimitDialogPremiumHint": "Premiumを解放すると月{limit}件の日記を作成できます",
   "@usageLimitDialogPremiumHint": {
     "description": "Premiumプランへのアップグレードを促す一文",
     "placeholders": {
@@ -769,7 +769,7 @@
   "@usageStatusUsageLabel": {
     "description": "使用量セクションのラベル"
   },
-  "usageStatusUsageValue": "{used} / {limit}回",
+  "usageStatusUsageValue": "{used} / {limit}件",
   "@usageStatusUsageValue": {
     "description": "使用済み回数と上限回数を表示する文",
     "placeholders": {
@@ -785,7 +785,7 @@
   "@usageStatusRemainingLabel": {
     "description": "残り回数セクションのラベル"
   },
-  "usageStatusRemainingValue": "{remaining}回",
+  "usageStatusRemainingValue": "{remaining}件",
   "@usageStatusRemainingValue": {
     "description": "残り回数を表示する文",
     "placeholders": {
@@ -974,7 +974,7 @@
   "@diaryPreviewUsageLimitTitle": {
     "description": "AI月間制限到達時のフォールバックダイアログタイトル"
   },
-  "diaryPreviewUsageLimitMessage": "AI生成の月間制限に達したため、次回のリセットまで新しい日記を生成できません。",
+  "diaryPreviewUsageLimitMessage": "今月の上限に達しました。次回のリセットまでお待ちいただくか、Premiumを解放してください。",
   "@diaryPreviewUsageLimitMessage": {
     "description": "AI月間制限到達時のフォールバックダイアログ本文"
   },
@@ -1398,7 +1398,7 @@
   "@subscriptionUsageWarningLimitReached": {
     "description": "AI生成制限に達した時の警告メッセージ"
   },
-  "subscriptionUpgradeRecommendationLimit": "Premiumプランにアップグレードすると月間{limit}回まで利用できます",
+  "subscriptionUpgradeRecommendationLimit": "Premiumを解放すると月{limit}件の日記を作成できます",
   "@subscriptionUpgradeRecommendationLimit": {
     "description": "具体的な制限回数を示すアップグレード推奨メッセージ",
     "placeholders": {
@@ -1407,7 +1407,7 @@
       }
     }
   },
-  "subscriptionUpgradeRecommendationGeneral": "より多くAI生成を利用される場合はPremiumプランがおすすめです",
+  "subscriptionUpgradeRecommendationGeneral": "Premiumを解放するとより多くの日記と過去1年の写真が利用できます",
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "一般的なアップグレード推奨メッセージ"
   },
@@ -1536,11 +1536,11 @@
   "@diaryDetailCopiedToClipboard": {
     "description": "日記コンテンツをクリップボードにコピーした際のスナックバーメッセージ"
   },
-  "lockedPhotoDialogTitle": "過去の日記を振り返ろう。",
+  "lockedPhotoDialogTitle": "過去1年を振り返ろう。",
   "@lockedPhotoDialogTitle": {
     "description": "ロック写真タップ時のアップグレードダイアログタイトル"
   },
-  "lockedPhotoDialogMessage": "アップグレードすると過去1年の写真にアクセスし、日記を作成できます。",
+  "lockedPhotoDialogMessage": "Premiumを解放すると過去1年の写真にアクセスし、日記を作成できます。",
   "@lockedPhotoDialogMessage": {
     "description": "ロック写真タップ時のアップグレードダイアログ本文"
   },
@@ -1572,7 +1572,7 @@
   "@settingsSubscriptionStoriesLabel": {
     "description": "設定画面の月間日記数ラベル"
   },
-  "subscriptionUpgradeRecommendationTimeAccess": "Premiumにアップグレードすると過去1年の写真にアクセスし、月{limit}件の日記を作成できます。",
+  "subscriptionUpgradeRecommendationTimeAccess": "Premiumを解放すると過去1年の写真にアクセスし、月{limit}件の日記を作成できます。",
   "@subscriptionUpgradeRecommendationTimeAccess": {
     "description": "時間軸フォーカスのアップグレード推奨メッセージ",
     "placeholders": {
@@ -1580,5 +1580,9 @@
         "type": "int"
       }
     }
+  },
+  "timelineLockedGroupLabel": "Premiumで利用可能",
+  "@timelineLockedGroupLabel": {
+    "description": "ロック写真グループのタイムラインヘッダーに表示するラベル"
   }
 }

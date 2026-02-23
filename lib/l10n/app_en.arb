@@ -424,7 +424,7 @@
   "@settingsSubscriptionExpiryLabel": {
     "description": "Label for subscription expiry date"
   },
-  "settingsUpgradeToPremium": "Upgrade to Premium",
+  "settingsUpgradeToPremium": "Unlock Premium",
   "@settingsUpgradeToPremium": {
     "description": "Button text for upgrading to the Premium plan"
   },
@@ -667,7 +667,7 @@
   "@errorSeverityCritical": {
     "description": "Error severity label for critical errors"
   },
-  "commonUpgrade": "Upgrade",
+  "commonUpgrade": "Unlock",
   "@commonUpgrade": {
     "description": "Generic upgrade button label"
   },
@@ -679,7 +679,7 @@
   "@usageLimitDialogTitle": {
     "description": "Title for the dialog shown when AI usage has reached the monthly limit"
   },
-  "usageLimitDialogBody": "Want to keep writing? Upgrade to create up to {limit} stories per month and revisit the past year.",
+  "usageLimitDialogBody": "Want to keep writing? Unlock Premium to create up to {limit} stories per month and revisit the past year.",
   "@usageLimitDialogBody": {
     "description": "Body text encouraging upgrade when limit is reached",
     "placeholders": {
@@ -713,7 +713,7 @@
       }
     }
   },
-  "usageLimitDialogPremiumHint": "The Premium plan allows up to {limit} generations per month.",
+  "usageLimitDialogPremiumHint": "Unlock Premium for up to {limit} stories per month.",
   "@usageLimitDialogPremiumHint": {
     "description": "Hint encouraging upgrade to Premium plan",
     "placeholders": {
@@ -769,7 +769,7 @@
   "@usageStatusUsageLabel": {
     "description": "Label for the usage amount section"
   },
-  "usageStatusUsageValue": "{used} / {limit} times",
+  "usageStatusUsageValue": "{used} / {limit} stories",
   "@usageStatusUsageValue": {
     "description": "Displays how many generations were used versus the limit",
     "placeholders": {
@@ -785,7 +785,7 @@
   "@usageStatusRemainingLabel": {
     "description": "Label for remaining counts"
   },
-  "usageStatusRemainingValue": "{remaining} times",
+  "usageStatusRemainingValue": "{remaining} stories",
   "@usageStatusRemainingValue": {
     "description": "Displays the remaining generation count",
     "placeholders": {
@@ -974,7 +974,7 @@
   "@diaryPreviewUsageLimitTitle": {
     "description": "Fallback dialog title shown when the AI monthly limit is reached"
   },
-  "diaryPreviewUsageLimitMessage": "You've reached the monthly AI generation limit. Please try again after the cycle resets or upgrade your plan.",
+  "diaryPreviewUsageLimitMessage": "You've reached the monthly limit. Please try again after the cycle resets or unlock Premium.",
   "@diaryPreviewUsageLimitMessage": {
     "description": "Fallback dialog message shown when the AI monthly limit is reached"
   },
@@ -1398,7 +1398,7 @@
   "@subscriptionUsageWarningLimitReached": {
     "description": "Warning message shown when AI generation limit is reached"
   },
-  "subscriptionUpgradeRecommendationLimit": "Upgrade to Premium to use up to {limit} generations per month.",
+  "subscriptionUpgradeRecommendationLimit": "Unlock Premium to create up to {limit} stories per month.",
   "@subscriptionUpgradeRecommendationLimit": {
     "description": "Upgrade recommendation message with specific limit",
     "placeholders": {
@@ -1407,7 +1407,7 @@
       }
     }
   },
-  "subscriptionUpgradeRecommendationGeneral": "For more AI generations, we recommend the Premium plan.",
+  "subscriptionUpgradeRecommendationGeneral": "Unlock Premium for more stories and the past year of photos.",
   "@subscriptionUpgradeRecommendationGeneral": {
     "description": "General upgrade recommendation message"
   },
@@ -1536,11 +1536,11 @@
   "@diaryDetailCopiedToClipboard": {
     "description": "Snack bar message when diary content is copied to clipboard"
   },
-  "lockedPhotoDialogTitle": "Revisit earlier days.",
+  "lockedPhotoDialogTitle": "Revisit the past year.",
   "@lockedPhotoDialogTitle": {
     "description": "Title for the locked photo upgrade dialog"
   },
-  "lockedPhotoDialogMessage": "Upgrade to access the past year of your photos and turn them into stories.",
+  "lockedPhotoDialogMessage": "Unlock Premium to access the past year of your photos and turn them into stories.",
   "@lockedPhotoDialogMessage": {
     "description": "Message for the locked photo upgrade dialog"
   },
@@ -1572,7 +1572,7 @@
   "@settingsSubscriptionStoriesLabel": {
     "description": "Label for monthly story count in settings"
   },
-  "subscriptionUpgradeRecommendationTimeAccess": "Upgrade to Premium to revisit the past year and create up to {limit} stories per month.",
+  "subscriptionUpgradeRecommendationTimeAccess": "Unlock Premium to revisit the past year and create up to {limit} stories per month.",
   "@subscriptionUpgradeRecommendationTimeAccess": {
     "description": "Time-access focused upgrade recommendation",
     "placeholders": {
@@ -1580,5 +1580,9 @@
         "type": "int"
       }
     }
+  },
+  "timelineLockedGroupLabel": "Available with Premium",
+  "@timelineLockedGroupLabel": {
+    "description": "Label shown on timeline headers for locked photo groups"
   }
 }

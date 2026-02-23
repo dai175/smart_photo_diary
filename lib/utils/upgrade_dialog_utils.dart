@@ -121,12 +121,6 @@ class UpgradeDialogUtils {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                dialogContext.l10n.settingsPremiumPlanFeatures,
-                style: AppTypography.bodyMedium,
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: AppSpacing.md),
               _buildPremiumBulletList(dialogContext),
               const SizedBox(height: AppSpacing.md),
               ...plans.map(

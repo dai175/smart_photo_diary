@@ -576,6 +576,10 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// スティッキーヘッダーを構築
   Widget _buildStickyHeader(TimelinePhotoGroup group) {
+    final isFullyLocked =
+        group.photos.isNotEmpty &&
+        group.photos.every((photo) => widget.controller.isPhotoLocked(photo));
+
     return Container(
       height: TimelineLayoutConstants.stickyHeaderHeight,
       width: double.infinity,
@@ -586,16 +590,26 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
       ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          group.displayName,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
+      child: Row(
+        children: [
+          Text(
+            group.displayName,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.left,
           ),
-          textAlign: TextAlign.left,
-        ),
+          if (isFullyLocked) ...[
+            const Spacer(),
+            Text(
+              context.l10n.timelineLockedGroupLabel,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
