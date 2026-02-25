@@ -168,25 +168,24 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
         );
       }
 
+      // Always update offset and pagination based on raw (unfiltered) count
+      _self._currentPhotoOffset += rawNewPhotos.length;
+      final reachedEnd = rawNewPhotos.length < requested;
+      _self._photoController.setHasMorePhotos(!reachedEnd);
+
       if (newPhotos.isNotEmpty) {
         final combined = <AssetEntity>[
           ..._self._photoController.photoAssets,
           ...newPhotos,
         ];
         _self._photoController.setPhotoAssetsPreservingSelection(combined);
-        // Use raw count for offset to avoid skipping photos
-        _self._currentPhotoOffset += rawNewPhotos.length;
-        final reachedEnd = rawNewPhotos.length < requested;
-        _self._photoController.setHasMorePhotos(!reachedEnd);
-      } else {
-        _self._photoController.setHasMorePhotos(false);
+      }
 
-        if (!showLoading) {
-          _self._logger.info(
-            'Preload finished: no more photos',
-            context: 'HomeScreen._preloadMorePhotos',
-          );
-        }
+      if (rawNewPhotos.isEmpty && !showLoading) {
+        _self._logger.info(
+          'Preload finished: no more photos',
+          context: 'HomeScreen._preloadMorePhotos',
+        );
       }
     } catch (e) {
       _self._logger.error(
