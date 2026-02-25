@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
@@ -82,9 +83,12 @@ class SettingsService implements ISettingsService {
     return ResultHelper.tryExecuteAsync(() async {
       final prefs = _preferences;
       if (prefs == null) {
-        throw StateError('SettingsService is not initialized');
+        throw const SettingsException('SettingsService is not initialized');
       }
-      await prefs.setInt(_photoTypeFilterKey, filter.index);
+      final saved = await prefs.setInt(_photoTypeFilterKey, filter.index);
+      if (!saved) {
+        throw const SettingsException('Failed to persist photo type filter');
+      }
       _photoTypeFilterNotifier.value = filter;
     }, context: 'SettingsService.setPhotoTypeFilter');
   }
@@ -113,7 +117,7 @@ class SettingsService implements ISettingsService {
     return ResultHelper.tryExecuteAsync(() async {
       final prefs = _preferences;
       if (prefs == null) {
-        throw StateError('SettingsService is not initialized');
+        throw const SettingsException('SettingsService is not initialized');
       }
       await prefs.setInt(_diaryLengthKey, length.index);
     }, context: 'SettingsService.setDiaryLength');
@@ -142,7 +146,7 @@ class SettingsService implements ISettingsService {
     return ResultHelper.tryExecuteAsync(() async {
       final prefs = _preferences;
       if (prefs == null) {
-        throw StateError('SettingsService is not initialized');
+        throw const SettingsException('SettingsService is not initialized');
       }
       await prefs.setInt(_themeKey, themeMode.index);
     }, context: 'SettingsService.setThemeMode');
@@ -161,7 +165,7 @@ class SettingsService implements ISettingsService {
     return ResultHelper.tryExecuteAsync(() async {
       final prefs = _preferences;
       if (prefs == null) {
-        throw StateError('SettingsService is not initialized');
+        throw const SettingsException('SettingsService is not initialized');
       }
       if (locale == null) {
         await prefs.remove(_localeKey);
@@ -191,7 +195,7 @@ class SettingsService implements ISettingsService {
     return ResultHelper.tryExecuteAsync(() async {
       final prefs = _preferences;
       if (prefs == null) {
-        throw StateError('SettingsService is not initialized');
+        throw const SettingsException('SettingsService is not initialized');
       }
       await prefs.setBool(_firstLaunchKey, false);
     }, context: 'SettingsService.setFirstLaunchCompleted');
