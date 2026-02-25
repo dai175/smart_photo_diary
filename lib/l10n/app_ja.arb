@@ -1572,5 +1572,21 @@
   "timelineLockedGroupLabel": "Premiumで利用可能",
   "@timelineLockedGroupLabel": {
     "description": "ロック写真グループのタイムラインヘッダーに表示するラベル"
+  },
+  "photoTypeFilterTitle": "表示する画像",
+  "@photoTypeFilterTitle": {
+    "description": "写真タイプフィルター設定タイトル"
+  },
+  "photoTypeFilterDialogTitle": "表示する画像を選択",
+  "@photoTypeFilterDialogTitle": {
+    "description": "写真タイプフィルター選択ダイアログタイトル"
+  },
+  "photoTypeFilterAll": "すべての画像",
+  "@photoTypeFilterAll": {
+    "description": "すべての画像オプション"
+  },
+  "photoTypeFilterPhotosOnly": "写真のみ",
+  "@photoTypeFilterPhotosOnly": {
+    "description": "写真のみオプション（スクリーンショット除外）"
   }
 }

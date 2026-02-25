@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/result/result.dart';
 import '../../models/diary_length.dart';
+import '../../models/photo_type_filter.dart';
 import '../../models/subscription_info_v2.dart';
 import '../../models/plans/plan.dart';
 
@@ -22,6 +23,19 @@ abstract class ISettingsService {
   /// - Success: void（設定完了）
   /// - Failure: [ServiceException] SharedPreferences書き込み失敗時
   Future<Result<void>> setDiaryLength(DiaryLength length);
+
+  /// 写真タイプフィルター変更通知用のValueNotifier
+  ValueNotifier<PhotoTypeFilter> get photoTypeFilterNotifier;
+
+  /// 現在の写真タイプフィルター設定
+  PhotoTypeFilter get photoTypeFilter;
+
+  /// 写真タイプフィルターを設定
+  ///
+  /// Returns:
+  /// - Success: void（設定完了）
+  /// - Failure: [ServiceException] SharedPreferences書き込み失敗時
+  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter);
 
   /// 現在のテーマモード
   ThemeMode get themeMode;

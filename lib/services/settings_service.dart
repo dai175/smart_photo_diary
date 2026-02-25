@@ -4,6 +4,7 @@ import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 import '../models/diary_length.dart';
+import '../models/photo_type_filter.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -24,7 +25,10 @@ class SettingsService implements ISettingsService {
   ISubscriptionService? _subscriptionService;
 
   static const String _localeKey = 'app_locale';
+  static const String _photoTypeFilterKey = 'photo_type_filter';
   final ValueNotifier<Locale?> _localeNotifier = ValueNotifier<Locale?>(null);
+  final ValueNotifier<PhotoTypeFilter> _photoTypeFilterNotifier =
+      ValueNotifier<PhotoTypeFilter>(PhotoTypeFilter.all);
 
   /// DI用の公開コンストラクタ
   SettingsService();
@@ -33,6 +37,7 @@ class SettingsService implements ISettingsService {
   Future<void> initialize() async {
     _preferences ??= await SharedPreferences.getInstance();
     _localeNotifier.value = _loadStoredLocale();
+    _photoTypeFilterNotifier.value = _loadStoredPhotoTypeFilter();
     _subscriptionService ??= await serviceLocator
         .getAsync<ISubscriptionService>();
   }
@@ -48,6 +53,37 @@ class SettingsService implements ISettingsService {
 
   @override
   ValueNotifier<Locale?> get localeNotifier => _localeNotifier;
+
+  @override
+  ValueNotifier<PhotoTypeFilter> get photoTypeFilterNotifier =>
+      _photoTypeFilterNotifier;
+
+  // 写真タイプフィルター
+  @override
+  PhotoTypeFilter get photoTypeFilter {
+    return ErrorHandler.safeExecuteSync(
+          () {
+            final index = _preferences?.getInt(_photoTypeFilterKey);
+            if (index == null ||
+                index < 0 ||
+                index >= PhotoTypeFilter.values.length) {
+              return PhotoTypeFilter.all;
+            }
+            return PhotoTypeFilter.values[index];
+          },
+          context: 'SettingsService.photoTypeFilter',
+          fallbackValue: PhotoTypeFilter.all,
+        ) ??
+        PhotoTypeFilter.all;
+  }
+
+  @override
+  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      await _preferences?.setInt(_photoTypeFilterKey, filter.index);
+      _photoTypeFilterNotifier.value = filter;
+    }, context: 'SettingsService.setPhotoTypeFilter');
+  }
 
   // 日記の長さ
   @override
@@ -145,6 +181,8 @@ class SettingsService implements ISettingsService {
   static const DiaryGenerationMode generationMode = DiaryGenerationMode.vision;
 
   Locale? _loadStoredLocale() => locale;
+
+  PhotoTypeFilter _loadStoredPhotoTypeFilter() => photoTypeFilter;
 
   static Locale? _parseLocale(String? value) {
     if (value == null || value.isEmpty) {
