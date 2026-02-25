@@ -1588,5 +1588,9 @@
   "photoTypeFilterPhotosOnly": "Photos only",
   "@photoTypeFilterPhotosOnly": {
     "description": "Photos only option (exclude screenshots)"
+  },
+  "settingsSaveError": "Failed to save settings. Please try again.",
+  "@settingsSaveError": {
+    "description": "Error message shown when settings save fails"
   }
 }

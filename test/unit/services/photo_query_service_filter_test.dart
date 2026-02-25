@@ -12,7 +12,13 @@ void main() {
     const emptyScreenshotIds = <String>{};
 
     setUp(() {
-      assets = List.generate(5, (_) => MockAssetEntity());
+      assets = List.generate(5, (i) {
+        final entity = MockAssetEntity();
+        when(() => entity.id).thenReturn('asset-$i');
+        when(() => entity.subtype).thenReturn(0);
+        when(() => entity.relativePath).thenReturn(null);
+        return entity;
+      });
     });
 
     test('all filter returns all assets unchanged', () {

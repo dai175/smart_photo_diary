@@ -62,14 +62,20 @@ class PhotoFilterSettingsSection extends StatelessWidget {
           (filter) => _getPhotoTypeFilterLabel(context, filter),
         );
 
+    if (!context.mounted) return;
+
     if (selected != null && selected != settingsService.photoTypeFilter) {
       final result = await settingsService.setPhotoTypeFilter(selected);
+      if (!context.mounted) return;
       if (result.isFailure) {
         logger.error(
           'Failed to update photo type filter preference',
           error: result.error,
           context: 'PhotoFilterSettingsSection',
         );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.settingsSaveError)));
         return;
       }
       onStateChanged();

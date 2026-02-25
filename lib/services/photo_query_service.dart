@@ -155,27 +155,18 @@ class PhotoQueryService {
     if (!Platform.isIOS) return {};
 
     try {
+      // PMDarwinPathFilterでスクリーンショットスマートアルバムを直接取得（ロケール非依存）
       final albums = await PhotoManager.getAssetPathList(
         type: RequestType.image,
+        pathFilterOption: const PMPathFilter(
+          darwin: PMDarwinPathFilter(
+            type: [PMDarwinAssetCollectionType.smartAlbum],
+            subType: [PMDarwinAssetCollectionSubtype.smartAlbumScreenshots],
+          ),
+        ),
       );
 
-      // スクリーンショットスマートアルバムを名前で探す（多言語対応）
-      final screenshotAlbumNames = {
-        'screenshots',
-        'スクリーンショット',
-        'bildschirmfotos',
-        "captures d'écran",
-        'capturas de pantalla',
-        '截屏',
-        '스크린샷',
-      };
-
-      final screenshotAlbum = albums
-          .where(
-            (album) => screenshotAlbumNames.contains(album.name.toLowerCase()),
-          )
-          .firstOrNull;
-
+      final screenshotAlbum = albums.firstOrNull;
       if (screenshotAlbum == null) return {};
 
       final count = await screenshotAlbum.assetCountAsync;
@@ -221,12 +212,13 @@ class PhotoQueryService {
     PhotoTypeFilter filter,
     Set<String> screenshotAssetIds,
   ) {
-    if (filter == PhotoTypeFilter.all) {
-      return assets;
-    }
-    return assets
-        .where((asset) => !_isScreenshot(asset, screenshotAssetIds))
-        .toList();
+    return switch (filter) {
+      PhotoTypeFilter.all => assets,
+      PhotoTypeFilter.photosOnly =>
+        assets
+            .where((asset) => !_isScreenshot(asset, screenshotAssetIds))
+            .toList(),
+    };
   }
 
   // =================================================================
