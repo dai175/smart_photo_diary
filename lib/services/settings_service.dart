@@ -80,7 +80,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setInt(_photoTypeFilterKey, filter.index);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw StateError('SettingsService is not initialized');
+      }
+      await prefs.setInt(_photoTypeFilterKey, filter.index);
       _photoTypeFilterNotifier.value = filter;
     }, context: 'SettingsService.setPhotoTypeFilter');
   }
@@ -107,7 +111,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setDiaryLength(DiaryLength length) async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setInt(_diaryLengthKey, length.index);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw StateError('SettingsService is not initialized');
+      }
+      await prefs.setInt(_diaryLengthKey, length.index);
     }, context: 'SettingsService.setDiaryLength');
   }
 
@@ -132,7 +140,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setInt(_themeKey, themeMode.index);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw StateError('SettingsService is not initialized');
+      }
+      await prefs.setInt(_themeKey, themeMode.index);
     }, context: 'SettingsService.setThemeMode');
   }
 
@@ -147,10 +159,14 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setLocale(Locale? locale) async {
     return ResultHelper.tryExecuteAsync(() async {
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw StateError('SettingsService is not initialized');
+      }
       if (locale == null) {
-        await _preferences?.remove(_localeKey);
+        await prefs.remove(_localeKey);
       } else {
-        await _preferences?.setString(_localeKey, _serializeLocale(locale));
+        await prefs.setString(_localeKey, _serializeLocale(locale));
       }
       _localeNotifier.value = locale;
     }, context: 'SettingsService.setLocale');
@@ -173,7 +189,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setFirstLaunchCompleted() async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setBool(_firstLaunchKey, false);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw StateError('SettingsService is not initialized');
+      }
+      await prefs.setBool(_firstLaunchKey, false);
     }, context: 'SettingsService.setFirstLaunchCompleted');
   }
 
