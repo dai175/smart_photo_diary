@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../core/result/result.dart';
 import '../core/result/result_extensions.dart';
 import '../models/diary_length.dart';
+import '../models/photo_type_filter.dart';
 import '../models/subscription_info_v2.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -24,7 +26,10 @@ class SettingsService implements ISettingsService {
   ISubscriptionService? _subscriptionService;
 
   static const String _localeKey = 'app_locale';
+  static const String _photoTypeFilterKey = 'photo_type_filter';
   final ValueNotifier<Locale?> _localeNotifier = ValueNotifier<Locale?>(null);
+  final ValueNotifier<PhotoTypeFilter> _photoTypeFilterNotifier =
+      ValueNotifier<PhotoTypeFilter>(PhotoTypeFilter.all);
 
   /// DI用の公開コンストラクタ
   SettingsService();
@@ -33,6 +38,7 @@ class SettingsService implements ISettingsService {
   Future<void> initialize() async {
     _preferences ??= await SharedPreferences.getInstance();
     _localeNotifier.value = _loadStoredLocale();
+    _photoTypeFilterNotifier.value = _loadStoredPhotoTypeFilter();
     _subscriptionService ??= await serviceLocator
         .getAsync<ISubscriptionService>();
   }
@@ -48,6 +54,44 @@ class SettingsService implements ISettingsService {
 
   @override
   ValueNotifier<Locale?> get localeNotifier => _localeNotifier;
+
+  @override
+  ValueNotifier<PhotoTypeFilter> get photoTypeFilterNotifier =>
+      _photoTypeFilterNotifier;
+
+  // 写真タイプフィルター
+  @override
+  PhotoTypeFilter get photoTypeFilter {
+    return ErrorHandler.safeExecuteSync(
+          () {
+            final index = _preferences?.getInt(_photoTypeFilterKey);
+            if (index == null ||
+                index < 0 ||
+                index >= PhotoTypeFilter.values.length) {
+              return PhotoTypeFilter.all;
+            }
+            return PhotoTypeFilter.values[index];
+          },
+          context: 'SettingsService.photoTypeFilter',
+          fallbackValue: PhotoTypeFilter.all,
+        ) ??
+        PhotoTypeFilter.all;
+  }
+
+  @override
+  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) async {
+    return ResultHelper.tryExecuteAsync(() async {
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw const SettingsException('SettingsService is not initialized');
+      }
+      final saved = await prefs.setInt(_photoTypeFilterKey, filter.index);
+      if (!saved) {
+        throw const SettingsException('Failed to persist photo type filter');
+      }
+      _photoTypeFilterNotifier.value = filter;
+    }, context: 'SettingsService.setPhotoTypeFilter');
+  }
 
   // 日記の長さ
   @override
@@ -71,7 +115,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setDiaryLength(DiaryLength length) async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setInt(_diaryLengthKey, length.index);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw const SettingsException('SettingsService is not initialized');
+      }
+      await prefs.setInt(_diaryLengthKey, length.index);
     }, context: 'SettingsService.setDiaryLength');
   }
 
@@ -96,7 +144,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setInt(_themeKey, themeMode.index);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw const SettingsException('SettingsService is not initialized');
+      }
+      await prefs.setInt(_themeKey, themeMode.index);
     }, context: 'SettingsService.setThemeMode');
   }
 
@@ -111,10 +163,14 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setLocale(Locale? locale) async {
     return ResultHelper.tryExecuteAsync(() async {
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw const SettingsException('SettingsService is not initialized');
+      }
       if (locale == null) {
-        await _preferences?.remove(_localeKey);
+        await prefs.remove(_localeKey);
       } else {
-        await _preferences?.setString(_localeKey, _serializeLocale(locale));
+        await prefs.setString(_localeKey, _serializeLocale(locale));
       }
       _localeNotifier.value = locale;
     }, context: 'SettingsService.setLocale');
@@ -137,7 +193,11 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<void>> setFirstLaunchCompleted() async {
     return ResultHelper.tryExecuteAsync(() async {
-      await _preferences?.setBool(_firstLaunchKey, false);
+      final prefs = _preferences;
+      if (prefs == null) {
+        throw const SettingsException('SettingsService is not initialized');
+      }
+      await prefs.setBool(_firstLaunchKey, false);
     }, context: 'SettingsService.setFirstLaunchCompleted');
   }
 
@@ -145,6 +205,8 @@ class SettingsService implements ISettingsService {
   static const DiaryGenerationMode generationMode = DiaryGenerationMode.vision;
 
   Locale? _loadStoredLocale() => locale;
+
+  PhotoTypeFilter _loadStoredPhotoTypeFilter() => photoTypeFilter;
 
   static Locale? _parseLocale(String? value) {
     if (value == null || value.isEmpty) {

@@ -7,13 +7,16 @@ import '../controllers/photo_selection_controller.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
 import '../models/diary_entry.dart';
+import '../models/photo_type_filter.dart';
 import '../screens/diary_screen.dart';
 import '../screens/diary_detail_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
+import '../services/interfaces/settings_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
+import '../services/photo_query_service.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
@@ -66,6 +69,11 @@ class _HomeScreenState extends State<HomeScreen>
   final ScrollSignal _diaryScrollSignal = ScrollSignal();
   final ScrollSignal _settingsScrollSignal = ScrollSignal();
 
+  // 写真タイプフィルター（設定から読み込み）
+  late final ISettingsService _settingsService;
+  late PhotoTypeFilter _photoTypeFilter;
+  Set<String> _screenshotAssetIds = {};
+
   // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
 
@@ -74,6 +82,11 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _logger = serviceLocator.get<ILoggingService>();
+    _settingsService = serviceLocator.get<ISettingsService>();
+    _photoTypeFilter = _settingsService.photoTypeFilter;
+    _settingsService.photoTypeFilterNotifier.addListener(
+      _onPhotoTypeFilterChanged,
+    );
     _homeController = HomeController();
     _photoController = PhotoSelectionController();
     // 統合後は日付制限を常時有効化
@@ -90,6 +103,9 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _settingsService.photoTypeFilterNotifier.removeListener(
+      _onPhotoTypeFilterChanged,
+    );
     _diarySub?.cancel();
     _homeController.dispose();
     _photoController.dispose();
@@ -102,6 +118,12 @@ class _HomeScreenState extends State<HomeScreen>
     if (state == AppLifecycleState.resumed) {
       _onResumed();
     }
+  }
+
+  void _onPhotoTypeFilterChanged() {
+    if (!mounted) return;
+    _photoTypeFilter = _settingsService.photoTypeFilterNotifier.value;
+    unawaited(_refreshHome());
   }
 
   Future<void> _onResumed() async {

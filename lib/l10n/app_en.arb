@@ -1572,5 +1572,25 @@
   "timelineLockedGroupLabel": "Available with Premium",
   "@timelineLockedGroupLabel": {
     "description": "Label shown on timeline headers for locked photo groups"
+  },
+  "photoTypeFilterTitle": "Image type",
+  "@photoTypeFilterTitle": {
+    "description": "Photo type filter setting title"
+  },
+  "photoTypeFilterDialogTitle": "Select image type",
+  "@photoTypeFilterDialogTitle": {
+    "description": "Photo type filter selection dialog title"
+  },
+  "photoTypeFilterAll": "All images",
+  "@photoTypeFilterAll": {
+    "description": "All images option"
+  },
+  "photoTypeFilterPhotosOnly": "Photos only",
+  "@photoTypeFilterPhotosOnly": {
+    "description": "Photos only option (exclude screenshots)"
+  },
+  "settingsSaveError": "Failed to save settings. Please try again.",
+  "@settingsSaveError": {
+    "description": "Error message shown when settings save fails"
   }
 }

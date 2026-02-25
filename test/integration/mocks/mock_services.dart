@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
@@ -26,6 +26,7 @@ import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/models/diary_length.dart';
+import 'package:smart_photo_diary/models/photo_type_filter.dart';
 
 /// Mock PhotoService for integration testing
 class MockIPhotoService extends Mock implements IPhotoService {}
@@ -446,6 +447,15 @@ class TestServiceSetup {
       () => mock.setDiaryLength(any()),
     ).thenAnswer((_) async => const Success(null));
 
+    // Photo type filter defaults
+    when(() => mock.photoTypeFilter).thenReturn(PhotoTypeFilter.all);
+    when(
+      () => mock.photoTypeFilterNotifier,
+    ).thenReturn(ValueNotifier<PhotoTypeFilter>(PhotoTypeFilter.all));
+    when(
+      () => mock.setPhotoTypeFilter(any()),
+    ).thenAnswer((_) async => const Success(null));
+
     return mock;
   }
 
@@ -568,6 +578,7 @@ void registerMockFallbacks() {
   registerFallbackValue(<({Uint8List imageData, DateTime time})>[]);
   registerFallbackValue(const Locale('ja'));
   registerFallbackValue(DiaryLength.standard);
+  registerFallbackValue(PhotoTypeFilter.all);
   registerFallbackValue(const DiaryFilter());
   registerFallbackValue(
     DiaryEntry(

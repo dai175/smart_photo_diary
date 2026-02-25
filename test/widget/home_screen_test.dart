@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
+import 'package:smart_photo_diary/models/photo_type_filter.dart';
 import 'package:smart_photo_diary/screens/home_screen.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
@@ -48,6 +49,10 @@ void main() {
     when(() => mockSettings.locale).thenReturn(null);
     when(() => mockSettings.themeMode).thenReturn(ThemeMode.system);
     when(() => mockSettings.localeNotifier).thenReturn(ValueNotifier(null));
+    when(() => mockSettings.photoTypeFilter).thenReturn(PhotoTypeFilter.all);
+    when(
+      () => mockSettings.photoTypeFilterNotifier,
+    ).thenReturn(ValueNotifier(PhotoTypeFilter.all));
 
     serviceLocator.registerSingleton<ILoggingService>(mockLogger);
     serviceLocator.registerSingleton<IPhotoService>(mockPhoto);

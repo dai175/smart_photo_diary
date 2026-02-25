@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/photo_type_filter.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
@@ -496,6 +497,17 @@ class IntegrationTestHelpers {
     // Setup locale notifier properly
     final localeNotifier = ValueNotifier<Locale?>(const Locale('ja'));
     when(() => mockSettingsService.localeNotifier).thenReturn(localeNotifier);
+
+    // Photo type filter defaults
+    when(
+      () => mockSettingsService.photoTypeFilter,
+    ).thenReturn(PhotoTypeFilter.all);
+    when(
+      () => mockSettingsService.photoTypeFilterNotifier,
+    ).thenReturn(ValueNotifier<PhotoTypeFilter>(PhotoTypeFilter.all));
+    when(
+      () => mockSettingsService.setPhotoTypeFilter(any()),
+    ).thenAnswer((_) async => const Success(null));
 
     // Storage service defaults - basic mock setup
     when(() => mockStorageService.exportData()).thenAnswer((_) async => '{}');

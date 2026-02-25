@@ -9,6 +9,7 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/screens/settings_screen.dart';
 import 'package:smart_photo_diary/models/diary_length.dart';
+import 'package:smart_photo_diary/models/photo_type_filter.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
@@ -64,6 +65,13 @@ void main() {
     when(() => mockSettings.themeMode).thenReturn(ThemeMode.system);
     when(() => mockSettings.diaryLength).thenReturn(DiaryLength.standard);
     when(() => mockSettings.localeNotifier).thenReturn(ValueNotifier(null));
+    when(() => mockSettings.photoTypeFilter).thenReturn(PhotoTypeFilter.all);
+    when(
+      () => mockSettings.photoTypeFilterNotifier,
+    ).thenReturn(ValueNotifier(PhotoTypeFilter.all));
+    when(
+      () => mockSettings.setPhotoTypeFilter(any()),
+    ).thenAnswer((_) async => const Success(null));
     when(() => mockSettings.getSubscriptionInfoV2()).thenAnswer(
       (_) async => const Failure(ServiceException('Not available in test')),
     );

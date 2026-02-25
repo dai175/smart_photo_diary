@@ -11,6 +11,7 @@ import '../localization/localization_extensions.dart';
 import '../controllers/scroll_signal.dart';
 import '../widgets/settings/appearance_settings_section.dart';
 import '../widgets/settings/diary_settings_section.dart';
+import '../widgets/settings/photo_filter_settings_section.dart';
 import '../widgets/settings/settings_row.dart';
 import '../widgets/settings/storage_settings_section.dart';
 import '../widgets/settings/subscription_settings_section.dart';
@@ -150,6 +151,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               _buildDivider(),
               DiarySettingsSection(
+                settingsService: _controller.settingsService!,
+                logger: _controller.logger,
+                onStateChanged: _controller.notifyStateChanged,
+              ),
+              _buildDivider(),
+              PhotoFilterSettingsSection(
                 settingsService: _controller.settingsService!,
                 logger: _controller.logger,
                 onStateChanged: _controller.notifyStateChanged,
