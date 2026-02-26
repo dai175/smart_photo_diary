@@ -187,18 +187,17 @@ class PhotoQueryService {
     }
   }
 
-  /// iOS PHAssetMediaSubtypePhotoScreenshot (1 << 9)
-  static const int _iosScreenshotSubtype = 512;
-
   /// スクリーンショット判定
   static bool _isScreenshot(AssetEntity asset, Set<String> screenshotAssetIds) {
-    // スマートアルバムベース判定（iOS: 最優先）
+    // スマートアルバムベース判定（iOS/Android共通）
     if (screenshotAssetIds.contains(asset.id)) {
       return true;
     }
 
+    // iOS: スマートアルバム（screenshotAssetIds）のみで判定
+    // subtype ビットマスクは実機で信頼できないため使用しない
     if (Platform.isIOS) {
-      return (asset.subtype & _iosScreenshotSubtype) != 0;
+      return false;
     }
 
     // Android: MediaStore.RELATIVE_PATH ベース
