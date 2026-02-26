@@ -158,6 +158,7 @@ class PhotoQueryService {
       // PMDarwinPathFilterでスクリーンショットスマートアルバムを直接取得（ロケール非依存）
       final albums = await PhotoManager.getAssetPathList(
         type: RequestType.image,
+        hasAll: false,
         pathFilterOption: const PMPathFilter(
           darwin: PMDarwinPathFilter(
             type: [PMDarwinAssetCollectionType.smartAlbum],
