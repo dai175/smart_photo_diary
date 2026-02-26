@@ -123,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen>
   void _onPhotoTypeFilterChanged() {
     if (!mounted) return;
     _photoTypeFilter = _settingsService.photoTypeFilterNotifier.value;
+    _homeScrollSignal.trigger();
     unawaited(_refreshHome());
   }
 
