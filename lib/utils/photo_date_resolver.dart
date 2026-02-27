@@ -8,8 +8,9 @@ class PhotoDateResolver {
 
   /// アセットから有効な日時を取得する。
   ///
-  /// [AssetEntity.createDateTime] がエポック（1970年以前）の場合は
-  /// [AssetEntity.modifiedDateTime] をフォールバックとして使用する。
+  /// [AssetEntity.createDateTime] が無効（エポック以前）の場合は
+  /// [AssetEntity.modifiedDateTime] をフォールバックとして使用し、
+  /// それも無効な場合は [DateTime.now] を返す。
   static DateTime resolveAssetDateTime(AssetEntity asset) {
     final createDate = asset.createDateTime;
     if (createDate.isAfter(_epoch)) return createDate;
