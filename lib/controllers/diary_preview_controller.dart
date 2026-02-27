@@ -212,6 +212,7 @@ class DiaryPreviewController extends BaseErrorController {
       await _recordPromptUsage();
       await _autoSaveDiary(assets: assets);
     } catch (e, stackTrace) {
+      _isAnalyzingPhotos = false;
       _logger.error(
         'Diary generation failed',
         error: e,

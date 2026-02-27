@@ -31,9 +31,6 @@ class DiaryPreviewGenerationDelegate {
        _logger = logger;
 
   /// 単一写真からAI日記を生成
-  ///
-  /// Returns null if image loading fails (caller should handle error state).
-  /// Throws on AI failure.
   Future<Result<GenerationOutput>> generateFromSinglePhoto({
     required IAiService aiService,
     required AssetEntity asset,
@@ -68,9 +65,6 @@ class DiaryPreviewGenerationDelegate {
   }
 
   /// 複数写真からAI日記を生成
-  ///
-  /// Returns null if no images could be loaded (caller should handle error state).
-  /// Throws on AI failure.
   Future<Result<GenerationOutput>> generateFromMultiplePhotos({
     required IAiService aiService,
     required List<AssetEntity> assets,
