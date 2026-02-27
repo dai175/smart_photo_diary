@@ -153,7 +153,7 @@ class TimelinePhotoTile extends StatelessWidget {
 
   /// 写真タップ時の処理
   void _handlePhotoTap(int mainIndex) {
-    if (mainIndex < 0) return;
+    if (mainIndex < 0 || mainIndex >= controller.selected.length) return;
 
     if (controller.isPhotoUsed(mainIndex)) {
       onUsedPhotoSelected?.call();
