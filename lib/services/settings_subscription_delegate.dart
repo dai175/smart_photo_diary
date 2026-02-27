@@ -93,6 +93,11 @@ class SettingsSubscriptionDelegate {
   /// プラン変更可能かどうかを確認
   Future<Result<bool>> canChangePlan() async {
     return ResultHelper.tryExecuteAsync(() async {
+      // サービス正常性チェック（値は不要だが、失敗時にFailureを返すためのガード）
+      final statusResult = await _subscriptionService.getCurrentStatus();
+      if (statusResult.isFailure) {
+        throw statusResult.error;
+      }
       return _subscriptionService.isInitialized;
     }, context: 'SettingsSubscriptionDelegate.canChangePlan');
   }
