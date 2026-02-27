@@ -14,7 +14,7 @@ void main() {
   late MockILoggingService mockLogger;
   late DiaryIndexManager indexManager;
   late Box<DiaryEntry> diaryBox;
-  int _nextId = 0;
+  int nextId = 0;
 
   setUpAll(() async {
     registerMockFallbacks();
@@ -24,7 +24,7 @@ void main() {
   setUp(() async {
     await HiveTestHelpers.clearDiaryBox();
     diaryBox = await Hive.openBox<DiaryEntry>('diary_entries');
-    _nextId = 0;
+    nextId = 0;
 
     mockLogger = MockILoggingService();
     when(
@@ -81,7 +81,7 @@ void main() {
     List<String>? tags,
   }) async {
     final now = DateTime.now();
-    final id = 'test-id-${_nextId++}';
+    final id = 'test-id-${nextId++}';
     final entry = DiaryEntry(
       id: id,
       date: date ?? DateTime(2026, 1, 15),

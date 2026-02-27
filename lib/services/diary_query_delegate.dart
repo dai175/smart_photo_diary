@@ -61,6 +61,7 @@ class DiaryQueryDelegate {
     DiaryFilter filter,
   ) async {
     try {
+      await _ensureInitialized();
       final box = _getBox();
       await _indexManager.ensureIndex(box);
       final result = <DiaryEntry>[];
@@ -116,13 +117,16 @@ class DiaryQueryDelegate {
     required int limit,
   }) async {
     try {
+      await _ensureInitialized();
+      if (limit <= 0) return const Success([]);
+      final safeOffset = offset < 0 ? 0 : offset;
       final box = _getBox();
       await _indexManager.ensureIndex(box);
       if (!filter.isActive) {
         final total = _indexManager.sortedIdsByDateDesc.length;
         if (total == 0) return const Success([]);
-        final start = offset.clamp(0, total);
-        final end = (offset + limit).clamp(0, total);
+        final start = safeOffset.clamp(0, total);
+        final end = (safeOffset + limit).clamp(0, total);
         if (start >= end) return const Success([]);
         final ids = _indexManager.sortedIdsByDateDesc.sublist(start, end);
         final entries = <DiaryEntry>[];
@@ -161,7 +165,7 @@ class DiaryQueryDelegate {
         final e = box.get(id);
         if (e == null) continue;
         if (!filter.matches(e)) continue;
-        if (skipped < offset) {
+        if (skipped < safeOffset) {
           skipped++;
           continue;
         }

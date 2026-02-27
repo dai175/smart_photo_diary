@@ -157,8 +157,16 @@ class DiaryCrudDelegate {
         );
       }
 
-      // バックグラウンドでタグを生成
-      generateTags(entry);
+      // バックグラウンドでタグを生成（失敗しても保存結果には影響しない）
+      try {
+        generateTags(entry);
+      } catch (tagError, tagStack) {
+        _loggingService.error(
+          'Background tag generation failed',
+          error: tagError,
+          stackTrace: tagStack,
+        );
+      }
 
       return Success(entry);
     } catch (e, stackTrace) {
@@ -173,27 +181,28 @@ class DiaryCrudDelegate {
       await _ensureInitialized();
       final box = _getBox();
       final old = box.get(entry.id);
+      if (old == null) {
+        return Failure(ServiceException('Diary not found: ${entry.id}'));
+      }
       await box.put(entry.id, entry);
-      if (old != null) {
-        if (old.date != entry.date) {
-          await _indexManager.ensureIndex(box);
-          _indexManager.updateEntryDate(box, entry);
-        }
-        _indexManager.updateEntrySearchText(entry);
-        final oldIds = Set<String>.from(old.photoIds);
-        final newIds = Set<String>.from(entry.photoIds);
-        final removed = oldIds.difference(newIds).toList();
-        final added = newIds.difference(oldIds).toList();
-        if (!_isDisposed()) {
-          _changeController.add(
-            DiaryChange(
-              type: DiaryChangeType.updated,
-              entryId: entry.id,
-              addedPhotoIds: added,
-              removedPhotoIds: removed,
-            ),
-          );
-        }
+      if (old.date != entry.date) {
+        await _indexManager.ensureIndex(box);
+        _indexManager.updateEntryDate(box, entry);
+      }
+      _indexManager.updateEntrySearchText(entry);
+      final oldIds = Set<String>.from(old.photoIds);
+      final newIds = Set<String>.from(entry.photoIds);
+      final removed = oldIds.difference(newIds).toList();
+      final added = newIds.difference(oldIds).toList();
+      if (!_isDisposed()) {
+        _changeController.add(
+          DiaryChange(
+            type: DiaryChangeType.updated,
+            entryId: entry.id,
+            addedPhotoIds: added,
+            removedPhotoIds: removed,
+          ),
+        );
       }
       return const Success(null);
     } catch (e) {
