@@ -30,15 +30,19 @@ class TimelineStickyHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(
-            group.displayName,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              group.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           if (isFullyLocked) ...[
-            const Spacer(),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               context.l10n.timelineLockedGroupLabel,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
