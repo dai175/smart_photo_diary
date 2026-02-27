@@ -68,7 +68,7 @@ class UpgradeDialogController extends BaseErrorController {
       _logger.debug(
         'Fetched multiple plan prices via DynamicPricingUtils',
         context: 'UpgradeDialogController.loadPlansAndPrices',
-        data: 'prices=${_priceStrings.toString()}',
+        data: {'prices': _priceStrings},
       );
 
       _state = UpgradeDialogState.showingPlans;
@@ -107,7 +107,7 @@ class UpgradeDialogController extends BaseErrorController {
       _logger.info(
         'Purchase flow started: ${plan.id}',
         context: 'UpgradeDialogController.purchasePlan',
-        data: 'productId=${plan.productId}, price=${plan.price}',
+        data: {'productId': plan.productId, 'price': plan.price},
       );
 
       final result = await _subscriptionService.purchasePlanClass(plan);
@@ -117,8 +117,10 @@ class UpgradeDialogController extends BaseErrorController {
         _logger.info(
           'Purchase succeeded',
           context: 'UpgradeDialogController.purchasePlan',
-          data:
-              'status=${purchaseResult.status}, productId=${purchaseResult.productId}',
+          data: {
+            'status': purchaseResult.status.toString(),
+            'productId': purchaseResult.productId,
+          },
         );
       } else {
         final error = result.error;
@@ -127,7 +129,7 @@ class UpgradeDialogController extends BaseErrorController {
           _logger.warning(
             'Possibly simulator or TestFlight environment',
             context: 'UpgradeDialogController.purchasePlan',
-            data: error.toString(),
+            data: {'error': error.toString()},
           );
         } else {
           _logger.error(

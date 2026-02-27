@@ -24,13 +24,11 @@ class PlanOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String description = '';
-    if (plan is PremiumYearlyPlan) {
-      final discount = (plan as PremiumYearlyPlan).discountPercentage;
-      if (discount > 0) {
-        description = context.l10n.upgradeDialogDiscountValue(discount);
-      }
-    }
+    final description = switch (plan) {
+      PremiumYearlyPlan(discountPercentage: final discount) when discount > 0 =>
+        context.l10n.upgradeDialogDiscountValue(discount),
+      _ => '',
+    };
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
