@@ -1,27 +1,37 @@
 import 'dart:io';
-import 'dart:convert';
 import 'dart:ui';
 import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/settings_service_interface.dart';
 import 'interfaces/storage_service_interface.dart';
 import '../core/service_locator.dart';
-import '../localization/localization_utils.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import 'storage_export_delegate.dart';
+import 'storage_import_delegate.dart';
 
 class StorageService implements IStorageService {
   final IDiaryService? _diaryService;
   final ISettingsService? _settingsService;
 
+  late final StorageExportDelegate _exportDelegate;
+  late final StorageImportDelegate _importDelegate;
+
   StorageService({
     IDiaryService? diaryService,
     ISettingsService? settingsService,
   }) : _diaryService = diaryService,
-       _settingsService = settingsService;
+       _settingsService = settingsService {
+    _exportDelegate = StorageExportDelegate(
+      getDiaryService: _getDiaryService,
+      resolveLocale: _resolveLocale,
+    );
+    _importDelegate = StorageImportDelegate(
+      getDiaryService: _getDiaryService,
+      resolveLocale: _resolveLocale,
+    );
+  }
 
   /// DiaryService を取得（コンストラクタ注入 or ServiceLocator フォールバック）
   Future<IDiaryService> _getDiaryService() async {
@@ -62,332 +72,13 @@ class StorageService implements IStorageService {
   // データのエクスポート（保存先選択可能）
   @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
-    final diaryService = await _getDiaryService();
-    final result = await diaryService.getSortedDiaryEntries();
-
-    if (result.isFailure) {
-      throw StorageException(
-        'Failed to retrieve diary data: ${result.error.message}',
-      );
-    }
-
-    var entries = result.value;
-
-    // 期間フィルター
-    if (startDate != null || endDate != null) {
-      entries = entries.where((entry) {
-        if (startDate != null && entry.date.isBefore(startDate)) return false;
-        if (endDate != null && entry.date.isAfter(endDate)) return false;
-        return true;
-      }).toList();
-    }
-
-    // JSON形式でエクスポート
-    final exportData = {
-      'app_name': 'Smart Photo Diary',
-      'export_date': DateTime.now().toIso8601String(),
-      'version': '1.0.0',
-      'entries': entries
-          .map(
-            (entry) => {
-              'id': entry.id,
-              'title': entry.title,
-              'content': entry.content,
-              'date': entry.date.toIso8601String(),
-              'photoIds': entry.photoIds,
-              'tags': entry.effectiveTags, // タグも含める
-              'createdAt': entry.createdAt.toIso8601String(),
-              'updatedAt': entry.updatedAt.toIso8601String(),
-            },
-          )
-          .toList(),
-    };
-
-    final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
-
-    // ファイル保存先を選択
-    final fileName =
-        'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
-    final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
-    final outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: l10n.settingsBackupDialogTitle,
-      fileName: fileName,
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-      bytes: utf8.encode(jsonString),
-    );
-
-    return outputFile;
+    return _exportDelegate.exportData(startDate: startDate, endDate: endDate);
   }
 
   // データのインポート（リストア機能）
   @override
   Future<Result<ImportResult?>> importData() async {
-    try {
-      // ファイル選択
-      final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-        dialogTitle: l10n.settingsRestoreDialogTitle,
-      );
-
-      if (result == null || result.files.single.path == null) {
-        return const Success(null);
-      }
-
-      final filePath = result.files.single.path!;
-      return await _processImportFile(filePath);
-    } catch (e) {
-      return Failure(
-        ServiceException(
-          'An error occurred during file selection',
-          originalError: e,
-        ),
-      );
-    }
-  }
-
-  // インポートファイルの処理
-  Future<Result<ImportResult>> _processImportFile(String filePath) async {
-    try {
-      // ファイルを読み込み
-      final file = File(filePath);
-      if (!await file.exists()) {
-        return const Failure(ServiceException('Selected file does not exist'));
-      }
-
-      final jsonContent = await file.readAsString();
-      final Map<String, dynamic> data;
-
-      try {
-        data = jsonDecode(jsonContent) as Map<String, dynamic>;
-      } catch (e) {
-        return const Failure(
-          ServiceException(
-            'Invalid JSON file. Please select a valid backup file',
-          ),
-        );
-      }
-
-      // データ検証
-      final validationResult = _validateImportData(data);
-      if (validationResult.isFailure) {
-        return Failure(validationResult.error);
-      }
-
-      // データをインポート
-      return await _importDiaryEntries(data);
-    } catch (e) {
-      return Failure(
-        ServiceException(
-          'An error occurred during file processing',
-          originalError: e,
-        ),
-      );
-    }
-  }
-
-  // インポートデータの検証
-  Result<void> _validateImportData(Map<String, dynamic> data) {
-    // 必須フィールドの確認
-    if (!data.containsKey('app_name') ||
-        data['app_name'] != 'Smart Photo Diary') {
-      return const Failure(
-        ServiceException('Not a Smart Photo Diary backup file'),
-      );
-    }
-
-    if (!data.containsKey('entries') || data['entries'] is! List) {
-      return const Failure(
-        ServiceException('Invalid backup file format (entries not found)'),
-      );
-    }
-
-    // バージョン互換性チェック（将来的な拡張用）
-    if (data.containsKey('version')) {
-      final version = data['version'] as String?;
-      if (version != null && !_isVersionCompatible(version)) {
-        return const Failure(
-          ServiceException('This backup file version is not supported'),
-        );
-      }
-    }
-
-    return const Success(null);
-  }
-
-  // バージョン互換性チェック
-  bool _isVersionCompatible(String version) {
-    // 現在は v1.0.0 のみサポート
-    // 将来的にマイナーバージョンアップに対応可能
-    return version.startsWith('1.');
-  }
-
-  // 日記エントリーのインポート
-  Future<Result<ImportResult>> _importDiaryEntries(
-    Map<String, dynamic> data,
-  ) async {
-    try {
-      final diaryService = await _getDiaryService();
-      final entries = data['entries'] as List<dynamic>;
-
-      int totalEntries = entries.length;
-      int successfulImports = 0;
-      int skippedEntries = 0;
-      int failedImports = 0;
-      final List<String> errors = [];
-      final List<String> warnings = [];
-
-      // パフォーマンス最適化: 既存エントリーを一度だけ取得
-      final existingResult = await diaryService.getSortedDiaryEntries();
-      if (existingResult.isFailure) {
-        throw StorageException(
-          'Failed to retrieve existing diary data: ${existingResult.error.message}',
-        );
-      }
-      final existingEntries = existingResult.value;
-
-      for (int i = 0; i < entries.length; i++) {
-        final entryData = entries[i];
-
-        try {
-          final result = await _importSingleEntry(
-            entryData,
-            diaryService,
-            existingEntries,
-          );
-          if (result.isSuccess) {
-            final importStatus = result.value;
-            if (importStatus == 'imported') {
-              successfulImports++;
-            } else if (importStatus == 'skipped') {
-              skippedEntries++;
-              warnings.add(
-                'Entry "${entryData['title']}" was skipped due to duplicate',
-              );
-            }
-          } else {
-            failedImports++;
-            errors.add('Entry ${i + 1}: ${result.error.message}');
-          }
-        } catch (e) {
-          failedImports++;
-          errors.add('Entry ${i + 1}: An error occurred during import: $e');
-        }
-      }
-
-      final importResult = ImportResult(
-        totalEntries: totalEntries,
-        successfulImports: successfulImports,
-        skippedEntries: skippedEntries,
-        failedImports: failedImports,
-        errors: errors,
-        warnings: warnings,
-      );
-
-      return Success(importResult);
-    } catch (e) {
-      return Failure(
-        ServiceException(
-          'An error occurred during import processing',
-          originalError: e,
-        ),
-      );
-    }
-  }
-
-  // 単一エントリーのインポート
-  Future<Result<String>> _importSingleEntry(
-    dynamic entryData,
-    IDiaryService diaryService,
-    List<dynamic> existingEntries,
-  ) async {
-    try {
-      if (entryData is! Map<String, dynamic>) {
-        return const Failure(ServiceException('Invalid entry format'));
-      }
-
-      // 必須フィールドの確認
-      final requiredFields = ['id', 'title', 'content', 'date'];
-      for (final field in requiredFields) {
-        if (!entryData.containsKey(field)) {
-          return Failure(ServiceException('Required field $field not found'));
-        }
-      }
-
-      // 日付の解析
-      final DateTime date;
-      try {
-        date = DateTime.parse(entryData['date'] as String);
-      } catch (e) {
-        return const Failure(ServiceException('Invalid date format'));
-      }
-
-      // 写真IDの検証
-      final photoIds = <String>[];
-      if (entryData.containsKey('photoIds') && entryData['photoIds'] is List) {
-        final rawPhotoIds = entryData['photoIds'] as List<dynamic>;
-        for (final photoId in rawPhotoIds) {
-          if (photoId is String) {
-            // 写真の存在確認
-            try {
-              final asset = await AssetEntity.fromId(photoId);
-              if (asset != null) {
-                photoIds.add(photoId);
-              }
-            } catch (e) {
-              // 写真が見つからない場合はスキップ（警告として記録）
-            }
-          }
-        }
-      }
-
-      // 既存エントリーの重複チェック（パフォーマンス最適化済み）
-      // IDベースの重複チェック
-      final idDuplicate = existingEntries.any(
-        (entry) => entry.id == entryData['id'],
-      );
-      if (idDuplicate) {
-        return const Success('skipped');
-      }
-
-      // 時刻ベースの重複チェック（同じ時刻の場合は重複とする）
-      final timeDuplicate = existingEntries.any(
-        (entry) => entry.date.isAtSameMomentAs(date),
-      );
-
-      if (timeDuplicate) {
-        return const Success('skipped');
-      }
-
-      // エントリーを保存
-      final saveResult = await diaryService.saveDiaryEntry(
-        date: date,
-        title: entryData['title'] as String,
-        content: entryData['content'] as String,
-        photoIds: photoIds,
-        location: entryData['location'] as String?,
-        tags: entryData.containsKey('tags') && entryData['tags'] is List
-            ? (entryData['tags'] as List<dynamic>).cast<String>()
-            : null,
-      );
-
-      if (saveResult.isFailure) {
-        throw StorageException(
-          'Failed to save entry: ${saveResult.error.message}',
-        );
-      }
-
-      return const Success('imported');
-    } catch (e) {
-      return Failure(
-        ServiceException(
-          'An error occurred during entry processing',
-          originalError: e,
-        ),
-      );
-    }
+    return _importDelegate.importData();
   }
 
   // データの最適化
