@@ -36,7 +36,6 @@ class TimelineStickyHeader extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             ),
-            textAlign: TextAlign.left,
           ),
           if (isFullyLocked) ...[
             const Spacer(),

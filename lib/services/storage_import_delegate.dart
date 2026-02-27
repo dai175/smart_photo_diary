@@ -132,7 +132,7 @@ class StorageImportDelegate {
       final diaryService = await _getDiaryService();
       final entries = data['entries'] as List<dynamic>;
 
-      int totalEntries = entries.length;
+      final int totalEntries = entries.length;
       int successfulImports = 0;
       int skippedEntries = 0;
       int failedImports = 0;
@@ -237,7 +237,7 @@ class StorageImportDelegate {
                 photoIds.add(photoId);
               }
             } catch (e) {
-              // 写真が見つからない場合はスキップ（警告として記録）
+              // 写真が見つからない場合はスキップ
             }
           }
         }

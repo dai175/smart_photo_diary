@@ -41,7 +41,7 @@ class StorageExportDelegate {
     }
 
     // JSON形式でエクスポート
-    final exportData = {
+    final jsonData = {
       'app_name': 'Smart Photo Diary',
       'export_date': DateTime.now().toIso8601String(),
       'version': '1.0.0',
@@ -61,7 +61,7 @@ class StorageExportDelegate {
           .toList(),
     };
 
-    final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+    final jsonString = const JsonEncoder.withIndent('  ').convert(jsonData);
 
     // ファイル保存先を選択
     final fileName =
