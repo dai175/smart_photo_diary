@@ -153,6 +153,9 @@ class StorageImportDelegate {
         );
       }
       final existingEntries = existingResult.value;
+      // インポート済みエントリーの追跡用セット（同一バックアップ内の重複検出）
+      final importedIds = <String>{};
+      final importedTimes = <int>{};
 
       for (int i = 0; i < entries.length; i++) {
         final entryData = entries[i];
@@ -162,6 +165,8 @@ class StorageImportDelegate {
             entryData,
             diaryService,
             existingEntries,
+            importedIds,
+            importedTimes,
           );
           if (result.isSuccess) {
             final importStatus = result.value;
@@ -208,6 +213,8 @@ class StorageImportDelegate {
     dynamic entryData,
     IDiaryService diaryService,
     List<dynamic> existingEntries,
+    Set<String> importedIds,
+    Set<int> importedTimes,
   ) async {
     try {
       if (entryData is! Map<String, dynamic>) {
@@ -250,17 +257,19 @@ class StorageImportDelegate {
       }
 
       // 既存エントリーの重複チェック（パフォーマンス最適化済み）
-      final idDuplicate = existingEntries.any(
-        (entry) => entry.id == entryData['id'],
-      );
+      final entryId = entryData['id'] as String;
+      final idDuplicate =
+          importedIds.contains(entryId) ||
+          existingEntries.any((entry) => entry.id == entryId);
       if (idDuplicate) {
         return const Success('skipped');
       }
 
       // 時刻ベースの重複チェック（同じ時刻の場合は重複とする）
-      final timeDuplicate = existingEntries.any(
-        (entry) => entry.date.isAtSameMomentAs(date),
-      );
+      final dateMs = date.millisecondsSinceEpoch;
+      final timeDuplicate =
+          importedTimes.contains(dateMs) ||
+          existingEntries.any((entry) => entry.date.isAtSameMomentAs(date));
 
       if (timeDuplicate) {
         return const Success('skipped');
@@ -283,6 +292,10 @@ class StorageImportDelegate {
           'Failed to save entry: ${saveResult.error.message}',
         );
       }
+
+      // インポート済みセットを更新（同一バックアップ内の後続重複を検出するため）
+      importedIds.add(entryId);
+      importedTimes.add(dateMs);
 
       return const Success('imported');
     } catch (e) {
