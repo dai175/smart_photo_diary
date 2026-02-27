@@ -22,7 +22,6 @@ enum DiaryGenerationMode {
 class SettingsService implements ISettingsService {
   SharedPreferences? _preferences;
 
-  // Phase 1.8.1.1: SubscriptionService依存注入
   ISubscriptionService? _subscriptionService;
   SettingsSubscriptionDelegate? _subscriptionDelegate;
 
@@ -239,10 +238,7 @@ class SettingsService implements ISettingsService {
     return '${locale.languageCode}_${locale.countryCode}';
   }
 
-  // ========================================
-  // Phase 1.8.1: サブスクリプション状態管理API
-  // （SettingsSubscriptionDelegate に委譲）
-  // ========================================
+  // サブスクリプション状態管理API（SettingsSubscriptionDelegate に委譲）
 
   /// delegate が初期化済みであることを保証してから返す
   SettingsSubscriptionDelegate _requireDelegate() {

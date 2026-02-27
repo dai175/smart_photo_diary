@@ -28,15 +28,8 @@ class SettingsSubscriptionDelegate {
   }
 
   /// 現在のプラン情報を取得（Planクラス版）
-  Future<Result<Plan>> getCurrentPlanClass() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final planResult = await _subscriptionService.getCurrentPlanClass();
-      if (planResult.isFailure) {
-        throw planResult.error;
-      }
-      return planResult.value;
-    }, context: 'SettingsSubscriptionDelegate.getCurrentPlanClass');
-  }
+  Future<Result<Plan>> getCurrentPlanClass() =>
+      _subscriptionService.getCurrentPlanClass();
 
   /// プラン期限情報を取得（V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
@@ -90,26 +83,12 @@ class SettingsSubscriptionDelegate {
   }
 
   /// 残り使用可能回数を取得
-  Future<Result<int>> getRemainingGenerations() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final result = await _subscriptionService.getRemainingGenerations();
-      if (result.isFailure) {
-        throw result.error;
-      }
-      return result.value;
-    }, context: 'SettingsSubscriptionDelegate.getRemainingGenerations');
-  }
+  Future<Result<int>> getRemainingGenerations() =>
+      _subscriptionService.getRemainingGenerations();
 
   /// 次回リセット日を取得
-  Future<Result<DateTime>> getNextResetDate() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final result = await _subscriptionService.getNextResetDate();
-      if (result.isFailure) {
-        throw result.error;
-      }
-      return result.value;
-    }, context: 'SettingsSubscriptionDelegate.getNextResetDate');
-  }
+  Future<Result<DateTime>> getNextResetDate() =>
+      _subscriptionService.getNextResetDate();
 
   /// プラン変更可能かどうかを確認
   Future<Result<bool>> canChangePlan() async {
