@@ -1,15 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
 import '../../controllers/photo_selection_controller.dart';
 import '../../controllers/scroll_signal.dart';
 import '../../core/service_locator.dart';
 import '../../localization/localization_extensions.dart';
-import '../../ui/components/fullscreen_photo_viewer.dart';
 import '../../models/timeline_photo_group.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/timeline_grouping_service.dart';
@@ -17,6 +13,9 @@ import '../../ui/design_system/app_spacing.dart';
 import 'timeline_cache_manager.dart';
 import 'timeline_constants.dart';
 import 'timeline_components.dart';
+import 'timeline_empty_states.dart';
+import 'timeline_photo_tile.dart';
+import 'timeline_sticky_header.dart';
 import 'timeline_scroll_manager.dart';
 
 /// タイムライン表示用の写真ウィジェット
@@ -233,16 +232,18 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       animation: widget.controller,
       builder: (context, child) {
         if (!widget.controller.hasPermission) {
-          return _buildPermissionDeniedState();
+          return TimelinePermissionDeniedState(
+            onRequestPermission: widget.onRequestPermission,
+          );
         }
 
         // 初回ロード中で写真がまだない場合は、シンプルなローディング表示
         if (widget.controller.isLoading && _photoGroups.isEmpty) {
-          return _buildSimpleLoadingState();
+          return const TimelineLoadingState();
         }
 
         if (_photoGroups.isEmpty) {
-          return _buildEmptyState();
+          return const TimelineEmptyState();
         }
         return _buildTimelineContent();
       },
@@ -266,7 +267,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         for (var i = 0; i < localizedGroups.length; i++) ...[
           if (localizedGroups[i].photos.isEmpty)
             SliverStickyHeader(
-              header: _buildStickyHeader(localizedGroups[i]),
+              header: TimelineStickyHeader(
+                group: localizedGroups[i],
+                isFullyLocked:
+                    _groupFullyLockedCache[localizedGroups[i].groupDate] ??
+                    false,
+              ),
               sliver: SliverToBoxAdapter(
                 child: SizedBox(
                   height: TimelineLayoutConstants.emptyStateHeight,
@@ -281,7 +287,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
             )
           else
             SliverStickyHeader(
-              header: _buildStickyHeader(localizedGroups[i]),
+              header: TimelineStickyHeader(
+                group: localizedGroups[i],
+                isFullyLocked:
+                    _groupFullyLockedCache[localizedGroups[i].groupDate] ??
+                    false,
+              ),
               sliver: SliverMainAxisGroup(
                 slivers: [
                   SliverGrid(
@@ -298,7 +309,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                         ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _buildPhotoTile(
-                        context,
                         localizedGroups[i],
                         index,
                         selectedDate,
@@ -338,10 +348,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   /// グループ内の表示アイテム数を計算（スケルトン含む）
-  ///
-  /// hasMorePhotosがtrueの場合、末尾グループに常に固定の大量プレースホルダーを表示。
-  /// プレースホルダーは軽量コンテナのため、大量でもパフォーマンスに影響しない。
-  /// これにより高速スクロールでもプレースホルダーに追いつかない。
   int _calculateChildCount(
     TimelinePhotoGroup group, {
     required bool isLastGroup,
@@ -371,7 +377,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
 
   /// 個別の写真タイルを構築
   Widget _buildPhotoTile(
-    BuildContext context,
     TimelinePhotoGroup group,
     int index,
     DateTime? selectedDate,
@@ -386,308 +391,19 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
 
     final photo = group.photos[index];
-
-    // キャッシュを使用してメインインデックスを高速取得
     final mainIndex = _cacheManager.photoIndexCache[photo.id] ?? -1;
-    final isSelected =
-        mainIndex >= 0 && mainIndex < widget.controller.selected.length
-        ? widget.controller.selected[mainIndex]
-        : false;
-    final isUsed = mainIndex >= 0
-        ? widget.controller.isPhotoUsed(mainIndex)
-        : false;
-    final isLocked = widget.controller.isPhotoLocked(photo);
 
-    // キャッシュを使用した薄化判定（パフォーマンス最適化）
-    final shouldDimPhoto =
-        !isLocked &&
-        _shouldDimPhoto(
-          photo: photo,
-          isSelected: isSelected,
-          selectedDate: selectedDate,
-        );
-
-    final heroTag = 'asset-${photo.id}';
-    final thumbnail = TimelinePhotoThumbnail(
+    return TimelinePhotoTile(
+      controller: widget.controller,
       photo: photo,
-      future: _cacheManager.getThumbnailFuture(photo),
-      thumbnailSize: TimelineLayoutConstants.thumbnailSize,
-      thumbnailQuality: TimelineLayoutConstants.thumbnailQuality,
-      borderRadius: TimelineLayoutConstants.borderRadius,
-      strokeWidth: TimelineLayoutConstants.loadingIndicatorStrokeWidth,
-      key: ValueKey(photo.id),
-    );
-
-    return GestureDetector(
-      onTap: isLocked
-          ? () => widget.onLockedPhotoTapped?.call()
-          : () => _handlePhotoTap(mainIndex),
-      onLongPress: isLocked
-          ? () => widget.onLockedPhotoTapped?.call()
-          : () => _handlePhotoLongPress(context, photo, heroTag, isUsed),
-      child: Stack(
-        children: [
-          // アニメーション最適化: AnimatedOpacityでスムーズな薄化切替
-          AnimatedOpacity(
-            opacity: shouldDimPhoto ? 0.6 : 1.0,
-            duration: const Duration(
-              milliseconds: TimelineLayoutConstants.animationDurationMs,
-            ),
-            curve: Curves.easeInOut,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(TimelineLayoutConstants.borderRadius),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(TimelineLayoutConstants.borderRadius),
-                ),
-                child: Hero(
-                  tag: heroTag,
-                  child: isLocked
-                      ? ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: TimelineLayoutConstants.lockedBlurSigma,
-                            sigmaY: TimelineLayoutConstants.lockedBlurSigma,
-                          ),
-                          child: thumbnail,
-                        )
-                      : thumbnail,
-                ),
-              ),
-            ),
-          ),
-          // ロック写真のロックアイコンオーバーレイ
-          if (isLocked)
-            Positioned.fill(
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    TimelineLayoutConstants.lockedIconPadding,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.lock_rounded,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    size: TimelineLayoutConstants.lockedIconSize,
-                  ),
-                ),
-              ),
-            ),
-          // パフォーマンス最適化された選択インジケーター（ロック時は非表示）
-          if (!isLocked)
-            Positioned(
-              top: TimelineLayoutConstants.selectionIndicatorTop,
-              right: TimelineLayoutConstants.selectionIndicatorRight,
-              child: TimelineSelectionIndicator(
-                isSelected: isSelected,
-                isUsed: isUsed,
-                shouldDimPhoto: shouldDimPhoto,
-                primaryColor: Theme.of(context).colorScheme.primary,
-                indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
-                iconSize: TimelineLayoutConstants.selectionIconSize,
-                borderWidth: TimelineLayoutConstants.selectionBorderWidth,
-              ),
-            ),
-          // パフォーマンス最適化された使用済みラベル（ロック時は非表示）
-          if (isUsed && !isLocked)
-            const TimelineUsedLabel(
-              bottom: TimelineLayoutConstants.usedLabelBottom,
-              left: TimelineLayoutConstants.usedLabelLeft,
-              horizontalPadding:
-                  TimelineLayoutConstants.usedLabelHorizontalPadding,
-              verticalPadding: TimelineLayoutConstants.usedLabelVerticalPadding,
-              borderRadius: TimelineLayoutConstants.borderRadius,
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// 写真タップ時の処理
-  void _handlePhotoTap(int mainIndex) {
-    if (mainIndex < 0) return;
-
-    if (widget.controller.isPhotoUsed(mainIndex)) {
-      widget.onUsedPhotoSelected?.call();
-      return;
-    }
-
-    final wasSelected = widget.controller.selected[mainIndex];
-
-    if (wasSelected) {
-      widget.controller.toggleSelect(mainIndex);
-      return;
-    }
-
-    if (!widget.controller.canSelectPhoto(mainIndex)) {
-      if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection) {
-        widget.onSelectionLimitReached?.call();
-        return;
-      }
-      widget.onDifferentDateSelected?.call();
-      return;
-    }
-
-    widget.controller.toggleSelect(mainIndex);
-  }
-
-  /// 写真長押し時の処理（使用済み/未使用で分岐）
-  void _handlePhotoLongPress(
-    BuildContext context,
-    AssetEntity photo,
-    String heroTag,
-    bool isUsed,
-  ) {
-    if (isUsed && widget.onUsedPhotoDetail != null) {
-      widget.onUsedPhotoDetail!(photo.id);
-    } else {
-      _showPhotoPreview(context, photo, heroTag);
-    }
-  }
-
-  /// 長押しで拡大プレビューを表示
-  void _showPhotoPreview(BuildContext context, AssetEntity asset, String tag) {
-    FullscreenPhotoViewer.show(context, asset: asset, heroTag: tag);
-  }
-
-  /// 写真を薄く表示するかどうかを判定
-  bool _shouldDimPhoto({
-    required AssetEntity photo,
-    required bool isSelected,
-    required DateTime? selectedDate,
-  }) {
-    if (isSelected) return false;
-    if (selectedDate == null) return false;
-    if (widget.controller.selectedCount >= AppConstants.maxPhotosSelection)
-      return true;
-    return !_isSameDateAsPhoto(selectedDate, photo);
-  }
-
-  /// 指定日付が写真と同じ日付かどうかを判定
-  bool _isSameDateAsPhoto(DateTime date, AssetEntity photo) {
-    final photoDate = photo.createDateTime;
-    return date.year == photoDate.year &&
-        date.month == photoDate.month &&
-        date.day == photoDate.day;
-  }
-
-  /// スティッキーヘッダーを構築
-  Widget _buildStickyHeader(TimelinePhotoGroup group) {
-    final isFullyLocked = _groupFullyLockedCache[group.groupDate] ?? false;
-
-    return Container(
-      height: TimelineLayoutConstants.stickyHeaderHeight,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
-      ),
-      child: Row(
-        children: [
-          Text(
-            group.displayName,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.left,
-          ),
-          if (isFullyLocked) ...[
-            const Spacer(),
-            Text(
-              context.l10n.timelineLockedGroupLabel,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// シンプルなローディング状態を構築（スケルトンなし）
-  Widget _buildSimpleLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(
-        strokeWidth: AppConstants.progressIndicatorStrokeWidth,
-      ),
-    );
-  }
-
-  /// 権限拒否状態を構築
-  Widget _buildPermissionDeniedState() {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.photo_library_outlined,
-                  size: AppConstants.emptyStateIconSize,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  context.l10n.photoPermissionMessage,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                if (widget.onRequestPermission != null)
-                  TextButton(
-                    onPressed: widget.onRequestPermission,
-                    child: Text(context.l10n.commonAllow),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 空状態を構築
-  Widget _buildEmptyState() {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.photo_outlined,
-                  size: AppConstants.emptyStateIconSize,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  context.l10n.photoNoPhotosMessage,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      mainIndex: mainIndex,
+      selectedDate: selectedDate,
+      cacheManager: _cacheManager,
+      onSelectionLimitReached: widget.onSelectionLimitReached,
+      onUsedPhotoSelected: widget.onUsedPhotoSelected,
+      onUsedPhotoDetail: widget.onUsedPhotoDetail,
+      onDifferentDateSelected: widget.onDifferentDateSelected,
+      onLockedPhotoTapped: widget.onLockedPhotoTapped,
     );
   }
 }
