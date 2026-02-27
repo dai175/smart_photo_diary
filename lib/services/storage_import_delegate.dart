@@ -107,7 +107,13 @@ class StorageImportDelegate {
 
     // バージョン互換性チェック（将来的な拡張用）
     if (data.containsKey('version')) {
-      final version = data['version'] as String?;
+      final versionValue = data['version'];
+      if (versionValue != null && versionValue is! String) {
+        return const Failure(
+          ServiceException('Invalid version format in backup file'),
+        );
+      }
+      final version = versionValue as String?;
       if (version != null && !_isVersionCompatible(version)) {
         return const Failure(
           ServiceException('This backup file version is not supported'),
@@ -268,7 +274,7 @@ class StorageImportDelegate {
         photoIds: photoIds,
         location: entryData['location'] as String?,
         tags: entryData.containsKey('tags') && entryData['tags'] is List
-            ? (entryData['tags'] as List<dynamic>).cast<String>()
+            ? (entryData['tags'] as List<dynamic>).whereType<String>().toList()
             : null,
       );
 
