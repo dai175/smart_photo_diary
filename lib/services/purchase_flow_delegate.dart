@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase/in_app_purchase.dart' hide PurchaseStatus;
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/basic_plan.dart';
 import '../config/in_app_purchase_config.dart';
-import 'interfaces/in_app_purchase_service_interface.dart' as iapsi;
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
@@ -68,7 +67,7 @@ class PurchaseFlowDelegate {
 
         return Success(
           PurchaseResult(
-            status: iapsi.PurchaseStatus.pending,
+            status: PurchaseStatus.pending,
             productId: productId,
             plan: plan,
           ),
@@ -96,27 +95,16 @@ class PurchaseFlowDelegate {
   /// 購入を復元
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     try {
-      final stateService = _getStateService();
-      if (!stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final inAppPurchase = _getInAppPurchase();
-      if (inAppPurchase == null) {
-        return const Failure(ServiceException('In-App Purchase not available'));
-      }
+      final validationError = _validateBasePreconditions();
+      if (validationError != null) return Failure(validationError);
 
       _log('Starting purchase restoration...');
 
-      await inAppPurchase.restorePurchases();
+      await _getInAppPurchase()!.restorePurchases();
 
       _log('Purchase restoration initiated');
 
-      return const Success([
-        PurchaseResult(status: iapsi.PurchaseStatus.pending),
-      ]);
+      return const Success([PurchaseResult(status: PurchaseStatus.pending)]);
     } catch (e) {
       return _handleError(e, 'restorePurchases');
     }
@@ -128,8 +116,7 @@ class PurchaseFlowDelegate {
 
   static const _logTag = 'PurchaseFlowDelegate';
 
-  /// 購入前提条件を検証
-  ServiceException? _validatePurchasePreconditions(Plan plan) {
+  ServiceException? _validateBasePreconditions() {
     if (!_getStateService().isInitialized) {
       return const ServiceException(
         'SubscriptionStateService is not initialized',
@@ -138,6 +125,13 @@ class PurchaseFlowDelegate {
     if (_getInAppPurchase() == null) {
       return const ServiceException('In-App Purchase not available');
     }
+    return null;
+  }
+
+  /// 購入前提条件を検証
+  ServiceException? _validatePurchasePreconditions(Plan plan) {
+    final baseError = _validateBasePreconditions();
+    if (baseError != null) return baseError;
     if (_getIsPurchasing()) {
       return const ServiceException('Another purchase is already in progress');
     }
@@ -169,12 +163,12 @@ class PurchaseFlowDelegate {
           context: _logTag,
         );
 
-        await Future.delayed(const Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(seconds: 1));
         final result = await _getStateService().createStatusForPlan(plan);
         if (result.isSuccess) {
           return Success(
             PurchaseResult(
-              status: iapsi.PurchaseStatus.purchased,
+              status: PurchaseStatus.purchased,
               productId: productId,
               plan: plan,
               purchaseDate: DateTime.now(),
