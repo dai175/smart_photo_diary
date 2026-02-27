@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:photo_manager/photo_manager.dart';
@@ -6,7 +5,6 @@ import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../core/errors/error_handler.dart';
 import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/diary_length.dart';
@@ -16,15 +14,22 @@ import '../services/interfaces/diary_crud_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/prompt_service_interface.dart';
+import '../utils/photo_date_resolver.dart';
 import 'base_error_controller.dart';
+import 'diary_preview_generation_delegate.dart';
+import 'diary_preview_save_delegate.dart';
 
 /// DiaryPreviewScreen のエラー種別
 enum DiaryPreviewErrorType { noPhotos, generationFailed, saveFailed }
 
 /// DiaryPreviewScreen の状態管理・ビジネスロジック
+///
+/// AI生成は [DiaryPreviewGenerationDelegate]、保存は [DiaryPreviewSaveDelegate]、
+/// 日時解決は [PhotoDateResolver] にそれぞれ委譲する。
 class DiaryPreviewController extends BaseErrorController {
   late final ILoggingService _logger;
-  late final IPhotoService _photoService;
+  late final DiaryPreviewGenerationDelegate _generationDelegate;
+  late final DiaryPreviewSaveDelegate _saveDelegate;
 
   bool _isInitializing = true;
   bool _isSaving = false;
@@ -92,7 +97,17 @@ class DiaryPreviewController extends BaseErrorController {
 
   DiaryPreviewController() {
     _logger = serviceLocator.get<ILoggingService>();
-    _photoService = ServiceRegistration.get<IPhotoService>();
+    final photoService = ServiceRegistration.get<IPhotoService>();
+
+    _generationDelegate = DiaryPreviewGenerationDelegate(
+      photoService: photoService,
+      logger: _logger,
+    );
+    _saveDelegate = DiaryPreviewSaveDelegate(
+      getDiaryService: () => ServiceRegistration.getAsync<IDiaryCrudService>(),
+      getPromptService: () => ServiceRegistration.getAsync<IPromptService>(),
+      logger: _logger,
+    );
   }
 
   void _setErrorState(DiaryPreviewErrorType type) {
@@ -144,16 +159,53 @@ class DiaryPreviewController extends BaseErrorController {
 
     try {
       final aiService = await ServiceRegistration.getAsync<IAiService>();
-      _photoDateTime = _resolvePhotoDateTime(assets);
+      _photoDateTime = PhotoDateResolver.resolveMedianDateTime(assets);
 
-      final aiResult = assets.length == 1
-          ? await _generateFromSinglePhoto(aiService, assets.first, locale)
-          : await _generateFromMultiplePhotos(aiService, assets, locale);
+      final Result<GenerationOutput> genResult;
+      if (assets.length == 1) {
+        genResult = await _generationDelegate.generateFromSinglePhoto(
+          aiService: aiService,
+          asset: assets.first,
+          photoDateTime: _photoDateTime,
+          locale: locale,
+          prompt: _selectedPrompt?.text,
+          contextText: _contextText,
+          diaryLength: _diaryLength,
+        );
+      } else {
+        _isAnalyzingPhotos = true;
+        _totalPhotos = assets.length;
+        _currentPhotoIndex = 0;
+        notifyListeners();
 
-      if (aiResult == null) return; // error already handled
+        genResult = await _generationDelegate.generateFromMultiplePhotos(
+          aiService: aiService,
+          assets: assets,
+          locale: locale,
+          prompt: _selectedPrompt?.text,
+          contextText: _contextText,
+          diaryLength: _diaryLength,
+          onProgress: (current, total) {
+            _logger.info(
+              'Image analysis progress: $current/$total',
+              context: 'DiaryPreviewController',
+            );
+            _currentPhotoIndex = current;
+            _totalPhotos = total;
+            notifyListeners();
+          },
+        );
 
-      _generatedTitle = aiResult.title;
-      _generatedContent = aiResult.content;
+        _isAnalyzingPhotos = false;
+      }
+
+      if (_handleUsageLimitIfNeeded(genResult)) return;
+
+      if (genResult.isFailure) throw genResult.error;
+
+      final output = genResult.value;
+      _generatedTitle = output.title;
+      _generatedContent = output.content;
       _isSaving = true;
       setLoading(false);
 
@@ -170,36 +222,9 @@ class DiaryPreviewController extends BaseErrorController {
     }
   }
 
-  static final _epoch = DateTime(1970);
-
-  /// アセットから有効な日時を取得する。
-  ///
-  /// [AssetEntity.createDateTime] がエポック（1970年以前）の場合は
-  /// [AssetEntity.modifiedDateTime] をフォールバックとして使用する。
-  static DateTime _resolveAssetDateTime(AssetEntity asset) {
-    final createDate = asset.createDateTime;
-    return createDate.isAfter(_epoch) ? createDate : asset.modifiedDateTime;
-  }
-
-  /// 写真リストの代表日時を算出（中央値）
-  DateTime _resolvePhotoDateTime(List<AssetEntity> assets) {
-    final photoTimes =
-        assets
-            .map(_resolveAssetDateTime)
-            .where((dt) => dt.isAfter(_epoch))
-            .toList()
-          ..sort();
-
-    if (photoTimes.isEmpty) return DateTime.now();
-
-    return photoTimes.length == 1
-        ? photoTimes.first
-        : photoTimes[photoTimes.length ~/ 2];
-  }
-
   /// AI生成結果のusage limitチェック。制限到達時は true を返す。
-  bool _handleUsageLimitIfNeeded(Result<DiaryGenerationResult> resultFromAi) {
-    if (resultFromAi case Failure<DiaryGenerationResult>(
+  bool _handleUsageLimitIfNeeded(Result<GenerationOutput> result) {
+    if (result case Failure<GenerationOutput>(
       exception: AiProcessingException(isUsageLimitError: true),
     )) {
       _usageLimitReached = true;
@@ -211,157 +236,26 @@ class DiaryPreviewController extends BaseErrorController {
     return false;
   }
 
-  /// 単一写真からAI日記を生成
-  Future<DiaryGenerationResult?> _generateFromSinglePhoto(
-    IAiService aiService,
-    AssetEntity asset,
-    Locale locale,
-  ) async {
-    final imageResult = await _photoService.getImageForAi(asset);
-    if (imageResult.isFailure) {
-      _setErrorState(DiaryPreviewErrorType.generationFailed);
-      return null;
-    }
-
-    final resultFromAi = await aiService.generateDiaryFromImage(
-      imageData: imageResult.value,
-      date: _photoDateTime,
-      prompt: _selectedPrompt?.text,
-      contextText: _contextText,
-      locale: locale,
-      diaryLength: _diaryLength,
-    );
-
-    if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
-    if (resultFromAi.isFailure) throw resultFromAi.error;
-
-    return resultFromAi.value;
-  }
-
-  /// 複数写真からAI日記を生成
-  Future<DiaryGenerationResult?> _generateFromMultiplePhotos(
-    IAiService aiService,
-    List<AssetEntity> assets,
-    Locale locale,
-  ) async {
-    _logger.info(
-      'Starting sequential analysis of multiple photos',
-      context: 'DiaryPreviewController',
-    );
-
-    final imagesWithTimes = <({Uint8List imageData, DateTime time})>[];
-    for (final asset in assets) {
-      final imageResult = await _photoService.getImageForAi(asset);
-      if (imageResult.isSuccess) {
-        imagesWithTimes.add((
-          imageData: imageResult.value,
-          time: _resolveAssetDateTime(asset),
-        ));
-      } else {
-        _logger.warning(
-          'Failed to load image, skipping asset: ${asset.id}',
-          context: 'DiaryPreviewController._generateFromMultiplePhotos',
-        );
-      }
-    }
-
-    if (imagesWithTimes.isEmpty) {
-      _setErrorState(DiaryPreviewErrorType.generationFailed);
-      return null;
-    }
-
-    _isAnalyzingPhotos = true;
-    _totalPhotos = imagesWithTimes.length;
-    _currentPhotoIndex = 0;
-    notifyListeners();
-
-    final resultFromAi = await aiService.generateDiaryFromMultipleImages(
-      imagesWithTimes: imagesWithTimes,
-      prompt: _selectedPrompt?.text,
-      contextText: _contextText,
-      onProgress: (current, total) {
-        _logger.info(
-          'Image analysis progress: $current/$total',
-          context: 'DiaryPreviewController',
-        );
-        _currentPhotoIndex = current;
-        _totalPhotos = total;
-        notifyListeners();
-      },
-      locale: locale,
-      diaryLength: _diaryLength,
-    );
-
-    _isAnalyzingPhotos = false;
-
-    if (_handleUsageLimitIfNeeded(resultFromAi)) return null;
-    if (resultFromAi.isFailure) throw resultFromAi.error;
-
-    return resultFromAi.value;
-  }
-
   /// プロンプト使用履歴を記録（非クリティカル）
   Future<void> _recordPromptUsage() async {
     if (_selectedPrompt == null) return;
-    try {
-      final promptService =
-          await ServiceRegistration.getAsync<IPromptService>();
-      final result = await promptService.recordPromptUsage(
-        promptId: _selectedPrompt!.id,
-      );
-      if (result case Failure(:final exception)) {
-        _logger.error(
-          'Prompt usage history recording failed',
-          error: exception,
-          context: 'DiaryPreviewController',
-        );
-      }
-    } catch (e) {
-      _logger.error(
-        'Prompt usage history recording error',
-        error: e,
-        context: 'DiaryPreviewController',
-      );
-    }
+    await _saveDelegate.recordPromptUsage(promptId: _selectedPrompt!.id);
   }
 
   /// 自動保存を実行する
   Future<void> _autoSaveDiary({required List<AssetEntity> assets}) async {
-    try {
-      _logger.info(
-        'Starting auto-save: photoCount=${assets.length}',
-        context: 'DiaryPreviewController',
-      );
+    final result = await _saveDelegate.saveDiary(
+      photoDateTime: _photoDateTime,
+      title: _generatedTitle,
+      content: _generatedContent,
+      assets: assets,
+    );
 
-      final diaryService =
-          await ServiceRegistration.getAsync<IDiaryCrudService>();
-
-      final saveResult = await diaryService.saveDiaryEntryWithPhotos(
-        date: _photoDateTime,
-        title: _generatedTitle,
-        content: _generatedContent,
-        photos: assets,
-      );
-
-      if (saveResult.isFailure) {
-        throw saveResult.error;
-      }
-
-      final savedDiary = saveResult.value;
-      _logger.info('Auto-save succeeded', context: 'DiaryPreviewController');
-
-      _savedDiaryId = savedDiary.id;
+    if (result.isSuccess) {
+      _savedDiaryId = result.value;
       _isSaving = false;
       notifyListeners();
-    } catch (e, stackTrace) {
-      final appError = ErrorHandler.handleError(e, context: 'auto-save');
-      _logger.error(
-        'Diary auto-save failed',
-        context: 'DiaryPreviewController._autoSaveDiary',
-        error: appError,
-        stackTrace: stackTrace,
-      );
-
+    } else {
       _isSaving = false;
       _setErrorState(DiaryPreviewErrorType.saveFailed);
     }
@@ -373,41 +267,20 @@ class DiaryPreviewController extends BaseErrorController {
     required String title,
     required String content,
   }) async {
-    try {
-      setLoading(true);
-      _clearErrorState();
+    setLoading(true);
+    _clearErrorState();
 
-      _logger.info(
-        'Starting diary save: photoCount=${assets.length}',
-        context: 'DiaryPreviewController',
-      );
+    final result = await _saveDelegate.saveDiary(
+      photoDateTime: _photoDateTime,
+      title: title,
+      content: content,
+      assets: assets,
+    );
 
-      final diaryService =
-          await ServiceRegistration.getAsync<IDiaryCrudService>();
-
-      final manualSaveResult = await diaryService.saveDiaryEntryWithPhotos(
-        date: _photoDateTime,
-        title: title,
-        content: content,
-        photos: assets,
-      );
-
-      if (manualSaveResult.isFailure) {
-        throw manualSaveResult.error;
-      }
-
-      _logger.info('Diary save succeeded', context: 'DiaryPreviewController');
+    if (result.isSuccess) {
       setLoading(false);
       return true;
-    } catch (e, stackTrace) {
-      final appError = ErrorHandler.handleError(e, context: 'diary-save');
-      _logger.error(
-        'Diary save failed',
-        context: 'DiaryPreviewController._saveDiaryEntry',
-        error: appError,
-        stackTrace: stackTrace,
-      );
-
+    } else {
       _setErrorState(DiaryPreviewErrorType.saveFailed);
       return false;
     }
