@@ -12,7 +12,9 @@ class PhotoDateResolver {
   /// [AssetEntity.modifiedDateTime] をフォールバックとして使用する。
   static DateTime resolveAssetDateTime(AssetEntity asset) {
     final createDate = asset.createDateTime;
-    return createDate.isAfter(_epoch) ? createDate : asset.modifiedDateTime;
+    if (createDate.isAfter(_epoch)) return createDate;
+    final modifiedDate = asset.modifiedDateTime;
+    return modifiedDate.isAfter(_epoch) ? modifiedDate : DateTime.now();
   }
 
   /// 写真リストの代表日時を算出（中央値）
