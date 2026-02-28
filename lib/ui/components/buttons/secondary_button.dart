@@ -34,7 +34,12 @@ class SecondaryButton extends StatelessWidget {
         ),
       ),
       elevation: 0,
-      child: ButtonContent(text: text, icon: icon, iconSpacing: AppSpacing.xs),
+      child: ButtonContent(
+        text: text,
+        icon: icon,
+        iconSpacing: AppSpacing.xs,
+        maxLines: null,
+      ),
     );
   }
 }

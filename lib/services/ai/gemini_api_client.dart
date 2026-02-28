@@ -91,6 +91,18 @@ class GeminiApiClient {
     double? temperature,
     int? maxOutputTokens,
   }) async {
+    // APIキー検証を先に行い、無効時に高コストなBase64エンコードを回避
+    if (!EnvironmentConfig.hasValidApiKey) {
+      _logger.error(
+        'Gemini API error: No valid API key configured',
+        context: 'sendVisionRequest',
+      );
+      EnvironmentConfig.printDebugInfo();
+      return const Failure(
+        AiProcessingException('No valid API key configured'),
+      );
+    }
+
     final base64Image = base64Encode(imageData);
 
     return _executeRequest(
