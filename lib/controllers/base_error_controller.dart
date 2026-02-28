@@ -188,28 +188,25 @@ abstract class BaseErrorController extends ChangeNotifier {
     ErrorDisplayConfig? errorConfig,
     String? retryButtonText,
   }) async {
-    int attempts = 0;
+    final result = await safeExecute(
+      operation,
+      setLoadingState: setLoadingState,
+      context: operationContext,
+    );
 
-    Future<T?> attemptOperation() async {
-      attempts++;
-      return await safeExecute(
-        operation,
-        setLoadingState: attempts == 1 ? setLoadingState : false,
-        context: operationContext,
-      );
+    if (result != null || _lastError == null || !context.mounted) {
+      return result;
     }
 
-    final result = await attemptOperation();
-
     VoidCallback? onRetry;
-    if (attempts < maxRetries) {
+    if (maxRetries > 1) {
       onRetry = () async {
         await Future.delayed(retryDelay);
         if (context.mounted) {
           await executeWithRetry(
             context,
             operation,
-            maxRetries: maxRetries - attempts,
+            maxRetries: maxRetries - 1,
             retryDelay: retryDelay,
             setLoadingState: false,
             operationContext: operationContext,
@@ -220,18 +217,14 @@ abstract class BaseErrorController extends ChangeNotifier {
       };
     }
 
-    if (result == null && _lastError != null) {
-      if (context.mounted) {
-        await showErrorInUI(
-          context,
-          config: errorConfig,
-          onRetry: onRetry,
-          retryButtonText: retryButtonText,
-        );
-      }
-    }
+    await showErrorInUI(
+      context,
+      config: errorConfig,
+      onRetry: onRetry,
+      retryButtonText: retryButtonText,
+    );
 
-    return result;
+    return null;
   }
 }
 

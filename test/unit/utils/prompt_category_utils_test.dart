@@ -407,7 +407,7 @@ void main() {
         isBasicAvailable: true,
       );
 
-      expect(stats.categoryName, '感情'); // PromptCategory.emotion.displayName
+      expect(stats.category, PromptCategory.emotion);
       expect(stats.premiumRatio, 0.7);
       expect(stats.basicAvailability, 0.3);
     });
@@ -432,7 +432,7 @@ void main() {
         expect(
           PromptWeightConfig.categoryWeights.containsKey(category),
           true,
-          reason: 'Missing weight for category: ${category.displayName}',
+          reason: 'Missing weight for category: ${category.id}',
         );
       }
     });

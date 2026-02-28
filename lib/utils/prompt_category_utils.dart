@@ -9,6 +9,18 @@ import '../ui/design_system/app_colors.dart';
 
 /// プロンプトカテゴリユーティリティ
 class PromptCategoryUtils {
+  static const Map<PromptCategory, String> _japaneseCategoryNames = {
+    PromptCategory.emotion: '感情',
+    PromptCategory.emotionDepth: '感情深掘り',
+    PromptCategory.sensoryEmotion: '感情五感',
+    PromptCategory.emotionGrowth: '感情成長',
+    PromptCategory.emotionConnection: '感情つながり',
+    PromptCategory.emotionDiscovery: '感情発見',
+    PromptCategory.emotionFantasy: '感情幻想',
+    PromptCategory.emotionHealing: '感情癒し',
+    PromptCategory.emotionEnergy: '感情エネルギー',
+  };
+
   static const Map<PromptCategory, String> _englishCategoryNames = {
     PromptCategory.emotion: 'Emotion',
     PromptCategory.emotionDepth: 'Deep Emotion',
@@ -29,24 +41,9 @@ class PromptCategoryUtils {
     required bool isPremium,
   }) {
     if (isPremium) {
-      // Premiumは全感情深掘り型カテゴリ利用可能
-      return [
-        PromptCategory.emotion, // 基本感情（Basic用）
-        PromptCategory.emotionDepth, // 感情深掘り
-        PromptCategory.sensoryEmotion, // 感情五感
-        PromptCategory.emotionGrowth, // 感情成長
-        PromptCategory.emotionConnection, // 感情つながり
-        PromptCategory.emotionDiscovery, // 感情発見
-        PromptCategory.emotionFantasy, // 感情幻想
-        PromptCategory.emotionHealing, // 感情癒し
-        PromptCategory.emotionEnergy, // 感情エネルギー
-      ];
-    } else {
-      // Basicは基本感情カテゴリのみ
-      return [
-        PromptCategory.emotion, // 基本感情
-      ];
+      return PromptCategory.values.toList();
     }
+    return [PromptCategory.emotion];
   }
 
   /// カテゴリがBasicプランで利用可能かチェック（感情深掘り型対応）
@@ -54,20 +51,7 @@ class PromptCategoryUtils {
   /// [category] チェック対象のカテゴリ
   /// 戻り値: Basicプランで利用可能かどうか
   static bool isBasicAvailable(PromptCategory category) {
-    switch (category) {
-      // 感情深掘り型カテゴリ
-      case PromptCategory.emotion:
-        return true; // 基本感情はBasic利用可能
-      case PromptCategory.emotionDepth:
-      case PromptCategory.sensoryEmotion:
-      case PromptCategory.emotionGrowth:
-      case PromptCategory.emotionConnection:
-      case PromptCategory.emotionDiscovery:
-      case PromptCategory.emotionFantasy:
-      case PromptCategory.emotionHealing:
-      case PromptCategory.emotionEnergy:
-        return false; // Premium感情カテゴリはBasic利用不可
-    }
+    return category == PromptCategory.emotion;
   }
 
   /// カテゴリの基本プロンプト数を取得
@@ -75,20 +59,8 @@ class PromptCategoryUtils {
   /// [category] 対象カテゴリ
   /// 戻り値: Basicプラン用プロンプト数
   static int getBasicPromptCount(PromptCategory category) {
-    switch (category) {
-      // 感情深掘り型カテゴリ
-      case PromptCategory.emotion:
-        return 5; // Basic感情カテゴリ
-      case PromptCategory.emotionDepth:
-      case PromptCategory.sensoryEmotion:
-      case PromptCategory.emotionGrowth:
-      case PromptCategory.emotionConnection:
-      case PromptCategory.emotionDiscovery:
-      case PromptCategory.emotionFantasy:
-      case PromptCategory.emotionHealing:
-      case PromptCategory.emotionEnergy:
-        return 0; // Premium専用カテゴリ
-    }
+    if (category == PromptCategory.emotion) return 5;
+    return 0;
   }
 
   /// カテゴリのPremiumプロンプト数を取得
@@ -286,13 +258,10 @@ class PromptCategoryUtils {
     PromptCategory category, {
     Locale? locale,
   }) {
-    final languageCode = locale?.languageCode.toLowerCase();
-
-    if (languageCode == 'en') {
-      return _englishCategoryNames[category] ?? category.displayName;
+    if (locale?.languageCode.toLowerCase() == 'en') {
+      return _englishCategoryNames[category]!;
     }
-
-    return category.displayName;
+    return _japaneseCategoryNames[category]!;
   }
 
   /// カテゴリの色を取得
@@ -340,9 +309,6 @@ class CategoryStats {
     required this.isBasicAvailable,
   });
 
-  /// カテゴリ名を取得
-  String get categoryName => category.displayName;
-
   /// Premium専用プロンプトの割合
   double get premiumRatio {
     if (totalPrompts == 0) return 0.0;
@@ -357,7 +323,7 @@ class CategoryStats {
 
   @override
   String toString() {
-    return 'CategoryStats(category: $categoryName, total: $totalPrompts, '
+    return 'CategoryStats(category: ${category.id}, total: $totalPrompts, '
         'basic: $basicPrompts, premium: $premiumPrompts, '
         'basicAvailable: $isBasicAvailable)';
   }

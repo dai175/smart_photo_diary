@@ -522,7 +522,7 @@ void main() {
             expect(
               prompt.category,
               equals(category),
-              reason: 'カテゴリ ${category.displayName} のフィルタリングが正しく動作していません',
+              reason: 'カテゴリ ${category.id} のフィルタリングが正しく動作していません',
             );
           }
 
@@ -571,7 +571,7 @@ void main() {
           expect(
             prompts.isEmpty,
             isTrue,
-            reason: 'Basicプランではカテゴリ ${category.displayName} のプロンプトが取得できてはいけません',
+            reason: 'Basicプランではカテゴリ ${category.id} のプロンプトが取得できてはいけません',
           );
         }
 
@@ -588,8 +588,7 @@ void main() {
           expect(
             prompts.isNotEmpty,
             isTrue,
-            reason:
-                'Premiumプランではカテゴリ ${category.displayName} のプロンプトが取得できる必要があります',
+            reason: 'Premiumプランではカテゴリ ${category.id} のプロンプトが取得できる必要があります',
           );
 
           for (final prompt in prompts) {
@@ -622,7 +621,7 @@ void main() {
           expect(
             entry.value,
             greaterThan(0),
-            reason: 'カテゴリ ${entry.key.displayName} にはプロンプトが存在する必要があります',
+            reason: 'カテゴリ ${entry.key.id} にはプロンプトが存在する必要があります',
           );
           totalPrompts += entry.value;
         }

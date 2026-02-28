@@ -44,18 +44,10 @@ void main() {
       expect(PromptCategory.fromId(''), PromptCategory.emotion);
     });
 
-    test('displayNames returns all category names', () {
-      final names = PromptCategory.displayNames;
-      expect(names.length, 9);
-      expect(names, contains('感情'));
-      expect(names, contains('感情深掘り'));
-      expect(names, contains('感情五感'));
-      expect(names, contains('感情成長'));
-      expect(names, contains('感情つながり'));
-      expect(names, contains('感情発見'));
-      expect(names, contains('感情幻想'));
-      expect(names, contains('感情癒し'));
-      expect(names, contains('感情エネルギー'));
+    test('all categories have unique IDs', () {
+      final ids = PromptCategory.values.map((c) => c.id).toList();
+      expect(ids.length, 9);
+      expect(ids.toSet().length, ids.length);
     });
   });
 
@@ -221,10 +213,6 @@ void main() {
         category: PromptCategory.emotionDiscovery,
         priority: 90,
       );
-
-      // categoryDisplayName
-      expect(shortPrompt.categoryDisplayName, '感情');
-      expect(longPrompt.categoryDisplayName, '感情発見');
 
       // textLength
       expect(shortPrompt.textLength, 12);

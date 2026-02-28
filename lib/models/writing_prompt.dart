@@ -11,40 +11,37 @@ part 'writing_prompt.g.dart';
 enum PromptCategory {
   // 基本感情カテゴリ（Basic用）
   @HiveField(0)
-  emotion('emotion', '感情'),
+  emotion('emotion'),
 
   // Premium感情深掘りカテゴリ
   @HiveField(1)
-  emotionDepth('emotion_depth', '感情深掘り'),
+  emotionDepth('emotion_depth'),
 
   @HiveField(2)
-  sensoryEmotion('sensory_emotion', '感情五感'),
+  sensoryEmotion('sensory_emotion'),
 
   @HiveField(3)
-  emotionGrowth('emotion_growth', '感情成長'),
+  emotionGrowth('emotion_growth'),
 
   @HiveField(4)
-  emotionConnection('emotion_connection', '感情つながり'),
+  emotionConnection('emotion_connection'),
 
   @HiveField(5)
-  emotionDiscovery('emotion_discovery', '感情発見'),
+  emotionDiscovery('emotion_discovery'),
 
   @HiveField(6)
-  emotionFantasy('emotion_fantasy', '感情幻想'),
+  emotionFantasy('emotion_fantasy'),
 
   @HiveField(7)
-  emotionHealing('emotion_healing', '感情癒し'),
+  emotionHealing('emotion_healing'),
 
   @HiveField(8)
-  emotionEnergy('emotion_energy', '感情エネルギー');
+  emotionEnergy('emotion_energy');
 
-  const PromptCategory(this.id, this.displayName);
+  const PromptCategory(this.id);
 
   /// カテゴリID（JSON保存用）
   final String id;
-
-  /// 表示名（日本語）
-  final String displayName;
 
   /// IDからカテゴリを取得
   static PromptCategory fromId(String id) {
@@ -52,13 +49,6 @@ enum PromptCategory {
       (category) => category.id == id,
       orElse: () => PromptCategory.emotion,
     );
-  }
-
-  /// 表示名のリストを取得
-  static List<String> get displayNames {
-    return PromptCategory.values
-        .map((category) => category.displayName)
-        .toList();
   }
 }
 
@@ -213,9 +203,6 @@ class WritingPrompt extends HiveObject {
     return false;
   }
 
-  /// カテゴリの表示名を取得
-  String get categoryDisplayName => category.displayName;
-
   /// プロンプトの長さ（文字数）を取得
   int get textLength => text.length;
 
@@ -273,7 +260,7 @@ class WritingPrompt extends HiveObject {
 
   @override
   String toString() {
-    return 'WritingPrompt(id: $id, category: ${category.displayName}, isPremium: $isPremiumOnly, text: $previewText)';
+    return 'WritingPrompt(id: $id, category: ${category.id}, isPremium: $isPremiumOnly, text: $previewText)';
   }
 
   @override
@@ -290,7 +277,7 @@ class WritingPrompt extends HiveObject {
   Map<String, dynamic> get debugInfo {
     return {
       'id': id,
-      'category': category.displayName,
+      'category': category.id,
       'isPremiumOnly': isPremiumOnly,
       'textLength': textLength,
       'tagsCount': tags.length,
