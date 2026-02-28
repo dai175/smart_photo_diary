@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design_system/app_spacing.dart';
 import 'animated_button_base.dart';
+import 'button_content.dart';
 
 /// サーフェスボタン（Material Design 3 Surface Tint）
 class SurfaceButton extends StatelessWidget {
@@ -28,19 +29,7 @@ class SurfaceButton extends StatelessWidget {
           : theme.colorScheme.surfaceContainerHighest,
       foregroundColor: theme.colorScheme.onSurface,
       elevation: AppSpacing.elevationXs,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: AppSpacing.iconSm),
-            const SizedBox(width: AppSpacing.sm),
-          ],
-          Flexible(
-            child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
-          ),
-        ],
-      ),
+      child: ButtonContent(text: text, icon: icon),
     );
   }
 }

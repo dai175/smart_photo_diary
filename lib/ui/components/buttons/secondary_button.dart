@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/app_spacing.dart';
 import '../../component_constants.dart';
 import 'animated_button_base.dart';
+import 'button_content.dart';
 
 /// セカンダリーボタン
 class SecondaryButton extends StatelessWidget {
@@ -33,17 +34,7 @@ class SecondaryButton extends StatelessWidget {
         ),
       ),
       elevation: 0,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: AppSpacing.iconSm),
-            const SizedBox(width: AppSpacing.xs),
-          ],
-          Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
+      child: ButtonContent(text: text, icon: icon, iconSpacing: AppSpacing.xs),
     );
   }
 }

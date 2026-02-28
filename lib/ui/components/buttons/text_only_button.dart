@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design_system/app_spacing.dart';
 import 'animated_button_base.dart';
+import 'button_content.dart';
 
 /// テキストのみボタン
 class TextOnlyButton extends StatelessWidget {
@@ -28,19 +29,7 @@ class TextOnlyButton extends StatelessWidget {
       elevation: 0,
       padding: AppSpacing.buttonPaddingSmall,
       enableScaleAnimation: false, // テキストボタンはスケールアニメーションなし
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: AppSpacing.iconSm),
-            const SizedBox(width: AppSpacing.xs),
-          ],
-          Flexible(
-            child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
-          ),
-        ],
-      ),
+      child: ButtonContent(text: text, icon: icon, iconSpacing: AppSpacing.xs),
     );
   }
 }

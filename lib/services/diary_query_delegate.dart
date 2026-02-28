@@ -56,6 +56,34 @@ class DiaryQueryDelegate {
     }
   }
 
+  /// フィルタ条件に基づいてID候補のイテラブルを構築
+  Iterable<String> _buildFilteredIdIterable(DiaryFilter filter) {
+    Iterable<String> idIterable = _indexManager.sortedIdsByDateDesc;
+
+    // 日付範囲があれば二分探索で範囲を絞る
+    if (filter.dateRange != null) {
+      final r = filter.dateRange!;
+      final s = DateTime(r.start.year, r.start.month, r.start.day);
+      final e = DateTime(r.end.year, r.end.month, r.end.day);
+      final range = _indexManager.findRangeByDateRange(s, e);
+      idIterable = _indexManager.sortedIdsByDateDesc.sublist(
+        range[0],
+        range[1],
+      );
+    }
+
+    // 検索語があれば検索インデックスで候補を絞り込み
+    final q = (filter.searchText ?? '').trim().toLowerCase();
+    if (q.isNotEmpty) {
+      idIterable = idIterable.where((id) {
+        final text = _indexManager.searchTextIndex[id];
+        return text != null && text.contains(q);
+      });
+    }
+
+    return idIterable;
+  }
+
   /// フィルタを適用して日記エントリーを取得
   Future<Result<List<DiaryEntry>>> getFilteredDiaryEntries(
     DiaryFilter filter,
@@ -72,27 +100,8 @@ class DiaryQueryDelegate {
         }
         return Success(result);
       }
-      // 日付範囲があれば二分探索で範囲を絞る
-      Iterable<String> idIterable = _indexManager.sortedIdsByDateDesc;
-      if (filter.dateRange != null) {
-        final r = filter.dateRange!;
-        final s = DateTime(r.start.year, r.start.month, r.start.day);
-        final e = DateTime(r.end.year, r.end.month, r.end.day);
-        final range = _indexManager.findRangeByDateRange(s, e);
-        idIterable = _indexManager.sortedIdsByDateDesc.sublist(
-          range[0],
-          range[1],
-        );
-      }
-      // 検索語があれば検索インデックスで候補を絞り込み
-      final q = (filter.searchText ?? '').trim().toLowerCase();
-      if (q.isNotEmpty) {
-        idIterable = idIterable.where((id) {
-          final text = _indexManager.searchTextIndex[id];
-          return text != null && text.contains(q);
-        });
-      }
-      for (final id in idIterable) {
+
+      for (final id in _buildFilteredIdIterable(filter)) {
         final e = box.get(id);
         if (e != null && filter.matches(e)) {
           result.add(e);
@@ -140,28 +149,7 @@ class DiaryQueryDelegate {
       final page = <DiaryEntry>[];
       int skipped = 0;
 
-      // 日付範囲があれば先に範囲を絞る
-      Iterable<String> idIterable = _indexManager.sortedIdsByDateDesc;
-      if (filter.dateRange != null) {
-        final r = filter.dateRange!;
-        final s = DateTime(r.start.year, r.start.month, r.start.day);
-        final e = DateTime(r.end.year, r.end.month, r.end.day);
-        final range = _indexManager.findRangeByDateRange(s, e);
-        idIterable = _indexManager.sortedIdsByDateDesc.sublist(
-          range[0],
-          range[1],
-        );
-      }
-      // 検索語があれば候補を先に絞る
-      final q = (filter.searchText ?? '').trim().toLowerCase();
-      if (q.isNotEmpty) {
-        idIterable = idIterable.where((id) {
-          final text = _indexManager.searchTextIndex[id];
-          return text != null && text.contains(q);
-        });
-      }
-
-      for (final id in idIterable) {
+      for (final id in _buildFilteredIdIterable(filter)) {
         final e = box.get(id);
         if (e == null) continue;
         if (!filter.matches(e)) continue;

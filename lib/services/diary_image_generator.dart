@@ -42,13 +42,15 @@ class DiaryImageGenerator {
       final outputFile = File('${tempDir.path}/$fileName');
 
       // キャンバスサイズを設定（スケール対応）
-      final actualWidth = format.isHD ? format.scaledWidth : format.width;
-      final actualHeight = format.isHD ? format.scaledHeight : format.height;
-
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(
         recorder,
-        Rect.fromLTWH(0, 0, actualWidth.toDouble(), actualHeight.toDouble()),
+        Rect.fromLTWH(
+          0,
+          0,
+          format.actualWidth.toDouble(),
+          format.actualHeight.toDouble(),
+        ),
       );
 
       // 画像を描画（分離レイアウト既定）
@@ -56,7 +58,10 @@ class DiaryImageGenerator {
 
       // Pictureからイメージに変換（スケール対応）
       final picture = recorder.endRecording();
-      final image = await picture.toImage(actualWidth, actualHeight);
+      final image = await picture.toImage(
+        format.actualWidth,
+        format.actualHeight,
+      );
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
@@ -96,8 +101,8 @@ class DiaryImageGenerator {
     List<AssetEntity>? photos,
   ) async {
     // ベース背景（ごく薄いグラデ）
-    final w = (format.isHD ? format.scaledWidth : format.width).toDouble();
-    final h = (format.isHD ? format.scaledHeight : format.height).toDouble();
+    final w = format.actualWidth.toDouble();
+    final h = format.actualHeight.toDouble();
     final baseBg = ui.Gradient.linear(
       const Offset(0, 0),
       Offset(w, h),

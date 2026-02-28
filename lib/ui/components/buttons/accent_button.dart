@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../design_system/app_spacing.dart';
 import 'animated_button_base.dart';
+import 'button_content.dart';
 
 /// アクセントボタン
 class AccentButton extends StatelessWidget {
@@ -26,19 +26,7 @@ class AccentButton extends StatelessWidget {
       backgroundColor: theme.colorScheme.secondary,
       foregroundColor: theme.colorScheme.onSecondary,
       shadowColor: theme.colorScheme.secondary.withValues(alpha: 0.3),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: AppSpacing.iconSm),
-            const SizedBox(width: AppSpacing.sm),
-          ],
-          Flexible(
-            child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
-          ),
-        ],
-      ),
+      child: ButtonContent(text: text, icon: icon),
     );
   }
 }
