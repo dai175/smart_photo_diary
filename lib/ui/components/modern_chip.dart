@@ -23,8 +23,7 @@ class ModernChip extends StatefulWidget {
     this.size = ChipSize.medium,
     this.style = ChipStyle.filled,
     this.animationDuration = AppConstants.quickAnimationDuration,
-  }) : _isTagVariant = false,
-       _isBadgeVariant = false;
+  }) : _variant = _ChipVariant.normal;
 
   /// 日記タグ表示専用コンストラクタ
   /// 全画面で統一されたタグスタイルを提供
@@ -40,8 +39,7 @@ class ModernChip extends StatefulWidget {
       size = ChipSize.small,
       style = ChipStyle.filled,
       animationDuration = AppConstants.quickAnimationDuration,
-      _isTagVariant = true,
-      _isBadgeVariant = false;
+      _variant = _ChipVariant.tag;
 
   /// タグカウントバッジ表示専用コンストラクタ
   /// 日記詳細画面などでタグ数を表示するバッジに使用
@@ -56,8 +54,7 @@ class ModernChip extends StatefulWidget {
       size = ChipSize.small,
       style = ChipStyle.filled,
       animationDuration = AppConstants.quickAnimationDuration,
-      _isTagVariant = false,
-      _isBadgeVariant = true;
+      _variant = _ChipVariant.badge;
 
   /// チップのラベルテキスト
   final String label;
@@ -95,11 +92,8 @@ class ModernChip extends StatefulWidget {
   /// アニメーションの継続時間
   final Duration animationDuration;
 
-  /// タグバリアントかどうか（内部フラグ）
-  final bool _isTagVariant;
-
-  /// バッジバリアントかどうか（内部フラグ）
-  final bool _isBadgeVariant;
+  /// チップのバリアント（内部フラグ）
+  final _ChipVariant _variant;
 
   @override
   State<ModernChip> createState() => _ModernChipState();
@@ -306,7 +300,8 @@ class _ModernChipState extends State<ModernChip>
       );
     }
 
-    if (widget._isTagVariant || widget._isBadgeVariant) {
+    if (widget._variant == _ChipVariant.tag ||
+        widget._variant == _ChipVariant.badge) {
       final isDark = Theme.of(context).brightness == Brightness.dark;
       final bg = AppColors.primary.withValues(alpha: AppConstants.opacityXXLow);
       return _ChipColorData(
@@ -326,6 +321,9 @@ class _ModernChipState extends State<ModernChip>
     );
   }
 }
+
+/// チップのバリアント（内部用）
+enum _ChipVariant { normal, tag, badge }
 
 /// チップのサイズ
 enum ChipSize { small, medium, large }
