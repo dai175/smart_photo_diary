@@ -117,7 +117,9 @@ class _ModernChipState extends State<ModernChip>
       animation: tapScaleController,
       builder: (context, child) {
         return Transform.scale(
-          scale: widget.onTap != null ? tapScaleAnimation.value : 1.0,
+          scale: (widget.enabled && widget.onTap != null)
+              ? tapScaleAnimation.value
+              : 1.0,
           child: MouseRegion(
             onEnter: (_) => _handleHoverEnter(),
             onExit: (_) => _handleHoverExit(),
