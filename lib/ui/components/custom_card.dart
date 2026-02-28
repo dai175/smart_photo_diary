@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../design_system/app_colors.dart';
 import '../../constants/app_constants.dart';
 import '../design_system/app_spacing.dart';
+import '../animations/tap_scale_mixin.dart';
 
 /// 統一されたデザインのカードコンポーネント
 /// 美しいシャドウ、アニメーション、ホバー効果を提供
@@ -67,9 +68,7 @@ class CustomCard extends StatefulWidget {
 }
 
 class _CustomCardState extends State<CustomCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+    with SingleTickerProviderStateMixin, TapScaleMixin {
   late Animation<double> _elevationAnimation;
 
   bool _isHovered = false;
@@ -77,13 +76,10 @@ class _CustomCardState extends State<CustomCard>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: AppConstants.shortAnimationDuration,
+    initTapScale(
       vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.99).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      duration: AppConstants.shortAnimationDuration,
+      scaleFactor: 0.99,
     );
 
     _elevationAnimation =
@@ -91,35 +87,32 @@ class _CustomCardState extends State<CustomCard>
           begin: widget.elevation ?? AppSpacing.elevationXs,
           end: (widget.elevation ?? AppSpacing.elevationXs) + 2,
         ).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeInOut,
-          ),
+          CurvedAnimation(parent: tapScaleController, curve: Curves.easeInOut),
         );
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    disposeTapScale();
     super.dispose();
   }
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.enableTapAnimation) {
-      _animationController.forward();
+      handleTapScaleDown();
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.enableTapAnimation) {
-      _animationController.reverse();
+      handleTapScaleUp();
     }
     widget.onTap?.call();
   }
 
   void _handleTapCancel() {
     if (widget.enableTapAnimation) {
-      _animationController.reverse();
+      handleTapScaleCancel();
     }
   }
 
@@ -145,7 +138,7 @@ class _CustomCardState extends State<CustomCard>
         widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
 
     return AnimatedBuilder(
-      animation: _animationController,
+      animation: tapScaleController,
       builder: (context, child) {
         return Container(
           width: widget.width,
@@ -159,7 +152,9 @@ class _CustomCardState extends State<CustomCard>
               onTapUp: widget.onTap != null ? _handleTapUp : null,
               onTapCancel: widget.onTap != null ? _handleTapCancel : null,
               child: Transform.scale(
-                scale: widget.enableTapAnimation ? _scaleAnimation.value : 1.0,
+                scale: widget.enableTapAnimation
+                    ? tapScaleAnimation.value
+                    : 1.0,
                 child: AnimatedContainer(
                   duration: AppConstants.quickAnimationDuration,
                   curve: Curves.easeInOut,

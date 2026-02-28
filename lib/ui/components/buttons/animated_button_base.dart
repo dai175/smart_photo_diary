@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_constants.dart';
 import '../../design_system/app_spacing.dart';
 import '../../design_system/app_typography.dart';
+import '../../animations/tap_scale_mixin.dart';
 
 /// Smart Photo Diary 統一ボタンシステム
 ///
@@ -87,60 +88,44 @@ class AnimatedButton extends StatefulWidget {
 }
 
 class _AnimatedButtonState extends State<AnimatedButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+    with SingleTickerProviderStateMixin, TapScaleMixin {
   late Animation<double> _elevationAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: widget.animationDuration,
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: AppConstants.scalePressed)
-        .animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeInOut,
-          ),
-        );
+    initTapScale(vsync: this, duration: widget.animationDuration);
 
     _elevationAnimation =
         Tween<double>(
           begin: widget.elevation ?? AppSpacing.elevationSm,
           end: (widget.elevation ?? AppSpacing.elevationSm) * 0.5,
         ).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeInOut,
-          ),
+          CurvedAnimation(parent: tapScaleController, curve: Curves.easeInOut),
         );
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    disposeTapScale();
     super.dispose();
   }
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.enableScaleAnimation) {
-      _animationController.forward();
+      handleTapScaleDown();
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.enableScaleAnimation) {
-      _animationController.reverse();
+      handleTapScaleUp();
     }
   }
 
   void _handleTapCancel() {
     if (widget.enableScaleAnimation) {
-      _animationController.reverse();
+      handleTapScaleCancel();
     }
   }
 
@@ -157,10 +142,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
         widget.foregroundColor ?? theme.colorScheme.onPrimary;
 
     return AnimatedBuilder(
-      animation: _animationController,
+      animation: tapScaleController,
       builder: (context, child) {
         return Transform.scale(
-          scale: widget.enableScaleAnimation ? _scaleAnimation.value : 1.0,
+          scale: widget.enableScaleAnimation ? tapScaleAnimation.value : 1.0,
           child: Container(
             width: widget.width,
             height: widget.height ?? AppSpacing.buttonHeightLg,

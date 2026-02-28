@@ -262,11 +262,6 @@ class SubscriptionStatus extends HiveObject {
     );
   }
 
-  /// 現在のプランを新しいPlanクラスとして取得
-  Plan getCurrentPlanClass() {
-    return PlanFactory.createPlan(planId);
-  }
-
   /// デバッグ用文字列表現
   @override
   String toString() {

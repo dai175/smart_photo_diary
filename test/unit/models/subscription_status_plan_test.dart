@@ -46,7 +46,7 @@ void main() {
           final newStatus = status.copyWith(planId: plan.id);
           expect(newStatus.planId, plan.id);
           // currentPlanのenumプロパティは削除されたため、Planクラスで検証
-          final planClass = newStatus.getCurrentPlanClass();
+          final planClass = newStatus.currentPlanClass;
           expect(planClass.id, plan.id);
         }
       });
@@ -64,9 +64,9 @@ void main() {
           isActive: true,
         );
 
-        expect(basicStatus.getCurrentPlanClass(), isA<BasicPlan>());
-        expect(monthlyStatus.getCurrentPlanClass(), isA<PremiumMonthlyPlan>());
-        expect(yearlyStatus.getCurrentPlanClass(), isA<PremiumYearlyPlan>());
+        expect(basicStatus.currentPlanClass, isA<BasicPlan>());
+        expect(monthlyStatus.currentPlanClass, isA<PremiumMonthlyPlan>());
+        expect(yearlyStatus.currentPlanClass, isA<PremiumYearlyPlan>());
       });
 
       test('プランIDに対応する正しいプロパティを持つ', () {
@@ -75,7 +75,7 @@ void main() {
           isActive: true,
         );
 
-        final plan = status.getCurrentPlanClass();
+        final plan = status.currentPlanClass;
 
         expect(plan.id, 'premium_yearly');
         expect(plan.price, 2800);
@@ -94,7 +94,7 @@ void main() {
 
         for (final status in statuses) {
           // Planクラスのプロパティを検証
-          final classPlan = status.getCurrentPlanClass();
+          final classPlan = status.currentPlanClass;
 
           // Planクラスの基本プロパティを検証
           expect(classPlan.id, status.planId);
@@ -118,14 +118,8 @@ void main() {
         // planIdはそのまま保持される
         expect(invalidStatus.planId, 'invalid_plan');
 
-        // getCurrentPlanClassは例外をスローする
-        expect(
-          () => invalidStatus.getCurrentPlanClass(),
-          throwsA(isA<ArgumentError>()),
-        );
-
-        // currentPlanのenumプロパティは削除されたため、このテストは無効
-        // PlanFactoryは不正なプランIDに対してArgumentErrorをスローする
+        // currentPlanClass ゲッターは不正なプランIDに対してBasicPlanにフォールバック
+        expect(invalidStatus.currentPlanClass, isA<BasicPlan>());
       });
     });
 
@@ -142,8 +136,8 @@ void main() {
           monthlyUsageCount: 50,
         );
 
-        final basicPlan = basicStatus.getCurrentPlanClass();
-        final premiumPlan = premiumStatus.getCurrentPlanClass();
+        final basicPlan = basicStatus.currentPlanClass;
+        final premiumPlan = premiumStatus.currentPlanClass;
 
         // 制限値の確認
         expect(basicPlan.monthlyAiGenerationLimit, 10);
@@ -161,8 +155,8 @@ void main() {
           isActive: true,
         );
 
-        final basicPlan = basicStatus.getCurrentPlanClass();
-        final premiumPlan = premiumStatus.getCurrentPlanClass();
+        final basicPlan = basicStatus.currentPlanClass;
+        final premiumPlan = premiumStatus.currentPlanClass;
 
         // Basicプランの機能制限
         expect(basicPlan.hasWritingPrompts, false);
