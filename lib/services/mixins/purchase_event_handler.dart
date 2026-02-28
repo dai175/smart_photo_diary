@@ -136,12 +136,8 @@ mixin PurchaseEventHandler on ServiceLogging {
         data: {'productId': purchaseDetails.productID},
       );
 
-      await applyPurchaseSideEffects(purchaseDetails);
+      final plan = await applyPurchaseSideEffects(purchaseDetails);
 
-      final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
-      if (plan == null) {
-        throw ArgumentError('Unknown product ID: ${purchaseDetails.productID}');
-      }
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.purchased,
         productId: purchaseDetails.productID,
@@ -168,8 +164,8 @@ mixin PurchaseEventHandler on ServiceLogging {
   }
 
   /// 購入完了時のサイドエフェクト（サブスクリプション状態更新）のみを実行する。
-  /// ストリームイベントはemitしない。
-  Future<void> applyPurchaseSideEffects(
+  /// ストリームイベントはemitしない。解決されたプランを返す。
+  Future<Plan> applyPurchaseSideEffects(
     iap.PurchaseDetails purchaseDetails,
   ) async {
     final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
@@ -177,6 +173,7 @@ mixin PurchaseEventHandler on ServiceLogging {
       throw ArgumentError('Unknown product ID: ${purchaseDetails.productID}');
     }
     await updateSubscriptionFromPurchase(purchaseDetails, plan);
+    return plan;
   }
 
   /// 購入復元を処理
@@ -191,14 +188,14 @@ mixin PurchaseEventHandler on ServiceLogging {
       );
 
       // サイドエフェクトのみ実行（ストリームイベントはemitしない）
-      await applyPurchaseSideEffects(purchaseDetails);
+      final plan = await applyPurchaseSideEffects(purchaseDetails);
 
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.restored,
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
         purchaseDate: _parseTransactionDate(purchaseDetails.transactionDate),
-        plan: PlanFactory.getPlanByProductId(purchaseDetails.productID),
+        plan: plan,
       );
       purchaseStreamController.add(result);
 

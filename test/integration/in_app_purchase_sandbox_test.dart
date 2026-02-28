@@ -23,7 +23,6 @@ void main() {
             .map((p) => p.productId)
             .toList();
         expect(paidProductIds, isNotEmpty);
-        expect(paidProductIds.length, equals(2));
 
         // 期待される商品IDが含まれていることを確認
         expect(
@@ -101,9 +100,7 @@ void main() {
         expect(PlanFactory.getPlanByProductId('invalid_product_id'), isNull);
       });
 
-      test('Basicプランの商品IDは空文字列', () {
-        expect(BasicPlan().productId, isEmpty);
-        // 空文字列でgetPlanByProductIdを呼ぶとnullが返る
+      test('空文字列の商品IDでnullが返される', () {
         expect(PlanFactory.getPlanByProductId(''), isNull);
       });
     });

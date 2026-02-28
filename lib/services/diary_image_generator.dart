@@ -140,14 +140,12 @@ class DiaryImageGenerator {
     ImageTextRenderer.fillTextPanel(canvas, split.textRect, format);
 
     // テキスト描画
-    final locale =
-        _settingsService.locale ?? ui.PlatformDispatcher.instance.locale;
     ImageTextRenderer.drawTextElementsInArea(
       canvas,
       diary,
       format,
       split.textRect,
-      locale: locale,
+      locale: _settingsService.locale,
     );
 
     // 最小ブランドはテキストパネル右下に

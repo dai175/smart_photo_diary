@@ -42,6 +42,14 @@ class PurchaseProductDelegate with PurchaseErrorHandlerMixin {
       final plan = PlanFactory.createPlan(planId);
       final productId = plan.productId;
 
+      if (productId.isEmpty) {
+        _log(
+          'Skipping price fetch for non-purchasable plan',
+          data: {'planId': planId},
+        );
+        return const Success(null);
+      }
+
       _log('Fetching price for plan: $planId (productId: $productId)');
 
       final response = await _getInAppPurchase()!.queryProductDetails({
