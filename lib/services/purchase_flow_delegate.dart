@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart' hide PurchaseStatus;
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../core/errors/error_handler.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/basic_plan.dart';
 import '../config/in_app_purchase_config.dart';
@@ -10,9 +9,10 @@ import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'purchase_product_delegate.dart';
+import 'purchase_error_handler_mixin.dart';
 
 /// 購入フロー・復元を担当する内部委譲クラス
-class PurchaseFlowDelegate {
+class PurchaseFlowDelegate with PurchaseErrorHandlerMixin {
   final ISubscriptionStateService Function() _getStateService;
   final InAppPurchase? Function() _getInAppPurchase;
   final bool Function() _getIsPurchasing;
@@ -33,6 +33,18 @@ class PurchaseFlowDelegate {
        _setIsPurchasing = setIsPurchasing,
        _productDelegate = productDelegate,
        _loggingService = loggingService;
+
+  @override
+  String get logTag => 'PurchaseFlowDelegate';
+
+  @override
+  ILoggingService? get loggingService => _loggingService;
+
+  @override
+  ISubscriptionStateService getStateService() => _getStateService();
+
+  @override
+  InAppPurchase? getInAppPurchase() => _getInAppPurchase();
 
   /// プランを購入
   Future<Result<PurchaseResult>> purchasePlan(Plan plan) async {
@@ -84,7 +96,7 @@ class PurchaseFlowDelegate {
       }
     } catch (e) {
       _setIsPurchasing(false);
-      return _handleError(
+      return handlePurchaseError(
         e,
         'purchasePlan',
         details: 'planId: ${plan.id}, productId: ${plan.productId}',
@@ -95,7 +107,7 @@ class PurchaseFlowDelegate {
   /// 購入を復元
   Future<Result<List<PurchaseResult>>> restorePurchases() async {
     try {
-      final validationError = _validateBasePreconditions();
+      final validationError = validateBasePreconditions();
       if (validationError != null) return Failure(validationError);
 
       _log('Starting purchase restoration...');
@@ -106,7 +118,7 @@ class PurchaseFlowDelegate {
 
       return const Success([PurchaseResult(status: PurchaseStatus.pending)]);
     } catch (e) {
-      return _handleError(e, 'restorePurchases');
+      return handlePurchaseError(e, 'restorePurchases');
     }
   }
 
@@ -114,23 +126,9 @@ class PurchaseFlowDelegate {
   // 内部ヘルパー
   // =================================================================
 
-  static const _logTag = 'PurchaseFlowDelegate';
-
-  ServiceException? _validateBasePreconditions() {
-    if (!_getStateService().isInitialized) {
-      return const ServiceException(
-        'SubscriptionStateService is not initialized',
-      );
-    }
-    if (_getInAppPurchase() == null) {
-      return const ServiceException('In-App Purchase not available');
-    }
-    return null;
-  }
-
   /// 購入前提条件を検証
   ServiceException? _validatePurchasePreconditions(Plan plan) {
-    final baseError = _validateBasePreconditions();
+    final baseError = validateBasePreconditions();
     if (baseError != null) return baseError;
     if (_getIsPurchasing()) {
       return const ServiceException('Another purchase is already in progress');
@@ -149,7 +147,7 @@ class PurchaseFlowDelegate {
   }) async {
     _loggingService?.error(
       'Store error occurred',
-      context: _logTag,
+      context: logTag,
       error: storeError,
     );
 
@@ -160,7 +158,7 @@ class PurchaseFlowDelegate {
           errorString.contains('StoreKit')) {
         _loggingService?.warning(
           'Simulator environment store connection error - mocking success',
-          context: _logTag,
+          context: logTag,
         );
 
         await Future.delayed(const Duration(seconds: 1));
@@ -177,7 +175,7 @@ class PurchaseFlowDelegate {
         } else {
           _loggingService?.warning(
             'Simulator mock: createStatusForPlan failed',
-            context: _logTag,
+            context: logTag,
           );
         }
       }
@@ -186,33 +184,6 @@ class PurchaseFlowDelegate {
   }
 
   void _log(String message, {Map<String, dynamic>? data}) {
-    _loggingService?.info(message, context: _logTag, data: data);
-  }
-
-  Result<T> _handleError<T>(
-    dynamic error,
-    String operation, {
-    String? details,
-  }) {
-    final errorContext = '$_logTag.$operation';
-    final message =
-        'Operation failed: $operation${details != null ? ' - $details' : ''}';
-
-    _loggingService?.error(message, context: errorContext, error: error);
-
-    final handledException = ErrorHandler.handleError(
-      error,
-      context: errorContext,
-    );
-
-    final serviceException = handledException is ServiceException
-        ? handledException
-        : ServiceException(
-            'Failed to $operation',
-            details: details ?? error.toString(),
-            originalError: error,
-          );
-
-    return Failure(serviceException);
+    _loggingService?.info(message, context: logTag, data: data);
   }
 }

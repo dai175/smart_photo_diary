@@ -1,15 +1,15 @@
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../core/errors/error_handler.dart';
 import '../models/plans/plan_factory.dart';
 import '../config/in_app_purchase_config.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
+import 'purchase_error_handler_mixin.dart';
 
 /// 商品クエリを担当する内部委譲クラス
-class PurchaseProductDelegate {
+class PurchaseProductDelegate with PurchaseErrorHandlerMixin {
   final ISubscriptionStateService Function() _getStateService;
   final InAppPurchase? Function() _getInAppPurchase;
   final ILoggingService? _loggingService;
@@ -22,10 +22,22 @@ class PurchaseProductDelegate {
        _getInAppPurchase = getInAppPurchase,
        _loggingService = loggingService;
 
+  @override
+  String get logTag => 'PurchaseProductDelegate';
+
+  @override
+  ILoggingService? get loggingService => _loggingService;
+
+  @override
+  ISubscriptionStateService getStateService() => _getStateService();
+
+  @override
+  InAppPurchase? getInAppPurchase() => _getInAppPurchase();
+
   /// 指定プランの実際の価格情報を取得
   Future<Result<PurchaseProduct?>> getProductPrice(String planId) async {
     try {
-      final validationError = _validatePreconditions();
+      final validationError = validateBasePreconditions();
       if (validationError != null) return Failure(validationError);
 
       final plan = PlanFactory.createPlan(planId);
@@ -73,14 +85,14 @@ class PurchaseProductDelegate {
 
       return Success(product);
     } catch (e) {
-      return _handleError(e, 'getProductPrice', details: planId);
+      return handlePurchaseError(e, 'getProductPrice', details: planId);
     }
   }
 
   /// In-App Purchase商品情報を取得
   Future<Result<List<PurchaseProduct>>> getProducts() async {
     try {
-      final validationError = _validatePreconditions();
+      final validationError = validateBasePreconditions();
       if (validationError != null) return Failure(validationError);
 
       _log('Fetching product information...');
@@ -102,7 +114,7 @@ class PurchaseProductDelegate {
       if (response.notFoundIDs.isNotEmpty) {
         _loggingService?.warning(
           'Products not found: ${response.notFoundIDs}',
-          context: _logTag,
+          context: logTag,
         );
       }
 
@@ -124,7 +136,7 @@ class PurchaseProductDelegate {
 
       return Success(products);
     } catch (e) {
-      return _handleError(e, 'getProducts');
+      return handlePurchaseError(e, 'getProducts');
     }
   }
 
@@ -132,7 +144,7 @@ class PurchaseProductDelegate {
   Future<ProductDetails> queryProductDetails(String productId) async {
     _loggingService?.debug(
       'Querying product details',
-      context: _logTag,
+      context: logTag,
       data: {'productId': productId},
     );
     final response = await _getInAppPurchase()!.queryProductDetails({
@@ -162,48 +174,7 @@ class PurchaseProductDelegate {
   // 内部ヘルパー
   // =================================================================
 
-  static const _logTag = 'PurchaseProductDelegate';
-
-  ServiceException? _validatePreconditions() {
-    if (!_getStateService().isInitialized) {
-      return const ServiceException(
-        'SubscriptionStateService is not initialized',
-      );
-    }
-    if (_getInAppPurchase() == null) {
-      return const ServiceException('In-App Purchase not available');
-    }
-    return null;
-  }
-
   void _log(String message, {Map<String, dynamic>? data}) {
-    _loggingService?.info(message, context: _logTag, data: data);
-  }
-
-  Result<T> _handleError<T>(
-    dynamic error,
-    String operation, {
-    String? details,
-  }) {
-    final errorContext = '$_logTag.$operation';
-    final message =
-        'Operation failed: $operation${details != null ? ' - $details' : ''}';
-
-    _loggingService?.error(message, context: errorContext, error: error);
-
-    final handledException = ErrorHandler.handleError(
-      error,
-      context: errorContext,
-    );
-
-    final serviceException = handledException is ServiceException
-        ? handledException
-        : ServiceException(
-            'Failed to $operation',
-            details: details ?? error.toString(),
-            originalError: error,
-          );
-
-    return Failure(serviceException);
+    _loggingService?.info(message, context: logTag, data: data);
   }
 }

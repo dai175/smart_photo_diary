@@ -8,19 +8,16 @@ import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
 import '../../../core/service_registration.dart';
 import '../../../localization/localization_utils.dart';
-import '../../../l10n/generated/app_localizations.dart';
 import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
 import '../../interfaces/logging_service_interface.dart';
 import '../../interfaces/photo_service_interface.dart';
 import '../../interfaces/settings_service_interface.dart';
+import '../share_channel_mixin.dart';
 
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
-class XShareChannel {
-  static const int _shareTimeoutSeconds = 60;
+class XShareChannel with ShareChannelMixin {
   static const int _xCharLimit = 280;
-  // iPad/iOS 26 で Rect が小さすぎると PlatformException が発生するため安全な値を使用
-  static const Rect _defaultShareOrigin = Rect.fromLTWH(0, 0, 100, 100);
 
   final ILoggingService _logger;
   final IPhotoService _photoService;
@@ -99,13 +96,14 @@ class XShareChannel {
             ShareParams(
               files: files,
               text: text,
-              sharePositionOrigin: shareOrigin ?? _defaultShareOrigin,
+              sharePositionOrigin:
+                  shareOrigin ?? ShareChannelMixin.defaultShareOrigin,
             ),
           )
           .timeout(
-            const Duration(seconds: _shareTimeoutSeconds),
+            const Duration(seconds: ShareChannelMixin.shareTimeoutSeconds),
             onTimeout: () {
-              final timeoutMessage = _getLocalizedMessage(
+              final timeoutMessage = getLocalizedMessage(
                 resolvedLocale,
                 (l10n) => l10n.commonShareTimeout,
                 'Sharing timed out',
@@ -135,7 +133,7 @@ class XShareChannel {
       }
       final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
 
-      final errorMessage = _getLocalizedMessage(
+      final errorMessage = getLocalizedMessage(
         resolvedLocale,
         (l10n) => l10n.commonShareFailedWithReason('Text sharing failed'),
         'Text sharing failed',
@@ -143,19 +141,6 @@ class XShareChannel {
       return Failure<void>(
         XShareException(errorMessage, originalError: e, stackTrace: st),
       );
-    }
-  }
-
-  String _getLocalizedMessage(
-    Locale locale,
-    String Function(AppLocalizations) getMessage,
-    String fallback,
-  ) {
-    try {
-      final l10n = LocalizationUtils.resolveFor(locale);
-      return getMessage(l10n);
-    } catch (_) {
-      return fallback;
     }
   }
 }
