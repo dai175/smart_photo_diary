@@ -76,6 +76,10 @@ abstract class Plan {
   // 共通プロパティ・メソッド
   // ========================================
 
+  /// 現在のロケールを取得（未設定時は 'ja' をフォールバック）
+  String get _currentLocale =>
+      Intl.getCurrentLocale().isEmpty ? 'ja' : Intl.getCurrentLocale();
+
   /// プランが有料かどうか
   bool get isPaid => price > 0;
 
@@ -87,13 +91,9 @@ abstract class Plan {
 
   /// 価格を表示用文字列に変換（デフォルト価格）
   String get formattedPrice {
-    final currentLocale = Intl.getCurrentLocale().isEmpty
-        ? 'ja'
-        : Intl.getCurrentLocale();
-
     return LocaleFormatUtils.formatCurrency(
       price,
-      locale: currentLocale,
+      locale: _currentLocale,
       currencyCode: SubscriptionConstants.defaultCurrencyCode,
     );
   }
@@ -104,13 +104,9 @@ abstract class Plan {
     String currencyCode, {
     String? locale,
   }) {
-    final currentLocale =
-        locale ??
-        (Intl.getCurrentLocale().isEmpty ? 'ja' : Intl.getCurrentLocale());
-
     return LocaleFormatUtils.formatCurrency(
       amount,
-      locale: currentLocale,
+      locale: locale ?? _currentLocale,
       currencyCode: currencyCode,
     );
   }

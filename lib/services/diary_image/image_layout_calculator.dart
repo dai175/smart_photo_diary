@@ -64,10 +64,17 @@ class ImageLayoutCalculator {
   /// 写真間のスペーシング
   static const double photoSpacing = 6.0;
 
+  /// フォーマットに基づくスケール係数を計算（幅・高さの平均、clamp済み）
+  static double _calculateScale(ShareFormat format) {
+    final widthScale = format.actualWidth / baseWidth;
+    final heightScale = format.actualHeight / baseHeight;
+    return ((widthScale + heightScale) / 2).clamp(minScale, maxScale);
+  }
+
   /// 分離レイアウトの領域（写真/テキスト）
   static ({Rect photoRect, Rect textRect}) getSplitLayout(ShareFormat format) {
-    final w = (format.isHD ? format.scaledWidth : format.width).toDouble();
-    final h = (format.isHD ? format.scaledHeight : format.height).toDouble();
+    final w = format.actualWidth.toDouble();
+    final h = format.actualHeight.toDouble();
     final scale = (format.isHD ? format.scale : 1.0);
     final gap = 12.0 * scale;
 
@@ -125,24 +132,14 @@ class ImageLayoutCalculator {
 
   /// フォーマットに応じたテキストサイズを計算
   static TextSizes calculateTextSizes(ShareFormat format, DiaryEntry diary) {
-    // 画像サイズに基づく基準スケール計算
-    final actualWidth = format.isHD ? format.scaledWidth : format.width;
-    final actualHeight = format.isHD ? format.scaledHeight : format.height;
-
     // フォーマットに応じたスケール計算
-    late final double baseScale;
+    late final double scale;
     if (format.isSquare) {
       // 正方形の場合は幅基準でスケール計算
-      baseScale = actualWidth / baseWidth;
+      scale = (format.actualWidth / baseWidth).clamp(minScale, maxScale);
     } else {
-      // 縦長の場合は幅と高さの平均
-      final widthScale = actualWidth / baseWidth;
-      final heightScale = actualHeight / baseHeight;
-      baseScale = (widthScale + heightScale) / 2;
+      scale = _calculateScale(format);
     }
-
-    // 最小・最大スケールを制限
-    final scale = baseScale.clamp(minScale, maxScale);
 
     final titleLen = diary.title.length;
     final contentLen = diary.content.length;
@@ -165,13 +162,7 @@ class ImageLayoutCalculator {
 
   /// スペーシングを計算
   static Spacing calculateSpacing(ShareFormat format) {
-    // 画像サイズに基づくスケール計算
-    final actualWidth = format.isHD ? format.scaledWidth : format.width;
-    final actualHeight = format.isHD ? format.scaledHeight : format.height;
-
-    final widthScale = actualWidth / baseWidth;
-    final heightScale = actualHeight / baseHeight;
-    final scale = ((widthScale + heightScale) / 2).clamp(minScale, maxScale);
+    final scale = _calculateScale(format);
 
     return Spacing(
       afterDate: (baseAfterDateSpacing * scale).round().toDouble(),
@@ -181,12 +172,7 @@ class ImageLayoutCalculator {
 
   /// ブランディング用フォントサイズを計算
   static double calculateBrandFontSize(ShareFormat format) {
-    final actualWidth = format.isHD ? format.scaledWidth : format.width;
-    final actualHeight = format.isHD ? format.scaledHeight : format.height;
-
-    final widthScale = actualWidth / baseWidth;
-    final heightScale = actualHeight / baseHeight;
-    final scale = ((widthScale + heightScale) / 2).clamp(minScale, maxScale);
+    final scale = _calculateScale(format);
 
     return (baseBrandFontSize * scale).round().toDouble();
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../constants/app_constants.dart';
-import '../../design_system/app_spacing.dart';
 import 'animated_button_base.dart';
+import 'button_content.dart';
 
 /// 危険な操作用ボタン
 class DangerButton extends StatelessWidget {
@@ -40,23 +40,7 @@ class DangerButton extends StatelessWidget {
                 ),
               ),
             )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: AppSpacing.iconSm),
-                  const SizedBox(width: AppSpacing.sm),
-                ],
-                Flexible(
-                  child: Text(
-                    text,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
+          : ButtonContent(text: text, icon: icon),
     );
   }
 }

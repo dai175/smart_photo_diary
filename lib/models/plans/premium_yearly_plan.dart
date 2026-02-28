@@ -1,11 +1,11 @@
-import 'plan.dart';
+import 'premium_plan.dart';
 import '../../constants/subscription_constants.dart';
 
 /// Premium年額プランの実装クラス
 ///
 /// Smart Photo Diaryの年額有料プランを表現します。
 /// 月額プランよりお得な価格設定で、全機能が利用可能です。
-class PremiumYearlyPlan extends Plan {
+class PremiumYearlyPlan extends PremiumPlan {
   /// シングルトンインスタンス
   static final PremiumYearlyPlan _instance = PremiumYearlyPlan._internal();
 
@@ -23,32 +23,6 @@ class PremiumYearlyPlan extends Plan {
         features: SubscriptionConstants.premiumFeatures,
         productId: SubscriptionConstants.premiumYearlyProductId,
       );
-
-  // ========================================
-  // プラン固有の機能フラグ実装
-  // ========================================
-
-  @override
-  bool get isPremium => true;
-
-  @override
-  bool get hasWritingPrompts => true;
-
-  @override
-  bool get hasAdvancedFilters => true;
-
-  @override
-  bool get hasAdvancedAnalytics => true;
-
-  @override
-  bool get hasPrioritySupport => true;
-
-  @override
-  int get pastPhotoAccessDays => 365; // Premiumプランは365日前まで
-
-  // ========================================
-  // Premium年額プラン固有のメソッド
-  // ========================================
 
   /// 月額換算価格を計算
   double get monthlyEquivalentPrice => price / 12.0;
