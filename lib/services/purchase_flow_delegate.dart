@@ -4,7 +4,6 @@ import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/basic_plan.dart';
-import '../config/in_app_purchase_config.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
@@ -52,7 +51,7 @@ class PurchaseFlowDelegate with PurchaseErrorHandlerMixin {
       final validationError = _validatePurchasePreconditions(plan);
       if (validationError != null) return Failure(validationError);
 
-      final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
+      final productId = plan.productId;
       _log(
         'Purchase process started',
         data: {'planId': plan.id, 'productId': productId},

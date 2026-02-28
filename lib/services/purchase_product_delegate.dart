@@ -2,7 +2,6 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../models/plans/plan_factory.dart';
-import '../config/in_app_purchase_config.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
@@ -41,7 +40,7 @@ class PurchaseProductDelegate with PurchaseErrorHandlerMixin {
       if (validationError != null) return Failure(validationError);
 
       final plan = PlanFactory.createPlan(planId);
-      final productId = InAppPurchaseConfig.getProductIdFromPlan(plan);
+      final productId = plan.productId;
 
       _log('Fetching price for plan: $planId (productId: $productId)');
 
@@ -97,7 +96,9 @@ class PurchaseProductDelegate with PurchaseErrorHandlerMixin {
 
       _log('Fetching product information...');
 
-      final productIds = InAppPurchaseConfig.allProductIds.toSet();
+      final productIds = PlanFactory.getPaidPlans()
+          .map((p) => p.productId)
+          .toSet();
       final response = await _getInAppPurchase()!.queryProductDetails(
         productIds,
       );
@@ -118,19 +119,29 @@ class PurchaseProductDelegate with PurchaseErrorHandlerMixin {
         );
       }
 
-      final products = response.productDetails.map((productDetail) {
-        final plan = InAppPurchaseConfig.getPlanFromProductId(productDetail.id);
-        return PurchaseProduct(
-          id: productDetail.id,
-          title: productDetail.title,
-          description: productDetail.description,
-          price: productDetail.price,
-          priceAmount:
-              double.tryParse(productDetail.rawPrice.toString()) ?? 0.0,
-          currencyCode: productDetail.currencyCode,
-          plan: plan,
-        );
-      }).toList();
+      final products = response.productDetails
+          .map((productDetail) {
+            final plan = PlanFactory.getPlanByProductId(productDetail.id);
+            if (plan == null) {
+              _loggingService?.warning(
+                'Unknown product ID: ${productDetail.id}',
+                context: logTag,
+              );
+              return null;
+            }
+            return PurchaseProduct(
+              id: productDetail.id,
+              title: productDetail.title,
+              description: productDetail.description,
+              price: productDetail.price,
+              priceAmount:
+                  double.tryParse(productDetail.rawPrice.toString()) ?? 0.0,
+              currencyCode: productDetail.currencyCode,
+              plan: plan,
+            );
+          })
+          .whereType<PurchaseProduct>()
+          .toList();
 
       _log('Successfully fetched ${products.length} products');
 

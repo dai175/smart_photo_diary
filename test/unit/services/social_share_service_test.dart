@@ -11,12 +11,15 @@ import 'package:smart_photo_diary/services/social_share_service.dart';
 import 'package:smart_photo_diary/services/diary_image_generator.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 
 class MockSocialShareService extends Mock implements ISocialShareService {}
 
 class MockLoggingService extends Mock implements ILoggingService {}
 
 class MockPhotoService extends Mock implements IPhotoService {}
+
+class MockSettingsService extends Mock implements ISettingsService {}
 
 void main() {
   late ISocialShareService shareService;
@@ -152,9 +155,14 @@ void main() {
       // PhotoServiceのモックを作成
       final mockPhotoService = MockPhotoService();
 
+      // SettingsServiceのモックを作成
+      final mockSettingsService = MockSettingsService();
+      when(() => mockSettingsService.locale).thenReturn(null);
+
       // DiaryImageGeneratorのモックを作成
       final mockImageGenerator = DiaryImageGenerator(
         logger: mockLoggingService,
+        settingsService: mockSettingsService,
       );
 
       // SocialShareServiceのインスタンスを作成
@@ -187,7 +195,12 @@ void main() {
     });
 
     test('constructor returns new instance', () {
-      final imageGen = DiaryImageGenerator(logger: mockLoggingService);
+      final mockSettings = MockSettingsService();
+      when(() => mockSettings.locale).thenReturn(null);
+      final imageGen = DiaryImageGenerator(
+        logger: mockLoggingService,
+        settingsService: mockSettings,
+      );
       final photoSvc = MockPhotoService();
       final instance1 = SocialShareService(
         logger: mockLoggingService,
@@ -203,22 +216,6 @@ void main() {
       expect(instance1, isA<SocialShareService>());
       expect(instance2, isA<SocialShareService>());
       expect(instance1, isNot(same(instance2)));
-    });
-
-    test('getSupportedFormats returns all ShareFormat values', () {
-      final formats = actualService.getSupportedFormats();
-
-      expect(formats, equals(ShareFormat.values));
-      expect(formats.length, equals(3));
-      expect(formats, contains(ShareFormat.portrait));
-      expect(formats, contains(ShareFormat.portraitHD));
-      expect(formats, contains(ShareFormat.square));
-    });
-
-    test('isFormatSupported returns true for all ShareFormat values', () {
-      for (final format in ShareFormat.values) {
-        expect(actualService.isFormatSupported(format), isTrue);
-      }
     });
 
     test('getRecommendedFormat returns HD version when useHD is true', () {

@@ -9,12 +9,16 @@ import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_image_generator.dart';
 import 'package:smart_photo_diary/services/interfaces/social_share_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 
 class MockLoggingService extends Mock implements ILoggingService {}
+
+class MockSettingsService extends Mock implements ISettingsService {}
 
 void main() {
   late DiaryImageGenerator generator;
   late MockLoggingService mockLoggingService;
+  late MockSettingsService mockSettingsService;
   late ServiceLocator testServiceLocator;
   late DiaryEntry diary;
 
@@ -28,11 +32,18 @@ void main() {
     testServiceLocator = ServiceLocator();
 
     mockLoggingService = MockLoggingService();
+    mockSettingsService = MockSettingsService();
 
     // LoggingServiceを登録
     testServiceLocator.registerSingleton<ILoggingService>(mockLoggingService);
 
-    generator = DiaryImageGenerator(logger: mockLoggingService);
+    // SettingsServiceのモック設定
+    when(() => mockSettingsService.locale).thenReturn(null);
+
+    generator = DiaryImageGenerator(
+      logger: mockLoggingService,
+      settingsService: mockSettingsService,
+    );
 
     // テスト用のDiaryEntryを作成
     final now = DateTime.now();
@@ -70,8 +81,14 @@ void main() {
 
   group('DiaryImageGenerator Tests', () {
     test('constructor returns new instance', () {
-      final instance1 = DiaryImageGenerator(logger: mockLoggingService);
-      final instance2 = DiaryImageGenerator(logger: mockLoggingService);
+      final instance1 = DiaryImageGenerator(
+        logger: mockLoggingService,
+        settingsService: mockSettingsService,
+      );
+      final instance2 = DiaryImageGenerator(
+        logger: mockLoggingService,
+        settingsService: mockSettingsService,
+      );
 
       expect(instance1, isA<DiaryImageGenerator>());
       expect(instance2, isA<DiaryImageGenerator>());
@@ -167,7 +184,10 @@ void main() {
   group('DiaryImageGenerator Constants Tests', () {
     test('internal constants are within reasonable ranges', () {
       // インスタンスを生成
-      final generator = DiaryImageGenerator(logger: mockLoggingService);
+      final generator = DiaryImageGenerator(
+        logger: mockLoggingService,
+        settingsService: mockSettingsService,
+      );
 
       // インスタンスが正常に作成されることを確認
       expect(generator, isNotNull);

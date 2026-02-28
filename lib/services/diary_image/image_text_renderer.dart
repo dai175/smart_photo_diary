@@ -1,9 +1,6 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../../models/diary_entry.dart';
-import '../../core/service_registration.dart';
 import '../ai/diary_locale_utils.dart';
-import '../interfaces/settings_service_interface.dart';
 import '../interfaces/social_share_service_interface.dart';
 import 'image_layout_calculator.dart';
 
@@ -76,8 +73,9 @@ class ImageTextRenderer {
     Canvas canvas,
     DiaryEntry diary,
     ShareFormat format,
-    Rect contentArea,
-  ) {
+    Rect contentArea, {
+    required Locale locale,
+  }) {
     final textAreaPadding = format.isSquare
         ? 24.0
         : (format.isPortrait ? 28.0 : 24.0);
@@ -100,7 +98,7 @@ class ImageTextRenderer {
       // 計測
       final datePainter = TextPainter(
         text: TextSpan(
-          text: formatDate(diary.date),
+          text: formatDate(diary.date, locale),
           style: _dateStyle(dateSize),
         ),
         textDirection: TextDirection.ltr,
@@ -165,7 +163,10 @@ class ImageTextRenderer {
     // フォールバック：ここに来るのは極端な長文だけ。末尾に…を付けて収める
     double currentY = textArea.top;
     final datePainterFallback = TextPainter(
-      text: TextSpan(text: formatDate(diary.date), style: _dateStyle(dateSize)),
+      text: TextSpan(
+        text: formatDate(diary.date, locale),
+        style: _dateStyle(dateSize),
+      ),
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: textArea.width);
     datePainterFallback.paint(canvas, Offset(textArea.left, currentY));
@@ -219,14 +220,7 @@ class ImageTextRenderer {
   }
 
   /// 日付をフォーマット（多言語化対応）
-  static String formatDate(DateTime date) {
-    Locale locale;
-    try {
-      final settingsService = ServiceRegistration.get<ISettingsService>();
-      locale = settingsService.locale ?? ui.PlatformDispatcher.instance.locale;
-    } catch (_) {
-      locale = ui.PlatformDispatcher.instance.locale;
-    }
+  static String formatDate(DateTime date, Locale locale) {
     return DiaryLocaleUtils.formatDate(date, locale);
   }
 }

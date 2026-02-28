@@ -8,6 +8,7 @@ import '../models/diary_entry.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../services/interfaces/logging_service_interface.dart';
+import 'interfaces/settings_service_interface.dart';
 import 'interfaces/social_share_service_interface.dart';
 import 'diary_image/image_layout_calculator.dart';
 import 'diary_image/image_photo_renderer.dart';
@@ -19,8 +20,13 @@ import 'diary_image/image_text_renderer.dart';
 /// 美しいシェア用画像を生成します。
 class DiaryImageGenerator {
   final ILoggingService _logger;
+  final ISettingsService _settingsService;
 
-  DiaryImageGenerator({required ILoggingService logger}) : _logger = logger;
+  DiaryImageGenerator({
+    required ILoggingService logger,
+    required ISettingsService settingsService,
+  }) : _logger = logger,
+       _settingsService = settingsService;
 
   /// 共有用画像を生成
   Future<Result<File>> generateImage({
@@ -122,6 +128,7 @@ class DiaryImageGenerator {
         photos,
         split.photoRect,
         format,
+        logger: _logger,
       );
     } else {
       // 写真が無い場合、写真領域も背景色で塗りつぶし（少し明るめ）
@@ -133,11 +140,14 @@ class DiaryImageGenerator {
     ImageTextRenderer.fillTextPanel(canvas, split.textRect, format);
 
     // テキスト描画
+    final locale =
+        _settingsService.locale ?? ui.PlatformDispatcher.instance.locale;
     ImageTextRenderer.drawTextElementsInArea(
       canvas,
       diary,
       format,
       split.textRect,
+      locale: locale,
     );
 
     // 最小ブランドはテキストパネル右下に

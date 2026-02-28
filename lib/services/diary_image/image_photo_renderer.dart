@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import '../../core/service_locator.dart';
 import '../interfaces/logging_service_interface.dart';
 import '../interfaces/social_share_service_interface.dart';
 import 'image_layout_calculator.dart';
@@ -20,12 +19,13 @@ class ImagePhotoRenderer {
     Canvas canvas,
     List<AssetEntity> photos,
     Rect area,
-    ShareFormat format,
-  ) async {
+    ShareFormat format, {
+    required ILoggingService logger,
+  }) async {
     final gap =
         ImageLayoutCalculator.photoSpacing * (format.isHD ? format.scale : 1.0);
     if (photos.length == 1) {
-      await _drawAssetIntoRect(canvas, photos.first, area);
+      await _drawAssetIntoRect(canvas, photos.first, area, logger: logger);
       return;
     }
 
@@ -36,14 +36,14 @@ class ImagePhotoRenderer {
           Rect.fromLTWH(area.left, area.top, cellW, area.height),
           Rect.fromLTWH(area.left + cellW + gap, area.top, cellW, area.height),
         ];
-        await _drawAssetsIntoRects(canvas, photos, rects);
+        await _drawAssetsIntoRects(canvas, photos, rects, logger: logger);
       } else {
         final cellH = (area.height - gap) / 2;
         final rects = [
           Rect.fromLTWH(area.left, area.top, area.width, cellH),
           Rect.fromLTWH(area.left, area.top + cellH + gap, area.width, cellH),
         ];
-        await _drawAssetsIntoRects(canvas, photos, rects);
+        await _drawAssetsIntoRects(canvas, photos, rects, logger: logger);
       }
       return;
     }
@@ -57,7 +57,7 @@ class ImagePhotoRenderer {
       Rect.fromLTWH(area.left + topCellW + gap, area.top, topCellW, topH),
       Rect.fromLTWH(area.left, area.top + topH + gap, area.width, bottomH),
     ];
-    await _drawAssetsIntoRects(canvas, photos, rects);
+    await _drawAssetsIntoRects(canvas, photos, rects, logger: logger);
   }
 
   /// プラットフォームネイティブのJPEG変換で画像バイト列を取得する。
@@ -95,11 +95,12 @@ class ImagePhotoRenderer {
   static Future<void> _drawAssetIntoRect(
     Canvas canvas,
     AssetEntity asset,
-    Rect rect,
-  ) async {
+    Rect rect, {
+    required ILoggingService logger,
+  }) async {
     final bytes = await _getImageBytes(asset, rect);
     if (bytes == null) {
-      ServiceLocator().get<ILoggingService>().warning(
+      logger.warning(
         'Failed to obtain thumbnail bytes for asset',
         context: 'ImagePhotoRenderer._drawAssetIntoRect',
         data: 'asset_id: ${asset.id}',
@@ -130,10 +131,11 @@ class ImagePhotoRenderer {
   static Future<void> _drawAssetsIntoRects(
     Canvas canvas,
     List<AssetEntity> assets,
-    List<Rect> rects,
-  ) async {
+    List<Rect> rects, {
+    required ILoggingService logger,
+  }) async {
     for (int i = 0; i < rects.length && i < assets.length; i++) {
-      await _drawAssetIntoRect(canvas, assets[i], rects[i]);
+      await _drawAssetIntoRect(canvas, assets[i], rects[i], logger: logger);
     }
   }
 }

@@ -8,7 +8,6 @@ import '../../constants/ai_constants.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../interfaces/logging_service_interface.dart';
-import '../../core/service_locator.dart';
 
 /// Gemini APIクライアント - API通信を担当
 class GeminiApiClient {
@@ -52,17 +51,13 @@ class GeminiApiClient {
       'https://generativelanguage.googleapis.com/v1beta/models/${AiConstants.geminiModelName}:generateContent';
 
   // APIキーをEnvironmentConfigから取得
-  static String get _apiKey {
+  String get _apiKey {
     final key = EnvironmentConfig.geminiApiKey;
     if (key.isEmpty) {
-      try {
-        serviceLocator.get<ILoggingService>().warning(
-          'GEMINI_API_KEY is not configured',
-          context: 'GeminiApiClient._apiKey',
-        );
-      } catch (_) {
-        // LoggingService unavailable in test
-      }
+      _logger.warning(
+        'GEMINI_API_KEY is not configured',
+        context: 'GeminiApiClient._apiKey',
+      );
       EnvironmentConfig.printDebugInfo();
     }
     return key;

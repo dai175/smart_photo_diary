@@ -3,7 +3,7 @@ import 'package:in_app_purchase/in_app_purchase.dart' as iap;
 import '../../models/subscription_status.dart';
 import '../../models/plans/plan.dart';
 import '../../constants/subscription_constants.dart';
-import '../../config/in_app_purchase_config.dart';
+import '../../models/plans/plan_factory.dart';
 import '../interfaces/in_app_purchase_service_interface.dart' as iapsi;
 import '../interfaces/in_app_purchase_service_interface.dart';
 import '../interfaces/subscription_state_service_interface.dart';
@@ -138,9 +138,10 @@ mixin PurchaseEventHandler on ServiceLogging {
 
       await applyPurchaseSideEffects(purchaseDetails);
 
-      final plan = InAppPurchaseConfig.getPlanFromProductId(
-        purchaseDetails.productID,
-      );
+      final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
+      if (plan == null) {
+        throw ArgumentError('Unknown product ID: ${purchaseDetails.productID}');
+      }
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.purchased,
         productId: purchaseDetails.productID,
@@ -171,9 +172,10 @@ mixin PurchaseEventHandler on ServiceLogging {
   Future<void> applyPurchaseSideEffects(
     iap.PurchaseDetails purchaseDetails,
   ) async {
-    final plan = InAppPurchaseConfig.getPlanFromProductId(
-      purchaseDetails.productID,
-    );
+    final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
+    if (plan == null) {
+      throw ArgumentError('Unknown product ID: ${purchaseDetails.productID}');
+    }
     await updateSubscriptionFromPurchase(purchaseDetails, plan);
   }
 
@@ -196,9 +198,7 @@ mixin PurchaseEventHandler on ServiceLogging {
         productId: purchaseDetails.productID,
         transactionId: purchaseDetails.purchaseID,
         purchaseDate: _parseTransactionDate(purchaseDetails.transactionDate),
-        plan: InAppPurchaseConfig.getPlanFromProductId(
-          purchaseDetails.productID,
-        ),
+        plan: PlanFactory.getPlanByProductId(purchaseDetails.productID),
       );
       purchaseStreamController.add(result);
 
