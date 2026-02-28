@@ -238,6 +238,10 @@ class StorageImportResultDialog {
       );
     }
 
+    if (parts.isEmpty) {
+      return context.l10n.settingsRestoreCompleteMessage(0);
+    }
+
     return parts.join(', ');
   }
 
