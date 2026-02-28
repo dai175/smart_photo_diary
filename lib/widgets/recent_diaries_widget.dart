@@ -4,6 +4,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/loading_shimmer.dart';
+import '../ui/components/modern_chip.dart';
 import '../localization/localization_extensions.dart';
 
 /// 最近の日記表示ウィジェット
@@ -164,29 +165,7 @@ class RecentDiariesWidget extends StatelessWidget {
     return Wrap(
       spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
-      children: tags
-          .take(3)
-          .map(
-            (tag) => Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xxs,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.secondary.withValues(alpha: 0.1),
-                borderRadius: AppSpacing.chipRadius,
-              ),
-              child: Text(
-                tag,
-                style: AppTypography.labelSmall.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-              ),
-            ),
-          )
-          .toList(),
+      children: tags.take(3).map((tag) => ModernChip.tag(label: tag)).toList(),
     );
   }
 }

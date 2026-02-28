@@ -23,7 +23,23 @@ class ModernChip extends StatefulWidget {
     this.size = ChipSize.medium,
     this.style = ChipStyle.filled,
     this.animationDuration = AppConstants.quickAnimationDuration,
-  });
+  }) : _isTagVariant = false;
+
+  /// 日記タグ表示専用コンストラクタ
+  /// 全画面で統一されたタグスタイルを提供
+  const ModernChip.tag({super.key, required this.label})
+    : onTap = null,
+      onDeleted = null,
+      backgroundColor = null,
+      foregroundColor = null,
+      icon = null,
+      deleteIcon = null,
+      selected = false,
+      enabled = true,
+      size = ChipSize.small,
+      style = ChipStyle.filled,
+      animationDuration = AppConstants.quickAnimationDuration,
+      _isTagVariant = true;
 
   /// チップのラベルテキスト
   final String label;
@@ -60,6 +76,9 @@ class ModernChip extends StatefulWidget {
 
   /// アニメーションの継続時間
   final Duration animationDuration;
+
+  /// タグバリアントかどうか（内部フラグ）
+  final bool _isTagVariant;
 
   @override
   State<ModernChip> createState() => _ModernChipState();
@@ -263,6 +282,17 @@ class _ModernChipState extends State<ModernChip>
         hoverColor: (widget.backgroundColor ?? AppColors.primary).withValues(
           alpha: AppConstants.opacityHigh,
         ),
+      );
+    }
+
+    if (widget._isTagVariant) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final bg = AppColors.primary.withValues(alpha: 0.12);
+      return _ChipColorData(
+        backgroundColor: bg,
+        foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
+        borderColor: AppColors.primary,
+        hoverColor: bg.withValues(alpha: AppConstants.opacityHigh),
       );
     }
 
