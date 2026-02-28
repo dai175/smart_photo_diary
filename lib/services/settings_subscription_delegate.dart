@@ -16,14 +16,19 @@ class SettingsSubscriptionDelegate {
     required ISubscriptionService subscriptionService,
   }) : _subscriptionService = subscriptionService;
 
+  /// Result から値を取り出す。Failure の場合は例外をスロー。
+  T _requireResult<T>(Result<T> result) {
+    if (result.isFailure) throw result.error;
+    return result.value;
+  }
+
   /// 包括的なサブスクリプション情報を取得（V2版）
   Future<Result<SubscriptionInfoV2>> getSubscriptionInfoV2() async {
     return ResultHelper.tryExecuteAsync(() async {
-      final statusResult = await _subscriptionService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-      return SubscriptionInfoV2.fromStatus(statusResult.value);
+      final status = _requireResult(
+        await _subscriptionService.getCurrentStatus(),
+      );
+      return SubscriptionInfoV2.fromStatus(status);
     }, context: 'SettingsSubscriptionDelegate.getSubscriptionInfoV2');
   }
 
@@ -34,51 +39,38 @@ class SettingsSubscriptionDelegate {
   /// プラン期限情報を取得（V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
     return ResultHelper.tryExecuteAsync(() async {
-      final statusResult = await _subscriptionService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-
-      final planResult = await _subscriptionService.getCurrentPlanClass();
-      if (planResult.isFailure) {
-        throw planResult.error;
-      }
-
-      return PlanPeriodInfoV2.fromStatusAndPlan(
-        statusResult.value,
-        planResult.value,
+      final status = _requireResult(
+        await _subscriptionService.getCurrentStatus(),
       );
+      final plan = _requireResult(
+        await _subscriptionService.getCurrentPlanClass(),
+      );
+
+      return PlanPeriodInfoV2.fromStatusAndPlan(status, plan);
     }, context: 'SettingsSubscriptionDelegate.getPlanPeriodInfoV2');
   }
 
   /// 自動更新状態情報を取得
   Future<Result<AutoRenewalInfoV2>> getAutoRenewalInfo() async {
     return ResultHelper.tryExecuteAsync(() async {
-      final statusResult = await _subscriptionService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-      return AutoRenewalInfoV2.fromStatus(statusResult.value);
+      final status = _requireResult(
+        await _subscriptionService.getCurrentStatus(),
+      );
+      return AutoRenewalInfoV2.fromStatus(status);
     }, context: 'SettingsSubscriptionDelegate.getAutoRenewalInfo');
   }
 
   /// 使用統計情報を取得（Planクラス版）
   Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass() async {
     return ResultHelper.tryExecuteAsync(() async {
-      final statusResult = await _subscriptionService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
-
-      final planResult = await _subscriptionService.getCurrentPlanClass();
-      if (planResult.isFailure) {
-        throw planResult.error;
-      }
-
-      return UsageStatisticsV2.fromStatusAndPlan(
-        statusResult.value,
-        planResult.value,
+      final status = _requireResult(
+        await _subscriptionService.getCurrentStatus(),
       );
+      final plan = _requireResult(
+        await _subscriptionService.getCurrentPlanClass(),
+      );
+
+      return UsageStatisticsV2.fromStatusAndPlan(status, plan);
     }, context: 'SettingsSubscriptionDelegate.getUsageStatisticsWithPlanClass');
   }
 
@@ -94,10 +86,7 @@ class SettingsSubscriptionDelegate {
   Future<Result<bool>> canChangePlan() async {
     return ResultHelper.tryExecuteAsync(() async {
       // サービス正常性チェック（値は不要だが、失敗時にFailureを返すためのガード）
-      final statusResult = await _subscriptionService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        throw statusResult.error;
-      }
+      _requireResult(await _subscriptionService.getCurrentStatus());
       return _subscriptionService.isInitialized;
     }, context: 'SettingsSubscriptionDelegate.canChangePlan');
   }

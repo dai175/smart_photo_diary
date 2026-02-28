@@ -74,11 +74,50 @@ class GeminiApiClient {
     double? temperature,
     int? maxOutputTokens,
   }) async {
+    return _executeRequest(
+      parts: [
+        {'text': prompt},
+      ],
+      requestContext: 'sendTextRequest',
+      temperature: temperature,
+      maxOutputTokens: maxOutputTokens,
+    );
+  }
+
+  /// 画像付きのAPIリクエストを送信（Vision API）
+  Future<Result<Map<String, dynamic>>> sendVisionRequest({
+    required String prompt,
+    required Uint8List imageData,
+    double? temperature,
+    int? maxOutputTokens,
+  }) async {
+    final base64Image = base64Encode(imageData);
+
+    return _executeRequest(
+      parts: [
+        {'text': prompt},
+        {
+          'inlineData': {'mimeType': 'image/jpeg', 'data': base64Image},
+        },
+      ],
+      requestContext: 'sendVisionRequest',
+      temperature: temperature,
+      maxOutputTokens: maxOutputTokens,
+    );
+  }
+
+  /// API リクエストの共通処理
+  Future<Result<Map<String, dynamic>>> _executeRequest({
+    required List<Map<String, dynamic>> parts,
+    required String requestContext,
+    double? temperature,
+    int? maxOutputTokens,
+  }) async {
     // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
       _logger.error(
         'Gemini API error: No valid API key configured',
-        context: 'sendTextRequest',
+        context: requestContext,
       );
       EnvironmentConfig.printDebugInfo();
       return const Failure(
@@ -92,12 +131,7 @@ class GeminiApiClient {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'contents': [
-            {
-              'parts': [
-                {'text': prompt},
-              ],
-              'role': 'user',
-            },
+            {'parts': parts, 'role': 'user'},
           ],
           'generationConfig': {
             'temperature': temperature ?? AiConstants.defaultTemperature,
@@ -109,21 +143,21 @@ class GeminiApiClient {
           },
           'safetySettings': _safetySettings,
         }),
-        requestContext: 'sendTextRequest',
+        requestContext: requestContext,
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _logger.debug(
           'Gemini API response received successfully',
-          context: 'sendTextRequest',
+          context: requestContext,
           data: _summarizeResponse(data),
         );
         return Success(data as Map<String, dynamic>);
       } else {
         _logger.error(
           'Gemini API error: ${response.statusCode}',
-          context: 'sendTextRequest',
+          context: requestContext,
         );
         return Failure(
           AiProcessingException(
@@ -137,99 +171,11 @@ class GeminiApiClient {
     } catch (e) {
       _logger.error(
         'Gemini API request error',
-        context: 'sendTextRequest',
+        context: requestContext,
         error: e,
       );
       return Failure(
         AiProcessingException('Gemini API request failed', originalError: e),
-      );
-    }
-  }
-
-  /// 画像付きのAPIリクエストを送信（Vision API）
-  Future<Result<Map<String, dynamic>>> sendVisionRequest({
-    required String prompt,
-    required Uint8List imageData,
-    double? temperature,
-    int? maxOutputTokens,
-  }) async {
-    // APIキーの事前検証
-    if (!EnvironmentConfig.hasValidApiKey) {
-      _logger.error(
-        'Gemini Vision API error: No valid API key configured',
-        context: 'sendVisionRequest',
-      );
-      EnvironmentConfig.printDebugInfo();
-      return const Failure(
-        AiProcessingException('No valid API key configured'),
-      );
-    }
-
-    try {
-      // Base64エンコード
-      final base64Image = base64Encode(imageData);
-
-      final response = await postWithRetry(
-        Uri.parse('$_apiUrl?key=$_apiKey'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'contents': [
-            {
-              'parts': [
-                {'text': prompt},
-                {
-                  'inlineData': {'mimeType': 'image/jpeg', 'data': base64Image},
-                },
-              ],
-              'role': 'user',
-            },
-          ],
-          'generationConfig': {
-            'temperature': temperature ?? AiConstants.defaultTemperature,
-            'maxOutputTokens':
-                maxOutputTokens ?? AiConstants.defaultMaxOutputTokens,
-            'topP': AiConstants.defaultTopP,
-            'topK': AiConstants.defaultTopK,
-            'thinkingConfig': {'thinkingBudget': 0},
-          },
-          'safetySettings': _safetySettings,
-        }),
-        requestContext: 'sendVisionRequest',
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        _logger.debug(
-          'Gemini Vision API response received successfully',
-          context: 'sendVisionRequest',
-          data: _summarizeResponse(data),
-        );
-        return Success(data as Map<String, dynamic>);
-      } else {
-        _logger.error(
-          'Gemini Vision API error: ${response.statusCode}',
-          context: 'sendVisionRequest',
-        );
-        return Failure(
-          AiProcessingException(
-            'Gemini Vision API error: ${response.statusCode}',
-            details: response.body,
-          ),
-        );
-      }
-    } on NetworkException catch (e) {
-      return Failure(e);
-    } catch (e) {
-      _logger.error(
-        'Gemini Vision API request error',
-        context: 'sendVisionRequest',
-        error: e,
-      );
-      return Failure(
-        AiProcessingException(
-          'Gemini Vision API request failed',
-          originalError: e,
-        ),
       );
     }
   }
