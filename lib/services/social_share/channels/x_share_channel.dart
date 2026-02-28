@@ -33,6 +33,17 @@ class XShareChannel with ShareChannelMixin {
     List<AssetEntity>? photos,
     Rect? shareOrigin,
   }) async {
+    // ロケールを先に解決（catch でも使えるようスコープ外に）
+    Locale? locale;
+    try {
+      final settingsService =
+          await ServiceRegistration.getAsync<ISettingsService>();
+      locale = settingsService.locale;
+    } catch (_) {
+      locale = null;
+    }
+    final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
+
     try {
       _logger.info(
         'Starting text share',
@@ -63,18 +74,6 @@ class XShareChannel with ShareChannelMixin {
           files.add(XFile(f.path));
         }
       }
-
-      // テキスト生成
-      Locale? locale;
-      try {
-        final settingsService =
-            await ServiceRegistration.getAsync<ISettingsService>();
-        locale = settingsService.locale;
-      } catch (_) {
-        locale = null;
-      }
-
-      final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
       final appName = LocalizationUtils.appTitleFor(resolvedLocale);
 
       // テキスト生成（280文字以内ならアプリ名を付与、超える場合は省略）
@@ -121,17 +120,6 @@ class XShareChannel with ShareChannelMixin {
         error: e,
         stackTrace: st,
       );
-
-      // Get current locale for error message
-      Locale? locale;
-      try {
-        final settingsService =
-            await ServiceRegistration.getAsync<ISettingsService>();
-        locale = settingsService.locale;
-      } catch (_) {
-        locale = null;
-      }
-      final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
 
       final errorMessage = getLocalizedMessage(
         resolvedLocale,

@@ -36,7 +36,8 @@ class InstagramShareChannel with ShareChannelMixin {
     // ロケールを先に解決（catch でも使えるようスコープ外に）
     Locale? locale;
     try {
-      final settingsService = ServiceRegistration.get<ISettingsService>();
+      final settingsService =
+          await ServiceRegistration.getAsync<ISettingsService>();
       locale = settingsService.locale;
     } catch (_) {
       locale = null;

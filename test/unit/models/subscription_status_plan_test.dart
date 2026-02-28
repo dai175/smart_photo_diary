@@ -52,7 +52,7 @@ void main() {
       });
     });
 
-    group('getCurrentPlanClass', () {
+    group('currentPlanClass', () {
       test('正しいPlanクラスインスタンスを返す', () {
         final basicStatus = SubscriptionStatus(planId: 'basic', isActive: true);
         final monthlyStatus = SubscriptionStatus(
