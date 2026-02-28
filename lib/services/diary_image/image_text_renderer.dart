@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import '../../models/diary_entry.dart';
 import '../ai/diary_locale_utils.dart';
@@ -74,8 +76,9 @@ class ImageTextRenderer {
     DiaryEntry diary,
     ShareFormat format,
     Rect contentArea, {
-    required Locale locale,
+    Locale? locale,
   }) {
+    final effectiveLocale = locale ?? ui.PlatformDispatcher.instance.locale;
     final textAreaPadding = format.isSquare
         ? 24.0
         : (format.isPortrait ? 28.0 : 24.0);
@@ -98,7 +101,7 @@ class ImageTextRenderer {
       // 計測
       final datePainter = TextPainter(
         text: TextSpan(
-          text: formatDate(diary.date, locale),
+          text: formatDate(diary.date, effectiveLocale),
           style: _dateStyle(dateSize),
         ),
         textDirection: TextDirection.ltr,
@@ -164,7 +167,7 @@ class ImageTextRenderer {
     double currentY = textArea.top;
     final datePainterFallback = TextPainter(
       text: TextSpan(
-        text: formatDate(diary.date, locale),
+        text: formatDate(diary.date, effectiveLocale),
         style: _dateStyle(dateSize),
       ),
       textDirection: TextDirection.ltr,
