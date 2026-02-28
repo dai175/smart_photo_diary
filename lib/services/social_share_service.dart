@@ -108,16 +108,6 @@ class SocialShareService implements ISocialShareService {
   }
 
   @override
-  List<ShareFormat> getSupportedFormats() {
-    return ShareFormat.values;
-  }
-
-  @override
-  bool isFormatSupported(ShareFormat format) {
-    return ShareFormat.values.contains(format);
-  }
-
-  @override
   ShareFormat getRecommendedFormat(
     ShareFormat baseFormat, {
     bool useHD = true,

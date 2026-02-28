@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_photo_diary/config/in_app_purchase_config.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
+import 'package:smart_photo_diary/models/plans/plan_factory.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 
@@ -18,13 +18,16 @@ void main() {
 
     group('Product Configuration Tests', () {
       test('商品IDが正しく設定されている', () {
-        // 全商品IDが定義されていることを確認
-        expect(InAppPurchaseConfig.allProductIds, isNotEmpty);
-        expect(InAppPurchaseConfig.allProductIds.length, equals(2));
+        // 有料プランの商品IDを取得
+        final paidProductIds = PlanFactory.getPaidPlans()
+            .map((p) => p.productId)
+            .toList();
+        expect(paidProductIds, isNotEmpty);
+        expect(paidProductIds.length, equals(2));
 
         // 期待される商品IDが含まれていることを確認
         expect(
-          InAppPurchaseConfig.allProductIds,
+          paidProductIds,
           containsAll([
             'smart_photo_diary_premium_monthly_plan',
             'smart_photo_diary_premium_yearly_plan',
@@ -35,33 +38,30 @@ void main() {
       test('プランと商品IDのマッピングが正しい', () {
         // プランから商品IDを取得
         expect(
-          InAppPurchaseConfig.getProductIdFromPlan(PremiumMonthlyPlan()),
+          PremiumMonthlyPlan().productId,
           equals('smart_photo_diary_premium_monthly_plan'),
         );
         expect(
-          InAppPurchaseConfig.getProductIdFromPlan(PremiumYearlyPlan()),
+          PremiumYearlyPlan().productId,
           equals('smart_photo_diary_premium_yearly_plan'),
         );
 
         // 商品IDからプランを取得
         expect(
-          InAppPurchaseConfig.getPlanFromProductId(
+          PlanFactory.getPlanByProductId(
             'smart_photo_diary_premium_monthly_plan',
-          ).id,
+          )?.id,
           equals(PremiumMonthlyPlan().id),
         );
         expect(
-          InAppPurchaseConfig.getPlanFromProductId(
+          PlanFactory.getPlanByProductId(
             'smart_photo_diary_premium_yearly_plan',
-          ).id,
+          )?.id,
           equals(PremiumYearlyPlan().id),
         );
 
-        // Basicプランは商品IDを持たない
-        expect(
-          () => InAppPurchaseConfig.getProductIdFromPlan(BasicPlan()),
-          throwsA(isA<ArgumentError>()),
-        );
+        // Basicプランの商品IDは空文字列
+        expect(BasicPlan().productId, isEmpty);
       });
     });
 
@@ -97,18 +97,14 @@ void main() {
     // =================================================================
 
     group('Error Handling Tests', () {
-      test('不正な商品IDでエラーが発生する', () {
-        expect(
-          () => InAppPurchaseConfig.getPlanFromProductId('invalid_product_id'),
-          throwsA(isA<ArgumentError>()),
-        );
+      test('不正な商品IDでnullが返される', () {
+        expect(PlanFactory.getPlanByProductId('invalid_product_id'), isNull);
       });
 
-      test('Basicプランの商品ID取得でエラーが発生する', () {
-        expect(
-          () => InAppPurchaseConfig.getProductIdFromPlan(BasicPlan()),
-          throwsA(isA<ArgumentError>()),
-        );
+      test('Basicプランの商品IDは空文字列', () {
+        expect(BasicPlan().productId, isEmpty);
+        // 空文字列でgetPlanByProductIdを呼ぶとnullが返る
+        expect(PlanFactory.getPlanByProductId(''), isNull);
       });
     });
 
@@ -118,12 +114,9 @@ void main() {
 
     group('Integration Confirmation Tests', () {
       test('全体的な設定の一貫性確認', () {
-        // 全商品IDが有効であることを確認
-        for (final productId in InAppPurchaseConfig.allProductIds) {
-          expect(
-            () => InAppPurchaseConfig.getPlanFromProductId(productId),
-            returnsNormally,
-          );
+        // 全有料プランの商品IDが有効であることを確認
+        for (final plan in PlanFactory.getPaidPlans()) {
+          expect(PlanFactory.getPlanByProductId(plan.productId), isNotNull);
         }
 
         // フォールバック価格の一貫性確認

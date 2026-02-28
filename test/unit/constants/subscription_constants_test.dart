@@ -91,7 +91,6 @@ void main() {
       });
 
       test('機能制限設定が正しく設定されている', () {
-        expect(SubscriptionConstants.maxPhotosPerEntry, equals(3));
         expect(SubscriptionConstants.tagsValidityDays, equals(7));
       });
     });

@@ -7,7 +7,6 @@ class AppConstants {
   static const int maxPhotosSelection = 3;
   static const int photoGridCrossAxisCount = 3;
   static const double photoGridSpacing = 8.0;
-  static const double photoThumbnailSize = 90.0;
   static const double photoCornerRadius = 16.0;
   // タイムライン用（内部グリッドと差別化する場合）
   static const int timelineThumbnailSizePx = 120; // 表示安定性優先の固定ピクセル
@@ -57,8 +56,6 @@ class AppConstants {
   static const Duration mediumAnimationDuration = Duration(milliseconds: 400);
   static const Duration slowAnimationDuration = Duration(milliseconds: 450);
   static const Duration xSlowAnimationDuration = Duration(milliseconds: 500);
-  static const Duration longAnimationDuration = Duration(milliseconds: 1500);
-  static const Duration xLongAnimationDuration = Duration(milliseconds: 2000);
   static const Duration microFastAnimationDuration = Duration(milliseconds: 80);
   static const Duration microBaseAnimationDuration = Duration(
     milliseconds: 100,

@@ -280,8 +280,12 @@ class ServiceRegistration {
       return service;
     });
 
-    // 13. DiaryImageGenerator (ソーシャル共有用画像生成 - LoggingServiceに依存)
-    final imageGenerator = DiaryImageGenerator(logger: loggingService);
+    // 13. DiaryImageGenerator (ソーシャル共有用画像生成 - LoggingService, SettingsServiceに依存)
+    final settingsService = await serviceLocator.getAsync<ISettingsService>();
+    final imageGenerator = DiaryImageGenerator(
+      logger: loggingService,
+      settingsService: settingsService,
+    );
     serviceLocator.registerSingleton<DiaryImageGenerator>(imageGenerator);
 
     // 14. SocialShareService (LoggingService, DiaryImageGenerator, PhotoServiceに依存)

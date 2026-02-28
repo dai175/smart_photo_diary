@@ -3,6 +3,7 @@ import '../../constants/app_constants.dart';
 import '../../constants/app_icons.dart';
 import '../../constants/subscription_constants.dart';
 import '../../localization/localization_extensions.dart';
+import '../../models/subscription_display_texts.dart';
 import '../../models/subscription_info_v2.dart';
 import '../../ui/animations/micro_interactions.dart';
 import '../../ui/components/animated_button.dart';
@@ -37,29 +38,31 @@ class _SubscriptionSettingsSectionState
   SubscriptionDisplayDataV2 _getLocalizedDisplayData() {
     return widget.subscriptionInfo!.getLocalizedDisplayData(
       locale: context.l10n.localeName,
-      usageFormatter: (used, limit) =>
-          context.l10n.usageStatusUsageValue(used, limit),
-      remainingFormatter: (remaining) =>
-          context.l10n.usageStatusRemainingValue(remaining),
-      limitReachedFormatter: () =>
-          context.l10n.subscriptionUsageWarningLimitReached,
-      warningRemainingFormatter: (remaining) =>
-          context.l10n.subscriptionUsageWarningRemaining(remaining),
-      upgradeRecommendationLimitFormatter: (limit) =>
-          context.l10n.subscriptionUpgradeRecommendationTimeAccess(limit),
-      upgradeRecommendationGeneralFormatter: () =>
-          context.l10n.subscriptionUpgradeRecommendationTimeAccess(
-            SubscriptionConstants.premiumMonthlyAiLimit,
-          ),
-      expiredText: context.l10n.subscriptionExpired,
-      todayText: context.l10n.subscriptionResetToday,
-      tomorrowText: context.l10n.subscriptionResetTomorrow,
-      inactiveStatusText: context.l10n.subscriptionStatusInactive,
-      expiryNearStatusText: context.l10n.subscriptionStatusExpiryNear,
-      autoRenewalNotApplicableText:
-          context.l10n.subscriptionAutoRenewalNotApplicable,
-      autoRenewalEnabledText: context.l10n.subscriptionAutoRenewalEnabled,
-      autoRenewalDisabledText: context.l10n.subscriptionAutoRenewalDisabled,
+      texts: SubscriptionDisplayTexts(
+        usageFormatter: (used, limit) =>
+            context.l10n.usageStatusUsageValue(used, limit),
+        remainingFormatter: (remaining) =>
+            context.l10n.usageStatusRemainingValue(remaining),
+        limitReachedFormatter: () =>
+            context.l10n.subscriptionUsageWarningLimitReached,
+        warningRemainingFormatter: (remaining) =>
+            context.l10n.subscriptionUsageWarningRemaining(remaining),
+        upgradeRecommendationLimitFormatter: (limit) =>
+            context.l10n.subscriptionUpgradeRecommendationTimeAccess(limit),
+        upgradeRecommendationGeneralFormatter: () =>
+            context.l10n.subscriptionUpgradeRecommendationTimeAccess(
+              SubscriptionConstants.premiumMonthlyAiLimit,
+            ),
+        expiredText: context.l10n.subscriptionExpired,
+        todayText: context.l10n.subscriptionResetToday,
+        tomorrowText: context.l10n.subscriptionResetTomorrow,
+        inactiveStatusText: context.l10n.subscriptionStatusInactive,
+        expiryNearStatusText: context.l10n.subscriptionStatusExpiryNear,
+        autoRenewalNotApplicableText:
+            context.l10n.subscriptionAutoRenewalNotApplicable,
+        autoRenewalEnabledText: context.l10n.subscriptionAutoRenewalEnabled,
+        autoRenewalDisabledText: context.l10n.subscriptionAutoRenewalDisabled,
+      ),
     );
   }
 

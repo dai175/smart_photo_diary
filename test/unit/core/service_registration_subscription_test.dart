@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_photo_diary/core/service_registration.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan_factory.dart';
@@ -10,6 +11,8 @@ import 'dart:io';
 void main() {
   group('ServiceRegistration - SubscriptionService統合テスト', () {
     setUpAll(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({});
       // テスト環境でのHive初期化
       final tempDir = Directory.systemTemp.createTempSync('hive_test');
       Hive.init(tempDir.path);

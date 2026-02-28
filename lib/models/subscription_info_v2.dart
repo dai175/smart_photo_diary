@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
+import 'subscription_display_texts.dart';
 import 'subscription_status.dart';
 
 /// 使用統計情報（新Planクラス版）
@@ -278,27 +279,14 @@ class SubscriptionInfoV2 {
   /// 設定画面表示用の統合データ（多言語化対応）
   SubscriptionDisplayDataV2 getLocalizedDisplayData({
     required String locale,
-    required String Function(int used, int limit) usageFormatter,
-    required String Function(int remaining) remainingFormatter,
-    required String Function() limitReachedFormatter,
-    required String Function(int remaining) warningRemainingFormatter,
-    required String Function(int limit) upgradeRecommendationLimitFormatter,
-    required String Function() upgradeRecommendationGeneralFormatter,
-    required String expiredText,
-    required String todayText,
-    required String tomorrowText,
-    required String inactiveStatusText,
-    required String expiryNearStatusText,
-    required String autoRenewalNotApplicableText,
-    required String autoRenewalEnabledText,
-    required String autoRenewalDisabledText,
+    required SubscriptionDisplayTexts texts,
   }) {
     // planStatus（ローカライズ版）
     String? localizedPlanStatus;
     if (!isActive) {
-      localizedPlanStatus = inactiveStatusText;
+      localizedPlanStatus = texts.inactiveStatusText;
     } else if (isPremium && periodInfo.isExpiryNear) {
-      localizedPlanStatus = expiryNearStatusText;
+      localizedPlanStatus = texts.expiryNearStatusText;
     }
 
     // 日付計算用の正規化された「今日」
@@ -311,7 +299,7 @@ class SubscriptionInfoV2 {
       final expiry = periodInfo.expiryDate!;
       final daysUntil = periodInfo.daysUntilExpiry ?? 0;
       if (daysUntil <= 0) {
-        localizedExpiryText = expiredText;
+        localizedExpiryText = texts.expiredText;
       } else if (expiry.year != today.year) {
         localizedExpiryText = '${expiry.year}/${expiry.month}/${expiry.day}';
       } else {
@@ -322,11 +310,11 @@ class SubscriptionInfoV2 {
     // autoRenewalText（ローカライズ版）
     String localizedAutoRenewalText;
     if (!isPremium) {
-      localizedAutoRenewalText = autoRenewalNotApplicableText;
+      localizedAutoRenewalText = texts.autoRenewalNotApplicableText;
     } else {
       localizedAutoRenewalText = autoRenewalInfo.isAutoRenewalEnabled
-          ? autoRenewalEnabledText
-          : autoRenewalDisabledText;
+          ? texts.autoRenewalEnabledText
+          : texts.autoRenewalDisabledText;
     }
 
     // resetDateText（ローカライズ版）
@@ -334,9 +322,9 @@ class SubscriptionInfoV2 {
     final resetDate = usageStats.nextResetDate;
     final daysUntilReset = resetDate.difference(today).inDays;
     if (daysUntilReset <= 0) {
-      localizedResetDateText = todayText;
+      localizedResetDateText = texts.todayText;
     } else if (daysUntilReset == 1) {
-      localizedResetDateText = tomorrowText;
+      localizedResetDateText = texts.tomorrowText;
     } else if (resetDate.year != today.year) {
       localizedResetDateText =
           '${resetDate.year}/${resetDate.month}/${resetDate.day}';
@@ -347,18 +335,18 @@ class SubscriptionInfoV2 {
     return SubscriptionDisplayDataV2(
       planName: getLocalizedPlanDisplayName(locale),
       planStatus: localizedPlanStatus,
-      usageText: usageStats.getLocalizedUsageDisplay(usageFormatter),
-      remainingText: remainingFormatter(usageStats.remainingCount),
+      usageText: usageStats.getLocalizedUsageDisplay(texts.usageFormatter),
+      remainingText: texts.remainingFormatter(usageStats.remainingCount),
       resetDateText: localizedResetDateText,
       expiryText: localizedExpiryText,
       autoRenewalText: localizedAutoRenewalText,
       warningMessage: getLocalizedUsageWarningMessage(
-        limitReachedFormatter,
-        warningRemainingFormatter,
+        texts.limitReachedFormatter,
+        texts.warningRemainingFormatter,
       ),
       recommendationMessage: getLocalizedPlanRecommendationMessage(
-        upgradeRecommendationLimitFormatter,
-        upgradeRecommendationGeneralFormatter,
+        texts.upgradeRecommendationLimitFormatter,
+        texts.upgradeRecommendationGeneralFormatter,
       ),
       showUpgradeButton: !isPremium,
       usageProgressValue: usageStats.usageRate,

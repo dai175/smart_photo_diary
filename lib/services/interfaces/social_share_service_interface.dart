@@ -51,16 +51,6 @@ abstract class ISocialShareService {
     List<AssetEntity>? photos,
   });
 
-  /// 共有可能なフォーマットの一覧を取得
-  ///
-  /// 戻り値: サポートされている全 [ShareFormat] のリスト。
-  List<ShareFormat> getSupportedFormats();
-
-  /// 指定されたフォーマットがサポートされているかチェック
-  ///
-  /// 戻り値: サポートされていれば true、そうでなければ false。
-  bool isFormatSupported(ShareFormat format);
-
   /// デバイスに適したフォーマットを取得
   ///
   /// [baseFormat] ベースとなるフォーマット

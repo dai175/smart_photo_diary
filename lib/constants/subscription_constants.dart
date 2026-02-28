@@ -95,9 +95,6 @@ class SubscriptionConstants {
   // 機能制限設定
   // ========================================
 
-  /// 写真選択可能枚数（Basic/Premium共通）
-  static const int maxPhotosPerEntry = 3;
-
   /// タグの有効期限（日数）
   static const int tagsValidityDays = 7;
 
