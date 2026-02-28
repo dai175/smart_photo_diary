@@ -75,7 +75,6 @@ CLAUDE.md rule: "All UI text uses internationalization (i18n) via `context.l10n`
 | Location | Hardcoded Content |
 |----------|-------------------|
 | `lib/models/import_result.dart` L23-39 | `'$successfulImports件の日記を正常に復元しました'` etc. |
-| `lib/models/subscription_info_v2.dart` L100-111 | `'自動更新が有効です。期限前に自動的に更新されます。'` etc. |
 | `lib/models/writing_prompt.dart` L232-236 | `'高'`, `'中'`, `'低'` |
 | `lib/services/interfaces/social_share_service_interface.dart` L79-97 | `ShareFormat.displayName`: `'縦長'`, `'正方形'` |
 | `lib/services/timeline_grouping_service.dart` L53-193 | `'今日'`, `'昨日'`, `'${date.year}年${date.month}月'` (in legacy methods) |
