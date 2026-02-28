@@ -199,6 +199,8 @@ abstract class BaseErrorController extends ChangeNotifier {
       );
     }
 
+    final result = await attemptOperation();
+
     VoidCallback? onRetry;
     if (attempts < maxRetries) {
       onRetry = () async {
@@ -207,7 +209,7 @@ abstract class BaseErrorController extends ChangeNotifier {
           await executeWithRetry(
             context,
             operation,
-            maxRetries: maxRetries,
+            maxRetries: maxRetries - attempts,
             retryDelay: retryDelay,
             setLoadingState: false,
             operationContext: operationContext,
@@ -217,8 +219,6 @@ abstract class BaseErrorController extends ChangeNotifier {
         }
       };
     }
-
-    final result = await attemptOperation();
 
     if (result == null && _lastError != null) {
       if (context.mounted) {

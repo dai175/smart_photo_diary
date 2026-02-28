@@ -228,13 +228,6 @@ class WritingPrompt extends HiveObject {
     return '${text.substring(0, 30)}...';
   }
 
-  /// プロンプトの重要度レベル（priority基準）
-  String get importanceLevel {
-    if (priority >= 80) return '高';
-    if (priority >= 50) return '中';
-    return '低';
-  }
-
   /// 指定ロケールに適したテキストを取得
   String textForLocale(Locale? locale) {
     return _resolveLocalizedString(localizedTexts, locale) ?? text;

@@ -72,37 +72,18 @@ abstract class ISocialShareService {
 /// 共有フォーマットの定義
 enum ShareFormat {
   /// 縦長フォーマット (9:16)
-  portrait(
-    aspectRatio: 0.5625,
-    width: 1080,
-    height: 1920,
-    displayName: '縦長',
-    scale: 2.0,
-  ),
+  portrait(aspectRatio: 0.5625, width: 1080, height: 1920, scale: 2.0),
 
   /// 縦長フォーマット 高解像度 (9:16)
-  portraitHD(
-    aspectRatio: 0.5625,
-    width: 1350,
-    height: 2400,
-    displayName: '縦長 (HD)',
-    scale: 2.5,
-  ),
+  portraitHD(aspectRatio: 0.5625, width: 1350, height: 2400, scale: 2.5),
 
   /// 正方形フォーマット (1:1)
-  square(
-    aspectRatio: 1.0,
-    width: 1080,
-    height: 1080,
-    displayName: '正方形',
-    scale: 2.0,
-  );
+  square(aspectRatio: 1.0, width: 1080, height: 1080, scale: 2.0);
 
   const ShareFormat({
     required this.aspectRatio,
     required this.width,
     required this.height,
-    required this.displayName,
     required this.scale,
   });
 
@@ -114,9 +95,6 @@ enum ShareFormat {
 
   /// 画像高さ
   final int height;
-
-  /// 表示名
-  final String displayName;
 
   /// デバイス解像度スケール
   final double scale;

@@ -46,7 +46,7 @@ class SocialShareService implements ISocialShareService {
   }) async {
     try {
       _logger.info(
-        'Starting social share: ${format.displayName}',
+        'Starting social share: ${format.name}',
         context: 'SocialShareService.shareToSocialMedia',
         data: 'diary_id: ${diary.id}',
       );
@@ -94,7 +94,7 @@ class SocialShareService implements ISocialShareService {
     List<AssetEntity>? photos,
   }) async {
     _logger.info(
-      'Starting share image generation: ${format.displayName}',
+      'Starting share image generation: ${format.name}',
       context: 'SocialShareService.generateShareImage',
       data: 'diary_id: ${diary.id}',
     );

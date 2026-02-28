@@ -23,7 +23,12 @@ void main() {
   group('TimelineGroupingService', () {
     group('groupPhotosForTimeline', () {
       test('空のリストを正しく処理する', () {
-        final result = service.groupPhotosForTimeline([]);
+        final result = service.groupPhotosForTimelineLocalized(
+          [],
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
+        );
         expect(result, isEmpty);
       });
 
@@ -31,7 +36,12 @@ void main() {
         final now = DateTime.now();
         final photo = createMockPhoto(now);
 
-        final result = service.groupPhotosForTimeline([photo]);
+        final result = service.groupPhotosForTimelineLocalized(
+          [photo],
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
+        );
 
         expect(result, hasLength(1));
         expect(result[0].displayName, '今日');
@@ -48,7 +58,12 @@ void main() {
           DateTime(now.year, now.month, now.day, 14, 0),
         );
 
-        final result = service.groupPhotosForTimeline([photo1, photo2]);
+        final result = service.groupPhotosForTimelineLocalized(
+          [photo1, photo2],
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
+        );
 
         expect(result, hasLength(1));
         expect(result[0].photos, hasLength(2));
@@ -60,7 +75,12 @@ void main() {
           DateTime(yesterday.year, yesterday.month, yesterday.day, 12, 0),
         );
 
-        final result = service.groupPhotosForTimeline([photo]);
+        final result = service.groupPhotosForTimelineLocalized(
+          [photo],
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
+        );
 
         expect(result, hasLength(1));
         expect(result[0].displayName, '昨日');
@@ -72,7 +92,12 @@ void main() {
         final photo2 = createMockPhoto(DateTime(2025, 8, 10));
         final photo3 = createMockPhoto(DateTime(2025, 3, 1));
 
-        final result = service.groupPhotosForTimeline([photo1, photo2, photo3]);
+        final result = service.groupPhotosForTimelineLocalized(
+          [photo1, photo2, photo3],
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
+        );
 
         expect(result, hasLength(3));
         // 降順（新しい月が先）
@@ -93,11 +118,16 @@ void main() {
         ).subtract(const Duration(days: 1));
         final oldDate = DateTime(2025, 1, 15);
 
-        final result = service.groupPhotosForTimeline([
-          createMockPhoto(today),
-          createMockPhoto(yesterday),
-          createMockPhoto(oldDate),
-        ]);
+        final result = service.groupPhotosForTimelineLocalized(
+          [
+            createMockPhoto(today),
+            createMockPhoto(yesterday),
+            createMockPhoto(oldDate),
+          ],
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
+        );
 
         expect(result, hasLength(3));
         expect(result[0].type, TimelineGroupType.today);
@@ -153,27 +183,36 @@ void main() {
     group('getTimelineHeader', () {
       test('今日のヘッダーテキストを正しく生成する', () {
         final today = DateTime.now();
-        final result = service.getTimelineHeader(
+        final result = service.getTimelineHeaderLocalized(
           today,
           TimelineGroupType.today,
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
         );
         expect(result, '今日');
       });
 
       test('昨日のヘッダーテキストを正しく生成する', () {
         final yesterday = DateTime.now().subtract(const Duration(days: 1));
-        final result = service.getTimelineHeader(
+        final result = service.getTimelineHeaderLocalized(
           yesterday,
           TimelineGroupType.yesterday,
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
         );
         expect(result, '昨日');
       });
 
       test('月単位のヘッダーテキストを正しく生成する', () {
         final date = DateTime(2025, 1, 15);
-        final result = service.getTimelineHeader(
+        final result = service.getTimelineHeaderLocalized(
           date,
           TimelineGroupType.monthly,
+          todayLabel: '今日',
+          yesterdayLabel: '昨日',
+          monthYearFormatter: (year, month) => '$year年$month月',
         );
         expect(result, '2025年1月');
       });

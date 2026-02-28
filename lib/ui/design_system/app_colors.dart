@@ -90,31 +90,4 @@ class AppColors {
   static const Color shadow = Color(0x14231E1A);
   static const Color shadowLight = Color(0x0A231E1A);
   static const Color shadowStrong = Color(0x28231E1A);
-
-  // ============= HELPER METHODS =============
-  /// 明度に基づいてテキスト色を決定
-  static Color getTextColorForBackground(Color backgroundColor) {
-    final luminance = backgroundColor.computeLuminance();
-    return luminance > 0.5 ? onBackground : onBackgroundDark;
-  }
-
-  /// カラーの透明度を調整
-  static Color withAlpha(Color color, double alpha) {
-    return color.withValues(alpha: alpha);
-  }
-
-  /// ホバー時のカラー
-  static Color getHoverColor(Color baseColor) {
-    return baseColor.withValues(alpha: 0.08);
-  }
-
-  /// フォーカス時のカラー
-  static Color getFocusColor(Color baseColor) {
-    return baseColor.withValues(alpha: 0.12);
-  }
-
-  /// プレス時のカラー
-  static Color getPressedColor(Color baseColor) {
-    return baseColor.withValues(alpha: 0.16);
-  }
 }

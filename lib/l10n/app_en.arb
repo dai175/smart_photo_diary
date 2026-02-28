@@ -582,6 +582,42 @@
       }
     }
   },
+  "settingsRestoreCompleteMessage": "Successfully restored {count} diary entries",
+  "@settingsRestoreCompleteMessage": {
+    "description": "Summary message when restore is completely successful",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreSummarySuccess": "Success: {count}",
+  "@settingsRestoreSummarySuccess": {
+    "description": "Success count in restore summary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreSummarySkipped": "Skipped: {count}",
+  "@settingsRestoreSummarySkipped": {
+    "description": "Skipped count in restore summary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreSummaryFailed": "Failed: {count}",
+  "@settingsRestoreSummaryFailed": {
+    "description": "Failed count in restore summary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "settingsSubscriptionInfoTitle": "Subscription details",
   "@settingsSubscriptionInfoTitle": {
     "description": "Title for the subscription legal information section"

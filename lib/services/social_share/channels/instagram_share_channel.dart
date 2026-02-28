@@ -50,7 +50,7 @@ class InstagramShareChannel {
 
     try {
       _logger.info(
-        'Starting Instagram share: ${format.displayName}',
+        'Starting Instagram share: ${format.name}',
         context: 'InstagramShareChannel.share',
         data: 'diary_id: ${diary.id}',
       );

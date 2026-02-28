@@ -238,10 +238,6 @@ void main() {
       expect(shortPrompt.previewText, 'Short prompt');
       expect(longPrompt.previewText.length, 33); // 30 chars + "..."
       expect(longPrompt.previewText.endsWith('...'), true);
-
-      // importanceLevel
-      expect(shortPrompt.importanceLevel, '低'); // priority 0
-      expect(longPrompt.importanceLevel, '高'); // priority 90
     });
 
     test('copyWith works correctly', () {

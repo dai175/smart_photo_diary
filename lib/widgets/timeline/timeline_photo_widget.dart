@@ -175,9 +175,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   void _updatePhotoGroups() {
-    // initState時は基本的なグルーピングのみ実行（多言語化なし）
-    final groups = _groupingService.groupPhotosForTimeline(
+    // initState時はcontextが利用できない場合があるため、フォールバックラベルを使用
+    final groups = _groupingService.groupPhotosForTimelineLocalized(
       widget.controller.photoAssets,
+      todayLabel: 'Today',
+      yesterdayLabel: 'Yesterday',
+      monthYearFormatter: (year, month) => '$year/$month',
     );
 
     // インデックスキャッシュを先に完全に再構築してからUI更新

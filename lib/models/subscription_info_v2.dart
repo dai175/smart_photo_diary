@@ -98,10 +98,12 @@ class AutoRenewalInfoV2 {
     String? managementUrl;
 
     if (status.autoRenewal) {
-      description = '自動更新が有効です。期限前に自動的に更新されます。';
+      description =
+          'Auto-renewal is enabled. Subscription will renew automatically before expiry.';
       managementUrl = 'https://apps.apple.com/account/subscriptions';
     } else {
-      description = '自動更新は無効です。期限切れ前に手動で更新してください。';
+      description =
+          'Auto-renewal is disabled. Please renew manually before expiry.';
     }
 
     return AutoRenewalInfoV2(
