@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
 import '../../ui/design_system/app_colors.dart';
@@ -143,7 +144,9 @@ class DiaryDetailContent extends StatelessWidget {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: AppColors.primary.withValues(
+                      alpha: AppConstants.opacityXXLow,
+                    ),
                     borderRadius: AppSpacing.chipRadius,
                   ),
                   child: Row(

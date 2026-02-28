@@ -102,7 +102,7 @@ class AppConstants {
 
   // レイアウト比率
   static const double loadingCenterHeightRatio = 0.3;
-  static const double opacityXXLow = 0.1;
+  static const double opacityXXLow = 0.12;
   static const double opacitySubtle = 0.2;
 
   // スケール（タップ・エントランスなど）

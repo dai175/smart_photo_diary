@@ -287,7 +287,7 @@ class _ModernChipState extends State<ModernChip>
 
     if (widget._isTagVariant) {
       final isDark = Theme.of(context).brightness == Brightness.dark;
-      final bg = AppColors.primary.withValues(alpha: 0.12);
+      final bg = AppColors.primary.withValues(alpha: AppConstants.opacityXXLow);
       return _ChipColorData(
         backgroundColor: bg,
         foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
