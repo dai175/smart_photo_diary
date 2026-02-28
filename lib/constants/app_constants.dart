@@ -99,11 +99,12 @@ class AppConstants {
   static const double opacityMedium = 0.7;
   static const double opacityLow = 0.5;
   static const double opacityXLow = 0.3;
+  static const double opacitySubtle = 0.2;
+  static const double opacityXXLow = 0.12;
+  static const double opacityXXXLow = 0.06;
 
   // レイアウト比率
   static const double loadingCenterHeightRatio = 0.3;
-  static const double opacityXXLow = 0.12;
-  static const double opacitySubtle = 0.2;
 
   // スケール（タップ・エントランスなど）
   static const double scaleTapSmall = 0.98;

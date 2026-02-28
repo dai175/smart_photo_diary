@@ -186,7 +186,9 @@ class _AnimatedButtonState extends State<AnimatedButton>
                       )
                     : Colors.transparent,
                 highlightColor: widget.enableSplashEffect
-                    ? foregroundColor.withValues(alpha: 0.06)
+                    ? foregroundColor.withValues(
+                        alpha: AppConstants.opacityXXXLow,
+                      )
                     : Colors.transparent,
                 child: Container(
                   padding: widget.padding ?? AppSpacing.buttonPaddingSmall,
