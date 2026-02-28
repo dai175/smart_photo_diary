@@ -181,10 +181,14 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 onTap: widget.onPressed, // メインのタップイベント
                 borderRadius: borderRadius,
                 splashColor: widget.enableSplashEffect
-                    ? foregroundColor.withValues(alpha: 0.12)
+                    ? foregroundColor.withValues(
+                        alpha: AppConstants.opacityXXLow,
+                      )
                     : Colors.transparent,
                 highlightColor: widget.enableSplashEffect
-                    ? foregroundColor.withValues(alpha: 0.06)
+                    ? foregroundColor.withValues(
+                        alpha: AppConstants.opacityXXXLow,
+                      )
                     : Colors.transparent,
                 child: Container(
                   padding: widget.padding ?? AppSpacing.buttonPaddingSmall,

@@ -295,7 +295,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
           runSpacing: AppSpacing.xs,
           children: tags
               .take(4) // 最大4つまで表示
-              .map((tag) => ModernChip(label: tag, selected: false))
+              .map((tag) => ModernChip.tag(label: tag))
               .toList(),
         );
       },

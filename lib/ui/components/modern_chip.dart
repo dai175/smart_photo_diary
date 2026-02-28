@@ -23,7 +23,38 @@ class ModernChip extends StatefulWidget {
     this.size = ChipSize.medium,
     this.style = ChipStyle.filled,
     this.animationDuration = AppConstants.quickAnimationDuration,
-  });
+  }) : _variant = _ChipVariant.normal;
+
+  /// 日記タグ表示専用コンストラクタ
+  /// 全画面で統一されたタグスタイルを提供
+  const ModernChip.tag({super.key, required this.label})
+    : onTap = null,
+      onDeleted = null,
+      backgroundColor = null,
+      foregroundColor = null,
+      icon = null,
+      deleteIcon = null,
+      selected = false,
+      enabled = true,
+      size = ChipSize.small,
+      style = ChipStyle.filled,
+      animationDuration = AppConstants.quickAnimationDuration,
+      _variant = _ChipVariant.tag;
+
+  /// タグカウントバッジ表示専用コンストラクタ
+  /// 日記詳細画面などでタグ数を表示するバッジに使用
+  const ModernChip.badge({super.key, required this.label, required this.icon})
+    : onTap = null,
+      onDeleted = null,
+      backgroundColor = null,
+      foregroundColor = null,
+      deleteIcon = null,
+      selected = false,
+      enabled = true,
+      size = ChipSize.small,
+      style = ChipStyle.filled,
+      animationDuration = AppConstants.quickAnimationDuration,
+      _variant = _ChipVariant.badge;
 
   /// チップのラベルテキスト
   final String label;
@@ -60,6 +91,9 @@ class ModernChip extends StatefulWidget {
 
   /// アニメーションの継続時間
   final Duration animationDuration;
+
+  /// チップのバリアント（内部フラグ）
+  final _ChipVariant _variant;
 
   @override
   State<ModernChip> createState() => _ModernChipState();
@@ -266,6 +300,18 @@ class _ModernChipState extends State<ModernChip>
       );
     }
 
+    if (widget._variant == _ChipVariant.tag ||
+        widget._variant == _ChipVariant.badge) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final bg = AppColors.primary.withValues(alpha: AppConstants.opacityXXLow);
+      return _ChipColorData(
+        backgroundColor: bg,
+        foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
+        borderColor: AppColors.primary,
+        hoverColor: bg.withValues(alpha: AppConstants.opacityHigh),
+      );
+    }
+
     return _ChipColorData(
       backgroundColor: widget.backgroundColor ?? AppColors.primaryContainer,
       foregroundColor: widget.foregroundColor ?? AppColors.onPrimaryContainer,
@@ -275,6 +321,9 @@ class _ModernChipState extends State<ModernChip>
     );
   }
 }
+
+/// チップのバリアント（内部用）
+enum _ChipVariant { normal, tag, badge }
 
 /// チップのサイズ
 enum ChipSize { small, medium, large }

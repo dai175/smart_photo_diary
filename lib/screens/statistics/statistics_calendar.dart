@@ -249,7 +249,7 @@ class StatisticsCalendar extends StatelessWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary.withValues(
-                                      alpha: 0.12,
+                                      alpha: AppConstants.opacityXXLow,
                                     ),
                                     borderRadius: AppSpacing.chipRadius,
                                   ),

@@ -3,7 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
-import '../../ui/design_system/app_colors.dart';
+import '../../ui/components/modern_chip.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -132,41 +132,12 @@ class DiaryDetailContent extends StatelessWidget {
               ),
             ),
             if (diaryEntry.effectiveTags.isNotEmpty) ...[
-              () {
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                final foreground = isDark
-                    ? AppColors.primaryLight
-                    : AppColors.primary;
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: AppSpacing.chipRadius,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.tag_rounded,
-                        color: foreground,
-                        size: AppSpacing.iconXs,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        l10n.diaryDetailTagCount(
-                          diaryEntry.effectiveTags.length,
-                        ),
-                        style: AppTypography.labelSmall.copyWith(
-                          color: foreground,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }(),
+              ModernChip.badge(
+                label: l10n.diaryDetailTagCount(
+                  diaryEntry.effectiveTags.length,
+                ),
+                icon: Icons.tag_rounded,
+              ),
             ],
           ],
         ),
