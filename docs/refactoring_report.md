@@ -48,7 +48,7 @@
 
 Large amount of unused code:
 
-- `isIOS` / `isAndroid` — `isIOS` uses `identical(1, 1.0)` which is always `false` in Dart (int and double are different types)
+- `isIOS` / `isAndroid` — `isIOS` uses `identical(1, 1.0)` which is `false` in the Dart VM (int and double are different types), but may be `true` under dart2js (Web) where all numbers are JavaScript doubles
 - `currentPlatformConfig` — unused
 - `serverSideValidationEnabled` (always `false`), `receiptValidationEndpoint`, `fraudDetectionEnabled`, `purchaseValidationTimeoutSeconds` — unused
 - `testAccounts`, `testProductIdPrefix`, `getTestProductId` — test-only, not used in production

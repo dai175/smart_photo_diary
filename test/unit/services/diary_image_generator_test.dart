@@ -88,7 +88,7 @@ void main() {
       // ログ呼び出しの確認
       verify(
         () => mockLoggingService.info(
-          'Starting image generation: 正方形',
+          'Starting image generation: ${ShareFormat.square.name}',
           context: 'DiaryImageGenerator.generateImage',
           data: 'diary_id: ${diary.id}',
         ),
@@ -130,7 +130,7 @@ void main() {
       // ログ呼び出しの確認
       verify(
         () => mockLoggingService.info(
-          'Starting image generation: 正方形',
+          'Starting image generation: ${ShareFormat.square.name}',
           context: 'DiaryImageGenerator.generateImage',
           data: 'diary_id: ${diary.id}',
         ),

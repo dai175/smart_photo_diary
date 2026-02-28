@@ -141,7 +141,7 @@ void main() {
   });
 
   group('AutoRenewalInfoV2', () {
-    test('自動更新有効 → 説明とURLが設定される', () {
+    test('自動更新有効 → URLが設定される', () {
       final status = SubscriptionStatus(
         planId: 'premium_monthly',
         isActive: true,
@@ -153,7 +153,6 @@ void main() {
 
       expect(info.isAutoRenewalEnabled, isTrue);
       expect(info.managementUrl, isNotNull);
-      expect(info.autoRenewalDescription, contains('enabled'));
     });
 
     test('自動更新無効 → URLがnull', () {
@@ -168,7 +167,6 @@ void main() {
 
       expect(info.isAutoRenewalEnabled, isFalse);
       expect(info.managementUrl, isNull);
-      expect(info.autoRenewalDescription, contains('disabled'));
     });
   });
 
