@@ -88,6 +88,12 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   List<TimelinePhotoGroup> _photoGroups = [];
   Map<DateTime, bool> _groupFullyLockedCache = {};
 
+  // i18nラベル（didChangeDependenciesで更新）
+  String _todayLabel = 'Today';
+  String _yesterdayLabel = 'Yesterday';
+  String Function(int, int) _monthYearFormatter = (year, month) =>
+      '$year/$month';
+
   // ログサービス
   ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
@@ -138,6 +144,15 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _todayLabel = context.l10n.timelineToday;
+    _yesterdayLabel = context.l10n.timelineYesterday;
+    _monthYearFormatter = (year, month) =>
+        context.l10n.timelineMonthYear(year, month);
+  }
+
+  @override
   void didUpdateWidget(covariant TimelinePhotoWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.scrollSignal != widget.scrollSignal) {
@@ -175,12 +190,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
   }
 
   void _updatePhotoGroups() {
-    // initState時はcontextが利用できない場合があるため、フォールバックラベルを使用
     final groups = _groupingService.groupPhotosForTimelineLocalized(
       widget.controller.photoAssets,
-      todayLabel: 'Today',
-      yesterdayLabel: 'Yesterday',
-      monthYearFormatter: (year, month) => '$year/$month',
+      todayLabel: _todayLabel,
+      yesterdayLabel: _yesterdayLabel,
+      monthYearFormatter: _monthYearFormatter,
     );
 
     // インデックスキャッシュを先に完全に再構築してからUI更新

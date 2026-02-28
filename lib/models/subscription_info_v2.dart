@@ -76,40 +76,28 @@ class UsageStatisticsV2 {
 }
 
 /// 自動更新情報（V2版）
+///
+/// UIテキストはビュー側でi18nを使用して生成するため、
+/// このモデルは状態のみを保持します。
 class AutoRenewalInfoV2 {
   /// 自動更新が有効かどうか
   final bool isAutoRenewalEnabled;
-
-  /// 自動更新の説明テキスト
-  final String autoRenewalDescription;
 
   /// 自動更新管理のディープリンクURL（プラットフォーム別）
   final String? managementUrl;
 
   const AutoRenewalInfoV2({
     required this.isAutoRenewalEnabled,
-    required this.autoRenewalDescription,
     required this.managementUrl,
   });
 
   /// ファクトリコンストラクタ
   factory AutoRenewalInfoV2.fromStatus(SubscriptionStatus status) {
-    String description;
-    String? managementUrl;
-
-    if (status.autoRenewal) {
-      description =
-          'Auto-renewal is enabled. Subscription will renew automatically before expiry.';
-      managementUrl = 'https://apps.apple.com/account/subscriptions';
-    } else {
-      description =
-          'Auto-renewal is disabled. Please renew manually before expiry.';
-    }
-
     return AutoRenewalInfoV2(
       isAutoRenewalEnabled: status.autoRenewal,
-      autoRenewalDescription: description,
-      managementUrl: managementUrl,
+      managementUrl: status.autoRenewal
+          ? 'https://apps.apple.com/account/subscriptions'
+          : null,
     );
   }
 }
