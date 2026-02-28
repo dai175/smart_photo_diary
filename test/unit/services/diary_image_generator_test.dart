@@ -108,7 +108,7 @@ void main() {
         // 各フォーマットでログが呼ばれることを確認
         verify(
           () => mockLoggingService.info(
-            'Starting image generation: ${format.displayName}',
+            'Starting image generation: ${format.name}',
             context: 'DiaryImageGenerator.generateImage',
             data: 'diary_id: ${diary.id}',
           ),

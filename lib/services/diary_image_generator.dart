@@ -30,7 +30,7 @@ class DiaryImageGenerator {
   }) async {
     try {
       _logger.info(
-        'Starting image generation: ${format.displayName}',
+        'Starting image generation: ${format.name}',
         context: 'DiaryImageGenerator.generateImage',
         data: 'diary_id: ${diary.id}',
       );

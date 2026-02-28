@@ -34,7 +34,7 @@ class StorageImportResultDialog {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                result.summaryMessage,
+                _buildSummaryMessage(context, result),
                 style: AppTypography.bodyLarge.copyWith(
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).colorScheme.onSurface,
@@ -209,6 +209,36 @@ class StorageImportResultDialog {
         ],
       ),
     );
+  }
+
+  static String _buildSummaryMessage(
+    BuildContext context,
+    ImportResult result,
+  ) {
+    if (result.isCompletelySuccessful) {
+      return context.l10n.settingsRestoreCompleteMessage(
+        result.successfulImports,
+      );
+    }
+
+    final parts = <String>[];
+    if (result.successfulImports > 0) {
+      parts.add(
+        context.l10n.settingsRestoreSummarySuccess(result.successfulImports),
+      );
+    }
+    if (result.skippedEntries > 0) {
+      parts.add(
+        context.l10n.settingsRestoreSummarySkipped(result.skippedEntries),
+      );
+    }
+    if (result.failedImports > 0) {
+      parts.add(
+        context.l10n.settingsRestoreSummaryFailed(result.failedImports),
+      );
+    }
+
+    return parts.join(', ');
   }
 
   static Widget _buildResultItem(

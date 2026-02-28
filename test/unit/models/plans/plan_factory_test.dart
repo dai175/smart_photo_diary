@@ -105,74 +105,6 @@ void main() {
       });
     });
 
-    group('getPlansWithFeature', () {
-      test('ライティングプロンプト機能を持つプランのみ返される', () {
-        final plans = PlanFactory.getPlansWithFeature(hasWritingPrompts: true);
-
-        expect(plans.length, 2);
-        expect(plans.every((plan) => plan.hasWritingPrompts), true);
-        expect(plans.every((plan) => plan.isPremium), true);
-      });
-
-      test('高度なフィルタ機能を持つプランのみ返される', () {
-        final plans = PlanFactory.getPlansWithFeature(hasAdvancedFilters: true);
-
-        expect(plans.length, 2);
-        expect(plans.every((plan) => plan.hasAdvancedFilters), true);
-      });
-
-      test('複数の機能条件でフィルタできる', () {
-        final plans = PlanFactory.getPlansWithFeature(
-          hasWritingPrompts: true,
-          hasAdvancedAnalytics: true,
-          hasPrioritySupport: true,
-        );
-
-        expect(plans.length, 2);
-        expect(plans.every((plan) => plan.isPremium), true);
-      });
-
-      test('機能を持たないプランのみ返される', () {
-        final plans = PlanFactory.getPlansWithFeature(hasWritingPrompts: false);
-
-        expect(plans.length, 1);
-        expect(plans[0], isA<BasicPlan>());
-      });
-    });
-
-    group('getPlansWithMinimumLimit', () {
-      test('最小制限値以上のプランのみ返される', () {
-        final plans = PlanFactory.getPlansWithMinimumLimit(50);
-
-        expect(plans.length, 2);
-        expect(
-          plans.every((plan) => plan.monthlyAiGenerationLimit >= 50),
-          true,
-        );
-      });
-
-      test('全プランが条件を満たす場合', () {
-        final plans = PlanFactory.getPlansWithMinimumLimit(5);
-
-        expect(plans.length, 3);
-      });
-
-      test('条件を満たすプランがない場合', () {
-        final plans = PlanFactory.getPlansWithMinimumLimit(200);
-
-        expect(plans.isEmpty, true);
-      });
-
-      test('価格順でソートされる', () {
-        final plans = PlanFactory.getPlansWithMinimumLimit(10);
-
-        expect(plans.length, 3);
-        expect(plans[0].price, 0); // Basic
-        expect(plans[1].price, 300); // Premium Monthly
-        expect(plans[2].price, 2800); // Premium Yearly
-      });
-    });
-
     group('isValidPlanId', () {
       test('有効なプランIDでtrueが返される', () {
         expect(PlanFactory.isValidPlanId('basic'), true);
@@ -220,18 +152,6 @@ void main() {
         final plan = PlanFactory.getPlanByProductId('');
 
         expect(plan, isNull);
-      });
-    });
-
-    group('debugGetAllPlansInfo', () {
-      test('デバッグ情報が正しく生成される', () {
-        final info = PlanFactory.debugGetAllPlansInfo();
-
-        expect(info, contains('=== Registered Plans ==='));
-        expect(info, contains('ID: basic'));
-        expect(info, contains('ID: premium_monthly'));
-        expect(info, contains('ID: premium_yearly'));
-        expect(info, contains('======================='));
       });
     });
   });

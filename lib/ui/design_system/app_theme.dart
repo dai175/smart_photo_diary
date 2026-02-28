@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'app_colors.dart';
-import 'app_spacing.dart';
-import '../component_constants.dart';
 import 'app_theme_light.dart';
 import 'app_theme_dark.dart';
 
@@ -27,47 +24,4 @@ class AppTheme {
 
   // ============= DARK THEME =============
   static ThemeData get darkTheme => buildDarkTheme(isTestEnv: _isTestEnv);
-
-  // ============= HELPER METHODS =============
-  /// 現在のテーマがダークかどうかを判定
-  static bool isDark(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
-
-  /// カスタムテーマデータを作成
-  static ThemeData createCustomTheme({
-    required Color primaryColor,
-    required Brightness brightness,
-  }) {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: primaryColor,
-      brightness: brightness,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: colorScheme,
-      textTheme: brightness == Brightness.light
-          ? lightTheme.textTheme
-          : darkTheme.textTheme,
-    );
-  }
-
-  /// ブラー効果付きコンテナを作成
-  static Widget createBlurContainer({
-    required Widget child,
-    double blurAmount = BlurConstants.defaultBlur,
-    Color? backgroundColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color:
-            backgroundColor ??
-            AppColors.surface.withValues(alpha: BlurConstants.backgroundAlpha),
-        borderRadius: AppSpacing.cardRadius,
-        boxShadow: AppSpacing.cardShadow,
-      ),
-      child: child,
-    );
-  }
 }

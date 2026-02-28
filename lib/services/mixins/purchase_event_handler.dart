@@ -152,7 +152,7 @@ mixin PurchaseEventHandler on ServiceLogging {
 
       isPurchasing = false;
       log(
-        '購入フラグをリセットしました',
+        'Purchase flag reset',
         level: LogLevel.debug,
         context: 'handlePurchaseCompleted',
       );
@@ -239,7 +239,7 @@ mixin PurchaseEventHandler on ServiceLogging {
 
     isPurchasing = false;
     log(
-      '購入フラグをリセットしました',
+      'Purchase flag reset',
       level: LogLevel.debug,
       context: 'handlePurchaseErrorEvent',
     );
@@ -263,7 +263,7 @@ mixin PurchaseEventHandler on ServiceLogging {
 
     isPurchasing = false;
     log(
-      '購入フラグをリセットしました',
+      'Purchase flag reset',
       level: LogLevel.debug,
       context: 'handlePurchaseCanceled',
     );

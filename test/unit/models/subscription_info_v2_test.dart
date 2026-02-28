@@ -153,7 +153,7 @@ void main() {
 
       expect(info.isAutoRenewalEnabled, isTrue);
       expect(info.managementUrl, isNotNull);
-      expect(info.autoRenewalDescription, contains('有効'));
+      expect(info.autoRenewalDescription, contains('enabled'));
     });
 
     test('自動更新無効 → URLがnull', () {
@@ -168,7 +168,7 @@ void main() {
 
       expect(info.isAutoRenewalEnabled, isFalse);
       expect(info.managementUrl, isNull);
-      expect(info.autoRenewalDescription, contains('無効'));
+      expect(info.autoRenewalDescription, contains('disabled'));
     });
   });
 

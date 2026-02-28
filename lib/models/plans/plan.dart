@@ -133,11 +133,6 @@ abstract class Plan {
     }
   }
 
-  /// プラン比較用のメソッド
-  bool hasMoreFeaturesThan(Plan otherPlan) {
-    return monthlyAiGenerationLimit > otherPlan.monthlyAiGenerationLimit;
-  }
-
   /// デバッグ用の文字列表現
   @override
   String toString() {

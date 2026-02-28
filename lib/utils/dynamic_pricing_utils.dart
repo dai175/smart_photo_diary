@@ -136,11 +136,6 @@ class DynamicPricingUtils {
     }
   }
 
-  /// StatefulWidgetで使用する動的価格管理クラス
-  static DynamicPriceManager createManager() {
-    return DynamicPriceManager._();
-  }
-
   /// フォールバック価格を取得
   static String _getFallbackPrice(
     String planId,
@@ -159,77 +154,6 @@ class DynamicPricingUtils {
     );
 
     return fallbackPrice;
-  }
-}
-
-/// 動的価格管理クラス（StatefulWidgetで使用）
-class DynamicPriceManager {
-  DynamicPriceManager._();
-
-  final Map<String, String> _priceCache = {};
-  bool _isLoading = false;
-
-  /// 価格がキャッシュされているかチェック
-  bool hasCachedPrice(String planId) => _priceCache.containsKey(planId);
-
-  /// キャッシュされた価格を取得
-  String? getCachedPrice(String planId) => _priceCache[planId];
-
-  /// ローディング状態
-  bool get isLoading => _isLoading;
-
-  /// 価格を取得してキャッシュ
-  Future<String> fetchAndCachePrice(
-    String planId, {
-    String? locale,
-    Duration timeout = DynamicPricingUtils.singlePlanTimeout,
-  }) async {
-    if (_priceCache.containsKey(planId)) {
-      return _priceCache[planId]!;
-    }
-
-    _isLoading = true;
-    try {
-      final price = await DynamicPricingUtils.getPlanPrice(
-        planId,
-        locale: locale,
-        timeout: timeout,
-      );
-      _priceCache[planId] = price;
-      return price;
-    } finally {
-      _isLoading = false;
-    }
-  }
-
-  /// 複数の価格を取得してキャッシュ
-  Future<Map<String, String>> fetchAndCacheMultiplePrices(
-    List<String> planIds, {
-    String? locale,
-    Duration timeout = DynamicPricingUtils.multiplePlanTimeout,
-  }) async {
-    _isLoading = true;
-    try {
-      final prices = await DynamicPricingUtils.getMultiplePlanPrices(
-        planIds,
-        locale: locale,
-        timeout: timeout,
-      );
-      _priceCache.addAll(prices);
-      return prices;
-    } finally {
-      _isLoading = false;
-    }
-  }
-
-  /// キャッシュをクリア
-  void clearCache() {
-    _priceCache.clear();
-  }
-
-  /// 特定のプランのキャッシュを削除
-  void removeCachedPrice(String planId) {
-    _priceCache.remove(planId);
   }
 }
 

@@ -259,7 +259,7 @@ void main() {
       expect(format.aspectRatio, equals(0.5625));
       expect(format.width, equals(1080));
       expect(format.height, equals(1920));
-      expect(format.displayName, equals('縦長'));
+      expect(format.name, equals('portrait'));
       expect(format.scale, equals(2.0));
       expect(format.isPortrait, isTrue);
       expect(format.isSquare, isFalse);
@@ -272,7 +272,7 @@ void main() {
       expect(format.aspectRatio, equals(0.5625));
       expect(format.width, equals(1350));
       expect(format.height, equals(2400));
-      expect(format.displayName, equals('縦長 (HD)'));
+      expect(format.name, equals('portraitHD'));
       expect(format.scale, equals(2.5));
       expect(format.isPortrait, isTrue);
       expect(format.isSquare, isFalse);
@@ -285,7 +285,7 @@ void main() {
       expect(format.aspectRatio, equals(1.0));
       expect(format.width, equals(1080));
       expect(format.height, equals(1080));
-      expect(format.displayName, equals('正方形'));
+      expect(format.name, equals('square'));
       expect(format.scale, equals(2.0));
       expect(format.isPortrait, isFalse);
       expect(format.isSquare, isTrue);

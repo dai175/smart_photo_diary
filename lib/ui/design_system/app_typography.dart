@@ -226,37 +226,4 @@ class AppTypography {
   static TextStyle withColor(TextStyle style, Color color) {
     return style.copyWith(color: color);
   }
-
-  /// 指定されたフォントウェイトでテキストスタイルを作成
-  static TextStyle withWeight(TextStyle style, FontWeight weight) {
-    return style.copyWith(fontWeight: weight);
-  }
-
-  /// 指定されたフォントサイズでテキストスタイルを作成
-  static TextStyle withSize(TextStyle style, double size) {
-    return style.copyWith(fontSize: size);
-  }
-
-  /// テキストに影を追加
-  static TextStyle withShadow(
-    TextStyle style, {
-    Color shadowColor = Colors.black26,
-    double blurRadius = 2.0,
-    Offset offset = const Offset(0, 1),
-  }) {
-    return style.copyWith(
-      shadows: [
-        Shadow(color: shadowColor, blurRadius: blurRadius, offset: offset),
-      ],
-    );
-  }
-
-  /// レスポンシブなフォントサイズを取得
-  static double getResponsiveFontSize(BuildContext context, double baseSize) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth > 600) {
-      return baseSize * 1.1; // タブレット/デスクトップで少し大きく
-    }
-    return baseSize;
-  }
 }

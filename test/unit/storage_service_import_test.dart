@@ -17,7 +17,6 @@ void main() {
         expect(result.hasErrors, true);
         expect(result.hasWarnings, true);
         expect(result.isCompletelySuccessful, false);
-        expect(result.summaryMessage, '成功: 7件、スキップ: 2件、失敗: 1件');
       });
 
       test('ImportResult should be completely successful when no errors', () {
@@ -33,7 +32,6 @@ void main() {
         expect(result.hasErrors, false);
         expect(result.hasWarnings, false);
         expect(result.isCompletelySuccessful, true);
-        expect(result.summaryMessage, '5件の日記を正常に復元しました');
       });
     });
 
@@ -50,7 +48,6 @@ void main() {
 
         expect(result.hasErrors, false);
         expect(result.hasWarnings, false);
-        expect(result.summaryMessage, '0件の日記を正常に復元しました');
       });
 
       test('should handle multiple errors and warnings', () {
@@ -67,7 +64,6 @@ void main() {
         expect(result.hasWarnings, true);
         expect(result.errors.length, 2);
         expect(result.warnings.length, 3);
-        expect(result.summaryMessage, '成功: 5件、スキップ: 3件、失敗: 2件');
       });
     });
   });

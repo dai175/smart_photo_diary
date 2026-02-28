@@ -1,10 +1,3 @@
-/// UIコンポーネント固有のサイズ/太さなどのトークン
-/// デザインシステム（AppSpacing/AppTypography/AppColors）に属さない
-/// “部品の規格値” をここで管理します。
-class ComponentConstants {
-  ComponentConstants._();
-}
-
 /// Chip/Tag コンポーネントの規格値
 class ChipConstants {
   // 高さ

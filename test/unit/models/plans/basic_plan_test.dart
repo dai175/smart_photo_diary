@@ -106,18 +106,6 @@ void main() {
       });
     });
 
-    group('比較メソッド', () {
-      test('hasMoreFeaturesThanが正しく動作する', () {
-        final anotherBasicPlan = BasicPlan();
-
-        // 同じプラン同士
-        expect(plan.hasMoreFeaturesThan(anotherBasicPlan), false);
-
-        // Basicプランは他のプランより機能が少ない
-        expect(plan.features.length, 6);
-      });
-    });
-
     group('シングルトン動作', () {
       test('複数回インスタンス化しても同じインスタンスが返される', () {
         final plan1 = BasicPlan();

@@ -582,6 +582,42 @@
       }
     }
   },
+  "settingsRestoreCompleteMessage": "{count}件の日記を正常に復元しました",
+  "@settingsRestoreCompleteMessage": {
+    "description": "復元完了時のサマリメッセージ",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreSummarySuccess": "成功: {count}件",
+  "@settingsRestoreSummarySuccess": {
+    "description": "復元結果の成功件数",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreSummarySkipped": "スキップ: {count}件",
+  "@settingsRestoreSummarySkipped": {
+    "description": "復元結果のスキップ件数",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreSummaryFailed": "失敗: {count}件",
+  "@settingsRestoreSummaryFailed": {
+    "description": "復元結果の失敗件数",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "settingsSubscriptionInfoTitle": "サブスクリプション情報",
   "@settingsSubscriptionInfoTitle": {
     "description": "サブスクリプション法的情報セクションのタイトル"

@@ -110,18 +110,6 @@ void main() {
       });
     });
 
-    group('比較メソッド', () {
-      test('hasMoreFeaturesThanが正しく動作する', () {
-        final anotherPremiumMonthly = PremiumMonthlyPlan();
-
-        // 同じプラン同士
-        expect(plan.hasMoreFeaturesThan(anotherPremiumMonthly), false);
-
-        // PremiumMonthlyプランは9つの機能を持つ
-        expect(plan.features.length, 9);
-      });
-    });
-
     group('シングルトン動作', () {
       test('複数回インスタンス化しても同じインスタンスが返される', () {
         final plan1 = PremiumMonthlyPlan();
