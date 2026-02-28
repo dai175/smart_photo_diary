@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
 import 'subscription_status.dart';
@@ -93,11 +95,15 @@ class AutoRenewalInfoV2 {
 
   /// ファクトリコンストラクタ
   factory AutoRenewalInfoV2.fromStatus(SubscriptionStatus status) {
+    String? managementUrl;
+    if (status.autoRenewal) {
+      managementUrl = defaultTargetPlatform == TargetPlatform.iOS
+          ? 'https://apps.apple.com/account/subscriptions'
+          : 'https://play.google.com/store/account/subscriptions';
+    }
     return AutoRenewalInfoV2(
       isAutoRenewalEnabled: status.autoRenewal,
-      managementUrl: status.autoRenewal
-          ? 'https://apps.apple.com/account/subscriptions'
-          : null,
+      managementUrl: managementUrl,
     );
   }
 }
