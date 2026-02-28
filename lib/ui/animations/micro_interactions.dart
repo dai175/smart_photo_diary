@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../constants/app_constants.dart';
+import 'tap_scale_mixin.dart';
 
 /// マイクロインタラクション用のアニメーション効果
 class MicroInteractions {
@@ -148,24 +149,20 @@ class _BounceWrapper extends StatefulWidget {
 }
 
 class _BounceWrapperState extends State<_BounceWrapper>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
+    with SingleTickerProviderStateMixin, TapScaleMixin {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this);
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: widget.scaleFactor,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    initTapScale(
+      vsync: this,
+      duration: widget.duration,
+      scaleFactor: widget.scaleFactor,
+    );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    disposeTapScale();
     super.dispose();
   }
 
@@ -173,16 +170,16 @@ class _BounceWrapperState extends State<_BounceWrapper>
     if (widget.enableHaptic) {
       MicroInteractions.hapticTap();
     }
-    _controller.forward();
+    handleTapScaleDown();
   }
 
   void _handleTapUp(TapUpDetails details) {
-    _controller.reverse();
+    handleTapScaleUp();
     widget.onTap();
   }
 
   void _handleTapCancel() {
-    _controller.reverse();
+    handleTapScaleCancel();
   }
 
   @override
@@ -192,10 +189,10 @@ class _BounceWrapperState extends State<_BounceWrapper>
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
       child: AnimatedBuilder(
-        animation: _scaleAnimation,
+        animation: tapScaleAnimation,
         builder: (context, child) {
           return Transform.scale(
-            scale: _scaleAnimation.value,
+            scale: tapScaleAnimation.value,
             child: widget.child,
           );
         },

@@ -4,6 +4,7 @@ import '../component_constants.dart';
 import '../design_system/app_colors.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
+import '../animations/tap_scale_mixin.dart';
 
 /// モダンなデザインのチップ/タグコンポーネント
 /// カテゴリー別の色分け、アニメーション効果を提供
@@ -65,51 +66,37 @@ class ModernChip extends StatefulWidget {
 }
 
 class _ModernChipState extends State<ModernChip>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
+    with SingleTickerProviderStateMixin, TapScaleMixin {
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: widget.animationDuration,
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: AppConstants.scalePressed)
-        .animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeInOut,
-          ),
-        );
+    initTapScale(vsync: this, duration: widget.animationDuration);
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    disposeTapScale();
     super.dispose();
   }
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.enabled && widget.onTap != null) {
-      _animationController.forward();
+      handleTapScaleDown();
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.enabled && widget.onTap != null) {
-      _animationController.reverse();
+      handleTapScaleUp();
       widget.onTap?.call();
     }
   }
 
   void _handleTapCancel() {
     if (widget.enabled && widget.onTap != null) {
-      _animationController.reverse();
+      handleTapScaleCancel();
     }
   }
 
@@ -127,10 +114,10 @@ class _ModernChipState extends State<ModernChip>
     final colorData = _getChipColorData(context);
 
     return AnimatedBuilder(
-      animation: _animationController,
+      animation: tapScaleController,
       builder: (context, child) {
         return Transform.scale(
-          scale: widget.onTap != null ? _scaleAnimation.value : 1.0,
+          scale: widget.onTap != null ? tapScaleAnimation.value : 1.0,
           child: MouseRegion(
             onEnter: (_) => _handleHoverEnter(),
             onExit: (_) => _handleHoverExit(),
