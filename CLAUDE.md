@@ -85,37 +85,10 @@ lib/
 
 ### Registered Services
 
-#### Phase 1: Core Services
-
-| Service | Interface | Role |
-|---------|-----------|------|
-| LoggingService | ILoggingService | Unified logging |
-| SubscriptionStateService | ISubscriptionStateService | Subscription state (Hive) |
-| AiUsageService | IAiUsageService | AI usage tracking |
-| FeatureAccessService | IFeatureAccessService | Feature access control |
-| InAppPurchaseService | IInAppPurchaseService | IAP processing |
-| SubscriptionService | ISubscriptionService | Subscription facade |
-| SettingsService | ISettingsService | App settings, theme, locale |
-| PhotoPermissionService | IPhotoPermissionService | Photo permission management |
-| PhotoCacheService | IPhotoCacheService | Photo thumbnail caching |
-| PhotoService | IPhotoService | Photo library access (facade) |
-| CameraService | ICameraService | Camera capture |
-| PhotoAccessControlService | IPhotoAccessControlService | Premium photo access control |
-| StorageService | IStorageService | Data export/import |
-| PromptUsageService | IPromptUsageService | Prompt usage history |
-| PromptService | IPromptService | Writing prompt management |
-| DiaryImageGenerator | (concrete) | Social share image generation |
-| SocialShareService | ISocialShareService | X/Instagram sharing |
-
-#### Phase 2: Dependent Services
-
-| Service | Interface | Role |
-|---------|-----------|------|
-| AiService | IAiService | AI diary/tag generation |
-| DiaryTagService | IDiaryTagService | Diary tag management |
-| DiaryStatisticsService | IDiaryStatisticsService | Diary statistics |
-| DiaryService | IDiaryService / IDiaryCrudService / IDiaryQueryService | Diary facade (CRUD, query, tags, stats) |
-| TimelineGroupingService | (static) | Date-based timeline grouping |
+See `lib/core/service_registration.dart` for the full service registry.
+- **Phase 1 (Core):** 17 services — logging, subscription, photo, AI usage, settings, etc.
+- **Phase 2 (Dependent):** 5 services — AI generation, diary (CRUD/query/tags/stats), timeline grouping
+- All interfaces defined in `lib/services/interfaces/` with `I` prefix naming convention
 
 ## Critical Development Guidelines
 
@@ -143,6 +116,13 @@ All log messages, exception messages, and debug data map keys must be written in
 - All new features must have tests
 - Test structure mirrors source: `test/unit/`, `test/widget/`, `test/integration/`
 - Use `mocktail` for mocking
+
+## Gotchas
+
+- Run `fvm dart run build_runner build` after modifying any Hive `@HiveType` model
+- Some controllers use delegate pattern (e.g., `diary_preview_generation_delegate.dart`) rather than extending ChangeNotifier directly
+- Test helpers and shared mocks are in `test/mocks/` and `test/test_helpers/`
+- `.env` must be in project root (not `assets/`), loaded via `dotenv.load(fileName: ".env")`
 
 ## Platform Specifics
 
