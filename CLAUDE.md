@@ -86,9 +86,10 @@ lib/
 ### Registered Services
 
 See `lib/core/service_registration.dart` for the full service registry.
-- **Phase 1 (Core):** 17 services — logging, subscription, photo, AI usage, settings, etc.
-- **Phase 2 (Dependent):** 5 services — AI generation, diary (CRUD/query/tags/stats), timeline grouping
+- **Phase 1 (Core):** 17 services — logging, subscription, photo, AI usage, settings, prompt, social share, etc.
+- **Phase 2 (Dependent):** 4 services — AiService, DiaryTagService, DiaryStatisticsService, DiaryService (+ split interface registrations for IDiaryCrudService, IDiaryQueryService)
 - All interfaces defined in `lib/services/interfaces/` with `I` prefix naming convention
+- Services use 3 registration types: `registerSingleton` (eager), `registerFactory` (new instance per call), `registerAsyncFactory` (async initialization)
 
 ## Critical Development Guidelines
 
@@ -123,6 +124,7 @@ All log messages, exception messages, and debug data map keys must be written in
 - Some controllers use delegate pattern (e.g., `diary_preview_generation_delegate.dart`) rather than extending ChangeNotifier directly
 - Test helpers and shared mocks are in `test/mocks/` and `test/test_helpers/`
 - `.env` must be in project root (not `assets/`), loaded via `dotenv.load(fileName: ".env")`
+- `DiaryService` implements both `IDiaryCrudService` and `IDiaryQueryService` — split interface registrations resolve to the same `IDiaryService` instance via `registerAsyncFactory`
 
 ## Platform Specifics
 
