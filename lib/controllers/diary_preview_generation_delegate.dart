@@ -75,25 +75,29 @@ class DiaryPreviewGenerationDelegate {
     void Function(int current, int total)? onProgress,
   }) async {
     _logger.info(
-      'Starting sequential analysis of multiple photos',
+      'Starting parallel loading of multiple photos',
       context: 'DiaryPreviewGenerationDelegate',
     );
 
-    final imagesWithTimes = <({Uint8List imageData, DateTime time})>[];
-    for (final asset in assets) {
-      final imageResult = await _photoService.getImageForAi(asset);
-      if (imageResult.isSuccess) {
-        imagesWithTimes.add((
-          imageData: imageResult.value,
-          time: PhotoDateResolver.resolveAssetDateTime(asset),
-        ));
-      } else {
+    final results = await Future.wait(
+      assets.map((asset) async {
+        final imageResult = await _photoService.getImageForAi(asset);
+        if (imageResult.isSuccess) {
+          return (
+            imageData: imageResult.value,
+            time: PhotoDateResolver.resolveAssetDateTime(asset),
+          );
+        }
         _logger.warning(
           'Failed to load image, skipping asset: ${asset.id}',
           context: 'DiaryPreviewGenerationDelegate.generateFromMultiplePhotos',
         );
-      }
-    }
+        return null;
+      }),
+    );
+    final imagesWithTimes = results
+        .whereType<({Uint8List imageData, DateTime time})>()
+        .toList();
 
     if (imagesWithTimes.isEmpty) {
       return const Failure(ServiceException('All image loading failed'));
