@@ -70,4 +70,10 @@ abstract class IStorageService {
   /// - Success: 最適化結果（true）
   /// - Failure: [ServiceException] 最適化処理失敗時
   Future<Result<bool>> optimizeDatabaseResult();
+
+  /// ストレージ情報のキャッシュを無効化する
+  ///
+  /// DB操作（インポート、最適化など）の後に呼び出し、
+  /// 次回 [getStorageInfo] / [getStorageInfoResult] で最新値を取得させる。
+  void invalidateStorageCache();
 }
