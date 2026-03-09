@@ -6,12 +6,11 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
-import '../../../core/service_registration.dart';
 import '../../../constants/app_constants.dart';
+import '../../../localization/localization_utils.dart';
 import '../../../models/diary_entry.dart';
 import '../../interfaces/logging_service_interface.dart';
 import '../../interfaces/photo_service_interface.dart';
-import '../../interfaces/settings_service_interface.dart';
 import '../share_channel_mixin.dart';
 
 /// テキスト共有チャネル実装（各プラットフォームで利用可能）
@@ -33,15 +32,7 @@ class XShareChannel with ShareChannelMixin {
     Rect? shareOrigin,
   }) async {
     // ロケールを先に解決（catch でも使えるようスコープ外に）
-    Locale? locale;
-    try {
-      final settingsService =
-          await ServiceRegistration.getAsync<ISettingsService>();
-      locale = settingsService.locale;
-    } catch (_) {
-      locale = null;
-    }
-    final resolvedLocale = locale ?? PlatformDispatcher.instance.locale;
+    final resolvedLocale = await LocalizationUtils.resolveCurrentLocale();
 
     try {
       _logger.info(

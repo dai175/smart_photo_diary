@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -8,12 +7,11 @@ import 'package:share_plus/share_plus.dart';
 import '../../../constants/app_constants.dart';
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
-import '../../../core/service_registration.dart';
+import '../../../localization/localization_utils.dart';
 import '../../../models/diary_entry.dart';
 import '../../interfaces/logging_service_interface.dart';
 import '../../diary_image_generator.dart';
 import '../../interfaces/social_share_service_interface.dart';
-import '../../interfaces/settings_service_interface.dart';
 import '../share_channel_mixin.dart';
 
 /// Instagram系（埋め込み画像を生成して共有）チャネル実装
@@ -34,15 +32,7 @@ class InstagramShareChannel with ShareChannelMixin {
     Rect? shareOrigin,
   }) async {
     // ロケールを先に解決（catch でも使えるようスコープ外に）
-    Locale? locale;
-    try {
-      final settingsService =
-          await ServiceRegistration.getAsync<ISettingsService>();
-      locale = settingsService.locale;
-    } catch (_) {
-      locale = null;
-    }
-    final resolvedLocale = locale ?? ui.PlatformDispatcher.instance.locale;
+    final resolvedLocale = await LocalizationUtils.resolveCurrentLocale();
 
     try {
       _logger.info(
