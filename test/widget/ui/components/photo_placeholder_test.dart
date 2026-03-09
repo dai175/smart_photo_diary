@@ -31,10 +31,11 @@ void main() {
         ),
       );
 
-      final container = tester.widget<Container>(find.byType(Container));
-      final constraints = container.constraints;
-      expect(constraints?.maxWidth, 100);
-      expect(constraints?.maxHeight, 100);
+      final renderBox = tester.renderObject<RenderBox>(
+        find.byType(PhotoPlaceholder),
+      );
+      expect(renderBox.size.width, 100);
+      expect(renderBox.size.height, 100);
     });
   });
 }
