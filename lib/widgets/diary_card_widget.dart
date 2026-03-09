@@ -14,7 +14,7 @@ import '../services/interfaces/photo_service_interface.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/loading_shimmer.dart';
 import '../ui/components/modern_chip.dart';
-import '../ui/design_system/app_colors.dart';
+import '../ui/components/photo_placeholder.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 
@@ -210,35 +210,13 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
       builder: (context, thumbnailSnapshot) {
         if (thumbnailSnapshot.hasError ||
             (thumbnailSnapshot.hasData && thumbnailSnapshot.data!.isFailure)) {
-          return Container(
-            width: AppConstants.diaryThumbnailSize,
-            height: AppConstants.diaryThumbnailSize,
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.broken_image_outlined,
-                color: AppColors.onSurfaceVariant,
-              ),
-            ),
+          return const PhotoPlaceholder(
+            size: AppConstants.diaryThumbnailSize,
+            isError: true,
           );
         }
         if (!thumbnailSnapshot.hasData) {
-          return Container(
-            width: AppConstants.diaryThumbnailSize,
-            height: AppConstants.diaryThumbnailSize,
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: AppConstants.progressIndicatorStrokeWidth,
-              ),
-            ),
-          );
+          return const PhotoPlaceholder(size: AppConstants.diaryThumbnailSize);
         }
 
         final thumbnailData = thumbnailSnapshot.data!.value;
