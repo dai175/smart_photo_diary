@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
+import '../../test_helpers/mock_platform_channels.dart';
 
 // モック
 class MockStorageService extends Mock implements IStorageService {}
@@ -139,37 +141,83 @@ void main() {
         verifyNever(() => mockStorageService.optimizeDatabaseResult());
       });
     });
+  });
 
-    group('invalidateStorageCache', () {
-      test('キャッシュ無効化後にgetStorageInfoResultが再取得する', () async {
-        const info1 = StorageInfo(totalSize: 1024, diaryDataSize: 512);
-        const info2 = StorageInfo(totalSize: 2048, diaryDataSize: 1024);
+  group('StorageService invalidateStorageCache', () {
+    late StorageService storageService;
+    late Directory testDir;
 
-        var callCount = 0;
-        when(() => mockStorageService.getStorageInfoResult()).thenAnswer((
-          _,
-        ) async {
-          callCount++;
-          return callCount == 1 ? const Success(info1) : const Success(info2);
-        });
-        when(
-          () => mockStorageService.invalidateStorageCache(),
-        ).thenReturn(null);
+    setUp(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      MockPlatformChannels.setupMocks();
 
-        // 1回目の取得
-        final result1 = await mockStorageService.getStorageInfoResult();
-        expect(result1.value.totalSize, 1024);
+      // テスト用ディレクトリを作成
+      testDir = Directory('/tmp/test_docs');
+      if (await testDir.exists()) {
+        await testDir.delete(recursive: true);
+      }
+      await testDir.create(recursive: true);
 
-        // キャッシュ無効化
-        mockStorageService.invalidateStorageCache();
+      storageService = StorageService();
+    });
 
-        // 2回目の取得（再取得されるべき）
-        final result2 = await mockStorageService.getStorageInfoResult();
-        expect(result2.value.totalSize, 2048);
+    tearDown(() async {
+      MockPlatformChannels.clearMocks();
+      if (await testDir.exists()) {
+        await testDir.delete(recursive: true);
+      }
+    });
 
-        verify(() => mockStorageService.getStorageInfoResult()).called(2);
-        verify(() => mockStorageService.invalidateStorageCache()).called(1);
-      });
+    test('キャッシュ無効化後にgetStorageInfoが最新値を再取得する', () async {
+      // 初期状態: .hiveファイルを1つ作成
+      final hiveFile = File('${testDir.path}/test.hive');
+      await hiveFile.writeAsBytes(List.filled(1024, 0));
+
+      // 1回目の取得（キャッシュされる）
+      final info1 = await storageService.getStorageInfo();
+      expect(info1.totalSize, 1024);
+
+      // ファイルを追加（ファイルシステムが変化）
+      final hiveFile2 = File('${testDir.path}/test2.hive');
+      await hiveFile2.writeAsBytes(List.filled(2048, 0));
+
+      // 2回目の取得（キャッシュから返るので古い値のまま）
+      final info2 = await storageService.getStorageInfo();
+      expect(info2.totalSize, 1024, reason: 'キャッシュが有効なので古い値が返る');
+
+      // キャッシュ無効化
+      storageService.invalidateStorageCache();
+
+      // 3回目の取得（再取得されて新しい値になる）
+      final info3 = await storageService.getStorageInfo();
+      expect(info3.totalSize, 1024 + 2048, reason: 'キャッシュ無効化後は最新値を取得');
+    });
+
+    test('キャッシュ無効化後にgetStorageInfoResultが最新値を再取得する', () async {
+      // 初期状態: .hiveファイルを1つ作成
+      final hiveFile = File('${testDir.path}/data.hive');
+      await hiveFile.writeAsBytes(List.filled(512, 0));
+
+      // 1回目の取得（キャッシュされる）
+      final result1 = await storageService.getStorageInfoResult();
+      expect(result1.isSuccess, true);
+      expect(result1.value.totalSize, 512);
+
+      // ファイルを追加
+      final hiveFile2 = File('${testDir.path}/data2.hive');
+      await hiveFile2.writeAsBytes(List.filled(512, 0));
+
+      // キャッシュ無効化なしでは古い値
+      final result2 = await storageService.getStorageInfoResult();
+      expect(result2.value.totalSize, 512);
+
+      // キャッシュ無効化
+      storageService.invalidateStorageCache();
+
+      // 新しい値が返る
+      final result3 = await storageService.getStorageInfoResult();
+      expect(result3.isSuccess, true);
+      expect(result3.value.totalSize, 1024);
     });
   });
 
