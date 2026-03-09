@@ -18,6 +18,11 @@ class StorageService implements IStorageService {
   late final StorageExportDelegate _exportDelegate;
   late final StorageImportDelegate _importDelegate;
 
+  // ストレージ情報キャッシュ
+  StorageInfo? _cachedStorageInfo;
+  DateTime? _cacheTimestamp;
+  static const _cacheDuration = Duration(minutes: 5);
+
   StorageService({
     IDiaryService? diaryService,
     ISettingsService? settingsService,
@@ -49,9 +54,22 @@ class StorageService implements IStorageService {
     }
   }
 
+  bool get _isCacheValid =>
+      _cachedStorageInfo != null &&
+      _cacheTimestamp != null &&
+      DateTime.now().difference(_cacheTimestamp!) < _cacheDuration;
+
+  @override
+  void invalidateStorageCache() {
+    _cachedStorageInfo = null;
+    _cacheTimestamp = null;
+  }
+
   // ストレージ使用量を取得
   @override
   Future<StorageInfo> getStorageInfo() async {
+    if (_isCacheValid) return _cachedStorageInfo!;
+
     final appDir = await getApplicationDocumentsDirectory();
     int diaryDataSize = 0;
 
@@ -66,7 +84,13 @@ class StorageService implements IStorageService {
       }
     }
 
-    return StorageInfo(totalSize: diaryDataSize, diaryDataSize: diaryDataSize);
+    final info = StorageInfo(
+      totalSize: diaryDataSize,
+      diaryDataSize: diaryDataSize,
+    );
+    _cachedStorageInfo = info;
+    _cacheTimestamp = DateTime.now();
+    return info;
   }
 
   // データのエクスポート（保存先選択可能）
@@ -92,6 +116,7 @@ class StorageService implements IStorageService {
     // 一時ファイルを削除
     await _cleanupTempFiles();
 
+    invalidateStorageCache();
     return true;
   }
 

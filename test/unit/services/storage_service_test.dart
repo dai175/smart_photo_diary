@@ -139,5 +139,34 @@ void main() {
         verifyNever(() => mockStorageService.optimizeDatabaseResult());
       });
     });
+
+    group('invalidateStorageCache', () {
+      test('キャッシュ無効化メソッドがインターフェースに存在する', () {
+        // invalidateStorageCache はインターフェースのメソッド
+        mockStorageService.invalidateStorageCache();
+        verify(() => mockStorageService.invalidateStorageCache()).called(1);
+      });
+    });
+  });
+
+  group('StorageInfo', () {
+    test('フォーマットされたサイズ文字列を返す', () {
+      const info = StorageInfo(totalSize: 1536, diaryDataSize: 1536);
+      expect(info.formattedTotalSize, '1.5KB');
+      expect(info.formattedDiaryDataSize, '1.5KB');
+    });
+
+    test('バイト単位のサイズ文字列を返す', () {
+      const info = StorageInfo(totalSize: 512, diaryDataSize: 512);
+      expect(info.formattedTotalSize, '512B');
+    });
+
+    test('MB単位のサイズ文字列を返す', () {
+      const info = StorageInfo(
+        totalSize: 1024 * 1024 * 2,
+        diaryDataSize: 1024 * 1024 * 2,
+      );
+      expect(info.formattedTotalSize, '2.0MB');
+    });
   });
 }
