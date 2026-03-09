@@ -124,8 +124,8 @@ class UpgradeDialogController extends BaseErrorController {
         );
       } else {
         final error = result.error;
-        if (error.toString().contains('In-App Purchase not available') ||
-            error.toString().contains('Product not found')) {
+        if (error.message.contains('In-App Purchase not available') ||
+            error.message.contains('Product not found')) {
           _logger.warning(
             'Possibly simulator or TestFlight environment',
             context: 'UpgradeDialogController.purchasePlan',
