@@ -47,36 +47,7 @@ class DiaryScreenController extends BaseErrorController {
 
   // 日記エントリーを読み込む（初期ページ）
   Future<void> loadDiaryEntries({bool showShimmer = true}) async {
-    try {
-      if (showShimmer) setLoading(true);
-      _resetPaging();
-      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
-      final result = await diaryService.getFilteredDiaryEntriesPage(
-        _currentFilter,
-        offset: _offset,
-        limit: _pageSize,
-      );
-
-      result.fold(
-        (entries) {
-          _diaryEntries = entries;
-          _offset = entries.length;
-          _hasMore = entries.length == _pageSize;
-          clearError();
-          if (showShimmer) setLoading(false);
-          notifyListeners();
-        },
-        (error) {
-          setError(error);
-          if (showShimmer) setLoading(false);
-          notifyListeners();
-        },
-      );
-    } catch (e) {
-      setError(ServiceException('Failed to load diaries: $e'));
-      if (showShimmer) setLoading(false);
-      notifyListeners();
-    }
+    await _loadEntriesWithFilter(_currentFilter, showShimmer: showShimmer);
   }
 
   // 次ページを読み込む
@@ -118,6 +89,40 @@ class DiaryScreenController extends BaseErrorController {
     _offset = 0;
     _hasMore = true;
     _isLoadingMore = false;
+  }
+
+  // フィルタを適用して日記エントリーを取得する共通メソッド
+  Future<void> _loadEntriesWithFilter(
+    DiaryFilter filter, {
+    bool showShimmer = true,
+  }) async {
+    try {
+      if (showShimmer) setLoading(true);
+      _resetPaging();
+      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
+      final result = await diaryService.getFilteredDiaryEntriesPage(
+        filter,
+        offset: _offset,
+        limit: _pageSize,
+      );
+
+      result.fold(
+        (entries) {
+          _diaryEntries = entries;
+          _offset = entries.length;
+          _hasMore = entries.length == _pageSize;
+          clearError();
+        },
+        (error) {
+          setError(error);
+        },
+      );
+    } catch (e) {
+      setError(ServiceException('Failed to load diaries: $e'));
+    }
+
+    if (showShimmer) setLoading(false);
+    notifyListeners();
   }
 
   // フィルタを適用（シマー表示あり、FilterBottomSheet用）
@@ -176,52 +181,16 @@ class DiaryScreenController extends BaseErrorController {
   // 検索実行
   void performSearch(String query) {
     _searchQuery = query;
-    setLoading(true);
-    _searchDiaryEntries(query);
+    final filter = query.isEmpty
+        ? _currentFilter
+        : _currentFilter.copyWith(searchText: query);
+    _loadEntriesWithFilter(filter);
   }
 
   // 検索クリア
   void clearSearch() {
     _searchController.clear();
     performSearch('');
-  }
-
-  // 検索で日記を絞り込み
-  Future<void> _searchDiaryEntries(String query) async {
-    try {
-      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
-
-      final filter = query.isEmpty
-          ? _currentFilter
-          : _currentFilter.copyWith(searchText: query);
-
-      _resetPaging();
-      final result = await diaryService.getFilteredDiaryEntriesPage(
-        filter,
-        offset: _offset,
-        limit: _pageSize,
-      );
-
-      result.fold(
-        (entries) {
-          _diaryEntries = entries;
-          _offset = entries.length;
-          _hasMore = entries.length == _pageSize;
-          clearError();
-          setLoading(false);
-          notifyListeners();
-        },
-        (error) {
-          setError(error);
-          setLoading(false);
-          notifyListeners();
-        },
-      );
-    } catch (e) {
-      setError(ServiceException('Search failed: $e'));
-      setLoading(false);
-      notifyListeners();
-    }
   }
 
   // シマーを表示せずにデータを再読み込み（スクロール位置維持）
