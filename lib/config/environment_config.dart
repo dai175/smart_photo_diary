@@ -132,7 +132,7 @@ class EnvironmentConfig {
   }
 
   /// プラン強制設定を取得（デバッグモードでのみ有効）
-  /// 有効な値: 'basic', 'premium', 'premium_monthly', 'premium_yearly'
+  /// 有効な値: 'basic', 'premium_monthly', 'premium_yearly'
   static String? get forcePlan {
     if (!kDebugMode) return null; // 本番ビルドでは常にnull
     if (!_isInitialized) return null;
@@ -141,12 +141,11 @@ class EnvironmentConfig {
     if (plan == null || plan.isEmpty) return null;
 
     // 有効なプラン名のみ許可
-    const validPlans = [
-      'basic',
-      'premium',
-      'premium_monthly',
-      'premium_yearly',
-    ];
+    const validPlans = {
+      SubscriptionConstants.basicPlanId,
+      SubscriptionConstants.premiumMonthlyPlanId,
+      SubscriptionConstants.premiumYearlyPlanId,
+    };
     if (validPlans.contains(plan)) {
       return plan;
     }
@@ -154,7 +153,7 @@ class EnvironmentConfig {
     _logger.warning(
       'Invalid FORCE_PLAN specified',
       context: 'EnvironmentConfig.forcePlan',
-      data: {'invalidPlan': plan, 'validPlans': validPlans},
+      data: {'invalidPlan': plan, 'validPlans': validPlans.toList()},
     );
     return null;
   }
