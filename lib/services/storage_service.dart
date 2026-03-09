@@ -5,6 +5,7 @@ import 'interfaces/diary_service_interface.dart';
 import 'interfaces/settings_service_interface.dart';
 import 'interfaces/storage_service_interface.dart';
 import '../core/service_locator.dart';
+import '../localization/localization_utils.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
@@ -45,13 +46,10 @@ class StorageService implements IStorageService {
 
   /// 現在のロケールを解決する
   Future<Locale> _resolveLocale() async {
-    try {
-      final settingsService =
-          _settingsService ?? await serviceLocator.getAsync<ISettingsService>();
-      return settingsService.locale ?? PlatformDispatcher.instance.locale;
-    } catch (_) {
-      return PlatformDispatcher.instance.locale;
+    if (_settingsService != null) {
+      return _settingsService.locale ?? PlatformDispatcher.instance.locale;
     }
+    return LocalizationUtils.resolveCurrentLocale();
   }
 
   bool get _isCacheValid =>
@@ -102,7 +100,9 @@ class StorageService implements IStorageService {
   // データのインポート（リストア機能）
   @override
   Future<Result<ImportResult?>> importData() async {
-    return _importDelegate.importData();
+    final result = await _importDelegate.importData();
+    invalidateStorageCache();
+    return result;
   }
 
   // データの最適化
