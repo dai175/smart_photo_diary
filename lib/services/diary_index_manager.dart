@@ -13,6 +13,8 @@ class DiaryIndexManager {
   final Map<String, String> searchTextIndex = {};
   // 日付（年月日）だけを保持した並行配列（sortedIdsByDateDesc と同じ順）
   final List<DateTime> sortedDatesByDayDesc = [];
+  // photoId → diaryId の逆引きインデックス
+  final Map<String, String> photoIdIndex = {};
 
   /// インデックス構築（起動時/再初期化時）
   Future<void> buildIndex(Box<DiaryEntry> diaryBox) async {
@@ -26,8 +28,12 @@ class DiaryIndexManager {
       );
     // 検索インデックス
     searchTextIndex.clear();
+    photoIdIndex.clear();
     for (final e in entries) {
       searchTextIndex[e.id] = buildSearchableText(e);
+      for (final photoId in e.photoIds) {
+        photoIdIndex[photoId] = e.id;
+      }
     }
     indexBuilt = true;
   }
@@ -117,6 +123,9 @@ class DiaryIndexManager {
       DateTime(entry.date.year, entry.date.month, entry.date.day),
     );
     searchTextIndex[entry.id] = buildSearchableText(entry);
+    for (final photoId in entry.photoIds) {
+      photoIdIndex[photoId] = entry.id;
+    }
   }
 
   /// エントリーの日付変更時にインデックスを更新
@@ -144,7 +153,7 @@ class DiaryIndexManager {
   }
 
   /// エントリーをインデックスから削除
-  void removeEntry(String id) {
+  void removeEntry(String id, {List<String>? photoIds}) {
     final idx = sortedIdsByDateDesc.indexOf(id);
     if (idx != -1) {
       if (sortedIdsByDateDesc.length > idx) {
@@ -155,5 +164,10 @@ class DiaryIndexManager {
       }
     }
     searchTextIndex.remove(id);
+    if (photoIds != null) {
+      for (final photoId in photoIds) {
+        photoIdIndex.remove(photoId);
+      }
+    }
   }
 }
