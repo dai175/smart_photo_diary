@@ -40,37 +40,12 @@ fvm flutter run --dart-define=FORCE_PLAN=premium  # Force premium plan
 
 ### Directory Structure
 
-```
-lib/
-├── core/                    # Core architecture
-│   ├── result/             # Result<T> pattern (type-safe error handling)
-│   ├── errors/             # Exception hierarchy (AppException base)
-│   ├── service_locator.dart    # DI container
-│   └── service_registration.dart # 2-phase service registration
-├── services/                # Service layer
-│   ├── interfaces/         # Service interfaces (I-prefix convention)
-│   ├── ai/                 # AI services (Gemini API client, generators)
-│   ├── social_share/       # Social sharing channels
-│   └── *.dart              # Service implementations
-├── models/                  # Data models (Hive-annotated)
-│   ├── plans/              # Subscription plan definitions
-│   └── states/             # State models
-├── screens/                 # Screen widgets
-├── controllers/             # Screen controllers (ChangeNotifier-based)
-├── widgets/                 # Reusable widget components
-├── shared/                  # Shared UI components (filters, etc.)
-├── ui/                      # UI system
-│   ├── design_system/      # Material Design 3 theme, colors, typography
-│   ├── components/         # Common UI components (CustomDialog, etc.)
-│   ├── animations/         # Animation definitions
-│   └── error_display/      # Severity-based error display system
-├── constants/               # App-wide constants
-├── utils/                   # Utility functions
-├── config/                  # Environment & IAP configuration
-├── l10n/                    # Internationalization ARB files
-├── localization/            # Locale extensions & utilities
-└── debug/                   # Debug-only screens
-```
+- `lib/core/` — DI container, Result<T> pattern, exception hierarchy
+- `lib/services/interfaces/` — all service interfaces (I-prefix)
+- `lib/controllers/` — ChangeNotifier-based screen controllers
+- `lib/ui/design_system/` — Material Design 3 theme, colors, typography
+- `lib/ui/components/` — shared UI components (CustomDialog, buttons, etc.)
+- `lib/l10n/` — ARB files (Japanese/English)
 
 ### Key Patterns
 
@@ -79,17 +54,17 @@ lib/
 - **`Result<T>` pattern** for type-safe error handling (`sealed class` with `Success<T>` / `Failure<T>`) — new features MUST use this
 - **Exception hierarchy** — `AppException` base class with specific subtypes in `lib/core/errors/`
 - **State management** — `ChangeNotifier`-based controllers (no Provider/Riverpod/Bloc)
-- **Facade pattern** — large services (DiaryService, SubscriptionService, PhotoService) delegate to internal sub-services
+- **Facade + Delegate pattern** — large services and controllers decompose into focused delegates (e.g., `DiaryQueryDelegate`, `PurchaseFlowDelegate`, `DiaryPreviewGenerationDelegate`). Each delegate has single responsibility and can be unit-tested independently.
 - **Constructor injection** — service dependencies injected via constructors
 - **`build_runner`** for generating Hive type adapters
+- **Async stale prevention** — use `_requestVersion` pattern: capture version before async op, check after completion to discard stale results
 
 ### Registered Services
 
 See `lib/core/service_registration.dart` for the full service registry.
-- **Phase 1 (Core):** 17 services — logging, subscription, photo, AI usage, settings, prompt, social share, etc.
-- **Phase 2 (Dependent):** 4 services — AiService, DiaryTagService, DiaryStatisticsService, DiaryService (+ split interface registrations for IDiaryCrudService, IDiaryQueryService)
-- All interfaces defined in `lib/services/interfaces/` with `I` prefix naming convention
-- Services use 3 registration types: `registerSingleton` (eager), `registerFactory` (new instance per call), `registerAsyncFactory` (async initialization)
+- 2-phase registration: Phase 1 (independent core services) → Phase 2 (cross-dependent services)
+- `DiaryService` implements split interfaces: `IDiaryCrudService` + `IDiaryQueryService` (resolve to same instance)
+- 3 registration types: `registerSingleton` (eager), `registerFactory` (per call), `registerAsyncFactory` (async init)
 
 ## Critical Development Guidelines
 
@@ -128,14 +103,10 @@ All log messages, exception messages, and debug data map keys must be written in
 
 ## Platform Specifics
 
-- Uses `photo_manager` and `permission_handler`
-- Handle `PermissionState.limited` for iOS 14+
+- Handle `PermissionState.limited` for iOS 14+ (photo_manager)
 - Premium users can access photos from past 365 days
-- In-App Purchase with StoreKit 2 support (`in_app_purchase` package)
 
 ## Internationalization (i18n)
 
-- ARB files in `lib/l10n/`: `app_ja.arb` (Japanese), `app_en.arb` (English)
-- Always use `context.l10n` for UI text
+- Always use `context.l10n` for UI text, never hardcoded strings
 - Service methods accept `Locale?` parameter for language-specific operations
-- Locale extensions in `lib/localization/`
