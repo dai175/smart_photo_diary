@@ -75,7 +75,8 @@ class NoOpLoggingService implements ILoggingService {
     StackTrace? stackTrace,
   }) {}
   @override
-  Stopwatch startTimer(String operation, {String? context}) => Stopwatch();
+  Stopwatch startTimer(String operation, {String? context}) =>
+      Stopwatch()..start();
   @override
   void endTimer(Stopwatch stopwatch, String operation, {String? context}) {}
 }
