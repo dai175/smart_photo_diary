@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../core/result/result.dart';
 import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/subscription_info_v2.dart';
@@ -57,19 +56,21 @@ class SettingsController extends BaseErrorController {
       final packageFuture = PackageInfo.fromPlatform()
           .then<PackageInfo?>((v) => v)
           .catchError((_) => null);
-      final phase1 = await Future.wait([settingsFuture, packageFuture]);
-      _settingsService = phase1[0] as ISettingsService;
-      _packageInfo = phase1[1] as PackageInfo?;
+      final (settings, packageInfo) = await (
+        settingsFuture,
+        packageFuture,
+      ).wait;
+      _settingsService = settings;
+      _packageInfo = packageInfo;
       _selectedLocale = _settingsService!.locale;
 
       // Phase 2: storageInfo と subscriptionInfo を並列取得
       final storageService = ServiceRegistration.get<IStorageService>();
-      final phase2 = await Future.wait([
+      final (storageResult, subscriptionResult) = await (
         storageService.getStorageInfoResult(),
         _settingsService!.getSubscriptionInfoV2(),
-      ]);
+      ).wait;
 
-      final storageResult = phase2[0] as Result<StorageInfo>;
       if (storageResult.isSuccess) {
         _storageInfo = storageResult.value;
       } else {
@@ -80,7 +81,6 @@ class SettingsController extends BaseErrorController {
         );
       }
 
-      final subscriptionResult = phase2[1] as Result<SubscriptionInfoV2>;
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
       } else {

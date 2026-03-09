@@ -194,6 +194,13 @@ class DiaryCrudDelegate {
       final newIds = Set<String>.from(entry.photoIds);
       final removed = oldIds.difference(newIds).toList();
       final added = newIds.difference(oldIds).toList();
+      // photoIdIndex を同期
+      for (final photoId in removed) {
+        _indexManager.photoIdIndex.remove(photoId);
+      }
+      for (final photoId in added) {
+        _indexManager.photoIdIndex[photoId] = entry.id;
+      }
       if (!_isDisposed()) {
         _changeController.add(
           DiaryChange(
