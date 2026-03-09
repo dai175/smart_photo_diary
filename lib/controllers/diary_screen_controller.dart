@@ -24,6 +24,7 @@ class DiaryScreenController extends BaseErrorController {
   int _offset = 0;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  bool _isReloadingEntries = false;
   int _requestVersion = 0;
 
   // Getters
@@ -53,7 +54,7 @@ class DiaryScreenController extends BaseErrorController {
 
   // 次ページを読み込む
   Future<void> loadMore() async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingMore || _isReloadingEntries || !_hasMore) return;
     final requestVersion = _requestVersion;
     _isLoadingMore = true;
     notifyListeners();
@@ -80,12 +81,14 @@ class DiaryScreenController extends BaseErrorController {
           notifyListeners();
         },
         (error) {
+          if (requestVersion != _requestVersion) return;
           setError(error);
           _isLoadingMore = false;
           notifyListeners();
         },
       );
     } catch (e) {
+      if (requestVersion != _requestVersion) return;
       setError(ServiceException('Failed to load more: $e'));
       _isLoadingMore = false;
       notifyListeners();
@@ -104,6 +107,7 @@ class DiaryScreenController extends BaseErrorController {
     bool showShimmer = true,
   }) async {
     final requestVersion = ++_requestVersion;
+    _isReloadingEntries = true;
     try {
       if (showShimmer) setLoading(true);
       _resetPaging();
@@ -123,15 +127,20 @@ class DiaryScreenController extends BaseErrorController {
           clearError();
         },
         (error) {
+          if (requestVersion != _requestVersion) return;
           setError(error);
         },
       );
     } catch (e) {
+      if (requestVersion != _requestVersion) return;
       setError(ServiceException('Failed to load diaries: $e'));
+    } finally {
+      if (requestVersion == _requestVersion) {
+        _isReloadingEntries = false;
+        if (showShimmer) setLoading(false);
+        notifyListeners();
+      }
     }
-
-    if (showShimmer) setLoading(false);
-    notifyListeners();
   }
 
   // フィルタを適用（シマー表示あり、FilterBottomSheet用）
