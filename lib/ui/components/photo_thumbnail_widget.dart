@@ -6,6 +6,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../constants/app_constants.dart';
 import '../design_system/app_spacing.dart';
 import '../animations/micro_interactions.dart';
+import 'photo_placeholder.dart';
 
 /// 写真サムネイルウィジェット（futureをキャッシュして再ビルド時の再取得を防止）
 ///
@@ -79,41 +80,11 @@ class _PhotoThumbnailWidgetState extends State<PhotoThumbnailWidget> {
         if (snapshot.hasError ||
             (snapshot.connectionState == ConnectionState.done &&
                 !snapshot.hasData)) {
-          return Container(
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: Icon(
-              Icons.broken_image_outlined,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          );
+          return PhotoPlaceholder(size: widget.size, isError: true);
         }
 
         if (!snapshot.hasData) {
-          return Container(
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: AppSpacing.photoRadius,
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-          );
+          return PhotoPlaceholder(size: widget.size);
         }
 
         Widget imageWidget = Container(
