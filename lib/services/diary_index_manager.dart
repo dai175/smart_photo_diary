@@ -152,6 +152,22 @@ class DiaryIndexManager {
     searchTextIndex[entry.id] = buildSearchableText(entry);
   }
 
+  /// photoIdIndex を更新（追加・削除）
+  void updateEntryPhotoIds(
+    String entryId, {
+    List<String> added = const [],
+    List<String> removed = const [],
+  }) {
+    for (final photoId in removed) {
+      if (photoIdIndex[photoId] == entryId) {
+        photoIdIndex.remove(photoId);
+      }
+    }
+    for (final photoId in added) {
+      photoIdIndex[photoId] = entryId;
+    }
+  }
+
   /// エントリーをインデックスから削除
   void removeEntry(String id, {List<String>? photoIds}) {
     final idx = sortedIdsByDateDesc.indexOf(id);
@@ -166,8 +182,12 @@ class DiaryIndexManager {
     searchTextIndex.remove(id);
     if (photoIds != null) {
       for (final photoId in photoIds) {
-        photoIdIndex.remove(photoId);
+        if (photoIdIndex[photoId] == id) {
+          photoIdIndex.remove(photoId);
+        }
       }
+    } else {
+      photoIdIndex.removeWhere((_, diaryId) => diaryId == id);
     }
   }
 }

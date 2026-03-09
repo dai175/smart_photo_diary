@@ -141,9 +141,33 @@ void main() {
     });
 
     group('invalidateStorageCache', () {
-      test('キャッシュ無効化メソッドがインターフェースに存在する', () {
-        // invalidateStorageCache はインターフェースのメソッド
+      test('キャッシュ無効化後にgetStorageInfoResultが再取得する', () async {
+        const info1 = StorageInfo(totalSize: 1024, diaryDataSize: 512);
+        const info2 = StorageInfo(totalSize: 2048, diaryDataSize: 1024);
+
+        var callCount = 0;
+        when(() => mockStorageService.getStorageInfoResult()).thenAnswer((
+          _,
+        ) async {
+          callCount++;
+          return callCount == 1 ? const Success(info1) : const Success(info2);
+        });
+        when(
+          () => mockStorageService.invalidateStorageCache(),
+        ).thenReturn(null);
+
+        // 1回目の取得
+        final result1 = await mockStorageService.getStorageInfoResult();
+        expect(result1.value.totalSize, 1024);
+
+        // キャッシュ無効化
         mockStorageService.invalidateStorageCache();
+
+        // 2回目の取得（再取得されるべき）
+        final result2 = await mockStorageService.getStorageInfoResult();
+        expect(result2.value.totalSize, 2048);
+
+        verify(() => mockStorageService.getStorageInfoResult()).called(2);
         verify(() => mockStorageService.invalidateStorageCache()).called(1);
       });
     });

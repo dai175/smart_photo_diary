@@ -436,4 +436,91 @@ void main() {
       expect(indexManager.photoIdIndex.containsKey('old'), isFalse);
     });
   });
+
+  group('updateEntryPhotoIds', () {
+    test('追加と削除が正しく反映される', () async {
+      final entry = createEntry(
+        id: 'diary1',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['p1', 'p2'],
+      );
+      await diaryBox.put('diary1', entry);
+      await indexManager.buildIndex(diaryBox);
+
+      expect(indexManager.photoIdIndex['p1'], 'diary1');
+      expect(indexManager.photoIdIndex['p2'], 'diary1');
+
+      indexManager.updateEntryPhotoIds(
+        'diary1',
+        added: ['p3'],
+        removed: ['p1'],
+      );
+
+      expect(indexManager.photoIdIndex.containsKey('p1'), isFalse);
+      expect(indexManager.photoIdIndex['p2'], 'diary1');
+      expect(indexManager.photoIdIndex['p3'], 'diary1');
+    });
+
+    test('他エントリーのphotoIdは削除されない', () async {
+      final entry1 = createEntry(
+        id: 'diary1',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['p1'],
+      );
+      final entry2 = createEntry(
+        id: 'diary2',
+        date: DateTime(2025, 1, 2),
+        photoIds: ['p2'],
+      );
+      await diaryBox.put('diary1', entry1);
+      await diaryBox.put('diary2', entry2);
+      await indexManager.buildIndex(diaryBox);
+
+      // diary1のremoveでp2（diary2所有）を指定しても削除されない
+      indexManager.updateEntryPhotoIds('diary1', removed: ['p2']);
+
+      expect(indexManager.photoIdIndex['p2'], 'diary2');
+    });
+  });
+
+  group('removeEntry photoIds null fallback', () {
+    test('photoIds未指定時 → 該当diaryIdのphotoIdIndexを全削除', () async {
+      final entry = createEntry(
+        id: 'diary1',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['p1', 'p2'],
+      );
+      await diaryBox.put('diary1', entry);
+      await indexManager.buildIndex(diaryBox);
+
+      expect(indexManager.photoIdIndex['p1'], 'diary1');
+      expect(indexManager.photoIdIndex['p2'], 'diary1');
+
+      indexManager.removeEntry('diary1');
+
+      expect(indexManager.photoIdIndex.containsKey('p1'), isFalse);
+      expect(indexManager.photoIdIndex.containsKey('p2'), isFalse);
+    });
+
+    test('photoIds未指定時 → 他エントリーのphotoIdは残る', () async {
+      final entry1 = createEntry(
+        id: 'diary1',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['p1'],
+      );
+      final entry2 = createEntry(
+        id: 'diary2',
+        date: DateTime(2025, 1, 2),
+        photoIds: ['p2'],
+      );
+      await diaryBox.put('diary1', entry1);
+      await diaryBox.put('diary2', entry2);
+      await indexManager.buildIndex(diaryBox);
+
+      indexManager.removeEntry('diary1');
+
+      expect(indexManager.photoIdIndex.containsKey('p1'), isFalse);
+      expect(indexManager.photoIdIndex['p2'], 'diary2');
+    });
+  });
 }

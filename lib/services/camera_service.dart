@@ -117,8 +117,7 @@ class CameraService implements ICameraService {
       // image_pickerでの権限拒否エラーを特別処理
       if (e is PlatformException &&
           (e.code == 'camera_access_denied' ||
-              e.code == 'Permission denied' ||
-              e.code == 'User denied')) {
+              e.code == 'camera_access_restricted')) {
         _logger.warning(
           'Camera permission was denied by user',
           context: 'CameraService.capturePhoto',

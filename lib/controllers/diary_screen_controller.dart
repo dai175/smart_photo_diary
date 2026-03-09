@@ -181,10 +181,10 @@ class DiaryScreenController extends BaseErrorController {
   // 検索実行
   void performSearch(String query) {
     _searchQuery = query;
-    final filter = query.isEmpty
-        ? _currentFilter
+    _currentFilter = query.isEmpty
+        ? _currentFilter.copyWith(clearSearchText: true)
         : _currentFilter.copyWith(searchText: query);
-    _loadEntriesWithFilter(filter);
+    _loadEntriesWithFilter(_currentFilter);
   }
 
   // 検索クリア
