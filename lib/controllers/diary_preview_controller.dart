@@ -22,6 +22,9 @@ import 'diary_preview_save_delegate.dart';
 /// DiaryPreviewScreen のエラー種別
 enum DiaryPreviewErrorType { noPhotos, generationFailed, saveFailed }
 
+/// DiaryPreviewScreen のローディング状態
+enum DiaryPreviewLoadingState { idle, initializing, analyzingPhotos, saving }
+
 /// DiaryPreviewScreen の状態管理・ビジネスロジック
 ///
 /// AI生成は [DiaryPreviewGenerationDelegate]、保存は [DiaryPreviewSaveDelegate]、
@@ -31,9 +34,8 @@ class DiaryPreviewController extends BaseErrorController {
   late final DiaryPreviewGenerationDelegate _generationDelegate;
   late final DiaryPreviewSaveDelegate _saveDelegate;
 
-  bool _isInitializing = true;
-  bool _isSaving = false;
-  bool _isAnalyzingPhotos = false;
+  DiaryPreviewLoadingState _loadingState =
+      DiaryPreviewLoadingState.initializing;
   int _currentPhotoIndex = 0;
   int _totalPhotos = 0;
   DateTime _photoDateTime = DateTime.now();
@@ -55,14 +57,19 @@ class DiaryPreviewController extends BaseErrorController {
     notifyListeners();
   }
 
+  /// 現在のローディング状態
+  DiaryPreviewLoadingState get loadingState => _loadingState;
+
   /// 初期化中か
-  bool get isInitializing => _isInitializing;
+  bool get isInitializing =>
+      _loadingState == DiaryPreviewLoadingState.initializing;
 
   /// 保存中か
-  bool get isSaving => _isSaving;
+  bool get isSaving => _loadingState == DiaryPreviewLoadingState.saving;
 
   /// 写真分析中か
-  bool get isAnalyzingPhotos => _isAnalyzingPhotos;
+  bool get isAnalyzingPhotos =>
+      _loadingState == DiaryPreviewLoadingState.analyzingPhotos;
 
   /// 現在分析中の写真インデックス
   int get currentPhotoIndex => _currentPhotoIndex;
@@ -113,7 +120,7 @@ class DiaryPreviewController extends BaseErrorController {
   void _setErrorState(DiaryPreviewErrorType type) {
     _errorType = type;
     setLoading(false);
-    _isSaving = false;
+    _loadingState = DiaryPreviewLoadingState.idle;
     notifyListeners();
   }
 
@@ -138,7 +145,7 @@ class DiaryPreviewController extends BaseErrorController {
 
     await Future.delayed(AppConstants.microStaggerUnit);
 
-    _isInitializing = false;
+    _loadingState = DiaryPreviewLoadingState.idle;
     notifyListeners();
 
     await _loadModelAndGenerateDiary(assets: assets, locale: locale);
@@ -173,7 +180,7 @@ class DiaryPreviewController extends BaseErrorController {
           diaryLength: _diaryLength,
         );
       } else {
-        _isAnalyzingPhotos = true;
+        _loadingState = DiaryPreviewLoadingState.analyzingPhotos;
         _totalPhotos = assets.length;
         _currentPhotoIndex = 0;
         notifyListeners();
@@ -196,7 +203,7 @@ class DiaryPreviewController extends BaseErrorController {
           },
         );
 
-        _isAnalyzingPhotos = false;
+        _loadingState = DiaryPreviewLoadingState.idle;
       }
 
       if (_handleUsageLimitIfNeeded(genResult)) return;
@@ -206,13 +213,13 @@ class DiaryPreviewController extends BaseErrorController {
       final output = genResult.value;
       _generatedTitle = output.title;
       _generatedContent = output.content;
-      _isSaving = true;
+      _loadingState = DiaryPreviewLoadingState.saving;
       setLoading(false);
 
       await _recordPromptUsage();
       await _autoSaveDiary(assets: assets);
     } catch (e, stackTrace) {
-      _isAnalyzingPhotos = false;
+      _loadingState = DiaryPreviewLoadingState.idle;
       _logger.error(
         'Diary generation failed',
         error: e,
@@ -229,7 +236,7 @@ class DiaryPreviewController extends BaseErrorController {
       exception: AiProcessingException(isUsageLimitError: true),
     )) {
       _usageLimitReached = true;
-      _isAnalyzingPhotos = false;
+      _loadingState = DiaryPreviewLoadingState.idle;
       setLoading(false);
       notifyListeners();
       return true;
@@ -254,10 +261,9 @@ class DiaryPreviewController extends BaseErrorController {
 
     if (result.isSuccess) {
       _savedDiaryId = result.value;
-      _isSaving = false;
+      _loadingState = DiaryPreviewLoadingState.idle;
       notifyListeners();
     } else {
-      _isSaving = false;
       _setErrorState(DiaryPreviewErrorType.saveFailed);
     }
   }
