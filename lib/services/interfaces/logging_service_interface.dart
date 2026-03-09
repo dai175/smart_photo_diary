@@ -54,3 +54,28 @@ abstract class ILoggingService {
   /// [context]: ログ発生元のコンテキスト情報（クラス名等）
   void endTimer(Stopwatch stopwatch, String operation, {String? context});
 }
+
+/// 何もしないロギングサービス実装
+///
+/// ロガーがオプショナルなサービスのデフォルト値として使用する。
+class NoOpLoggingService implements ILoggingService {
+  const NoOpLoggingService();
+
+  @override
+  void debug(String message, {String? context, dynamic data}) {}
+  @override
+  void info(String message, {String? context, dynamic data}) {}
+  @override
+  void warning(String message, {String? context, dynamic data}) {}
+  @override
+  void error(
+    String message, {
+    String? context,
+    dynamic error,
+    StackTrace? stackTrace,
+  }) {}
+  @override
+  Stopwatch startTimer(String operation, {String? context}) => Stopwatch();
+  @override
+  void endTimer(Stopwatch stopwatch, String operation, {String? context}) {}
+}
