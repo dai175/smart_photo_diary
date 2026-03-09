@@ -221,7 +221,7 @@ class DiaryCrudDelegate {
       final existing = box.get(id);
       await box.delete(id);
       if (_indexManager.indexBuilt) {
-        _indexManager.removeEntry(id);
+        _indexManager.removeEntry(id, photoIds: existing?.photoIds);
       }
       if (existing != null) {
         if (!_isDisposed()) {

@@ -16,13 +16,14 @@ void main() {
     List<String>? tags,
     String? location,
     List<String>? legacyTags,
+    List<String> photoIds = const ['photo1'],
   }) {
     return DiaryEntry(
       id: id,
       date: date,
       title: title,
       content: content,
-      photoIds: ['photo1'],
+      photoIds: photoIds,
       createdAt: date,
       updatedAt: date,
       tags: tags,
@@ -364,6 +365,75 @@ void main() {
 
       expect(indexManager.sortedIdsByDateDesc, ['a']);
       expect(indexManager.searchTextIndex.containsKey('a'), isTrue);
+    });
+
+    test('photoIds指定時 → photoIdIndexからも削除', () async {
+      final entry = createEntry(
+        id: 'a',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['p1', 'p2'],
+      );
+      await diaryBox.put('a', entry);
+      await indexManager.buildIndex(diaryBox);
+
+      expect(indexManager.photoIdIndex['p1'], 'a');
+      expect(indexManager.photoIdIndex['p2'], 'a');
+
+      indexManager.removeEntry('a', photoIds: ['p1', 'p2']);
+
+      expect(indexManager.photoIdIndex.containsKey('p1'), isFalse);
+      expect(indexManager.photoIdIndex.containsKey('p2'), isFalse);
+    });
+  });
+
+  group('photoIdIndex', () {
+    test('buildIndex → photoId→diaryIdマッピングが構築される', () async {
+      final entry1 = createEntry(
+        id: 'diary1',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['photoA', 'photoB'],
+      );
+      final entry2 = createEntry(
+        id: 'diary2',
+        date: DateTime(2025, 1, 2),
+        photoIds: ['photoC'],
+      );
+      await diaryBox.put('diary1', entry1);
+      await diaryBox.put('diary2', entry2);
+      await indexManager.buildIndex(diaryBox);
+
+      expect(indexManager.photoIdIndex['photoA'], 'diary1');
+      expect(indexManager.photoIdIndex['photoB'], 'diary1');
+      expect(indexManager.photoIdIndex['photoC'], 'diary2');
+    });
+
+    test('insertEntry → photoIdIndexも更新される', () async {
+      await indexManager.buildIndex(diaryBox);
+
+      final entry = createEntry(
+        id: 'new',
+        date: DateTime(2025, 6, 1),
+        photoIds: ['newPhoto'],
+      );
+      await diaryBox.put('new', entry);
+      indexManager.insertEntry(diaryBox, entry);
+
+      expect(indexManager.photoIdIndex['newPhoto'], 'new');
+    });
+
+    test('再buildIndexで古いマッピングはクリアされる', () async {
+      final entry = createEntry(
+        id: 'a',
+        date: DateTime(2025, 1, 1),
+        photoIds: ['old'],
+      );
+      await diaryBox.put('a', entry);
+      await indexManager.buildIndex(diaryBox);
+      expect(indexManager.photoIdIndex['old'], 'a');
+
+      await diaryBox.delete('a');
+      await indexManager.buildIndex(diaryBox);
+      expect(indexManager.photoIdIndex.containsKey('old'), isFalse);
     });
   });
 }

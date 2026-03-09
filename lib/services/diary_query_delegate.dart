@@ -172,12 +172,14 @@ class DiaryQueryDelegate {
     }
   }
 
-  /// 写真の撮影日付で日記を検索
+  /// 写真の撮影日付で日記を検索（インデックスによる日付範囲絞り込み）
   Future<Result<List<DiaryEntry>>> getDiaryByPhotoDate(
     DateTime photoDate,
   ) async {
     try {
       await _ensureInitialized();
+      final box = _getBox();
+      await _indexManager.ensureIndex(box);
 
       final targetDate = DateTime(
         photoDate.year,
@@ -185,14 +187,16 @@ class DiaryQueryDelegate {
         photoDate.day,
       );
 
-      final entries = _getBox().values.where((entry) {
-        final entryDate = DateTime(
-          entry.date.year,
-          entry.date.month,
-          entry.date.day,
-        );
-        return entryDate.isAtSameMomentAs(targetDate);
-      }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      final range = _indexManager.findRangeByDateRange(targetDate, targetDate);
+      final ids = _indexManager.sortedIdsByDateDesc.sublist(range[0], range[1]);
+      final entries = <DiaryEntry>[];
+      for (final id in ids) {
+        final entry = box.get(id);
+        if (entry != null) {
+          entries.add(entry);
+        }
+      }
+      entries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return Success(entries);
     } catch (e) {
       _loggingService.error('Diary search by capture date error', error: e);
@@ -205,14 +209,17 @@ class DiaryQueryDelegate {
     }
   }
 
-  /// 写真IDから日記エントリーを取得
+  /// 写真IDから日記エントリーを取得（photoIdIndex による O(1) ルックアップ）
   Future<Result<DiaryEntry?>> getDiaryEntryByPhotoId(String photoId) async {
     try {
       await _ensureInitialized();
+      final box = _getBox();
+      await _indexManager.ensureIndex(box);
 
-      final allEntries = _getBox().values;
-      for (final entry in allEntries) {
-        if (entry.photoIds.contains(photoId)) {
+      final diaryId = _indexManager.photoIdIndex[photoId];
+      if (diaryId != null) {
+        final entry = box.get(diaryId);
+        if (entry != null) {
           _loggingService.info(
             'Diary found for photoId: $photoId, diaryId: ${entry.id}',
           );
