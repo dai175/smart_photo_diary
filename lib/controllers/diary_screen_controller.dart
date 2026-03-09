@@ -24,6 +24,7 @@ class DiaryScreenController extends BaseErrorController {
   int _offset = 0;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  int _requestVersion = 0;
 
   // Getters
   List<DiaryEntry> get diaryEntries => _diaryEntries;
@@ -53,6 +54,7 @@ class DiaryScreenController extends BaseErrorController {
   // 次ページを読み込む
   Future<void> loadMore() async {
     if (_isLoadingMore || !_hasMore) return;
+    final requestVersion = _requestVersion;
     _isLoadingMore = true;
     notifyListeners();
 
@@ -66,9 +68,14 @@ class DiaryScreenController extends BaseErrorController {
 
       result.fold(
         (entries) {
+          if (requestVersion != _requestVersion) {
+            _isLoadingMore = false;
+            return;
+          }
           _diaryEntries = [..._diaryEntries, ...entries];
           _offset += entries.length;
           _hasMore = entries.length == _pageSize;
+          clearError();
           _isLoadingMore = false;
           notifyListeners();
         },
@@ -96,6 +103,7 @@ class DiaryScreenController extends BaseErrorController {
     DiaryFilter filter, {
     bool showShimmer = true,
   }) async {
+    final requestVersion = ++_requestVersion;
     try {
       if (showShimmer) setLoading(true);
       _resetPaging();
@@ -108,6 +116,7 @@ class DiaryScreenController extends BaseErrorController {
 
       result.fold(
         (entries) {
+          if (requestVersion != _requestVersion) return;
           _diaryEntries = entries;
           _offset = entries.length;
           _hasMore = entries.length == _pageSize;
@@ -174,6 +183,7 @@ class DiaryScreenController extends BaseErrorController {
     _isSearching = false;
     _searchQuery = '';
     _searchController.clear();
+    _currentFilter = _currentFilter.copyWith(clearSearchText: true);
     notifyListeners();
     loadDiaryEntries(); // 全ての日記を再表示
   }
