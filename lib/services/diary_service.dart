@@ -14,27 +14,6 @@ import 'diary_index_manager.dart';
 import 'diary_crud_delegate.dart';
 import 'diary_query_delegate.dart';
 
-/// フォールバック用の無操作ロガー（テスト環境等でServiceLocator未設定時に使用）
-class _NoOpLoggingService implements ILoggingService {
-  @override
-  void debug(String message, {String? context, dynamic data}) {}
-  @override
-  void info(String message, {String? context, dynamic data}) {}
-  @override
-  void warning(String message, {String? context, dynamic data}) {}
-  @override
-  void error(
-    String message, {
-    String? context,
-    dynamic error,
-    StackTrace? stackTrace,
-  }) {}
-  @override
-  Stopwatch startTimer(String operation, {String? context}) => Stopwatch();
-  @override
-  void endTimer(Stopwatch stopwatch, String operation, {String? context}) {}
-}
-
 /// 日記の管理を担当するサービスクラス（Facade）
 ///
 /// CRUD操作は[DiaryCrudDelegate]に、クエリ操作は[DiaryQueryDelegate]に委譲。
@@ -43,7 +22,7 @@ class _NoOpLoggingService implements ILoggingService {
 class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
   Box<DiaryEntry>? _diaryBox;
-  ILoggingService _loggingService = _NoOpLoggingService();
+  ILoggingService _loggingService = const NoOpLoggingService();
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
   bool _disposed = false;
 
