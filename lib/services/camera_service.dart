@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -114,9 +115,10 @@ class CameraService implements ICameraService {
       }
     } catch (e) {
       // image_pickerでの権限拒否エラーを特別処理
-      if (e.toString().contains('camera_access_denied') ||
-          e.toString().contains('Permission denied') ||
-          e.toString().contains('User denied')) {
+      if (e is PlatformException &&
+          (e.code == 'camera_access_denied' ||
+              e.code == 'Permission denied' ||
+              e.code == 'User denied')) {
         _logger.warning(
           'Camera permission was denied by user',
           context: 'CameraService.capturePhoto',
