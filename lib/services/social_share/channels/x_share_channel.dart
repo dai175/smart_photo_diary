@@ -7,7 +7,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/errors/app_exceptions.dart';
 import '../../../core/result/result.dart';
 import '../../../core/service_registration.dart';
-import '../../../localization/localization_utils.dart';
 import '../../../constants/app_constants.dart';
 import '../../../models/diary_entry.dart';
 import '../../interfaces/logging_service_interface.dart';
@@ -74,9 +73,9 @@ class XShareChannel with ShareChannelMixin {
           files.add(XFile(f.path));
         }
       }
-      final appName = LocalizationUtils.appTitleFor(resolvedLocale);
+      final hashtag = AppConstants.shareHashtag;
 
-      // テキスト生成（280文字以内ならアプリ名を付与、超える場合は省略）
+      // テキスト生成（280文字以内ならハッシュタグを付与、超える場合は省略）
       final bodyParts = <String>[];
       if (diary.title.isNotEmpty) {
         bodyParts.add(diary.title);
@@ -85,9 +84,9 @@ class XShareChannel with ShareChannelMixin {
         bodyParts.add(diary.content);
       }
       final bodyText = bodyParts.join('\n\n');
-      final textWithAppName = '$bodyText\n\n$appName';
-      final text = textWithAppName.characters.length <= _xCharLimit
-          ? textWithAppName
+      final textWithHashtag = '$bodyText\n\n$hashtag';
+      final text = textWithHashtag.characters.length <= _xCharLimit
+          ? textWithHashtag
           : bodyText;
 
       await SharePlus.instance
