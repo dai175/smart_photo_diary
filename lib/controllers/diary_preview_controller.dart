@@ -274,6 +274,7 @@ class DiaryPreviewController extends BaseErrorController {
     required String title,
     required String content,
   }) async {
+    _loadingState = DiaryPreviewLoadingState.saving;
     setLoading(true);
     _clearErrorState();
 
@@ -285,6 +286,7 @@ class DiaryPreviewController extends BaseErrorController {
     );
 
     if (result.isSuccess) {
+      _loadingState = DiaryPreviewLoadingState.idle;
       setLoading(false);
       return true;
     } else {
