@@ -8,38 +8,27 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
-import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
-import 'package:smart_photo_diary/services/storage_service.dart';
 
 class MockLoggingService extends Mock implements ILoggingService {}
 
 class MockSettingsService extends Mock implements ISettingsService {}
 
-class MockStorageService extends Mock implements IStorageService {}
-
 void main() {
   late MockLoggingService mockLogger;
   late MockSettingsService mockSettings;
-  late MockStorageService mockStorage;
 
   setUp(() {
     ServiceLocator().clear();
     mockLogger = MockLoggingService();
     mockSettings = MockSettingsService();
-    mockStorage = MockStorageService();
 
     ServiceLocator().registerSingleton<ILoggingService>(mockLogger);
     ServiceLocator().registerSingleton<ISettingsService>(mockSettings);
-    ServiceLocator().registerSingleton<IStorageService>(mockStorage);
 
     // Default stubs
     when(() => mockSettings.locale).thenReturn(null);
     when(() => mockSettings.getSubscriptionInfoV2()).thenAnswer(
       (_) async => const Failure(ServiceException('Not available in test')),
-    );
-    when(() => mockStorage.getStorageInfoResult()).thenAnswer(
-      (_) async =>
-          const Success(StorageInfo(totalSize: 1024, diaryDataSize: 512)),
     );
   });
 
@@ -58,7 +47,6 @@ void main() {
         addTearDown(controller.dispose);
 
         expect(controller.packageInfo, isNull);
-        expect(controller.storageInfo, isNull);
         expect(controller.subscriptionInfo, isNull);
         expect(controller.selectedLocale, isNull);
         expect(controller.isLoading, isFalse);
@@ -92,27 +80,6 @@ void main() {
 
         await controller.loadSettings();
         expect(wasLoadingTrue, isTrue);
-      });
-
-      test('ストレージ情報取得エラー時もロードが完了する', () async {
-        when(() => mockStorage.getStorageInfoResult()).thenAnswer(
-          (_) async => const Failure(ServiceException('Storage error')),
-        );
-
-        final controller = createController();
-        addTearDown(controller.dispose);
-
-        await controller.loadSettings();
-
-        expect(controller.isLoading, isFalse);
-        expect(controller.storageInfo, isNull);
-        verify(
-          () => mockLogger.error(
-            any(),
-            error: any(named: 'error'),
-            context: any(named: 'context'),
-          ),
-        ).called(greaterThan(0));
       });
     });
 

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
+import 'services/interfaces/storage_service_interface.dart';
 import 'models/diary_entry.dart';
 import 'models/subscription_status.dart';
 import 'models/writing_prompt.dart';
@@ -54,6 +55,23 @@ Future<void> main() async {
   );
 
   runApp(const MyApp());
+
+  // スタートアップ時のデータベース最適化（fire-and-forget、アプリ起動をブロックしない）
+  _optimizeDatabaseOnStartup(logger);
+}
+
+Future<void> _optimizeDatabaseOnStartup(ILoggingService logger) async {
+  final storageService = serviceLocator.get<IStorageService>();
+  final result = await storageService.optimizeDatabaseResult();
+  result.fold(
+    (_) =>
+        logger.info('Startup database optimization completed', context: 'main'),
+    (error) => logger.warning(
+      'Startup database optimization failed',
+      context: 'main',
+      data: error.toString(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

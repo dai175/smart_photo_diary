@@ -4,7 +4,6 @@ import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
 import '../../services/interfaces/storage_service_interface.dart';
 import '../../services/interfaces/logging_service_interface.dart';
-import '../../services/storage_service.dart';
 import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../utils/dialog_utils.dart';
@@ -13,17 +12,11 @@ import 'storage_import_result_dialog.dart';
 
 /// Storage and backup-related settings section.
 ///
-/// Displays storage usage info and provides backup, restore,
-/// and database optimization actions.
+/// Displays backup and restore actions.
 class StorageSettingsSection extends StatelessWidget {
-  final StorageInfo? storageInfo;
   final VoidCallback onReloadSettings;
 
-  const StorageSettingsSection({
-    super.key,
-    required this.storageInfo,
-    required this.onReloadSettings,
-  });
+  const StorageSettingsSection({super.key, required this.onReloadSettings});
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +25,6 @@ class StorageSettingsSection extends StatelessWidget {
         _buildBackupAction(context),
         _buildDivider(),
         _buildRestoreAction(context),
-        _buildDivider(),
-        _buildOptimizeAction(context),
       ],
     );
   }
@@ -63,20 +54,6 @@ class StorageSettingsSection extends StatelessWidget {
       title: context.l10n.settingsRestoreTitle,
       subtitle: context.l10n.settingsRestoreSubtitle,
       onTap: () => _restoreData(context),
-    );
-  }
-
-  Widget _buildOptimizeAction(BuildContext context) {
-    final subtitle = storageInfo != null
-        ? context.l10n.settingsStorageUsageValue(
-            storageInfo!.formattedTotalSize,
-          )
-        : context.l10n.settingsCleanupSubtitle;
-    return SettingsRow(
-      icon: AppIcons.settingsCleanup,
-      title: context.l10n.settingsCleanupTitle,
-      subtitle: subtitle,
-      onTap: () => _optimizeDatabase(context),
     );
   }
 
@@ -156,49 +133,6 @@ class StorageSettingsSection extends StatelessWidget {
       ServiceRegistration.get<ILoggingService>().error(
         'Data restore failed',
         context: 'StorageSettingsSection._restoreData',
-        error: e,
-      );
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      DialogUtils.showErrorDialog(
-        context,
-        context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
-      );
-    }
-  }
-
-  Future<void> _optimizeDatabase(BuildContext context) async {
-    try {
-      DialogUtils.showLoadingDialog(
-        context,
-        context.l10n.settingsOptimizeInProgress,
-      );
-
-      final storageService = ServiceRegistration.get<IStorageService>();
-      final optimizeResult = await storageService.optimizeDatabaseResult();
-
-      if (!context.mounted) return;
-      Navigator.pop(context);
-
-      if (optimizeResult.isSuccess && optimizeResult.value) {
-        onReloadSettings();
-        DialogUtils.showSuccessDialog(
-          context,
-          context.l10n.settingsOptimizeSuccessTitle,
-          context.l10n.settingsOptimizeSuccessMessage,
-        );
-      } else {
-        final errorMessage = optimizeResult.isFailure
-            ? context.l10n.settingsOptimizeErrorWithDetails(
-                optimizeResult.error.message,
-              )
-            : context.l10n.settingsOptimizeFailedMessage;
-        DialogUtils.showErrorDialog(context, errorMessage);
-      }
-    } catch (e) {
-      ServiceRegistration.get<ILoggingService>().error(
-        'Database optimization failed',
-        context: 'StorageSettingsSection._optimizeDatabase',
         error: e,
       );
       if (!context.mounted) return;
