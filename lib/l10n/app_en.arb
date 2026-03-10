@@ -424,19 +424,6 @@
   "@settingsUpgradeToPremium": {
     "description": "Button text for upgrading to the Premium plan"
   },
-  "settingsStorageSectionTitle": "Storage information",
-  "@settingsStorageSectionTitle": {
-    "description": "Title for the storage information section"
-  },
-  "settingsStorageUsageValue": "Used storage: {size}",
-  "@settingsStorageUsageValue": {
-    "description": "Displays formatted storage usage",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
   "settingsBackupTitle": "Backup",
   "@settingsBackupTitle": {
     "description": "Title for the backup action"
@@ -452,14 +439,6 @@
   "settingsRestoreSubtitle": "Import diaries from a file",
   "@settingsRestoreSubtitle": {
     "description": "Subtitle for the restore action"
-  },
-  "settingsCleanupTitle": "Cleanup data",
-  "@settingsCleanupTitle": {
-    "description": "Title for the cleanup action"
-  },
-  "settingsCleanupSubtitle": "Remove unnecessary data",
-  "@settingsCleanupSubtitle": {
-    "description": "Subtitle for the cleanup action"
   },
   "settingsVersionTitle": "App version",
   "@settingsVersionTitle": {
@@ -518,31 +497,6 @@
         "type": "String"
       }
     }
-  },
-  "settingsOptimizeInProgress": "Optimizing...",
-  "@settingsOptimizeInProgress": {
-    "description": "Message shown while optimization is running"
-  },
-  "settingsOptimizeSuccessTitle": "Optimization complete",
-  "@settingsOptimizeSuccessTitle": {
-    "description": "Title shown when optimization completes"
-  },
-  "settingsOptimizeSuccessMessage": "Your database has been optimized.",
-  "@settingsOptimizeSuccessMessage": {
-    "description": "Message shown when optimization completes"
-  },
-  "settingsOptimizeErrorWithDetails": "Optimization error: {details}",
-  "@settingsOptimizeErrorWithDetails": {
-    "description": "Error message shown when optimization fails",
-    "placeholders": {
-      "details": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsOptimizeFailedMessage": "Optimization failed.",
-  "@settingsOptimizeFailedMessage": {
-    "description": "Message shown when optimization fails without details"
   },
   "settingsRestoreResultTitle": "Restore result",
   "@settingsRestoreResultTitle": {

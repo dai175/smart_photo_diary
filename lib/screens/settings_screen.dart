@@ -168,7 +168,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               _buildDivider(),
               StorageSettingsSection(
-                storageInfo: _controller.storageInfo,
                 onReloadSettings: _controller.loadSettings,
               ),
               _buildDivider(),

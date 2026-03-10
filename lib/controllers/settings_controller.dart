@@ -7,8 +7,6 @@ import '../core/service_registration.dart';
 import '../models/subscription_info_v2.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/settings_service_interface.dart';
-import '../services/interfaces/storage_service_interface.dart';
-import '../services/storage_service.dart';
 import 'base_error_controller.dart';
 
 /// SettingsScreen の状態管理・ビジネスロジック
@@ -20,15 +18,11 @@ class SettingsController extends BaseErrorController {
   ILoggingService get logger => _logger;
 
   PackageInfo? _packageInfo;
-  StorageInfo? _storageInfo;
   SubscriptionInfoV2? _subscriptionInfo;
   Locale? _selectedLocale;
 
   /// パッケージ情報
   PackageInfo? get packageInfo => _packageInfo;
-
-  /// ストレージ情報
-  StorageInfo? get storageInfo => _storageInfo;
 
   /// サブスクリプション情報
   SubscriptionInfoV2? get subscriptionInfo => _subscriptionInfo;
@@ -64,22 +58,9 @@ class SettingsController extends BaseErrorController {
       _packageInfo = packageInfo;
       _selectedLocale = _settingsService!.locale;
 
-      // Phase 2: storageInfo と subscriptionInfo を並列取得
-      final storageService = ServiceRegistration.get<IStorageService>();
-      final (storageResult, subscriptionResult) = await (
-        storageService.getStorageInfoResult(),
-        _settingsService!.getSubscriptionInfoV2(),
-      ).wait;
-
-      if (storageResult.isSuccess) {
-        _storageInfo = storageResult.value;
-      } else {
-        _logger.error(
-          'Failed to fetch storage info',
-          error: storageResult.error,
-          context: 'SettingsController',
-        );
-      }
+      // subscriptionInfo を取得
+      final subscriptionResult = await _settingsService!
+          .getSubscriptionInfoV2();
 
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;

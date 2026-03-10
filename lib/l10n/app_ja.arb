@@ -424,19 +424,6 @@
   "@settingsUpgradeToPremium": {
     "description": "Premiumプランへアップグレードするボタン文言"
   },
-  "settingsStorageSectionTitle": "ストレージ情報",
-  "@settingsStorageSectionTitle": {
-    "description": "ストレージ情報セクションのタイトル"
-  },
-  "settingsStorageUsageValue": "使用容量: {size}",
-  "@settingsStorageUsageValue": {
-    "description": "フォーマット済みのストレージ使用量",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
   "settingsBackupTitle": "バックアップ",
   "@settingsBackupTitle": {
     "description": "バックアップアクションのタイトル"
@@ -452,14 +439,6 @@
   "settingsRestoreSubtitle": "ファイルから日記を復元",
   "@settingsRestoreSubtitle": {
     "description": "リストアアクションの補足"
-  },
-  "settingsCleanupTitle": "データ削除",
-  "@settingsCleanupTitle": {
-    "description": "データクリーンアップアクションのタイトル"
-  },
-  "settingsCleanupSubtitle": "不要なデータを削除",
-  "@settingsCleanupSubtitle": {
-    "description": "データクリーンアップアクションの補足"
   },
   "settingsVersionTitle": "アプリバージョン",
   "@settingsVersionTitle": {
@@ -518,31 +497,6 @@
         "type": "String"
       }
     }
-  },
-  "settingsOptimizeInProgress": "最適化中...",
-  "@settingsOptimizeInProgress": {
-    "description": "最適化実行中に表示するメッセージ"
-  },
-  "settingsOptimizeSuccessTitle": "最適化完了",
-  "@settingsOptimizeSuccessTitle": {
-    "description": "最適化成功時のダイアログタイトル"
-  },
-  "settingsOptimizeSuccessMessage": "データベースの最適化が完了しました。",
-  "@settingsOptimizeSuccessMessage": {
-    "description": "最適化成功時のメッセージ"
-  },
-  "settingsOptimizeErrorWithDetails": "最適化エラー: {details}",
-  "@settingsOptimizeErrorWithDetails": {
-    "description": "最適化失敗時のエラーメッセージ",
-    "placeholders": {
-      "details": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsOptimizeFailedMessage": "最適化に失敗しました。",
-  "@settingsOptimizeFailedMessage": {
-    "description": "詳細がない最適化失敗時のメッセージ"
   },
   "settingsRestoreResultTitle": "リストア結果",
   "@settingsRestoreResultTitle": {
