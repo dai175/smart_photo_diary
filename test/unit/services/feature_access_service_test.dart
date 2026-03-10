@@ -130,24 +130,14 @@ void main() {
     });
 
     group('canAccessWritingPrompts', () {
-      test('Basicプランでもtrueを返す', () async {
-        final status = createBasicStatus();
-        setupStateService(status);
+      test('初期化済みなら常にSuccess(true)を返す（getCurrentStatusは呼ばない）', () async {
+        when(() => mockStateService.isInitialized).thenReturn(true);
 
         final result = await service.canAccessWritingPrompts();
 
         expect(result, isA<Success<bool>>());
         expect(result.value, isTrue);
-      });
-
-      test('有効なPremiumプランではtrueを返す', () async {
-        final status = createValidPremiumStatus();
-        setupStateService(status, isValid: true);
-
-        final result = await service.canAccessWritingPrompts();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isTrue);
+        verifyNever(() => mockStateService.getCurrentStatus());
       });
 
       test('StateServiceが未初期化の場合Failureを返す', () async {
@@ -156,15 +146,6 @@ void main() {
         final result = await service.canAccessWritingPrompts();
 
         expect(result, isA<Failure<bool>>());
-      });
-
-      test('初期化済みなら常にSuccess(true)を返す', () async {
-        when(() => mockStateService.isInitialized).thenReturn(true);
-
-        final result = await service.canAccessWritingPrompts();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isTrue);
       });
     });
 
