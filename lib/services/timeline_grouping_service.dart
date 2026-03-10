@@ -1,5 +1,6 @@
 import 'package:photo_manager/photo_manager.dart';
 import '../models/timeline_photo_group.dart';
+import '../utils/date_utils.dart';
 
 /// タイムライン用の写真グルーピングサービス
 ///
@@ -42,8 +43,7 @@ class TimelineGroupingService {
         groupKey = 'yesterday';
       } else {
         // 月単位でグルーピング
-        groupKey =
-            '${photoDate.year}-${photoDate.month.toString().padLeft(2, '0')}';
+        groupKey = photoDate.toYearMonth();
       }
 
       groupMap.putIfAbsent(groupKey, () => []).add(photo);

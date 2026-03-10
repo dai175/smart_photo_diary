@@ -6,6 +6,7 @@ import 'interfaces/ai_usage_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'mixins/service_logging.dart';
+import '../utils/date_utils.dart';
 
 /// AiUsageService
 ///
@@ -305,17 +306,10 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
     }
   }
 
-  String _getCurrentMonth() {
-    final now = DateTime.now();
-    return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
-  }
+  String _getCurrentMonth() => DateTime.now().toYearMonth();
 
   String _getUsageMonth(SubscriptionStatus status) {
-    if (status.lastResetDate != null) {
-      final resetDate = status.lastResetDate!;
-      return '${resetDate.year.toString().padLeft(4, '0')}-${resetDate.month.toString().padLeft(2, '0')}';
-    }
-    return _getCurrentMonth();
+    return status.lastResetDate?.toYearMonth() ?? _getCurrentMonth();
   }
 
   DateTime _calculateNextResetDate(DateTime? lastResetDate) {
