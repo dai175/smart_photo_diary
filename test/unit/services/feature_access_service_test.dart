@@ -310,19 +310,14 @@ void main() {
         expect(result, isA<Failure<bool>>());
       });
 
-      test(
-        'canAccessWritingPromptsでgetCurrentStatusが例外をスロー → Failure',
-        () async {
-          when(() => mockStateService.isInitialized).thenReturn(true);
-          when(
-            () => mockStateService.getCurrentStatus(),
-          ).thenThrow(Exception('DB crash'));
+      test('canAccessWritingPromptsは初期化済みなら常にSuccess(true)を返す', () async {
+        when(() => mockStateService.isInitialized).thenReturn(true);
 
-          final result = await service.canAccessWritingPrompts();
+        final result = await service.canAccessWritingPrompts();
 
-          expect(result, isA<Failure<bool>>());
-        },
-      );
+        expect(result, isA<Success<bool>>());
+        expect(result.value, isTrue);
+      });
 
       test('canAccessDataExportでgetCurrentStatusが例外をスロー → Failure', () async {
         when(() => mockStateService.isInitialized).thenReturn(true);

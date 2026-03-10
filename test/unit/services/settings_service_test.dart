@@ -145,12 +145,6 @@ void main() {
       });
     });
 
-    group('generationMode', () {
-      test('常にvisionを返す', () {
-        expect(SettingsService.generationMode, DiaryGenerationMode.vision);
-      });
-    });
-
     group('getSubscriptionInfoV2', () {
       test('ISubscriptionService成功 → Success伝播', () async {
         final basicPlan = BasicPlan();

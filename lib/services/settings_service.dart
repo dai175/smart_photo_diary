@@ -13,12 +13,6 @@ import 'interfaces/subscription_service_interface.dart';
 import '../core/service_locator.dart';
 import 'settings_subscription_delegate.dart';
 
-/// 日記生成方式の列挙型
-enum DiaryGenerationMode {
-  /// 画像直接解析方式（画像 → Gemini Vision API）
-  vision,
-}
-
 class SettingsService implements ISettingsService {
   SharedPreferences? _preferences;
 
@@ -203,9 +197,6 @@ class SettingsService implements ISettingsService {
       await prefs.setBool(_firstLaunchKey, false);
     }, context: 'SettingsService.setFirstLaunchCompleted');
   }
-
-  // 日記生成モード（常にvision固定）
-  static const DiaryGenerationMode generationMode = DiaryGenerationMode.vision;
 
   Locale? _loadStoredLocale() => locale;
 

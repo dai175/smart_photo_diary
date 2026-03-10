@@ -31,13 +31,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
     try {
       log('Checking AI generation usage availability', level: LogLevel.debug);
 
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -92,13 +86,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<void>> incrementAiUsage() async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -153,13 +141,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<int>> getRemainingGenerations() async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -201,13 +183,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<int>> getMonthlyUsage() async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -225,13 +201,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<void>> resetUsage() async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -258,13 +228,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<void>> resetMonthlyUsageIfNeeded() async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -286,13 +250,7 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<DateTime>> getNextResetDate() async {
     try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
+      final statusResult = await _getInitializedStatus();
       if (statusResult.isFailure) {
         return Failure(statusResult.error);
       }
@@ -315,6 +273,16 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   // =================================================================
   // 内部ヘルパーメソッド
   // =================================================================
+
+  /// 初期化チェック + ステータス取得を一括で行うヘルパー
+  Future<Result<SubscriptionStatus>> _getInitializedStatus() async {
+    if (!_stateService.isInitialized) {
+      return const Failure(
+        ServiceException('SubscriptionStateService is not initialized'),
+      );
+    }
+    return _stateService.getCurrentStatus();
+  }
 
   Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
     final currentMonth = _getCurrentMonth();
