@@ -17,6 +17,7 @@ class SettingsController extends BaseErrorController {
   /// ログサービス（UIウィジェットに渡す用）
   ILoggingService get logger => _logger;
 
+  int _requestVersion = 0;
   PackageInfo? _packageInfo;
   SubscriptionInfoV2? _subscriptionInfo;
   Locale? _selectedLocale;
@@ -42,10 +43,11 @@ class SettingsController extends BaseErrorController {
 
   /// 設定データを読み込む
   Future<void> loadSettings() async {
+    final localVersion = ++_requestVersion;
     setLoading(true);
 
     try {
-      // Phase 1: settingsService と packageInfo を並列取得
+      // settingsService と packageInfo を並列取得
       final settingsFuture = ServiceRegistration.getAsync<ISettingsService>();
       final packageFuture = PackageInfo.fromPlatform()
           .then<PackageInfo?>((v) => v)
@@ -54,6 +56,8 @@ class SettingsController extends BaseErrorController {
         settingsFuture,
         packageFuture,
       ).wait;
+      if (localVersion != _requestVersion) return;
+
       _settingsService = settings;
       _packageInfo = packageInfo;
       _selectedLocale = _settingsService!.locale;
@@ -61,6 +65,7 @@ class SettingsController extends BaseErrorController {
       // subscriptionInfo を取得
       final subscriptionResult = await _settingsService!
           .getSubscriptionInfoV2();
+      if (localVersion != _requestVersion) return;
 
       if (subscriptionResult.isSuccess) {
         _subscriptionInfo = subscriptionResult.value;
@@ -72,6 +77,7 @@ class SettingsController extends BaseErrorController {
         );
       }
     } catch (e) {
+      if (localVersion != _requestVersion) return;
       _logger.error(
         'Failed to load settings',
         error: e,
