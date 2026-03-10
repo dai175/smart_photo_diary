@@ -61,57 +61,19 @@ class FeatureAccessService
 
   @override
   Future<Result<bool>> canAccessWritingPrompts() async {
+    // Writing prompts are accessible for all plans (Basic gets limited set,
+    // Premium gets full set — filtering is handled by PromptService).
     try {
       if (!_stateService.isInitialized) {
         return const Failure(
           ServiceException('SubscriptionStateService is not initialized'),
         );
       }
-
-      // デバッグモードでプラン強制設定をチェック
-      if (kDebugMode) {
-        final forcePlan = EnvironmentConfig.forcePlan;
-        if (forcePlan != null) {
-          log(
-            'Forced plan setting: Writing Prompts access: true',
-            level: LogLevel.debug,
-            data: {'plan': forcePlan},
-          );
-          return const Success(true);
-        }
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      if (currentPlan is BasicPlan) {
-        log(
-          'Writing prompts access - Basic plan (limited prompts)',
-          level: LogLevel.debug,
-        );
-        return const Success(true);
-      }
-
-      final isPremiumValid = _stateService.isSubscriptionValid(status);
-      if (isPremiumValid) {
-        log(
-          'Writing prompts access - Premium plan',
-          level: LogLevel.debug,
-          data: {'valid': isPremiumValid},
-        );
-        return const Success(true);
-      } else {
-        log(
-          'Writing prompts access - Premium plan expired/inactive, basic access only',
-          level: LogLevel.debug,
-        );
-        return const Success(true);
-      }
+      log(
+        'Writing prompts access: accessible for all plans',
+        level: LogLevel.debug,
+      );
+      return const Success(true);
     } catch (e) {
       log(
         'Error checking writing prompts access',
@@ -144,46 +106,7 @@ class FeatureAccessService
 
   @override
   Future<Result<bool>> canAccessDataExport() async {
-    try {
-      if (!_stateService.isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
-
-      final statusResult = await _stateService.getCurrentStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
-      }
-
-      final status = statusResult.value;
-      final currentPlan = PlanFactory.createPlan(status.planId);
-
-      if (currentPlan is BasicPlan) {
-        log(
-          'Data export access - Basic plan (JSON only)',
-          level: LogLevel.debug,
-        );
-        return const Success(true);
-      }
-
-      final isPremiumValid = _stateService.isSubscriptionValid(status);
-      log(
-        'Data export access - Premium plan',
-        level: LogLevel.debug,
-        data: {'valid': isPremiumValid},
-      );
-
-      return Success(isPremiumValid);
-    } catch (e) {
-      log('Error checking data export access', level: LogLevel.error, error: e);
-      return Failure(
-        ServiceException(
-          'Failed to check data export access',
-          details: e.toString(),
-        ),
-      );
-    }
+    return _checkFeatureAccess('Data export', basicPlanResult: true);
   }
 
   @override
@@ -200,36 +123,32 @@ class FeatureAccessService
         );
       }
 
-      final premiumFeaturesResult = await canAccessPremiumFeatures();
-      final writingPromptsResult = await canAccessWritingPrompts();
-      final advancedFiltersResult = await canAccessAdvancedFilters();
-      final advancedAnalyticsResult = await canAccessAdvancedAnalytics();
-      final prioritySupportResult = await canAccessPrioritySupport();
-      final dataExportResult = await canAccessDataExport();
-      final statsDashboardResult = await canAccessStatsDashboard();
+      final results = await Future.wait([
+        canAccessPremiumFeatures(),
+        canAccessWritingPrompts(),
+        canAccessAdvancedFilters(),
+        canAccessAdvancedAnalytics(),
+        canAccessPrioritySupport(),
+        canAccessDataExport(),
+        canAccessStatsDashboard(),
+      ]);
 
-      if (premiumFeaturesResult.isFailure)
-        return Failure(premiumFeaturesResult.error);
-      if (writingPromptsResult.isFailure)
-        return Failure(writingPromptsResult.error);
-      if (advancedFiltersResult.isFailure)
-        return Failure(advancedFiltersResult.error);
-      if (advancedAnalyticsResult.isFailure)
-        return Failure(advancedAnalyticsResult.error);
-      if (prioritySupportResult.isFailure)
-        return Failure(prioritySupportResult.error);
-      if (dataExportResult.isFailure) return Failure(dataExportResult.error);
-      if (statsDashboardResult.isFailure)
-        return Failure(statsDashboardResult.error);
+      final keys = [
+        'premiumFeatures',
+        'writingPrompts',
+        'advancedFilters',
+        'advancedAnalytics',
+        'prioritySupport',
+        'dataExport',
+        'statsDashboard',
+      ];
+
+      for (final result in results) {
+        if (result.isFailure) return Failure(result.error);
+      }
 
       final featureAccess = {
-        'premiumFeatures': premiumFeaturesResult.value,
-        'writingPrompts': writingPromptsResult.value,
-        'advancedFilters': advancedFiltersResult.value,
-        'advancedAnalytics': advancedAnalyticsResult.value,
-        'prioritySupport': prioritySupportResult.value,
-        'dataExport': dataExportResult.value,
-        'statsDashboard': statsDashboardResult.value,
+        for (var i = 0; i < keys.length; i++) keys[i]: results[i].value,
       };
 
       log('Feature access map', level: LogLevel.debug, data: featureAccess);
@@ -246,7 +165,10 @@ class FeatureAccessService
   // 内部ヘルパーメソッド
   // =================================================================
 
-  Future<Result<bool>> _checkFeatureAccess(String featureName) async {
+  Future<Result<bool>> _checkFeatureAccess(
+    String featureName, {
+    bool basicPlanResult = false,
+  }) async {
     try {
       if (!_stateService.isInitialized) {
         return const Failure(
@@ -263,7 +185,7 @@ class FeatureAccessService
       final currentPlan = PlanFactory.createPlan(status.planId);
 
       if (currentPlan is BasicPlan) {
-        return const Success(false);
+        return Success(basicPlanResult);
       }
 
       final isPremiumValid = _stateService.isSubscriptionValid(status);
