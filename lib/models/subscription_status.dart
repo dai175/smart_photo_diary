@@ -3,6 +3,7 @@ import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
 import 'plans/basic_plan.dart';
 import '../constants/subscription_constants.dart';
+import '../utils/date_utils.dart';
 
 part 'subscription_status.g.dart';
 
@@ -78,13 +79,7 @@ class SubscriptionStatus extends HiveObject {
     this.cancelDate,
     this.planChangeDate,
     this.pendingPlanId,
-  }) : usageMonth = usageMonth ?? _getCurrentMonth();
-
-  /// 現在の月を YYYY-MM 形式で取得
-  static String _getCurrentMonth() {
-    final now = DateTime.now();
-    return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}';
-  }
+  }) : usageMonth = usageMonth ?? DateTime.now().toYearMonth();
 
   /// 現在のプランを取得（Plan classベース）
   Plan get currentPlanClass {
@@ -172,8 +167,9 @@ class SubscriptionStatus extends HiveObject {
   /// 使用量を手動でリセット（テスト用）
   void resetUsage() {
     monthlyUsageCount = 0;
-    usageMonth = _getCurrentMonth();
-    lastResetDate = DateTime.now();
+    final now = DateTime.now();
+    usageMonth = now.toYearMonth();
+    lastResetDate = now;
   }
 
   /// サブスクリプションをキャンセル
