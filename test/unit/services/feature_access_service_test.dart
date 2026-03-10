@@ -157,6 +157,15 @@ void main() {
 
         expect(result, isA<Failure<bool>>());
       });
+
+      test('初期化済みなら常にSuccess(true)を返す', () async {
+        when(() => mockStateService.isInitialized).thenReturn(true);
+
+        final result = await service.canAccessWritingPrompts();
+
+        expect(result, isA<Success<bool>>());
+        expect(result.value, isTrue);
+      });
     });
 
     group('canAccessDataExport', () {
@@ -308,15 +317,6 @@ void main() {
         final result = await service.canAccessPremiumFeatures();
 
         expect(result, isA<Failure<bool>>());
-      });
-
-      test('canAccessWritingPromptsは初期化済みなら常にSuccess(true)を返す', () async {
-        when(() => mockStateService.isInitialized).thenReturn(true);
-
-        final result = await service.canAccessWritingPrompts();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isTrue);
       });
 
       test('canAccessDataExportでgetCurrentStatusが例外をスロー → Failure', () async {
