@@ -49,6 +49,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   }
 
   Future<List<AssetEntity>> _fetchPhotoAssets() {
+    if (widget.entry.photoIds.isEmpty) {
+      return Future.value([]);
+    }
     final photoService = serviceLocator.get<IPhotoService>();
     return photoService
         .getAssetsByIds(widget.entry.photoIds)
@@ -152,6 +155,10 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   }
 
   Widget _buildPhotoThumbnails() {
+    // photoIdsが空なら即座に返す（FutureBuilderの状態遷移による高さ変動を防止）
+    if (widget.entry.photoIds.isEmpty) {
+      return const SizedBox();
+    }
     return FutureBuilder<List<AssetEntity>>(
       future: _photoAssetsFuture,
       builder: (context, snapshot) {
