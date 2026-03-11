@@ -197,8 +197,7 @@ void main() {
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
         );
-        // pumpAndSettleせず1フレームだけで即表示されることを確認
-        await tester.pump();
+        // pumpWidget直後にアサート（初回フレームでちらつきがないことを検証）
 
         expect(find.text('Cached1'), findsOneWidget);
         expect(find.text('Cached2'), findsOneWidget);
@@ -219,7 +218,7 @@ void main() {
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
         );
-        await tester.pump();
+        // pumpWidget直後にアサート（初回フレームでちらつきがないことを検証）
 
         expect(find.text('Stale1'), findsOneWidget);
         expect(find.text('Stale2'), findsOneWidget);
