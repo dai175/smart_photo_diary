@@ -65,6 +65,9 @@ web/build/
 # --- Serena MCP Server ---
 .serena/
 
+# --- Junie ---
+.junie/
+
 # --- 一時ファイル・その他 ---
 *.iml
 *.log
