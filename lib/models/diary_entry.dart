@@ -71,6 +71,9 @@ class DiaryEntry extends HiveObject {
     tagsGeneratedAt = DateTime.now();
   }
 
+  // タグがキャッシュ済みかどうか（期限に関わらず表示用）
+  bool get hasCachedTags => tags != null;
+
   // タグが有効かどうかをチェック（7日間有効）
   bool get hasValidTags {
     if (tags == null || tagsGeneratedAt == null) return false;
