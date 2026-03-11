@@ -208,6 +208,25 @@ void main() {
         verifyNever(() => mockTagService.getTagsForEntry(entry));
       });
 
+      testWidgets('期限切れキャッシュでもタグが即表示される', (tester) async {
+        final entry = _createEntry(
+          photoIds: [],
+          tags: ['Stale1', 'Stale2'],
+          tagsGeneratedAt: DateTime.now().subtract(const Duration(days: 8)),
+        );
+        // tags != null なので _fetchTags() は呼ばれないはず（スタブなし）
+
+        await tester.pumpWidget(
+          _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
+        );
+        await tester.pump();
+
+        expect(find.text('Stale1'), findsOneWidget);
+        expect(find.text('Stale2'), findsOneWidget);
+        expect(find.text('Generating tags...'), findsNothing);
+        verifyNever(() => mockTagService.getTagsForEntry(entry));
+      });
+
       testWidgets('タグ取得エラー時にフォールバックタグが表示される', (tester) async {
         // 午前10時の日記 → Morning
         final entry = _createEntry(

@@ -35,21 +35,23 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   @override
   void initState() {
     super.initState();
-    _photoAssetsFuture = _fetchPhotoAssets();
-    _tagsFuture = widget.entry.hasValidTags
-        ? Future.value(widget.entry.tags)
-        : _fetchTags();
+    _initAsyncState();
   }
 
   @override
   void didUpdateWidget(DiaryCardWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.entry.id != widget.entry.id) {
-      _photoAssetsFuture = _fetchPhotoAssets();
-      _tagsFuture = widget.entry.hasValidTags
-          ? Future.value(widget.entry.tags)
-          : _fetchTags();
+      _initAsyncState();
     }
+  }
+
+  void _initAsyncState() {
+    _photoAssetsFuture = _fetchPhotoAssets();
+    // hasCachedTags の場合は _buildTags が同期パスで即返すため Future 不要
+    _tagsFuture = widget.entry.hasCachedTags
+        ? Future.value(widget.entry.tags)
+        : _fetchTags();
   }
 
   Future<List<AssetEntity>> _fetchPhotoAssets() {
@@ -253,7 +255,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
     final l10n = context.l10n;
 
     // キャッシュ済みタグは同期的に即表示（FutureBuilder不要）
-    if (widget.entry.hasValidTags) {
+    if (widget.entry.hasCachedTags) {
       return _buildTagChips(widget.entry.tags!);
     }
 
