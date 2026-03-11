@@ -31,9 +31,6 @@ class DiaryEntry extends HiveObject {
   @HiveField(7)
   List<String>? tags; // AI生成またはインポートされたタグ
 
-  @HiveField(8)
-  DateTime? tagsGeneratedAt; // タグ生成日時
-
   @HiveField(9)
   String? location; // 位置情報
 
@@ -53,7 +50,6 @@ class DiaryEntry extends HiveObject {
     required this.createdAt,
     required this.updatedAt,
     this.tags,
-    this.tagsGeneratedAt,
     this.location,
     this.legacyTags,
   });
@@ -68,25 +64,14 @@ class DiaryEntry extends HiveObject {
   // タグを更新（永続化はサービス層が担当）
   void updateTags(List<String> newTags) {
     tags = newTags;
-    tagsGeneratedAt = DateTime.now();
   }
 
-  // タグがキャッシュ済みかどうか（期限に関わらず表示用）
+  // タグがキャッシュ済みかどうか
   bool get hasCachedTags => tags != null;
-
-  // タグが有効かどうかをチェック（7日間有効）
-  bool get hasValidTags {
-    if (tags == null || tagsGeneratedAt == null) return false;
-
-    final daysSinceGeneration = DateTime.now()
-        .difference(tagsGeneratedAt!)
-        .inDays;
-    return daysSinceGeneration < 7; // 7日以内なら有効
-  }
 
   // 日記エントリーのコピーを作成するメソッド
   //
-  // nullable フィールド (tags, tagsGeneratedAt, location) を明示的に null に
+  // nullable フィールド (tags, location) を明示的に null に
   // リセットするには、copyWith(tags: null) のように渡す。
   DiaryEntry copyWith({
     String? id,
@@ -97,7 +82,6 @@ class DiaryEntry extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? tags = _sentinel,
-    Object? tagsGeneratedAt = _sentinel,
     Object? location = _sentinel,
   }) {
     return DiaryEntry(
@@ -109,9 +93,6 @@ class DiaryEntry extends HiveObject {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       tags: tags == _sentinel ? this.tags : tags as List<String>?,
-      tagsGeneratedAt: tagsGeneratedAt == _sentinel
-          ? this.tagsGeneratedAt
-          : tagsGeneratedAt as DateTime?,
       location: location == _sentinel ? this.location : location as String?,
       legacyTags: legacyTags,
     );

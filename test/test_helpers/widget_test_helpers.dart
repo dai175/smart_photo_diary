@@ -49,7 +49,6 @@ class WidgetTestHelpers {
     DateTime? updatedAt,
     String? location,
     List<String>? tags,
-    DateTime? tagsGeneratedAt,
   }) {
     final now = DateTime.now();
     return DiaryEntry(
@@ -62,7 +61,6 @@ class WidgetTestHelpers {
       updatedAt: updatedAt ?? now,
       location: location,
       tags: tags,
-      tagsGeneratedAt: tagsGeneratedAt,
     );
   }
 
