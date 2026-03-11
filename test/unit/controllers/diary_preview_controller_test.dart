@@ -168,7 +168,7 @@ void main() {
 
     group('stale generation prevention', () {
       test('再生成が開始されたら古い生成結果は破棄される', () async {
-        // First call: will hang on getImageForAi
+        // First call: slow generation that fails with generationFailed
         final mockAsset1 = MockAssetEntity();
         when(() => mockAsset1.createDateTime).thenReturn(DateTime(2025, 1, 15));
         when(() => mockPhotoService.getImageForAi(mockAsset1)).thenAnswer((
@@ -179,33 +179,28 @@ void main() {
           return const Failure(PhotoAccessException('No AI image available'));
         });
 
-        final mockAsset2 = MockAssetEntity();
-        when(() => mockAsset2.createDateTime).thenReturn(DateTime(2025, 1, 16));
-        when(() => mockPhotoService.getImageForAi(mockAsset2)).thenAnswer(
-          (_) async =>
-              const Failure(PhotoAccessException('No AI image available')),
-        );
-
         final controller = createController();
         addTearDown(controller.dispose);
 
-        // Start first generation (slow)
+        // Start first generation (slow, would result in generationFailed)
         final future1 = controller.initializeAndGenerate(
           assets: [mockAsset1],
           locale: const Locale('en'),
         );
 
-        // Start second generation immediately (invalidates first)
+        // Start second generation with empty assets (results in noPhotos)
+        // This invalidates the first generation
         final future2 = controller.initializeAndGenerate(
-          assets: [mockAsset2],
+          assets: [],
           locale: const Locale('en'),
         );
 
         await Future.wait([future1, future2]);
 
-        // The error should reflect the second generation's result, not the first
+        // The error should reflect the second generation's result (noPhotos),
+        // not the first (generationFailed)
         expect(controller.hasError, isTrue);
-        expect(controller.errorType, DiaryPreviewErrorType.generationFailed);
+        expect(controller.errorType, DiaryPreviewErrorType.noPhotos);
       });
     });
 

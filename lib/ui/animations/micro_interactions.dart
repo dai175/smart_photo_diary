@@ -131,6 +131,7 @@ enum VibrationIntensity { light, medium, heavy }
 /// バウンス効果のラッパーウィジェット
 class _BounceWrapper extends StatefulWidget {
   const _BounceWrapper({
+    super.key,
     required this.child,
     required this.onTap,
     this.enableHaptic = true,

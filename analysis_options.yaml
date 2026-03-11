@@ -18,6 +18,7 @@ analyzer:
     # These rules provide style guidance but don't indicate actual problems
     prefer_const_declarations: ignore  # Use const for declarations when possible
     avoid_redundant_argument_values: ignore  # Style preference, not error
+    unused_element_parameter: ignore  # Conflicts with use_key_in_widget_constructors on private widgets
 
 linter:
   # The lint rules applied to this project can be customized in the
