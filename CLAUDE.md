@@ -41,11 +41,23 @@ fvm flutter run --dart-define=FORCE_PLAN=premium  # Force premium plan
 ### Directory Structure
 
 - `lib/core/` — DI container, Result<T> pattern, exception hierarchy
+- `lib/config/` — environment config (.env loader, build-time constants)
+- `lib/constants/` — app-wide constants (subscription, theme, AI, cache)
+- `lib/models/` — data models, Hive types, plan definitions (`plans/`), state models (`states/`)
 - `lib/services/interfaces/` — all service interfaces (I-prefix)
+- `lib/services/ai/` — Gemini client, prompt builder, tag/diary generators
+- `lib/services/diary_image/` — diary image generation (layout, photo/text rendering)
+- `lib/services/social_share/` — social share channel implementations
 - `lib/controllers/` — ChangeNotifier-based screen controllers
+- `lib/screens/` — screen/page implementations (home, diary detail, statistics, settings, onboarding)
+- `lib/widgets/` — domain-specific reusable widgets (timeline, settings, upgrade)
 - `lib/ui/design_system/` — Material Design 3 theme, colors, typography
 - `lib/ui/components/` — shared UI components (CustomDialog, buttons, etc.)
+- `lib/ui/animations/` — micro-interactions, page transitions
+- `lib/ui/error_display/` — error display system with severity levels
+- `lib/utils/` — utility functions (date, dialog, locale, performance monitor)
 - `lib/l10n/` — ARB files (Japanese/English)
+- `lib/localization/` — localization extensions and helpers
 
 ### Key Patterns
 
@@ -55,6 +67,8 @@ fvm flutter run --dart-define=FORCE_PLAN=premium  # Force premium plan
 - **Exception hierarchy** — `AppException` base class with specific subtypes in `lib/core/errors/`
 - **State management** — `ChangeNotifier`-based controllers (no Provider/Riverpod/Bloc)
 - **Facade + Delegate pattern** — large services and controllers decompose into focused delegates (e.g., `DiaryQueryDelegate`, `PurchaseFlowDelegate`, `DiaryPreviewGenerationDelegate`). Each delegate has single responsibility and can be unit-tested independently.
+  - Services: `DiaryService` → `DiaryCrudDelegate` + `DiaryQueryDelegate`, `StorageService` → `StorageExportDelegate` + `StorageImportDelegate`, `SubscriptionService` → `PurchaseFlowDelegate` + `PurchaseProductDelegate`
+  - Controllers: `DiaryPreviewController` → `DiaryPreviewGenerationDelegate` + `DiaryPreviewSaveDelegate`
 - **Constructor injection** — service dependencies injected via constructors
 - **`build_runner`** for generating Hive type adapters
 - **Async stale prevention** — use `_requestVersion` pattern: capture version before async op, check after completion to discard stale results
@@ -86,6 +100,7 @@ All log messages, exception messages, and debug data map keys must be written in
 - No gradients, follow Material Design 3 (theme defined in `ui/design_system/`)
 - All UI text uses internationalization (i18n) via `context.l10n`, never hardcoded strings
 - Variable names in English, UI text localized (Japanese/English)
+- Service methods accept `Locale?` parameter for language-specific operations
 
 ### Testing
 - Maintain 100% test success rate
@@ -95,6 +110,7 @@ All log messages, exception messages, and debug data map keys must be written in
 
 ## Gotchas
 
+- `.claude.local.md` is gitignored — use for personal/local Claude Code settings
 - Run `fvm dart run build_runner build` after modifying any Hive `@HiveType` model
 - Some controllers use delegate pattern (e.g., `diary_preview_generation_delegate.dart`) rather than extending ChangeNotifier directly
 - Test helpers and shared mocks are in `test/mocks/` and `test/test_helpers/`
@@ -105,8 +121,3 @@ All log messages, exception messages, and debug data map keys must be written in
 
 - Handle `PermissionState.limited` for iOS 14+ (photo_manager)
 - Premium users can access photos from past 365 days
-
-## Internationalization (i18n)
-
-- Always use `context.l10n` for UI text, never hardcoded strings
-- Service methods accept `Locale?` parameter for language-specific operations
