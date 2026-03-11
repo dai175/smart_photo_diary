@@ -68,6 +68,8 @@ class TimelinePhotoTile extends StatelessWidget {
     final semanticLabel = l10n.photoSemanticIndex(mainIndex + 1);
     final semanticHint = isLocked
         ? l10n.photoSemanticLocked
+        : isUsed
+        ? l10n.photoUsedLabel
         : isSelected
         ? l10n.photoSemanticSelected
         : l10n.photoSemanticNotSelected;

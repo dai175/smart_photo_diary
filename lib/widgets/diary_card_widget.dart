@@ -105,6 +105,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
     return Semantics(
       label: l10n.diaryCardSemanticLabel(title, formattedDate),
       button: true,
+      excludeSemantics: true,
       child: CustomCard(
         onTap: widget.onTap,
         elevation: AppSpacing.elevationXs,

@@ -202,6 +202,7 @@ class _SelectableCard extends StatelessWidget {
   final Widget child;
 
   const _SelectableCard({
+    super.key,
     required this.isSelected,
     required this.accentColor,
     this.unselectedBackgroundColor,
@@ -241,6 +242,7 @@ class _CircleIcon extends StatelessWidget {
   final IconData icon;
 
   const _CircleIcon({
+    super.key,
     required this.isSelected,
     required this.accentColor,
     required this.icon,

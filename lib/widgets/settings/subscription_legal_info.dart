@@ -119,6 +119,7 @@ class _PlanDetailRow extends StatelessWidget {
   final String features;
 
   const _PlanDetailRow({
+    super.key,
     required this.title,
     required this.planId,
     required this.formatter,
@@ -197,6 +198,7 @@ class _LegalLinkButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _LegalLinkButton({
+    super.key,
     required this.text,
     required this.icon,
     required this.onPressed,

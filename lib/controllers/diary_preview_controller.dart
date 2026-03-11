@@ -157,13 +157,13 @@ class DiaryPreviewController extends BaseErrorController {
     required List<AssetEntity> assets,
     required Locale locale,
   }) async {
+    final localVersion = ++_requestVersion;
+    _clearErrorState();
+
     if (assets.isEmpty) {
       _setErrorState(DiaryPreviewErrorType.noPhotos);
       return;
     }
-
-    final localVersion = ++_requestVersion;
-    _clearErrorState();
     setLoading(true);
 
     try {
@@ -225,7 +225,7 @@ class DiaryPreviewController extends BaseErrorController {
 
       await _recordPromptUsage();
       if (localVersion != _requestVersion) return;
-      await _autoSaveDiary(assets: assets);
+      await _autoSaveDiary(assets: assets, localVersion: localVersion);
     } catch (e, stackTrace) {
       if (localVersion != _requestVersion) return;
       _loadingState = DiaryPreviewLoadingState.idle;
@@ -260,13 +260,18 @@ class DiaryPreviewController extends BaseErrorController {
   }
 
   /// 自動保存を実行する
-  Future<void> _autoSaveDiary({required List<AssetEntity> assets}) async {
+  Future<void> _autoSaveDiary({
+    required List<AssetEntity> assets,
+    required int localVersion,
+  }) async {
     final result = await _saveDelegate.saveDiary(
       photoDateTime: _photoDateTime,
       title: _generatedTitle,
       content: _generatedContent,
       assets: assets,
     );
+
+    if (localVersion != _requestVersion) return;
 
     if (result.isSuccess) {
       _savedDiaryId = result.value;
