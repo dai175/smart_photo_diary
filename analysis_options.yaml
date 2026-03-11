@@ -7,7 +7,7 @@
 
 # The following line activates a set of recommended lints for Flutter apps,
 # packages, and plugins designed to encourage good coding practices.
-include: package:flutter_lints/flutter.yaml
+include: package:lints/recommended.yaml
 
 analyzer:
   exclude:
@@ -21,7 +21,7 @@ analyzer:
 
 linter:
   # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
+  # section below to disable rules from the `package:lints/recommended.yaml`
   # included above or to enable additional rules. A list of all available lints
   # and their documentation is published at https://dart.dev/lints.
   #
@@ -47,6 +47,14 @@ linter:
     avoid_print: true  # Avoid using print for debugging
     avoid_empty_else: true  # Avoid empty else blocks
     always_declare_return_types: true  # Always declare return types
+    no_logic_in_create_state: true  # No logic in createState()
+
+    # Flutter-specific (equivalent to flutter_lints additions over lints/recommended)
+    avoid_web_libraries_in_flutter: true  # Avoid dart:html etc. in Flutter
+    prefer_const_constructors_in_immutables: true  # Use const constructors in @immutable classes
+    sized_box_for_whitespace: true  # Use SizedBox instead of Container for whitespace
+    use_full_hex_values_for_flutter_colors: true  # Use 8-digit hex for Colors
+    use_key_in_widget_constructors: true  # Include key parameter in widget constructors
     
     # Readability
     lines_longer_than_80_chars: false  # Disable 80 char limit (better for Japanese text)

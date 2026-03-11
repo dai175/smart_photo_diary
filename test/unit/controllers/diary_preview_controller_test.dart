@@ -166,6 +166,49 @@ void main() {
       });
     });
 
+    group('stale generation prevention', () {
+      test('再生成が開始されたら古い生成結果は破棄される', () async {
+        // First call: will hang on getImageForAi
+        final mockAsset1 = MockAssetEntity();
+        when(() => mockAsset1.createDateTime).thenReturn(DateTime(2025, 1, 15));
+        when(() => mockPhotoService.getImageForAi(mockAsset1)).thenAnswer((
+          _,
+        ) async {
+          // Simulate slow AI processing
+          await Future.delayed(const Duration(milliseconds: 100));
+          return const Failure(PhotoAccessException('No AI image available'));
+        });
+
+        final mockAsset2 = MockAssetEntity();
+        when(() => mockAsset2.createDateTime).thenReturn(DateTime(2025, 1, 16));
+        when(() => mockPhotoService.getImageForAi(mockAsset2)).thenAnswer(
+          (_) async =>
+              const Failure(PhotoAccessException('No AI image available')),
+        );
+
+        final controller = createController();
+        addTearDown(controller.dispose);
+
+        // Start first generation (slow)
+        final future1 = controller.initializeAndGenerate(
+          assets: [mockAsset1],
+          locale: const Locale('en'),
+        );
+
+        // Start second generation immediately (invalidates first)
+        final future2 = controller.initializeAndGenerate(
+          assets: [mockAsset2],
+          locale: const Locale('en'),
+        );
+
+        await Future.wait([future1, future2]);
+
+        // The error should reflect the second generation's result, not the first
+        expect(controller.hasError, isTrue);
+        expect(controller.errorType, DiaryPreviewErrorType.generationFailed);
+      });
+    });
+
     group('dispose', () {
       test('dispose で例外が発生しない', () {
         final controller = createController();

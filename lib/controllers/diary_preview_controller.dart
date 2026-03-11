@@ -36,6 +36,7 @@ class DiaryPreviewController extends BaseErrorController {
 
   DiaryPreviewLoadingState _loadingState =
       DiaryPreviewLoadingState.initializing;
+  int _requestVersion = 0;
   int _currentPhotoIndex = 0;
   int _totalPhotos = 0;
   DateTime _photoDateTime = DateTime.now();
@@ -161,11 +162,14 @@ class DiaryPreviewController extends BaseErrorController {
       return;
     }
 
+    final localVersion = ++_requestVersion;
     _clearErrorState();
     setLoading(true);
 
     try {
       final aiService = await ServiceRegistration.getAsync<IAiService>();
+      if (localVersion != _requestVersion) return;
+
       _photoDateTime = PhotoDateResolver.resolveMedianDateTime(assets);
 
       final Result<GenerationOutput> genResult;
@@ -179,6 +183,7 @@ class DiaryPreviewController extends BaseErrorController {
           contextText: _contextText,
           diaryLength: _diaryLength,
         );
+        if (localVersion != _requestVersion) return;
       } else {
         _loadingState = DiaryPreviewLoadingState.analyzingPhotos;
         _totalPhotos = assets.length;
@@ -202,6 +207,7 @@ class DiaryPreviewController extends BaseErrorController {
             notifyListeners();
           },
         );
+        if (localVersion != _requestVersion) return;
 
         _loadingState = DiaryPreviewLoadingState.idle;
       }
@@ -210,6 +216,7 @@ class DiaryPreviewController extends BaseErrorController {
 
       if (genResult.isFailure) throw genResult.error;
 
+      if (localVersion != _requestVersion) return;
       final output = genResult.value;
       _generatedTitle = output.title;
       _generatedContent = output.content;
@@ -217,8 +224,10 @@ class DiaryPreviewController extends BaseErrorController {
       setLoading(false);
 
       await _recordPromptUsage();
+      if (localVersion != _requestVersion) return;
       await _autoSaveDiary(assets: assets);
     } catch (e, stackTrace) {
+      if (localVersion != _requestVersion) return;
       _loadingState = DiaryPreviewLoadingState.idle;
       _logger.error(
         'Diary generation failed',

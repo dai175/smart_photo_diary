@@ -377,6 +377,64 @@ void main() {
       });
     });
 
+    group('stale request prevention', () {
+      test('loadDiaryEntry の結果が後続リクエストで無効化される', () async {
+        final entry1 = _createEntry(id: 'id-1', title: 'First');
+        final entry2 = _createEntry(id: 'id-2', title: 'Second');
+
+        when(() => mockDiaryService.getDiaryEntry('id-1')).thenAnswer((
+          _,
+        ) async {
+          await Future.delayed(const Duration(milliseconds: 100));
+          return Success(entry1);
+        });
+        when(
+          () => mockDiaryService.getDiaryEntry('id-2'),
+        ).thenAnswer((_) async => Success(entry2));
+
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        // Start slow load, then immediately start fast load
+        final future1 = controller.loadDiaryEntry('id-1');
+        final future2 = controller.loadDiaryEntry('id-2');
+
+        await Future.wait([future1, future2]);
+
+        // Second load should win; first result should be discarded
+        expect(controller.diaryEntry?.id, equals('id-2'));
+        expect(controller.diaryEntry?.title, equals('Second'));
+      });
+
+      test('deleteDiary の結果が後続リクエストで無効化される', () async {
+        final entry = _createEntry();
+        when(
+          () => mockDiaryService.getDiaryEntry('test-id'),
+        ).thenAnswer((_) async => Success(entry));
+        when(() => mockDiaryService.deleteDiaryEntry('test-id')).thenAnswer((
+          _,
+        ) async {
+          await Future.delayed(const Duration(milliseconds: 100));
+          return const Success(null);
+        });
+
+        final controller = DiaryDetailController();
+        addTearDown(controller.dispose);
+
+        await controller.loadDiaryEntry('test-id');
+
+        // Start delete (slow), then immediately load again (invalidates delete)
+        final deleteFuture = controller.deleteDiary('test-id');
+        // loadDiaryEntry returns void, so we await it separately
+        final loadFuture = controller.loadDiaryEntry('test-id');
+
+        final deleteResult = await deleteFuture;
+        await loadFuture;
+        // Delete should return false because it was superseded
+        expect(deleteResult, isFalse);
+      });
+    });
+
     group('editing', () {
       test('startEditing で isEditing が true になる', () {
         final controller = DiaryDetailController();
