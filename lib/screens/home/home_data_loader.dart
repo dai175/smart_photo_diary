@@ -76,7 +76,12 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       _self._photoController.setPhotoAssets(photos);
       // Use raw count for offset to correctly page through all photos
       _self._currentPhotoOffset = rawPhotos.length;
-      if (rawPhotos.length < _HomeScreenState._photosPerPage) {
+      // Note: rawPhotos is post-_filterByDateRange (not truly raw from album).
+      // On Android, DateTimeCond may include photos outside the range
+      // (e.g. DATE_ADDED vs DATE_TAKEN mismatch), which _filterByDateRange
+      // then removes. Using `< pageSize` would prematurely stop pagination
+      // if even 1 photo is filtered out. Use isEmpty instead.
+      if (rawPhotos.isEmpty) {
         _self._photoController.setHasMorePhotos(false);
       } else {
         _self._photoController.setHasMorePhotos(true);
@@ -170,8 +175,9 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
       // Always update offset and pagination based on raw (unfiltered) count
       _self._currentPhotoOffset += rawNewPhotos.length;
-      final reachedEnd = rawNewPhotos.length < requested;
-      _self._photoController.setHasMorePhotos(!reachedEnd);
+      // See comment in _loadTodayPhotos: rawNewPhotos is post-filter, so
+      // count < requested doesn't reliably indicate end-of-album.
+      _self._photoController.setHasMorePhotos(rawNewPhotos.isNotEmpty);
 
       if (newPhotos.isNotEmpty) {
         final combined = <AssetEntity>[
