@@ -36,7 +36,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   void initState() {
     super.initState();
     _photoAssetsFuture = _fetchPhotoAssets();
-    _tagsFuture = _fetchTags();
+    _tagsFuture = widget.entry.hasValidTags
+        ? Future.value(widget.entry.tags)
+        : _fetchTags();
   }
 
   @override
@@ -44,7 +46,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.entry.id != widget.entry.id) {
       _photoAssetsFuture = _fetchPhotoAssets();
-      _tagsFuture = _fetchTags();
+      _tagsFuture = widget.entry.hasValidTags
+          ? Future.value(widget.entry.tags)
+          : _fetchTags();
     }
   }
 
@@ -247,6 +251,13 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
 
   Widget _buildTags(BuildContext context) {
     final l10n = context.l10n;
+
+    // キャッシュ済みタグは同期的に即表示（FutureBuilder不要）
+    if (widget.entry.hasValidTags) {
+      return _buildTagChips(widget.entry.tags!);
+    }
+
+    // キャッシュなしの場合のみ非同期取得
     return FutureBuilder<List<String>?>(
       future: _tagsFuture,
       builder: (context, snapshot) {
@@ -273,17 +284,20 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
         }
 
         final tags = snapshot.data ?? _fallbackTags(l10n);
-        if (tags.isEmpty) return const SizedBox();
-
-        return Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          children: tags
-              .take(4) // 最大4つまで表示
-              .map((tag) => ModernChip.tag(label: tag))
-              .toList(),
-        );
+        return _buildTagChips(tags);
       },
+    );
+  }
+
+  Widget _buildTagChips(List<String> tags) {
+    if (tags.isEmpty) return const SizedBox();
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      children: tags
+          .take(4) // 最大4つまで表示
+          .map((tag) => ModernChip.tag(label: tag))
+          .toList(),
     );
   }
 }

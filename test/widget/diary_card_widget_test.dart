@@ -28,6 +28,7 @@ DiaryEntry _createEntry({
   DateTime? date,
   List<String> photoIds = const [],
   List<String>? tags,
+  DateTime? tagsGeneratedAt,
 }) {
   final d = date ?? DateTime(2025, 6, 15, 10, 30);
   return DiaryEntry(
@@ -39,6 +40,7 @@ DiaryEntry _createEntry({
     createdAt: d,
     updatedAt: d,
     tags: tags,
+    tagsGeneratedAt: tagsGeneratedAt ?? (tags != null ? DateTime.now() : null),
   );
 }
 
@@ -186,6 +188,24 @@ void main() {
 
         expect(find.text('Morning'), findsOneWidget);
         expect(find.text('Happy'), findsOneWidget);
+      });
+
+      testWidgets('キャッシュ済みタグはFutureBuilder経由せず即表示される', (tester) async {
+        final entry = _createEntry(photoIds: [], tags: ['Cached1', 'Cached2']);
+        // hasValidTags==trueなのでスタブ不要（呼ばれないことをverifyNeverで確認）
+
+        await tester.pumpWidget(
+          _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
+        );
+        // pumpAndSettleせず1フレームだけで即表示されることを確認
+        await tester.pump();
+
+        expect(find.text('Cached1'), findsOneWidget);
+        expect(find.text('Cached2'), findsOneWidget);
+        // 「Generating tags...」が表示されないことを確認
+        expect(find.text('Generating tags...'), findsNothing);
+        // getTagsForEntryが呼ばれていないことを確認
+        verifyNever(() => mockTagService.getTagsForEntry(entry));
       });
 
       testWidgets('タグ取得エラー時にフォールバックタグが表示される', (tester) async {
