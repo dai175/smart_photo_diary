@@ -31,7 +31,9 @@
 - **依存性注入**: ServiceLocatorによる疎結合設計（2フェーズ初期化）
 - **Result<T>パターン**: sealed classによる関数型エラーハンドリングで型安全性を確保
 - **インターフェース指向**: テスタビリティを重視した設計（Iプレフィックス規約）
-- **Facadeパターン**: 大きなサービスは内部サブサービスに委譲し単一責任を維持
+- **Facade + Delegateパターン**: 大きなサービス/コントローラーは専用Delegateに分解し単一責任を維持
+  - Services: `DiaryService` → `DiaryCrudDelegate` + `DiaryQueryDelegate`、`SubscriptionService` → `PurchaseFlowDelegate` + `PurchaseProductDelegate`
+  - Controllers: `DiaryPreviewController` → `DiaryPreviewGenerationDelegate` + `DiaryPreviewSaveDelegate`
 - **ChangeNotifier状態管理**: Provider/Riverpod等を使わないシンプルな状態管理
 - **3層テスト戦略**: ユニット・ウィジェット・統合テスト（100%成功率維持）
 
@@ -39,27 +41,36 @@
 
 ```
 lib/
-├── core/           # コアアーキテクチャ（DI、Result<T>、例外階層）
-├── services/       # サービス層（インターフェース指向）
-├── models/         # データモデル（Hiveアダプター付き）
-├── screens/        # 画面
-├── controllers/    # 画面コントローラー（ChangeNotifier）
-├── widgets/        # 再利用可能ウィジェット
-├── shared/         # 共有UIコンポーネント（フィルター等）
-├── ui/             # デザインシステム（MD3テーマ、共通コンポーネント）
-├── constants/      # アプリ定数
-├── utils/          # ユーティリティ
-├── config/         # 環境・IAP設定
-├── l10n/           # 国際化ARBファイル
-├── localization/   # ロケール拡張・ユーティリティ
-└── debug/          # デバッグ専用画面
+├── core/               # コアアーキテクチャ（DI、Result<T>、例外階層）
+├── config/             # 環境設定（.envローダー、ビルド時定数）
+├── constants/          # アプリ定数（サブスク、テーマ、AI、キャッシュ）
+├── models/             # データモデル、Hive型、プラン定義（plans/）、状態モデル（states/）
+├── services/
+│   ├── interfaces/     # サービスインターフェース（Iプレフィックス）
+│   ├── ai/             # Geminiクライアント、プロンプトビルダー、タグ/日記生成
+│   ├── diary_image/    # 日記画像生成（レイアウト、写真/テキスト描画）
+│   ├── social_share/   # SNSシェアチャネル実装
+│   └── mixins/         # サービス共通Mixin（ログ、購入イベント）
+├── controllers/        # 画面コントローラー（ChangeNotifier + Delegate）
+├── screens/            # 画面実装（ホーム、日記詳細、統計、設定、オンボーディング）
+├── widgets/            # ドメイン固有ウィジェット（タイムライン、設定、アップグレード）
+├── shared/             # 共有UIコンポーネント（フィルター等）
+├── ui/
+│   ├── design_system/  # Material Design 3テーマ、カラー、タイポグラフィ
+│   ├── components/     # 共通UIコンポーネント（CustomDialog、ボタン等）
+│   ├── animations/     # マイクロインタラクション、ページ遷移
+│   └── error_display/  # エラー表示システム（重要度レベル別）
+├── utils/              # ユーティリティ（日付、ダイアログ、ロケール、パフォーマンス監視）
+├── l10n/               # 国際化ARBファイル
+├── localization/       # ロケール拡張・ユーティリティ
+└── debug/              # デバッグ専用画面
 ```
 
 ## 技術スタック
 
 ### Core Framework
 - **Flutter 3.32.0**: FVM管理、日本語・英語ロケール対応
-- **Dart 3**: Records、Patterns、sealed classesを活用
+- **Dart 3.8+**: Records、Patterns、sealed classesを活用
 
 ### データストレージ
 - **Hive & hive_flutter**: 高速NoSQLローカルデータベース
