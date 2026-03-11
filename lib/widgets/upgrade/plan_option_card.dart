@@ -30,53 +30,61 @@ class PlanOptionCard extends StatelessWidget {
         context.l10n.upgradeDialogDiscountValue(discount),
       _ => '',
     };
+    final priceText = _getPriceText(context);
+    final semanticsLabel = [
+      planName,
+      if (description.isNotEmpty) description,
+      priceText,
+    ].join(', ');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Semantics(
-        label: planName,
+        label: semanticsLabel,
         button: true,
-        child: CustomCard(
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-            child: Padding(
-              padding: AppSpacing.cardPadding,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          planName,
-                          style: AppTypography.titleMedium.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (description.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.xs),
+        child: ExcludeSemantics(
+          child: CustomCard(
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
+              child: Padding(
+                padding: AppSpacing.cardPadding,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            description,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                            planName,
+                            style: AppTypography.titleMedium.copyWith(
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
+                          if (description.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              description,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  _buildPriceDisplay(context),
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    size: AppSpacing.iconXs,
-                  ),
-                ],
+                    _buildPriceDisplay(context),
+                    const SizedBox(width: AppSpacing.sm),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: AppSpacing.iconXs,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -95,19 +103,21 @@ class PlanOptionCard extends StatelessWidget {
     }
   }
 
-  Widget _buildPriceDisplay(BuildContext context) {
+  String _getPriceText(BuildContext context) {
     final price =
         priceString ??
         SubscriptionConstants.formatPriceForPlan(
           plan.id,
           context.l10n.localeName,
         );
-    final priceText = plan.isMonthly
+    return plan.isMonthly
         ? context.l10n.pricingPerMonthShort(price)
         : context.l10n.pricingPerYearShort(price);
+  }
 
+  Widget _buildPriceDisplay(BuildContext context) {
     return Text(
-      priceText,
+      _getPriceText(context),
       style: AppTypography.titleMedium.copyWith(
         fontWeight: FontWeight.w700,
         color: AppColors.primary,
