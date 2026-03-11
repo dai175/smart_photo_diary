@@ -28,7 +28,6 @@ DiaryEntry _createEntry({
   DateTime? date,
   List<String> photoIds = const [],
   List<String>? tags,
-  DateTime? tagsGeneratedAt,
 }) {
   final d = date ?? DateTime(2025, 6, 15, 10, 30);
   return DiaryEntry(
@@ -40,7 +39,6 @@ DiaryEntry _createEntry({
     createdAt: d,
     updatedAt: d,
     tags: tags,
-    tagsGeneratedAt: tagsGeneratedAt ?? (tags != null ? DateTime.now() : null),
   );
 }
 
@@ -192,7 +190,7 @@ void main() {
 
       testWidgets('キャッシュ済みタグはFutureBuilder経由せず即表示される', (tester) async {
         final entry = _createEntry(photoIds: [], tags: ['Cached1', 'Cached2']);
-        // hasValidTags==trueなのでスタブ不要（呼ばれないことをverifyNeverで確認）
+        // hasCachedTags==trueなのでスタブ不要（呼ばれないことをverifyNeverで確認）
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -204,25 +202,6 @@ void main() {
         // 「Generating tags...」が表示されないことを確認
         expect(find.text('Generating tags...'), findsNothing);
         // getTagsForEntryが呼ばれていないことを確認
-        verifyNever(() => mockTagService.getTagsForEntry(entry));
-      });
-
-      testWidgets('期限切れキャッシュでもタグが即表示される', (tester) async {
-        final entry = _createEntry(
-          photoIds: [],
-          tags: ['Stale1', 'Stale2'],
-          tagsGeneratedAt: DateTime.now().subtract(const Duration(days: 8)),
-        );
-        // tags != null なので _fetchTags() は呼ばれないはず（スタブなし）
-
-        await tester.pumpWidget(
-          _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
-        );
-        // pumpWidget直後にアサート（初回フレームでちらつきがないことを検証）
-
-        expect(find.text('Stale1'), findsOneWidget);
-        expect(find.text('Stale2'), findsOneWidget);
-        expect(find.text('Generating tags...'), findsNothing);
         verifyNever(() => mockTagService.getTagsForEntry(entry));
       });
 

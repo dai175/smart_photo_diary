@@ -251,66 +251,6 @@ void main() {
       });
     });
 
-    group('Tags Validation Logic', () {
-      test('should identify valid cached tags', () {
-        // Arrange
-        final validTagsDate = DateTime.now().subtract(const Duration(days: 3));
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: DateTime(2024, 1, 15),
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: DateTime(2024, 1, 15, 14),
-          updatedAt: DateTime(2024, 1, 15, 14),
-          tags: ['cached-tag1', 'cached-tag2'],
-          tagsGeneratedAt: validTagsDate,
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isTrue);
-        expect(entry.tags, equals(['cached-tag1', 'cached-tag2']));
-      });
-
-      test('should identify invalid cached tags', () {
-        // Arrange
-        final oldTagsDate = DateTime.now().subtract(const Duration(days: 8));
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: DateTime(2024, 1, 15),
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: DateTime(2024, 1, 15, 14),
-          updatedAt: DateTime(2024, 1, 15, 14),
-          tags: ['old-tag'],
-          tagsGeneratedAt: oldTagsDate,
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isFalse);
-        expect(entry.tags, equals(['old-tag']));
-      });
-
-      test('should identify missing tags', () {
-        // Arrange
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: DateTime(2024, 1, 15, 10, 30),
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: DateTime(2024, 1, 15, 14),
-          updatedAt: DateTime(2024, 1, 15, 14),
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isFalse);
-        expect(entry.tags, isNull);
-        expect(entry.tagsGeneratedAt, isNull);
-      });
-    });
-
     group('Time-based Tag Logic', () {
       test('should identify morning time correctly', () {
         // Arrange & Act

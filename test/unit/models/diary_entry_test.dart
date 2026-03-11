@@ -35,7 +35,6 @@ void main() {
         expect(entry.createdAt, equals(testCreatedAt));
         expect(entry.updatedAt, equals(testUpdatedAt));
         expect(entry.tags, isNull);
-        expect(entry.tagsGeneratedAt, isNull);
         expect(entry.location, isNull);
       });
 
@@ -50,112 +49,12 @@ void main() {
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
           tags: ['tag1', 'tag2'],
-          tagsGeneratedAt: testDate,
           location: 'Test Location',
         );
 
         // Assert
         expect(entry.tags, equals(['tag1', 'tag2']));
-        expect(entry.tagsGeneratedAt, equals(testDate));
         expect(entry.location, equals('Test Location'));
-      });
-    });
-
-    group('hasValidTags', () {
-      test('should return false when tags is null', () {
-        // Arrange
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: testDate,
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: testCreatedAt,
-          updatedAt: testUpdatedAt,
-          tags: null,
-          tagsGeneratedAt: DateTime.now(),
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isFalse);
-      });
-
-      test('should return false when tagsGeneratedAt is null', () {
-        // Arrange
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: testDate,
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: testCreatedAt,
-          updatedAt: testUpdatedAt,
-          tags: ['tag1'],
-          tagsGeneratedAt: null,
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isFalse);
-      });
-
-      test('should return true when tags were generated within 7 days', () {
-        // Arrange
-        final recentTagsDate = DateTime.now().subtract(const Duration(days: 3));
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: testDate,
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: testCreatedAt,
-          updatedAt: testUpdatedAt,
-          tags: ['tag1'],
-          tagsGeneratedAt: recentTagsDate,
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isTrue);
-      });
-
-      test(
-        'should return false when tags were generated more than 7 days ago',
-        () {
-          // Arrange
-          final oldTagsDate = DateTime.now().subtract(const Duration(days: 8));
-          final entry = DiaryEntry(
-            id: 'test-id',
-            date: testDate,
-            title: 'Test Title',
-            content: 'Test Content',
-            photoIds: ['photo1'],
-            createdAt: testCreatedAt,
-            updatedAt: testUpdatedAt,
-            tags: ['tag1'],
-            tagsGeneratedAt: oldTagsDate,
-          );
-
-          // Act & Assert
-          expect(entry.hasValidTags, isFalse);
-        },
-      );
-
-      test('should return true for tags generated exactly 6 days ago', () {
-        // Arrange
-        final exactDate = DateTime.now().subtract(const Duration(days: 6));
-        final entry = DiaryEntry(
-          id: 'test-id',
-          date: testDate,
-          title: 'Test Title',
-          content: 'Test Content',
-          photoIds: ['photo1'],
-          createdAt: testCreatedAt,
-          updatedAt: testUpdatedAt,
-          tags: ['tag1'],
-          tagsGeneratedAt: exactDate,
-        );
-
-        // Act & Assert
-        expect(entry.hasValidTags, isTrue);
       });
     });
 
@@ -203,7 +102,6 @@ void main() {
           createdAt: testCreatedAt,
           updatedAt: testUpdatedAt,
           tags: ['original-tag'],
-          tagsGeneratedAt: testDate,
           location: 'Original Location',
         );
       });
@@ -223,7 +121,6 @@ void main() {
           expect(copy.createdAt, equals(originalEntry.createdAt));
           expect(copy.updatedAt, equals(originalEntry.updatedAt));
           expect(copy.tags, equals(originalEntry.tags));
-          expect(copy.tagsGeneratedAt, equals(originalEntry.tagsGeneratedAt));
           expect(copy.location, equals(originalEntry.location));
         },
       );
@@ -254,7 +151,6 @@ void main() {
         final newDate = DateTime(2024, 2, 1);
         final newCreatedAt = DateTime(2024, 2, 1, 10, 0);
         final newUpdatedAt = DateTime(2024, 2, 1, 11, 0);
-        final newTagsGeneratedAt = DateTime(2024, 2, 1, 12, 0);
 
         // Act
         final copy = originalEntry.copyWith(
@@ -266,7 +162,6 @@ void main() {
           createdAt: newCreatedAt,
           updatedAt: newUpdatedAt,
           tags: ['new-tag1', 'new-tag2'],
-          tagsGeneratedAt: newTagsGeneratedAt,
           location: 'New Location',
         );
 
@@ -279,7 +174,6 @@ void main() {
         expect(copy.createdAt, equals(newCreatedAt));
         expect(copy.updatedAt, equals(newUpdatedAt));
         expect(copy.tags, equals(['new-tag1', 'new-tag2']));
-        expect(copy.tagsGeneratedAt, equals(newTagsGeneratedAt));
         expect(copy.location, equals('New Location'));
       });
 

@@ -41,12 +41,12 @@ class DiaryTagService implements IDiaryTagService {
   @override
   Future<Result<List<String>>> getTagsForEntry(DiaryEntry entry) async {
     try {
-      // 有効なキャッシュがあればそれを返す
-      if (entry.hasValidTags) {
+      // キャッシュ済みタグがあればそれを返す
+      if (entry.hasCachedTags) {
         return Success(entry.tags!);
       }
 
-      // キャッシュが無効または存在しない場合は新しく生成
+      // タグ未生成の場合は新しく生成
       _logger.debug('Generating new tags: ${entry.id}');
       final tagsResult = await _aiService.generateTagsFromContent(
         title: entry.title,

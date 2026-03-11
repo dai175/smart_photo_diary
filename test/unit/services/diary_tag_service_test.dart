@@ -52,7 +52,6 @@ void main() {
     String title = 'Test Title',
     String content = 'Test Content',
     List<String>? tags,
-    DateTime? tagsGeneratedAt,
   }) {
     return DiaryEntry(
       id: id,
@@ -63,17 +62,12 @@ void main() {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       tags: tags,
-      tagsGeneratedAt: tagsGeneratedAt,
     );
   }
 
   group('getTagsForEntry', () {
-    test('キャッシュ有効時はキャッシュを返す（AI呼び出しなし）', () async {
-      final entry = createEntry(
-        id: 'cached_entry',
-        tags: ['タグ1', 'タグ2'],
-        tagsGeneratedAt: DateTime.now(),
-      );
+    test('キャッシュ済みタグはそのまま返す（AI呼び出しなし）', () async {
+      final entry = createEntry(id: 'cached_entry', tags: ['タグ1', 'タグ2']);
 
       final result = await tagService.getTagsForEntry(entry);
 
