@@ -34,7 +34,7 @@ updates:
       development:
         patterns:
           - "flutter_test"
-          - "flutter_lints"
+          - "lints"
           - "mocktail"
           - "build_runner"
           - "hive_generator"

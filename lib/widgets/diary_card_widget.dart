@@ -100,62 +100,68 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
         ? widget.entry.title
         : l10n.diaryCardUntitled;
 
-    return CustomCard(
-      onTap: widget.onTap,
-      elevation: AppSpacing.elevationXs,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ヘッダー（日付とアイコン）
-          Row(
-            children: [
-              Text(
-                l10n.formatMonthDay(widget.entry.date),
-                style: AppTypography.withColor(
-                  AppTypography.labelSmall,
-                  Theme.of(context).colorScheme.onSurfaceVariant,
+    final formattedDate = l10n.formatMonthDay(widget.entry.date);
+
+    return Semantics(
+      label: l10n.diaryCardSemanticLabel(title, formattedDate),
+      button: true,
+      child: CustomCard(
+        onTap: widget.onTap,
+        elevation: AppSpacing.elevationXs,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ヘッダー（日付とアイコン）
+            Row(
+              children: [
+                Text(
+                  formattedDate,
+                  style: AppTypography.withColor(
+                    AppTypography.labelSmall,
+                    Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: AppSpacing.iconSm,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // タイトル
-          Text(
-            title,
-            style: AppTypography.titleLarge,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const SizedBox(height: AppSpacing.sm),
-
-          // 本文（一部）
-          Text(
-            widget.entry.content,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.withColor(
-              AppTypography.bodyMedium,
-              Theme.of(context).colorScheme.onSurfaceVariant,
+                const Spacer(),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: AppSpacing.iconSm,
+                ),
+              ],
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
 
-          // 写真があれば表示
-          _buildPhotoThumbnails(),
+            // タイトル
+            Text(
+              title,
+              style: AppTypography.titleLarge,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
 
-          // タグ（動的生成）
-          _buildTags(context),
-        ],
+            const SizedBox(height: AppSpacing.sm),
+
+            // 本文（一部）
+            Text(
+              widget.entry.content,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.withColor(
+                AppTypography.bodyMedium,
+                Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // 写真があれば表示
+            _buildPhotoThumbnails(),
+
+            // タグ（動的生成）
+            _buildTags(context),
+          ],
+        ),
       ),
     );
   }

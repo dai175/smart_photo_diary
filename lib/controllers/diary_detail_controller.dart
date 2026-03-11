@@ -18,6 +18,7 @@ class DiaryDetailController extends BaseErrorController {
   List<AssetEntity> _photoAssets = [];
   bool _isEditing = false;
   bool _wasModified = false;
+  int _requestVersion = 0;
   DiaryDetailErrorType? _errorType;
   String _rawErrorDetail = '';
 
@@ -57,26 +58,32 @@ class DiaryDetailController extends BaseErrorController {
 
   /// 日記エントリーを読み込む
   Future<void> loadDiaryEntry(String diaryId) async {
+    final localVersion = ++_requestVersion;
     try {
       _clearErrorState();
       setLoading(true);
 
       final diaryService =
           await ServiceRegistration.getAsync<IDiaryCrudService>();
+      if (localVersion != _requestVersion) return;
       final result = await diaryService.getDiaryEntry(diaryId);
 
       switch (result) {
         case Success(data: final entry):
           if (entry == null) {
+            if (localVersion != _requestVersion) return;
             _setErrorState(DiaryDetailErrorType.notFound);
             return;
           }
 
           final photoService =
               await ServiceRegistration.getAsync<IPhotoService>();
+          if (localVersion != _requestVersion) return;
           final assetsResult = await photoService.getAssetsByIds(
             entry.photoIds,
           );
+
+          if (localVersion != _requestVersion) return;
 
           if (assetsResult.isFailure) {
             try {
@@ -96,9 +103,11 @@ class DiaryDetailController extends BaseErrorController {
           setLoading(false);
 
         case Failure(exception: final e):
+          if (localVersion != _requestVersion) return;
           _setErrorState(DiaryDetailErrorType.loadFailed, e.message);
       }
     } catch (e) {
+      if (localVersion != _requestVersion) return;
       _setErrorState(DiaryDetailErrorType.loadFailed, '$e');
     }
   }
@@ -111,12 +120,14 @@ class DiaryDetailController extends BaseErrorController {
   }) async {
     if (_diaryEntry == null) return false;
 
+    final localVersion = ++_requestVersion;
     try {
       setLoading(true);
       _clearErrorState();
 
       final diaryService =
           await ServiceRegistration.getAsync<IDiaryCrudService>();
+      if (localVersion != _requestVersion) return false;
 
       final updatedEntry = _diaryEntry!.copyWith(
         title: title,
@@ -124,6 +135,7 @@ class DiaryDetailController extends BaseErrorController {
         updatedAt: DateTime.now(),
       );
       final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
+      if (localVersion != _requestVersion) return false;
 
       switch (updateResult) {
         case Success():
@@ -137,6 +149,7 @@ class DiaryDetailController extends BaseErrorController {
           return false;
       }
     } catch (e) {
+      if (localVersion != _requestVersion) return false;
       _setErrorState(DiaryDetailErrorType.updateFailed, '$e');
       return false;
     }
@@ -146,13 +159,16 @@ class DiaryDetailController extends BaseErrorController {
   Future<bool> deleteDiary(String diaryId) async {
     if (_diaryEntry == null) return false;
 
+    final localVersion = ++_requestVersion;
     try {
       setLoading(true);
       _clearErrorState();
 
       final diaryService =
           await ServiceRegistration.getAsync<IDiaryCrudService>();
+      if (localVersion != _requestVersion) return false;
       final deleteResult = await diaryService.deleteDiaryEntry(diaryId);
+      if (localVersion != _requestVersion) return false;
 
       switch (deleteResult) {
         case Success():
@@ -163,6 +179,7 @@ class DiaryDetailController extends BaseErrorController {
           return false;
       }
     } catch (e) {
+      if (localVersion != _requestVersion) return false;
       _setErrorState(DiaryDetailErrorType.deleteFailed, '$e');
       return false;
     }

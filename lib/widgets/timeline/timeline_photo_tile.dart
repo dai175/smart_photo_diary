@@ -5,6 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
 import '../../controllers/photo_selection_controller.dart';
+import '../../localization/localization_extensions.dart';
 import '../../ui/components/fullscreen_photo_viewer.dart';
 import 'timeline_cache_manager.dart';
 import 'timeline_constants.dart';
@@ -63,90 +64,105 @@ class TimelinePhotoTile extends StatelessWidget {
       key: ValueKey(photo.id),
     );
 
-    return GestureDetector(
-      onTap: isLocked
-          ? () => onLockedPhotoTapped?.call()
-          : () => _handlePhotoTap(mainIndex),
-      onLongPress: isLocked
-          ? () => onLockedPhotoTapped?.call()
-          : () => _handlePhotoLongPress(context, heroTag, isUsed),
-      child: Stack(
-        children: [
-          AnimatedOpacity(
-            opacity: shouldDim ? 0.6 : 1.0,
-            duration: const Duration(
-              milliseconds: TimelineLayoutConstants.animationDurationMs,
-            ),
-            curve: Curves.easeInOut,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(TimelineLayoutConstants.borderRadius),
-                ),
+    final l10n = context.l10n;
+    final semanticLabel = l10n.photoSemanticIndex(mainIndex + 1);
+    final semanticHint = isLocked
+        ? l10n.photoSemanticLocked
+        : isSelected
+        ? l10n.photoSemanticSelected
+        : l10n.photoSemanticNotSelected;
+
+    return Semantics(
+      label: semanticLabel,
+      hint: semanticHint,
+      selected: isSelected,
+      button: true,
+      child: GestureDetector(
+        onTap: isLocked
+            ? () => onLockedPhotoTapped?.call()
+            : () => _handlePhotoTap(mainIndex),
+        onLongPress: isLocked
+            ? () => onLockedPhotoTapped?.call()
+            : () => _handlePhotoLongPress(context, heroTag, isUsed),
+        child: Stack(
+          children: [
+            AnimatedOpacity(
+              opacity: shouldDim ? 0.6 : 1.0,
+              duration: const Duration(
+                milliseconds: TimelineLayoutConstants.animationDurationMs,
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(TimelineLayoutConstants.borderRadius),
-                ),
-                child: Hero(
-                  tag: heroTag,
-                  child: isLocked
-                      ? ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: TimelineLayoutConstants.lockedBlurSigma,
-                            sigmaY: TimelineLayoutConstants.lockedBlurSigma,
-                          ),
-                          child: thumbnail,
-                        )
-                      : thumbnail,
-                ),
-              ),
-            ),
-          ),
-          if (isLocked)
-            Positioned.fill(
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    TimelineLayoutConstants.lockedIconPadding,
+              curve: Curves.easeInOut,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(TimelineLayoutConstants.borderRadius),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    shape: BoxShape.circle,
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(TimelineLayoutConstants.borderRadius),
                   ),
-                  child: Icon(
-                    Icons.lock_rounded,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    size: TimelineLayoutConstants.lockedIconSize,
+                  child: Hero(
+                    tag: heroTag,
+                    child: isLocked
+                        ? ImageFiltered(
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: TimelineLayoutConstants.lockedBlurSigma,
+                              sigmaY: TimelineLayoutConstants.lockedBlurSigma,
+                            ),
+                            child: thumbnail,
+                          )
+                        : thumbnail,
                   ),
                 ),
               ),
             ),
-          if (!isLocked)
-            Positioned(
-              top: TimelineLayoutConstants.selectionIndicatorTop,
-              right: TimelineLayoutConstants.selectionIndicatorRight,
-              child: TimelineSelectionIndicator(
-                isSelected: isSelected,
-                isUsed: isUsed,
-                shouldDimPhoto: shouldDim,
-                primaryColor: Theme.of(context).colorScheme.primary,
-                indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
-                iconSize: TimelineLayoutConstants.selectionIconSize,
-                borderWidth: TimelineLayoutConstants.selectionBorderWidth,
+            if (isLocked)
+              Positioned.fill(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(
+                      TimelineLayoutConstants.lockedIconPadding,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.lock_rounded,
+                      color: Colors.white.withValues(alpha: 0.9),
+                      size: TimelineLayoutConstants.lockedIconSize,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          if (isUsed && !isLocked)
-            const TimelineUsedLabel(
-              bottom: TimelineLayoutConstants.usedLabelBottom,
-              left: TimelineLayoutConstants.usedLabelLeft,
-              horizontalPadding:
-                  TimelineLayoutConstants.usedLabelHorizontalPadding,
-              verticalPadding: TimelineLayoutConstants.usedLabelVerticalPadding,
-              borderRadius: TimelineLayoutConstants.borderRadius,
-            ),
-        ],
+            if (!isLocked)
+              Positioned(
+                top: TimelineLayoutConstants.selectionIndicatorTop,
+                right: TimelineLayoutConstants.selectionIndicatorRight,
+                child: TimelineSelectionIndicator(
+                  isSelected: isSelected,
+                  isUsed: isUsed,
+                  shouldDimPhoto: shouldDim,
+                  primaryColor: Theme.of(context).colorScheme.primary,
+                  indicatorSize: TimelineLayoutConstants.selectionIndicatorSize,
+                  iconSize: TimelineLayoutConstants.selectionIconSize,
+                  borderWidth: TimelineLayoutConstants.selectionBorderWidth,
+                ),
+              ),
+            if (isUsed && !isLocked)
+              const TimelineUsedLabel(
+                bottom: TimelineLayoutConstants.usedLabelBottom,
+                left: TimelineLayoutConstants.usedLabelLeft,
+                horizontalPadding:
+                    TimelineLayoutConstants.usedLabelHorizontalPadding,
+                verticalPadding:
+                    TimelineLayoutConstants.usedLabelVerticalPadding,
+                borderRadius: TimelineLayoutConstants.borderRadius,
+              ),
+          ],
+        ),
       ),
     );
   }

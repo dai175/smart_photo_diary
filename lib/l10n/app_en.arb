@@ -1582,5 +1582,21 @@
   "settingsSaveError": "Failed to save settings. Please try again.",
   "@settingsSaveError": {
     "description": "Error message shown when settings save fails"
+  },
+  "photoSemanticLocked": "Locked",
+  "@photoSemanticLocked": {
+    "description": "Semantic label indicating the photo is locked (Premium only)"
+  },
+  "diaryCardSemanticLabel": "Diary: {title}, {date}",
+  "@diaryCardSemanticLabel": {
+    "description": "Semantic label for diary card widget",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }
