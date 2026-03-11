@@ -135,7 +135,7 @@ class DiaryDetailController extends BaseErrorController {
         updatedAt: DateTime.now(),
       );
       final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
-      if (localVersion != _requestVersion) return false;
+      if (localVersion != _requestVersion) return updateResult.isSuccess;
 
       switch (updateResult) {
         case Success():
@@ -168,7 +168,7 @@ class DiaryDetailController extends BaseErrorController {
           await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return false;
       final deleteResult = await diaryService.deleteDiaryEntry(diaryId);
-      if (localVersion != _requestVersion) return false;
+      if (localVersion != _requestVersion) return deleteResult.isSuccess;
 
       switch (deleteResult) {
         case Success():

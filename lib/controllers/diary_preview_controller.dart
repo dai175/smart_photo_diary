@@ -198,6 +198,7 @@ class DiaryPreviewController extends BaseErrorController {
           contextText: _contextText,
           diaryLength: _diaryLength,
           onProgress: (current, total) {
+            if (localVersion != _requestVersion) return;
             _logger.info(
               'Image analysis progress: $current/$total',
               context: 'DiaryPreviewController',
