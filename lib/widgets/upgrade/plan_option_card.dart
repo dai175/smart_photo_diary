@@ -42,6 +42,7 @@ class PlanOptionCard extends StatelessWidget {
       child: Semantics(
         label: semanticsLabel,
         button: true,
+        onTap: onTap,
         child: ExcludeSemantics(
           child: CustomCard(
             child: InkWell(
