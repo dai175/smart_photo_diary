@@ -108,7 +108,7 @@ lib/
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/your-username/smart_photo_diary.git
+git clone https://github.com/dai175/smart_photo_diary.git
 cd smart_photo_diary
 
 # FVMを利用している場合（推奨）
