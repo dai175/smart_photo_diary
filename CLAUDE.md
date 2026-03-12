@@ -95,6 +95,23 @@ All log messages, exception messages, and debug data map keys must be written in
 - Never commit without explicit user approval
 - Always run `fvm flutter analyze` and `fvm dart format .` before commits
 
+### Commit Messages
+- Use Conventional Commits format: `<type>: <description>`
+- Types: `fix:`, `feat:`, `refactor:`, `chore:`, `docs:`, `test:`
+- Write in English, concise (1 sentence preferred)
+- Focus on "why" not "what" in the description
+
+### Pull Requests
+- Title: short (<70 chars), use same Conventional Commits prefix
+- Body format:
+  ```
+  ## Summary
+  - <bullet points describing changes>
+
+  ## Test Plan
+  - <how to verify the changes>
+  ```
+
 ### UI Guidelines
 - Use `CustomDialog` for modals, never `AlertDialog`
 - No gradients, follow Material Design 3 (theme defined in `ui/design_system/`)
