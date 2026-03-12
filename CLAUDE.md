@@ -114,8 +114,12 @@ All log messages, exception messages, and debug data map keys must be written in
 - Run `fvm dart run build_runner build` after modifying any Hive `@HiveType` model
 - Some controllers use delegate pattern (e.g., `diary_preview_generation_delegate.dart`) rather than extending ChangeNotifier directly
 - Test helpers and shared mocks are in `test/mocks/` and `test/test_helpers/`
-- `.env` must be in project root (not `assets/`), loaded via `dotenv.load(fileName: ".env")`
-- `DiaryService` implements both `IDiaryCrudService` and `IDiaryQueryService` — split interface registrations resolve to the same `IDiaryService` instance via `registerAsyncFactory`
+
+## CI/CD
+
+- `.github/workflows/ci.yml` — test, analyze, format check, coverage (min 48%), build
+- `.github/workflows/release.yml` — release automation
+- `.github/workflows/ios-deploy.yml` — iOS deployment
 
 ## Platform Specifics
 
