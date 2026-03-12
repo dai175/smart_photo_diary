@@ -157,15 +157,17 @@ class DiaryCrudDelegate {
         );
       }
 
-      // バックグラウンドでタグを生成（失敗しても保存結果には影響しない）
-      try {
-        generateTags(entry);
-      } catch (tagError, tagStack) {
-        _loggingService.error(
-          'Background tag generation failed',
-          error: tagError,
-          stackTrace: tagStack,
-        );
+      // バックグラウンドでタグを生成（タグ未指定時のみ、失敗しても保存結果には影響しない）
+      if (tags == null) {
+        try {
+          generateTags(entry);
+        } catch (tagError, tagStack) {
+          _loggingService.error(
+            'Background tag generation failed',
+            error: tagError,
+            stackTrace: tagStack,
+          );
+        }
       }
 
       return Success(entry);

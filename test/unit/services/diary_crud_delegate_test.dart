@@ -185,6 +185,23 @@ void main() {
         ).called(1);
       });
 
+      test('tags指定時はバックグラウンドタグ生成がスキップされる', () async {
+        await delegate.saveDiaryEntry(
+          date: DateTime(2026, 1, 15),
+          title: 'テスト',
+          content: 'テスト',
+          photoIds: ['photo1'],
+          tags: ['imported-tag1', 'imported-tag2'],
+        );
+
+        verifyNever(
+          () => mockTagService.generateTagsInBackground(
+            any(),
+            onSearchIndexUpdate: any(named: 'onSearchIndexUpdate'),
+          ),
+        );
+      });
+
       test('disposed時はイベントが発火しない', () async {
         disposed = true;
         final events = <DiaryChange>[];

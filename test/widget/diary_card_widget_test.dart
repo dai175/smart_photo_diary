@@ -7,12 +7,9 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
-import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/widgets/diary_card_widget.dart';
-
-class MockDiaryTagService extends Mock implements IDiaryTagService {}
 
 class MockPhotoCacheService extends Mock implements IPhotoCacheService {}
 
@@ -59,16 +56,13 @@ Widget _wrapWithApp(Widget child) {
 }
 
 void main() {
-  late MockDiaryTagService mockTagService;
   late MockPhotoCacheService mockPhotoCacheService;
   late MockPhotoService mockPhotoService;
 
   setUp(() {
     ServiceLocator().clear();
-    mockTagService = MockDiaryTagService();
     mockPhotoCacheService = MockPhotoCacheService();
     mockPhotoService = MockPhotoService();
-    ServiceLocator().registerSingleton<IDiaryTagService>(mockTagService);
     ServiceLocator().registerSingleton<IPhotoCacheService>(
       mockPhotoCacheService,
     );
@@ -88,9 +82,6 @@ void main() {
     group('表示', () {
       testWidgets('タイトルが表示される', (tester) async {
         final entry = _createEntry(title: 'My Diary', photoIds: []);
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -102,9 +93,6 @@ void main() {
 
       testWidgets('コンテンツが表示される', (tester) async {
         final entry = _createEntry(content: 'A beautiful day.', photoIds: []);
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -116,9 +104,6 @@ void main() {
 
       testWidgets('タイトル空時にUntitledフォールバック', (tester) async {
         final entry = _createEntry(title: '', photoIds: []);
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -135,9 +120,6 @@ void main() {
 
       testWidgets('日付が表示される', (tester) async {
         final entry = _createEntry(date: DateTime(2025, 6, 15), photoIds: []);
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -153,9 +135,6 @@ void main() {
       testWidgets('onTapコールバックが呼ばれる', (tester) async {
         bool tapped = false;
         final entry = _createEntry(photoIds: []);
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenAnswer((_) async => const Success(['Morning']));
 
         await tester.pumpWidget(
           _wrapWithApp(
@@ -174,10 +153,7 @@ void main() {
 
     group('タグ', () {
       testWidgets('タグが正しく表示される', (tester) async {
-        final entry = _createEntry(photoIds: []);
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenAnswer((_) async => const Success(['Morning', 'Happy']));
+        final entry = _createEntry(photoIds: [], tags: ['Morning', 'Happy']);
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -188,9 +164,8 @@ void main() {
         expect(find.text('Happy'), findsOneWidget);
       });
 
-      testWidgets('キャッシュ済みタグはFutureBuilder経由せず即表示される', (tester) async {
+      testWidgets('タグが即表示される（非同期取得なし）', (tester) async {
         final entry = _createEntry(photoIds: [], tags: ['Cached1', 'Cached2']);
-        // hasCachedTags==trueなのでスタブ不要（呼ばれないことをverifyNeverで確認）
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
@@ -201,27 +176,22 @@ void main() {
         expect(find.text('Cached2'), findsOneWidget);
         // 「Generating tags...」が表示されないことを確認
         expect(find.text('Generating tags...'), findsNothing);
-        // getTagsForEntryが呼ばれていないことを確認
-        verifyNever(() => mockTagService.getTagsForEntry(entry));
       });
 
-      testWidgets('タグ取得エラー時にフォールバックタグが表示される', (tester) async {
-        // 午前10時の日記 → Morning
+      testWidgets('タグなし日記ではタグチップが表示されない', (tester) async {
         final entry = _createEntry(
           date: DateTime(2025, 6, 15, 10, 0),
           photoIds: [],
         );
-        when(
-          () => mockTagService.getTagsForEntry(entry),
-        ).thenThrow(Exception('error'));
 
         await tester.pumpWidget(
           _wrapWithApp(DiaryCardWidget(entry: entry, onTap: () {})),
         );
         await tester.pumpAndSettle();
 
-        // フォールバック: 時間帯タグ（英語で "Morning"）
-        expect(find.text('Morning'), findsOneWidget);
+        // スピナーが表示されないことを確認
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.text('Generating tags...'), findsNothing);
       });
     });
   });
