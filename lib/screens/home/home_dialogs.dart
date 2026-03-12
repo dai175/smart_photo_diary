@@ -45,6 +45,10 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
     _showSimpleDialog(context.l10n.photoUsedPhotoMessage);
   }
 
+  void _showDifferentDateModal() {
+    _showSimpleDialog(context.l10n.photoDifferentDateMessage);
+  }
+
   void _showSimpleDialog(String message) {
     DialogUtils.showSimpleDialog(context, message);
   }
