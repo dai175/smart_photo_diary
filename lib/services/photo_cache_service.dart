@@ -272,7 +272,7 @@ class PhotoCacheService implements IPhotoCacheService {
   }
 
   /// メモリ使用状況をチェック
-  void _checkMemoryUsage() async {
+  void _checkMemoryUsage() {
     final now = DateTime.now();
     if (_lastMemoryCheck != null &&
         now.difference(_lastMemoryCheck!) < _memoryCheckInterval) {
@@ -308,7 +308,7 @@ class PhotoCacheService implements IPhotoCacheService {
   }
 
   /// アグレッシブなクリーンアップ
-  void _performAggressiveCleanup() async {
+  void _performAggressiveCleanup() {
     final loggingService = _logger;
     loggingService.warning(
       'Executing aggressive cleanup',

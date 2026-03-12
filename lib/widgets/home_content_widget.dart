@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/photo_selection_controller.dart';
+import '../controllers/scroll_signal.dart';
+import '../models/timeline_callbacks.dart';
 import '../widgets/timeline_fab_integration.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -12,7 +14,6 @@ import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
 import '../constants/app_constants.dart';
 import '../constants/subscription_constants.dart';
-import '../controllers/scroll_signal.dart';
 
 /// ホーム画面のメインコンテンツウィジェット
 ///
@@ -22,33 +23,17 @@ import '../controllers/scroll_signal.dart';
 /// - 日記作成フローとの統合
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
-  final VoidCallback onRequestPermission;
-  final VoidCallback onSelectionLimitReached;
-  final VoidCallback onUsedPhotoSelected;
-  final Function(String photoId)? onUsedPhotoDetail;
-  final VoidCallback? onLockedPhotoTapped;
-  final VoidCallback onCameraPressed;
+  final TimelineCallbacks callbacks;
   final Function(String) onDiaryTap;
   final Future<void> Function()? onRefresh;
-  final VoidCallback? onDiaryCreated;
-  final VoidCallback? onLoadMorePhotos;
-  final VoidCallback? onPreloadMorePhotos;
   final ScrollSignal? scrollSignal;
 
   const HomeContentWidget({
     super.key,
     required this.photoController,
-    required this.onRequestPermission,
-    required this.onSelectionLimitReached,
-    required this.onUsedPhotoSelected,
-    this.onUsedPhotoDetail,
-    this.onLockedPhotoTapped,
-    required this.onCameraPressed,
+    this.callbacks = const TimelineCallbacks(),
     required this.onDiaryTap,
     this.onRefresh,
-    this.onDiaryCreated,
-    this.onLoadMorePhotos,
-    this.onPreloadMorePhotos,
     this.scrollSignal,
   });
 
@@ -161,15 +146,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           Expanded(
             child: TimelineFABIntegration(
               controller: widget.photoController,
-              onSelectionLimitReached: widget.onSelectionLimitReached,
-              onUsedPhotoSelected: widget.onUsedPhotoSelected,
-              onUsedPhotoDetail: widget.onUsedPhotoDetail,
-              onRequestPermission: widget.onRequestPermission,
-              onLockedPhotoTapped: widget.onLockedPhotoTapped,
-              onCameraPressed: widget.onCameraPressed,
-              onDiaryCreated: widget.onDiaryCreated,
-              onLoadMorePhotos: widget.onLoadMorePhotos,
-              onPreloadMorePhotos: widget.onPreloadMorePhotos,
+              callbacks: widget.callbacks,
               scrollSignal: widget.scrollSignal,
             ),
           ),

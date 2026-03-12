@@ -44,13 +44,13 @@ jobs:
           restore-keys: |
             build-runner-${{ runner.os }}-
 
+      - name: Create test .env file
+        run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
+
       - name: Generate code
         run: |
           dart run build_runner build --delete-conflicting-outputs
           dart format .
-
-      - name: Create test .env file
-        run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
 
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
@@ -76,6 +76,12 @@ jobs:
         with:
           path: coverage/lcov.info
           min_coverage: 48
+
+      - name: Report coverage summary
+        if: github.event_name == 'pull_request'
+        run: |
+          COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep 'lines' | grep -oP '[\d.]+%' || true)
+          echo "## Test Coverage: ${COVERAGE:-Unknown}" >> $GITHUB_STEP_SUMMARY
 
   build-android:
     name: Build Android
