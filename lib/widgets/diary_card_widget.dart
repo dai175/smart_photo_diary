@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
@@ -40,7 +41,8 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   @override
   void didUpdateWidget(DiaryCardWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.entry.id != widget.entry.id) {
+    if (oldWidget.entry.id != widget.entry.id ||
+        !listEquals(oldWidget.entry.photoIds, widget.entry.photoIds)) {
       _initAsyncState();
     }
   }

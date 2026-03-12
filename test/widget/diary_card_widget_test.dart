@@ -151,6 +151,35 @@ void main() {
       });
     });
 
+    group('didUpdateWidget', () {
+      testWidgets('photoIds変更時にgetAssetsByIdsが新しいIDで再呼び出しされる', (tester) async {
+        final entry1 = _createEntry(id: 'same-id', photoIds: ['photo-a']);
+        final entry2 = _createEntry(
+          id: 'same-id',
+          photoIds: ['photo-a', 'photo-b'],
+        );
+
+        await tester.pumpWidget(
+          _wrapWithApp(DiaryCardWidget(entry: entry1, onTap: () {})),
+        );
+        await tester.pumpAndSettle();
+
+        // 初回は ['photo-a'] で呼ばれる
+        verify(() => mockPhotoService.getAssetsByIds(['photo-a'])).called(1);
+
+        // 同じ id だが photoIds が変わった entry で再描画
+        await tester.pumpWidget(
+          _wrapWithApp(DiaryCardWidget(entry: entry2, onTap: () {})),
+        );
+        await tester.pumpAndSettle();
+
+        // 新しい photoIds で再呼び出しされることを検証
+        verify(
+          () => mockPhotoService.getAssetsByIds(['photo-a', 'photo-b']),
+        ).called(1);
+      });
+    });
+
     group('タグ', () {
       testWidgets('タグが正しく表示される', (tester) async {
         final entry = _createEntry(photoIds: [], tags: ['Morning', 'Happy']);
