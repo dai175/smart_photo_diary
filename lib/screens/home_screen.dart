@@ -25,6 +25,7 @@ import '../utils/upgrade_dialog_utils.dart';
 import '../widgets/home_content_widget.dart';
 import '../ui/components/custom_dialog.dart';
 import '../controllers/scroll_signal.dart';
+import '../models/timeline_callbacks.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/component_constants.dart';
 import '../models/diary_change.dart';
@@ -277,16 +278,18 @@ class _HomeScreenState extends State<HomeScreen>
       // ホーム画面（統合後のタイムライン表示）
       HomeContentWidget(
         photoController: _photoController,
-        onRequestPermission: _loadTodayPhotos,
-        onSelectionLimitReached: _showSelectionLimitModal,
-        onUsedPhotoSelected: _showUsedPhotoModal,
-        onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,
-        onLockedPhotoTapped: _showLockedPhotoModal,
+        callbacks: TimelineCallbacks(
+          onRequestPermission: _loadTodayPhotos,
+          onSelectionLimitReached: _showSelectionLimitModal,
+          onUsedPhotoSelected: _showUsedPhotoModal,
+          onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,
+          onLockedPhotoTapped: _showLockedPhotoModal,
+          onCameraPressed: _capturePhoto,
+          onDiaryCreated: _onDiaryCreated,
+          onLoadMorePhotos: _loadMorePhotos,
+          onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
+        ),
         onRefresh: _refreshHome,
-        onCameraPressed: _capturePhoto,
-        onDiaryCreated: _onDiaryCreated,
-        onLoadMorePhotos: _loadMorePhotos,
-        onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
         scrollSignal: _homeScrollSignal,
         onDiaryTap: _openDiaryDetail,
       ),

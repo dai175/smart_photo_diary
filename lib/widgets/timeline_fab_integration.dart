@@ -3,6 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../controllers/scroll_signal.dart';
 import '../core/service_registration.dart';
+import '../models/timeline_callbacks.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
 import '../services/interfaces/logging_service_interface.dart';
@@ -15,35 +16,8 @@ class TimelineFABIntegration extends StatelessWidget {
   /// 写真選択コントローラー
   final PhotoSelectionController controller;
 
-  /// 選択上限到達時のコールバック
-  final VoidCallback? onSelectionLimitReached;
-
-  /// 使用済み写真選択時のコールバック
-  final VoidCallback? onUsedPhotoSelected;
-
-  /// 使用済み写真詳細表示コールバック
-  final Function(String photoId)? onUsedPhotoDetail;
-
-  /// 権限要求コールバック
-  final VoidCallback? onRequestPermission;
-
-  /// 異なる日付選択時のコールバック
-  final VoidCallback? onDifferentDateSelected;
-
-  /// ロック写真タップ時のコールバック
-  final VoidCallback? onLockedPhotoTapped;
-
-  /// カメラ撮影コールバック
-  final VoidCallback? onCameraPressed;
-
-  /// 日記作成完了時のコールバック
-  final VoidCallback? onDiaryCreated;
-
-  /// 追加写真読み込み要求コールバック
-  final VoidCallback? onLoadMorePhotos;
-
-  /// バックグラウンド先読み要求コールバック
-  final VoidCallback? onPreloadMorePhotos;
+  /// タイムライン関連コールバック群
+  final TimelineCallbacks callbacks;
 
   /// 外部から先頭へスクロールさせるためのシグナル
   final ScrollSignal? scrollSignal;
@@ -51,16 +25,7 @@ class TimelineFABIntegration extends StatelessWidget {
   const TimelineFABIntegration({
     super.key,
     required this.controller,
-    this.onSelectionLimitReached,
-    this.onUsedPhotoSelected,
-    this.onUsedPhotoDetail,
-    this.onRequestPermission,
-    this.onDifferentDateSelected,
-    this.onLockedPhotoTapped,
-    this.onCameraPressed,
-    this.onDiaryCreated,
-    this.onLoadMorePhotos,
-    this.onPreloadMorePhotos,
+    this.callbacks = const TimelineCallbacks(),
     this.scrollSignal,
   });
 
@@ -70,15 +35,7 @@ class TimelineFABIntegration extends StatelessWidget {
       children: [
         TimelinePhotoWidget(
           controller: controller,
-          onSelectionLimitReached: onSelectionLimitReached,
-          onUsedPhotoSelected: onUsedPhotoSelected,
-          onUsedPhotoDetail: onUsedPhotoDetail,
-          onRequestPermission: onRequestPermission,
-          onDifferentDateSelected: onDifferentDateSelected,
-          onLockedPhotoTapped: onLockedPhotoTapped,
-          onCameraPressed: onCameraPressed,
-          onLoadMorePhotos: onLoadMorePhotos,
-          onPreloadMorePhotos: onPreloadMorePhotos,
+          callbacks: callbacks,
           showFAB: false, // FABは別途管理
           scrollSignal: scrollSignal,
         ),
@@ -87,7 +44,7 @@ class TimelineFABIntegration extends StatelessWidget {
           bottom: 16,
           child: SmartFABWidget(
             photoController: controller,
-            onCameraPressed: onCameraPressed,
+            onCameraPressed: callbacks.onCameraPressed,
             onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
             heroTag: null,
           ),
@@ -180,7 +137,7 @@ class TimelineFABIntegration extends StatelessWidget {
       if (created == true) {
         // 日記作成完了後に選択をクリアし、コールバックを実行
         controller.clearSelection();
-        onDiaryCreated?.call();
+        callbacks.onDiaryCreated?.call();
       }
     });
   }

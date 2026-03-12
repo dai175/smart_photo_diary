@@ -6,6 +6,7 @@ import '../../controllers/photo_selection_controller.dart';
 import '../../controllers/scroll_signal.dart';
 import '../../core/service_locator.dart';
 import '../../localization/localization_extensions.dart';
+import '../../models/timeline_callbacks.dart';
 import '../../models/timeline_photo_group.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/timeline_grouping_service.dart';
@@ -29,35 +30,11 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 写真選択コントローラー
   final PhotoSelectionController controller;
 
-  /// 選択上限到達時のコールバック
-  final VoidCallback? onSelectionLimitReached;
-
-  /// 使用済み写真選択時のコールバック
-  final VoidCallback? onUsedPhotoSelected;
-
-  /// 使用済み写真詳細表示コールバック
-  final Function(String photoId)? onUsedPhotoDetail;
-
-  /// 権限要求コールバック
-  final VoidCallback? onRequestPermission;
-
-  /// 異なる日付選択時のコールバック
-  final VoidCallback? onDifferentDateSelected;
-
-  /// ロック写真タップ時のコールバック
-  final VoidCallback? onLockedPhotoTapped;
-
-  /// カメラ撮影コールバック
-  final VoidCallback? onCameraPressed;
+  /// タイムライン関連コールバック群
+  final TimelineCallbacks callbacks;
 
   /// スマートFAB表示制御
   final bool showFAB;
-
-  /// 追加写真読み込み要求コールバック
-  final VoidCallback? onLoadMorePhotos;
-
-  /// バックグラウンド先読み要求コールバック
-  final VoidCallback? onPreloadMorePhotos;
 
   /// 外部から先頭へスクロールさせるためのシグナル
   final ScrollSignal? scrollSignal;
@@ -65,15 +42,7 @@ class TimelinePhotoWidget extends StatefulWidget {
   const TimelinePhotoWidget({
     super.key,
     required this.controller,
-    this.onSelectionLimitReached,
-    this.onUsedPhotoSelected,
-    this.onUsedPhotoDetail,
-    this.onRequestPermission,
-    this.onDifferentDateSelected,
-    this.onLockedPhotoTapped,
-    this.onCameraPressed,
-    this.onLoadMorePhotos,
-    this.onPreloadMorePhotos,
+    this.callbacks = const TimelineCallbacks(),
     this.showFAB = true,
     this.scrollSignal,
   });
@@ -114,8 +83,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     super.initState();
 
     // スクロールマネージャーのコールバック設定
-    _scrollManager.onLoadMorePhotos = widget.onLoadMorePhotos;
-    _scrollManager.onPreloadMorePhotos = widget.onPreloadMorePhotos;
+    _scrollManager.onLoadMorePhotos = widget.callbacks.onLoadMorePhotos;
+    _scrollManager.onPreloadMorePhotos = widget.callbacks.onPreloadMorePhotos;
     _scrollManager.onViewportPrefetch = _scheduleViewportPrefetch;
     _scrollManager.hasMorePhotos = () => widget.controller.hasMorePhotos;
     _scrollManager.photoCount = () => widget.controller.photoAssets.length;
@@ -160,8 +129,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.scrollSignal?.addListener(_scrollManager.scrollToTop);
     }
     // コールバックの更新
-    _scrollManager.onLoadMorePhotos = widget.onLoadMorePhotos;
-    _scrollManager.onPreloadMorePhotos = widget.onPreloadMorePhotos;
+    _scrollManager.onLoadMorePhotos = widget.callbacks.onLoadMorePhotos;
+    _scrollManager.onPreloadMorePhotos = widget.callbacks.onPreloadMorePhotos;
     _scrollManager.hasMorePhotos = () => widget.controller.hasMorePhotos;
     _scrollManager.photoCount = () => widget.controller.photoAssets.length;
     _scrollManager.totalItemCount = () => _totalItemCount();
@@ -250,7 +219,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       builder: (context, child) {
         if (!widget.controller.hasPermission) {
           return TimelinePermissionDeniedState(
-            onRequestPermission: widget.onRequestPermission,
+            onRequestPermission: widget.callbacks.onRequestPermission,
           );
         }
 
@@ -416,11 +385,11 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       mainIndex: mainIndex,
       selectedDate: selectedDate,
       cacheManager: _cacheManager,
-      onSelectionLimitReached: widget.onSelectionLimitReached,
-      onUsedPhotoSelected: widget.onUsedPhotoSelected,
-      onUsedPhotoDetail: widget.onUsedPhotoDetail,
-      onDifferentDateSelected: widget.onDifferentDateSelected,
-      onLockedPhotoTapped: widget.onLockedPhotoTapped,
+      onSelectionLimitReached: widget.callbacks.onSelectionLimitReached,
+      onUsedPhotoSelected: widget.callbacks.onUsedPhotoSelected,
+      onUsedPhotoDetail: widget.callbacks.onUsedPhotoDetail,
+      onDifferentDateSelected: widget.callbacks.onDifferentDateSelected,
+      onLockedPhotoTapped: widget.callbacks.onLockedPhotoTapped,
     );
   }
 }
