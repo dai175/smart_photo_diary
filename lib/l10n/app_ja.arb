@@ -163,6 +163,10 @@
   "@photoUsedPhotoMessage": {
     "description": "使用済み写真を選択した際のメッセージ"
   },
+  "photoDifferentDateMessage": "同じ日付の写真のみ選択できます",
+  "@photoDifferentDateMessage": {
+    "description": "異なる日付の写真を選択した際のメッセージ"
+  },
   "photoUsedLabel": "使用済み",
   "@photoUsedLabel": {
     "description": "使用済み写真のラベル"

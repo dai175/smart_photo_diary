@@ -283,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen>
           onSelectionLimitReached: _showSelectionLimitModal,
           onUsedPhotoSelected: _showUsedPhotoModal,
           onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,
+          onDifferentDateSelected: _showDifferentDateModal,
           onLockedPhotoTapped: _showLockedPhotoModal,
           onCameraPressed: _capturePhoto,
           onDiaryCreated: _onDiaryCreated,

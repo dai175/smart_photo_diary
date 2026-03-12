@@ -163,6 +163,10 @@
   "@photoUsedPhotoMessage": {
     "description": "Message shown when a used photo is selected"
   },
+  "photoDifferentDateMessage": "You can only select photos from the same date",
+  "@photoDifferentDateMessage": {
+    "description": "Message shown when a photo from a different date is selected"
+  },
   "photoUsedLabel": "Used",
   "@photoUsedLabel": {
     "description": "Label displayed on photos already used in a diary"
