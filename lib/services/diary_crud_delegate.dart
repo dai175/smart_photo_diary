@@ -257,9 +257,9 @@ class DiaryCrudDelegate {
     required String title,
     required String content,
     required List<AssetEntity> photos,
-  }) async {
+  }) {
     final List<String> photoIds = photos.map((photo) => photo.id).toList();
-    return await saveDiaryEntry(
+    return saveDiaryEntry(
       date: date,
       title: title,
       content: content,

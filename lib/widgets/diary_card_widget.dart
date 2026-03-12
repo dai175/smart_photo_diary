@@ -27,10 +27,13 @@ class DiaryCardWidget extends StatefulWidget {
 
 class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   late Future<List<AssetEntity>> _photoAssetsFuture;
+  late final IPhotoCacheService _photoCacheService;
+  final _thumbnailFutures = <String, Future<Result<Uint8List>>>{};
 
   @override
   void initState() {
     super.initState();
+    _photoCacheService = serviceLocator.get<IPhotoCacheService>();
     _initAsyncState();
   }
 
@@ -43,6 +46,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   }
 
   void _initAsyncState() {
+    _thumbnailFutures.clear();
     _photoAssetsFuture = _fetchPhotoAssets();
   }
 
@@ -181,15 +185,18 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   }
 
   Widget _buildThumbnail(AssetEntity asset) {
-    final cacheService = serviceLocator.get<IPhotoCacheService>();
     final size = AppConstants.diaryThumbnailSize.toInt();
-    return FutureBuilder<Result<Uint8List>>(
-      future: cacheService.getThumbnail(
+    final future = _thumbnailFutures.putIfAbsent(
+      asset.id,
+      () => _photoCacheService.getThumbnail(
         asset,
         width: size,
         height: size,
         quality: AppConstants.diaryThumbnailQuality,
       ),
+    );
+    return FutureBuilder<Result<Uint8List>>(
+      future: future,
       builder: (context, thumbnailSnapshot) {
         if (thumbnailSnapshot.hasError ||
             (thumbnailSnapshot.hasData && thumbnailSnapshot.data!.isFailure)) {
