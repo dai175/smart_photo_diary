@@ -69,11 +69,11 @@ lib/
 ## 技術スタック
 
 ### Core Framework
-- **Flutter 3.32.0**: FVM管理、日本語・英語ロケール対応
-- **Dart 3.8+**: Records、Patterns、sealed classesを活用
+- **Flutter 3.41.4**: FVM管理、日本語・英語ロケール対応
+- **Dart 3.11+**: Records、Patterns、sealed classesを活用
 
 ### データストレージ
-- **Hive & hive_flutter**: 高速NoSQLローカルデータベース
+- **Hive CE & hive_ce_flutter**: 高速NoSQLローカルデータベース
 - **SharedPreferences**: アプリ設定の永続化
 
 ### AI・API連携
@@ -98,7 +98,7 @@ lib/
 ## 開発環境構築
 
 ### 前提条件
-- Flutter SDK (3.32.0)
+- Flutter SDK (3.41.4)
 - FVM (Flutter Version Management) - 推奨
 - Xcode（iOSビルド用）
 - Android Studio（Androidビルド用）
