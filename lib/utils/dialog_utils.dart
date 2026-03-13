@@ -156,49 +156,51 @@ class DialogUtils {
                 AppSpacing.lg,
                 AppSpacing.sm,
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(options.length, (index) {
-                  final option = options[index];
-                  final isSelected = option == selectedValue;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: index == options.length - 1 ? 0 : AppSpacing.xs,
-                    ),
-                    child: RadioListTile<T>(
-                      title: Text(
-                        getLabel(option),
-                        style: theme.textTheme.bodyLarge,
+              content: RadioGroup<T>(
+                groupValue: selectedValue,
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  Navigator.pop(context, value);
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(options.length, (index) {
+                    final option = options[index];
+                    final isSelected = option == selectedValue;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index == options.length - 1 ? 0 : AppSpacing.xs,
                       ),
-                      value: option,
-                      groupValue: selectedValue,
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xs,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadiusSm,
+                      child: RadioListTile<T>(
+                        title: Text(
+                          getLabel(option),
+                          style: theme.textTheme.bodyLarge,
                         ),
+                        value: option,
+                        dense: true,
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.borderRadiusSm,
+                          ),
+                        ),
+                        tileColor: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: _radioTileOpacity),
+                        selectedTileColor: theme.colorScheme.primary.withValues(
+                          alpha: _radioTileOpacity,
+                        ),
+                        selected: isSelected,
                       ),
-                      tileColor: theme.colorScheme.surfaceContainerHighest
-                          .withValues(alpha: _radioTileOpacity),
-                      selectedTileColor: theme.colorScheme.primary.withValues(
-                        alpha: _radioTileOpacity,
-                      ),
-                      selected: isSelected,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedValue = value;
-                        });
-                        Navigator.pop(context, value);
-                      },
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
               actions: [
                 CustomDialogAction(

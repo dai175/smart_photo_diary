@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.8.8+1
 
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.11.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -50,7 +50,7 @@ dependencies:
   shared_preferences: ^2.3.2
   package_info_plus: ^9.0.0
   file_picker: ^10.2.0
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.2
   image_picker: ^1.0.7
   in_app_purchase: ^3.2.3
   url_launcher: ^6.1.14
@@ -74,8 +74,8 @@ dev_dependencies:
   # rules and activating additional ones.
   lints: ^6.1.0
   mocktail: ^1.0.4
-  build_runner: ^2.4.15
-  hive_ce_generator: ^1.8.1
+  build_runner: ^2.12.2
+  hive_ce_generator: ^1.11.1
   flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
