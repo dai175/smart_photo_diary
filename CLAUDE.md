@@ -9,7 +9,7 @@ Smart Photo Diary is a Flutter mobile application that generates diary entries f
 ## Development Commands
 
 ```bash
-# Setup and dependencies (using FVM - Flutter 3.32.0)
+# Setup and dependencies (using FVM - Flutter 3.41.4)
 fvm flutter pub get
 fvm dart run build_runner build
 
