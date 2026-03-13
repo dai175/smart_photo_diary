@@ -4,9 +4,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
 import 'services/interfaces/storage_service_interface.dart';
-import 'models/diary_entry.dart';
-import 'models/subscription_status.dart';
-import 'models/writing_prompt.dart';
+import 'hive_registrar.g.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'core/service_locator.dart';
@@ -26,11 +24,7 @@ Future<void> main() async {
   await Hive.initFlutter(appDocumentDir.path);
 
   // アダプターの登録
-  Hive.registerAdapter(DiaryEntryAdapter());
-  Hive.registerAdapter(SubscriptionStatusAdapter());
-  Hive.registerAdapter(PromptCategoryAdapter());
-  Hive.registerAdapter(WritingPromptAdapter());
-  Hive.registerAdapter(PromptUsageHistoryAdapter());
+  Hive.registerAdapters();
 
   // アプリケーション初期化開始
   final appStartTime = DateTime.now();

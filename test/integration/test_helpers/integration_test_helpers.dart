@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:smart_photo_diary/hive_registrar.g.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
@@ -73,7 +74,7 @@ class IntegrationTestHelpers {
 
     // Register adapters if not already registered
     if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(DiaryEntryAdapter());
+      Hive.registerAdapters();
     }
   }
 
