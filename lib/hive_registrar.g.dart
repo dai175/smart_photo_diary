@@ -2,12 +2,22 @@
 // Do not modify
 // Check in to version control
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 
 extension HiveRegistrar on HiveInterface {
+  void registerAdapters() {
+    registerAdapter(DiaryEntryAdapter());
+    registerAdapter(PromptCategoryAdapter());
+    registerAdapter(PromptUsageHistoryAdapter());
+    registerAdapter(SubscriptionStatusAdapter());
+    registerAdapter(WritingPromptAdapter());
+  }
+}
+
+extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(DiaryEntryAdapter());
     registerAdapter(PromptCategoryAdapter());

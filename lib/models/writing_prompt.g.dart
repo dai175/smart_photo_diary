@@ -8,7 +8,7 @@ part of 'writing_prompt.dart';
 
 class WritingPromptAdapter extends TypeAdapter<WritingPrompt> {
   @override
-  final int typeId = 4;
+  final typeId = 4;
 
   @override
   WritingPrompt read(BinaryReader reader) {
@@ -78,7 +78,7 @@ class WritingPromptAdapter extends TypeAdapter<WritingPrompt> {
 
 class PromptUsageHistoryAdapter extends TypeAdapter<PromptUsageHistory> {
   @override
-  final int typeId = 5;
+  final typeId = 5;
 
   @override
   PromptUsageHistory read(BinaryReader reader) {
@@ -121,7 +121,7 @@ class PromptUsageHistoryAdapter extends TypeAdapter<PromptUsageHistory> {
 
 class PromptCategoryAdapter extends TypeAdapter<PromptCategory> {
   @override
-  final int typeId = 3;
+  final typeId = 3;
 
   @override
   PromptCategory read(BinaryReader reader) {
