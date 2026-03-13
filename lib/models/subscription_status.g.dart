@@ -17,14 +17,16 @@ class SubscriptionStatusAdapter extends TypeAdapter<SubscriptionStatus> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return SubscriptionStatus(
-      planId: fields[0] as String,
-      isActive: fields[1] as bool,
+      planId: fields[0] == null
+          ? SubscriptionConstants.basicPlanId
+          : fields[0] as String,
+      isActive: fields[1] == null ? true : fields[1] as bool,
       startDate: fields[2] as DateTime?,
       expiryDate: fields[3] as DateTime?,
-      monthlyUsageCount: fields[4] as int,
+      monthlyUsageCount: fields[4] == null ? 0 : (fields[4] as num).toInt(),
       usageMonth: fields[5] as String?,
       lastResetDate: fields[6] as DateTime?,
-      autoRenewal: fields[7] as bool,
+      autoRenewal: fields[7] == null ? false : fields[7] as bool,
       transactionId: fields[8] as String?,
       lastPurchaseDate: fields[9] as DateTime?,
       cancelDate: fields[10] as DateTime?,

@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import '../models/diary_entry.dart';
 
 /// 日記エントリーのインメモリインデックス管理

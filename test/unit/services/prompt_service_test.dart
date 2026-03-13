@@ -5,7 +5,7 @@
 
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/prompt_service.dart';
 import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';

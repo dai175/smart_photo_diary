@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'plans/plan.dart';
 import 'plans/plan_factory.dart';
 import 'plans/basic_plan.dart';
