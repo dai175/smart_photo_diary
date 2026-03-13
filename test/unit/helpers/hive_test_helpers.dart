@@ -1,6 +1,7 @@
 import 'package:hive_ce/hive_ce.dart';
-import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/hive_registrar.g.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import 'dart:io';
@@ -20,15 +21,7 @@ class HiveTestHelpers {
     Hive.init(tempDir.path);
 
     // TypeAdapterを登録
-    if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(DiaryEntryAdapter());
-    }
-    if (!Hive.isAdapterRegistered(2)) {
-      Hive.registerAdapter(SubscriptionStatusAdapter());
-    }
-    if (!Hive.isAdapterRegistered(5)) {
-      Hive.registerAdapter(PromptUsageHistoryAdapter());
-    }
+    Hive.registerAdapters();
 
     _isInitialized = true;
   }
