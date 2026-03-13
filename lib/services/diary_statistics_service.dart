@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import '../models/diary_entry.dart';
 import 'interfaces/diary_statistics_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';

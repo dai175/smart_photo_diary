@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'mock_platform_channels.dart';

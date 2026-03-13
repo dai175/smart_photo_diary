@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_change.dart';

@@ -3,7 +3,7 @@
 // プロンプト使用履歴のCRUD操作を担当するサービス
 // Hive Boxを使用したローカル永続化
 
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
 import '../services/interfaces/logging_service_interface.dart';

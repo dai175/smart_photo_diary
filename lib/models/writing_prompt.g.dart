@@ -20,12 +20,12 @@ class WritingPromptAdapter extends TypeAdapter<WritingPrompt> {
       id: fields[0] as String,
       text: fields[1] as String,
       category: fields[2] as PromptCategory,
-      isPremiumOnly: fields[3] as bool,
-      tags: (fields[4] as List).cast<String>(),
+      isPremiumOnly: fields[3] == null ? false : fields[3] as bool,
+      tags: fields[4] == null ? const [] : (fields[4] as List).cast<String>(),
       description: fields[5] as String?,
-      priority: fields[6] as int,
+      priority: fields[6] == null ? 0 : (fields[6] as num).toInt(),
       createdAt: fields[7] as DateTime?,
-      isActive: fields[8] as bool,
+      isActive: fields[8] == null ? true : fields[8] as bool,
       localizedTexts: (fields[9] as Map?)?.cast<String, String>(),
       localizedDescriptions: (fields[10] as Map?)?.cast<String, String>(),
       localizedTags: (fields[11] as Map?)?.map(
@@ -90,7 +90,7 @@ class PromptUsageHistoryAdapter extends TypeAdapter<PromptUsageHistory> {
       promptId: fields[0] as String,
       usedAt: fields[1] as DateTime?,
       diaryEntryId: fields[2] as String?,
-      wasHelpful: fields[3] as bool,
+      wasHelpful: fields[3] == null ? true : fields[3] as bool,
     );
   }
 
@@ -154,31 +154,22 @@ class PromptCategoryAdapter extends TypeAdapter<PromptCategory> {
     switch (obj) {
       case PromptCategory.emotion:
         writer.writeByte(0);
-        break;
       case PromptCategory.emotionDepth:
         writer.writeByte(1);
-        break;
       case PromptCategory.sensoryEmotion:
         writer.writeByte(2);
-        break;
       case PromptCategory.emotionGrowth:
         writer.writeByte(3);
-        break;
       case PromptCategory.emotionConnection:
         writer.writeByte(4);
-        break;
       case PromptCategory.emotionDiscovery:
         writer.writeByte(5);
-        break;
       case PromptCategory.emotionFantasy:
         writer.writeByte(6);
-        break;
       case PromptCategory.emotionHealing:
         writer.writeByte(7);
-        break;
       case PromptCategory.emotionEnergy:
         writer.writeByte(8);
-        break;
     }
   }
 

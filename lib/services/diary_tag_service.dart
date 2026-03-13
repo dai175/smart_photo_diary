@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import 'interfaces/diary_tag_service_interface.dart';
