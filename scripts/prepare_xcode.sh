@@ -19,11 +19,23 @@ if [ -z "$GEMINI_API_KEY" ]; then
     exit 1
 fi
 
+# jqコマンドの確認
+if ! command -v jq &>/dev/null; then
+    echo "❌ jqがインストールされていません。brew install jq でインストールしてください"
+    exit 1
+fi
+
+# dart_defines.jsonを安全に一時生成（--dart-define-from-fileで使用）
+dart_defines_file="$(mktemp "${TMPDIR:-/tmp}/dart_defines.XXXXXX.json")"
+chmod 600 "$dart_defines_file"
+trap 'rm -f "$dart_defines_file"' EXIT
+jq -n --arg key "$GEMINI_API_KEY" '{GEMINI_API_KEY: $key}' > "$dart_defines_file"
+
 echo "🔧 Xcode準備中（APIキー設定のみ）..."
 
-# APIキー付きで基本準備（高速）
+# APIキーをファイル経由で渡す
 fvm flutter build ios \
-    --dart-define=GEMINI_API_KEY="$GEMINI_API_KEY" \
+    --dart-define-from-file="$dart_defines_file" \
     --release
 
 if [ $? -eq 0 ]; then

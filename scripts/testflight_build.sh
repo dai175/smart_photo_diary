@@ -5,6 +5,12 @@
 
 echo "🚀 TestFlight用ビルド開始..."
 
+# jqコマンドの確認
+if ! command -v jq &>/dev/null; then
+    echo "❌ jqがインストールされていません。brew install jq でインストールしてください"
+    exit 1
+fi
+
 # .envファイルの存在確認
 if [ ! -f ".env" ]; then
     echo "❌ .envファイルが見つかりません"
@@ -19,11 +25,17 @@ if [ -z "$GEMINI_API_KEY" ]; then
     exit 1
 fi
 
+# dart_defines.jsonを安全に一時生成（--dart-define-from-fileで使用）
+dart_defines_file="$(mktemp "${TMPDIR:-/tmp}/dart_defines.XXXXXX.json")"
+chmod 600 "$dart_defines_file"
+trap 'rm -f "$dart_defines_file"' EXIT
+jq -n --arg key "$GEMINI_API_KEY" '{GEMINI_API_KEY: $key}' > "$dart_defines_file"
+
 echo "📱 iOS リリースビルド実行中..."
 
-# リリースビルド（APIキー指定）
+# リリースビルド（APIキーをファイル経由で渡す）
 fvm flutter build ipa \
-    --dart-define=GEMINI_API_KEY="$GEMINI_API_KEY" \
+    --dart-define-from-file="$dart_defines_file" \
     --release
 
 if [ $? -eq 0 ]; then
@@ -38,10 +50,10 @@ if [ $? -eq 0 ]; then
     echo "3. Import → build/ios/ipa/smart_photo_diary.ipa"
     echo "4. Distribute App → App Store Connect → Upload"
     echo ""
-    echo "【方法2: コマンドライン】"
-    echo "xcrun altool --upload-app -f build/ios/ipa/smart_photo_diary.ipa \\"
-    echo "  --type ios -u your-apple-id@example.com \\"
-    echo "  --password your-app-specific-password"
+    echo "【方法2: Transporter.app】"
+    echo "1. Mac App Store から Transporter をダウンロード"
+    echo "2. .ipa ファイルをドラッグ&ドロップ"
+    echo "3. 配信ボタンをクリック"
     echo ""
     echo "💡 .ipaファイルが生成済みなので、手動アーカイブは不要です"
 else
