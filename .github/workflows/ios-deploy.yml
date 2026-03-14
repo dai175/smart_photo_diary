@@ -1,12 +1,8 @@
 name: iOS Deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Git tag to deploy (e.g., v1.1.0)'
-        required: true
-        type: string
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -23,29 +19,23 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - name: Checkout specific tag
+      - name: Checkout release tag
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.inputs.tag }}
+          ref: ${{ github.event.release.tag_name }}
 
-      - name: Verify CI passed for tag
+      - name: Verify CI passed
         env:
           GH_TOKEN: ${{ github.token }}
-          DEPLOY_TAG: ${{ github.event.inputs.tag }}
         run: |
-          echo "Checking CI status for tag: $DEPLOY_TAG"
-          if ! git tag --points-at HEAD | grep -Fxq "$DEPLOY_TAG"; then
-            echo "::error::Tag $DEPLOY_TAG does not point to the checked-out commit"
-            exit 1
-          fi
           COMMIT_SHA=$(git rev-parse HEAD)
           echo "DEPLOY_SHA=$COMMIT_SHA" >> $GITHUB_ENV
           CI_STATUS=$(gh run list --commit "$COMMIT_SHA" --workflow ci.yml --event push --branch main --status completed --json conclusion --jq '.[0].conclusion // "not_found"' 2>/dev/null || echo "not_found")
           if [ "$CI_STATUS" != "success" ]; then
-            echo "::error::CI has not passed for this tag (status: ${CI_STATUS}). Please ensure CI passes before deploying."
+            echo "::error::CI has not passed for this commit (status: ${CI_STATUS}). Please ensure CI passes before deploying."
             exit 1
           fi
-          echo "CI passed for tag $DEPLOY_TAG (commit: $COMMIT_SHA)"
+          echo "CI passed for commit $COMMIT_SHA"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -152,14 +142,17 @@ jobs:
 
       - name: Build iOS IPA
         env:
-          DEPLOY_TAG: ${{ github.event.inputs.tag }}
+          DEPLOY_TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION_NAME="$DEPLOY_TAG"
-          VERSION_NAME=${VERSION_NAME#v}
-          echo "Deploying version: $VERSION_NAME from tag $DEPLOY_TAG"
+          VERSION_NAME="${DEPLOY_TAG#v}"
+          BUILD_NUMBER=$(gh run list --workflow release.yml --commit "$DEPLOY_SHA" --status completed --json runNumber --jq '.[0].runNumber // empty' 2>/dev/null || true)
+          if [ -z "$BUILD_NUMBER" ]; then
+            echo "::warning::Could not retrieve release build number, using current run number"
+            BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          fi
 
-          BUILD_NUMBER=$GITHUB_RUN_NUMBER
-          echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
+          echo "Deploying version: $VERSION_NAME from tag $DEPLOY_TAG (build #$BUILD_NUMBER)"
 
           flutter build ipa --release \
             --build-name=$VERSION_NAME \
@@ -208,7 +201,7 @@ jobs:
 
       - name: Create release summary
         env:
-          DEPLOY_TAG: ${{ github.event.inputs.tag }}
+          DEPLOY_TAG: ${{ github.event.release.tag_name }}
         run: |
           echo "## iOS Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
