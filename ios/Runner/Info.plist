@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -22,7 +24,52 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram</string>
+		<string>instagram-stories</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Smart Photo Diaryでは、直接写真を撮影して日記に追加できます。撮影した写真は自動的に選択され、すぐに日記作成を開始できます。</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>このアプリは位置情報機能を使用しませんが、使用しているライブラリが位置情報APIを参照している可能性があります</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>このアプリは位置情報機能を使用しませんが、使用しているライブラリが位置情報APIを参照している可能性があります</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>写真ライブラリに新しい写真を保存します</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>写真ライブラリにアクセスして、日記作成に使用する写真を取得します</string>
+	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -33,32 +80,6 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>写真ライブラリにアクセスして、日記作成に使用する写真を取得します</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>写真ライブラリに新しい写真を保存します</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Smart Photo Diaryでは、直接写真を撮影して日記に追加できます。撮影した写真は自動的に選択され、すぐに日記作成を開始できます。</string>
-	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
-	<true/>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>このアプリは位置情報機能を使用しませんが、使用しているライブラリが位置情報APIを参照している可能性があります</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>このアプリは位置情報機能を使用しませんが、使用しているライブラリが位置情報APIを参照している可能性があります</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-	</dict>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>instagram</string>
-		<string>instagram-stories</string>
 	</array>
 </dict>
 </plist>
