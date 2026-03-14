@@ -18,7 +18,7 @@ abstract class PremiumPlan extends Plan {
   bool get isPremium => true;
 
   @override
-  bool get hasWritingPrompts => true;
+  bool get hasAllWritingPrompts => true;
 
   @override
   bool get hasAdvancedFilters => true;

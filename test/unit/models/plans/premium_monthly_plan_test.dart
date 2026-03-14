@@ -63,8 +63,8 @@ void main() {
         expect(plan.isPremium, true);
       });
 
-      test('hasWritingPromptsがtrueを返す', () {
-        expect(plan.hasWritingPrompts, true);
+      test('hasAllWritingPromptsがtrueを返す', () {
+        expect(plan.hasAllWritingPrompts, true);
       });
 
       test('hasAdvancedFiltersがtrueを返す', () {

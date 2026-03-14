@@ -101,7 +101,7 @@ void main() {
           expect(classPlan.price, isA<int>());
           expect(classPlan.monthlyAiGenerationLimit, isA<int>());
           expect(classPlan.isPremium, isA<bool>());
-          expect(classPlan.hasWritingPrompts, isA<bool>());
+          expect(classPlan.hasAllWritingPrompts, isA<bool>());
           expect(classPlan.hasAdvancedFilters, isA<bool>());
           expect(classPlan.hasAdvancedAnalytics, isA<bool>());
           expect(classPlan.hasPrioritySupport, isA<bool>());
@@ -159,13 +159,13 @@ void main() {
         final premiumPlan = premiumStatus.currentPlanClass;
 
         // Basicプランの機能制限
-        expect(basicPlan.hasWritingPrompts, false);
+        expect(basicPlan.hasAllWritingPrompts, false);
         expect(basicPlan.hasAdvancedFilters, false);
         expect(basicPlan.hasAdvancedAnalytics, false);
         expect(basicPlan.hasPrioritySupport, false);
 
         // Premiumプランのフル機能
-        expect(premiumPlan.hasWritingPrompts, true);
+        expect(premiumPlan.hasAllWritingPrompts, true);
         expect(premiumPlan.hasAdvancedFilters, true);
         expect(premiumPlan.hasAdvancedAnalytics, true);
         expect(premiumPlan.hasPrioritySupport, true);

@@ -224,7 +224,10 @@ void main() {
         final supportResult = await mockService.canAccessPrioritySupport();
 
         expect(premiumResult.value, isFalse);
-        expect(promptsResult.value, isFalse); // Basic does not have prompts
+        expect(
+          promptsResult.value,
+          isTrue,
+        ); // All plans can access writing prompts
         expect(filtersResult.value, isFalse);
         expect(analyticsResult.value, isFalse);
         expect(supportResult.value, isFalse);

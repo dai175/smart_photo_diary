@@ -195,9 +195,9 @@ class SubscriptionStatus extends HiveObject {
     return isValid && currentPlanClass.isPremium;
   }
 
-  /// ライティングプロンプトにアクセスできるかどうか
-  bool get canAccessWritingPrompts {
-    return canAccessPremiumFeatures && currentPlanClass.hasWritingPrompts;
+  /// 全ライティングプロンプトにアクセスできるかどうか
+  bool get canAccessAllWritingPrompts {
+    return canAccessPremiumFeatures && currentPlanClass.hasAllWritingPrompts;
   }
 
   /// 高度なフィルタにアクセスできるかどうか

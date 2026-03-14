@@ -57,8 +57,8 @@ abstract class Plan {
   /// プレミアムプランかどうか
   bool get isPremium;
 
-  /// ライティングプロンプト機能アクセス権
-  bool get hasWritingPrompts;
+  /// 全ライティングプロンプトへのアクセス権
+  bool get hasAllWritingPrompts;
 
   /// 高度なフィルタ機能アクセス権
   bool get hasAdvancedFilters;

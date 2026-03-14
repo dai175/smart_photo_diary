@@ -453,13 +453,9 @@ class MockSubscriptionService implements ISubscriptionService {
       );
     }
 
-    final statusResult = await getCurrentStatus();
-    if (statusResult.isFailure) {
-      return Failure(statusResult.error);
-    }
-
-    final status = statusResult.value;
-    return Success(status.canAccessWritingPrompts);
+    // Writing prompts are accessible for all plans (Basic gets limited set,
+    // Premium gets full set), matching FeatureAccessService behavior.
+    return const Success(true);
   }
 
   @override

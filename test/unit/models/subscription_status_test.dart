@@ -259,7 +259,7 @@ void main() {
         final status = SubscriptionStatus.createDefault();
 
         expect(status.canAccessPremiumFeatures, isFalse);
-        expect(status.canAccessWritingPrompts, isFalse);
+        expect(status.canAccessAllWritingPrompts, isFalse);
         expect(status.canAccessAdvancedFilters, isFalse);
         expect(status.canAccessAdvancedAnalytics, isFalse);
       });
@@ -271,7 +271,7 @@ void main() {
         );
 
         expect(status.canAccessPremiumFeatures, isTrue);
-        expect(status.canAccessWritingPrompts, isTrue);
+        expect(status.canAccessAllWritingPrompts, isTrue);
         expect(status.canAccessAdvancedFilters, isTrue);
         expect(status.canAccessAdvancedAnalytics, isTrue);
       });
@@ -285,7 +285,7 @@ void main() {
         );
 
         expect(status.canAccessPremiumFeatures, isFalse);
-        expect(status.canAccessWritingPrompts, isFalse);
+        expect(status.canAccessAllWritingPrompts, isFalse);
         expect(status.canAccessAdvancedFilters, isFalse);
         expect(status.canAccessAdvancedAnalytics, isFalse);
       });
