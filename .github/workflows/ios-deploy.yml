@@ -7,60 +7,13 @@ on:
         description: 'Git tag to deploy (e.g., v1.1.0)'
         required: true
         type: string
-      skip_tests:
-        description: 'Skip tests (use when already passed on this tag)'
-        required: false
-        default: false
-        type: boolean
 
 env:
   FLUTTER_VERSION: '3.41.4'
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.skip_tests != 'true' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-          
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Cache build_runner
-        uses: actions/cache@v5
-        with:
-          path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
-          restore-keys: |
-            build-runner-${{ runner.os }}-
-
-      - name: Generate code
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          dart format .
-
-      - name: Create test .env file
-        run: echo "GEMINI_API_KEY=test_key_for_ci" > .env
-        
-      - name: Run analyzer
-        run: flutter analyze --fatal-warnings --fatal-infos
-        
-      - name: Run tests
-        run: flutter test --reporter=expanded
-
   ios-deploy:
     name: Deploy to App Store
-    needs: test
-    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     runs-on: macos-15
     environment: production
     timeout-minutes: 60
