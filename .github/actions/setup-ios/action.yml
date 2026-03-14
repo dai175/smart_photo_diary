@@ -26,7 +26,10 @@ runs:
         echo "Installing iOS platform if missing..."
         if ! xcrun simctl list runtimes | grep -q "iOS"; then
           echo "iOS platform not found, downloading..."
-          xcodebuild -downloadPlatform iOS
+          if ! xcodebuild -downloadPlatform iOS; then
+            echo "::error::Failed to download iOS platform"
+            exit 1
+          fi
         else
           echo "iOS platform already available"
         fi
