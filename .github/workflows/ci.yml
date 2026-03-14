@@ -22,9 +22,6 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  FLUTTER_VERSION: '3.41.4'
-
 jobs:
   quality-check:
     name: Code Quality & Tests
@@ -38,7 +35,6 @@ jobs:
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           setup-java: 'true'
 
       - name: Verify formatting
@@ -105,7 +101,6 @@ jobs:
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           setup-java: 'true'
 
       - name: Build release AAB
@@ -133,8 +128,6 @@ jobs:
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Setup iOS
         uses: ./.github/actions/setup-ios

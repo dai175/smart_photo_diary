@@ -2,9 +2,6 @@ name: Setup Flutter
 description: Common Flutter setup with caching, code generation, and .env creation
 
 inputs:
-  flutter-version:
-    description: Flutter SDK version
-    required: true
   setup-java:
     description: Whether to setup Java (for Android builds)
     default: 'false'
@@ -15,6 +12,14 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Read Flutter version from .fvmrc
+      id: fvm
+      shell: bash
+      run: |
+        FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)
+        echo "flutter_version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
+        echo "Using Flutter $FLUTTER_VERSION (from .fvmrc)"
+
     - name: Setup Java
       if: inputs.setup-java == 'true'
       uses: actions/setup-java@v5
@@ -25,9 +30,9 @@ runs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: ${{ inputs.flutter-version }}
+        flutter-version: ${{ steps.fvm.outputs.flutter_version }}
         channel: 'stable'
-        cache: false
+        cache: true
 
     - name: Cache pub packages
       uses: actions/cache@v5
