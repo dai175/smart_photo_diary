@@ -24,7 +24,12 @@ runs:
         echo "Available platforms:"
         xcrun simctl list runtimes
         echo "Installing iOS platform if missing..."
-        xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
+        if ! xcrun simctl list runtimes | grep -q "iOS"; then
+          echo "iOS platform not found, downloading..."
+          xcodebuild -downloadPlatform iOS
+        else
+          echo "iOS platform already available"
+        fi
 
     - name: Cache CocoaPods
       uses: actions/cache@v5
