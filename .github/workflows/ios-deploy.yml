@@ -24,11 +24,18 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      - name: Set deploy info
+      - name: Verify CI passed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           COMMIT_SHA=$(git rev-parse HEAD)
           echo "DEPLOY_SHA=$COMMIT_SHA" >> $GITHUB_ENV
-          echo "Deploying tag: ${{ github.event.release.tag_name }} (commit: $COMMIT_SHA)"
+          CI_STATUS=$(gh run list --commit "$COMMIT_SHA" --workflow ci.yml --event push --branch main --status completed --json conclusion --jq '.[0].conclusion // "not_found"' 2>/dev/null || echo "not_found")
+          if [ "$CI_STATUS" != "success" ]; then
+            echo "::error::CI has not passed for this commit (status: ${CI_STATUS}). Please ensure CI passes before deploying."
+            exit 1
+          fi
+          echo "CI passed for commit $COMMIT_SHA"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -136,9 +143,14 @@ jobs:
       - name: Build iOS IPA
         env:
           DEPLOY_TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION_NAME="${DEPLOY_TAG#v}"
-          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          BUILD_NUMBER=$(gh run list --workflow release.yml --commit "$DEPLOY_SHA" --status completed --json runNumber --jq '.[0].runNumber // empty' 2>/dev/null || true)
+          if [ -z "$BUILD_NUMBER" ]; then
+            echo "::warning::Could not retrieve release build number, using current run number"
+            BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          fi
 
           echo "Deploying version: $VERSION_NAME from tag $DEPLOY_TAG (build #$BUILD_NUMBER)"
 
