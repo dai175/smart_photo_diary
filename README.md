@@ -93,7 +93,6 @@ lib/
 - **Build Runner & Hive Generator**: コード生成自動化
 - **Mocktail**: モック化テストフレームワーク
 - **GitHub Actions**: CI/CDパイプライン
-- **Codecov**: テストカバレッジ追跡
 
 ## 開発環境構築
 
@@ -155,9 +154,9 @@ fvm dart format .
 ## CI/CD
 
 ### GitHub Actions ワークフロー
-- **ci.yml**: コード品質・テスト自動実行（push + PR + 手動実行時）、Codecovカバレッジアップロード
+- **ci.yml**: コード品質・テスト・ビルド検証自動実行（push + PR + 手動実行時）
 - **release.yml**: GitHub Releases自動作成（バージョンタグ時）
-- **ios-deploy.yml**: App Store/TestFlight手動デプロイ
+- **ios-deploy.yml**: App Store/TestFlight手動デプロイ（fastlane経由）
 
 ## ビルド・デプロイ
 

@@ -78,9 +78,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
-        
       - name: Verify Xcode and install iOS platform if needed
         run: |
           echo "Xcode version:"
@@ -222,29 +219,31 @@ jobs:
           echo "=== Generated IPA files ==="
           ls -la build/ios/ipa/
           
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ios
+
       - name: Upload to TestFlight
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
-          echo "📱 Uploading to TestFlight..."
-          echo "ℹ️  Note: For App Store submission, manually submit from App Store Connect after TestFlight processing"
-          echo ""
-          
-          # Find the actual IPA file (should be the only .ipa file in the directory)
-          IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
-          echo "Found IPA file: $IPA_FILE"
-          
-          if [ -z "$IPA_FILE" ]; then
+          echo "📱 Uploading to TestFlight via fastlane..."
+
+          IPA_PATH=$(find "$PWD/build/ios/ipa" -name "*.ipa" -print -quit)
+          if [ -z "$IPA_PATH" ]; then
             echo "❌ Error: No IPA file found in build/ios/ipa/"
             exit 1
           fi
-          
-          xcrun altool --upload-app \
-            -f "$IPA_FILE" \
-            -u "$APPLE_ID" \
-            -p "$APPLE_APP_PASSWORD" \
-            -t ios
+          echo "Found IPA file: $IPA_PATH"
+          export IPA_PATH
+
+          cd ios
+          bundle exec fastlane upload_testflight
           
       - name: Cleanup sensitive files
         if: always()

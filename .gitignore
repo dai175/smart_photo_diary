@@ -80,6 +80,10 @@ web/build/
 # --- 環境変数ファイル ---
 .env
 
+# --- fastlane ---
+ios/fastlane/report.xml
+ios/fastlane/README.md
+
 # --- テストカバレッジ ---
 coverage/
 # --- l10n generated files ---
