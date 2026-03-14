@@ -52,7 +52,7 @@ lib/
 │   ├── social_share/   # SNSシェアチャネル実装
 │   └── mixins/         # サービス共通Mixin（ログ、購入イベント）
 ├── controllers/        # 画面コントローラー（ChangeNotifier + Delegate）
-├── screens/            # 画面実装（ホーム、日記詳細、統計、設定、オンボーディング）
+├── screens/            # 画面実装（ホーム、日記プレビュー、日記詳細、統計、設定、オンボーディング）
 ├── widgets/            # ドメイン固有ウィジェット（タイムライン、設定、アップグレード）
 ├── shared/             # 共有UIコンポーネント（フィルター等）
 ├── ui/
