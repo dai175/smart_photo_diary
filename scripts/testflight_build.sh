@@ -25,16 +25,17 @@ if [ -z "$GEMINI_API_KEY" ]; then
     exit 1
 fi
 
-# dart_defines.jsonを生成（--dart-define-from-fileで使用）
-# trapで中断時も確実に削除
-trap 'rm -f dart_defines.json' EXIT
-echo '{}' | jq --arg key "$GEMINI_API_KEY" '.GEMINI_API_KEY = $key' > dart_defines.json
+# dart_defines.jsonを安全に一時生成（--dart-define-from-fileで使用）
+dart_defines_file="$(mktemp "${TMPDIR:-/tmp}/dart_defines.XXXXXX.json")"
+chmod 600 "$dart_defines_file"
+trap 'rm -f "$dart_defines_file"' EXIT
+jq -n --arg key "$GEMINI_API_KEY" '{GEMINI_API_KEY: $key}' > "$dart_defines_file"
 
 echo "📱 iOS リリースビルド実行中..."
 
 # リリースビルド（APIキーをファイル経由で渡す）
 fvm flutter build ipa \
-    --dart-define-from-file=dart_defines.json \
+    --dart-define-from-file="$dart_defines_file" \
     --release
 
 if [ $? -eq 0 ]; then
