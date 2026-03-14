@@ -1,0 +1,29 @@
+name: Setup iOS
+description: Common iOS setup with Xcode verification, CocoaPods caching, and dependency installation
+
+runs:
+  using: composite
+  steps:
+    - name: Verify Xcode and install iOS platform if needed
+      shell: bash
+      run: |
+        echo "Xcode version:"
+        xcodebuild -version
+        echo "Available platforms:"
+        xcrun simctl list runtimes
+        echo "Installing iOS platform if missing..."
+        xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
+
+    - name: Cache CocoaPods
+      uses: actions/cache@v5
+      with:
+        path: ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Install CocoaPods dependencies
+      shell: bash
+      run: |
+        cd ios
+        pod install

@@ -27,7 +27,15 @@ runs:
       with:
         flutter-version: ${{ inputs.flutter-version }}
         channel: 'stable'
-        cache: false  # Disable built-in cache to use actions/cache@v5 separately
+        cache: true
+
+    - name: Cache pub packages
+      uses: actions/cache@v5
+      with:
+        path: ~/.pub-cache
+        key: pub-cache-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+        restore-keys: |
+          pub-cache-${{ runner.os }}-
 
     - name: Get dependencies
       shell: bash
