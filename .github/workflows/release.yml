@@ -217,7 +217,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📋 Release Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: ${{ needs.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Pre-release**: ${{ github.event.inputs.prerelease || false }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pre-release**: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') || (github.event_name == 'push' && contains(needs.version.outputs.version, '-')) }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Assets" >> $GITHUB_STEP_SUMMARY
           echo "- iOS Build Archive" >> $GITHUB_STEP_SUMMARY
