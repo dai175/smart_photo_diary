@@ -15,6 +15,9 @@ on:
       - '.vscode/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -49,7 +52,7 @@ jobs:
 
       - name: Remove generated and UI files from coverage
         run: |
-          sudo apt-get install -y lcov > /dev/null 2>&1
+          if ! command -v lcov &>/dev/null; then sudo apt-get install -y lcov; fi
           lcov --remove coverage/lcov.info \
             '**/*.g.dart' \
             '**/l10n/generated/*' \
@@ -133,27 +136,8 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Verify Xcode and install iOS platform if needed
-        run: |
-          echo "Xcode version:"
-          xcodebuild -version
-          echo "Available platforms:"
-          xcrun simctl list runtimes
-          echo "Installing iOS platform if missing..."
-          xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v5
-        with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Install CocoaPods dependencies
-        run: |
-          cd ios
-          pod install
+      - name: Setup iOS
+        uses: ./.github/actions/setup-ios
 
       - name: Build iOS (release, no codesign)
         run: flutter build ios --release --no-codesign

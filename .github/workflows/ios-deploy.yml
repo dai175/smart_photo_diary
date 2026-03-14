@@ -52,14 +52,8 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Verify Xcode and install iOS platform if needed
-        run: |
-          echo "Xcode version:"
-          xcodebuild -version
-          echo "Available platforms:"
-          xcrun simctl list runtimes
-          echo "Installing iOS platform if missing..."
-          xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
+      - name: Setup iOS
+        uses: ./.github/actions/setup-ios
 
       - name: Verify required secrets
         env:
@@ -88,19 +82,6 @@ jobs:
             exit 1
           fi
           echo "All required secrets verified"
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v5
-        with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Install CocoaPods dependencies
-        run: |
-          cd ios
-          pod install
 
       - name: Install Apple certificate and provisioning profile
         env:
@@ -241,25 +222,3 @@ jobs:
           echo "1. Check TestFlight for build processing status" >> $GITHUB_STEP_SUMMARY
           echo "2. For beta testing: Add beta testers and collect feedback" >> $GITHUB_STEP_SUMMARY
           echo "3. For App Store release: Manually submit from App Store Connect" >> $GITHUB_STEP_SUMMARY
-
-  notify:
-    name: Notify Deployment
-    needs: ios-deploy
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Notify success
-        if: needs.ios-deploy.result == 'success'
-        env:
-          DEPLOY_TAG: ${{ github.event.inputs.tag }}
-        run: |
-          echo "iOS deployment to TestFlight successful!"
-          echo "Tag: $DEPLOY_TAG"
-
-      - name: Notify failure
-        if: needs.ios-deploy.result == 'failure'
-        run: |
-          echo "iOS deployment failed!"
-          echo "Please check the logs for details."
-          exit 1

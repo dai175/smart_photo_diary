@@ -1,0 +1,49 @@
+name: Setup iOS
+description: Common iOS setup with Xcode selection, verification, CocoaPods caching, and dependency installation
+
+inputs:
+  xcode-version:
+    description: Xcode app name (e.g., Xcode_26.2)
+    required: false
+    default: 'Xcode_26.2'
+
+runs:
+  using: composite
+  steps:
+    - name: Select Xcode version
+      shell: bash
+      env:
+        XCODE_VERSION: ${{ inputs.xcode-version }}
+      run: sudo xcode-select -s "/Applications/${XCODE_VERSION}.app/Contents/Developer"
+
+    - name: Verify Xcode and install iOS platform if needed
+      shell: bash
+      run: |
+        echo "Xcode version:"
+        xcodebuild -version
+        echo "Available platforms:"
+        xcrun simctl list runtimes
+        echo "Installing iOS platform if missing..."
+        if ! xcrun simctl list runtimes | grep -q "iOS"; then
+          echo "iOS platform not found, downloading..."
+          if ! xcodebuild -downloadPlatform iOS; then
+            echo "::error::Failed to download iOS platform"
+            exit 1
+          fi
+        else
+          echo "iOS platform already available"
+        fi
+
+    - name: Cache CocoaPods
+      uses: actions/cache@v5
+      with:
+        path: ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Install CocoaPods dependencies
+      shell: bash
+      run: |
+        cd ios
+        pod install
