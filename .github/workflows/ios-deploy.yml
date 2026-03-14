@@ -1,12 +1,16 @@
 name: iOS Deploy
 
 on:
-  workflow_dispatch:  # 手動実行のみ
+  workflow_dispatch:
     inputs:
       tag:
         description: 'Git tag to deploy (e.g., v1.1.0)'
         required: true
         type: string
+
+permissions:
+  contents: read
+  actions: read
 
 env:
   FLUTTER_VERSION: '3.41.4'
@@ -24,12 +28,29 @@ jobs:
         with:
           ref: ${{ github.event.inputs.tag }}
 
+      - name: Verify CI passed for tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          echo "Checking CI status for tag: $DEPLOY_TAG"
+          if ! git tag --points-at HEAD | grep -Fxq "$DEPLOY_TAG"; then
+            echo "::error::Tag $DEPLOY_TAG does not point to the checked-out commit"
+            exit 1
+          fi
+          COMMIT_SHA=$(git rev-parse HEAD)
+          echo "DEPLOY_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+          CI_STATUS=$(gh run list --commit "$COMMIT_SHA" --workflow ci.yml --event push --branch main --status completed --json conclusion --jq '.[0].conclusion // "not_found"' 2>/dev/null || echo "not_found")
+          if [ "$CI_STATUS" != "success" ]; then
+            echo "::error::CI has not passed for this tag (status: ${CI_STATUS}). Please ensure CI passes before deploying."
+            exit 1
+          fi
+          echo "CI passed for tag $DEPLOY_TAG (commit: $COMMIT_SHA)"
+
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
 
       - name: Verify Xcode and install iOS platform if needed
         run: |
@@ -39,33 +60,34 @@ jobs:
           xcrun simctl list runtimes
           echo "Installing iOS platform if missing..."
           xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
-          
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Cache build_runner
-        uses: actions/cache@v5
-        with:
-          path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
-          restore-keys: |
-            build-runner-${{ runner.os }}-
-
-      - name: Generate code
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          dart format .
 
       - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          IOS_DISTRIBUTION_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "❌ Error: GEMINI_API_KEY secret is not set"
-            echo "Please add GEMINI_API_KEY to GitHub repository secrets"
+          MISSING=()
+          [ -z "$GEMINI_API_KEY" ] && MISSING+=("GEMINI_API_KEY")
+          [ -z "$IOS_DISTRIBUTION_CERTIFICATE" ] && MISSING+=("IOS_DISTRIBUTION_CERTIFICATE")
+          [ -z "$IOS_CERTIFICATE_PASSWORD" ] && MISSING+=("IOS_CERTIFICATE_PASSWORD")
+          [ -z "$IOS_PROVISIONING_PROFILE" ] && MISSING+=("IOS_PROVISIONING_PROFILE")
+          [ -z "$IOS_KEYCHAIN_PASSWORD" ] && MISSING+=("IOS_KEYCHAIN_PASSWORD")
+          [ -z "$IOS_TEAM_ID" ] && MISSING+=("IOS_TEAM_ID")
+          [ -z "$APP_STORE_CONNECT_API_KEY_ID" ] && MISSING+=("APP_STORE_CONNECT_API_KEY_ID")
+          [ -z "$APP_STORE_CONNECT_ISSUER_ID" ] && MISSING+=("APP_STORE_CONNECT_ISSUER_ID")
+          [ -z "$APP_STORE_CONNECT_API_KEY" ] && MISSING+=("APP_STORE_CONNECT_API_KEY")
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "::error::Missing required secrets: ${MISSING[*]}"
             exit 1
           fi
-          echo "✅ Required secrets verified"
+          echo "All required secrets verified"
 
       - name: Cache CocoaPods
         uses: actions/cache@v5
@@ -79,7 +101,7 @@ jobs:
         run: |
           cd ios
           pod install
-          
+
       - name: Install Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
@@ -87,39 +109,33 @@ jobs:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
           KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
         run: |
-          # Create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # Import certificate and provisioning profile from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
-          # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-          # Import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # Apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-          # Xcode project already configured for manual signing
-          
-          # Verify installation
           echo "=== Installed certificates ==="
           security find-identity -v -p codesigning $KEYCHAIN_PATH
           echo "=== Installed provisioning profiles ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
           echo "=== Xcode project signing settings ==="
           grep -n "CODE_SIGN_STYLE\|PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj || true
-          
+
       - name: Create ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
         run: |
           cat > ios/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -129,7 +145,7 @@ jobs:
               <key>method</key>
               <string>app-store</string>
               <key>teamID</key>
-              <string>${{ secrets.IOS_TEAM_ID }}</string>
+              <string>${TEAM_ID}</string>
               <key>uploadBitcode</key>
               <false/>
               <key>compileBitcode</key>
@@ -146,32 +162,37 @@ jobs:
           </dict>
           </plist>
           EOF
-          
-      - name: Build iOS IPA
+
+      - name: Create dart-defines file
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # Extract version from user-specified tag (industry standard approach)
-          VERSION_NAME=${{ github.event.inputs.tag }}
-          VERSION_NAME=${VERSION_NAME#v}  # Remove 'v' prefix (v1.1.0 -> 1.1.0)
-          echo "Deploying version: $VERSION_NAME from tag ${{ github.event.inputs.tag }}"
-          
-          # Generate incremental build number (Apple/Google recommended approach)
-          # Each version starts from build 1 (industry standard)
+          echo '{}' | jq --arg key "$GEMINI_API_KEY" '.GEMINI_API_KEY = $key' > dart_defines.json
+
+      - name: Build iOS IPA
+        env:
+          DEPLOY_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          VERSION_NAME="$DEPLOY_TAG"
+          VERSION_NAME=${VERSION_NAME#v}
+          echo "Deploying version: $VERSION_NAME from tag $DEPLOY_TAG"
+
           BUILD_NUMBER=$GITHUB_RUN_NUMBER
           echo "Build number: $BUILD_NUMBER (run #$GITHUB_RUN_NUMBER)"
-          
-          echo "🔑 Using build-time constants for API key injection"
+
           flutter build ipa --release \
             --build-name=$VERSION_NAME \
             --build-number=$BUILD_NUMBER \
             --export-options-plist=ios/ExportOptions.plist \
-            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          
-          # List generated IPA files to find the correct name
+            --dart-define-from-file=dart_defines.json
+
           echo "=== Generated IPA files ==="
           ls -la build/ios/ipa/
-          
+
+      - name: Cleanup dart-defines file
+        if: always()
+        run: rm -f dart_defines.json
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -185,11 +206,11 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
-          echo "📱 Uploading to TestFlight via fastlane..."
+          echo "Uploading to TestFlight via fastlane..."
 
           IPA_PATH=$(find "$PWD/build/ios/ipa" -name "*.ipa" -print -quit)
           if [ -z "$IPA_PATH" ]; then
-            echo "❌ Error: No IPA file found in build/ios/ipa/"
+            echo "::error::No IPA file found in build/ios/ipa/"
             exit 1
           fi
           echo "Found IPA file: $IPA_PATH"
@@ -197,23 +218,26 @@ jobs:
 
           cd ios
           bundle exec fastlane upload_testflight
-          
+
       - name: Cleanup sensitive files
         if: always()
         run: |
           rm -f ios/ExportOptions.plist
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
-          
+
       - name: Create release summary
+        env:
+          DEPLOY_TAG: ${{ github.event.inputs.tag }}
         run: |
-          echo "## 🍎 iOS Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## iOS Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: $DEPLOY_TAG" >> $GITHUB_STEP_SUMMARY
           echo "- **Bundle ID**: com.focuswave.dev.smartPhotoDiary" >> $GITHUB_STEP_SUMMARY
           echo "- **Target**: TestFlight" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ${{ env.DEPLOY_SHA }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📱 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
           echo "1. Check TestFlight for build processing status" >> $GITHUB_STEP_SUMMARY
           echo "2. For beta testing: Add beta testers and collect feedback" >> $GITHUB_STEP_SUMMARY
           echo "3. For App Store release: Manually submit from App Store Connect" >> $GITHUB_STEP_SUMMARY
@@ -223,17 +247,19 @@ jobs:
     needs: ios-deploy
     runs-on: ubuntu-latest
     if: always()
-    
+
     steps:
       - name: Notify success
         if: needs.ios-deploy.result == 'success'
+        env:
+          DEPLOY_TAG: ${{ github.event.inputs.tag }}
         run: |
-          echo "✅ iOS deployment to TestFlight successful!"
-          echo "Tag: ${{ github.event.inputs.tag }}"
-          
+          echo "iOS deployment to TestFlight successful!"
+          echo "Tag: $DEPLOY_TAG"
+
       - name: Notify failure
         if: needs.ios-deploy.result == 'failure'
         run: |
-          echo "❌ iOS deployment failed!"
+          echo "iOS deployment failed!"
           echo "Please check the logs for details."
           exit 1

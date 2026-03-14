@@ -3,9 +3,21 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: '3.41.4'
@@ -20,37 +32,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Cache build_runner
-        uses: actions/cache@v5
-        with:
-          path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
-          restore-keys: |
-            build-runner-${{ runner.os }}-
-
-      - name: Create test .env file
-        run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
-
-      - name: Generate code
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          dart format .
+          setup-java: 'true'
 
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
@@ -77,20 +63,32 @@ jobs:
             -o coverage/lcov.info
 
       - name: Check coverage threshold
-        uses: VeryGoodOpenSource/very_good_coverage@v3
-        with:
-          path: coverage/lcov.info
-          min_coverage: 55
+        run: |
+          COVERAGE_LINE=$(lcov --summary coverage/lcov.info 2>&1 | grep 'lines' || true)
+          COVERAGE_NUM=$(echo "$COVERAGE_LINE" | sed -n 's/.*:\s*\([0-9.]*\)%.*/\1/p' | head -1)
+          COVERAGE="${COVERAGE_NUM}%"
+          MIN_COVERAGE=55
+          echo "Coverage: ${COVERAGE:-Unknown}"
+          if [ -z "$COVERAGE_NUM" ]; then
+            echo "::error::Could not parse coverage percentage"
+            exit 1
+          fi
+          if ! awk "BEGIN { exit ($COVERAGE_NUM >= $MIN_COVERAGE ? 0 : 1) }"; then
+            echo "::error::Coverage ${COVERAGE} is below threshold ${MIN_COVERAGE}%"
+            exit 1
+          fi
+          echo "Coverage ${COVERAGE} meets threshold ${MIN_COVERAGE}%"
 
       - name: Report coverage summary
         if: github.event_name == 'pull_request'
         run: |
-          COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep 'lines' | grep -oP '[\d.]+%' || true)
+          COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep 'lines' | grep -oE '[0-9]+\.[0-9]+%' || true)
           echo "## Test Coverage: ${COVERAGE:-Unknown}" >> $GITHUB_STEP_SUMMARY
 
   build-android:
     name: Build Android
     needs: quality-check
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -98,42 +96,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Cache build_runner
-        uses: actions/cache@v5
-        with:
-          path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
-          restore-keys: |
-            build-runner-${{ runner.os }}-
-
-      - name: Generate code
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          dart format .
-
-      - name: Create .env file for CI build
-        run: |
-          echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
-          echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
+          setup-java: 'true'
 
       - name: Build release AAB
         run: flutter build appbundle --release
@@ -141,16 +111,16 @@ jobs:
       - name: Verify Android build success
         run: |
           if [ -f "build/app/outputs/bundle/release/app-release.aab" ]; then
-            echo "✅ Release AAB built successfully"
+            echo "Release AAB built successfully"
           else
-            echo "❌ Release AAB not found"
+            echo "::error::Release AAB not found"
             exit 1
           fi
-          echo "🎉 Android build completed successfully (CI verification only)"
 
   build-ios:
     name: Build iOS
     needs: quality-check
+    if: github.event_name != 'pull_request'
     runs-on: macos-15
     timeout-minutes: 45
 
@@ -159,11 +129,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
 
       - name: Verify Xcode and install iOS platform if needed
         run: |
@@ -173,27 +141,6 @@ jobs:
           xcrun simctl list runtimes
           echo "Installing iOS platform if missing..."
           xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Cache build_runner
-        uses: actions/cache@v5
-        with:
-          path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
-          restore-keys: |
-            build-runner-${{ runner.os }}-
-
-      - name: Generate code
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          dart format .
-
-      - name: Create .env file for CI build
-        run: |
-          echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
-          echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
 
       - name: Cache CocoaPods
         uses: actions/cache@v5
@@ -214,13 +161,11 @@ jobs:
       - name: Verify iOS build success
         run: |
           if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            echo "✅ iOS release build completed successfully"
+            echo "iOS release build completed successfully"
           else
-            echo "❌ iOS release build not found"
+            echo "::error::iOS release build not found"
             exit 1
           fi
-          echo "🎉 iOS build completed successfully (CI verification only)"
-          echo "ℹ️ Note: CI builds use dummy API keys and no code signing"
 
   ci-summary:
     name: CI Summary
@@ -230,24 +175,33 @@ jobs:
 
     steps:
       - name: Create CI summary
+        env:
+          ANDROID_RESULT: ${{ needs.build-android.result }}
+          IOS_RESULT: ${{ needs.build-ios.result }}
         run: |
-          echo "## 🧪 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Completed Steps" >> $GITHUB_STEP_SUMMARY
+          echo "### Completed Steps" >> $GITHUB_STEP_SUMMARY
           echo "- **Code Quality**: Tests, analysis, and formatting checks" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.build-android.result }}" = "success" ]; then
-            echo "- **Android Build**: AAB compilation verified ✅" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ANDROID_RESULT" = "success" ]; then
+            echo "- **Android Build**: AAB compilation verified" >> $GITHUB_STEP_SUMMARY
+          elif [ "$ANDROID_RESULT" = "skipped" ]; then
+            echo "- **Android Build**: Skipped (PR build)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- **Android Build**: Failed ❌" >> $GITHUB_STEP_SUMMARY
+            echo "- **Android Build**: Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ "${{ needs.build-ios.result }}" = "success" ]; then
-            echo "- **iOS Build**: Release compilation verified ✅" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$IOS_RESULT" = "success" ]; then
+            echo "- **iOS Build**: Release compilation verified" >> $GITHUB_STEP_SUMMARY
+          elif [ "$IOS_RESULT" = "skipped" ]; then
+            echo "- **iOS Build**: Skipped (PR build)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- **iOS Build**: Failed ❌" >> $GITHUB_STEP_SUMMARY
+            echo "- **iOS Build**: Failed" >> $GITHUB_STEP_SUMMARY
           fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ℹ️ Important Notes" >> $GITHUB_STEP_SUMMARY
-          echo "- CI builds use dummy API keys for testing purposes" >> $GITHUB_STEP_SUMMARY
+          echo "### Notes" >> $GITHUB_STEP_SUMMARY
+          echo "- CI builds create a dummy .env file for testing purposes" >> $GITHUB_STEP_SUMMARY
           echo "- iOS builds are unsigned (--no-codesign)" >> $GITHUB_STEP_SUMMARY
-          echo "- Platform builds run on all triggers (push, PR, manual dispatch)" >> $GITHUB_STEP_SUMMARY
-          echo "- For production builds, use release workflows with proper secrets" >> $GITHUB_STEP_SUMMARY
+          echo "- Platform builds are skipped on pull requests to reduce cost" >> $GITHUB_STEP_SUMMARY

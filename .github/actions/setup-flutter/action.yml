@@ -1,0 +1,50 @@
+name: Setup Flutter
+description: Common Flutter setup with caching, code generation, and .env creation
+
+inputs:
+  flutter-version:
+    description: Flutter SDK version
+    required: true
+  setup-java:
+    description: Whether to setup Java (for Android builds)
+    default: 'false'
+  java-version:
+    description: Java version for Android builds
+    default: '17'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      if: inputs.setup-java == 'true'
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'zulu'
+        java-version: ${{ inputs.java-version }}
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        channel: 'stable'
+        cache: false  # Disable built-in cache to use actions/cache@v5 separately
+
+    - name: Get dependencies
+      shell: bash
+      run: flutter pub get
+
+    - name: Cache build_runner
+      uses: actions/cache@v5
+      with:
+        path: .dart_tool/build
+        key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
+        restore-keys: |
+          build-runner-${{ runner.os }}-
+
+    - name: Create .env file
+      shell: bash
+      run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
+
+    - name: Generate code
+      shell: bash
+      run: dart run build_runner build --delete-conflicting-outputs

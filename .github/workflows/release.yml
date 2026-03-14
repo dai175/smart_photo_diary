@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*'  # バージョンタグでトリガー (例: v1.0.0, v1.2.3-beta)
+      - 'v*'
   workflow_dispatch:
     inputs:
       version:
@@ -34,32 +34,33 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Extract version info
         id: version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          # Extract version from Git tag (industry standard approach)
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            # Tagged release: extract version from tag (e.g., v1.0.0 -> 1.0.0)
-            VERSION="${GITHUB_REF#refs/tags/}"      # v1.0.0 (for tag_name)
-            VERSION_NAME="${VERSION#v}"             # 1.0.0 (for build_name)
+            VERSION="${GITHUB_REF#refs/tags/}"
+            VERSION_NAME="${VERSION#v}"
             echo "Release build - Tag: ${VERSION}, Version: ${VERSION_NAME}"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Manual execution: use input version
-            VERSION="${{ github.event.inputs.version }}"
+            VERSION="$INPUT_VERSION"
+            if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::Invalid version format: ${VERSION}. Expected: v1.2.3 or v1.2.3-beta.1"
+              exit 1
+            fi
             VERSION_NAME="${VERSION#v}"
             echo "Manual build - Version: ${VERSION_NAME}"
           else
-            # Non-release build: use development version
             VERSION="v1.0.0-dev"
             VERSION_NAME="1.0.0-dev"
             echo "Development build - Version: ${VERSION_NAME}"
           fi
-          
-          # Generate incremental build number (Apple/Google recommended approach)
+
           BUILD_NUMBER=$GITHUB_RUN_NUMBER
           echo "Build number: ${BUILD_NUMBER} (run #${GITHUB_RUN_NUMBER})"
-          
+
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
           echo "build_number=${BUILD_NUMBER}" >> $GITHUB_OUTPUT
@@ -74,11 +75,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
 
       - name: Verify Xcode and install iOS platform if needed
         run: |
@@ -88,33 +87,16 @@ jobs:
           xcrun simctl list runtimes
           echo "Installing iOS platform if missing..."
           xcodebuild -downloadPlatform iOS || echo "Platform already available or download failed"
-          
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Cache build_runner
-        uses: actions/cache@v5
-        with:
-          path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
-          restore-keys: |
-            build-runner-${{ runner.os }}-
-
-      - name: Generate code
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          dart format .
 
       - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           if [ -z "$GEMINI_API_KEY" ]; then
-            echo "❌ Error: GEMINI_API_KEY secret is not set"
-            echo "Please add GEMINI_API_KEY to GitHub repository secrets for iOS release builds"
+            echo "::error::GEMINI_API_KEY secret is not set"
             exit 1
           fi
-          echo "✅ Required secrets verified"
+          echo "Required secrets verified"
 
       - name: Cache CocoaPods
         uses: actions/cache@v5
@@ -128,45 +110,41 @@ jobs:
         run: |
           cd ios
           pod install
-          
-      - name: Build iOS (release, no codesign)
+
+      - name: Create dart-defines file
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+          echo '{}' | jq --arg key "$GEMINI_API_KEY" '.GEMINI_API_KEY = $key' > dart_defines.json
+
+      - name: Build iOS (release, no codesign)
+        run: |
           echo "Building iOS version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
-          
-          echo "🔑 Using build-time constants for API key injection"
           flutter build ios --release --no-codesign \
             --build-name=${{ needs.version.outputs.version_name }} \
             --build-number=${{ needs.version.outputs.build_number }} \
-            --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-        
-      - name: Build environment cleanup
-        run: |
-          echo "✅ Build environment cleanup completed"
-        
+            --dart-define-from-file=dart_defines.json
+
+      - name: Cleanup dart-defines file
+        if: always()
+        run: rm -f dart_defines.json
+
       - name: Prepare iOS artifacts
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
-          VERSION=${{ github.ref_name }}
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION=${{ github.event.inputs.version }}
-          fi
-          
-          # Create a flat directory for iOS artifacts
           mkdir -p ios-artifacts
-          
-          # Create zip in the flat directory (use subshell to avoid cd issues)
+
           (
             cd build/ios/iphoneos
             zip -r ../../../ios-artifacts/smart-photo-diary-ios-${VERSION}.zip Runner.app
           )
-          
-          # Generate checksums for iOS artifacts
+
           (
             cd ios-artifacts
             shasum -a 256 smart-photo-diary-ios-*.zip > smart-photo-diary-checksums.txt
           )
-          
+
       - name: Upload iOS artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -178,19 +156,17 @@ jobs:
     name: Create GitHub Release
     needs: [version, build-ios-release]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-          
+
       - name: Download iOS artifacts
         uses: actions/download-artifact@v7
         with:
           name: ios-release-artifacts
           path: ./artifacts/ios
-          
-      # Release notes will be created manually on GitHub Releases page
-          
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -213,13 +189,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release summary
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          IS_PRERELEASE: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') || (github.event_name == 'push' && contains(needs.version.outputs.version, '-')) }}
         run: |
-          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Release Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: ${{ needs.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Pre-release**: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') || (github.event_name == 'push' && contains(needs.version.outputs.version, '-')) }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Release Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pre-release**: $IS_PRERELEASE" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Assets" >> $GITHUB_STEP_SUMMARY
+          echo "### Assets" >> $GITHUB_STEP_SUMMARY
           echo "- iOS Build Archive" >> $GITHUB_STEP_SUMMARY
           echo "- SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
