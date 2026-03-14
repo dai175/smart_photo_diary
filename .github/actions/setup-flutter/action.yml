@@ -27,7 +27,7 @@ runs:
       with:
         flutter-version: ${{ inputs.flutter-version }}
         channel: 'stable'
-        cache: true
+        cache: false
 
     - name: Cache pub packages
       uses: actions/cache@v5
