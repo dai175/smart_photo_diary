@@ -1,0 +1,27 @@
+name: Verify CI Passed
+description: Verify that CI pipeline has passed for the current commit
+
+inputs:
+  set-deploy-sha:
+    description: Whether to export DEPLOY_SHA to GITHUB_ENV
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Verify CI passed
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        SET_DEPLOY_SHA: ${{ inputs.set-deploy-sha }}
+      run: |
+        COMMIT_SHA=$(git rev-parse HEAD)
+        if [ "$SET_DEPLOY_SHA" = "true" ]; then
+          echo "DEPLOY_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+        fi
+        CI_STATUS=$(gh run list --commit "$COMMIT_SHA" --workflow ci.yml --event push --branch main --status completed --json conclusion --jq '.[0].conclusion // "not_found"' 2>/dev/null || echo "not_found")
+        if [ "$CI_STATUS" != "success" ]; then
+          echo "::error::CI has not passed for this commit (status: ${CI_STATUS}). Please ensure CI passes before proceeding."
+          exit 1
+        fi
+        echo "CI passed for commit $COMMIT_SHA"

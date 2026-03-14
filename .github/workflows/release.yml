@@ -5,11 +5,9 @@ on:
     tags:
       - 'v*'
 
-env:
-  FLUTTER_VERSION: '3.41.4'
-
 permissions:
   contents: write
+  actions: read
   pull-requests: read
 
 jobs:
@@ -25,16 +23,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Verify CI passed
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          COMMIT_SHA=$(git rev-parse HEAD)
-          CI_STATUS=$(gh run list --commit "$COMMIT_SHA" --workflow ci.yml --event push --branch main --status completed --json conclusion --jq '.[0].conclusion // "not_found"' 2>/dev/null || echo "not_found")
-          if [ "$CI_STATUS" != "success" ]; then
-            echo "::error::CI has not passed for this commit (status: ${CI_STATUS}). Please ensure CI passes before releasing."
-            exit 1
-          fi
-          echo "CI passed for commit $COMMIT_SHA"
+        uses: ./.github/actions/verify-ci
 
       - name: Extract version info
         id: version
@@ -61,8 +50,6 @@ jobs:
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Setup iOS
         uses: ./.github/actions/setup-ios
