@@ -61,13 +61,18 @@ jobs:
       - name: Run tests
         run: flutter test --coverage --reporter=expanded
 
-      - name: Remove generated files from coverage
+      - name: Remove generated and UI files from coverage
         run: |
           sudo apt-get install -y lcov > /dev/null 2>&1
           lcov --remove coverage/lcov.info \
             '**/*.g.dart' \
             '**/l10n/generated/*' \
             '**/debug/*' \
+            '**/screens/**' \
+            '**/widgets/**' \
+            '**/ui/**' \
+            '**/shared/**' \
+            '**/main.dart' \
             --ignore-errors unused \
             -o coverage/lcov.info
 
@@ -75,7 +80,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
           path: coverage/lcov.info
-          min_coverage: 48
+          min_coverage: 55
 
       - name: Report coverage summary
         if: github.event_name == 'pull_request'

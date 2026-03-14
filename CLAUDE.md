@@ -134,7 +134,7 @@ All log messages, exception messages, and debug data map keys must be written in
 
 ## CI/CD
 
-- `.github/workflows/ci.yml` — test, analyze, format check, coverage (min 48%), build
+- `.github/workflows/ci.yml` — test, analyze, format check, coverage (min 55%, UI layer excluded), build
 - `.github/workflows/release.yml` — release automation
 - `.github/workflows/ios-deploy.yml` — iOS deployment
 
