@@ -4,17 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g., v1.0.0)'
-        required: true
-        type: string
-      prerelease:
-        description: 'Mark as pre-release'
-        required: false
-        default: false
-        type: boolean
 
 env:
   FLUTTER_VERSION: '3.41.4'
@@ -36,7 +25,6 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Verify CI passed
-        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -50,29 +38,12 @@ jobs:
 
       - name: Extract version info
         id: version
-        env:
-          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/}"
-            VERSION_NAME="${VERSION#v}"
-            echo "Release build - Tag: ${VERSION}, Version: ${VERSION_NAME}"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="$INPUT_VERSION"
-            if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
-              echo "::error::Invalid version format: ${VERSION}. Expected: v1.2.3 or v1.2.3-beta.1"
-              exit 1
-            fi
-            VERSION_NAME="${VERSION#v}"
-            echo "Manual build - Version: ${VERSION_NAME}"
-          else
-            VERSION="v1.0.0-dev"
-            VERSION_NAME="1.0.0-dev"
-            echo "Development build - Version: ${VERSION_NAME}"
-          fi
-
+          VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION_NAME="${VERSION#v}"
           BUILD_NUMBER=$GITHUB_RUN_NUMBER
-          echo "Build number: ${BUILD_NUMBER} (run #${GITHUB_RUN_NUMBER})"
+
+          echo "Release build - Tag: ${VERSION}, Version: ${VERSION_NAME}, Build: ${BUILD_NUMBER}"
 
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
@@ -169,7 +140,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: "Smart Photo Diary ${{ needs.version.outputs.version }}"
           draft: true
-          prerelease: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') || (github.event_name == 'push' && contains(needs.version.outputs.version, '-')) }}
+          prerelease: ${{ contains(needs.version.outputs.version, '-') }}
           files: |
             artifacts/ios/smart-photo-diary-ios-*.zip
             artifacts/ios/smart-photo-diary-checksums.txt
@@ -186,7 +157,7 @@ jobs:
       - name: Create release summary
         env:
           VERSION: ${{ needs.version.outputs.version }}
-          IS_PRERELEASE: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') || (github.event_name == 'push' && contains(needs.version.outputs.version, '-')) }}
+          IS_PRERELEASE: ${{ contains(needs.version.outputs.version, '-') }}
         run: |
           echo "## Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
