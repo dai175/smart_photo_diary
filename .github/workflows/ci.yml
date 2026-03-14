@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -37,7 +37,7 @@ jobs:
         run: flutter pub get
 
       - name: Cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
@@ -91,16 +91,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -113,7 +113,7 @@ jobs:
         run: flutter pub get
 
       - name: Cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
@@ -151,7 +151,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -173,7 +173,7 @@ jobs:
         run: flutter pub get
 
       - name: Cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
@@ -191,7 +191,7 @@ jobs:
           echo "ℹ️ Using dummy API key for CI build (testing purposes only)"
 
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}

@@ -33,7 +33,7 @@ jobs:
       build_number: ${{ steps.version.outputs.build_number }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Extract version info
         id: version
@@ -71,7 +71,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -93,7 +93,7 @@ jobs:
         run: flutter pub get
 
       - name: Cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'lib/models/**/*.dart') }}
@@ -117,7 +117,7 @@ jobs:
           echo "✅ Required secrets verified"
 
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
@@ -168,7 +168,7 @@ jobs:
           )
           
       - name: Upload iOS artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ios-release-artifacts
           path: ios-artifacts/*
@@ -181,10 +181,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
           
       - name: Download iOS artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ios-release-artifacts
           path: ./artifacts/ios
