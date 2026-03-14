@@ -23,7 +23,7 @@ fvm flutter test test/integration/   # Integration tests only
 fvm flutter analyze                # Must show "No issues found!"
 fvm dart format .                  # ALWAYS run after code changes
 
-# Coverage measurement (threshold: 48%, enforced in CI)
+# Coverage measurement (threshold: 55%, enforced in CI)
 fvm flutter test --coverage
 lcov --summary coverage/lcov.info                                    # Summary
 genhtml coverage/lcov.info -o coverage/html && open coverage/html/index.html  # HTML report
@@ -55,6 +55,8 @@ fvm flutter run --dart-define=FORCE_PLAN=premium  # Force premium plan
 - `lib/ui/components/` — shared UI components (CustomDialog, buttons, etc.)
 - `lib/ui/animations/` — micro-interactions, page transitions
 - `lib/ui/error_display/` — error display system with severity levels
+- `lib/shared/` — shared UI elements (active filters display, filter bottom sheet)
+- `lib/debug/` — debug screens (font debug)
 - `lib/utils/` — utility functions (date, dialog, locale, performance monitor)
 - `lib/l10n/` — ARB files (Japanese/English)
 - `lib/localization/` — localization extensions and helpers
