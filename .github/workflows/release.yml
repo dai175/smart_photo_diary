@@ -202,7 +202,7 @@ jobs:
           tag_name: ${{ needs.version.outputs.version }}
           name: "Smart Photo Diary ${{ needs.version.outputs.version }}"
           draft: true
-          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          prerelease: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') || (github.event_name == 'push' && contains(needs.version.outputs.version, '-')) }}
           files: |
             artifacts/ios/smart-photo-diary-ios-*.zip
             artifacts/ios/smart-photo-diary-checksums.txt
