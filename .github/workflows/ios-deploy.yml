@@ -78,11 +78,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Select Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26'
-        
       - name: Verify Xcode and install iOS platform if needed
         run: |
           echo "Xcode version:"
