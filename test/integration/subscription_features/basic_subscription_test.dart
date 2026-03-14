@@ -65,7 +65,7 @@ void main() {
       expect(status.planId, equals(PremiumMonthlyPlan().id));
       final plan = PremiumMonthlyPlan();
       expect(plan.monthlyAiGenerationLimit, equals(100));
-      expect(plan.hasWritingPrompts, isTrue);
+      expect(plan.hasAllWritingPrompts, isTrue);
     });
 
     test('3.1.1.3: 使用量制限テスト（Basic 10回制限）', () async {

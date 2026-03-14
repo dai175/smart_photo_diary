@@ -59,8 +59,8 @@ void main() {
         expect(plan.isPremium, false);
       });
 
-      test('hasWritingPromptsがfalseを返す', () {
-        expect(plan.hasWritingPrompts, false);
+      test('hasAllWritingPromptsがfalseを返す', () {
+        expect(plan.hasAllWritingPrompts, false);
       });
 
       test('hasAdvancedFiltersがfalseを返す', () {

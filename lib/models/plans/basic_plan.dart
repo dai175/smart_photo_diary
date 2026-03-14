@@ -32,7 +32,7 @@ class BasicPlan extends Plan {
   bool get isPremium => false;
 
   @override
-  bool get hasWritingPrompts => false;
+  bool get hasAllWritingPrompts => false;
 
   @override
   bool get hasAdvancedFilters => false;

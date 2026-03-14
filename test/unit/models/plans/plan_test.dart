@@ -60,7 +60,7 @@ void main() {
       test('Basic プランの機能フラグが正しく設定されている', () {
         final plan = BasicPlan();
 
-        expect(plan.hasWritingPrompts, isFalse);
+        expect(plan.hasAllWritingPrompts, isFalse);
         expect(plan.hasAdvancedFilters, isFalse);
         expect(plan.hasAdvancedAnalytics, isFalse);
         expect(plan.hasPrioritySupport, isFalse);
@@ -69,7 +69,7 @@ void main() {
       test('Premium Monthly プランの機能フラグが正しく設定されている', () {
         final plan = PremiumMonthlyPlan();
 
-        expect(plan.hasWritingPrompts, isTrue);
+        expect(plan.hasAllWritingPrompts, isTrue);
         expect(plan.hasAdvancedFilters, isTrue);
         expect(plan.hasAdvancedAnalytics, isTrue);
         expect(plan.hasPrioritySupport, isTrue);
@@ -78,7 +78,7 @@ void main() {
       test('Premium Yearly プランの機能フラグが正しく設定されている', () {
         final plan = PremiumYearlyPlan();
 
-        expect(plan.hasWritingPrompts, isTrue);
+        expect(plan.hasAllWritingPrompts, isTrue);
         expect(plan.hasAdvancedFilters, isTrue);
         expect(plan.hasAdvancedAnalytics, isTrue);
         expect(plan.hasPrioritySupport, isTrue);

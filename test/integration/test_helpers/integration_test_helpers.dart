@@ -638,7 +638,7 @@ class IntegrationTestHelpers {
 
     // Verify premium features based on plan type
     if (plan.isPremium) {
-      if (plan.hasWritingPrompts) {
+      if (plan.hasAllWritingPrompts) {
         expect(find.textContaining('ライティングプロンプト'), findsWidgets);
       }
       if (plan.hasAdvancedFilters) {

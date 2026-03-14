@@ -94,7 +94,8 @@ class MockSubscriptionService implements ISubscriptionService {
 
   @override
   Future<Result<bool>> canAccessWritingPrompts() async {
-    return Success(_currentStatus.canAccessWritingPrompts);
+    // Writing prompts are accessible for all plans, matching FeatureAccessService.
+    return const Success(true);
   }
 
   @override
@@ -381,7 +382,7 @@ void main() {
         final result = await service.canAccessWritingPrompts();
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, isFalse); // Basic plan
+        expect(result.value, isTrue); // All plans can access writing prompts
       });
 
       test('高度なフィルタのアクセス権をチェックできる', () async {

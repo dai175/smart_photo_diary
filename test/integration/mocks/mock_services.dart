@@ -522,7 +522,7 @@ class TestServiceSetup {
     ).thenAnswer((_) async => Success(plan.isPremium));
     when(
       () => mock.canAccessWritingPrompts(),
-    ).thenAnswer((_) async => Success(plan.hasWritingPrompts));
+    ).thenAnswer((_) async => const Success(true));
     when(
       () => mock.canAccessAdvancedFilters(),
     ).thenAnswer((_) async => Success(plan.hasAdvancedFilters));
