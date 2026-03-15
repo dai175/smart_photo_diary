@@ -2,23 +2,28 @@ import 'package:flutter/foundation.dart';
 import 'app_exceptions.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../result/result.dart';
-import '../service_locator.dart';
 
 /// アプリケーション全体のエラーハンドリングユーティリティ
 class ErrorHandler {
+  static ILoggingService? _logger;
+
+  /// ロガーを注入する（ServiceRegistration初期化時に呼び出す）
+  static void configure({required ILoggingService logger}) {
+    _logger = logger;
+  }
+
   /// エラーをログに記録し、適切なAppExceptionに変換する
   static AppException handleError(dynamic error, {String? context}) {
     // 既にAppExceptionの場合はそのまま返す
     if (error is AppException) {
-      try {
-        final logger = serviceLocator.get<ILoggingService>();
+      final logger = _logger;
+      if (logger != null) {
         logger.error(
           'AppException: ${error.message}',
           context: context ?? 'ErrorHandler.handleError',
           error: error,
         );
-      } catch (_) {
-        // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+      } else {
         final contextMessage = context != null ? '[$context] ' : '';
         debugPrint('${contextMessage}AppException: ${error.message}');
       }
@@ -29,15 +34,14 @@ class ErrorHandler {
     final message = 'An unexpected error occurred';
     final exception = ServiceException(message, originalError: error);
 
-    try {
-      final logger = serviceLocator.get<ILoggingService>();
+    final logger = _logger;
+    if (logger != null) {
       logger.error(
         message,
         context: context ?? 'ErrorHandler.handleError',
         error: error,
       );
-    } catch (_) {
-      // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+    } else {
       final contextMessage = context != null ? '[$context] ' : '';
       debugPrint('${contextMessage}Error: $error');
     }
@@ -51,16 +55,15 @@ class ErrorHandler {
     String? context,
     StackTrace? stackTrace,
   }) {
-    try {
-      final logger = serviceLocator.get<ILoggingService>();
+    final logger = _logger;
+    if (logger != null) {
       logger.error(
         'Error: $error',
         context: context ?? 'ErrorHandler.logError',
         error: error,
         stackTrace: stackTrace,
       );
-    } catch (_) {
-      // LoggingServiceが利用できない場合はdebugPrintにフォールバック
+    } else {
       final contextMessage = context != null ? '[$context] ' : '';
       debugPrint('${contextMessage}Error: $error');
 
@@ -105,5 +108,11 @@ class ErrorHandler {
       logError(error, context: context, stackTrace: stackTrace);
       return fallbackValue;
     }
+  }
+
+  /// テスト用: ロガーをリセットする
+  @visibleForTesting
+  static void resetForTesting() {
+    _logger = null;
   }
 }

@@ -3,7 +3,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/errors/error_handler.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
-import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 
 class MockLoggingService extends Mock implements ILoggingService {}
@@ -13,16 +12,7 @@ void main() {
 
   setUp(() {
     mockLogger = MockLoggingService();
-    if (serviceLocator.isRegistered<ILoggingService>()) {
-      serviceLocator.unregister<ILoggingService>();
-    }
-    serviceLocator.registerSingleton<ILoggingService>(mockLogger);
-  });
-
-  tearDown(() {
-    if (serviceLocator.isRegistered<ILoggingService>()) {
-      serviceLocator.unregister<ILoggingService>();
-    }
+    ErrorHandler.configure(logger: mockLogger);
   });
 
   group('ErrorHandler', () {
@@ -60,9 +50,9 @@ void main() {
       });
 
       test(
-        'falls back to debugPrint when LoggingService is not registered',
+        'falls back to debugPrint when LoggingService is not configured',
         () {
-          serviceLocator.unregister<ILoggingService>();
+          ErrorHandler.resetForTesting();
 
           final result = ErrorHandler.handleError(
             Exception('test'),
@@ -92,7 +82,7 @@ void main() {
       });
 
       test('falls back to debugPrint when LoggingService unavailable', () {
-        serviceLocator.unregister<ILoggingService>();
+        ErrorHandler.resetForTesting();
 
         // Should not throw
         ErrorHandler.logError(Exception('test'), context: 'fallback');
