@@ -40,7 +40,10 @@ void main() {
   });
 
   DiaryPreviewController createController() {
-    return DiaryPreviewController();
+    return DiaryPreviewController(
+      logger: mockLogger,
+      photoService: mockPhotoService,
+    );
   }
 
   group('DiaryPreviewController', () {

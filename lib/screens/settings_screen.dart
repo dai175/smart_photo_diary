@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/settings_controller.dart';
+import '../core/service_registration.dart';
+import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -34,7 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = SettingsController();
+    _controller = SettingsController(
+      logger: ServiceRegistration.get<ILoggingService>(),
+    );
     _scrollController = ScrollController();
     widget.scrollSignal?.addListener(_onScrollToTop);
     _controller.loadSettings();

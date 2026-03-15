@@ -46,7 +46,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = DiaryPreviewController();
+    _controller = DiaryPreviewController(
+      logger: ServiceRegistration.get<ILoggingService>(),
+      photoService: ServiceRegistration.get(),
+    );
     _titleController = TextEditingController();
     _contentController = TextEditingController();
     _controller.addListener(_onControllerChanged);

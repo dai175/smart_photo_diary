@@ -3,6 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
+import 'core/hive_encryption_helper.dart';
+import 'models/diary_entry.dart';
 import 'services/interfaces/storage_service_interface.dart';
 import 'hive_registrar.g.dart';
 import 'screens/home_screen.dart';
@@ -26,11 +28,16 @@ Future<void> main() async {
   // アダプターの登録
   Hive.registerAdapters();
 
+  // Hive暗号化の初期化（キーの生成/読み込み + 既存データのマイグレーション）
+  final encryptionHelper = HiveEncryptionHelper();
+  await encryptionHelper.initialize();
+  await encryptionHelper.migrateBoxIfNeeded<DiaryEntry>('diary_entries');
+
   // アプリケーション初期化開始
   final appStartTime = DateTime.now();
 
   // サービスロケータの初期化（LoggingService登録のため先に実行）
-  await ServiceRegistration.initialize();
+  await ServiceRegistration.initialize(encryptionHelper: encryptionHelper);
   final logger = serviceLocator.get<ILoggingService>();
 
   logger.info('Application initialization started', context: 'main');
@@ -55,7 +62,7 @@ Future<void> main() async {
 }
 
 Future<void> _optimizeDatabaseOnStartup(ILoggingService logger) async {
-  final storageService = serviceLocator.get<IStorageService>();
+  final storageService = await serviceLocator.getAsync<IStorageService>();
   final result = await storageService.optimizeDatabaseResult();
   result.fold(
     (_) =>

@@ -20,19 +20,15 @@ class AiService implements IAiService {
   final DiaryGenerator _diaryGenerator;
   final TagGenerator _tagGenerator;
   final ISubscriptionService? _subscriptionService;
-  final ILoggingService? _logger;
+  final ILoggingService _logger;
 
   AiService({
     DiaryGenerator? diaryGenerator,
     TagGenerator? tagGenerator,
     ISubscriptionService? subscriptionService,
-    ILoggingService? logger,
-  }) : _diaryGenerator =
-           diaryGenerator ??
-           DiaryGenerator(logger: logger ?? const NoOpLoggingService()),
-       _tagGenerator =
-           tagGenerator ??
-           TagGenerator(logger: logger ?? const NoOpLoggingService()),
+    required ILoggingService logger,
+  }) : _diaryGenerator = diaryGenerator ?? DiaryGenerator(logger: logger),
+       _tagGenerator = tagGenerator ?? TagGenerator(logger: logger),
        _subscriptionService = subscriptionService,
        _logger = logger;
 
@@ -53,7 +49,7 @@ class AiService implements IAiService {
     if (_subscriptionService == null) return;
     final resetResult = await _subscriptionService.resetMonthlyUsageIfNeeded();
     if (resetResult.isFailure) {
-      _logger?.warning(
+      _logger.warning(
         'Monthly usage reset failed',
         context: 'AiService.$caller',
         data: resetResult.error.toString(),
@@ -102,7 +98,7 @@ class AiService implements IAiService {
 
     final result = await _subscriptionService.incrementAiUsage();
     if (result.isFailure) {
-      _logger?.warning(
+      _logger.warning(
         'Failed to record AI usage',
         context: 'AiService._recordAiUsage',
         data: result.error.toString(),

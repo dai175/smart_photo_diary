@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:path_provider/path_provider.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/settings_service_interface.dart';
+import 'interfaces/logging_service_interface.dart';
 import 'interfaces/storage_service_interface.dart';
-import '../core/service_locator.dart';
 import '../localization/localization_utils.dart';
 import '../models/import_result.dart';
 import '../core/result/result.dart';
@@ -15,6 +15,7 @@ import 'storage_import_delegate.dart';
 class StorageService implements IStorageService {
   final IDiaryService? _diaryService;
   final ISettingsService? _settingsService;
+  final ILoggingService _logger;
 
   late final StorageExportDelegate _exportDelegate;
   late final StorageImportDelegate _importDelegate;
@@ -27,8 +28,10 @@ class StorageService implements IStorageService {
   StorageService({
     IDiaryService? diaryService,
     ISettingsService? settingsService,
+    ILoggingService? logger,
   }) : _diaryService = diaryService,
-       _settingsService = settingsService {
+       _settingsService = settingsService,
+       _logger = logger ?? const NoOpLoggingService() {
     _exportDelegate = StorageExportDelegate(
       getDiaryService: _getDiaryService,
       resolveLocale: _resolveLocale,
@@ -39,9 +42,15 @@ class StorageService implements IStorageService {
     );
   }
 
-  /// DiaryService を取得（コンストラクタ注入 or ServiceLocator フォールバック）
+  /// DiaryService を取得
   Future<IDiaryService> _getDiaryService() async {
-    return _diaryService ?? await serviceLocator.getAsync<IDiaryService>();
+    if (_diaryService == null) {
+      throw StateError(
+        'StorageService: diaryService is not injected. '
+        'Ensure it is provided via constructor.',
+      );
+    }
+    return _diaryService;
   }
 
   /// 現在のロケールを解決する
@@ -145,7 +154,12 @@ class StorageService implements IStorageService {
         }
       }
     } catch (e) {
-      // エラーがあっても続行
+      // Cleanup failure is non-critical; log and continue
+      _logger.warning(
+        'Temp file cleanup failed',
+        context: 'StorageService._cleanupTempFiles',
+        data: e.toString(),
+      );
     }
   }
 

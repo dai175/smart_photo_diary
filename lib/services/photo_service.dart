@@ -6,7 +6,6 @@ import 'interfaces/camera_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'interfaces/photo_cache_service_interface.dart';
 import '../core/result/result.dart';
-import '../core/service_locator.dart';
 import 'photo_query_service.dart';
 import 'photo_data_service.dart';
 
@@ -18,12 +17,15 @@ class PhotoService implements IPhotoService {
   final IPhotoPermissionService _permissionService;
   final PhotoQueryService _queryService;
   final PhotoDataService _dataService;
+  final ICameraService Function() _getCameraService;
 
   PhotoService({
     required ILoggingService logger,
     required IPhotoPermissionService permissionService,
     required IPhotoCacheService cacheService,
+    required ICameraService Function() getCameraService,
   }) : _permissionService = permissionService,
+       _getCameraService = getCameraService,
        _queryService = PhotoQueryService(
          logger: logger,
          requestPermission: permissionService.requestPermission,
@@ -34,7 +36,7 @@ class PhotoService implements IPhotoService {
        );
 
   /// カメラサービス（遅延解決 - 循環依存回避）
-  ICameraService get _cameraService => serviceLocator.get<ICameraService>();
+  ICameraService get _cameraService => _getCameraService();
 
   // =================================================================
   // 権限管理メソッド（IPhotoPermissionServiceへの委譲）

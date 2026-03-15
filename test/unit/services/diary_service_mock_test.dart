@@ -6,8 +6,14 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/services/diary_service.dart';
 import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
+
+class MockILoggingService extends Mock implements ILoggingService {}
+
+class MockIDiaryTagService extends Mock implements IDiaryTagService {}
 
 // Mock classes
 class MockIAiService extends Mock implements IAiService {}
@@ -340,7 +346,10 @@ void main() {
 
       test('should create instance with dependencies', () {
         // Act
-        final service = DiaryService.createWithDependencies();
+        final service = DiaryService.createWithDependencies(
+          logger: MockILoggingService(),
+          tagService: MockIDiaryTagService(),
+        );
 
         // Assert
         expect(service, isA<DiaryService>());
@@ -350,7 +359,10 @@ void main() {
     group('Interface Compliance', () {
       test('should implement DiaryService interface', () {
         // Act
-        final service = DiaryService.createWithDependencies();
+        final service = DiaryService.createWithDependencies(
+          logger: MockILoggingService(),
+          tagService: MockIDiaryTagService(),
+        );
 
         // Assert
         expect(service, isA<DiaryService>());
@@ -358,7 +370,10 @@ void main() {
 
       test('should have all required service methods', () {
         // Act
-        final service = DiaryService.createWithDependencies();
+        final service = DiaryService.createWithDependencies(
+          logger: MockILoggingService(),
+          tagService: MockIDiaryTagService(),
+        );
 
         // Assert
         expect(service.saveDiaryEntry, isA<Function>());
