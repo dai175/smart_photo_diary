@@ -73,8 +73,14 @@ class ImageLayoutCalculator {
   /// 通常日記の写真領域比率（portrait）
   static const double standardContentPhotoRatioPortrait = 0.62;
 
+  /// 通常日記のsquare写真幅比率
+  static const double squarePhotoWidthRatio = 0.56;
+
   /// テキストエリアの最小高さ（px）
   static const double minTextAreaHeight = 200.0;
+
+  /// テキストエリアの最小幅（px、square用）
+  static const double minTextAreaWidth = 80.0;
 
   /// コンテンツが短いかどうか（レイアウト・フォントサイズ判定用）
   static bool _isShortContent(DiaryEntry diary) =>
@@ -94,7 +100,7 @@ class ImageLayoutCalculator {
   ) {
     final w = format.actualWidth.toDouble();
     final h = format.actualHeight.toDouble();
-    final scale = (format.isHD ? format.scale : 1.0);
+    final scale = format.effectiveScale;
     final gap = 12.0 * scale;
     final isShort = _isShortContent(diary);
 
@@ -114,7 +120,9 @@ class ImageLayoutCalculator {
         return (photoRect: photoRect, textRect: textRect);
       }
       // 通常: 横レイアウト（写真左・テキスト右）
-      final double photoW = (w * 0.56).clamp(0.0, w - 80.0 * scale).toDouble();
+      final double photoW = (w * squarePhotoWidthRatio)
+          .clamp(0.0, w - minTextAreaWidth * scale)
+          .toDouble();
       final photoRect = Rect.fromLTWH(0, 0, photoW, h);
       final textRect = Rect.fromLTWH(
         photoRect.right + gap,

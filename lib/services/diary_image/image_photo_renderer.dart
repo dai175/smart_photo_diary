@@ -22,8 +22,7 @@ class ImagePhotoRenderer {
     ShareFormat format, {
     required ILoggingService logger,
   }) async {
-    final gap =
-        ImageLayoutCalculator.photoSpacing * (format.isHD ? format.scale : 1.0);
+    final gap = ImageLayoutCalculator.photoSpacing * format.effectiveScale;
     if (photos.length == 1) {
       await _drawAssetIntoRect(canvas, photos.first, area, logger: logger);
       return;

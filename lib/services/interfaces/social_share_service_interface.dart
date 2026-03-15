@@ -105,6 +105,9 @@ enum ShareFormat {
   /// スケールされた高さ
   int get scaledHeight => (height * scale).round();
 
+  /// HD考慮済みのスケール係数（非HDでは1.0）
+  double get effectiveScale => isHD ? scale : 1.0;
+
   /// HD考慮済みの実際の幅
   int get actualWidth => isHD ? scaledWidth : width;
 
