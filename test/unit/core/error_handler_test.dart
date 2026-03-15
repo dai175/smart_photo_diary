@@ -13,6 +13,7 @@ void main() {
   setUp(() {
     mockLogger = MockLoggingService();
     ErrorHandler.configure(logger: mockLogger);
+    addTearDown(ErrorHandler.resetForTesting);
   });
 
   group('ErrorHandler', () {
