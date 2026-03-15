@@ -70,6 +70,16 @@ class ImageLayoutCalculator {
   /// ショート日記の写真領域比率（square）
   static const double shortContentPhotoRatioSquare = 0.60;
 
+  /// 通常日記の写真領域比率（portrait）
+  static const double standardContentPhotoRatioPortrait = 0.62;
+
+  /// テキストエリアの最小高さ（px）
+  static const double minTextAreaHeight = 200.0;
+
+  /// コンテンツが短いかどうか（レイアウト・フォントサイズ判定用）
+  static bool _isShortContent(DiaryEntry diary) =>
+      diary.content.length <= contentLengthThreshold;
+
   /// フォーマットに基づくスケール係数を計算（幅・高さの平均、clamp済み）
   static double _calculateScale(ShareFormat format) {
     final widthScale = format.actualWidth / baseWidth;
@@ -86,13 +96,13 @@ class ImageLayoutCalculator {
     final h = format.actualHeight.toDouble();
     final scale = (format.isHD ? format.scale : 1.0);
     final gap = 12.0 * scale;
-    final isShortContent = diary.content.length <= contentLengthThreshold;
+    final isShort = _isShortContent(diary);
 
     if (format.isSquare) {
-      if (isShortContent) {
+      if (isShort) {
         // ショート日記: 縦レイアウト（写真上・テキスト下）
         final double photoH = (h * shortContentPhotoRatioSquare)
-            .clamp(0.0, h - 200.0 * scale)
+            .clamp(0.0, h - minTextAreaHeight * scale)
             .toDouble();
         final photoRect = Rect.fromLTWH(0, 0, w, photoH);
         final textRect = Rect.fromLTWH(
@@ -116,8 +126,12 @@ class ImageLayoutCalculator {
     }
 
     // 縦長: 上部に写真、下部にテキスト
-    final ratio = isShortContent ? shortContentPhotoRatioPortrait : 0.62;
-    final double photoH = (h * ratio).clamp(0.0, h - 200.0 * scale).toDouble();
+    final ratio = isShort
+        ? shortContentPhotoRatioPortrait
+        : standardContentPhotoRatioPortrait;
+    final double photoH = (h * ratio)
+        .clamp(0.0, h - minTextAreaHeight * scale)
+        .toDouble();
     final photoRect = Rect.fromLTWH(0, 0, w, photoH);
     final textRect = Rect.fromLTWH(
       0,
@@ -168,7 +182,6 @@ class ImageLayoutCalculator {
     }
 
     final titleLen = diary.title.length;
-    final contentLen = diary.content.length;
 
     // スケールに応じてフォントサイズを調整
     return TextSizes(
@@ -179,9 +192,9 @@ class ImageLayoutCalculator {
       titleMaxLines: titleLen > titleMaxLengthThreshold
           ? ImageLayoutCalculator.titleMaxLinesLong
           : ImageLayoutCalculator.titleMaxLines,
-      contentSize: contentLen > contentLengthThreshold
-          ? (baseContentFontSizeLong * scale).round().toDouble()
-          : (baseContentFontSize * scale).round().toDouble(),
+      contentSize: _isShortContent(diary)
+          ? (baseContentFontSize * scale).round().toDouble()
+          : (baseContentFontSizeLong * scale).round().toDouble(),
       contentMaxLines: ImageLayoutCalculator.contentMaxLines,
     );
   }
