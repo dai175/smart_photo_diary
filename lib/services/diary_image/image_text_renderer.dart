@@ -82,7 +82,15 @@ class ImageTextRenderer {
     final textAreaPadding = format.isSquare
         ? 24.0
         : (format.isPortrait ? 28.0 : 24.0);
-    final textArea = contentArea.deflate(textAreaPadding);
+    final scale = (format.isHD ? format.scale : 1.0);
+    final brandReserve =
+        ImageLayoutCalculator.calculateBrandFontSize(format) + 24.0 * scale;
+    final textArea = Rect.fromLTWH(
+      contentArea.left + textAreaPadding,
+      contentArea.top + textAreaPadding,
+      contentArea.width - textAreaPadding * 2,
+      contentArea.height - textAreaPadding * 2 - brandReserve,
+    );
 
     // 初期フォントサイズ
     final baseSizes = ImageLayoutCalculator.calculateTextSizes(format, diary);
