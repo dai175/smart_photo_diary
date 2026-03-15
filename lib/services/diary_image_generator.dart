@@ -119,7 +119,7 @@ class DiaryImageGenerator {
     canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgPaint);
 
     // レイアウト領域を決定
-    final split = ImageLayoutCalculator.getSplitLayout(format);
+    final split = ImageLayoutCalculator.getSplitLayout(format, diary);
 
     // 写真領域に描画（なければスキップ）
     if (photos != null && photos.isNotEmpty) {

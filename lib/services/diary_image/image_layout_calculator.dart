@@ -64,6 +64,12 @@ class ImageLayoutCalculator {
   /// 写真間のスペーシング
   static const double photoSpacing = 6.0;
 
+  /// ショート日記の写真領域比率（portrait）
+  static const double shortContentPhotoRatioPortrait = 0.75;
+
+  /// ショート日記の写真領域比率（square）
+  static const double shortContentPhotoRatioSquare = 0.70;
+
   /// フォーマットに基づくスケール係数を計算（幅・高さの平均、clamp済み）
   static double _calculateScale(ShareFormat format) {
     final widthScale = format.actualWidth / baseWidth;
@@ -72,14 +78,19 @@ class ImageLayoutCalculator {
   }
 
   /// 分離レイアウトの領域（写真/テキスト）
-  static ({Rect photoRect, Rect textRect}) getSplitLayout(ShareFormat format) {
+  static ({Rect photoRect, Rect textRect}) getSplitLayout(
+    ShareFormat format,
+    DiaryEntry diary,
+  ) {
     final w = format.actualWidth.toDouble();
     final h = format.actualHeight.toDouble();
     final scale = (format.isHD ? format.scale : 1.0);
     final gap = 12.0 * scale;
+    final isShortContent = diary.content.length <= contentLengthThreshold;
 
     if (format.isSquare) {
-      final double photoW = (w * 0.56).clamp(0.0, w - 80.0 * scale).toDouble();
+      final ratio = isShortContent ? shortContentPhotoRatioSquare : 0.56;
+      final double photoW = (w * ratio).clamp(0.0, w - 80.0 * scale).toDouble();
       final photoRect = Rect.fromLTWH(0, 0, photoW, h);
       final textRect = Rect.fromLTWH(
         photoRect.right + gap,
@@ -91,7 +102,8 @@ class ImageLayoutCalculator {
     }
 
     // 縦長: 上部に写真、下部にテキスト
-    final double photoH = (h * 0.62).clamp(0.0, h - 200.0 * scale).toDouble();
+    final ratio = isShortContent ? shortContentPhotoRatioPortrait : 0.62;
+    final double photoH = (h * ratio).clamp(0.0, h - 200.0 * scale).toDouble();
     final photoRect = Rect.fromLTWH(0, 0, w, photoH);
     final textRect = Rect.fromLTWH(
       0,
