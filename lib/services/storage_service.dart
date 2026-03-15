@@ -28,10 +28,10 @@ class StorageService implements IStorageService {
   StorageService({
     IDiaryService? diaryService,
     ISettingsService? settingsService,
-    ILoggingService? logger,
+    required ILoggingService logger,
   }) : _diaryService = diaryService,
        _settingsService = settingsService,
-       _logger = logger ?? const NoOpLoggingService() {
+       _logger = logger {
     _exportDelegate = StorageExportDelegate(
       getDiaryService: _getDiaryService,
       resolveLocale: _resolveLocale,

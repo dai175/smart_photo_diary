@@ -16,17 +16,11 @@ class ErrorHandler {
   static AppException handleError(dynamic error, {String? context}) {
     // 既にAppExceptionの場合はそのまま返す
     if (error is AppException) {
-      final logger = _logger;
-      if (logger != null) {
-        logger.error(
-          'AppException: ${error.message}',
-          context: context ?? 'ErrorHandler.handleError',
-          error: error,
-        );
-      } else {
-        final contextMessage = context != null ? '[$context] ' : '';
-        debugPrint('${contextMessage}AppException: ${error.message}');
-      }
+      _log(
+        'AppException: ${error.message}',
+        context: context ?? 'ErrorHandler.handleError',
+        error: error,
+      );
       return error;
     }
 
@@ -34,17 +28,11 @@ class ErrorHandler {
     final message = 'An unexpected error occurred';
     final exception = ServiceException(message, originalError: error);
 
-    final logger = _logger;
-    if (logger != null) {
-      logger.error(
-        message,
-        context: context ?? 'ErrorHandler.handleError',
-        error: error,
-      );
-    } else {
-      final contextMessage = context != null ? '[$context] ' : '';
-      debugPrint('${contextMessage}Error: $error');
-    }
+    _log(
+      message,
+      context: context ?? 'ErrorHandler.handleError',
+      error: error,
+    );
 
     return exception;
   }
@@ -55,20 +43,35 @@ class ErrorHandler {
     String? context,
     StackTrace? stackTrace,
   }) {
+    _log(
+      'Error: $error',
+      context: context ?? 'ErrorHandler.logError',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
+
+  /// ロガーがあればロガーへ、なければ debugPrint にフォールバック
+  static void _log(
+    String message, {
+    String? context,
+    dynamic error,
+    StackTrace? stackTrace,
+  }) {
     final logger = _logger;
     if (logger != null) {
       logger.error(
-        'Error: $error',
-        context: context ?? 'ErrorHandler.logError',
+        message,
+        context: context,
         error: error,
         stackTrace: stackTrace,
       );
     } else {
-      final contextMessage = context != null ? '[$context] ' : '';
-      debugPrint('${contextMessage}Error: $error');
+      final prefix = context != null ? '[$context] ' : '';
+      debugPrint('$prefix$message');
 
       if (stackTrace != null && kDebugMode) {
-        debugPrint('${contextMessage}StackTrace: $stackTrace');
+        debugPrint('${prefix}StackTrace: $stackTrace');
       }
     }
   }

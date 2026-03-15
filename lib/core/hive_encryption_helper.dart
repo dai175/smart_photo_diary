@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_ce/hive_ce.dart';
 
@@ -55,30 +56,23 @@ class HiveEncryptionHelper {
       // 未暗号化ボックスを開いてデータを読み出す
       final box = await Hive.openBox<T>(boxName);
       if (box.isNotEmpty) {
-        final Map<dynamic, T> entries = {};
-        for (final key in box.keys) {
-          final value = box.get(key);
-          if (value != null) {
-            entries[key] = value;
-          }
-        }
+        final entries = box.toMap();
         await box.close();
         await Hive.deleteBoxFromDisk(boxName);
 
-        // 暗号化ボックスに書き戻す
+        // 暗号化ボックスに一括書き込み
         final encryptedBox = await Hive.openBox<T>(
           boxName,
           encryptionCipher: cipher,
         );
-        for (final entry in entries.entries) {
-          await encryptedBox.put(entry.key, entry.value);
-        }
+        await encryptedBox.putAll(entries);
         await encryptedBox.close();
       } else {
         await box.close();
       }
-    } catch (_) {
-      // ボックスが存在しない、または既に暗号化済みの場合は無視
+    } catch (e) {
+      // ボックスが存在しない、または既に暗号化済みの場合は続行
+      debugPrint('Hive migration skipped for $boxName: $e');
     }
 
     await _secureStorage.write(key: flagKey, value: 'true');
