@@ -41,6 +41,8 @@ import '../services/prompt_usage_service.dart';
 import '../services/social_share_service.dart';
 import '../services/interfaces/social_share_service_interface.dart';
 import '../services/diary_image_generator.dart';
+import 'errors/error_handler.dart';
+import 'hive_encryption_helper.dart';
 import 'service_locator.dart';
 
 /// Service registration configuration
@@ -96,10 +98,13 @@ import 'service_locator.dart';
 /// **循環依存**: なし（全て単方向の依存関係）
 class ServiceRegistration {
   static bool _isInitialized = false;
+  static HiveEncryptionHelper? _encryptionHelper;
   static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
 
   /// Initialize and register all services
-  static Future<void> initialize() async {
+  static Future<void> initialize({
+    HiveEncryptionHelper? encryptionHelper,
+  }) async {
     if (_isInitialized) {
       _logger.debug(
         'Services already initialized',
@@ -107,6 +112,8 @@ class ServiceRegistration {
       );
       return;
     }
+
+    _encryptionHelper = encryptionHelper;
 
     final startTime = DateTime.now();
     try {
@@ -152,6 +159,9 @@ class ServiceRegistration {
     // 1. LoggingService (基盤サービス - 他のサービスの依存関係として使用)
     final loggingService = LoggingService();
     serviceLocator.registerSingleton<ILoggingService>(loggingService);
+
+    // ErrorHandler にロガーを注入（ServiceLocator直接依存を排除）
+    ErrorHandler.configure(logger: loggingService);
 
     _logger.debug(
       'Starting core service registration',
@@ -228,10 +238,12 @@ class ServiceRegistration {
     serviceLocator.registerSingleton<IPhotoCacheService>(photoCacheService);
 
     // 7b. PhotoService (Facade - 写真クエリ/データ + 権限・カメラ委譲)
+    // CameraServiceは循環依存回避のため関数型で遅延解決
     final photoService = PhotoService(
       logger: loggingService,
       permissionService: serviceLocator.get<IPhotoPermissionService>(),
       cacheService: photoCacheService,
+      getCameraService: () => serviceLocator.get<ICameraService>(),
     );
     serviceLocator.registerSingleton<IPhotoService>(photoService);
 
@@ -249,8 +261,7 @@ class ServiceRegistration {
       () => PhotoAccessControlService(logger: loggingService),
     );
 
-    // 11. StorageService (DiaryServiceに依存するが、最適化機能のみ)
-    serviceLocator.registerFactory<IStorageService>(() => StorageService());
+    // 11. StorageService — Phase 2 に移動（DiaryServiceに依存するため）
 
     // 12a. PromptUsageService (使用履歴管理 - Hive依存のみ)
     serviceLocator.registerAsyncFactory<IPromptUsageService>(() async {
@@ -345,6 +356,7 @@ class ServiceRegistration {
       final diaryService = DiaryService.createWithDependencies(
         logger: serviceLocator.get<ILoggingService>(),
         tagService: tagService,
+        encryptionCipher: _encryptionHelper?.cipher,
       );
 
       // Initialize the service
@@ -360,6 +372,15 @@ class ServiceRegistration {
     serviceLocator.registerAsyncFactory<IDiaryQueryService>(() async {
       return await serviceLocator.getAsync<IDiaryService>();
     });
+
+    // StorageService (DiaryServiceに依存)
+    serviceLocator.registerAsyncFactory<IStorageService>(() async {
+      final diaryService = await serviceLocator.getAsync<IDiaryService>();
+      return StorageService(
+        diaryService: diaryService,
+        logger: serviceLocator.get<ILoggingService>(),
+      );
+    });
   }
 
   /// Reset service registration (useful for testing)
@@ -372,6 +393,7 @@ class ServiceRegistration {
     }
     serviceLocator.clear();
     _isInitialized = false;
+    _encryptionHelper = null;
   }
 
   /// Check if services are initialized

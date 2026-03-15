@@ -18,7 +18,11 @@ void main() {
 
     setUp(() async {
       // Initialize DiaryService with real Hive database
-      diaryService = DiaryService.createWithDependencies();
+      final mockTagService = MockIDiaryTagService();
+      diaryService = DiaryService.createWithDependencies(
+        logger: TestServiceSetup.getLoggingService(),
+        tagService: mockTagService,
+      );
       await diaryService.initialize();
 
       // Clear any existing entries

@@ -5,7 +5,6 @@ import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
-import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/diary_length.dart';
 import '../models/writing_prompt.dart';
@@ -103,17 +102,25 @@ class DiaryPreviewController extends BaseErrorController {
   /// 使用量制限に到達したか
   bool get usageLimitReached => _usageLimitReached;
 
-  DiaryPreviewController() {
-    _logger = serviceLocator.get<ILoggingService>();
-    final photoService = ServiceRegistration.get<IPhotoService>();
+  DiaryPreviewController({
+    required ILoggingService logger,
+    required IPhotoService photoService,
+    Future<IDiaryCrudService> Function()? getDiaryService,
+    Future<IPromptService> Function()? getPromptService,
+  }) {
+    _logger = logger;
 
     _generationDelegate = DiaryPreviewGenerationDelegate(
       photoService: photoService,
       logger: _logger,
     );
     _saveDelegate = DiaryPreviewSaveDelegate(
-      getDiaryService: () => ServiceRegistration.getAsync<IDiaryCrudService>(),
-      getPromptService: () => ServiceRegistration.getAsync<IPromptService>(),
+      getDiaryService:
+          getDiaryService ??
+          () => ServiceRegistration.getAsync<IDiaryCrudService>(),
+      getPromptService:
+          getPromptService ??
+          () => ServiceRegistration.getAsync<IPromptService>(),
       logger: _logger,
     );
   }

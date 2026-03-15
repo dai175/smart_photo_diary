@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/subscription_info_v2.dart';
 import '../services/interfaces/logging_service_interface.dart';
@@ -37,8 +36,8 @@ class SettingsController extends BaseErrorController {
   /// 設定データの読み込みが完了しているか
   bool get hasSettingsLoaded => _settingsService != null;
 
-  SettingsController() {
-    _logger = serviceLocator.get<ILoggingService>();
+  SettingsController({required ILoggingService logger}) {
+    _logger = logger;
   }
 
   /// 設定データを読み込む

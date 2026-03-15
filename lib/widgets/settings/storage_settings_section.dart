@@ -64,7 +64,8 @@ class StorageSettingsSection extends StatelessWidget {
         context.l10n.settingsBackupInProgress,
       );
 
-      final storageService = ServiceRegistration.get<IStorageService>();
+      final storageService =
+          await ServiceRegistration.getAsync<IStorageService>();
       final exportResult = await storageService.exportDataResult();
 
       if (!context.mounted) return;
@@ -110,7 +111,8 @@ class StorageSettingsSection extends StatelessWidget {
         context.l10n.settingsRestoreInProgress,
       );
 
-      final storageService = ServiceRegistration.get<IStorageService>();
+      final storageService =
+          await ServiceRegistration.getAsync<IStorageService>();
       final result = await storageService.importData();
 
       if (!context.mounted) return;

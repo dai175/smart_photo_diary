@@ -8,6 +8,7 @@ import '../../localization/localization_extensions.dart';
 import '../../models/diary_length.dart';
 import '../../models/writing_prompt.dart';
 import '../../services/interfaces/logging_service_interface.dart';
+import '../../services/interfaces/photo_service_interface.dart';
 import '../../services/interfaces/settings_service_interface.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/design_system/app_spacing.dart';
@@ -46,7 +47,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = DiaryPreviewController();
+    _controller = DiaryPreviewController(
+      logger: ServiceRegistration.get<ILoggingService>(),
+      photoService: ServiceRegistration.get<IPhotoService>(),
+    );
     _titleController = TextEditingController();
     _contentController = TextEditingController();
     _controller.addListener(_onControllerChanged);

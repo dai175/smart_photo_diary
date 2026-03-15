@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:hive_ce/hive_ce.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 import '../models/diary_entry.dart';
@@ -79,11 +80,15 @@ class DiaryCrudDelegate {
       final existingResult = await getDiaryByPhotoDate(photoDate);
       if (existingResult.isSuccess && existingResult.value.isNotEmpty) {
         _loggingService.warning(
-          'Diary already exists for ${photoDate.toString().split(' ')[0]}',
+          'Diary already exists for ${DateFormat('yyyy-MM-dd').format(photoDate)}',
         );
       }
-    } catch (_) {
-      // 重複チェック失敗は無視して作成を続行
+    } catch (e) {
+      _loggingService.warning(
+        'Duplicate check failed',
+        context: 'DiaryCrudDelegate.createDiaryForPastPhoto',
+        data: e.toString(),
+      );
     }
 
     return _saveEntry(

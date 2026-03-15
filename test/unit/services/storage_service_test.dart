@@ -3,12 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/services/storage_service.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import '../../test_helpers/mock_platform_channels.dart';
 
 // モック
 class MockStorageService extends Mock implements IStorageService {}
+
+class MockLoggingService extends Mock implements ILoggingService {}
 
 void main() {
   late MockStorageService mockStorageService;
@@ -158,7 +161,7 @@ void main() {
       }
       await testDir.create(recursive: true);
 
-      storageService = StorageService();
+      storageService = StorageService(logger: MockLoggingService());
     });
 
     tearDown(() async {

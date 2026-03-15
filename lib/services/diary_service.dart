@@ -8,7 +8,6 @@ import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/diary_tag_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import 'diary_index_manager.dart';
 import 'diary_crud_delegate.dart';
@@ -22,7 +21,8 @@ import 'diary_query_delegate.dart';
 class DiaryService implements IDiaryService {
   static const String _boxName = 'diary_entries';
   Box<DiaryEntry>? _diaryBox;
-  ILoggingService _loggingService = const NoOpLoggingService();
+  final ILoggingService _loggingService;
+  final HiveAesCipher? _encryptionCipher;
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
   bool _disposed = false;
 
@@ -34,9 +34,13 @@ class DiaryService implements IDiaryService {
   late final DiaryQueryDelegate _queryDelegate;
 
   // プライベートコンストラクタ（依存性注入用）
-  DiaryService._({ILoggingService? logger, IDiaryTagService? tagService})
-    : _injectedTagService = tagService {
-    if (logger != null) _loggingService = logger;
+  DiaryService._({
+    required ILoggingService logger,
+    required IDiaryTagService tagService,
+    HiveAesCipher? encryptionCipher,
+  }) : _loggingService = logger,
+       _tagService = tagService,
+       _encryptionCipher = encryptionCipher {
     _crudDelegate = DiaryCrudDelegate(
       getBox: () => _diaryBox!,
       ensureInitialized: _ensureInitialized,
@@ -56,10 +60,15 @@ class DiaryService implements IDiaryService {
 
   // 依存性注入用のファクトリメソッド
   static DiaryService createWithDependencies({
-    ILoggingService? logger,
-    IDiaryTagService? tagService,
+    required ILoggingService logger,
+    required IDiaryTagService tagService,
+    HiveAesCipher? encryptionCipher,
   }) {
-    return DiaryService._(logger: logger, tagService: tagService);
+    return DiaryService._(
+      logger: logger,
+      tagService: tagService,
+      encryptionCipher: encryptionCipher,
+    );
   }
 
   // 初期化メソッド（外部から呼び出し可能）
@@ -71,10 +80,8 @@ class DiaryService implements IDiaryService {
   @override
   Stream<DiaryChange> get changes => _diaryChangeController.stream;
 
-  /// タグサービス（コンストラクタ注入 or 遅延解決）
-  final IDiaryTagService? _injectedTagService;
-  IDiaryTagService get _tagService =>
-      _injectedTagService ?? serviceLocator.get<IDiaryTagService>();
+  /// タグサービス（コンストラクタ注入）
+  final IDiaryTagService _tagService;
 
   // =================================================================
   // 初期化
@@ -90,10 +97,30 @@ class DiaryService implements IDiaryService {
     }
   }
 
+  static const String _metaBoxName = 'diary_meta';
+  static const String _encryptionMigratedKey = 'encryption_migrated';
+
   // 初期化処理
   Future<void> _init() async {
     try {
-      _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
+      // 暗号化が有効な場合、未マイグレーションのデータを先に移行する
+      // NOTE: Hive CEは暗号化不一致時に例外を投げず、クラッシュリカバリで
+      // サイレントにデータを破棄するため、暗号化で開く前にチェックが必要
+      if (_encryptionCipher != null) {
+        final metaBox = await Hive.openBox(_metaBoxName);
+        final migrated =
+            metaBox.get(_encryptionMigratedKey, defaultValue: false) == true;
+        if (!migrated) {
+          await _migrateToEncrypted(metaBox);
+          return;
+        }
+        await metaBox.close();
+      }
+
+      _diaryBox = await Hive.openBox<DiaryEntry>(
+        _boxName,
+        encryptionCipher: _encryptionCipher,
+      );
       _loggingService.info(
         'Hive box initialization completed: ${_diaryBox?.length ?? 0} entries',
       );
@@ -110,12 +137,48 @@ class DiaryService implements IDiaryService {
     }
   }
 
+  /// 未暗号化ボックスから暗号化ボックスへマイグレーション
+  Future<void> _migrateToEncrypted(Box metaBox) async {
+    try {
+      // 未暗号化で開いてデータを読み出す
+      final unencryptedBox = await Hive.openBox<DiaryEntry>(_boxName);
+      final entries = unencryptedBox.toMap();
+      _loggingService.info(
+        'Starting encryption migration: ${entries.length} entries found',
+      );
+      await unencryptedBox.close();
+      await Hive.deleteBoxFromDisk(_boxName);
+
+      // 暗号化ボックスに書き込み
+      // NOTE: HiveObjectは元のボックスへの参照を持つため、
+      // copyWith()で新しいインスタンスを作成してから書き込む
+      _diaryBox = await Hive.openBox<DiaryEntry>(
+        _boxName,
+        encryptionCipher: _encryptionCipher,
+      );
+      await _diaryBox!.putAll(entries.map((k, v) => MapEntry(k, v.copyWith())));
+      _loggingService.info(
+        'Encryption migration completed: ${_diaryBox!.length} entries',
+      );
+
+      await metaBox.put(_encryptionMigratedKey, true);
+      await metaBox.close();
+      await _indexManager.buildIndex(_diaryBox!);
+    } catch (e) {
+      _loggingService.error('Encryption migration failed', error: e);
+      await _recreateBox();
+    }
+  }
+
   /// スキーマ不整合時のみボックスを削除して再作成する
   Future<void> _recreateBox() async {
     try {
       await Hive.deleteBoxFromDisk(_boxName);
       _loggingService.warning('Old box deleted');
-      _diaryBox = await Hive.openBox<DiaryEntry>(_boxName);
+      _diaryBox = await Hive.openBox<DiaryEntry>(
+        _boxName,
+        encryptionCipher: _encryptionCipher,
+      );
       _loggingService.info('New box created');
       await _indexManager.buildIndex(_diaryBox!);
     } catch (deleteError) {

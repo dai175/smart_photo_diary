@@ -5,6 +5,7 @@ import 'package:smart_photo_diary/services/photo_service.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/camera_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_permission_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import '../../test_helpers/mock_platform_channels.dart';
@@ -22,6 +23,8 @@ class MockPhotoCacheService extends Mock implements IPhotoCacheService {}
 
 class MockPhotoPermissionService extends Mock
     implements IPhotoPermissionService {}
+
+class MockCameraService extends Mock implements ICameraService {}
 
 void main() {
   group('PhotoService Error Handling Tests', () {
@@ -62,6 +65,7 @@ void main() {
         logger: mockLogger,
         permissionService: mockPermissionService,
         cacheService: mockCacheService,
+        getCameraService: () => MockCameraService(),
       );
     });
 

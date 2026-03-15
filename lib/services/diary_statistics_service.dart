@@ -23,7 +23,12 @@ class DiaryStatisticsService implements IDiaryStatisticsService {
         return Hive.box<DiaryEntry>(_boxName);
       }
       return null;
-    } catch (_) {
+    } catch (e) {
+      _logger.warning(
+        'Failed to access diary box',
+        context: 'DiaryStatisticsService._diaryBox',
+        data: e.toString(),
+      );
       return null;
     }
   }

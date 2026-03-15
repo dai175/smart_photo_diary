@@ -37,7 +37,7 @@ void main() {
   });
 
   SettingsController createController() {
-    return SettingsController();
+    return SettingsController(logger: mockLogger);
   }
 
   group('SettingsController', () {

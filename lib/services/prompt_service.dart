@@ -11,7 +11,6 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
-import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
@@ -67,18 +66,6 @@ class PromptService implements IPromptService {
 
       // キャッシュを生成
       _buildCaches();
-
-      // 使用履歴サービスを取得（コンストラクタ未注入かつServiceLocator経由でも失敗時はnull）
-      if (_usageService == null) {
-        try {
-          _usageService = await serviceLocator.getAsync<IPromptUsageService>();
-        } catch (e) {
-          _logger.warning(
-            'PromptService: Usage history feature disabled (${e.toString()})',
-          );
-          _usageService = null;
-        }
-      }
 
       _isInitialized = true;
       _logger.info(
