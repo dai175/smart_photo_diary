@@ -1,17 +1,19 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_ce/hive_ce.dart';
 
-/// Hiveボックスの暗号化を管理するヘルパークラス
+/// Hiveボックスの暗号化キーを管理するヘルパークラス
 ///
 /// 初回起動時に256bit AESキーを生成し、flutter_secure_storageに保存。
 /// 2回目以降は保存済みキーを読み込む。
-/// 既存の未暗号化ボックスから暗号化ボックスへのマイグレーションも提供。
+///
+/// NOTE: 暗号化マイグレーション（未暗号化→暗号化）は DiaryService が担当。
+/// Hive CEは暗号化不一致時に例外を投げずクラッシュリカバリで
+/// サイレントにデータを破棄するため、マイグレーション前のデータ確認が必要で、
+/// DiaryEntry固有のcopyWith()が必要なため、ジェネリックな実装は不適切。
 class HiveEncryptionHelper {
   static const _keyStorageKey = 'hive_aes_encryption_key';
-  static const _migrationFlagPrefix = 'hive_encryption_migrated_';
 
   final FlutterSecureStorage _secureStorage;
   HiveAesCipher? _cipher;
@@ -41,41 +43,5 @@ class HiveEncryptionHelper {
       );
     }
     return _cipher!;
-  }
-
-  /// 未暗号化ボックスから暗号化ボックスへマイグレーション
-  ///
-  /// 既存の未暗号化データがある場合のみ実行。
-  /// マイグレーション完了後はフラグを保存し、以降はスキップ。
-  Future<void> migrateBoxIfNeeded<T>(String boxName) async {
-    final flagKey = '$_migrationFlagPrefix$boxName';
-    final migrated = await _secureStorage.read(key: flagKey);
-    if (migrated == 'true') return;
-
-    try {
-      // 未暗号化ボックスを開いてデータを読み出す
-      final box = await Hive.openBox<T>(boxName);
-      if (box.isNotEmpty) {
-        final entries = box.toMap();
-        await box.close();
-        await Hive.deleteBoxFromDisk(boxName);
-
-        // 暗号化ボックスに一括書き込み
-        final encryptedBox = await Hive.openBox<T>(
-          boxName,
-          encryptionCipher: cipher,
-        );
-        await encryptedBox.putAll(entries);
-        await encryptedBox.close();
-      } else {
-        await box.close();
-      }
-      // マイグレーション成功時のみフラグを設定
-      await _secureStorage.write(key: flagKey, value: 'true');
-    } catch (e) {
-      // ボックスが存在しない、または既に暗号化済みの場合は続行
-      // ServiceLocator初期化前に呼ばれるためdebugPrintをフォールバックとして使用
-      debugPrint('Hive migration skipped for $boxName: $e');
-    }
   }
 }

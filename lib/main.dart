@@ -4,7 +4,6 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config/environment_config.dart';
 import 'core/hive_encryption_helper.dart';
-import 'models/diary_entry.dart';
 import 'services/interfaces/storage_service_interface.dart';
 import 'hive_registrar.g.dart';
 import 'screens/home_screen.dart';
@@ -28,11 +27,11 @@ Future<void> main() async {
   // アダプターの登録
   Hive.registerAdapters();
 
-  // Hive暗号化の初期化（キーの生成/読み込み + 既存データのマイグレーション）
+  // Hive暗号化キーの初期化（キーの生成/読み込み）
+  // NOTE: マイグレーション（未暗号化→暗号化）はDiaryService初期化時に実行
   final encryptionHelper = HiveEncryptionHelper();
   try {
     await encryptionHelper.initialize();
-    await encryptionHelper.migrateBoxIfNeeded<DiaryEntry>('diary_entries');
   } catch (e, stackTrace) {
     // ServiceLocator未初期化のため、printをフォールバックとして使用
     // ignore: avoid_print
