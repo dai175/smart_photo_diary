@@ -70,11 +70,12 @@ class HiveEncryptionHelper {
       } else {
         await box.close();
       }
+      // マイグレーション成功時のみフラグを設定
+      await _secureStorage.write(key: flagKey, value: 'true');
     } catch (e) {
       // ボックスが存在しない、または既に暗号化済みの場合は続行
+      // ServiceLocator初期化前に呼ばれるためdebugPrintをフォールバックとして使用
       debugPrint('Hive migration skipped for $boxName: $e');
     }
-
-    await _secureStorage.write(key: flagKey, value: 'true');
   }
 }

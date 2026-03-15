@@ -98,17 +98,11 @@ void main() {
         );
       });
 
-      test('marks migration complete for non-existent box', () async {
+      test('does not mark migration complete when box open fails', () async {
         // Arrange
         when(
           () => mockStorage.read(key: 'hive_encryption_migrated_test_box'),
         ).thenAnswer((_) async => null);
-        when(
-          () => mockStorage.write(
-            key: 'hive_encryption_migrated_test_box',
-            value: 'true',
-          ),
-        ).thenAnswer((_) async {});
 
         // Initialize with a key so cipher is available
         final testKey = Hive.generateSecureKey();
@@ -119,16 +113,16 @@ void main() {
         final helper = HiveEncryptionHelper(secureStorage: mockStorage);
         await helper.initialize();
 
-        // Act — box doesn't exist, catches error and marks complete
+        // Act — box doesn't exist (Hive not initialized), catches error
         await helper.migrateBoxIfNeeded<String>('test_box');
 
-        // Assert
-        verify(
+        // Assert — flag should NOT be written so migration can be retried
+        verifyNever(
           () => mockStorage.write(
             key: 'hive_encryption_migrated_test_box',
-            value: 'true',
+            value: any(named: 'value'),
           ),
-        ).called(1);
+        );
       });
     });
   });

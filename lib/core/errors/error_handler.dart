@@ -28,11 +28,7 @@ class ErrorHandler {
     final message = 'An unexpected error occurred';
     final exception = ServiceException(message, originalError: error);
 
-    _log(
-      message,
-      context: context ?? 'ErrorHandler.handleError',
-      error: error,
-    );
+    _log(message, context: context ?? 'ErrorHandler.handleError', error: error);
 
     return exception;
   }

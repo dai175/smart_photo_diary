@@ -30,8 +30,17 @@ Future<void> main() async {
 
   // Hive暗号化の初期化（キーの生成/読み込み + 既存データのマイグレーション）
   final encryptionHelper = HiveEncryptionHelper();
-  await encryptionHelper.initialize();
-  await encryptionHelper.migrateBoxIfNeeded<DiaryEntry>('diary_entries');
+  try {
+    await encryptionHelper.initialize();
+    await encryptionHelper.migrateBoxIfNeeded<DiaryEntry>('diary_entries');
+  } catch (e, stackTrace) {
+    // ServiceLocator未初期化のため、printをフォールバックとして使用
+    // ignore: avoid_print
+    print('CRITICAL: Hive encryption initialization failed: $e');
+    // ignore: avoid_print
+    print(stackTrace);
+    rethrow;
+  }
 
   // アプリケーション初期化開始
   final appStartTime = DateTime.now();

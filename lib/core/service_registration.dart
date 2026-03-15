@@ -393,6 +393,7 @@ class ServiceRegistration {
     }
     serviceLocator.clear();
     _isInitialized = false;
+    _encryptionHelper = null;
   }
 
   /// Check if services are initialized
