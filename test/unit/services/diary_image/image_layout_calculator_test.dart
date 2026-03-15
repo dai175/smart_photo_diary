@@ -21,7 +21,11 @@ void main() {
 
   group('getSplitLayout', () {
     test('portrait → 上部写真、下部テキスト', () {
-      final layout = ImageLayoutCalculator.getSplitLayout(ShareFormat.portrait);
+      final diary = createDiary(content: 'A' * 250);
+      final layout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portrait,
+        diary,
+      );
       // 写真が上部
       expect(layout.photoRect.top, 0);
       expect(layout.photoRect.left, 0);
@@ -30,8 +34,10 @@ void main() {
     });
 
     test('portraitHD → スケール適用された上部写真、下部テキスト', () {
+      final diary = createDiary(content: 'A' * 250);
       final layout = ImageLayoutCalculator.getSplitLayout(
         ShareFormat.portraitHD,
+        diary,
       );
       expect(layout.photoRect.top, 0);
       expect(layout.textRect.top, greaterThan(layout.photoRect.bottom));
@@ -43,7 +49,11 @@ void main() {
     });
 
     test('square → 左部写真、右部テキスト', () {
-      final layout = ImageLayoutCalculator.getSplitLayout(ShareFormat.square);
+      final diary = createDiary(content: 'A' * 250);
+      final layout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.square,
+        diary,
+      );
       // 写真が左
       expect(layout.photoRect.left, 0);
       expect(layout.photoRect.top, 0);
@@ -52,8 +62,9 @@ void main() {
     });
 
     test('各フォーマットでphotoRectとtextRectが重ならない', () {
+      final diary = createDiary(content: 'A' * 250);
       for (final format in ShareFormat.values) {
-        final layout = ImageLayoutCalculator.getSplitLayout(format);
+        final layout = ImageLayoutCalculator.getSplitLayout(format, diary);
         final intersection = layout.photoRect.intersect(layout.textRect);
         expect(
           intersection.isEmpty ||
@@ -63,6 +74,88 @@ void main() {
           reason: '$format: photoRect and textRect should not overlap',
         );
       }
+    });
+
+    test('portrait + ショート日記 → 写真エリアが通常より大きい', () {
+      final shortDiary = createDiary(content: 'Short content');
+      final longDiary = createDiary(content: 'A' * 250);
+      final shortLayout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portrait,
+        shortDiary,
+      );
+      final longLayout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portrait,
+        longDiary,
+      );
+      expect(
+        shortLayout.photoRect.height,
+        greaterThan(longLayout.photoRect.height),
+      );
+      expect(shortLayout.textRect.height, lessThan(longLayout.textRect.height));
+    });
+
+    test('portraitHD + ショート日記 → 写真エリアが通常より大きい', () {
+      final shortDiary = createDiary(content: 'Short content');
+      final longDiary = createDiary(content: 'A' * 250);
+      final shortLayout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portraitHD,
+        shortDiary,
+      );
+      final longLayout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portraitHD,
+        longDiary,
+      );
+      expect(
+        shortLayout.photoRect.height,
+        greaterThan(longLayout.photoRect.height),
+      );
+    });
+
+    test('square + ショート日記 → 縦レイアウト（写真上・テキスト下）', () {
+      final shortDiary = createDiary(content: 'Short content');
+      final layout = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.square,
+        shortDiary,
+      );
+      // 写真がfull width、上部配置
+      expect(layout.photoRect.width, ShareFormat.square.actualWidth.toDouble());
+      expect(layout.photoRect.top, 0);
+      // テキストが写真の下に配置
+      expect(layout.textRect.top, greaterThan(layout.photoRect.bottom));
+      expect(layout.textRect.width, ShareFormat.square.actualWidth.toDouble());
+    });
+
+    test('ショート日記でもphotoRectとtextRectが重ならない', () {
+      final shortDiary = createDiary(content: 'Short');
+      for (final format in ShareFormat.values) {
+        final layout = ImageLayoutCalculator.getSplitLayout(format, shortDiary);
+        final intersection = layout.photoRect.intersect(layout.textRect);
+        expect(
+          intersection.isEmpty ||
+              intersection.width <= 0 ||
+              intersection.height <= 0,
+          isTrue,
+          reason:
+              '$format: photoRect and textRect should not overlap (short diary)',
+        );
+      }
+    });
+
+    test('境界値: ちょうど200文字はショートレイアウト', () {
+      final diary200 = createDiary(content: 'A' * 200);
+      final diary201 = createDiary(content: 'A' * 201);
+      final layout200 = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portrait,
+        diary200,
+      );
+      final layout201 = ImageLayoutCalculator.getSplitLayout(
+        ShareFormat.portrait,
+        diary201,
+      );
+      expect(
+        layout200.photoRect.height,
+        greaterThan(layout201.photoRect.height),
+      );
     });
   });
 

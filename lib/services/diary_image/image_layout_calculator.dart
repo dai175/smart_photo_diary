@@ -64,6 +64,28 @@ class ImageLayoutCalculator {
   /// 写真間のスペーシング
   static const double photoSpacing = 6.0;
 
+  /// ショート日記の写真領域比率（portrait）
+  static const double shortContentPhotoRatioPortrait = 0.75;
+
+  /// ショート日記の写真領域比率（square）
+  static const double shortContentPhotoRatioSquare = 0.60;
+
+  /// 通常日記の写真領域比率（portrait）
+  static const double standardContentPhotoRatioPortrait = 0.62;
+
+  /// 通常日記のsquare写真幅比率
+  static const double squarePhotoWidthRatio = 0.56;
+
+  /// テキストエリアの最小高さ（px）
+  static const double minTextAreaHeight = 200.0;
+
+  /// テキストエリアの最小幅（px、square用）
+  static const double minTextAreaWidth = 80.0;
+
+  /// コンテンツが短いかどうか（レイアウト・フォントサイズ判定用）
+  static bool _isShortContent(DiaryEntry diary) =>
+      diary.content.length <= contentLengthThreshold;
+
   /// フォーマットに基づくスケール係数を計算（幅・高さの平均、clamp済み）
   static double _calculateScale(ShareFormat format) {
     final widthScale = format.actualWidth / baseWidth;
@@ -72,14 +94,35 @@ class ImageLayoutCalculator {
   }
 
   /// 分離レイアウトの領域（写真/テキスト）
-  static ({Rect photoRect, Rect textRect}) getSplitLayout(ShareFormat format) {
+  static ({Rect photoRect, Rect textRect}) getSplitLayout(
+    ShareFormat format,
+    DiaryEntry diary,
+  ) {
     final w = format.actualWidth.toDouble();
     final h = format.actualHeight.toDouble();
-    final scale = (format.isHD ? format.scale : 1.0);
+    final scale = format.effectiveScale;
     final gap = 12.0 * scale;
+    final isShort = _isShortContent(diary);
 
     if (format.isSquare) {
-      final double photoW = (w * 0.56).clamp(0.0, w - 80.0 * scale).toDouble();
+      if (isShort) {
+        // ショート日記: 縦レイアウト（写真上・テキスト下）
+        final double photoH = (h * shortContentPhotoRatioSquare)
+            .clamp(0.0, h - minTextAreaHeight * scale)
+            .toDouble();
+        final photoRect = Rect.fromLTWH(0, 0, w, photoH);
+        final textRect = Rect.fromLTWH(
+          0,
+          photoRect.bottom + gap,
+          w,
+          h - photoH - gap,
+        );
+        return (photoRect: photoRect, textRect: textRect);
+      }
+      // 通常: 横レイアウト（写真左・テキスト右）
+      final double photoW = (w * squarePhotoWidthRatio)
+          .clamp(0.0, w - minTextAreaWidth * scale)
+          .toDouble();
       final photoRect = Rect.fromLTWH(0, 0, photoW, h);
       final textRect = Rect.fromLTWH(
         photoRect.right + gap,
@@ -91,7 +134,12 @@ class ImageLayoutCalculator {
     }
 
     // 縦長: 上部に写真、下部にテキスト
-    final double photoH = (h * 0.62).clamp(0.0, h - 200.0 * scale).toDouble();
+    final ratio = isShort
+        ? shortContentPhotoRatioPortrait
+        : standardContentPhotoRatioPortrait;
+    final double photoH = (h * ratio)
+        .clamp(0.0, h - minTextAreaHeight * scale)
+        .toDouble();
     final photoRect = Rect.fromLTWH(0, 0, w, photoH);
     final textRect = Rect.fromLTWH(
       0,
@@ -142,7 +190,6 @@ class ImageLayoutCalculator {
     }
 
     final titleLen = diary.title.length;
-    final contentLen = diary.content.length;
 
     // スケールに応じてフォントサイズを調整
     return TextSizes(
@@ -153,9 +200,9 @@ class ImageLayoutCalculator {
       titleMaxLines: titleLen > titleMaxLengthThreshold
           ? ImageLayoutCalculator.titleMaxLinesLong
           : ImageLayoutCalculator.titleMaxLines,
-      contentSize: contentLen > contentLengthThreshold
-          ? (baseContentFontSizeLong * scale).round().toDouble()
-          : (baseContentFontSize * scale).round().toDouble(),
+      contentSize: _isShortContent(diary)
+          ? (baseContentFontSize * scale).round().toDouble()
+          : (baseContentFontSizeLong * scale).round().toDouble(),
       contentMaxLines: ImageLayoutCalculator.contentMaxLines,
     );
   }
