@@ -9,7 +9,7 @@
 - **タイムライン表示**: 日付別グルーピング（今日/昨日/月別）による写真タイムライン（スティッキーヘッダー対応）
 - **多言語対応**: 日本語・英語の完全i18n対応（UI、AI生成、タグ全て）
 - **SNSシェア**: X（Twitter）・Instagramへの日記シェア機能（画像生成対応）
-- **完全プライベート**: データはすべて端末内に保存（プライバシーファースト設計）
+- **完全プライベート**: データはすべて端末内に暗号化保存（プライバシーファースト設計）
 - **統計・分析機能**: 日記の振り返りと使用パターン分析をサポート
 - **過去の写真対応**: Premium会員限定で過去365日間の写真から日記作成可能
 - **データ管理**: 日記データのエクスポート・インポート機能
@@ -74,7 +74,8 @@ lib/
 - **Dart 3.11+**: Records、Patterns、sealed classesを活用
 
 ### データストレージ
-- **Hive CE & hive_ce_flutter**: 高速NoSQLローカルデータベース
+- **Hive CE & hive_ce_flutter**: 高速NoSQLローカルデータベース（AES-256暗号化対応）
+- **Flutter Secure Storage**: 暗号鍵の安全な管理（Keychain/Keystore）
 - **SharedPreferences**: アプリ設定の永続化
 
 ### AI・API連携
@@ -112,13 +113,15 @@ git clone https://github.com/dai175/smart_photo_diary.git
 cd smart_photo_diary
 
 # FVMを利用している場合（推奨）
+fvm install
 fvm flutter pub get
 
 # コード生成実行
 fvm dart run build_runner build
 
-# 環境変数設定（プロジェクトルートに .env ファイル作成）
-# GEMINI_API_KEY=your_api_key_here
+# 環境変数設定（テンプレートをコピーしてAPIキーを設定）
+cp .env.example .env
+# .env を編集して GEMINI_API_KEY を設定
 
 # アプリを起動
 fvm flutter run
@@ -177,6 +180,7 @@ fvm flutter run --dart-define=FORCE_PLAN=premium  # プラン強制指定
 ## プライバシー・セキュリティ
 
 - **ローカルファースト**: 全ユーザーデータは端末内保存
+- **データ暗号化**: 日記データはAES-256で暗号化、暗号鍵はOS標準のセキュアストレージ（Keychain/Keystore）で保護
 - **API キー管理**: 環境変数による安全な管理（.envはプロジェクトルートに配置、gitignore済み）
 - **権限管理**: 最小限の権限要求（写真アクセスのみ）
 
