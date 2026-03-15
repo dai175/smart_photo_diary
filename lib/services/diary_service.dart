@@ -106,9 +106,15 @@ class DiaryService implements IDiaryService {
       // 暗号化が有効な場合、未マイグレーションのデータを先に移行する
       // NOTE: Hive CEは暗号化不一致時に例外を投げず、クラッシュリカバリで
       // サイレントにデータを破棄するため、暗号化で開く前にチェックが必要
-      if (_encryptionCipher != null && !await _isEncryptionMigrated()) {
-        await _migrateToEncrypted();
-        return;
+      if (_encryptionCipher != null) {
+        final metaBox = await Hive.openBox(_metaBoxName);
+        final migrated =
+            metaBox.get(_encryptionMigratedKey, defaultValue: false) == true;
+        if (!migrated) {
+          await _migrateToEncrypted(metaBox);
+          return;
+        }
+        await metaBox.close();
       }
 
       _diaryBox = await Hive.openBox<DiaryEntry>(
@@ -131,43 +137,14 @@ class DiaryService implements IDiaryService {
     }
   }
 
-  /// 暗号化マイグレーション済みかどうかをメタボックスで確認
-  Future<bool> _isEncryptionMigrated() async {
-    try {
-      final metaBox = await Hive.openBox(_metaBoxName);
-      final migrated = metaBox.get(_encryptionMigratedKey, defaultValue: false);
-      return migrated == true;
-    } catch (e) {
-      _loggingService.warning(
-        'Failed to read migration meta, assuming not migrated',
-        data: e.toString(),
-      );
-      return false;
-    }
-  }
-
-  /// 暗号化マイグレーション完了をメタボックスに記録
-  Future<void> _markEncryptionMigrated() async {
-    try {
-      final metaBox = await Hive.openBox(_metaBoxName);
-      await metaBox.put(_encryptionMigratedKey, true);
-    } catch (e) {
-      _loggingService.warning(
-        'Failed to write migration meta',
-        data: e.toString(),
-      );
-    }
-  }
-
   /// 未暗号化ボックスから暗号化ボックスへマイグレーション
-  Future<void> _migrateToEncrypted() async {
+  Future<void> _migrateToEncrypted(Box metaBox) async {
     try {
       // 未暗号化で開いてデータを読み出す
       final unencryptedBox = await Hive.openBox<DiaryEntry>(_boxName);
       final entries = unencryptedBox.toMap();
-      final entryCount = entries.length;
       _loggingService.info(
-        'Starting encryption migration: $entryCount entries found',
+        'Starting encryption migration: ${entries.length} entries found',
       );
       await unencryptedBox.close();
       await Hive.deleteBoxFromDisk(_boxName);
@@ -179,18 +156,13 @@ class DiaryService implements IDiaryService {
         _boxName,
         encryptionCipher: _encryptionCipher,
       );
-      if (entries.isNotEmpty) {
-        final copied = <dynamic, DiaryEntry>{};
-        for (final entry in entries.entries) {
-          copied[entry.key] = entry.value.copyWith();
-        }
-        await _diaryBox!.putAll(copied);
-      }
+      await _diaryBox!.putAll(entries.map((k, v) => MapEntry(k, v.copyWith())));
       _loggingService.info(
         'Encryption migration completed: ${_diaryBox!.length} entries',
       );
 
-      await _markEncryptionMigrated();
+      await metaBox.put(_encryptionMigratedKey, true);
+      await metaBox.close();
       await _indexManager.buildIndex(_diaryBox!);
     } catch (e) {
       _loggingService.error('Encryption migration failed', error: e);
