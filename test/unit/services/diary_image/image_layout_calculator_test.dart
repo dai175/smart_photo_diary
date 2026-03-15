@@ -111,22 +111,18 @@ void main() {
       );
     });
 
-    test('square + ショート日記 → 写真エリアが通常より大きい', () {
+    test('square + ショート日記 → 縦レイアウト（写真上・テキスト下）', () {
       final shortDiary = createDiary(content: 'Short content');
-      final longDiary = createDiary(content: 'A' * 250);
-      final shortLayout = ImageLayoutCalculator.getSplitLayout(
+      final layout = ImageLayoutCalculator.getSplitLayout(
         ShareFormat.square,
         shortDiary,
       );
-      final longLayout = ImageLayoutCalculator.getSplitLayout(
-        ShareFormat.square,
-        longDiary,
-      );
-      expect(
-        shortLayout.photoRect.width,
-        greaterThan(longLayout.photoRect.width),
-      );
-      expect(shortLayout.textRect.width, lessThan(longLayout.textRect.width));
+      // 写真がfull width、上部配置
+      expect(layout.photoRect.width, ShareFormat.square.actualWidth.toDouble());
+      expect(layout.photoRect.top, 0);
+      // テキストが写真の下に配置
+      expect(layout.textRect.top, greaterThan(layout.photoRect.bottom));
+      expect(layout.textRect.width, ShareFormat.square.actualWidth.toDouble());
     });
 
     test('ショート日記でもphotoRectとtextRectが重ならない', () {

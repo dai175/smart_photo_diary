@@ -68,7 +68,7 @@ class ImageLayoutCalculator {
   static const double shortContentPhotoRatioPortrait = 0.75;
 
   /// ショート日記の写真領域比率（square）
-  static const double shortContentPhotoRatioSquare = 0.70;
+  static const double shortContentPhotoRatioSquare = 0.60;
 
   /// フォーマットに基づくスケール係数を計算（幅・高さの平均、clamp済み）
   static double _calculateScale(ShareFormat format) {
@@ -89,8 +89,22 @@ class ImageLayoutCalculator {
     final isShortContent = diary.content.length <= contentLengthThreshold;
 
     if (format.isSquare) {
-      final ratio = isShortContent ? shortContentPhotoRatioSquare : 0.56;
-      final double photoW = (w * ratio).clamp(0.0, w - 80.0 * scale).toDouble();
+      if (isShortContent) {
+        // ショート日記: 縦レイアウト（写真上・テキスト下）
+        final double photoH = (h * shortContentPhotoRatioSquare)
+            .clamp(0.0, h - 200.0 * scale)
+            .toDouble();
+        final photoRect = Rect.fromLTWH(0, 0, w, photoH);
+        final textRect = Rect.fromLTWH(
+          0,
+          photoRect.bottom + gap,
+          w,
+          h - photoH - gap,
+        );
+        return (photoRect: photoRect, textRect: textRect);
+      }
+      // 通常: 横レイアウト（写真左・テキスト右）
+      final double photoW = (w * 0.56).clamp(0.0, w - 80.0 * scale).toDouble();
       final photoRect = Rect.fromLTWH(0, 0, photoW, h);
       final textRect = Rect.fromLTWH(
         photoRect.right + gap,
