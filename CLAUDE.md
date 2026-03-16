@@ -34,7 +34,7 @@ fvm flutter gen-l10n              # Generate localization files
 
 # Debug run
 fvm flutter run
-fvm flutter run --dart-define=FORCE_PLAN=premium  # Force premium plan
+fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_monthly  # Force premium plan
 ```
 
 ## Architecture Overview
