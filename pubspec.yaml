@@ -77,7 +77,7 @@ dev_dependencies:
   # rules and activating additional ones.
   lints: ^6.1.0
   mocktail: ^1.0.4
-  build_runner: ^2.12.2
+  build_runner: ^2.13.1
   hive_ce_generator: ^1.11.1
   flutter_launcher_icons: ^0.14.4
 
