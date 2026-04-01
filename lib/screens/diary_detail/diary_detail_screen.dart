@@ -99,7 +99,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
 
     if (success && mounted) {
-      MicroInteractions.hapticNotification();
+      MicroInteractions.hapticSuccess();
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(l10n.diaryUpdateSuccessMessage)),
       );
@@ -181,11 +181,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   /// AppBarを構築
   PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
     return AppBar(
-      title: Text(
-        _controller.isEditing
-            ? l10n.diaryDetailEditTitle
-            : l10n.diaryDetailViewTitle,
-      ),
+      title: _controller.isEditing ? Text(l10n.diaryDetailEditTitle) : null,
       actions: [
         // 共有ボタン
         if (!_controller.isLoading &&
@@ -235,7 +231,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 child: Row(
                   children: [
                     const Icon(Icons.delete_rounded),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(l10n.commonDelete),
                   ],
                 ),
@@ -286,14 +282,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           boxShadow: Theme.of(context).brightness == Brightness.dark
-              ? AppSpacing.cardShadowDark
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+              ? AppSpacing.bottomBarShadowDark
+              : AppSpacing.bottomBarShadow,
         ),
         child: Row(
           children: [

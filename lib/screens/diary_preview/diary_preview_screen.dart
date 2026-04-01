@@ -120,7 +120,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     // 自動保存完了後のナビゲーション（consumeで1回限り）
     final savedId = _controller.consumeSavedDiaryId();
     if (savedId != null && mounted) {
-      MicroInteractions.hapticNotification();
+      MicroInteractions.hapticSuccess();
       final scaffoldMessenger = ScaffoldMessenger.of(context);
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
@@ -147,7 +147,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     );
 
     if (success && mounted) {
-      MicroInteractions.hapticNotification();
+      MicroInteractions.hapticSuccess();
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
       );
@@ -291,14 +291,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           boxShadow: Theme.of(context).brightness == Brightness.dark
-              ? AppSpacing.cardShadowDark
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+              ? AppSpacing.bottomBarShadowDark
+              : AppSpacing.bottomBarShadow,
         ),
         child: SlideInWidget(
           delay: AppConstants.mediumAnimationDuration,

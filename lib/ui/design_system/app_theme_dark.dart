@@ -286,7 +286,9 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         return AppColors.onSurfaceDark;
       }),
       todayBorder: const BorderSide(color: AppColors.primaryLight),
-      todayForegroundColor: const WidgetStatePropertyAll(AppColors.primaryLight),
+      todayForegroundColor: const WidgetStatePropertyAll(
+        AppColors.primaryLight,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
       ),
