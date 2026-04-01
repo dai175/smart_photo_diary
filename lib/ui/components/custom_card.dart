@@ -172,7 +172,7 @@ class _CustomCardState extends State<CustomCard>
                               )
                             : null),
                     boxShadow: isDark
-                        ? null
+                        ? AppSpacing.cardShadowDark
                         : [
                             BoxShadow(
                               color: shadowColor,
