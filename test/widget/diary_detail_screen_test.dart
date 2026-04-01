@@ -112,7 +112,6 @@ void main() {
         expect(find.byIcon(Icons.share_rounded), findsOneWidget);
         expect(find.byType(PopupMenuButton<String>), findsOneWidget);
       });
-
     });
 
     group('Error state', () {

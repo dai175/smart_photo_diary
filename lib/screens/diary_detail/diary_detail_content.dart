@@ -72,7 +72,7 @@ class DiaryDetailContent extends StatelessWidget {
           // メタデータセクション
           DiaryDetailMetadataSection(
             diaryEntry: diaryEntry,
-            photoAssets: photoAssets,
+            hasPhotos: photoAssets.isNotEmpty,
           ),
 
           const SizedBox(height: AppSpacing.xxxl),

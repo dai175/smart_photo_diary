@@ -1192,10 +1192,6 @@
   "@commonClearFilters": {
     "description": "Button label to remove all active filters"
   },
-  "diaryDetailViewTitle": "",
-  "@diaryDetailViewTitle": {
-    "description": "App bar title when viewing a diary"
-  },
   "diaryDetailEditTitle": "Edit",
   "@diaryDetailEditTitle": {
     "description": "App bar title when editing a diary"
@@ -1203,10 +1199,6 @@
   "diaryDetailContentHeading": "Content",
   "@diaryDetailContentHeading": {
     "description": "Heading for the diary content section"
-  },
-  "diaryDetailEditContentHeading": "Edit",
-  "@diaryDetailEditContentHeading": {
-    "description": "Content section heading when in edit mode"
   },
   "diaryDetailLoadingTitle": "Loading diary...",
   "@diaryDetailLoadingTitle": {

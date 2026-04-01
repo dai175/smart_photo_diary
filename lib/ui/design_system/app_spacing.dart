@@ -184,9 +184,18 @@ class AppSpacing {
     BoxShadow(color: Color(0x33000000), blurRadius: 4.0, offset: Offset(0, 2)),
   ];
 
-  /// ダークモード用浮上カードシャドウ
-  static const List<BoxShadow> elevatedCardShadowDark = [
-    BoxShadow(color: Color(0x40000000), blurRadius: 8.0, offset: Offset(0, 3)),
+  /// ボトムバー用シャドウ（上向き）
+  static const List<BoxShadow> bottomBarShadow = [
+    BoxShadow(
+      color: Color(0x0D000000),
+      blurRadius: 10.0,
+      offset: Offset(0, -2),
+    ),
+  ];
+
+  /// ダークモード用ボトムバーシャドウ
+  static const List<BoxShadow> bottomBarShadowDark = [
+    BoxShadow(color: Color(0x33000000), blurRadius: 4.0, offset: Offset(0, -1)),
   ];
 
   /// ボタン用のシャドウ

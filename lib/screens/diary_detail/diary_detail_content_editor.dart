@@ -71,10 +71,7 @@ class DiaryDetailContentEditor extends StatelessWidget {
           size: AppSpacing.iconMd,
         ),
         const SizedBox(width: AppSpacing.sm),
-        Text(
-          l10n.diaryDetailContentHeading,
-          style: AppTypography.titleLarge,
-        ),
+        Text(l10n.diaryDetailContentHeading, style: AppTypography.titleLarge),
       ],
     );
   }

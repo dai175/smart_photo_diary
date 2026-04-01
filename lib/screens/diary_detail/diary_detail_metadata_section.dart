@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
-
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
 import '../../ui/components/custom_card.dart';
@@ -14,11 +12,11 @@ class DiaryDetailMetadataSection extends StatelessWidget {
   const DiaryDetailMetadataSection({
     super.key,
     required this.diaryEntry,
-    required this.photoAssets,
+    this.hasPhotos = false,
   });
 
   final DiaryEntry diaryEntry;
-  final List<AssetEntity> photoAssets;
+  final bool hasPhotos;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +25,7 @@ class DiaryDetailMetadataSection extends StatelessWidget {
     }
 
     return SlideInWidget(
-      delay: Duration(milliseconds: photoAssets.isNotEmpty ? 300 : 200),
+      delay: Duration(milliseconds: hasPhotos ? 300 : 200),
       child: CustomCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
