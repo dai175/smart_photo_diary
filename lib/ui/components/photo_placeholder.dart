@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/app_constants.dart';
 import '../design_system/app_spacing.dart';
+import 'loading_shimmer.dart';
 
 /// 写真サムネイルのプレースホルダーウィジェット
 ///
 /// エラー状態（壊れた画像アイコン）またはローディング状態
-/// （プログレスインジケーター）を表示する。
+/// （シマーアニメーション）を表示する。
 class PhotoPlaceholder extends StatelessWidget {
   const PhotoPlaceholder({super.key, required this.size, this.isError = false});
 
@@ -18,6 +18,14 @@ class PhotoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!isError) {
+      return ImageShimmer(
+        width: size,
+        height: size,
+        borderRadius: AppSpacing.photoRadius,
+      );
+    }
+
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: size,
@@ -27,14 +35,10 @@ class PhotoPlaceholder extends StatelessWidget {
         borderRadius: AppSpacing.photoRadius,
       ),
       child: Center(
-        child: isError
-            ? Icon(
-                Icons.broken_image_outlined,
-                color: colorScheme.onSurfaceVariant,
-              )
-            : const CircularProgressIndicator(
-                strokeWidth: AppConstants.progressIndicatorStrokeWidth,
-              ),
+        child: Icon(
+          Icons.broken_image_outlined,
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
