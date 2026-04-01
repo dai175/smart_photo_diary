@@ -6,6 +6,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../constants/app_constants.dart';
 import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
+import '../../ui/components/loading_shimmer.dart';
 
 /// パフォーマンス最適化された写真サムネイルウィジェット
 class TimelinePhotoThumbnail extends StatelessWidget {
@@ -74,11 +75,11 @@ class TimelinePhotoThumbnail extends StatelessWidget {
         } else if (!snapshot.hasData) {
           // ローディング中は軽量なプレースホルダーのみ（アニメーションなし）
           // SliverGridの遅延構築でオフスクリーンに大量生成される可能性があるため
-          return Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-            ),
+          return ImageShimmer(
+            width: double.infinity,
+            height: double.infinity,
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+            enabled: false,
           );
         } else {
           // Failure case
