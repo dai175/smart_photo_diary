@@ -42,7 +42,7 @@ class DiaryDetailPhotoSection extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  l10n.diaryDetailPhotosSectionTitle(photoAssets.length),
+                  l10n.diaryDetailPhotosSectionTitle,
                   style: AppTypography.titleLarge,
                 ),
               ],

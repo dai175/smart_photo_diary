@@ -1212,9 +1212,13 @@
   "@diaryDetailEditTitle": {
     "description": "日記編集時のタイトル"
   },
-  "diaryDetailContentHeading": "日記の内容",
+  "diaryDetailContentHeading": "内容",
   "@diaryDetailContentHeading": {
     "description": "日記本文セクションの見出し"
+  },
+  "diaryDetailEditContentHeading": "編集",
+  "@diaryDetailEditContentHeading": {
+    "description": "編集モード時のコンテンツセクション見出し"
   },
   "diaryDetailLoadingTitle": "日記を読み込み中...",
   "@diaryDetailLoadingTitle": {
@@ -1224,18 +1228,13 @@
   "@diaryDetailLoadingSubtitle": {
     "description": "日記読み込み中に表示する補足文"
   },
-  "diaryDetailDateLabel": "日記の日付",
+  "diaryDetailDateLabel": "日付",
   "@diaryDetailDateLabel": {
     "description": "日記の日付を示すラベル"
   },
-  "diaryDetailPhotosSectionTitle": "写真 ({count}枚)",
+  "diaryDetailPhotosSectionTitle": "写真",
   "@diaryDetailPhotosSectionTitle": {
-    "description": "写真セクションのタイトル",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "写真セクションのタイトル"
   },
   "diaryDetailTagCount": "{count}個のタグ",
   "@diaryDetailTagCount": {

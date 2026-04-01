@@ -1212,9 +1212,13 @@
   "@diaryDetailEditTitle": {
     "description": "App bar title when editing a diary"
   },
-  "diaryDetailContentHeading": "Diary content",
+  "diaryDetailContentHeading": "Content",
   "@diaryDetailContentHeading": {
     "description": "Heading for the diary content section"
+  },
+  "diaryDetailEditContentHeading": "Edit",
+  "@diaryDetailEditContentHeading": {
+    "description": "Content section heading when in edit mode"
   },
   "diaryDetailLoadingTitle": "Loading diary...",
   "@diaryDetailLoadingTitle": {
@@ -1224,18 +1228,13 @@
   "@diaryDetailLoadingSubtitle": {
     "description": "Subtitle shown while the diary is loading"
   },
-  "diaryDetailDateLabel": "Diary date",
+  "diaryDetailDateLabel": "Date",
   "@diaryDetailDateLabel": {
     "description": "Label for the diary date"
   },
-  "diaryDetailPhotosSectionTitle": "Photos ({count})",
+  "diaryDetailPhotosSectionTitle": "Photos",
   "@diaryDetailPhotosSectionTitle": {
-    "description": "Heading for the photos section with count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "Heading for the photos section"
   },
   "diaryDetailTagCount": "{count} tags",
   "@diaryDetailTagCount": {
