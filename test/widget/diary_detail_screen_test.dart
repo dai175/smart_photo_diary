@@ -98,7 +98,7 @@ void main() {
         );
       });
 
-      testWidgets('shows edit, delete, and share buttons', (
+      testWidgets('shows edit, share, and overflow menu buttons', (
         WidgetTester tester,
       ) async {
         when(
@@ -109,8 +109,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.delete_rounded), findsOneWidget);
         expect(find.byIcon(Icons.share_rounded), findsOneWidget);
+        expect(find.byType(PopupMenuButton<String>), findsOneWidget);
       });
 
       testWidgets('AppBar shows view title in read mode', (
