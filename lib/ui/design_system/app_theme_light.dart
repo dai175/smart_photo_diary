@@ -27,8 +27,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       onSecondaryContainer: AppColors.onSecondaryContainer,
       surface: AppColors.surface,
       onSurface: AppColors.onSurface,
-      surfaceContainerHighest: Color(0xFFDDD8D2),
-      surfaceContainerHigh: Color(0xFFC4BEB7),
+      surfaceContainerHighest: Color(0xFFC4BEB7),
+      surfaceContainerHigh: Color(0xFFE8E4DF),
       onSurfaceVariant: AppColors.onSurfaceVariant,
       error: AppColors.error,
       onError: AppColors.onError,
@@ -234,6 +234,31 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       contentTextStyle: AppTypography.withColor(
         AppTypography.bodyMedium,
         AppColors.onSurface,
+      ),
+    ),
+
+    // Date Picker Theme — warm tone に統一
+    datePickerTheme: DatePickerThemeData(
+      headerBackgroundColor: AppColors.primaryContainer,
+      headerForegroundColor: AppColors.onPrimaryContainer,
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: Colors.transparent,
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppColors.primary;
+        }
+        return null;
+      }),
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
+        return AppColors.onSurface;
+      }),
+      todayBorder: const BorderSide(color: AppColors.primary),
+      todayForegroundColor: const WidgetStatePropertyAll(AppColors.primary),
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppSpacing.cardRadiusLarge,
       ),
     ),
 
