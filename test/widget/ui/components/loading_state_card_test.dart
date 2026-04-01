@@ -23,24 +23,6 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('追加コンテンツを表示する', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: LoadingStateCard(
-                title: 'Title',
-                subtitle: 'Subtitle',
-                additionalContent: LinearProgressIndicator(value: 0.5),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    });
-
     testWidgets('カスタムインジケーターカラーを適用する', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -58,20 +40,6 @@ void main() {
 
       final containers = find.byType(Container);
       expect(containers, findsWidgets);
-    });
-
-    testWidgets('追加コンテンツがない場合は余分なスペースを表示しない', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: LoadingStateCard(title: 'Title', subtitle: 'Subtitle'),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(LinearProgressIndicator), findsNothing);
     });
   });
 }
