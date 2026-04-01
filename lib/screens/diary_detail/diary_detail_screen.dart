@@ -98,6 +98,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
 
     if (success && mounted) {
+      MicroInteractions.hapticNotification();
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(l10n.diaryUpdateSuccessMessage)),
       );
@@ -128,6 +129,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     final success = await _controller.deleteDiary(widget.diaryId);
 
     if (success && mounted) {
+      MicroInteractions.hapticSuccess();
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(l10n.diaryDeleteSuccessMessage)),
       );

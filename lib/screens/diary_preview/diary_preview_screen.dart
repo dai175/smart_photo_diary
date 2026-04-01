@@ -13,6 +13,7 @@ import '../../services/interfaces/settings_service_interface.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/animations/list_animations.dart';
+import '../../ui/animations/micro_interactions.dart';
 import '../diary_detail_screen.dart';
 import 'diary_preview_body.dart';
 import 'diary_preview_dialogs.dart';
@@ -119,6 +120,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     // 自動保存完了後のナビゲーション（consumeで1回限り）
     final savedId = _controller.consumeSavedDiaryId();
     if (savedId != null && mounted) {
+      MicroInteractions.hapticNotification();
       final scaffoldMessenger = ScaffoldMessenger.of(context);
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
@@ -145,6 +147,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     );
 
     if (success && mounted) {
+      MicroInteractions.hapticNotification();
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(context.l10n.diaryPreviewSaveSuccess)),
       );

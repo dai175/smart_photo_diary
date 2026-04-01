@@ -8,6 +8,7 @@ import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
 import '../models/diary_entry.dart';
 import '../models/photo_type_filter.dart';
+import '../ui/animations/micro_interactions.dart';
 import '../screens/diary_screen.dart';
 import '../screens/diary_detail_screen.dart';
 import '../screens/settings_screen.dart';
@@ -340,6 +341,7 @@ class _HomeScreenState extends State<HomeScreen>
                 type: BottomNavigationBarType.fixed,
                 currentIndex: _homeController.currentIndex,
                 onTap: (index) {
+                  MicroInteractions.hapticSelection();
                   if (_homeController.currentIndex == index) {
                     // 同じタブを再タップした場合、先頭へスクロール
                     switch (index) {

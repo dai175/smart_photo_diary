@@ -29,6 +29,16 @@ class MicroInteractions {
     HapticFeedback.selectionClick();
   }
 
+  /// 成功時のハプティックフィードバック
+  static void hapticSuccess() {
+    HapticFeedback.mediumImpact();
+  }
+
+  /// 通知レベルのハプティックフィードバック
+  static void hapticNotification() {
+    HapticFeedback.heavyImpact();
+  }
+
   /// バウンス効果
   static Widget bounceOnTap({
     required Widget child,
