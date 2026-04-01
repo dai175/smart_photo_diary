@@ -6,6 +6,7 @@ import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
+import '../ui/components/loading_state_card.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
@@ -100,36 +101,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppConstants.loadingCenterHeightRatio,
         ),
         Center(
-          child: CustomCard(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: AppSpacing.cardPadding,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest
-                        .withValues(alpha: AppConstants.opacityXLow),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const CircularProgressIndicator(strokeWidth: 3),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  context.l10n.settingsLoadingTitle,
-                  style: AppTypography.titleLarge.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  context.l10n.settingsLoadingSubtitle,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+          child: LoadingStateCard(
+            title: context.l10n.settingsLoadingTitle,
+            subtitle: context.l10n.settingsLoadingSubtitle,
           ),
         ),
       ],

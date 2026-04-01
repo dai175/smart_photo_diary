@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/statistics_controller.dart';
 import 'diary_detail_screen.dart';
 import '../ui/design_system/app_spacing.dart';
-import '../ui/design_system/app_typography.dart';
-import '../ui/components/custom_card.dart';
+import '../ui/components/loading_state_card.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../localization/localization_extensions.dart';
 import 'statistics/statistics_cards.dart';
@@ -47,42 +46,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
           body: _controller.isLoading
               ? Center(
-                  child: CustomCard(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: AppSpacing.cardPadding,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 3,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        Text(
-                          l10n.statisticsLoadingTitle,
-                          style: AppTypography.titleLarge.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          l10n.statisticsLoadingSubtitle,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                  child: LoadingStateCard(
+                    title: l10n.statisticsLoadingTitle,
+                    subtitle: l10n.statisticsLoadingSubtitle,
                   ),
                 )
               : MicroInteractions.pullToRefresh(
