@@ -253,6 +253,9 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
         if (states.contains(WidgetState.selected)) {
           return Colors.white;
         }
+        if (states.contains(WidgetState.disabled)) {
+          return null;
+        }
         return AppColors.onSurface;
       }),
       todayBorder: const BorderSide(color: AppColors.primary),
