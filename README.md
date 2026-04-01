@@ -32,7 +32,7 @@
 - **Result<T>パターン**: sealed classによる関数型エラーハンドリングで型安全性を確保
 - **インターフェース指向**: テスタビリティを重視した設計（Iプレフィックス規約）
 - **Facade + Delegateパターン**: 大きなサービス/コントローラーは専用Delegateに分解し単一責任を維持
-  - Services: `DiaryService` → `DiaryCrudDelegate` + `DiaryQueryDelegate`、`SubscriptionService` → `PurchaseFlowDelegate` + `PurchaseProductDelegate`
+  - Services: `DiaryService` → `DiaryCrudDelegate` + `DiaryQueryDelegate`、`StorageService` → `StorageExportDelegate` + `StorageImportDelegate`、`SubscriptionService` → `PurchaseFlowDelegate` + `PurchaseProductDelegate`、`SettingsService` → `SettingsSubscriptionDelegate`
   - Controllers: `DiaryPreviewController` → `DiaryPreviewGenerationDelegate` + `DiaryPreviewSaveDelegate`
 - **ChangeNotifier状態管理**: Provider/Riverpod等を使わないシンプルな状態管理
 - **3層テスト戦略**: ユニット・ウィジェット・統合テスト（100%成功率維持）
@@ -51,14 +51,15 @@ lib/
 │   ├── diary_image/    # 日記画像生成（レイアウト、写真/テキスト描画）
 │   ├── social_share/   # SNSシェアチャネル実装
 │   ├── mixins/         # サービス共通Mixin（ログ、購入イベント）
-│   └── *.dart          # コアサービス実装とDelegate（diary, subscription, photo等）
-├── controllers/        # 画面コントローラー（ChangeNotifier + Delegate）
-├── screens/            # 画面実装（ホーム、日記プレビュー、日記詳細、統計、設定、オンボーディング）
-├── widgets/            # ドメイン固有ウィジェット（タイムライン、設定、アップグレード）
+│   └── *.dart          # コアサービス実装、Delegate、使用量追跡、機能アクセス制御、サブスク状態管理
+├── controllers/        # 画面コントローラー（ChangeNotifier + Delegate）、BaseErrorController、ユーティリティNotifier
+├── screens/            # 画面実装（home/, diary_detail/, diary_preview/, statistics/, onboarding/ + ルート直下）
+├── widgets/            # ドメイン固有ウィジェット（タイムライン、設定、アップグレード、FAB、カレンダー、プロンプト選択）
 ├── shared/             # 共有UIコンポーネント（フィルター等）
 ├── ui/
 │   ├── design_system/  # Material Design 3テーマ、カラー、タイポグラフィ
 │   ├── components/     # 共通UIコンポーネント（CustomDialog、ボタン等）
+│   ├── component_constants.dart  # 共有UIコンポーネント定数
 │   ├── animations/     # マイクロインタラクション、ページ遷移
 │   └── error_display/  # エラー表示システム（重要度レベル別）
 ├── utils/              # ユーティリティ（日付、ダイアログ、ロケール、動的価格、パフォーマンス監視）
@@ -174,7 +175,7 @@ fvm flutter build appbundle          # Google Play Store用
 
 # デバッグ
 fvm flutter run
-fvm flutter run --dart-define=FORCE_PLAN=premium  # プラン強制指定
+fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_monthly  # プラン強制指定（premium_monthly/premium_yearly/basic）
 ```
 
 ## プライバシー・セキュリティ
