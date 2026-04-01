@@ -154,7 +154,7 @@ class CameraService implements ICameraService {
     );
 
     // photo_managerに新しい写真が追加されるまで少し待つ
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(AppConstants.cameraSettleDelay);
 
     // 写真ライブラリを更新
     await PhotoManager.clearFileCache();

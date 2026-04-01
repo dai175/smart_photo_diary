@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/writing_prompt.dart';
 import '../../ui/components/custom_card.dart';
@@ -17,7 +18,7 @@ class DiaryPreviewPromptDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FadeInWidget(
-      delay: const Duration(milliseconds: 50),
+      delay: AppConstants.staggerDelayXSmall,
       child: CustomCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
