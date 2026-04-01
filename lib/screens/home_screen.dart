@@ -341,7 +341,6 @@ class _HomeScreenState extends State<HomeScreen>
                 type: BottomNavigationBarType.fixed,
                 currentIndex: _homeController.currentIndex,
                 onTap: (index) {
-                  MicroInteractions.hapticSelection();
                   if (_homeController.currentIndex == index) {
                     // 同じタブを再タップした場合、先頭へスクロール
                     switch (index) {
@@ -358,6 +357,7 @@ class _HomeScreenState extends State<HomeScreen>
                     return;
                   }
 
+                  MicroInteractions.hapticSelection();
                   if (index == AppConstants.homeTabIndex) {
                     _loadUsedPhotoIds();
                   }

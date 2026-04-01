@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
+import '../../ui/animations/micro_interactions.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
@@ -188,7 +189,7 @@ class DiaryDetailContentEditor extends StatelessWidget {
     final title = diaryEntry.title.isNotEmpty ? '${diaryEntry.title}\n\n' : '';
     final text = '$title${diaryEntry.content}\n\n${AppConstants.shareHashtag}';
     Clipboard.setData(ClipboardData(text: text));
-    HapticFeedback.mediumImpact();
+    MicroInteractions.hapticSuccess();
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.diaryDetailCopiedToClipboard)));

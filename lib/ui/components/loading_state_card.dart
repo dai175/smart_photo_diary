@@ -13,7 +13,6 @@ class LoadingStateCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.indicatorColor,
-    this.additionalContent,
   });
 
   /// ローディングタイトル
@@ -24,9 +23,6 @@ class LoadingStateCard extends StatelessWidget {
 
   /// インジケーター背景色（デフォルト: surfaceContainerHighest）
   final Color? indicatorColor;
-
-  /// 追加コンテンツ（進捗バーなど）
-  final Widget? additionalContent;
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +58,6 @@ class LoadingStateCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          if (additionalContent != null) ...[
-            const SizedBox(height: AppSpacing.lg),
-            additionalContent!,
-          ],
         ],
       ),
     );
