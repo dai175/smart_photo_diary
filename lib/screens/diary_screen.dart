@@ -158,6 +158,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       builder: (context) => FilterBottomSheet(
         initialFilter: _controller.currentFilter,
         onApply: (filter) {
+          MicroInteractions.hapticSelection();
           _controller.applyFilter(filter);
           if (_scrollController.hasClients) {
             _scrollController.jumpTo(0);
