@@ -274,13 +274,15 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         ),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          boxShadow: Theme.of(context).brightness == Brightness.dark
+              ? AppSpacing.cardShadowDark
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
         ),
         child: Row(
           children: [
