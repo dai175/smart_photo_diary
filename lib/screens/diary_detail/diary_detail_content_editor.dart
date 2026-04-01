@@ -73,7 +73,7 @@ class DiaryDetailContentEditor extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(
           isEditing
-              ? l10n.diaryDetailEditTitle
+              ? l10n.diaryDetailEditContentHeading
               : l10n.diaryDetailContentHeading,
           style: AppTypography.titleLarge,
         ),

@@ -52,14 +52,12 @@ class DiaryDetailMetadataSection extends StatelessWidget {
               context,
               l10n.commonCreatedAtLabel,
               l10n.formatFullDateTime(diaryEntry.createdAt),
-              Icons.access_time_rounded,
             ),
             const SizedBox(height: AppSpacing.sm),
             _buildMetadataRow(
               context,
               l10n.commonUpdatedAtLabel,
               l10n.formatFullDateTime(diaryEntry.updatedAt),
-              Icons.update_rounded,
             ),
             if (diaryEntry.effectiveTags.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
@@ -71,20 +69,9 @@ class DiaryDetailMetadataSection extends StatelessWidget {
     );
   }
 
-  Widget _buildMetadataRow(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
+  Widget _buildMetadataRow(BuildContext context, String label, String value) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          size: AppSpacing.iconXs,
-        ),
-        const SizedBox(width: AppSpacing.sm),
         Text(
           '$label: ',
           style: AppTypography.labelMedium.copyWith(
@@ -107,12 +94,6 @@ class DiaryDetailMetadataSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.tag_rounded,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          size: AppSpacing.iconXs,
-        ),
-        const SizedBox(width: AppSpacing.sm),
         Text(
           l10n.commonTagsLabel,
           style: AppTypography.labelMedium.copyWith(
