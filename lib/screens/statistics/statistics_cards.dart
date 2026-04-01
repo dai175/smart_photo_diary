@@ -77,7 +77,7 @@ class StatisticsCards extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: SlideInWidget(
-                delay: const Duration(milliseconds: 250),
+                delay: AppConstants.staggerDelayMedium,
                 child: _buildStatCard(
                   context,
                   l10n.statisticsMonthlyCountTitle,

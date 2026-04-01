@@ -66,6 +66,8 @@ class AppConstants {
     milliseconds: 300,
   );
   static const Duration fastAnimationDuration = Duration(milliseconds: 150);
+  static const Duration staggerDelayXSmall = Duration(milliseconds: 50);
+  static const Duration staggerDelayMedium = Duration(milliseconds: 250);
   static const Duration shimmerAnimationPeriod = Duration(milliseconds: 1800);
 
   // SnackBar 表示時間
@@ -76,6 +78,9 @@ class AppConstants {
   // 機能的ディレイ（UIアニメーションとは独立）
   /// 統計データ変更ハンドラーのデバウンス時間
   static const Duration statisticsDebounce = Duration(milliseconds: 350);
+
+  /// カメラ撮影後の安定化待機時間
+  static const Duration cameraSettleDelay = Duration(milliseconds: 1500);
 
   /// スクロール位置に基づくプリフェッチデバウンス遅延
   static const Duration prefetchDebounceDelay = Duration(milliseconds: 200);

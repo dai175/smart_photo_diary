@@ -296,7 +296,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           ],
         ),
         child: SlideInWidget(
-          delay: const Duration(milliseconds: 400),
+          delay: AppConstants.mediumAnimationDuration,
           begin: const Offset(0, 1),
           child: PrimaryButton(
             onPressed: _saveDiary,
