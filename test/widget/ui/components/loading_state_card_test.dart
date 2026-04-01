@@ -38,8 +38,14 @@ void main() {
         ),
       );
 
-      final containers = find.byType(Container);
-      expect(containers, findsWidgets);
+      final container =
+          tester.widgetList<Container>(find.byType(Container)).firstWhere(
+        (c) =>
+            c.decoration is BoxDecoration &&
+            (c.decoration as BoxDecoration).shape == BoxShape.circle,
+      );
+      final decoration = container.decoration! as BoxDecoration;
+      expect(decoration.color, Colors.red);
     });
   });
 }
