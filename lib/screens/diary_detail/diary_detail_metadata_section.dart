@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../../l10n/generated/app_localizations.dart';
+import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
 import '../../ui/components/custom_card.dart';
 import '../../ui/components/modern_chip.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
-import '../../localization/localization_extensions.dart';
 
-/// 日記詳細のメタデータセクション（作成日、更新日、タグ）
+/// 日記詳細のタグセクション
 class DiaryDetailMetadataSection extends StatelessWidget {
   const DiaryDetailMetadataSection({
     super.key,
     required this.diaryEntry,
     required this.photoAssets,
-    required this.l10n,
   });
 
   final DiaryEntry diaryEntry;
   final List<AssetEntity> photoAssets;
-  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
+    if (diaryEntry.effectiveTags.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return SlideInWidget(
       delay: Duration(milliseconds: photoAssets.isNotEmpty ? 300 : 200),
       child: CustomCard(
@@ -34,82 +35,28 @@ class DiaryDetailMetadataSection extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  Icons.info_outline_rounded,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: AppSpacing.iconSm,
+                  Icons.tag_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: AppSpacing.iconMd,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  l10n.diaryDetailMetadataTitle,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  context.l10n.diaryDetailTagsSectionTitle,
+                  style: AppTypography.titleLarge,
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
-            _buildMetadataRow(
-              context,
-              l10n.commonCreatedAtLabel,
-              l10n.formatFullDateTime(diaryEntry.createdAt),
+            const SizedBox(height: AppSpacing.lg),
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: diaryEntry.effectiveTags
+                  .map((tag) => ModernChip.tag(label: tag))
+                  .toList(),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildMetadataRow(
-              context,
-              l10n.commonUpdatedAtLabel,
-              l10n.formatFullDateTime(diaryEntry.updatedAt),
-            ),
-            if (diaryEntry.effectiveTags.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _buildTagsRow(context),
-            ],
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildMetadataRow(BuildContext context, String label, String value) {
-    return Row(
-      children: [
-        Text(
-          '$label: ',
-          style: AppTypography.labelMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: AppTypography.bodyMedium.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTagsRow(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.commonTagsLabel,
-          style: AppTypography.labelMedium.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Expanded(
-          child: Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: diaryEntry.effectiveTags
-                .map((tag) => ModernChip.tag(label: tag))
-                .toList(),
-          ),
-        ),
-      ],
     );
   }
 }

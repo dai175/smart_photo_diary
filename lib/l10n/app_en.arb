@@ -1188,21 +1188,9 @@
   "@commonBodyLabel": {
     "description": "Label for body/content fields"
   },
-  "commonTagsLabel": "Tags: ",
-  "@commonTagsLabel": {
-    "description": "Label prefix for tag lists"
-  },
   "commonClearFilters": "Clear filters",
   "@commonClearFilters": {
     "description": "Button label to remove all active filters"
-  },
-  "commonCreatedAtLabel": "Created",
-  "@commonCreatedAtLabel": {
-    "description": "Label for created timestamp"
-  },
-  "commonUpdatedAtLabel": "Updated",
-  "@commonUpdatedAtLabel": {
-    "description": "Label for updated timestamp"
   },
   "diaryDetailViewTitle": "Diary details",
   "@diaryDetailViewTitle": {
@@ -1236,14 +1224,9 @@
   "@diaryDetailPhotosSectionTitle": {
     "description": "Heading for the photos section"
   },
-  "diaryDetailTagCount": "{count} tags",
-  "@diaryDetailTagCount": {
-    "description": "Number of tags associated with the diary",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+  "diaryDetailTagsSectionTitle": "Tags",
+  "@diaryDetailTagsSectionTitle": {
+    "description": "Heading for the tags section"
   },
   "diaryDetailTitleHint": "Enter diary title",
   "@diaryDetailTitleHint": {
@@ -1252,10 +1235,6 @@
   "diaryDetailContentHint": "Please enter the diary content",
   "@diaryDetailContentHint": {
     "description": "Hint text for the diary content field"
-  },
-  "diaryDetailMetadataTitle": "Details",
-  "@diaryDetailMetadataTitle": {
-    "description": "Heading for the metadata section"
   },
   "diaryDetailDeleteDialogTitle": "Delete diary",
   "@diaryDetailDeleteDialogTitle": {
