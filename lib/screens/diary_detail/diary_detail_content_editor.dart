@@ -66,15 +66,13 @@ class DiaryDetailContentEditor extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          isEditing ? Icons.edit_rounded : Icons.article_rounded,
+          Icons.article_rounded,
           color: Theme.of(context).colorScheme.primary,
           size: AppSpacing.iconMd,
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
-          isEditing
-              ? l10n.diaryDetailEditContentHeading
-              : l10n.diaryDetailContentHeading,
+          l10n.diaryDetailContentHeading,
           style: AppTypography.titleLarge,
         ),
       ],

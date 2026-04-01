@@ -203,22 +203,17 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             icon: const Icon(Icons.share_rounded),
             tooltip: l10n.commonShare,
           ),
-        // 編集モード切替ボタン
+        // 編集モード切替ボタン（閲覧モード時のみ表示、編集時は下部バーで操作）
         if (!_controller.isLoading &&
             !_controller.hasError &&
-            _controller.diaryEntry != null)
+            _controller.diaryEntry != null &&
+            !_controller.isEditing)
           IconButton(
             onPressed: () {
-              if (_controller.isEditing) {
-                _updateDiary();
-              } else {
-                _controller.startEditing();
-              }
+              _controller.startEditing();
             },
-            icon: Icon(
-              _controller.isEditing ? Icons.check_rounded : Icons.edit_rounded,
-            ),
-            tooltip: _controller.isEditing ? l10n.commonSave : l10n.commonEdit,
+            icon: const Icon(Icons.edit_rounded),
+            tooltip: l10n.commonEdit,
           ),
         // オーバーフローメニュー（削除など）
         if (!_controller.isLoading &&
