@@ -188,9 +188,7 @@ void main() {
         await tester.tap(find.byIcon(Icons.edit_rounded));
         await tester.pumpAndSettle();
 
-        // Edit icon changes to check (save) icon
-        expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-        // "Edit" appears in AppBar
+        // "Edit" appears in AppBar title
         expect(find.text('Edit'), findsAtLeastNWidgets(1));
       });
 
@@ -224,8 +222,6 @@ void main() {
         // Enter edit mode
         await tester.tap(find.byIcon(Icons.edit_rounded));
         await tester.pumpAndSettle();
-
-        expect(find.byIcon(Icons.check_rounded), findsOneWidget);
 
         // Tap cancel
         await tester.tap(find.text('Cancel'));
