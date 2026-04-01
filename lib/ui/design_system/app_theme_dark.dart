@@ -267,6 +267,31 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       ),
     ),
 
+    // Date Picker Theme (Dark) — warm dark tone に統一
+    datePickerTheme: DatePickerThemeData(
+      headerBackgroundColor: AppColors.surfaceContainerDark,
+      headerForegroundColor: AppColors.onSurfaceDark,
+      backgroundColor: AppColors.surfaceDark,
+      surfaceTintColor: Colors.transparent,
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppColors.primaryLight;
+        }
+        return null;
+      }),
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppColors.onBackground;
+        }
+        return AppColors.onSurfaceDark;
+      }),
+      todayBorder: const BorderSide(color: AppColors.primaryLight),
+      todayForegroundColor: const WidgetStatePropertyAll(AppColors.primaryLight),
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppSpacing.cardRadiusLarge,
+      ),
+    ),
+
     // Snack Bar Theme (Dark)
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.onSurfaceDark,
