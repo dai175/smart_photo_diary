@@ -113,18 +113,6 @@ void main() {
         expect(find.byType(PopupMenuButton<String>), findsOneWidget);
       });
 
-      testWidgets('AppBar shows view title in read mode', (
-        WidgetTester tester,
-      ) async {
-        when(
-          () => mockDiaryService.getDiaryEntry('test-id-1'),
-        ).thenAnswer((_) async => Success(testEntry));
-
-        await tester.pumpWidget(buildDiaryDetailScreen());
-        await tester.pumpAndSettle();
-
-        expect(find.text('Diary details'), findsOneWidget);
-      });
     });
 
     group('Error state', () {
@@ -202,8 +190,8 @@ void main() {
 
         // Edit icon changes to check (save) icon
         expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-        // "Edit diary" appears in AppBar AND content editor section
-        expect(find.text('Edit diary'), findsAtLeastNWidgets(1));
+        // "Edit" appears in AppBar
+        expect(find.text('Edit'), findsAtLeastNWidgets(1));
       });
 
       testWidgets('bottom bar shows save and cancel in edit mode', (
@@ -243,8 +231,6 @@ void main() {
         await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
-        // Should revert to view mode
-        expect(find.text('Diary details'), findsOneWidget);
         // Bottom bar should disappear
         expect(find.text('Cancel'), findsNothing);
         // edit_rounded icon should return (AppBar + content section)

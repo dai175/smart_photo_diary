@@ -1192,11 +1192,11 @@
   "@commonClearFilters": {
     "description": "Button label to remove all active filters"
   },
-  "diaryDetailViewTitle": "Diary details",
+  "diaryDetailViewTitle": "",
   "@diaryDetailViewTitle": {
     "description": "App bar title when viewing a diary"
   },
-  "diaryDetailEditTitle": "Edit diary",
+  "diaryDetailEditTitle": "Edit",
   "@diaryDetailEditTitle": {
     "description": "App bar title when editing a diary"
   },

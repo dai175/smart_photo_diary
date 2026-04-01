@@ -1037,7 +1037,7 @@
   "@diarySearchHint": {
     "description": "日記検索欄のヒントテキスト"
   },
-  "diaryListTitle": "日記一覧",
+  "diaryListTitle": "日記",
   "@diaryListTitle": {
     "description": "日記一覧画面のタイトル"
   },
@@ -1192,11 +1192,11 @@
   "@commonClearFilters": {
     "description": "適用中のフィルタをすべて解除するボタンラベル"
   },
-  "diaryDetailViewTitle": "日記の詳細",
+  "diaryDetailViewTitle": "",
   "@diaryDetailViewTitle": {
     "description": "日記詳細画面のタイトル"
   },
-  "diaryDetailEditTitle": "日記を編集",
+  "diaryDetailEditTitle": "編集",
   "@diaryDetailEditTitle": {
     "description": "日記編集時のタイトル"
   },
