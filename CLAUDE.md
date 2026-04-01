@@ -51,12 +51,13 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 - `lib/services/diary_image/` — diary image generation (layout, photo/text rendering)
 - `lib/services/social_share/` — social share channel implementations
 - `lib/services/mixins/` — shared service mixins (e.g., error handling)
-- `lib/services/*.dart` — core service implementations and their delegates (flat structure at services root)
-- `lib/controllers/` — ChangeNotifier-based screen controllers
-- `lib/screens/` — screen/page implementations (home, diary detail, statistics, settings, onboarding)
-- `lib/widgets/` — domain-specific reusable widgets (timeline, settings, upgrade)
+- `lib/services/*.dart` — core service implementations, delegates, usage tracking (`ai_usage_service`, `prompt_usage_service`), feature access control, and subscription state management (flat structure at services root)
+- `lib/controllers/` — ChangeNotifier-based screen controllers, `BaseErrorController` (shared error handling), and utility notifiers (`PastPhotosNotifier`, `ScrollSignal`, `SmartFabController`)
+- `lib/screens/` — screen/page implementations with subdirectories (`home/`, `diary_detail/`, `diary_preview/`, `statistics/`, `onboarding/`) and root-level screen files (`settings_screen.dart`, `diary_screen.dart`)
+- `lib/widgets/` — domain-specific reusable widgets (timeline, settings, upgrade, FAB, calendar, prompt selection)
 - `lib/ui/design_system/` — Material Design 3 theme, colors, typography
 - `lib/ui/components/` — shared UI components (CustomDialog, buttons, etc.)
+- `lib/ui/component_constants.dart` — shared UI component constants
 - `lib/ui/animations/` — micro-interactions, page transitions
 - `lib/ui/error_display/` — error display system with severity levels
 - `lib/shared/` — shared UI elements (active filters display, filter bottom sheet)
@@ -73,7 +74,7 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 - **Exception hierarchy** — `AppException` base class with specific subtypes in `lib/core/errors/`
 - **State management** — `ChangeNotifier`-based controllers (no Provider/Riverpod/Bloc)
 - **Facade + Delegate pattern** — large services and controllers decompose into focused delegates (e.g., `DiaryQueryDelegate`, `PurchaseFlowDelegate`, `DiaryPreviewGenerationDelegate`). Each delegate has single responsibility and can be unit-tested independently.
-  - Services: `DiaryService` → `DiaryCrudDelegate` + `DiaryQueryDelegate`, `StorageService` → `StorageExportDelegate` + `StorageImportDelegate`, `SubscriptionService` → `PurchaseFlowDelegate` + `PurchaseProductDelegate`
+  - Services: `DiaryService` → `DiaryCrudDelegate` + `DiaryQueryDelegate`, `StorageService` → `StorageExportDelegate` + `StorageImportDelegate`, `SubscriptionService` → `PurchaseFlowDelegate` + `PurchaseProductDelegate`, `SettingsService` → `SettingsSubscriptionDelegate`
   - Controllers: `DiaryPreviewController` → `DiaryPreviewGenerationDelegate` + `DiaryPreviewSaveDelegate`
 - **Constructor injection** — service dependencies injected via constructors
 - **`build_runner`** for generating Hive type adapters
