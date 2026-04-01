@@ -220,17 +220,32 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             ),
             tooltip: _controller.isEditing ? l10n.commonSave : l10n.commonEdit,
           ),
-        // 削除ボタン
+        // オーバーフローメニュー（削除など）
         if (!_controller.isLoading &&
             !_controller.hasError &&
-            _controller.diaryEntry != null)
-          IconButton(
-            onPressed: () {
-              MicroInteractions.hapticTap(intensity: VibrationIntensity.medium);
-              _deleteDiary();
+            _controller.diaryEntry != null &&
+            !_controller.isEditing)
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'delete') {
+                MicroInteractions.hapticTap(
+                  intensity: VibrationIntensity.medium,
+                );
+                _deleteDiary();
+              }
             },
-            icon: const Icon(Icons.delete_rounded),
-            tooltip: l10n.commonDelete,
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_rounded),
+                    const SizedBox(width: 8),
+                    Text(l10n.commonDelete),
+                  ],
+                ),
+              ),
+            ],
           ),
       ],
     );
