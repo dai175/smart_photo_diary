@@ -6,6 +6,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/components/custom_card.dart';
+import '../../ui/components/loading_state_card.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -315,35 +316,12 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   Widget _buildLoadingState(AppLocalizations l10n) {
     return Center(
       child: FadeInWidget(
-        child: CustomCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: AppSpacing.cardPadding,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: const CircularProgressIndicator(strokeWidth: 3),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text(
-                l10n.diaryDetailLoadingTitle,
-                style: AppTypography.titleLarge,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.diaryDetailLoadingSubtitle,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+        child: LoadingStateCard(
+          title: l10n.diaryDetailLoadingTitle,
+          subtitle: l10n.diaryDetailLoadingSubtitle,
+          indicatorColor: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
         ),
       ),
     );
