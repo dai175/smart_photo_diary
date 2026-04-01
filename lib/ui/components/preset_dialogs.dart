@@ -215,7 +215,7 @@ class PresetDialogs {
         : l10n.currentPlanPhotosPremiumValue;
 
     return CustomDialog(
-      icon: Icons.analytics_rounded,
+      icon: Icons.data_usage_rounded,
       iconColor: null,
       title: l10n.usageStatusDialogTitle,
       content: SingleChildScrollView(

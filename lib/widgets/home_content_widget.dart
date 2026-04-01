@@ -66,7 +66,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         Container(
           margin: const EdgeInsets.only(right: AppSpacing.xs),
           child: IconButton(
-            icon: const Icon(Icons.analytics_rounded),
+            icon: const Icon(Icons.data_usage_rounded),
             onPressed: () => _showUsageStatus(context),
             tooltip: context.l10n.usageStatusDialogTitle,
           ),

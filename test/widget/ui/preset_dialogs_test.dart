@@ -480,7 +480,7 @@ void main() {
         await tester.tap(find.text('Show'));
         await tester.pumpAndSettle();
 
-        expect(find.byIcon(Icons.analytics_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.data_usage_rounded), findsOneWidget);
         // Upgrade to Premium button should be shown for basic plan
         expect(find.text('Unlock Premium'), findsOneWidget);
       });
