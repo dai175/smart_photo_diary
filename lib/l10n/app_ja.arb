@@ -1188,21 +1188,9 @@
   "@commonBodyLabel": {
     "description": "本文項目のラベル"
   },
-  "commonTagsLabel": "タグ: ",
-  "@commonTagsLabel": {
-    "description": "タグ項目のラベル"
-  },
   "commonClearFilters": "フィルタをクリア",
   "@commonClearFilters": {
     "description": "適用中のフィルタをすべて解除するボタンラベル"
-  },
-  "commonCreatedAtLabel": "作成日時",
-  "@commonCreatedAtLabel": {
-    "description": "作成日時のラベル"
-  },
-  "commonUpdatedAtLabel": "更新日時",
-  "@commonUpdatedAtLabel": {
-    "description": "更新日時のラベル"
   },
   "diaryDetailViewTitle": "日記の詳細",
   "@diaryDetailViewTitle": {
@@ -1236,14 +1224,9 @@
   "@diaryDetailPhotosSectionTitle": {
     "description": "写真セクションのタイトル"
   },
-  "diaryDetailTagCount": "{count}個のタグ",
-  "@diaryDetailTagCount": {
-    "description": "タグ数を表示する文",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+  "diaryDetailTagsSectionTitle": "タグ",
+  "@diaryDetailTagsSectionTitle": {
+    "description": "タグセクションのタイトル"
   },
   "diaryDetailTitleHint": "日記のタイトルを入力",
   "@diaryDetailTitleHint": {
@@ -1252,10 +1235,6 @@
   "diaryDetailContentHint": "日記の内容を入力してください",
   "@diaryDetailContentHint": {
     "description": "日記本文入力欄のヒント"
-  },
-  "diaryDetailMetadataTitle": "詳細情報",
-  "@diaryDetailMetadataTitle": {
-    "description": "メタデータセクションの見出し"
   },
   "diaryDetailDeleteDialogTitle": "日記の削除",
   "@diaryDetailDeleteDialogTitle": {

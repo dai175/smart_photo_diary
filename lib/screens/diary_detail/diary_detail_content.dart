@@ -3,7 +3,6 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
-import '../../ui/components/modern_chip.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -74,7 +73,6 @@ class DiaryDetailContent extends StatelessWidget {
           DiaryDetailMetadataSection(
             diaryEntry: diaryEntry,
             photoAssets: photoAssets,
-            l10n: l10n,
           ),
 
           const SizedBox(height: AppSpacing.xxxl),
@@ -131,14 +129,6 @@ class DiaryDetailContent extends StatelessWidget {
                 ],
               ),
             ),
-            if (diaryEntry.effectiveTags.isNotEmpty) ...[
-              ModernChip.badge(
-                label: l10n.diaryDetailTagCount(
-                  diaryEntry.effectiveTags.length,
-                ),
-                icon: Icons.tag_rounded,
-              ),
-            ],
           ],
         ),
       ),
