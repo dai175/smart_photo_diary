@@ -134,8 +134,11 @@ class GeminiApiClient {
 
     try {
       final response = await postWithRetry(
-        Uri.parse('$_apiUrl?key=$_apiKey'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse(_apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': _apiKey,
+        },
         body: jsonEncode({
           'contents': [
             {'parts': parts, 'role': 'user'},
