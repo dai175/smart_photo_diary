@@ -48,24 +48,16 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         return const Success(false);
       }
 
-      await _resetMonthlyUsageIfNeeded(status);
-
-      final updatedStatusResult = await _stateService.getCurrentStatus();
-      if (updatedStatusResult.isFailure) {
-        return Failure(updatedStatusResult.error);
-      }
-
-      final updatedStatus = updatedStatusResult.value;
-      final currentPlan = PlanFactory.createPlan(updatedStatus.planId);
+      final usageCount = await _resetMonthlyUsageIfNeeded(status);
+      final currentPlan = PlanFactory.createPlan(status.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
-
-      final canUse = updatedStatus.monthlyUsageCount < monthlyLimit;
+      final canUse = usageCount < monthlyLimit;
 
       log(
         'AI generation availability check completed',
         level: LogLevel.debug,
         data: {
-          'usage': updatedStatus.monthlyUsageCount,
+          'usage': usageCount,
           'limit': monthlyLimit,
           'canUse': canUse,
           'planId': currentPlan.id,
@@ -100,30 +92,32 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         );
       }
 
-      await _resetMonthlyUsageIfNeeded(status);
-
-      final latestStatusResult = await _stateService.getCurrentStatus();
-      if (latestStatusResult.isFailure) {
-        return Failure(latestStatusResult.error);
-      }
-
-      final latestStatus = latestStatusResult.value;
-      final currentPlan = PlanFactory.createPlan(latestStatus.planId);
+      final usageCount = await _resetMonthlyUsageIfNeeded(status);
+      final currentPlan = PlanFactory.createPlan(status.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
 
-      if (latestStatus.monthlyUsageCount >= monthlyLimit) {
+      if (usageCount >= monthlyLimit) {
         return Failure(
           ServiceException(
-            'Monthly AI generation limit reached: ${latestStatus.monthlyUsageCount}/$monthlyLimit',
+            'Monthly AI generation limit reached: $usageCount/$monthlyLimit',
           ),
         );
       }
 
-      final updatedStatus = latestStatus.copyWith(
-        monthlyUsageCount: latestStatus.monthlyUsageCount + 1,
+      // forcePlan 由来の planId/expiryDate を永続化しないよう raw を経由する
+      final rawStatusResult = await _getInitializedRawStatus();
+      if (rawStatusResult.isFailure) {
+        return Failure(rawStatusResult.error);
+      }
+      final rawStatus = rawStatusResult.value;
+      final updatedStatus = rawStatus.copyWith(
+        monthlyUsageCount: rawStatus.monthlyUsageCount + 1,
       );
 
-      await _stateService.updateStatus(updatedStatus);
+      final updateResult = await _stateService.updateStatus(updatedStatus);
+      if (updateResult.isFailure) {
+        return Failure(updateResult.error);
+      }
       log(
         'AI usage incremented',
         level: LogLevel.info,
@@ -153,17 +147,10 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         return const Success(0);
       }
 
-      await _resetMonthlyUsageIfNeeded(status);
-
-      final updatedStatusResult = await _stateService.getCurrentStatus();
-      if (updatedStatusResult.isFailure) {
-        return Failure(updatedStatusResult.error);
-      }
-
-      final updatedStatus = updatedStatusResult.value;
-      final currentPlan = PlanFactory.createPlan(updatedStatus.planId);
+      final usageCount = await _resetMonthlyUsageIfNeeded(status);
+      final currentPlan = PlanFactory.createPlan(status.planId);
       final monthlyLimit = currentPlan.monthlyAiGenerationLimit;
-      final remaining = monthlyLimit - updatedStatus.monthlyUsageCount;
+      final remaining = monthlyLimit - usageCount;
 
       return Success(remaining > 0 ? remaining : 0);
     } catch (e) {
@@ -202,19 +189,21 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<void>> resetUsage() async {
     try {
-      final statusResult = await _getInitializedStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
+      final rawStatusResult = await _getInitializedRawStatus();
+      if (rawStatusResult.isFailure) {
+        return Failure(rawStatusResult.error);
       }
 
-      final status = statusResult.value;
-      final resetStatus = status.copyWith(
+      final resetStatus = rawStatusResult.value.copyWith(
         monthlyUsageCount: 0,
         lastResetDate: DateTime.now(),
         usageMonth: _getCurrentMonth(),
       );
 
-      await _stateService.updateStatus(resetStatus);
+      final updateResult = await _stateService.updateStatus(resetStatus);
+      if (updateResult.isFailure) {
+        return Failure(updateResult.error);
+      }
       log('Usage manually reset', level: LogLevel.info);
 
       return const Success(null);
@@ -285,25 +274,65 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
     return _stateService.getCurrentStatus();
   }
 
-  Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
+  /// 書き戻し用: 初期化チェック + raw ステータス取得を一括で行うヘルパー
+  ///
+  /// forcePlan で上書きされた値を DB に書き戻さないよう、永続化操作の直前に
+  /// 必ずこの helper 経由で raw status を取得する。
+  Future<Result<SubscriptionStatus>> _getInitializedRawStatus() async {
+    if (!_stateService.isInitialized) {
+      return const Failure(
+        ServiceException('SubscriptionStateService is not initialized'),
+      );
+    }
+    return _stateService.getRawStatus();
+  }
+
+  /// 月次リセットを必要に応じて適用し、適用後の使用量カウントを返す。
+  ///
+  /// [status] は forced view を許容するが、`monthlyUsageCount` /
+  /// `lastResetDate` は forced と raw で同値のため判定に使える。リセット時のみ
+  /// raw を取得して書き戻す。raw 取得に失敗した場合は best-effort として
+  /// `status.monthlyUsageCount` をそのまま返し、呼び出し側のフローを止めない。
+  Future<int> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
     final currentMonth = _getCurrentMonth();
     final statusMonth = _getUsageMonth(status);
 
-    if (statusMonth != currentMonth) {
-      log(
-        'Resetting monthly usage',
-        level: LogLevel.info,
-        data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
-      );
-
-      final resetStatus = status.copyWith(
-        monthlyUsageCount: 0,
-        lastResetDate: DateTime.now(),
-        usageMonth: currentMonth,
-      );
-
-      await _stateService.updateStatus(resetStatus);
+    if (statusMonth == currentMonth) {
+      return status.monthlyUsageCount;
     }
+
+    log(
+      'Resetting monthly usage',
+      level: LogLevel.info,
+      data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
+    );
+
+    final rawStatusResult = await _getInitializedRawStatus();
+    if (rawStatusResult.isFailure) {
+      log(
+        'Failed to fetch raw status for reset; skipping reset',
+        level: LogLevel.warning,
+        error: rawStatusResult.error,
+      );
+      return status.monthlyUsageCount;
+    }
+
+    final resetStatus = rawStatusResult.value.copyWith(
+      monthlyUsageCount: 0,
+      lastResetDate: DateTime.now(),
+      usageMonth: currentMonth,
+    );
+
+    final updateResult = await _stateService.updateStatus(resetStatus);
+    if (updateResult.isFailure) {
+      log(
+        'Failed to persist monthly reset; preserving previous count',
+        level: LogLevel.warning,
+        error: updateResult.error,
+      );
+      return status.monthlyUsageCount;
+    }
+    return 0;
   }
 
   String _getCurrentMonth() => DateTime.now().toYearMonth();

@@ -28,6 +28,17 @@ abstract class ISubscriptionStateService {
   /// - Failure: [ServiceException] サービスが未初期化、またはデータ取得に失敗した場合
   Future<Result<SubscriptionStatus>> getCurrentStatus();
 
+  /// 永続化された素のサブスクリプション状態を取得
+  ///
+  /// `getCurrentStatus()` と異なり、デバッグ時の強制プラン上書きは適用しない。
+  /// 使用量カウントなどの書き戻し時に、強制プランの値で DB を汚染しないために
+  /// 利用する内部用メソッド。UI や上限判定からは [getCurrentStatus] を使うこと。
+  ///
+  /// Returns:
+  /// - Success: Hive に保存された生のサブスクリプション状態
+  /// - Failure: [ServiceException] サービスが未初期化、またはデータ取得に失敗した場合
+  Future<Result<SubscriptionStatus>> getRawStatus();
+
   /// サブスクリプション状態を更新
   ///
   /// [status]: 更新するサブスクリプション状態

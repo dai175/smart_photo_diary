@@ -129,25 +129,10 @@ class SubscriptionStateService
   @override
   Future<Result<SubscriptionStatus>> getCurrentStatus() async {
     try {
-      if (!_isInitialized) {
-        return const Failure(
-          ServiceException('SubscriptionStateService is not initialized'),
-        );
-      }
+      final rawResult = await _readPersistedStatus();
+      if (rawResult.isFailure) return rawResult;
 
-      final status = _subscriptionBox?.get(SubscriptionConstants.statusKey);
-      if (status == null) {
-        await _ensureInitialStatus();
-        final initialStatus = _subscriptionBox?.get(
-          SubscriptionConstants.statusKey,
-        );
-        if (initialStatus == null) {
-          return const Failure(
-            ServiceException('Failed to create initial subscription status'),
-          );
-        }
-        return Success(initialStatus);
-      }
+      final status = rawResult.value;
 
       // デバッグモードでプラン強制設定がある場合、返り値のみを動的に変更
       if (kDebugMode) {
@@ -187,6 +172,44 @@ class SubscriptionStateService
         ServiceException('Failed to get current status', details: e.toString()),
       );
     }
+  }
+
+  @override
+  Future<Result<SubscriptionStatus>> getRawStatus() async {
+    try {
+      return await _readPersistedStatus();
+    } catch (e) {
+      log('Error getting raw status', level: LogLevel.error, error: e);
+      return Failure(
+        ServiceException('Failed to get raw status', details: e.toString()),
+      );
+    }
+  }
+
+  /// Hive から永続化済みステータスを取得する共通処理
+  ///
+  /// 未初期化や初期状態作成失敗時は Failure を返す。forcePlan などの
+  /// 動的上書きは適用しない。
+  Future<Result<SubscriptionStatus>> _readPersistedStatus() async {
+    if (!_isInitialized) {
+      return const Failure(
+        ServiceException('SubscriptionStateService is not initialized'),
+      );
+    }
+
+    final status = _subscriptionBox?.get(SubscriptionConstants.statusKey);
+    if (status != null) return Success(status);
+
+    await _ensureInitialStatus();
+    final initialStatus = _subscriptionBox?.get(
+      SubscriptionConstants.statusKey,
+    );
+    if (initialStatus == null) {
+      return const Failure(
+        ServiceException('Failed to create initial subscription status'),
+      );
+    }
+    return Success(initialStatus);
   }
 
   @override
