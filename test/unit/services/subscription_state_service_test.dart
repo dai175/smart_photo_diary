@@ -81,6 +81,44 @@ void main() {
     });
   });
 
+  group('getRawStatus', () {
+    test('未初期化時は Failure を返す', () async {
+      final result = await stateService.getRawStatus();
+      expect(result.isFailure, isTrue);
+    });
+
+    test('永続化された状態をそのまま返す', () async {
+      await stateService.initialize();
+
+      final newStatus = SubscriptionStatus(
+        planId: 'premium_monthly',
+        isActive: true,
+        startDate: DateTime.now(),
+        expiryDate: DateTime.now().add(const Duration(days: 30)),
+        autoRenewal: true,
+        monthlyUsageCount: 12,
+        lastResetDate: DateTime.now(),
+      );
+      await stateService.updateStatus(newStatus);
+
+      final result = await stateService.getRawStatus();
+      expect(result.isSuccess, isTrue);
+      expect(result.value.planId, equals('premium_monthly'));
+      expect(result.value.monthlyUsageCount, equals(12));
+    });
+
+    test('ボックスが空のとき Basic 初期状態を返す', () async {
+      await stateService.initialize();
+      await stateService.clearStatus();
+
+      final result = await stateService.getRawStatus();
+      expect(result.isSuccess, isTrue);
+      expect(result.value.planId, equals('basic'));
+      expect(result.value.isActive, isTrue);
+      expect(result.value.monthlyUsageCount, equals(0));
+    });
+  });
+
   group('状態更新', () {
     setUp(() async {
       await stateService.initialize();

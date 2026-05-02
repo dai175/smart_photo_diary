@@ -1,13 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/ai_usage_service.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/subscription_state_service_interface.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/constants/subscription_constants.dart';
 import '../helpers/hive_test_helpers.dart';
 
 class MockLoggingService extends Mock implements ILoggingService {}
+
+class _MockSubscriptionStateService extends Mock
+    implements ISubscriptionStateService {}
+
+class _SubscriptionStatusFake extends Fake implements SubscriptionStatus {}
 
 void main() {
   late AiUsageService usageService;
@@ -214,6 +222,122 @@ void main() {
       expect(result.value.year, equals(2026));
       expect(result.value.month, equals(1));
       expect(result.value.day, equals(1));
+    });
+  });
+
+  // forcePlan 中の DB 汚染防止: 書き戻しは raw status をベースに行う。
+  // forcePlan の実フラグはテストから操作できないため、stateService を mock し
+  // getCurrentStatus と getRawStatus が異なる値を返す状況を再現する。
+  group('writebacks use raw status (forcePlan invariant)', () {
+    late _MockSubscriptionStateService mockState;
+    late AiUsageService service;
+
+    setUpAll(() {
+      registerFallbackValue(_SubscriptionStatusFake());
+    });
+
+    SubscriptionStatus rawBasic({int count = 0, DateTime? lastResetDate}) {
+      return SubscriptionStatus(
+        planId: SubscriptionConstants.basicPlanId,
+        isActive: true,
+        startDate: DateTime(2026, 1, 1),
+        expiryDate: null,
+        autoRenewal: false,
+        monthlyUsageCount: count,
+        lastResetDate: lastResetDate ?? DateTime.now(),
+      );
+    }
+
+    SubscriptionStatus forcedPremium({int count = 0, DateTime? lastResetDate}) {
+      return SubscriptionStatus(
+        planId: SubscriptionConstants.premiumMonthlyPlanId,
+        isActive: true,
+        startDate: DateTime(2026, 1, 1),
+        expiryDate: DateTime.now().add(const Duration(days: 30)),
+        autoRenewal: false,
+        monthlyUsageCount: count,
+        lastResetDate: lastResetDate ?? DateTime.now(),
+      );
+    }
+
+    setUp(() {
+      mockState = _MockSubscriptionStateService();
+      when(() => mockState.isInitialized).thenReturn(true);
+      when(() => mockState.isSubscriptionValid(any())).thenReturn(true);
+      when(
+        () => mockState.updateStatus(any()),
+      ).thenAnswer((_) async => const Success(null));
+      service = AiUsageService(
+        stateService: mockState,
+        logger: MockLoggingService(),
+      );
+    });
+
+    test('incrementAiUsage は raw の planId/expiryDate を保持して書き戻す', () async {
+      final raw = rawBasic(count: 3);
+      final forced = forcedPremium(count: 3);
+
+      when(
+        () => mockState.getCurrentStatus(),
+      ).thenAnswer((_) async => Success(forced));
+      when(
+        () => mockState.getRawStatus(),
+      ).thenAnswer((_) async => Success(raw));
+
+      final result = await service.incrementAiUsage();
+      expect(result.isSuccess, isTrue);
+
+      final captured =
+          verify(() => mockState.updateStatus(captureAny())).captured.single
+              as SubscriptionStatus;
+
+      expect(captured.planId, equals(SubscriptionConstants.basicPlanId));
+      expect(captured.expiryDate, isNull);
+      expect(captured.monthlyUsageCount, equals(4));
+    });
+
+    test('resetUsage は raw の planId/expiryDate を保持して書き戻す', () async {
+      final raw = rawBasic(count: 8);
+
+      when(
+        () => mockState.getRawStatus(),
+      ).thenAnswer((_) async => Success(raw));
+
+      final result = await service.resetUsage();
+      expect(result.isSuccess, isTrue);
+
+      final captured =
+          verify(() => mockState.updateStatus(captureAny())).captured.single
+              as SubscriptionStatus;
+
+      expect(captured.planId, equals(SubscriptionConstants.basicPlanId));
+      expect(captured.expiryDate, isNull);
+      expect(captured.monthlyUsageCount, equals(0));
+    });
+
+    test('月跨ぎリセットは raw の planId/expiryDate を保持して書き戻す', () async {
+      final now = DateTime.now();
+      final previousMonth = DateTime(now.year, now.month - 1, 15);
+      final raw = rawBasic(count: 5, lastResetDate: previousMonth);
+      final forced = forcedPremium(count: 5, lastResetDate: previousMonth);
+
+      when(
+        () => mockState.getCurrentStatus(),
+      ).thenAnswer((_) async => Success(forced));
+      when(
+        () => mockState.getRawStatus(),
+      ).thenAnswer((_) async => Success(raw));
+
+      final result = await service.resetMonthlyUsageIfNeeded();
+      expect(result.isSuccess, isTrue);
+
+      final captured =
+          verify(() => mockState.updateStatus(captureAny())).captured.single
+              as SubscriptionStatus;
+
+      expect(captured.planId, equals(SubscriptionConstants.basicPlanId));
+      expect(captured.expiryDate, isNull);
+      expect(captured.monthlyUsageCount, equals(0));
     });
   });
 }

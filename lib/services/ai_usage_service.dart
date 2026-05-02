@@ -119,8 +119,14 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         );
       }
 
-      final updatedStatus = latestStatus.copyWith(
-        monthlyUsageCount: latestStatus.monthlyUsageCount + 1,
+      // forcePlan 由来の planId/expiryDate を永続化しないよう raw を経由する
+      final rawStatusResult = await _getInitializedRawStatus();
+      if (rawStatusResult.isFailure) {
+        return Failure(rawStatusResult.error);
+      }
+      final rawStatus = rawStatusResult.value;
+      final updatedStatus = rawStatus.copyWith(
+        monthlyUsageCount: rawStatus.monthlyUsageCount + 1,
       );
 
       await _stateService.updateStatus(updatedStatus);
@@ -202,13 +208,12 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
   @override
   Future<Result<void>> resetUsage() async {
     try {
-      final statusResult = await _getInitializedStatus();
-      if (statusResult.isFailure) {
-        return Failure(statusResult.error);
+      final rawStatusResult = await _getInitializedRawStatus();
+      if (rawStatusResult.isFailure) {
+        return Failure(rawStatusResult.error);
       }
 
-      final status = statusResult.value;
-      final resetStatus = status.copyWith(
+      final resetStatus = rawStatusResult.value.copyWith(
         monthlyUsageCount: 0,
         lastResetDate: DateTime.now(),
         usageMonth: _getCurrentMonth(),
@@ -285,6 +290,19 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
     return _stateService.getCurrentStatus();
   }
 
+  /// 書き戻し用: 初期化チェック + raw ステータス取得を一括で行うヘルパー
+  ///
+  /// forcePlan で上書きされた値を DB に書き戻さないよう、永続化操作の直前に
+  /// 必ずこの helper 経由で raw status を取得する。
+  Future<Result<SubscriptionStatus>> _getInitializedRawStatus() async {
+    if (!_stateService.isInitialized) {
+      return const Failure(
+        ServiceException('SubscriptionStateService is not initialized'),
+      );
+    }
+    return _stateService.getRawStatus();
+  }
+
   Future<void> _resetMonthlyUsageIfNeeded(SubscriptionStatus status) async {
     final currentMonth = _getCurrentMonth();
     final statusMonth = _getUsageMonth(status);
@@ -296,7 +314,19 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         data: {'previousMonth': statusMonth, 'currentMonth': currentMonth},
       );
 
-      final resetStatus = status.copyWith(
+      // Best-effort: 内部 helper として呼ばれるため raw fetch に失敗しても
+      // 呼び出し元のフローを壊さず、次回起動でリトライさせる。
+      final rawStatusResult = await _getInitializedRawStatus();
+      if (rawStatusResult.isFailure) {
+        log(
+          'Failed to fetch raw status for reset; skipping reset',
+          level: LogLevel.warning,
+          error: rawStatusResult.error,
+        );
+        return;
+      }
+
+      final resetStatus = rawStatusResult.value.copyWith(
         monthlyUsageCount: 0,
         lastResetDate: DateTime.now(),
         usageMonth: currentMonth,
