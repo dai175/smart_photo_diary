@@ -114,7 +114,10 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         monthlyUsageCount: rawStatus.monthlyUsageCount + 1,
       );
 
-      await _stateService.updateStatus(updatedStatus);
+      final updateResult = await _stateService.updateStatus(updatedStatus);
+      if (updateResult.isFailure) {
+        return Failure(updateResult.error);
+      }
       log(
         'AI usage incremented',
         level: LogLevel.info,
@@ -197,7 +200,10 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
         usageMonth: _getCurrentMonth(),
       );
 
-      await _stateService.updateStatus(resetStatus);
+      final updateResult = await _stateService.updateStatus(resetStatus);
+      if (updateResult.isFailure) {
+        return Failure(updateResult.error);
+      }
       log('Usage manually reset', level: LogLevel.info);
 
       return const Success(null);
@@ -317,7 +323,15 @@ class AiUsageService with ServiceLogging implements IAiUsageService {
       usageMonth: currentMonth,
     );
 
-    await _stateService.updateStatus(resetStatus);
+    final updateResult = await _stateService.updateStatus(resetStatus);
+    if (updateResult.isFailure) {
+      log(
+        'Failed to persist monthly reset; preserving previous count',
+        level: LogLevel.warning,
+        error: updateResult.error,
+      );
+      return status.monthlyUsageCount;
+    }
     return 0;
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/ai_usage_service.dart';
@@ -338,6 +339,62 @@ void main() {
       expect(captured.planId, equals(SubscriptionConstants.basicPlanId));
       expect(captured.expiryDate, isNull);
       expect(captured.monthlyUsageCount, equals(0));
+    });
+
+    test('incrementAiUsage は updateStatus 失敗を Failure として伝播する', () async {
+      final raw = rawBasic(count: 2);
+      final forced = forcedPremium(count: 2);
+
+      when(
+        () => mockState.getCurrentStatus(),
+      ).thenAnswer((_) async => Success(forced));
+      when(
+        () => mockState.getRawStatus(),
+      ).thenAnswer((_) async => Success(raw));
+      when(() => mockState.updateStatus(any())).thenAnswer(
+        (_) async => const Failure(ServiceException('hive write failed')),
+      );
+
+      final result = await service.incrementAiUsage();
+      expect(result.isFailure, isTrue);
+    });
+
+    test('resetUsage は updateStatus 失敗を Failure として伝播する', () async {
+      when(
+        () => mockState.getRawStatus(),
+      ).thenAnswer((_) async => Success(rawBasic(count: 5)));
+      when(() => mockState.updateStatus(any())).thenAnswer(
+        (_) async => const Failure(ServiceException('hive write failed')),
+      );
+
+      final result = await service.resetUsage();
+      expect(result.isFailure, isTrue);
+    });
+
+    test('月跨ぎリセットの updateStatus 失敗時は上限超えとして判定される', () async {
+      final now = DateTime.now();
+      final previousMonth = DateTime(now.year, now.month - 1, 15);
+      // raw/forced いずれも Basic、count = 上限 10、先月の lastResetDate
+      final atLimit = rawBasic(
+        count: SubscriptionConstants.basicMonthlyAiLimit,
+        lastResetDate: previousMonth,
+      );
+
+      when(
+        () => mockState.getCurrentStatus(),
+      ).thenAnswer((_) async => Success(atLimit));
+      when(
+        () => mockState.getRawStatus(),
+      ).thenAnswer((_) async => Success(atLimit));
+      when(() => mockState.updateStatus(any())).thenAnswer(
+        (_) async => const Failure(ServiceException('hive write failed')),
+      );
+
+      // helper が誤って 0 を返すなら 0 < 10 で true。修正後は元の count(10) が
+      // 温存され 10 < 10 = false となり、Hive と乖離した判定が出ない。
+      final result = await service.canUseAiGeneration();
+      expect(result.isSuccess, isTrue);
+      expect(result.value, isFalse);
     });
   });
 }
