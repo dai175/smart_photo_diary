@@ -132,51 +132,67 @@ class PromptSelectionItems {
     required bool isPremium,
     required VoidCallback onTap,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final accentColor = PromptCategoryUtils.getCategoryColor(prompt.category);
-
-    return _SelectableCard(
-      isSelected: isSelected,
-      accentColor: accentColor,
+    return InkWell(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              ModernChip.tonedTag(
-                PromptCategoryUtils.getCategoryDisplayName(
-                  prompt.category,
-                  locale: Localizations.localeOf(context),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.selectedBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? AppColors.accentMuted : Colors.transparent,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                ModernChip.tonedTag(
+                  PromptCategoryUtils.getCategoryDisplayName(
+                    prompt.category,
+                    locale: Localizations.localeOf(context),
+                  ),
+                  index: prompt.category.index,
                 ),
-                index: prompt.category.index,
-              ),
-              if (!isPremium && prompt.isPremiumOnly) ...[
-                const SizedBox(width: AppSpacing.xs),
-                const _PremiumBadge(),
+                if (!isPremium && prompt.isPremiumOnly) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  const _PremiumBadge(),
+                ],
+                const Spacer(),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppColors.accentMuted,
+                    size: 20,
+                  ),
               ],
-              const Spacer(),
-              if (isSelected)
-                Icon(Icons.check_circle, color: accentColor, size: 20),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            prompt.text,
-            style: isSelected
-                ? AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)
-                : AppTypography.bodyMedium,
-          ),
-          if (prompt.description != null) ...[
-            const SizedBox(height: AppSpacing.xs),
+            ),
+            const SizedBox(height: AppSpacing.sm),
             Text(
-              prompt.description!,
-              style: AppTypography.bodySmall.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              prompt.text,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                letterSpacing: -0.1,
+                height: 1.4,
+                color: AppColors.onSurface,
               ),
             ),
+            if (prompt.description != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                prompt.description!,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  color: AppColors.muted,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

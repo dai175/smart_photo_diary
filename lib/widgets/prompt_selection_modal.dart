@@ -8,7 +8,6 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../ui/component_constants.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -193,7 +192,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ヘッダー: 日付ラベル + タイトル
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -217,11 +215,15 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                   color: AppColors.onSurface,
                 ),
               ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.promptSelectionSubtitle,
+                style: AppTypography.cardBody.copyWith(color: AppColors.muted),
+              ),
             ],
           ),
         ),
 
-        // コンテキスト入力トグル
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -247,20 +249,33 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        _showContextInput
-                            ? Icons.expand_less
-                            : Icons.expand_more,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.primary,
+                      AnimatedRotation(
+                        turns: _showContextInput ? 0.25 : 0,
+                        duration: AppConstants.quickAnimationDuration,
+                        child: const Icon(
+                          Icons.chevron_right,
+                          size: 18,
+                          color: AppColors.accentMuted,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         l10n.promptContextToggle,
                         style: AppTypography.bodySmall.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: AppColors.accentMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Flexible(
+                        child: Text(
+                          l10n.promptContextInputHelper,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.muted,
+                            fontSize: 11,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -289,43 +304,79 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
           ),
         ),
 
-        // クイックオプション 2列グリッド
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _buildQuickOptionCell(
-                  isSelected: _selectedPrompt == null && !_isRandomSelected,
-                  icon: Icons.edit_off_rounded,
-                  title: l10n.promptOptionNone,
-                  onTap: () => setState(() {
-                    _selectedPrompt = null;
-                    _isRandomSelected = false;
-                  }),
+              Text(
+                l10n.promptSectionQuickOptions,
+                style: AppTypography.sectionLabel.copyWith(
+                  color: AppColors.muted,
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _buildQuickOptionCell(
-                  isSelected: _isRandomSelected,
-                  icon: Icons.shuffle_rounded,
-                  title: l10n.promptOptionRandom,
-                  onTap: _isLoading
-                      ? null
-                      : () => setState(() {
-                          _selectedPrompt = null;
-                          _isRandomSelected = true;
-                        }),
-                ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildQuickOptionCell(
+                      isSelected: _selectedPrompt == null && !_isRandomSelected,
+                      icon: Icons.edit_off_rounded,
+                      title: l10n.promptOptionNone,
+                      desc: l10n.promptOptionNoneDescription,
+                      onTap: () => setState(() {
+                        _selectedPrompt = null;
+                        _isRandomSelected = false;
+                      }),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _buildQuickOptionCell(
+                      isSelected: _isRandomSelected,
+                      icon: Icons.shuffle_rounded,
+                      title: l10n.promptOptionRandom,
+                      desc: l10n.promptRandomDescription,
+                      onTap: _isLoading
+                          ? null
+                          : () => setState(() {
+                              _selectedPrompt = null;
+                              _isRandomSelected = true;
+                            }),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
 
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
 
-        // プロンプトリスト
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Row(
+            children: [
+              Text(
+                l10n.promptSectionBrowse,
+                style: AppTypography.sectionLabel.copyWith(
+                  color: AppColors.muted,
+                ),
+              ),
+              const Spacer(),
+              if (!_isLoading)
+                Text(
+                  l10n.promptBrowseCount(_availablePrompts.length),
+                  style: AppTypography.cardBody.copyWith(
+                    fontSize: 11.5,
+                    color: AppColors.muted,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+
         Flexible(
           child: _availablePrompts.isEmpty
               ? _buildEmptyState()
@@ -339,41 +390,73 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     required bool isSelected,
     required IconData icon,
     required String title,
+    required String desc,
     required VoidCallback? onTap,
   }) {
     return InkWell(
-      borderRadius: BorderRadius.circular(ModalConstants.radius - 4),
+      borderRadius: AppSpacing.cardRadiusLarge,
       onTap: onTap,
       child: Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.selectedBg : AppColors.glyphBg,
-          borderRadius: BorderRadius.circular(ModalConstants.radius - 4),
+          color: isSelected ? AppColors.selectedBg : AppColors.cardBg,
+          borderRadius: AppSpacing.cardRadiusLarge,
           border: Border.all(
             color: isSelected ? AppColors.accentMuted : AppColors.divider,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected ? AppColors.accentMuted : AppColors.muted,
+            Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.accentMuted
+                        : AppColors.glyphBg,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 16,
+                    color: isSelected ? Colors.white : AppColors.muted,
+                  ),
+                ),
+                const Spacer(),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle,
+                    size: 18,
+                    color: AppColors.accentMuted,
+                  ),
+              ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               title,
-              style: AppTypography.cardBody.copyWith(
-                color: isSelected ? AppColors.accentMuted : AppColors.onSurface,
-                fontWeight: FontWeight.w600,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.1,
+                height: 1.2,
+                color: AppColors.onSurface,
               ),
               maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              desc,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w400,
+                height: 1.45,
+                color: AppColors.muted,
+              ),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -384,10 +467,19 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Widget _buildPromptList() {
     return ListView.separated(
-      padding: AppSpacing.cardPadding,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.xs,
+        AppSpacing.sm,
+        AppSpacing.lg,
+      ),
       itemCount: _availablePrompts.length,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.sm),
+      separatorBuilder: (context, index) => const Divider(
+        height: 1,
+        color: AppColors.divider,
+        indent: 14,
+        endIndent: 14,
+      ),
       itemBuilder: (context, index) {
         final prompt = _availablePrompts[index];
         return PromptSelectionItems.buildPromptCard(

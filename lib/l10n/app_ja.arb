@@ -1519,6 +1519,27 @@
   "@promptContextInputHelper": {
     "description": "状況テキスト入力のヘルパーテキスト"
   },
+  "promptSelectionSubtitle": "質問を選んで日記を深めるか、スキップしてください",
+  "@promptSelectionSubtitle": {
+    "description": "プロンプト選択モーダルのタイトル下サブタイトル"
+  },
+  "promptSectionQuickOptions": "クイックオプション",
+  "@promptSectionQuickOptions": {
+    "description": "プロンプト選択モーダルのクイックオプションカード上のセクションラベル"
+  },
+  "promptSectionBrowse": "プロンプト一覧",
+  "@promptSectionBrowse": {
+    "description": "プロンプト選択モーダルのプロンプトリスト上のセクションラベル"
+  },
+  "promptBrowseCount": "{count} 件",
+  "@promptBrowseCount": {
+    "description": "プロンプト一覧セクションヘッダー横の件数ラベル",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diaryDetailCopiedToClipboard": "日記をコピーしました",
   "@diaryDetailCopiedToClipboard": {
     "description": "日記コンテンツをクリップボードにコピーした際のスナックバーメッセージ"

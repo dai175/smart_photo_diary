@@ -1519,6 +1519,27 @@
   "@promptContextInputHelper": {
     "description": "Helper text for the context text input"
   },
+  "promptSelectionSubtitle": "Pick a question to anchor your writing, or skip.",
+  "@promptSelectionSubtitle": {
+    "description": "Subtitle below the prompt selection modal title"
+  },
+  "promptSectionQuickOptions": "Quick options",
+  "@promptSectionQuickOptions": {
+    "description": "Section label above the quick option cards in prompt selection modal"
+  },
+  "promptSectionBrowse": "Browse prompts",
+  "@promptSectionBrowse": {
+    "description": "Section label above the prompt list in prompt selection modal"
+  },
+  "promptBrowseCount": "{count} available",
+  "@promptBrowseCount": {
+    "description": "Prompt count label shown next to the Browse prompts section header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diaryDetailCopiedToClipboard": "Diary copied to clipboard",
   "@diaryDetailCopiedToClipboard": {
     "description": "Snack bar message when diary content is copied to clipboard"
