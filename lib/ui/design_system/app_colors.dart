@@ -101,6 +101,7 @@ class AppColors {
   static const Color photoFallback = Color(0xFFF0EDE8);
   static const Color handle = Color(0xFFDDD8D2);
   static const Color selectedBg = Color(0x1AB8856C);
+  static const Color premiumBg = Color(0xFFF4E1D2);
 
   // ============= 3-TONE TAG SYSTEM =============
   static const Color tagPrimaryBg = Color(0xFFE5E0DA);

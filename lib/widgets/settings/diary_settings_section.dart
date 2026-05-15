@@ -12,12 +12,14 @@ class DiarySettingsSection extends StatelessWidget {
   final ISettingsService settingsService;
   final ILoggingService logger;
   final VoidCallback onStateChanged;
+  final bool showBottomDivider;
 
   const DiarySettingsSection({
     super.key,
     required this.settingsService,
     required this.logger,
     required this.onStateChanged,
+    this.showBottomDivider = false,
   });
 
   @override
@@ -33,7 +35,7 @@ class DiarySettingsSection extends StatelessWidget {
 
     return SettingsRow(
       icon: Icons.short_text_rounded,
-
+      showDivider: showBottomDivider,
       title: context.l10n.settingsDiaryLengthTitle,
       subtitle: currentLabel,
       onTap: () => _showDiaryLengthDialog(context),

@@ -4,8 +4,6 @@ import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
 import '../../services/interfaces/storage_service_interface.dart';
 import '../../services/interfaces/logging_service_interface.dart';
-import '../../ui/design_system/app_colors.dart';
-import '../../ui/design_system/app_spacing.dart';
 import '../../utils/dialog_utils.dart';
 import 'settings_row.dart';
 import 'storage_import_result_dialog.dart';
@@ -21,24 +19,13 @@ class StorageSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        _buildBackupAction(context),
-        _buildDivider(),
-        _buildRestoreAction(context),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(
-      height: 1,
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      color: AppColors.outline.withValues(alpha: 0.1),
+      children: [_buildBackupAction(context), _buildRestoreAction(context)],
     );
   }
 
   Widget _buildBackupAction(BuildContext context) {
     return SettingsRow(
+      showDivider: true,
       icon: AppIcons.settingsExport,
 
       title: context.l10n.settingsBackupTitle,

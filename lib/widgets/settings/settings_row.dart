@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_icons.dart';
 import '../../ui/animations/micro_interactions.dart';
+import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
-import '../../ui/design_system/app_typography.dart';
 
-/// Reusable settings row widget used across all settings sections.
 class SettingsRow extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -12,6 +11,7 @@ class SettingsRow extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? trailing;
   final String? semanticLabel;
+  final bool showDivider;
 
   const SettingsRow({
     super.key,
@@ -21,50 +21,76 @@ class SettingsRow extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.semanticLabel,
+    this.showDivider = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final row = Container(
-      padding: AppSpacing.cardPadding,
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: AppSpacing.iconMd,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+    final row = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: AppSpacing.cardPadding,
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.glyphBg,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  subtitle,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  size: 18,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // ignore: use_null_aware_elements, build_runner analyzer does not yet support this syntax
+              if (trailing != null) trailing!,
+              if (trailing == null && onTap != null)
+                Icon(
+                  AppIcons.actionForward,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: AppSpacing.iconSm,
+                ),
+            ],
           ),
-          // ignore: use_null_aware_elements, build_runner analyzer does not yet support this syntax
-          if (trailing != null) trailing!,
-          if (trailing == null && onTap != null)
-            Icon(
-              AppIcons.actionForward,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: AppSpacing.iconSm,
-            ),
-        ],
-      ),
+        ),
+        if (showDivider)
+          Container(
+            height: 0.5,
+            margin: const EdgeInsets.only(left: 66),
+            color: AppColors.divider,
+          ),
+      ],
     );
 
     Widget result = onTap != null

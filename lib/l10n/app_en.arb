@@ -303,6 +303,26 @@
   "@settingsAppBarTitle": {
     "description": "App bar title for the settings screen"
   },
+  "settingsAccountLabel": "Account",
+  "@settingsAccountLabel": {
+    "description": "Uppercase section label above the settings screen title"
+  },
+  "settingsGroupAppearance": "Appearance",
+  "@settingsGroupAppearance": {
+    "description": "Settings group header for appearance options"
+  },
+  "settingsGroupDiaryPhotos": "Diary & Photos",
+  "@settingsGroupDiaryPhotos": {
+    "description": "Settings group header for diary and photo options"
+  },
+  "settingsGroupData": "Data",
+  "@settingsGroupData": {
+    "description": "Settings group header for data management options"
+  },
+  "settingsGroupAbout": "About",
+  "@settingsGroupAbout": {
+    "description": "Settings group header for app information"
+  },
   "settingsLoadingTitle": "Loading settings...",
   "@settingsLoadingTitle": {
     "description": "Headline shown while settings are loading"

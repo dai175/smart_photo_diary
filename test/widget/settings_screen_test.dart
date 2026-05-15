@@ -136,8 +136,8 @@ void main() {
   }
 
   group('SettingsScreen', () {
-    group('AppBar display', () {
-      testWidgets('shows AppBar with settings title', (
+    group('Header display', () {
+      testWidgets('shows custom header with settings title', (
         WidgetTester tester,
       ) async {
         registerResolvedServices();
@@ -145,11 +145,11 @@ void main() {
         await tester.pumpWidget(buildSettingsScreen());
         await pumpFrames(tester);
 
-        expect(find.byType(AppBar), findsOneWidget);
+        expect(find.byType(AppBar), findsNothing);
         expect(find.text('Settings'), findsOneWidget);
       });
 
-      testWidgets('AppBar title is visible during loading state', (
+      testWidgets('header title is visible during loading state', (
         WidgetTester tester,
       ) async {
         final completer = registerAsyncSettingsService();
@@ -157,8 +157,8 @@ void main() {
         await tester.pumpWidget(buildSettingsScreen());
         await pumpFrames(tester);
 
-        // AppBar should still show title even during loading
-        expect(find.byType(AppBar), findsOneWidget);
+        // Custom header shows title even during loading
+        expect(find.byType(AppBar), findsNothing);
         expect(find.text('Settings'), findsOneWidget);
 
         // Clean up: complete to avoid pending futures

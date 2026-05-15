@@ -303,6 +303,26 @@
   "@settingsAppBarTitle": {
     "description": "設定画面のアプリバータイトル"
   },
+  "settingsAccountLabel": "アカウント",
+  "@settingsAccountLabel": {
+    "description": "設定画面タイトル上の大文字セクションラベル"
+  },
+  "settingsGroupAppearance": "外観",
+  "@settingsGroupAppearance": {
+    "description": "外観オプションのグループヘッダー"
+  },
+  "settingsGroupDiaryPhotos": "日記・写真",
+  "@settingsGroupDiaryPhotos": {
+    "description": "日記・写真オプションのグループヘッダー"
+  },
+  "settingsGroupData": "データ",
+  "@settingsGroupData": {
+    "description": "データ管理オプションのグループヘッダー"
+  },
+  "settingsGroupAbout": "アプリについて",
+  "@settingsGroupAbout": {
+    "description": "アプリ情報グループヘッダー"
+  },
   "settingsLoadingTitle": "設定を読み込み中...",
   "@settingsLoadingTitle": {
     "description": "設定画面ローディングカードのタイトル"
