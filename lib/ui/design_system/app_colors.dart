@@ -90,4 +90,31 @@ class AppColors {
   static const Color shadow = Color(0x14231E1A);
   static const Color shadowLight = Color(0x0A231E1A);
   static const Color shadowStrong = Color(0x28231E1A);
+
+  // ============= SEMANTIC CARD TOKENS =============
+  static const Color cardBg = Color(0xFFFFFFFF);
+  static const Color muted = Color(0xFF6B6560);
+  static const Color accentMuted = Color(0xFF8E6450);
+  static const Color divider = Color(0xFFEDE9E4);
+  static const Color chipOutline = Color(0xFFDDD8D2);
+  static const Color glyphBg = Color(0xFFF0EDE8);
+  static const Color photoFallback = Color(0xFFF0EDE8);
+  static const Color handle = Color(0xFFDDD8D2);
+  static const Color selectedBg = Color(0x1AB8856C);
+
+  // ============= 3-TONE TAG SYSTEM =============
+  static const Color tagPrimaryBg = Color(0xFFE5E0DA);
+  static const Color tagPrimaryFg = Color(0xFF2C3338);
+  static const Color tagSecondaryBg = Color(0xFFEFE6DE);
+  static const Color tagSecondaryFg = Color(0xFF3E322B);
+  static const Color tagAccentBg = Color(0xFFF1DCCB);
+  static const Color tagAccentFg = Color(0xFF8E6450);
+
+  // ============= CALENDAR TOKENS =============
+  static const Color calEntryBg = Color(0x2EB8856C);
+  static const Color calCountBg = Color(0xFFB8856C);
+  static const Color calCountFg = Color(0xFFFFFFFF);
+  static const Color calToday = Color(0xFF6B7B8D);
+  static const Color calSelected = Color(0xFFB8856C);
+  static const Color calDot = Color(0xFF8E6450);
 }

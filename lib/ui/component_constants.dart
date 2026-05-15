@@ -39,6 +39,8 @@ class TileConstants {
 /// ボタンの規格値
 class ButtonConstants {
   static const double borderWidth = 1.5;
+  static const double heightSm = 46.0;
+  static const double heightMd = 50.0;
 }
 
 /// 入力フィールドの規格値
@@ -88,4 +90,21 @@ class LabelConstants {
   /// 未選択アイテムの不透明度（ライト/ダーク共通）
   /// 基準色は Light: onSurfaceVariant / Dark: onSurfaceDark を使用
   static const double unselectedOpacity = 0.55;
+}
+
+/// カードの角丸半径
+class CardConstants {
+  static const double radiusHero = 20.0;
+  static const double radiusMagazine = 18.0;
+  static const double radiusEditorial = 22.0;
+}
+
+/// ボトムシートの規格値
+class BottomSheetConstants {
+  static const double radius = 28.0;
+}
+
+/// モーダルの規格値
+class ModalConstants {
+  static const double radius = 24.0;
 }

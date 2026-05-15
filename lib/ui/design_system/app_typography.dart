@@ -221,6 +221,71 @@ class AppTypography {
     height: 1.33,
   );
 
+  // ============= DESIGN HANDOFF STYLES =============
+  /// ヒーローカードタイトル（22pt/w700/-0.2/lh1.2）
+  static const TextStyle cardTitle = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.2,
+    height: 1.2,
+  );
+
+  /// マガジンカードタイトル（19pt/w700/-0.1/lh1.25）
+  static const TextStyle magazineTitle = TextStyle(
+    fontSize: 19,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.1,
+    height: 1.25,
+  );
+
+  /// カード本文抜粋（13.5pt/w400/+0.1/1.55lh）
+  static const TextStyle cardBody = TextStyle(
+    fontSize: 13.5,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.1,
+    height: 1.55,
+  );
+
+  /// セクションヘッダー uppercase 用（11pt/w700/+0.8/lh1.2）
+  static const TextStyle sectionLabel = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.8,
+    height: 1.2,
+  );
+
+  /// 日付アクセント uppercase 用（11pt/w700/+0.6/lh1.2）
+  static const TextStyle dateLabel = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.6,
+    height: 1.2,
+  );
+
+  /// 詳細画面タイトル（26pt/w700/-0.3/lh1.2）
+  static const TextStyle detailTitle = TextStyle(
+    fontSize: 26,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.3,
+    height: 1.2,
+  );
+
+  /// 詳細本文（15.5pt/w400/+0.05/1.75lh）
+  static const TextStyle detailBody = TextStyle(
+    fontSize: 15.5,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.05,
+    height: 1.75,
+  );
+
+  /// 統計ヒーロー数字（40pt/w700/-1.2/lh1.0）
+  static const TextStyle statsDisplay = TextStyle(
+    fontSize: 40,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -1.2,
+    height: 1.0,
+  );
+
   // ============= HELPER METHODS =============
   /// 指定されたカラーでテキストスタイルを作成
   static TextStyle withColor(TextStyle style, Color color) {
