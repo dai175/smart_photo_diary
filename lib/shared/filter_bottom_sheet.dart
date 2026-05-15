@@ -4,21 +4,23 @@ import '../services/interfaces/diary_tag_service_interface.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
-import '../constants/theme_constants.dart';
+import '../ui/component_constants.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
 import '../localization/localization_extensions.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
   final Function(DiaryFilter) onApply;
-  final IDiaryTagService? tagService; // テスト用のオプショナル依存性注入
+  final IDiaryTagService? tagService;
 
   const FilterBottomSheet({
     super.key,
     required this.initialFilter,
     required this.onApply,
-    this.tagService, // テスト時に外部からタグサービスを注入可能
+    this.tagService,
   });
 
   @override
@@ -31,6 +33,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   List<String> _availableTags = [];
   bool _isLoadingTags = true;
 
+  int get _activeFilterCount {
+    int count = 0;
+    if (_currentFilter.dateRange != null) count++;
+    if (_currentFilter.selectedTags.isNotEmpty) count++;
+    if (_currentFilter.timeOfDay.isNotEmpty) count++;
+    return count;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +51,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   Future<void> _loadAvailableTags() async {
     try {
-      // テスト時は注入されたサービスを使用、本番時はServiceLocator経由
       final tagService =
           widget.tagService ??
           await serviceLocator.getAsync<IDiaryTagService>();
@@ -53,9 +62,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           _isLoadingTags = false;
         });
       } else {
-        setState(() {
-          _isLoadingTags = false;
-        });
+        setState(() => _isLoadingTags = false);
         _logger.error(
           context.l10n.filterTagLoadError,
           error: result.error,
@@ -63,9 +70,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         );
       }
     } catch (e) {
-      setState(() {
-        _isLoadingTags = false;
-      });
+      setState(() => _isLoadingTags = false);
       _logger.error(
         context.l10n.filterTagLoadError,
         error: e,
@@ -74,44 +79,50 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     }
   }
 
-  void _selectDateRange() async {
+  Future<void> _selectSingleDate(bool isStart) async {
     try {
-      // まず開始日を選択
-      final startDate = await showDatePicker(
-        context: context,
-        initialDate:
-            _currentFilter.dateRange?.start ??
-            DateTime.now().subtract(const Duration(days: 7)),
-        firstDate: DateTime(2020),
-        lastDate: DateTime.now(),
-        helpText: context.l10n.filterSelectStartDate,
-        cancelText: context.l10n.commonCancel,
-        confirmText: context.l10n.commonNext,
-      );
+      final currentStart = _currentFilter.dateRange?.start;
+      final currentEnd = _currentFilter.dateRange?.end;
 
-      if (startDate == null) return;
-
-      // 次に終了日を選択
-      if (!mounted) return;
-      final endDate = await showDatePicker(
-        context: context,
-        initialDate: _currentFilter.dateRange?.end ?? DateTime.now(),
-        firstDate: startDate,
-        lastDate: DateTime.now(),
-        helpText: context.l10n.filterSelectEndDate,
-        cancelText: context.l10n.commonCancel,
-        confirmText: context.l10n.commonSelect,
-      );
-
-      if (endDate != null) {
-        final dateRange = DateTimeRange(start: startDate, end: endDate);
-        setState(() {
-          _currentFilter = _currentFilter.copyWith(dateRange: dateRange);
-        });
+      if (isStart) {
+        final date = await showDatePicker(
+          context: context,
+          initialDate:
+              currentStart ?? DateTime.now().subtract(const Duration(days: 7)),
+          firstDate: DateTime(2020),
+          lastDate: currentEnd ?? DateTime.now(),
+          helpText: context.l10n.filterSelectStartDate,
+          cancelText: context.l10n.commonCancel,
+          confirmText: context.l10n.commonSelect,
+        );
+        if (date != null && mounted) {
+          setState(() {
+            _currentFilter = _currentFilter.copyWith(
+              dateRange: DateTimeRange(start: date, end: currentEnd ?? date),
+            );
+          });
+        }
+      } else {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: currentEnd ?? DateTime.now(),
+          firstDate: currentStart ?? DateTime(2020),
+          lastDate: DateTime.now(),
+          helpText: context.l10n.filterSelectEndDate,
+          cancelText: context.l10n.commonCancel,
+          confirmText: context.l10n.commonSelect,
+        );
+        if (date != null && mounted) {
+          setState(() {
+            _currentFilter = _currentFilter.copyWith(
+              dateRange: DateTimeRange(start: currentStart ?? date, end: date),
+            );
+          });
+        }
       }
     } catch (e) {
       _logger.error(
-        'Date range selection error',
+        'Date selection error',
         error: e,
         context: 'FilterBottomSheet',
       );
@@ -139,7 +150,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     } else {
       newTags.add(tag);
     }
-
     setState(() {
       _currentFilter = _currentFilter.copyWith(selectedTags: newTags);
     });
@@ -152,7 +162,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     } else {
       newTimeOfDay.add(period);
     }
-
     setState(() {
       _currentFilter = _currentFilter.copyWith(timeOfDay: newTimeOfDay);
     });
@@ -167,166 +176,298 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   List<MapEntry<TimeOfDayPeriod, String>> _timeOfDayEntries(
     BuildContext context,
   ) {
-    return [
-      MapEntry(TimeOfDayPeriod.morning, context.l10n.filterTimeSlotMorning),
-      MapEntry(TimeOfDayPeriod.noon, context.l10n.filterTimeSlotNoon),
-      MapEntry(TimeOfDayPeriod.evening, context.l10n.filterTimeSlotEvening),
-      MapEntry(TimeOfDayPeriod.night, context.l10n.filterTimeSlotNight),
-    ];
-  }
-
-  String _formatDateRange(DateTimeRange dateRange) {
     final l10n = context.l10n;
-    final start = l10n.formatMonthDay(dateRange.start);
-    final end = l10n.formatMonthDay(dateRange.end);
-    return '$start - $end';
+    return [
+      MapEntry(TimeOfDayPeriod.morning, '🌅 ${l10n.filterTimeSlotMorning}'),
+      MapEntry(TimeOfDayPeriod.noon, '☀️ ${l10n.filterTimeSlotNoon}'),
+      MapEntry(TimeOfDayPeriod.evening, '🌆 ${l10n.filterTimeSlotEvening}'),
+      MapEntry(TimeOfDayPeriod.night, '🌙 ${l10n.filterTimeSlotNight}'),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       height:
           MediaQuery.of(context).size.height *
           AppConstants.bottomSheetHeightRatio,
-      decoration: const BoxDecoration(borderRadius: AppSpacing.modalRadius),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(BottomSheetConstants.radius),
+        ),
+      ),
       child: Column(
         children: [
-          // ハンドル
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(AppSpacing.xxs),
+          // ドラッグハンドル
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.md),
+            child: Center(
+              child: Container(
+                width: 36,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.handle,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
             ),
           ),
 
+          const SizedBox(height: AppSpacing.md),
+
           // ヘッダー
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.largePadding,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.l10n.filterTitle,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Text(
+                    l10n.filterTitle,
+                    style: AppTypography.detailTitle,
+                  ),
                 ),
                 TextOnlyButton(
                   onPressed: _clearAllFilters,
-                  text: context.l10n.filterClearAll,
+                  text: l10n.filterClearAll,
                 ),
               ],
             ),
           ),
 
-          const Divider(),
+          const SizedBox(height: AppSpacing.sm),
 
           // フィルタオプション
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.largePadding,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               children: [
                 // 日付範囲
                 _buildSection(
-                  title: context.l10n.filterDateRange,
-                  child: Column(
-                    children: [
-                      Card(
-                        child: ListTile(
-                          leading: const Icon(Icons.calendar_today),
-                          title: Text(
-                            _currentFilter.dateRange != null
-                                ? _formatDateRange(_currentFilter.dateRange!)
-                                : context.l10n.filterSelectPeriod,
-                          ),
-                          trailing: _currentFilter.dateRange != null
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: _clearDateRange,
-                                )
-                              : const Icon(Icons.arrow_forward_ios),
-                          onTap: _selectDateRange,
-                        ),
-                      ),
-                    ],
-                  ),
+                  title: l10n.filterDateRange,
+                  child: _buildDatePillGrid(context),
                 ),
 
                 // タグ
                 _buildSection(
-                  title: context.l10n.filterTags,
+                  title: l10n.filterTags,
                   child: _isLoadingTags
                       ? const Padding(
-                          padding: ThemeConstants.defaultCardPadding,
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                          ),
                           child: Center(child: CircularProgressIndicator()),
                         )
                       : _availableTags.isEmpty
                       ? Padding(
-                          padding: ThemeConstants.defaultCardPadding,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                          ),
                           child: Text(
-                            context.l10n.filterNoTags,
-                            style: const TextStyle(color: Colors.grey),
+                            l10n.filterNoTags,
+                            style: AppTypography.cardBody.copyWith(
+                              color: AppColors.muted,
+                            ),
                           ),
                         )
                       : Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
-                          children: _availableTags.map((tag) {
-                            final isSelected = _currentFilter.selectedTags
-                                .contains(tag);
-                            return FilterChip(
-                              label: Text('#$tag'),
-                              selected: isSelected,
-                              onSelected: (_) => _toggleTag(tag),
-                            );
-                          }).toList(),
+                          spacing: AppSpacing.xs,
+                          runSpacing: AppSpacing.xs,
+                          children: _availableTags
+                              .map(
+                                (tag) => _buildFilterChip(
+                                  '#$tag',
+                                  _currentFilter.selectedTags.contains(tag),
+                                  () => _toggleTag(tag),
+                                ),
+                              )
+                              .toList(),
                         ),
                 ),
 
                 // 時間帯
                 _buildSection(
-                  title: context.l10n.filterTimeOfDay,
+                  title: l10n.filterTimeOfDay,
                   child: Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
                     children: _timeOfDayEntries(context).map((entry) {
                       final isSelected = _currentFilter.timeOfDay.contains(
                         entry.key,
                       );
-                      return FilterChip(
-                        label: Text(entry.value),
-                        selected: isSelected,
-                        onSelected: (_) => _toggleTimeOfDay(entry.key),
+                      return _buildFilterChip(
+                        entry.value,
+                        isSelected,
+                        () => _toggleTimeOfDay(entry.key),
                       );
                     }).toList(),
                   ),
                 ),
 
-                const SizedBox(height: 100), // ボタンのためのスペース
+                const SizedBox(height: 100),
               ],
             ),
           ),
 
           // 適用ボタン
-          Container(
-            padding: ThemeConstants.defaultCardPadding,
-            child: PrimaryButton(
-              onPressed: () {
-                widget.onApply(_currentFilter);
-                Navigator.pop(context);
-              },
-              width: double.infinity,
-              text: context.l10n.filterApply,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SizedBox(
+                  height: ButtonConstants.heightMd,
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    onPressed: () {
+                      widget.onApply(_currentFilter);
+                      Navigator.pop(context);
+                    },
+                    width: double.infinity,
+                    text: l10n.filterApply,
+                  ),
+                ),
+                if (_activeFilterCount > 0)
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: const BoxDecoration(
+                        color: AppColors.accentMuted,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$_activeFilterCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDatePillGrid(BuildContext context) {
+    final startDate = _currentFilter.dateRange?.start;
+    final endDate = _currentFilter.dateRange?.end;
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDatePill(
+            label: context.l10n.filterSelectStartDate,
+            date: startDate,
+            isStart: true,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _buildDatePill(
+            label: context.l10n.filterSelectEndDate,
+            date: endDate,
+            isStart: false,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDatePill({
+    required String label,
+    required DateTime? date,
+    required bool isStart,
+  }) {
+    final hasDate = date != null;
+    final l10n = context.l10n;
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => _selectSingleDate(isStart),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: hasDate ? AppColors.selectedBg : AppColors.glyphBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: hasDate ? AppColors.accentMuted : AppColors.divider,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: AppTypography.sectionLabel.copyWith(
+                      color: AppColors.accentMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hasDate ? l10n.formatMonthDay(date) : '--',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: hasDate ? AppColors.accentMuted : AppColors.muted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (hasDate)
+              GestureDetector(
+                onTap: _clearDateRange,
+                child: const Icon(
+                  Icons.close,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: AppConstants.quickAnimationDuration,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.selectedBg : AppColors.glyphBg,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isSelected ? AppColors.accentMuted : AppColors.divider,
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.cardBody.copyWith(
+            color: isSelected ? AppColors.accentMuted : AppColors.muted,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
       ),
     );
   }
@@ -338,10 +479,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            title.toUpperCase(),
+            style: AppTypography.sectionLabel.copyWith(
+              color: AppColors.accentMuted,
+            ),
           ),
         ),
         child,

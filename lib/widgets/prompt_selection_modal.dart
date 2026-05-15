@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../constants/ai_constants.dart';
 import '../constants/app_constants.dart';
 import '../models/writing_prompt.dart';
@@ -7,6 +8,8 @@ import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
+import '../ui/component_constants.dart';
+import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_dialog.dart';
@@ -17,11 +20,13 @@ import 'prompt_selection_items.dart';
 class PromptSelectionModal extends StatefulWidget {
   final void Function(WritingPrompt?, String?) onPromptSelected;
   final void Function(String?) onSkip;
+  final DateTime? date;
 
   const PromptSelectionModal({
     super.key,
     required this.onPromptSelected,
     required this.onSkip,
+    this.date,
   });
 
   @override
@@ -43,6 +48,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   late final TextEditingController _contextController;
   late final AnimationController _contextAnimationController;
   late final Animation<double> _contextAnimation;
+  late String _headerDate;
 
   @override
   void initState() {
@@ -61,6 +67,17 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final date = widget.date ?? DateTime.now();
+    final locale = Localizations.localeOf(context);
+    _headerDate = DateFormat(
+      'MMM d',
+      locale.toString(),
+    ).format(date).toUpperCase();
+  }
+
+  @override
   void dispose() {
     _contextAnimationController.dispose();
     _contextController.dispose();
@@ -73,20 +90,15 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       _subscriptionService =
           await ServiceRegistration.getAsync<ISubscriptionService>();
 
-      // Premium状態を取得
       final accessResult = await _subscriptionService
           .canAccessPremiumFeatures();
       if (accessResult.isSuccess) {
         _isPremium = accessResult.value;
       }
 
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       final locale = Localizations.localeOf(context);
-
-      // 利用可能なプロンプトを読み込み
       _availablePrompts = _promptService.getPromptsForPlan(
         isPremium: _isPremium,
         locale: locale,
@@ -155,7 +167,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
         onPressed: () {
           final contextText = _getContextText();
           if (_isRandomSelected) {
-            // ランダム選択の場合は実際のプロンプトを取得して渡す
             final randomPrompt = _promptService.getRandomPrompt(
               isPremium: _isPremium,
               locale: Localizations.localeOf(context),
@@ -183,7 +194,25 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 日付ラベル
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.xs,
+            AppSpacing.md,
+            0,
+          ),
+          child: Text(
+            _headerDate,
+            style: AppTypography.dateLabel.copyWith(
+              color: AppColors.accentMuted,
+            ),
+          ),
+        ),
+
+        // コンテキスト入力トグル
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.md,
@@ -191,70 +220,103 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
             AppSpacing.md,
             AppSpacing.sm,
           ),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () {
-                    setState(() {
-                      _showContextInput = !_showContextInput;
-                    });
-                    if (_showContextInput) {
-                      _contextAnimationController.forward();
-                    } else {
-                      _contextAnimationController.reverse();
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.xs,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _showContextInput
-                              ? Icons.expand_less
-                              : Icons.expand_more,
-                          size: 18,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () {
+                  setState(() {
+                    _showContextInput = !_showContextInput;
+                  });
+                  if (_showContextInput) {
+                    _contextAnimationController.forward();
+                  } else {
+                    _contextAnimationController.reverse();
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _showContextInput
+                            ? Icons.expand_less
+                            : Icons.expand_more,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        l10n.promptContextToggle,
+                        style: AppTypography.bodySmall.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                         ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          l10n.promptContextToggle,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizeTransition(
-                  sizeFactor: _contextAnimation,
-                  axisAlignment: -1.0,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: TextField(
-                      controller: _contextController,
-                      maxLines: 2,
-                      maxLength: AiConstants.contextTextMaxLength,
-                      decoration: InputDecoration(
-                        labelText: l10n.promptContextInputLabel,
-                        hintText: l10n.promptContextInputHint,
-                        helperText: l10n.promptContextInputHelper,
-                        helperMaxLines: 2,
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              SizeTransition(
+                sizeFactor: _contextAnimation,
+                axisAlignment: -1.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs),
+                  child: TextField(
+                    controller: _contextController,
+                    maxLines: 2,
+                    maxLength: AiConstants.contextTextMaxLength,
+                    decoration: InputDecoration(
+                      labelText: l10n.promptContextInputLabel,
+                      hintText: l10n.promptContextInputHint,
+                      helperText: l10n.promptContextInputHelper,
+                      helperMaxLines: 2,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+
+        // クイックオプション 2列グリッド
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildQuickOptionCell(
+                  isSelected: _selectedPrompt == null && !_isRandomSelected,
+                  icon: Icons.edit_off_rounded,
+                  title: l10n.promptOptionNone,
+                  onTap: () => setState(() {
+                    _selectedPrompt = null;
+                    _isRandomSelected = false;
+                  }),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _buildQuickOptionCell(
+                  isSelected: _isRandomSelected,
+                  icon: Icons.shuffle_rounded,
+                  title: l10n.promptOptionRandom,
+                  onTap: _isLoading
+                      ? null
+                      : () => setState(() {
+                          _selectedPrompt = null;
+                          _isRandomSelected = true;
+                        }),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.sm),
+
+        // プロンプトリスト
         Flexible(
           child: _availablePrompts.isEmpty
               ? _buildEmptyState()
@@ -264,39 +326,63 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     );
   }
 
+  Widget _buildQuickOptionCell({
+    required bool isSelected,
+    required IconData icon,
+    required String title,
+    required VoidCallback? onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(ModalConstants.radius - 4),
+      onTap: onTap,
+      child: Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.selectedBg : AppColors.glyphBg,
+          borderRadius: BorderRadius.circular(ModalConstants.radius - 4),
+          border: Border.all(
+            color: isSelected ? AppColors.accentMuted : AppColors.divider,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected ? AppColors.accentMuted : AppColors.muted,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: AppTypography.cardBody.copyWith(
+                color: isSelected
+                    ? AppColors.accentMuted
+                    : AppColors.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPromptList() {
     return ListView.separated(
       padding: AppSpacing.cardPadding,
-      itemCount:
-          _availablePrompts.length +
-          2, // +1 for no prompt, +1 for random selection
+      itemCount: _availablePrompts.length,
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
-        if (index == 0) {
-          return PromptSelectionItems.buildNoPromptOption(
-            context,
-            isSelected: _selectedPrompt == null && !_isRandomSelected,
-            onTap: () => setState(() {
-              _selectedPrompt = null;
-              _isRandomSelected = false;
-            }),
-          );
-        } else if (index == 1) {
-          return PromptSelectionItems.buildRandomButton(
-            context,
-            isSelected: _isRandomSelected,
-            isLoading: _isLoading,
-            onTap: _isLoading
-                ? null
-                : () => setState(() {
-                    _selectedPrompt = null;
-                    _isRandomSelected = true;
-                  }),
-          );
-        }
-
-        final prompt = _availablePrompts[index - 2];
+        final prompt = _availablePrompts[index];
         return PromptSelectionItems.buildPromptCard(
           context,
           prompt: prompt,
@@ -341,8 +427,5 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       _selectedPrompt = prompt;
       _isRandomSelected = false;
     });
-
-    // 使用履歴記録は実際に日記生成が完了した時点で行う
-    // ここでは選択のみ行い、履歴記録はしない
   }
 }

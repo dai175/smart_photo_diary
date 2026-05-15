@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/writing_prompt.dart';
+import '../ui/components/modern_chip.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../utils/prompt_category_utils.dart';
@@ -141,28 +142,12 @@ class PromptSelectionItems {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xs,
-                  vertical: AppSpacing.xxs,
+              ModernChip.tonedTag(
+                PromptCategoryUtils.getCategoryDisplayName(
+                  prompt.category,
+                  locale: Localizations.localeOf(context),
                 ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? accentColor
-                      : accentColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppSpacing.xs),
-                ),
-                child: Text(
-                  PromptCategoryUtils.getCategoryDisplayName(
-                    prompt.category,
-                    locale: Localizations.localeOf(context),
-                  ),
-                  style: AppTypography.labelSmall.copyWith(
-                    color: isSelected ? colorScheme.onPrimary : accentColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                index: prompt.category.index,
               ),
               const Spacer(),
               if (isSelected)

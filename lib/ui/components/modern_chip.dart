@@ -23,7 +23,28 @@ class ModernChip extends StatefulWidget {
     this.size = ChipSize.medium,
     this.style = ChipStyle.filled,
     this.animationDuration = AppConstants.quickAnimationDuration,
+    this.borderRadius,
   }) : _variant = _ChipVariant.normal;
+
+  factory ModernChip.tonedTag(String label, {required int index}) {
+    const bgs = [
+      AppColors.tagPrimaryBg,
+      AppColors.tagSecondaryBg,
+      AppColors.tagAccentBg,
+    ];
+    const fgs = [
+      AppColors.tagPrimaryFg,
+      AppColors.tagSecondaryFg,
+      AppColors.tagAccentFg,
+    ];
+    final tone = index % 3;
+    return ModernChip(
+      label: label,
+      backgroundColor: bgs[tone],
+      foregroundColor: fgs[tone],
+      borderRadius: 8.0,
+    );
+  }
 
   /// 日記タグ表示専用コンストラクタ
   /// 全画面で統一されたタグスタイルを提供
@@ -39,6 +60,7 @@ class ModernChip extends StatefulWidget {
       size = ChipSize.small,
       style = ChipStyle.filled,
       animationDuration = AppConstants.quickAnimationDuration,
+      borderRadius = null,
       _variant = _ChipVariant.tag;
 
   /// タグカウントバッジ表示専用コンストラクタ
@@ -54,6 +76,7 @@ class ModernChip extends StatefulWidget {
       size = ChipSize.small,
       style = ChipStyle.filled,
       animationDuration = AppConstants.quickAnimationDuration,
+      borderRadius = null,
       _variant = _ChipVariant.badge;
 
   /// チップのラベルテキスト
@@ -91,6 +114,9 @@ class ModernChip extends StatefulWidget {
 
   /// アニメーションの継続時間
   final Duration animationDuration;
+
+  /// カスタム角丸半径（null時はサイズに応じた pill 形）
+  final double? borderRadius;
 
   /// チップのバリアント（内部フラグ）
   final _ChipVariant _variant;
@@ -166,7 +192,9 @@ class _ModernChipState extends State<ModernChip>
                 curve: Curves.easeInOut,
                 decoration: BoxDecoration(
                   color: _getBackgroundColor(colorData),
-                  borderRadius: BorderRadius.circular(chipData.height / 2),
+                  borderRadius: BorderRadius.circular(
+                    widget.borderRadius ?? chipData.height / 2,
+                  ),
                   border: widget.style == ChipStyle.outlined
                       ? Border.all(
                           color: colorData.borderColor,
