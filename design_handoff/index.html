@@ -1,0 +1,3573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Smart Photo Diary — Diaries List redesign</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; }
+  body { font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="cards.jsx"></script>
+<script type="text/babel" src="screen.jsx"></script>
+<script type="text/babel" src="detail-screen.jsx"></script>
+<script type="text/babel" src="stats-screen.jsx"></script>
+<script type="text/babel" src="prompt-modal.jsx"></script>
+<script type="text/babel" src="home-screen.jsx"></script>
+<script type="text/babel" src="settings-screen.jsx"></script>
+<script type="text/babel" src="filter-sheet.jsx"></script>
+
+<script type="text/babel">
+
+// ─── palette tokens, mapped from AppColors (Quiet Luxury) ─────────
+const lightTokens = {
+  surface: '#FAF8F5',
+  cardBg:  '#FFFFFF',
+  cardShadow: '0 1px 2px rgba(35,30,26,0.04), 0 6px 22px rgba(35,30,26,0.06)',
+  cardBorder: '0.5px solid rgba(35,30,26,0.04)',
+  title:   '#2C2825',
+  muted:   '#6B6560',
+  accentMuted: '#8E6450',   // accentDark, for date label
+  divider: '#EDE9E4',
+  navActive: '#6B7B8D',
+  navInactive: '#9E9891',
+  chipOutline: '#DDD8D2',
+  photoFallback: '#F0EDE8',
+  photoInner: 'inset 0 0 0 0.5px rgba(0,0,0,0.04)',
+  // Filled tag tones — three muted fills cycle across the row
+  tagPrimaryBg: '#E5E0DA',     tagPrimaryFg: '#2C3338',
+  tagSecondaryBg: '#EFE6DE',   tagSecondaryFg: '#3E322B',
+  tagAccentBg: '#F1DCCB',      tagAccentFg: '#8E6450',
+  editorialDatePill: '#2C2825',
+  // detail-screen extensions
+  body: '#3D3833',
+  editFieldBg: '#FFFFFF',
+  editFieldBorder: '#E5E0DA',
+  // stats-screen extensions
+  cardSoftBorder: 'rgba(35,30,26,0.05)',
+  statCardPrimary:   '#EEEAE3',
+  statCardSecondary: '#F2EAE2',
+  statCardAccent:    '#F4E1D2',
+  success: '#5C8A62', successBg: 'rgba(92,138,98,0.12)',
+  calEntryBg:  'rgba(184,133,108,0.18)',
+  calCountBg:  '#B8856C',  calCountFg: '#FFFFFF',
+  calToday:    '#6B7B8D',
+  calSelected: '#B8856C',  calSelectedFg: '#FFFFFF',
+  calDot:      '#8E6450',
+  // prompt-modal extensions
+  modalBg: '#FFFFFF',
+  modalScrim: 'rgba(20,18,16,0.45)',
+  modalShadow: '0 30px 80px rgba(35,30,26,0.25), 0 8px 24px rgba(35,30,26,0.10)',
+  cardShadowSoft: '0 1px 2px rgba(35,30,26,0.03)',
+  selectedBg: 'rgba(184,133,108,0.10)',
+  glyphBg: '#F0EDE8',
+  premiumBg: '#F4E1D2', premiumFg: '#8E6450',
+  handle: '#DDD8D2',
+  // home-screen extensions
+  usagePillBg: '#FFFFFF',
+  usagePillBorder: 'rgba(35,30,26,0.08)',
+  usagePillWarnBg: '#FCE4E1',
+  usagePillWarnBorder: 'rgba(181,69,58,0.25)',
+  error: '#B5453A',
+};
+
+const darkTokens = {
+  surface: '#1A1816',
+  cardBg:  '#2A2623',
+  cardShadow: '0 1px 2px rgba(0,0,0,0.35), 0 6px 22px rgba(0,0,0,0.4)',
+  cardBorder: '0.5px solid rgba(255,255,255,0.03)',
+  title:   '#E8E2DC',
+  muted:   '#9E9891',
+  accentMuted: '#D4A68E',
+  divider: '#3D3833',
+  navActive: '#C4D2DD',
+  navInactive: '#6B6560',
+  chipOutline: '#3D3833',
+  photoFallback: '#2E2A27',
+  photoInner: 'inset 0 0 0 0.5px rgba(255,255,255,0.04)',
+  tagPrimaryBg: 'rgba(149,165,180,0.18)',   tagPrimaryFg: '#C4D2DD',
+  tagSecondaryBg: 'rgba(196,175,161,0.18)', tagSecondaryFg: '#D6BBA7',
+  tagAccentBg: 'rgba(212,166,142,0.18)',    tagAccentFg: '#E4BEA3',
+  editorialDatePill: '#2C2825',
+  // detail-screen extensions
+  body: '#C7C0B8',
+  editFieldBg: '#221F1D',
+  editFieldBorder: '#3D3833',
+  // stats-screen extensions
+  cardSoftBorder: 'rgba(255,255,255,0.04)',
+  statCardPrimary:   'rgba(149,165,180,0.14)',
+  statCardSecondary: 'rgba(196,175,161,0.14)',
+  statCardAccent:    'rgba(212,166,142,0.14)',
+  success: '#8FB594', successBg: 'rgba(143,181,148,0.15)',
+  calEntryBg:  'rgba(212,166,142,0.22)',
+  calCountBg:  '#D4A68E',  calCountFg: '#1A1816',
+  calToday:    '#95A5B4',
+  calSelected: '#D4A68E',  calSelectedFg: '#1A1816',
+  calDot:      '#E4BEA3',
+  // prompt-modal extensions
+  modalBg: '#2E2A27',
+  modalScrim: 'rgba(0,0,0,0.6)',
+  modalShadow: '0 30px 80px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4)',
+  cardShadowSoft: 'none',
+  selectedBg: 'rgba(212,166,142,0.16)',
+  glyphBg: '#3A3633',
+  premiumBg: 'rgba(212,166,142,0.22)', premiumFg: '#E4BEA3',
+  handle: '#3D3833',
+  // home-screen extensions
+  usagePillBg: '#2A2623',
+  usagePillBorder: 'rgba(255,255,255,0.04)',
+  usagePillWarnBg: 'rgba(181,69,58,0.18)',
+  usagePillWarnBorder: 'rgba(181,69,58,0.35)',
+  error: '#E07B70',
+};
+
+// expose for detail-screen.jsx isDark check
+window.darkTokens = darkTokens;
+window.lightTokens = lightTokens;
+
+// ─── sample entries ──────────────────────────────────────────────
+const PHOTO = {
+  cathedral: 'https://images.unsplash.com/photo-1548276145-69a9521f0499?w=800&q=80&auto=format&fit=crop',
+  cat:       'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&q=80&auto=format&fit=crop',
+  sunset:    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+};
+
+const ENTRIES = [
+  {
+    date: '2/18', title: 'Finding Peace in Grandeur',
+    body: 'Standing before this magnificent cathedral, I initially felt a profound sense of awe, almost overwhelmed by its sheer scale. It was a moment of quiet reflection.',
+    tags: ['Night', 'Cathedral', 'Reflection', 'Peace'],
+    photos: [PHOTO.cathedral], photoCount: 1,
+  },
+  {
+    date: '2/17', title: 'Comfort in a Feline Gaze',
+    body: 'Seeing her so peaceful, eyes barely open, brought an immediate wave of calm. Lately, things have felt a bit chaotic, and her presence shifted everything.',
+    tags: ['Morning', 'Cat', 'Warmth'],
+    photos: [PHOTO.cat], photoCount: 2,
+  },
+  {
+    date: '2/16', title: 'Sunset\u2019s Gentle Calm',
+    body: 'The first thing that hit me was a wave of quiet relief, a deep exhale. Lately life has felt like a constant rush, but here the setting sun painted everything still.',
+    tags: ['Evening', 'Sunset', 'Stillness'],
+    photos: [PHOTO.sunset], photoCount: 3,
+  },
+];
+
+// ─── detail-screen entries (longer body, multi-photo) ────────────
+const DETAIL_ENTRY = {
+  date: '2/18', fullDate: 'February 18, 2026', dayOfWeek: 'Tuesday',
+  title: 'Finding Peace in Grandeur',
+  body:
+    'Standing before this magnificent cathedral, I initially felt a profound sense of awe, almost overwhelmed by its sheer scale. It was a moment of quiet reflection, a personal pilgrimage of sorts.\n\nThe aged stone and soft lights spoke of enduring strength, mirroring the resilience I had recently been seeking within myself. Watching the day fade behind the spires, I felt the noise of the week slowly settle.',
+  tags: ['Night', 'Cathedral', 'Reflection', 'Peace'],
+  photos: [PHOTO.cathedral], photoCount: 1,
+};
+
+const DETAIL_ENTRY_MULTI = {
+  ...DETAIL_ENTRY,
+  photos: [PHOTO.cathedral, PHOTO.sunset, PHOTO.cat, PHOTO.cathedral, PHOTO.sunset],
+  photoCount: 5,
+};
+
+const DETAIL_META = [
+  { label: 'Created',  value: 'Feb 18, 2026 · 21:34' },
+  { label: 'Updated',  value: 'Feb 19, 2026 · 08:12' },
+  { label: 'Photos',   value: '1' },
+  { label: 'Prompt',   value: 'Random selection' },
+];
+const DETAIL_META_MULTI = [
+  { label: 'Created',  value: 'Feb 18, 2026 · 21:34' },
+  { label: 'Updated',  value: 'Feb 19, 2026 · 08:12' },
+  { label: 'Photos',   value: '5' },
+  { label: 'Prompt',   value: 'Random selection' },
+];
+
+// ─── variant catalogue ───────────────────────────────────────────
+const VARIANTS = [
+  { id: 'baseline',  label: 'A · Baseline (current)', Card: CardBaseline,
+    blurb: 'Reference. Outlined chips, small thumb strip, regular-weight title.' },
+  { id: 'hero',      label: 'B · Hero photo',         Card: CardHero,
+    blurb: 'Photo crowns the card. Bold title, filled tag chips, photo-count badge.' },
+  { id: 'magazine',  label: 'C · Magazine split',     Card: CardMagazine,
+    blurb: 'Tall photo locks the left edge. Compact row height, type ramp on the right.' },
+  { id: 'editorial', label: 'D · Editorial overlay',  Card: CardEditorial,
+    blurb: 'Full-bleed photo carries the title in white. Date pill on the photo, body + tags below.' },
+];
+
+// ─── phone artboard ──────────────────────────────────────────────
+function PhonePreview({ tokens, Card, sectionLabel, twoEntries = true }) {
+  const entries = twoEntries ? ENTRIES.slice(0, 2) : ENTRIES.slice(0, 1);
+  return (
+    <IOSDevice width={402} height={874} dark={tokens === darkTokens}>
+      <DiaryScreen tokens={tokens} entries={entries} Card={Card}
+        sectionLabel={sectionLabel}/>
+    </IOSDevice>
+  );
+}
+
+// ─── Flutter handoff card ────────────────────────────────────────
+const FLUTTER_CODE = `// Updated DiaryCardWidget — "Hero photo" variant.
+// Drop-in replacement for the current widget; uses your existing
+// AppColors, AppSpacing, AppTypography tokens.
+
+class DiaryCardWidget extends StatelessWidget {
+  final DiaryEntry entry;
+  final VoidCallback onTap;
+  const DiaryCardWidget({super.key, required this.entry, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs   = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final title = entry.title.isNotEmpty ? entry.title : l10n.diaryCardUntitled;
+    final dateText = l10n.formatMonthDay(entry.date);
+
+    return Semantics(
+      label: l10n.diaryCardSemanticLabel(title, dateText),
+      button: true, excludeSemantics: true,
+      child: Material(
+        color: isDark
+          ? AppColors.surfaceContainerDark
+          : cs.surface,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        elevation: 0,
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ───── hero photo (3:2) ─────
+              if (entry.photoIds.isNotEmpty)
+                AspectRatio(
+                  aspectRatio: 3 / 2,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      DiaryHeroPhoto(photoId: entry.photoIds.first),
+                      if (entry.photoIds.length > 1)
+                        Positioned(
+                          right: 12, bottom: 12,
+                          child: _PhotoCountBadge(count: entry.photoIds.length),
+                        ),
+                    ],
+                  ),
+                ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ───── date + chevron ─────
+                    Row(
+                      children: [
+                        Text(
+                          dateText.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600,
+                            letterSpacing: 0.6,
+                            color: isDark
+                              ? AppColors.accentLight
+                              : AppColors.accentDark,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.chevron_right_rounded,
+                          size: 18, color: cs.onSurfaceVariant),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // ───── title (bold, tightened) ─────
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.titleLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        height: 1.25,
+                        letterSpacing: -0.2,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+
+                    // ───── body excerpt ─────
+                    Text(
+                      entry.content,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.55,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // ───── filled tag chips (3-tone cycle) ─────
+                    _DiaryTagRow(tags: entry.effectiveTags.take(4).toList()),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Filled chip with a three-tone cycle so a row reads as
+// curated rather than a uniform stripe.
+class _DiaryTagRow extends StatelessWidget {
+  final List<String> tags;
+  const _DiaryTagRow({required this.tags});
+
+  static const _tones = [_TagTone.accent, _TagTone.secondary, _TagTone.primary];
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Wrap(
+      spacing: 6, runSpacing: 6,
+      children: List.generate(tags.length, (i) {
+        final tone = _tones[i % _tones.length];
+        return _TagChip(label: tags[i], tone: tone, isDark: isDark);
+      }),
+    );
+  }
+}
+
+enum _TagTone { primary, secondary, accent }
+
+class _TagChip extends StatelessWidget {
+  final String label;
+  final _TagTone tone;
+  final bool isDark;
+  const _TagChip({required this.label, required this.tone, required this.isDark});
+
+  ({Color bg, Color fg}) _palette() {
+    if (isDark) {
+      switch (tone) {
+        case _TagTone.primary:
+          return (bg: AppColors.primaryLight.withValues(alpha: 0.18),
+                  fg: const Color(0xFFC4D2DD));
+        case _TagTone.secondary:
+          return (bg: AppColors.secondaryLight.withValues(alpha: 0.18),
+                  fg: const Color(0xFFD6BBA7));
+        case _TagTone.accent:
+          return (bg: AppColors.accentLight.withValues(alpha: 0.18),
+                  fg: const Color(0xFFE4BEA3));
+      }
+    }
+    switch (tone) {
+      case _TagTone.primary:
+        return (bg: const Color(0xFFE5E0DA), fg: AppColors.onPrimaryContainer);
+      case _TagTone.secondary:
+        return (bg: const Color(0xFFEFE6DE), fg: AppColors.onSecondaryContainer);
+      case _TagTone.accent:
+        return (bg: const Color(0xFFF1DCCB), fg: AppColors.accentDark);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = _palette();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: p.bg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11.5, fontWeight: FontWeight.w600,
+          letterSpacing: 0.15, color: p.fg, height: 1.0,
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoCountBadge extends StatelessWidget {
+  final int count;
+  const _PhotoCountBadge({required this.count});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.collections_outlined, size: 12, color: Colors.white),
+          const SizedBox(width: 4),
+          Text('$count', style: const TextStyle(
+            color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700,
+          )),
+        ],
+      ),
+    );
+  }
+}`;
+
+function CodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          diary_card_widget.dart · hero variant
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Drop-in replacement for <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DiaryCardWidget</code>.
+        Uses your existing <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>AppColors</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>AppSpacing</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>AppTypography</code>
+        tokens. Pair with a <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DiaryHeroPhoto</code> widget
+        that wraps your existing <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>FutureBuilder&lt;Uint8List&gt;</code> path
+        with <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>BoxFit.cover</code>.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── design notes card ──────────────────────────────────────────
+function NotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{
+        width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0,
+      }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 18,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Design notes
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825', letterSpacing: -0.3, lineHeight: 1.25 }}>
+          What each variant fixes
+        </div>
+      </div>
+      <Bullet title="① Title vs body hierarchy"
+        body="Title bumped to 22 / w700 / −0.2 tracking, body kept at 13.5 / 1.55. Adds two full ramp steps between them so the title carries the card. Date moves to a small uppercase label in accentDark — a third hierarchy tier instead of competing with the title."/>
+      <Bullet title="② Tag prominence"
+        body="Outlined chips → filled chips with a 3-tone cycle (accent / secondary / primary containers). Same height, no border. They read as content metadata, not form chrome, and the row gains rhythm without shouting."/>
+      <Bullet title="③ Photo presence"
+        body="Thumbnail strip → 3:2 hero (B), 124×156 anchor (C), or full-bleed overlay (D). Multi-photo entries get a '+N' badge so the card communicates count without sacrificing scale."/>
+      <Bullet title="Palette discipline"
+        body="Every fill is sourced from AppColors. Light/dark were validated side-by-side; dark mode uses surfaceContainerDark for cards against backgroundDark, plus reduced-opacity tag fills so chips don't punch above the title."/>
+      <Bullet title="My recommendation"
+        body="Ship B (Hero) as the default — strongest fix for all three issues with the lowest risk to existing layout assumptions. Keep D (Editorial) as a candidate for a future 'cover photo' detail-driven mode."/>
+    </div>
+  );
+}
+
+// ─── Detail notes card ──────────────────────────────────────────
+function DetailNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Detail screen
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          From form to editorial spread
+        </div>
+      </div>
+      <Bullet title="Photo as a real hero"
+        body="Edge-to-edge 4:3 photo at the top, under a floating glass AppBar with a soft top scrim. Replaces the calendar-icon date card + the photo-card-with-heading that buried the image."/>
+      <Bullet title="One spread, not five stacked cards"
+        body="The current screen wraps each section (date, photos, content, tags) in its own CustomCard with icon + title. The redesign drops that chrome — date, title, tags, body and gallery all live on one continuous surface separated by hairline dividers."/>
+      <Bullet title="Title carries the page"
+        body="Title bumped to 26 / w700 / −0.3 tracking, body kept at 15.5 / 1.75 for comfortable reading. Date demoted to a small uppercase accent label with weekday."/>
+      <Bullet title="Tags right under the title"
+        body="Same 3-tone filled chips from the Hero list card, no 'Tags' heading needed — they sit between title and body as content metadata."/>
+      <Bullet title="Edit mode kept calm"
+        body="Inline labelled fields replace the boxed TextFields. Bottom action bar with Cancel + filled Save remains, sized for the home indicator."/>
+      <Bullet title="Metadata moved to the footer"
+        body="Created / Updated / Photos / Prompt live as a quiet key-value list at the bottom — out of the reading path, available if needed."/>
+    </div>
+  );
+}
+
+// ─── Detail Flutter code ────────────────────────────────────────
+const DETAIL_FLUTTER_CODE = `// Refactored diary_detail_content.dart — Hero detail layout.
+// Drops the per-section CustomCard chrome; renders the whole detail
+// as one continuous editorial surface.
+
+class DiaryDetailContent extends StatelessWidget {
+  const DiaryDetailContent({
+    super.key,
+    required this.diaryEntry,
+    required this.photoAssets,
+    required this.isEditing,
+    required this.titleController,
+    required this.contentController,
+  });
+
+  final DiaryEntry diaryEntry;
+  final List<AssetEntity> photoAssets;
+  final bool isEditing;
+  final TextEditingController titleController;
+  final TextEditingController contentController;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs   = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return CustomScrollView(
+      slivers: [
+        // ───── hero photo under the floating AppBar ─────
+        if (photoAssets.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _DiaryDetailHero(
+              asset: photoAssets.first,
+              totalCount: photoAssets.length,
+            ),
+          ),
+
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          sliver: SliverList(delegate: SliverChildListDelegate([
+            // ───── date label (uppercase accent) ─────
+            _DateLine(date: diaryEntry.date),
+            const SizedBox(height: 10),
+
+            // ───── title ─────
+            if (isEditing)
+              _LabelledField(
+                label: l10n.commonTitleLabel,
+                controller: titleController,
+                hint: l10n.diaryDetailTitleHint,
+                style: AppTypography.titleLarge.copyWith(
+                  fontSize: 22, fontWeight: FontWeight.w700,
+                  height: 1.25, letterSpacing: -0.2,
+                ),
+              )
+            else
+              Text(
+                diaryEntry.title.isNotEmpty
+                  ? diaryEntry.title
+                  : l10n.diaryCardUntitled,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: 26, fontWeight: FontWeight.w700,
+                  height: 1.22, letterSpacing: -0.3,
+                  color: cs.onSurface,
+                ),
+              ),
+            const SizedBox(height: 14),
+
+            // ───── tags inline (no card, no header) ─────
+            if (!isEditing && diaryEntry.effectiveTags.isNotEmpty)
+              _DiaryTagRow(tags: diaryEntry.effectiveTags),
+
+            // ───── divider ─────
+            const _Hairline(),
+
+            // ───── body ─────
+            if (isEditing)
+              _LabelledField(
+                label: l10n.commonBodyLabel,
+                controller: contentController,
+                hint: l10n.diaryDetailContentHint,
+                multiline: true,
+                style: AppTypography.bodyLarge.copyWith(
+                  fontSize: 15.5, height: 1.7,
+                ),
+              )
+            else
+              GestureDetector(
+                onLongPress: () => _copyToClipboard(context),
+                child: Text(
+                  diaryEntry.content,
+                  style: AppTypography.bodyLarge.copyWith(
+                    fontSize: 15.5, height: 1.75,
+                    letterSpacing: 0.05,
+                    color: isDark
+                      ? const Color(0xFFC7C0B8)
+                      : const Color(0xFF3D3833),
+                  ),
+                ),
+              ),
+
+            // ───── inline gallery (remaining photos) ─────
+            if (!isEditing && photoAssets.length > 1) ...[
+              const SizedBox(height: 24),
+              _InlineGallery(assets: photoAssets),
+            ],
+
+            // ───── footer metadata ─────
+            if (!isEditing) ...[
+              const _Hairline(),
+              _MetaRow(label: 'Created',
+                value: l10n.formatDateTime(diaryEntry.createdAt)),
+              _MetaRow(label: 'Updated',
+                value: l10n.formatDateTime(diaryEntry.updatedAt)),
+              _MetaRow(label: 'Photos',
+                value: '\${photoAssets.length}'),
+            ],
+            const SizedBox(height: 16),
+          ])),
+        ),
+      ],
+    );
+  }
+
+  void _copyToClipboard(BuildContext context) {
+    final l10n = context.l10n;
+    final title = diaryEntry.title.isNotEmpty ? '\${diaryEntry.title}\\n\\n' : '';
+    final text = '\$title\${diaryEntry.content}\\n\\n\${AppConstants.shareHashtag}';
+    Clipboard.setData(ClipboardData(text: text));
+    MicroInteractions.hapticSuccess();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.diaryDetailCopiedToClipboard)),
+    );
+  }
+}
+
+// ─── hero (4:3, scrim under AppBar) ───────────────────────────────
+class _DiaryDetailHero extends StatelessWidget {
+  final AssetEntity asset;
+  final int totalCount;
+  const _DiaryDetailHero({required this.asset, required this.totalCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 4 / 3,
+      child: Stack(fit: StackFit.expand, children: [
+        Hero(
+          tag: 'diary-detail-asset-\${asset.id}',
+          child: DiaryHeroPhoto(asset: asset, fit: BoxFit.cover),
+        ),
+        // top scrim so floating AppBar icons stay legible
+        const _TopScrim(),
+        if (totalCount > 1)
+          Positioned(
+            right: 14, bottom: 14,
+            child: _PhotoCountBadge(current: 1, total: totalCount),
+          ),
+      ]),
+    );
+  }
+}
+
+class _TopScrim extends StatelessWidget {
+  const _TopScrim();
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        alignment: Alignment.topCenter,
+        height: 140,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            colors: [Color(0x73141210), Color(0x00141210)],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── date line ─────────────────────────────────────────────────────
+class _DateLine extends StatelessWidget {
+  final DateTime date;
+  const _DateLine({required this.date});
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    return Row(children: [
+      Text(
+        l10n.formatFullDate(date).toUpperCase(),
+        style: TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w700,
+          letterSpacing: 0.8, color: accent,
+        ),
+      ),
+      const SizedBox(width: 8),
+      Container(width: 3, height: 3, decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.5),
+        shape: BoxShape.circle,
+      )),
+      const SizedBox(width: 8),
+      Text(
+        l10n.formatWeekday(date),
+        style: TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.4,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ]);
+  }
+}
+
+// ─── hairline divider ─────────────────────────────────────────────
+class _Hairline extends StatelessWidget {
+  const _Hairline();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Container(
+        height: 1,
+        color: Theme.of(context).colorScheme.outlineVariant,
+      ),
+    );
+  }
+}
+
+// ─── meta row (footer key-value) ──────────────────────────────────
+class _MetaRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _MetaRow({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(label.toUpperCase(), style: TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.4,
+          color: isDark ? AppColors.accentLight : AppColors.accentDark,
+        )),
+        Text(value, style: TextStyle(
+          fontSize: 13, color: cs.onSurfaceVariant,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        )),
+      ]),
+    );
+  }
+}
+
+// ─── inline labelled edit field (replaces boxed TextField) ────────
+class _LabelledField extends StatelessWidget {
+  final String label;
+  final String hint;
+  final TextEditingController controller;
+  final TextStyle style;
+  final bool multiline;
+  const _LabelledField({
+    required this.label, required this.hint,
+    required this.controller, required this.style,
+    this.multiline = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label.toUpperCase(), style: TextStyle(
+        fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8,
+        color: isDark ? AppColors.accentLight : AppColors.accentDark,
+      )),
+      const SizedBox(height: 6),
+      Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 14,
+          vertical: multiline ? 14 : 12),
+        child: TextField(
+          controller: controller,
+          maxLines: multiline ? null : 1,
+          minLines: multiline ? 7 : 1,
+          style: style.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: hint, border: InputBorder.none,
+            isDense: true, contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ),
+    ]);
+  }
+}`;
+
+function DetailCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · detail
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          diary_detail_content.dart · hero spread
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Refactor of <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DiaryDetailContent</code>.
+        Drops the per-section <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>CustomCard</code> chrome and the date/photos/content/tags icon headers.
+        The controller (<code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DiaryDetailController</code>),
+        scaffold, <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>PopScope</code> and bottom save/cancel bar stay as-is.
+        Reuses <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>_DiaryTagRow</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>_PhotoCountBadge</code>
+        from the list-card handoff.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{DETAIL_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── Stats notes card ──────────────────────────────────────────
+function StatsNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Statistics screen
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          The number is the data
+        </div>
+      </div>
+      <Bullet title="Numerals as the hero"
+        body="Value bumped to 40 / w700 / −1.2 tracking with tabular figures. Icons drop out — the number itself reads as the data, not a row of icon + label + value chrome."/>
+      <Bullet title="Accent label tier"
+        body="Same uppercase 11 / w700 / +0.9 tracking accent label used on date lines in the list & detail screens. Statistics now sits in the same type system instead of speaking its own dialect."/>
+      <Bullet title="Trend microcopy"
+        body="Streak + monthly cards carry a small filled +Δ pill in success-green. Quiet, but it tells the user the metric is alive without a chart."/>
+      <Bullet title="Calendar redrawn"
+        body="Entry days get a warm accent-tinted disc; multi-entry days carry a small filled count chip at the corner — no more markers overlapping the date. Today is a ring. Selected is the solid fill. The legend is tucked under the grid in the same accent-label rhythm."/>
+      <Bullet title="Two card flavours"
+        body="A · Neutral — flat white cards. Calmest, defers to the calendar. B · Tinted — uses the 3-tone chip palette (primary / accent / secondary / primary) on the card grounds. More personality; matches the chip vocabulary from the list cards."/>
+      <Bullet title="My recommendation"
+        body="Ship A (Neutral). Tinted is great for a future 'yearly review' mode but adds visual noise to the everyday view."/>
+    </div>
+  );
+}
+
+// ─── Statistics Flutter code ───────────────────────────────────
+const STATS_FLUTTER_CODE = `// Refactored statistics_cards.dart — display-numeral cards.
+// Drop-in replacement; same constructor signature.
+
+class StatisticsCards extends StatelessWidget {
+  const StatisticsCards({
+    super.key,
+    required this.totalEntries,
+    required this.currentStreak,
+    required this.longestStreak,
+    required this.monthlyCount,
+    this.tone = StatCardTone.neutral,
+  });
+
+  final int totalEntries;
+  final int currentStreak;
+  final int longestStreak;
+  final int monthlyCount;
+  final StatCardTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    final cards = <Widget>[
+      _StatCard(
+        label: l10n.statisticsTotalEntriesTitle,
+        value: '\$totalEntries',
+        unit:  l10n.statisticsUnitDiary,
+        tone:  tone == StatCardTone.tinted
+          ? _Tone.primary : _Tone.neutral,
+      ),
+      _StatCard(
+        label: l10n.statisticsCurrentStreakTitle,
+        value: '\$currentStreak',
+        unit:  l10n.statisticsUnitDay,
+        tone:  tone == StatCardTone.tinted
+          ? _Tone.accent : _Tone.neutral,
+      ),
+      _StatCard(
+        label: l10n.statisticsLongestStreakTitle,
+        value: '\$longestStreak',
+        unit:  l10n.statisticsUnitDay,
+        tone:  tone == StatCardTone.tinted
+          ? _Tone.secondary : _Tone.neutral,
+      ),
+      _StatCard(
+        label: l10n.statisticsMonthlyCountTitle,
+        value: '\$monthlyCount',
+        unit:  l10n.statisticsUnitDiary,
+        tone:  tone == StatCardTone.tinted
+          ? _Tone.primary : _Tone.neutral,
+      ),
+    ];
+
+    return GridView.count(
+      crossAxisCount: 2, shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 10, crossAxisSpacing: 10,
+      childAspectRatio: 1.55,
+      children: cards,
+    );
+  }
+}
+
+enum StatCardTone { neutral, tinted }
+enum _Tone { neutral, primary, secondary, accent }
+
+class _StatCard extends StatelessWidget {
+  final String label, value, unit;
+  final _Tone tone;
+  const _StatCard({
+    required this.label, required this.value,
+    required this.unit, required this.tone,
+  });
+
+  ({Color bg, Color labelColor}) _palette(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    switch (tone) {
+      case _Tone.neutral:
+        return (
+          bg: isDark ? AppColors.surfaceContainerDark : cs.surface,
+          labelColor: isDark ? AppColors.accentLight : AppColors.accentDark,
+        );
+      case _Tone.primary:
+        return (
+          bg: isDark
+            ? AppColors.primaryLight.withValues(alpha: 0.14)
+            : const Color(0xFFEEEAE3),
+          labelColor: isDark
+            ? const Color(0xFFC4D2DD)
+            : AppColors.onPrimaryContainer,
+        );
+      case _Tone.secondary:
+        return (
+          bg: isDark
+            ? AppColors.secondaryLight.withValues(alpha: 0.14)
+            : const Color(0xFFF2EAE2),
+          labelColor: isDark
+            ? const Color(0xFFD6BBA7)
+            : AppColors.onSecondaryContainer,
+        );
+      case _Tone.accent:
+        return (
+          bg: isDark
+            ? AppColors.accentLight.withValues(alpha: 0.14)
+            : const Color(0xFFF4E1D2),
+          labelColor: isDark
+            ? const Color(0xFFE4BEA3)
+            : AppColors.accentDark,
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = _palette(context);
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      decoration: BoxDecoration(
+        color: p.bg,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: tone == _Tone.neutral
+          ? AppSpacing.cardShadowXs : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label.toUpperCase(), style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.9,
+            color: p.labelColor,
+          )),
+          const Spacer(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(value, style: TextStyle(
+                fontSize: 40, fontWeight: FontWeight.w700,
+                height: 1.0, letterSpacing: -1.2,
+                color: cs.onSurface,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              )),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(unit, style: TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w500,
+                  color: cs.onSurfaceVariant,
+                )),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── statistics_calendar.dart — restyle hooks for table_calendar ───
+// Use these in your existing CalendarStyle / CalendarBuilders.
+class HeroCalendarTheme {
+  static CalendarStyle style(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    return CalendarStyle(
+      defaultTextStyle: TextStyle(
+        fontSize: 14, fontWeight: FontWeight.w500,
+        color: cs.onSurface,
+      ),
+      weekendTextStyle: TextStyle(
+        fontSize: 14, fontWeight: FontWeight.w500,
+        color: isDark ? AppColors.accentLight : AppColors.accentDark,
+      ),
+      outsideTextStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.35)),
+      // entry day: warm tinted disc
+      defaultDecoration: const BoxDecoration(shape: BoxShape.circle),
+      // today: ring only
+      todayDecoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isDark ? AppColors.primaryLight : AppColors.primary,
+          width: 1.5,
+        ),
+      ),
+      todayTextStyle: TextStyle(
+        fontSize: 14, fontWeight: FontWeight.w700,
+        color: cs.onSurface,
+      ),
+      // selected: solid accent fill
+      selectedDecoration: BoxDecoration(
+        color: accent,
+        shape: BoxShape.circle,
+      ),
+      selectedTextStyle: TextStyle(
+        fontSize: 14, fontWeight: FontWeight.w700,
+        color: isDark ? AppColors.backgroundDark : Colors.white,
+      ),
+      cellMargin: const EdgeInsets.all(3),
+    );
+  }
+
+  // Marker builder: warm tinted disc behind the number for any entry day,
+  // small filled count chip in the lower-right for multi-entry days.
+  static Widget? markerBuilder(
+    BuildContext context, DateTime day, List events,
+  ) {
+    if (events.isEmpty) return null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tintBg = isDark
+      ? AppColors.accentLight.withValues(alpha: 0.22)
+      : AppColors.accent.withValues(alpha: 0.18);
+    final countBg = isDark ? AppColors.accentLight : AppColors.accent;
+    final countFg = isDark ? AppColors.backgroundDark : Colors.white;
+
+    return Stack(children: [
+      // tinted disc behind the day number (positioned to match the cell)
+      Positioned.fill(
+        child: Container(
+          margin: const EdgeInsets.all(3),
+          decoration: BoxDecoration(color: tintBg, shape: BoxShape.circle),
+        ),
+      ),
+      if (events.length > 1)
+        Positioned(
+          right: 0, bottom: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+            constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+            decoration: BoxDecoration(
+              color: countBg,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Center(
+              child: Text(
+                events.length > 9 ? '9+' : '\${events.length}',
+                style: TextStyle(
+                  fontSize: 9, fontWeight: FontWeight.w700,
+                  color: countFg, height: 1.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      if (events.length == 1)
+        Positioned(
+          right: 6, bottom: 6,
+          child: Container(
+            width: 4, height: 4,
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.accentLight : AppColors.accentDark,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+    ]);
+  }
+
+  static HeaderStyle headerStyle(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return HeaderStyle(
+      titleCentered: true,
+      titleTextStyle: TextStyle(
+        fontSize: 18, fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
+        color: cs.onSurface,
+      ),
+      formatButtonVisible: false,
+      leftChevronIcon: Icon(Icons.chevron_left_rounded,
+        color: cs.onSurfaceVariant),
+      rightChevronIcon: Icon(Icons.chevron_right_rounded,
+        color: cs.onSurface),
+      headerPadding: const EdgeInsets.symmetric(vertical: 12),
+    );
+  }
+}`;
+
+function StatsCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · statistics
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          statistics_cards.dart + calendar theme
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Two pieces: drop-in <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>StatisticsCards</code> rewrite
+        (now with a <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>tone: StatCardTone</code> param —
+        default <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>.neutral</code> for the recommended look),
+        and a <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>HeroCalendarTheme</code> helper
+        whose <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>CalendarStyle</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>HeaderStyle</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>markerBuilder</code> plug straight
+        into your existing <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>TableCalendar</code>.
+        Controller (<code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>StatisticsController</code>)
+        and screen scaffold stay untouched.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{STATS_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── Prompt-modal notes card ──────────────────────────────────
+function PromptNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Prompt selection modal
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          One sheet, no rainbow
+        </div>
+      </div>
+      <Bullet title="Category color soup → 3-tone chips"
+        body="The current PromptCategoryUtils.getCategoryColor returns 9 different MD-bright colors (Deep Purple, Teal, Pink, Cyan, Orange…) which clash with Quiet Luxury. Replaced with a deterministic primary / accent / secondary cycle — same filled-chip palette the list cards use, so prompts visually belong to the rest of the app."/>
+      <Bullet title="Header carries the moment"
+        body="Tiny uppercase accent label (the date) + bold 22 / w700 title + muted sub-instruction. Same three-tier ramp as the list / detail / stats screens. Replaces the icon + title row of CustomDialog."/>
+      <Bullet title="Two presentations"
+        body="A · Centered modal — drop-in match for the current CustomDialog. B · Bottom sheet (recommended on iOS) — drag handle, anchored to the bottom edge, scrolls inside the sheet. Same inner content; you pick the host."/>
+      <Bullet title="Quick options separated"
+        body="‘No prompt’ and ‘Random’ become a 2-up shortcut row above a section divider, with their own compact card style. They're no longer indistinguishable from the actual prompt items below."/>
+      <Bullet title="Selection state simplified"
+        body="Was a 2 px accent border + alpha-15 fill. Now a single 1 px accent border + warm 10 % tint + a filled accent check disc on the right. Less visual weight, clearer signal."/>
+      <Bullet title="Premium prompts gain a badge"
+        body="Filled accent ‘★ Premium’ pill next to the category chip — keeps the affordance discoverable without changing the card's overall structure."/>
+      <Bullet title="My recommendation"
+        body="Ship B (Bottom sheet) as the primary on iOS. Keep A (Centered) as the small-form fallback for tablets / iPad."/>
+    </div>
+  );
+}
+
+// ─── Prompt-modal Flutter code ─────────────────────────────────
+const PROMPT_FLUTTER_CODE = `// Refactored prompt selection. Two pieces:
+//   · PromptSelectionSheet — bottom-sheet host (recommended on iOS)
+//   · PromptSelectionItems — rewritten card widgets
+// The current PromptSelectionModal (CustomDialog) can be kept as the
+// tablet fallback by reusing the same inner widget.
+
+class PromptSelectionSheet extends StatelessWidget {
+  final void Function(WritingPrompt?, String?) onPromptSelected;
+  final void Function(String?) onSkip;
+  const PromptSelectionSheet({
+    super.key,
+    required this.onPromptSelected,
+    required this.onSkip,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    required void Function(WritingPrompt?, String?) onPromptSelected,
+    required void Function(String?) onSkip,
+  }) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x73141210),
+      builder: (_) => PromptSelectionSheet(
+        onPromptSelected: onPromptSelected,
+        onSkip: onSkip,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceContainerHighDark : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 36, height: 5,
+              decoration: BoxDecoration(
+                color: isDark
+                  ? AppColors.outlineDark
+                  : AppColors.outline,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            Expanded(
+              child: _PromptModalContent(
+                scrollController: scrollController,
+                onPromptSelected: onPromptSelected,
+                onSkip: onSkip,
+              ),
+            ),
+            SafeArea(top: false,
+              child: const SizedBox(height: 0),
+            ),
+          ]),
+        );
+      },
+    );
+  }
+}
+
+// ─── selectable row (replaces _SelectableCard) ────────────────────
+class _PromptRow extends StatelessWidget {
+  final WritingPrompt prompt;
+  final bool isSelected;
+  final VoidCallback onTap;
+  const _PromptRow({
+    required this.prompt, required this.isSelected, required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected
+            ? (isDark
+                ? AppColors.accentLight.withValues(alpha: 0.16)
+                : AppColors.accent.withValues(alpha: 0.10))
+            : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? accent : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            _CategoryChip(category: prompt.category),
+            if (prompt.isPremiumOnly) ...[
+              const SizedBox(width: 6),
+              const _PremiumBadge(),
+            ],
+            const Spacer(),
+            if (isSelected) _CheckDisc(color: accent),
+          ]),
+          const SizedBox(height: 8),
+          Text(
+            prompt.text,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              height: 1.4, letterSpacing: -0.1,
+              color: cs.onSurface,
+            ),
+          ),
+          if (prompt.description != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              prompt.description!,
+              style: TextStyle(
+                fontSize: 12.5, height: 1.5,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ]),
+      ),
+    );
+  }
+}
+
+// ─── unified 3-tone category chip ─────────────────────────────────
+enum _ChipTone { primary, secondary, accent }
+
+class _CategoryChip extends StatelessWidget {
+  final PromptCategory category;
+  const _CategoryChip({required this.category});
+
+  // Deterministic mapping: every category lands in one of 3 tones.
+  // This replaces PromptCategoryUtils.getCategoryColor's 9-colour palette
+  // for the chip rendering only — the data layer stays untouched.
+  static const _toneMap = <PromptCategory, _ChipTone>{
+    PromptCategory.emotion:           _ChipTone.primary,
+    PromptCategory.emotionDepth:      _ChipTone.secondary,
+    PromptCategory.sensoryEmotion:    _ChipTone.accent,
+    PromptCategory.emotionGrowth:     _ChipTone.secondary,
+    PromptCategory.emotionConnection: _ChipTone.primary,
+    PromptCategory.emotionDiscovery:  _ChipTone.accent,
+    PromptCategory.emotionFantasy:    _ChipTone.secondary,
+    PromptCategory.emotionHealing:    _ChipTone.primary,
+    PromptCategory.emotionEnergy:     _ChipTone.accent,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tone = _toneMap[category] ?? _ChipTone.primary;
+    final ({Color bg, Color fg}) p = switch (tone) {
+      _ChipTone.primary => isDark
+        ? (bg: AppColors.primaryLight.withValues(alpha: 0.18),
+           fg: const Color(0xFFC4D2DD))
+        : (bg: const Color(0xFFE5E0DA), fg: AppColors.onPrimaryContainer),
+      _ChipTone.secondary => isDark
+        ? (bg: AppColors.secondaryLight.withValues(alpha: 0.18),
+           fg: const Color(0xFFD6BBA7))
+        : (bg: const Color(0xFFEFE6DE), fg: AppColors.onSecondaryContainer),
+      _ChipTone.accent => isDark
+        ? (bg: AppColors.accentLight.withValues(alpha: 0.18),
+           fg: const Color(0xFFE4BEA3))
+        : (bg: const Color(0xFFF1DCCB), fg: AppColors.accentDark),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: p.bg, borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        PromptCategoryUtils.getCategoryDisplayName(
+          category, locale: Localizations.localeOf(context)),
+        style: TextStyle(
+          fontSize: 11.5, fontWeight: FontWeight.w600,
+          letterSpacing: 0.15, color: p.fg, height: 1.0,
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumBadge extends StatelessWidget {
+  const _PremiumBadge();
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fg = isDark ? const Color(0xFFE4BEA3) : AppColors.accentDark;
+    final bg = isDark
+      ? AppColors.accentLight.withValues(alpha: 0.22)
+      : const Color(0xFFF4E1D2);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg, borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.star_rounded, size: 11, color: fg),
+        const SizedBox(width: 3),
+        Text('PREMIUM', style: TextStyle(
+          fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.3,
+          color: fg, height: 1.0,
+        )),
+      ]),
+    );
+  }
+}
+
+class _CheckDisc extends StatelessWidget {
+  final Color color;
+  const _CheckDisc({required this.color});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 22, height: 22,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: const Icon(Icons.check_rounded, size: 14, color: Colors.white),
+    );
+  }
+}
+
+// ─── quick options (No prompt / Random) ───────────────────────────
+class _QuickOption extends StatelessWidget {
+  final IconData glyph;
+  final String title;
+  final String description;
+  final bool isSelected;
+  final VoidCallback onTap;
+  const _QuickOption({
+    required this.glyph, required this.title, required this.description,
+    required this.isSelected, required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    final borderColor = isSelected
+      ? accent
+      : Theme.of(context).colorScheme.outlineVariant;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected
+            ? accent.withValues(alpha: isDark ? 0.16 : 0.10)
+            : (isDark ? AppColors.surfaceContainerHighestDark : Colors.white),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: 1),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Container(
+              width: 28, height: 28,
+              decoration: BoxDecoration(
+                color: isSelected
+                  ? accent
+                  : (isDark ? const Color(0xFF3A3633) : const Color(0xFFF0EDE8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(glyph, size: 16,
+                color: isSelected ? Colors.white : cs.onSurfaceVariant),
+            ),
+            const Spacer(),
+            if (isSelected) _CheckDisc(color: accent),
+          ]),
+          const SizedBox(height: 10),
+          Text(title, style: TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: -0.1,
+            color: cs.onSurface,
+          )),
+          const SizedBox(height: 4),
+          Text(description, style: TextStyle(
+            fontSize: 11.5, height: 1.45, color: cs.onSurfaceVariant,
+          ), maxLines: 2, overflow: TextOverflow.ellipsis),
+        ]),
+      ),
+    );
+  }
+}`;
+
+function PromptCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · prompt selection
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          prompt_selection_sheet.dart + items
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Two pieces: <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>PromptSelectionSheet</code> as
+        a <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DraggableScrollableSheet</code> host
+        (recommended on iOS), plus rewritten <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>_PromptRow</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>_QuickOption</code> /
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>_CategoryChip</code> widgets.
+        The existing CustomDialog-based <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>PromptSelectionModal</code> can
+        keep using the same inner widget for tablet/iPad. Data layer
+        (<code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>IPromptService</code>,
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>PromptCategoryUtils</code>) untouched —
+        only the chip's color resolution is overridden by a 3-tone map.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{PROMPT_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── Home notes card ──────────────────────────────────────────
+function HomeNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Home screen
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          Today, structured
+        </div>
+      </div>
+      <Bullet title="Header tier"
+        body="The full date (formatFullDate) collapses into an accent weekday label (TUESDAY · FEB 18) + a bold 'Today' headline. Same three-tier ramp as the list / detail / stats / modal screens. The data_usage icon button becomes a usage pill in the top-right that shows count and limit at a glance (12 / 30), with warning state when nearing the cap."/>
+      <Bullet title="Photo timeline rhythm"
+        body="The flat photo grid is broken into Morning / Afternoon / Evening sections, each headed by the same uppercase accent label used everywhere. A small right-aligned count sits opposite — gives the timeline structure without adding chrome."/>
+      <Bullet title="Selection state unified"
+        body="Was a hollow primary check mark + 2 px border. Now a single 1 px accent ring + 14 % accent overlay + a filled accent check disc in the top-right. Unselected tiles show a hollow glass ring to hint they're selectable. Identical vocabulary to the prompt modal's selection chip and the list card check disc."/>
+      <Bullet title="Used + locked states clarified"
+        body="Photos already used in a diary dim to 45 % and carry a black-blur 'DIARY' pill in the top-left. Premium-locked photos dim further and show a central 'PREMIUM' lock badge. Both states stop the tile from receiving a selection ring, so the affordance is unambiguous."/>
+      <Bullet title="Smart FAB grows up"
+        body="Camera state stays a 56 px circular FAB in accent terracotta with a soft outer glow. The moment you select a photo, the FAB morphs into a wide pill action bar at the bottom — 'N photos selected · Clear · Create diary →' — replacing both the top selection-count bar and the FAB. One source of action, same vocabulary as the prompt modal's primary button."/>
+      <Bullet title="Empty state"
+        body="The 'no photos today' state gets its own moment — a soft tinted disc with the camera glyph, a calm 'No photos from today yet' headline, and a single helper line. The FAB still floats so the user can shoot the first photo of the day."/>
+    </div>
+  );
+}
+
+// ─── Home Flutter code ────────────────────────────────────────
+const HOME_FLUTTER_CODE = `// Refactored home_content_widget.dart — Hero header + time sections
+// + selection-action bar replacing both the top bar and the FAB.
+// HomeScreen scaffold, HomeController, PhotoSelectionController stay
+// untouched — only the presentation layer changes.
+
+class HomeContentWidget extends StatelessWidget {
+  final PhotoSelectionController photoController;
+  final TimelineCallbacks callbacks;
+  final Function(String) onDiaryTap;
+  final Future<void> Function()? onRefresh;
+  final ScrollSignal? scrollSignal;
+  final UsageSnapshot? usage;
+
+  const HomeContentWidget({
+    super.key,
+    required this.photoController,
+    this.callbacks = const TimelineCallbacks(),
+    required this.onDiaryTap,
+    this.onRefresh,
+    this.scrollSignal,
+    this.usage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      // no AppBar — header is part of the scrolling body
+      body: ListenableBuilder(
+        listenable: photoController,
+        builder: (context, _) {
+          final selected = photoController.selectedCount;
+          return Stack(children: [
+            _Body(
+              photoController: photoController,
+              callbacks: callbacks,
+              scrollSignal: scrollSignal,
+              onRefresh: onRefresh,
+              usage: usage,
+            ),
+            // Smart FAB / selection bar at the bottom edge
+            Positioned(
+              left: 16, right: 16, bottom: 16,
+              child: _HomeBottomAction(
+                photoController: photoController,
+                onCameraPressed: callbacks.onCameraPressed,
+                onCreateDiaryPressed: () =>
+                  TimelineFABIntegration.createDiary(context, photoController, callbacks),
+              ),
+            ),
+          ]);
+        },
+      ),
+    );
+  }
+}
+
+// ─── header (date + usage pill) ─────────────────────────────────
+class _HomeHeader extends StatelessWidget {
+  final UsageSnapshot? usage;
+  const _HomeHeader({this.usage});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    final today = DateTime.now();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                l10n.formatWeekdayAndDate(today).toUpperCase(),
+                style: TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+                  color: accent,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l10n.homeTodayHeadline,
+                style: TextStyle(
+                  fontSize: 28, fontWeight: FontWeight.w700, height: 1.1,
+                  letterSpacing: -0.4, color: cs.onSurface,
+                ),
+              ),
+            ]),
+          ),
+          if (usage != null) _UsagePill(usage: usage!),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── usage pill (replaces the data_usage IconButton) ────────────
+class _UsagePill extends StatelessWidget {
+  final UsageSnapshot usage;
+  const _UsagePill({required this.usage});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final ratio = usage.limit == 0 ? 0 : usage.used / usage.limit;
+    final warn = ratio > 0.85;
+
+    final bg = warn
+      ? AppColors.errorContainer
+      : (isDark ? AppColors.surfaceContainerDark : Colors.white);
+    final fg = warn ? AppColors.error : cs.onSurface;
+
+    return InkWell(
+      onTap: () => HomeContentWidget.showUsageStatus(context),
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 11),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: warn ? AppColors.error.withValues(alpha: 0.25)
+                        : cs.outlineVariant,
+            width: 0.5,
+          ),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(warn ? Icons.error_outline_rounded : Icons.schedule_rounded,
+            size: 12, color: warn ? AppColors.error : cs.onSurfaceVariant),
+          const SizedBox(width: 7),
+          Text.rich(
+            TextSpan(children: [
+              TextSpan(text: '\${usage.used}', style: TextStyle(
+                fontSize: 12, fontWeight: FontWeight.w700, color: fg,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              )),
+              TextSpan(text: ' / \${usage.limit}', style: TextStyle(
+                fontSize: 12, fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+              )),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+// ─── time-of-day section header ─────────────────────────────────
+class _TimeSectionHeader extends StatelessWidget {
+  final String label;
+  final int count;
+  const _TimeSectionHeader({required this.label, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
+      child: Row(children: [
+        Text(label.toUpperCase(), style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+          color: accent,
+        )),
+        const Spacer(),
+        Text('\$count photo\${count == 1 ? '' : 's'}',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500,
+            color: cs.onSurfaceVariant)),
+      ]),
+    );
+  }
+}
+
+// ─── photo tile (selection ring + DIARY chip + locked) ──────────
+// Drop-in replacement for the inner tile used by TimelinePhotoWidget.
+class HomePhotoTile extends StatelessWidget {
+  final AssetEntity asset;
+  final bool isSelected;
+  final bool isUsed;
+  final bool isLocked;
+  final VoidCallback? onTap;
+
+  const HomePhotoTile({
+    super.key,
+    required this.asset,
+    this.isSelected = false,
+    this.isUsed = false,
+    this.isLocked = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(fit: StackFit.expand, children: [
+          // photo
+          Opacity(
+            opacity: isUsed ? 0.45 : (isLocked ? 0.55 : 1.0),
+            child: ColorFiltered(
+              colorFilter: isLocked
+                ? const ColorFilter.matrix(<double>[
+                    0.4, 0.4, 0.4, 0, 0,
+                    0.4, 0.4, 0.4, 0, 0,
+                    0.4, 0.4, 0.4, 0, 0,
+                    0,   0,   0,   1, 0,
+                  ])
+                : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+              child: AssetEntityImage(asset, fit: BoxFit.cover, isOriginal: false),
+            ),
+          ),
+          // selection ring + overlay
+          if (isSelected && !isUsed && !isLocked)
+            Positioned.fill(child: IgnorePointer(
+              child: Container(decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.13),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: accent, width: 2.5),
+              )),
+            )),
+          // unselected hint ring
+          if (!isSelected && !isUsed && !isLocked)
+            const Positioned(top: 8, right: 8, child: _HollowRing()),
+          // selected check disc
+          if (isSelected && !isUsed && !isLocked)
+            Positioned(top: 8, right: 8, child: _CheckDisc(accent: accent)),
+          // used chip
+          if (isUsed)
+            const Positioned(top: 8, left: 8, child: _DiaryChip()),
+          // premium-locked badge (centered)
+          if (isLocked) const Center(child: _LockedBadge()),
+        ]),
+      ),
+    );
+  }
+}
+
+class _HollowRing extends StatelessWidget {
+  const _HollowRing();
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 22, height: 22,
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: 0.25), shape: BoxShape.circle,
+      border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1.5),
+    ),
+  );
+}
+
+class _CheckDisc extends StatelessWidget {
+  final Color accent;
+  const _CheckDisc({required this.accent});
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 24, height: 24,
+    decoration: BoxDecoration(
+      color: accent, shape: BoxShape.circle,
+      boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 1))],
+    ),
+    child: const Icon(Icons.check_rounded, size: 14, color: Colors.white),
+  );
+}
+
+class _DiaryChip extends StatelessWidget {
+  const _DiaryChip();
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: 0.7),
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Row(mainAxisSize: MainAxisSize.min, children: const [
+      Icon(Icons.menu_book_rounded, size: 10, color: Colors.white),
+      SizedBox(width: 4),
+      Text('DIARY', style: TextStyle(
+        fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5,
+        color: Colors.white, height: 1.0,
+      )),
+    ]),
+  );
+}
+
+class _LockedBadge extends StatelessWidget {
+  const _LockedBadge();
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: 0.7),
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Row(mainAxisSize: MainAxisSize.min, children: const [
+      Icon(Icons.lock_outline_rounded, size: 10, color: Colors.white),
+      SizedBox(width: 5),
+      Text('PREMIUM', style: TextStyle(
+        fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5,
+        color: Colors.white, height: 1.0,
+      )),
+    ]),
+  );
+}
+
+// ─── smart bottom action (FAB ↔ wide selection bar) ─────────────
+class _HomeBottomAction extends StatelessWidget {
+  final PhotoSelectionController photoController;
+  final VoidCallback? onCameraPressed;
+  final VoidCallback? onCreateDiaryPressed;
+  const _HomeBottomAction({
+    required this.photoController,
+    this.onCameraPressed, this.onCreateDiaryPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = photoController.selectedCount;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+
+    return AnimatedSwitcher(
+      duration: AppConstants.standardTransitionDuration,
+      switchInCurve: Curves.easeOutBack,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(scale: animation, child: child),
+      ),
+      child: selected > 0
+        ? _SelectionBar(
+            key: const ValueKey('selection-bar'),
+            count: selected,
+            accent: accent,
+            onClear: photoController.clearSelection,
+            onCreate: onCreateDiaryPressed,
+          )
+        : Align(
+            key: const ValueKey('fab'),
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+              onPressed: onCameraPressed,
+              backgroundColor: accent,
+              foregroundColor: Colors.white,
+              elevation: 6,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.camera_alt_rounded, size: 24),
+            ),
+          ),
+    );
+  }
+}
+
+class _SelectionBar extends StatelessWidget {
+  final int count;
+  final Color accent;
+  final VoidCallback? onClear;
+  final VoidCallback? onCreate;
+  const _SelectionBar({
+    super.key,
+    required this.count, required this.accent,
+    this.onClear, this.onCreate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.fromLTRB(22, 0, 8, 0),
+      decoration: BoxDecoration(
+        color: accent, borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(color: accent.withValues(alpha: 0.45),
+            blurRadius: 24, offset: const Offset(0, 8)),
+          const BoxShadow(color: Color(0x26000000),
+            blurRadius: 6, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Row(children: [
+        Text('\$count', style: const TextStyle(
+          fontSize: 19, fontWeight: FontWeight.w700,
+          letterSpacing: -0.3, color: Colors.white,
+          fontFeatures: [FontFeature.tabularFigures()],
+        )),
+        const SizedBox(width: 8),
+        Text(l10n.homeSelectionLabel(count), style: const TextStyle(
+          fontSize: 13, fontWeight: FontWeight.w600,
+          color: Colors.white,
+        )),
+        const Spacer(),
+        TextButton(
+          onPressed: onClear,
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.18),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            minimumSize: const Size(0, 40),
+            shape: const StadiumBorder(),
+          ),
+          child: Text(l10n.commonClear),
+        ),
+        const SizedBox(width: 4),
+        FilledButton.icon(
+          onPressed: onCreate,
+          style: FilledButton.styleFrom(
+            foregroundColor: accent, backgroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            minimumSize: const Size(0, 40),
+            shape: const StadiumBorder(),
+            textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
+          icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+          label: Text(l10n.homeCreateDiary),
+        ),
+      ]),
+    );
+  }
+}`;
+
+function HomeCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · home
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          home_content_widget.dart + tile rewrite
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Three pieces: rewritten <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>HomeContentWidget</code> with
+        a scrolling body that includes <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>_HomeHeader</code> +
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>_UsagePill</code>,
+        a drop-in <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>HomePhotoTile</code> for
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>TimelinePhotoWidget</code>'s
+        inner cell, and a smart <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>_HomeBottomAction</code> that
+        replaces both the in-content selection bar and <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>SmartFABWidget</code>.
+        Controllers (<code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>HomeController</code>,
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>PhotoSelectionController</code>,
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>SmartFABController</code>) and
+        timeline data flow stay intact.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{HOME_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── Settings notes card ──────────────────────────────────────
+function SettingsNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Settings screen
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          Plan first, list second
+        </div>
+      </div>
+      <Bullet title="Header tier"
+        body="The 'Settings' AppBar title becomes the same accent-label-plus-bold-headline pair used on every other screen — ACCOUNT → Settings."/>
+      <Bullet title="Plan card as page hero"
+        body="The current subscription section is a single collapsible row buried mid-list. Promoted to a hero card at the very top: pill plan badge, 36 / w700 display numeral for monthly usage, slim progress track, primary upgrade button (or 'auto-renews' caption for Premium). Same display-numeral vocabulary as the statistics screen."/>
+      <Bullet title="Sections, not one giant card"
+        body="Was: one big CustomCard wrapping every section, separated by hairline dividers — visually one block, hard to scan. Now: each section is its own grouped card (Appearance / Diary & Photos / Data / About) headed by an uppercase accent label. Same iOS-style grouped-list rhythm the user already expects, but with the Hero accent palette."/>
+      <Bullet title="Row chrome trimmed"
+        body="Was: medium icon + 2-line text + chevron, all at full opacity. Now: small soft-tinted icon tile (36 × 36 rounded 10) in the muted accent color, title at 15 / w600, subtitle at 12.5 muted, chevron at the edge. Reads as a list of choices, not a list of icons."/>
+      <Bullet title="Warning + recommendation moved"
+        body="Currently they live inside the expanded subscription card with warning / info container fills. With the hero plan card, they collapse into the progress track turning red and a single warning-styled row in the About-adjacent group when relevant — quieter, more legible."/>
+      <Bullet title="What stays the same"
+        body="Section breakdown matches the current SettingsController exactly: Appearance (theme + language), Diary length, Photo type filter, Subscription, Storage (backup + restore), Version / Privacy / License. Same dialogs, same callbacks."/>
+    </div>
+  );
+}
+
+// ─── Settings Flutter code ────────────────────────────────────
+const SETTINGS_FLUTTER_CODE = `// Refactored settings_screen.dart — Hero header + grouped sections
+// + plan card as the page hero.
+// SettingsController, all *SettingsSection widgets and dialogs stay
+// untouched; only the screen-level composition + SettingsRow rendering
+// changes.
+
+class SettingsScreen extends StatefulWidget {
+  final Function(ThemeMode)? onThemeChanged;
+  final ScrollSignal? scrollSignal;
+  const SettingsScreen({super.key, this.onThemeChanged, this.scrollSignal});
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late final SettingsController _controller;
+  late final ScrollController _scrollController;
+  // … initState/dispose/scrollSignal handling unchanged …
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: MicroInteractions.pullToRefresh(
+            onRefresh: _controller.loadSettings,
+            color: AppColors.primary,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                SliverToBoxAdapter(child: _HeroHeader()),
+                if (_controller.isLoading)
+                  SliverFillRemaining(child: _buildLoadingContent())
+                else if (!_controller.hasSettingsLoaded)
+                  SliverFillRemaining(child: _buildSettingsLoadError())
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 32),
+                    sliver: SliverList(delegate: SliverChildListDelegate([
+                      // ── plan hero card ──
+                      _PlanCard(
+                        subscriptionInfo: _controller.subscriptionInfo,
+                        onTap: _controller.openSubscriptionDetail,
+                        onUpgrade: () =>
+                          UpgradeDialogUtils.showUpgradeDialog(context),
+                      ),
+                      const SizedBox(height: 22),
+
+                      // ── Appearance ──
+                      _SettingsGroup(
+                        label: context.l10n.settingsGroupAppearance,
+                        child: AppearanceSettingsSection(
+                          settingsService: _controller.settingsService!,
+                          logger: _controller.logger,
+                          selectedLocale: _controller.selectedLocale,
+                          onThemeChanged: widget.onThemeChanged,
+                          onLocaleChanged: _controller.onLocaleChanged,
+                          onStateChanged: _controller.notifyStateChanged,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+
+                      // ── Diary & Photos ──
+                      _SettingsGroup(
+                        label: context.l10n.settingsGroupDiaryAndPhotos,
+                        child: Column(children: [
+                          DiarySettingsSection(
+                            settingsService: _controller.settingsService!,
+                            logger: _controller.logger,
+                            onStateChanged: _controller.notifyStateChanged,
+                          ),
+                          const _RowDivider(),
+                          PhotoFilterSettingsSection(
+                            settingsService: _controller.settingsService!,
+                            logger: _controller.logger,
+                            onStateChanged: _controller.notifyStateChanged,
+                          ),
+                        ]),
+                      ),
+                      const SizedBox(height: 22),
+
+                      // ── Data (backup / restore) ──
+                      _SettingsGroup(
+                        label: context.l10n.settingsGroupData,
+                        child: StorageSettingsSection(
+                          onReloadSettings: _controller.loadSettings,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+
+                      // ── About ──
+                      _SettingsGroup(
+                        label: context.l10n.settingsGroupAbout,
+                        child: Column(children: [
+                          _buildVersionInfo(),
+                          const _RowDivider(),
+                          _buildPrivacyPolicyInfo(),
+                          const _RowDivider(),
+                          _buildLicenseInfo(),
+                        ]),
+                      ),
+                    ])),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+  // … _buildVersionInfo / _buildPrivacyPolicyInfo / _buildLicenseInfo
+  //    rebuilt to use SettingsRow (now restyled) — bodies unchanged …
+}
+
+// ─── hero header (accent label → bold headline) ─────────────────
+class _HeroHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l10n.settingsHeroEyebrow.toUpperCase(), style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+          color: accent,
+        )),
+        const SizedBox(height: 2),
+        Text(l10n.settingsAppBarTitle, style: TextStyle(
+          fontSize: 28, fontWeight: FontWeight.w700, height: 1.1,
+          letterSpacing: -0.4, color: cs.onSurface,
+        )),
+      ]),
+    );
+  }
+}
+
+// ─── grouped section ────────────────────────────────────────────
+class _SettingsGroup extends StatelessWidget {
+  final String label;
+  final Widget child;
+  const _SettingsGroup({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(6, 4, 6, 10),
+        child: Text(label.toUpperCase(), style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+          color: accent,
+        )),
+      ),
+      Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceContainerDark : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: cs.outlineVariant, width: 0.5),
+          boxShadow: AppSpacing.cardShadowXs,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: child,
+      ),
+    ]);
+  }
+}
+
+class _RowDivider extends StatelessWidget {
+  const _RowDivider();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 66),
+      child: Container(
+        height: 0.5,
+        color: Theme.of(context).colorScheme.outlineVariant,
+      ),
+    );
+  }
+}
+
+// ─── restyled SettingsRow ───────────────────────────────────────
+// Drop-in replacement for the existing SettingsRow widget.
+// Smaller, soft-tinted accent icon tile + heavier title.
+class SettingsRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+  final bool danger;
+  final String? semanticLabel;
+
+  const SettingsRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+    this.trailing,
+    this.danger = false,
+    this.semanticLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    final glyphBg = isDark
+      ? const Color(0xFF3A3633) : const Color(0xFFF0EDE8);
+    final iconBg = danger
+      ? AppColors.errorContainer
+      : glyphBg;
+    final iconFg = danger ? AppColors.error : accent;
+
+    final row = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      child: Row(children: [
+        Container(
+          width: 36, height: 36,
+          decoration: BoxDecoration(
+            color: iconBg, borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: iconFg),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(
+                fontSize: 15, fontWeight: FontWeight.w600,
+                letterSpacing: -0.1, height: 1.3,
+                color: danger ? AppColors.error : cs.onSurface,
+              )),
+              const SizedBox(height: 2),
+              Text(subtitle, style: TextStyle(
+                fontSize: 12.5, height: 1.4,
+                color: cs.onSurfaceVariant,
+              ), maxLines: 1, overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ),
+        if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
+        if (onTap != null)
+          Icon(Icons.chevron_right_rounded,
+            size: 18, color: cs.onSurfaceVariant),
+      ]),
+    );
+
+    Widget result = onTap != null
+      ? InkWell(onTap: onTap, child: row)
+      : row;
+    if (semanticLabel != null) {
+      result = Semantics(
+        label: semanticLabel, button: onTap != null, child: result,
+      );
+    }
+    return result;
+  }
+}
+
+// ─── plan hero card ─────────────────────────────────────────────
+class _PlanCard extends StatelessWidget {
+  final SubscriptionInfoV2? subscriptionInfo;
+  final VoidCallback? onTap;
+  final VoidCallback? onUpgrade;
+  const _PlanCard({this.subscriptionInfo, this.onTap, this.onUpgrade});
+
+  @override
+  Widget build(BuildContext context) {
+    if (subscriptionInfo == null) return const _PlanCardSkeleton();
+    final info = subscriptionInfo!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    final used = info.monthlyUsageCount;
+    final limit = info.monthlyAiGenerationLimit;
+    final remaining = (limit - used).clamp(0, limit);
+    final ratio = limit == 0 ? 0.0 : used / limit;
+    final warn = ratio > 0.85;
+
+    final bg = info.isPremium
+      ? (isDark
+          ? AppColors.accentLight.withValues(alpha: 0.14)
+          : const Color(0xFFF4E1D2))
+      : (isDark ? AppColors.surfaceContainerDark : Colors.white);
+
+    return Material(
+      color: bg, borderRadius: BorderRadius.circular(20), clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // plan badge row
+            Row(children: [
+              _PlanBadge(isPremium: info.isPremium),
+              const Spacer(),
+              if (onTap != null)
+                Icon(Icons.chevron_right_rounded,
+                  size: 18, color: cs.onSurfaceVariant),
+            ]),
+            const SizedBox(height: 14),
+
+            // eyebrow + display numerals
+            Text(
+              context.l10n.settingsPlanThisMonth.toUpperCase(),
+              style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.9,
+                color: isDark ? AppColors.accentLight : AppColors.accentDark,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic, children: [
+              Text('\$used', style: TextStyle(
+                fontSize: 36, fontWeight: FontWeight.w700,
+                height: 1.0, letterSpacing: -1.0,
+                color: cs.onSurface,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              )),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('/ \$limit \${context.l10n.settingsPlanDiariesUnit}',
+                  style: TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w500,
+                    color: cs.onSurfaceVariant,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  )),
+              ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  context.l10n.settingsPlanRemainingAndReset(remaining),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 10),
+
+            // progress track
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: ratio.toDouble().clamp(0.0, 1.0),
+                minHeight: 6,
+                backgroundColor: cs.outlineVariant,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  warn ? AppColors.error : accent,
+                ),
+              ),
+            ),
+
+            if (!info.isPremium) ...[
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: onUpgrade,
+                  icon: const Icon(Icons.star_rounded, size: 14),
+                  label: Text(context.l10n.settingsUpgradeToPremium),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: accent, foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                    textStyle: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2),
+                  ),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.settingsPlanAutoRenewal(info.expiryDate),
+                style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+              ),
+            ],
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanBadge extends StatelessWidget {
+  final bool isPremium;
+  const _PlanBadge({required this.isPremium});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isPremium
+      ? Colors.white
+      : (isDark
+          ? AppColors.primaryLight.withValues(alpha: 0.18)
+          : const Color(0xFFE5E0DA));
+    final fg = isPremium
+      ? AppColors.accentDark
+      : (isDark ? const Color(0xFFC4D2DD) : AppColors.onPrimaryContainer);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg, borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (isPremium) ...[
+          Icon(Icons.star_rounded, size: 10, color: fg),
+          const SizedBox(width: 4),
+        ],
+        Text(
+          (isPremium
+            ? context.l10n.settingsPlanPremiumLabel
+            : context.l10n.settingsPlanBasicLabel).toUpperCase(),
+          style: TextStyle(
+            fontSize: 10.5, fontWeight: FontWeight.w700,
+            letterSpacing: 0.5, color: fg, height: 1.0,
+          ),
+        ),
+      ]),
+    );
+  }
+}`;
+
+function SettingsCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · settings
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          settings_screen.dart + SettingsRow + _PlanCard
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Three pieces: rewritten <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>SettingsScreen</code> with
+        a Hero header + grouped sections, a drop-in <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>SettingsRow</code> rewrite
+        (same constructor signature — adds an optional <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>danger</code> flag),
+        and a new <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>_PlanCard</code> hero replacing
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>SubscriptionSettingsSection</code>'s
+        collapsible row.
+        Controller (<code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>SettingsController</code>) and
+        per-section widgets (Appearance / Diary / PhotoFilter / Storage) keep their existing APIs — they just render
+        through the new <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>SettingsRow</code>.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{SETTINGS_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── Filter notes card ────────────────────────────────────────
+function FilterNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Diary filter
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          Quieter chrome, clearer state
+        </div>
+      </div>
+      <Bullet title="Section labels harmonised"
+        body="The bold 'Date Range' / 'Tags' / 'Time of day' titles become the same uppercase accent labels (DATE RANGE / TAGS / TIME OF DAY) that head every section across the app. A small right-aligned hint shows live state ('3 selected', 'Feb 11 – Feb 18')."/>
+      <Bullet title="Tags get a real selected state"
+        body="Was: stock Material FilterChip — a flat gray pill with a tick that barely reads. Now: filled accent terracotta + white text + tick on selected, soft outlined chip on the rest. Selecting a tag now feels like a commitment, not a check."/>
+      <Bullet title="Date range, decompressed"
+        body="The Card+ListTile with calendar-icon + 'Select period' chevron becomes two compact pill buttons (Start / End) side-by-side. When empty they show 'Select date'; when filled they show the formatted date in tabular figures with a small × to clear that side."/>
+      <Bullet title="Time of day, illustrated"
+        body="Same chip vocabulary as Tags, but each label carries a tiny morning / noon / evening / night icon for instant scan. Same selected treatment."/>
+      <Bullet title="Apply button knows the count"
+        body="The full-width primary Apply pill shows the live active count inline ('Apply [3] filters'). When nothing is set it falls back to 'Apply filter'. Matches the Create-diary CTA from the home selection bar and the prompt modal — same primary vocabulary."/>
+      <Bullet title="Active filters strip rebuilt"
+        body="The strip that appears above the Diaries list when filters are applied was stock Material Chips with avatar icons in surface-secondary. Replaced with the 3-tone removable chip vocabulary: date range in primary tone, tags in accent, time slots in secondary. Each chip carries its own × hit target, and the header gains an accent count label."/>
+    </div>
+  );
+}
+
+// ─── Filter Flutter code ──────────────────────────────────────
+const FILTER_FLUTTER_CODE = `// Refactored filter_bottom_sheet.dart — Hero language applied.
+// Same DiaryFilter model, same onApply callback, same dialogs for
+// date picking. Only the bottom-sheet body and the chip widgets change.
+
+class FilterBottomSheet extends StatefulWidget {
+  final DiaryFilter initialFilter;
+  final Function(DiaryFilter) onApply;
+  final IDiaryTagService? tagService;
+  const FilterBottomSheet({
+    super.key,
+    required this.initialFilter,
+    required this.onApply,
+    this.tagService,
+  });
+  // … state/load/toggle methods unchanged …
+}
+
+class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  late DiaryFilter _currentFilter;
+  List<String> _availableTags = const [];
+  bool _isLoadingTags = true;
+  // … _loadAvailableTags / _selectDateRange / _toggleTag /
+  //    _toggleTimeOfDay / _clearAllFilters identical to the
+  //    original implementation …
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    final activeCount = _currentFilter.activeFilterCount;
+
+    return Container(
+      height: MediaQuery.of(context).size.height
+        * AppConstants.bottomSheetHeightRatio,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceContainerHighDark : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(children: [
+        // drag handle
+        Container(
+          width: 36, height: 5,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.outlineDark : AppColors.outline,
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+
+        // header (accent eyebrow + bold title + Clear-all pill)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(context.l10n.filterEyebrow.toUpperCase(), style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+                color: isDark ? AppColors.accentLight : AppColors.accentDark,
+              )),
+              const SizedBox(height: 2),
+              Text(context.l10n.filterTitle, style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.3,
+                color: cs.onSurface,
+              )),
+            ])),
+            if (activeCount > 0)
+              OutlinedButton(
+                onPressed: () => setState(() {
+                  _currentFilter = DiaryFilter.empty;
+                }),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  side: BorderSide(color: cs.outlineVariant),
+                  shape: const StadiumBorder(),
+                  textStyle: const TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                child: Text(context.l10n.filterClearAll),
+              ),
+          ]),
+        ),
+        Divider(height: 0.5, color: cs.outlineVariant),
+
+        // body
+        Expanded(child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          children: [
+            // ── DATE RANGE ─────────────────────────────────────
+            _SectionLabel(
+              label: context.l10n.filterDateRange,
+              hint: _currentFilter.dateRange == null
+                ? null
+                : '\${context.l10n.formatMonthDay(_currentFilter.dateRange!.start)} – '
+                  '\${context.l10n.formatMonthDay(_currentFilter.dateRange!.end)}',
+            ),
+            Row(children: [
+              Expanded(child: _DatePill(
+                label: context.l10n.filterDateStartLabel,
+                value: _currentFilter.dateRange?.start,
+                onTap: _selectDateRange,
+                onClear: () => setState(() {
+                  _currentFilter = _currentFilter.copyWith(clearDateRange: true);
+                }),
+              )),
+              const SizedBox(width: 10),
+              Expanded(child: _DatePill(
+                label: context.l10n.filterDateEndLabel,
+                value: _currentFilter.dateRange?.end,
+                onTap: _selectDateRange,
+              )),
+            ]),
+            const SizedBox(height: 22),
+
+            // ── TAGS ───────────────────────────────────────────
+            _SectionLabel(
+              label: context.l10n.filterTags,
+              hint: _currentFilter.selectedTags.isEmpty
+                ? null
+                : context.l10n.filterTagsSelectedCount(
+                    _currentFilter.selectedTags.length),
+            ),
+            if (_isLoadingTags)
+              const Padding(padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(child: CircularProgressIndicator()))
+            else if (_availableTags.isEmpty)
+              Text(context.l10n.filterNoTags,
+                style: TextStyle(color: cs.onSurfaceVariant))
+            else
+              Wrap(spacing: 6, runSpacing: 6,
+                children: _availableTags.map((tag) => _FilterTagChip(
+                  label: '#\$tag',
+                  selected: _currentFilter.selectedTags.contains(tag),
+                  onTap: () => _toggleTag(tag),
+                )).toList(),
+              ),
+            const SizedBox(height: 22),
+
+            // ── TIME OF DAY ────────────────────────────────────
+            _SectionLabel(label: context.l10n.filterTimeOfDay),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              _TimeChip(period: TimeOfDayPeriod.morning,
+                selected: _currentFilter.timeOfDay.contains(TimeOfDayPeriod.morning),
+                onTap: () => _toggleTimeOfDay(TimeOfDayPeriod.morning)),
+              _TimeChip(period: TimeOfDayPeriod.noon,
+                selected: _currentFilter.timeOfDay.contains(TimeOfDayPeriod.noon),
+                onTap: () => _toggleTimeOfDay(TimeOfDayPeriod.noon)),
+              _TimeChip(period: TimeOfDayPeriod.evening,
+                selected: _currentFilter.timeOfDay.contains(TimeOfDayPeriod.evening),
+                onTap: () => _toggleTimeOfDay(TimeOfDayPeriod.evening)),
+              _TimeChip(period: TimeOfDayPeriod.night,
+                selected: _currentFilter.timeOfDay.contains(TimeOfDayPeriod.night),
+                onTap: () => _toggleTimeOfDay(TimeOfDayPeriod.night)),
+            ]),
+          ],
+        )),
+
+        // apply button
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: cs.outlineVariant, width: 0.5)),
+            color: isDark ? AppColors.surfaceContainerHighDark : Colors.white,
+          ),
+          child: FilledButton(
+            onPressed: () {
+              widget.onApply(_currentFilter);
+              Navigator.pop(context);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: accent, foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)),
+              textStyle: const TextStyle(
+                fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.2),
+            ),
+            child: activeCount == 0
+              ? Text(context.l10n.filterApply)
+              : Row(mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(context.l10n.filterApplyPrefix),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text('\$activeCount',
+                        style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w700,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        )),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(context.l10n.filterApplySuffix(activeCount)),
+                  ]),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+// ─── section header ──────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  final String? hint;
+  const _SectionLabel({required this.label, this.hint});
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+      child: Row(children: [
+        Text(label.toUpperCase(), style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+          color: accent,
+        )),
+        const Spacer(),
+        if (hint != null)
+          Text(hint!, style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w500,
+            color: cs.onSurfaceVariant,
+          )),
+      ]),
+    );
+  }
+}
+
+// ─── date pill ───────────────────────────────────────────────────
+class _DatePill extends StatelessWidget {
+  final String label;
+  final DateTime? value;
+  final VoidCallback onTap;
+  final VoidCallback? onClear;
+  const _DatePill({
+    required this.label, required this.value,
+    required this.onTap, this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final filled = value != null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    final accentMuted = isDark ? AppColors.accentLight : AppColors.accentDark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+        decoration: BoxDecoration(
+          color: filled
+            ? accent.withValues(alpha: isDark ? 0.16 : 0.10)
+            : (isDark ? const Color(0xFF3A3633) : const Color(0xFFF0EDE8)),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: filled ? accent : cs.outlineVariant,
+            width: 1,
+          ),
+        ),
+        child: Stack(children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(label.toUpperCase(), style: TextStyle(
+              fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8,
+              color: accentMuted,
+            )),
+            const SizedBox(height: 2),
+            Text(
+              filled
+                ? context.l10n.formatLongDate(value!)
+                : context.l10n.filterSelectDate,
+              style: TextStyle(
+                fontSize: filled ? 15 : 14,
+                fontWeight: filled ? FontWeight.w600 : FontWeight.w500,
+                color: filled ? cs.onSurface : cs.onSurfaceVariant,
+                letterSpacing: -0.1,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ]),
+          if (filled && onClear != null)
+            Positioned(top: 0, right: 0, child: InkWell(
+              onTap: onClear,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                width: 20, height: 20,
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.close_rounded,
+                  size: 11, color: cs.onSurface),
+              ),
+            )),
+        ]),
+      ),
+    );
+  }
+}
+
+// ─── tag chip (filled vs outlined) ───────────────────────────────
+class _FilterTagChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _FilterTagChip({
+    required this.label, required this.selected, required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accent;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected
+            ? accent
+            : (isDark ? const Color(0xFF3A3633) : const Color(0xFFF0EDE8)),
+          borderRadius: BorderRadius.circular(999),
+          border: selected ? null : Border.all(
+            color: cs.outlineVariant, width: 1,
+          ),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (selected) ...[
+            const Icon(Icons.check_rounded, size: 14, color: Colors.white),
+            const SizedBox(width: 4),
+          ],
+          Text(label, style: TextStyle(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? Colors.white : cs.onSurface,
+            letterSpacing: 0.1, height: 1.0,
+          )),
+        ]),
+      ),
+    );
+  }
+}
+
+// ─── ActiveFiltersDisplay restyled ───────────────────────────────
+// Drop-in replacement for the list-screen strip. 3-tone removable chips.
+class ActiveFiltersDisplay extends StatelessWidget {
+  final DiaryFilter filter;
+  final VoidCallback onClear;
+  final Function(String)? onRemoveTag;
+  final Function(TimeOfDayPeriod)? onRemoveTimeOfDay;
+  final VoidCallback? onRemoveDateRange;
+  final VoidCallback? onRemoveSearch;
+  const ActiveFiltersDisplay({
+    super.key,
+    required this.filter, required this.onClear,
+    this.onRemoveTag, this.onRemoveTimeOfDay,
+    this.onRemoveDateRange, this.onRemoveSearch,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        border: Border(bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(
+            context.l10n.filterActiveTitle(filter.activeFilterCount).toUpperCase(),
+            style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1,
+              color: accent,
+            ),
+          ),
+          TextButton(
+            onPressed: onClear,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, 28),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              foregroundColor: cs.onSurface,
+              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            child: Text(context.l10n.filterActiveClearAll),
+          ),
+        ]),
+        const SizedBox(height: 8),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          if (filter.dateRange != null)
+            _RemovableChip(
+              label: '\${context.l10n.formatMonthDay(filter.dateRange!.start)} – '
+                     '\${context.l10n.formatMonthDay(filter.dateRange!.end)}',
+              tone: _ChipTone.primary,
+              onRemove: onRemoveDateRange,
+            ),
+          for (final tag in filter.selectedTags)
+            _RemovableChip(label: '#\$tag', tone: _ChipTone.accent,
+              onRemove: () => onRemoveTag?.call(tag)),
+          for (final period in filter.timeOfDay)
+            _RemovableChip(
+              label: _timeLabel(context, period),
+              tone: _ChipTone.secondary,
+              onRemove: () => onRemoveTimeOfDay?.call(period),
+            ),
+          if (filter.searchText != null && filter.searchText!.isNotEmpty)
+            _RemovableChip(
+              label: context.l10n.filterActiveSearch(filter.searchText!),
+              tone: _ChipTone.primary,
+              onRemove: onRemoveSearch,
+            ),
+        ]),
+      ]),
+    );
+  }
+}
+
+enum _ChipTone { primary, secondary, accent }
+
+class _RemovableChip extends StatelessWidget {
+  final String label;
+  final _ChipTone tone;
+  final VoidCallback? onRemove;
+  const _RemovableChip({
+    required this.label, required this.tone, this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ({Color bg, Color fg}) p = switch (tone) {
+      _ChipTone.primary => isDark
+        ? (bg: AppColors.primaryLight.withValues(alpha: 0.18),
+           fg: const Color(0xFFC4D2DD))
+        : (bg: const Color(0xFFE5E0DA), fg: AppColors.onPrimaryContainer),
+      _ChipTone.secondary => isDark
+        ? (bg: AppColors.secondaryLight.withValues(alpha: 0.18),
+           fg: const Color(0xFFD6BBA7))
+        : (bg: const Color(0xFFEFE6DE), fg: AppColors.onSecondaryContainer),
+      _ChipTone.accent => isDark
+        ? (bg: AppColors.accentLight.withValues(alpha: 0.18),
+           fg: const Color(0xFFE4BEA3))
+        : (bg: const Color(0xFFF1DCCB), fg: AppColors.accentDark),
+    };
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 5, 6, 5),
+      decoration: BoxDecoration(
+        color: p.bg, borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Text(label, style: TextStyle(
+          fontSize: 11.5, fontWeight: FontWeight.w600,
+          color: p.fg, height: 1.0,
+        )),
+        const SizedBox(width: 6),
+        InkWell(
+          onTap: onRemove,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 16, height: 16,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.10),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.close_rounded, size: 11, color: p.fg),
+          ),
+        ),
+      ]),
+    );
+  }
+}`;
+
+function FilterCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · filter
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          filter_bottom_sheet.dart + ActiveFiltersDisplay
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Two pieces: rewritten <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>FilterBottomSheet</code> with
+        a Hero header, two-pill date range, filled-state tag chips and a count-aware
+        Apply button, plus a drop-in <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>ActiveFiltersDisplay</code> rewrite
+        using the 3-tone removable chip vocabulary.
+        The <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DiaryFilter</code> model,
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>IDiaryTagService</code>,
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>showDatePicker</code> flow
+        and the <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>onApply</code> callback all stay intact.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{FILTER_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
+// ─── canvas ──────────────────────────────────────────────────────
+const PHONE_W = 460, PHONE_H = 950;
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="notes" title="Diaries list redesign"
+        subtitle="Smart Photo Diary · 4 card variants in iPhone context, both modes. Recommended pick: B · Hero photo.">
+        <DCArtboard id="notes-card" label="Design notes" width={520} height={PHONE_H}>
+          <NotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="light" title="Light mode" subtitle="Same two entries across all four variants for direct comparison.">
+        {VARIANTS.map((v) => (
+          <DCArtboard key={v.id} id={`light-${v.id}`} label={v.label}
+            width={PHONE_W} height={PHONE_H}>
+            <PhonePreview tokens={lightTokens} Card={v.Card}/>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="dark" title="Dark mode" subtitle="Verify against AppColors.backgroundDark surfaces.">
+        {VARIANTS.map((v) => (
+          <DCArtboard key={v.id} id={`dark-${v.id}`} label={v.label}
+            width={PHONE_W} height={PHONE_H}>
+            <PhonePreview tokens={darkTokens} Card={v.Card}/>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="handoff" title="Flutter handoff · list card"
+        subtitle="Hero variant — recommended. Two new private widgets, no controller changes.">
+        <DCArtboard id="flutter" label="diary_card_widget.dart" width={920} height={PHONE_H}>
+          <CodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="detail-notes" title="Diary detail — Hero applied"
+        subtitle="Same vocabulary as the list Hero card, blown up to a full screen. Photo as a real hero, accent date label, bold title, filled 3-tone tags, divider before the body.">
+        <DCArtboard id="detail-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <DetailNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="detail-light" title="Detail · Light"
+        subtitle="Read, multi-photo (5), and edit states.">
+        <DCArtboard id="detail-read-light" label="Read · single photo" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <DetailScreen tokens={lightTokens} entry={DETAIL_ENTRY} meta={DETAIL_META}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-multi-light" label="Read · multi-photo" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <DetailScreen tokens={lightTokens} entry={DETAIL_ENTRY_MULTI} meta={DETAIL_META_MULTI}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-edit-light" label="Edit mode" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <DetailScreen tokens={lightTokens} entry={DETAIL_ENTRY} mode="edit"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="detail-dark" title="Detail · Dark">
+        <DCArtboard id="detail-read-dark" label="Read · single photo" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <DetailScreen tokens={darkTokens} entry={DETAIL_ENTRY} meta={DETAIL_META}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-multi-dark" label="Read · multi-photo" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <DetailScreen tokens={darkTokens} entry={DETAIL_ENTRY_MULTI} meta={DETAIL_META_MULTI}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-edit-dark" label="Edit mode" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <DetailScreen tokens={darkTokens} entry={DETAIL_ENTRY} mode="edit"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="detail-handoff" title="Flutter handoff · detail"
+        subtitle="Refactored diary_detail_content.dart. Same controller API — only the presentation layer changes.">
+        <DCArtboard id="detail-flutter" label="diary_detail_content.dart" width={920} height={PHONE_H}>
+          <DetailCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="stats-notes" title="Statistics — Hero applied"
+        subtitle="Display numerals as the hero; the calendar redrawn with warm entry-day discs and corner count chips.">
+        <DCArtboard id="stats-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <StatsNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="stats-light" title="Statistics · Light"
+        subtitle="A · Neutral cards (recommended) — B · Tinted cards using the 3-tone chip palette.">
+        <DCArtboard id="stats-neutral-light" label="A · Neutral · Light" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <StatsScreen tokens={lightTokens} variant="neutral"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="stats-tinted-light" label="B · Tinted · Light" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <StatsScreen tokens={lightTokens} variant="tinted"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="stats-dark" title="Statistics · Dark">
+        <DCArtboard id="stats-neutral-dark" label="A · Neutral · Dark" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <StatsScreen tokens={darkTokens} variant="neutral"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="stats-tinted-dark" label="B · Tinted · Dark" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <StatsScreen tokens={darkTokens} variant="tinted"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="stats-handoff" title="Flutter handoff · statistics"
+        subtitle="statistics_cards.dart rewrite + HeroCalendarTheme helper for table_calendar.">
+        <DCArtboard id="stats-flutter" label="statistics_cards.dart" width={920} height={PHONE_H}>
+          <StatsCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="prompt-notes" title="Prompt modal — Hero applied"
+        subtitle="Unifies the 9-color category palette into the 3-tone chip vocabulary, separates quick options from the prompt list, and offers a bottom-sheet host.">
+        <DCArtboard id="prompt-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <PromptNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="prompt-light" title="Prompt modal · Light"
+        subtitle="A · Centered modal (matches current CustomDialog) — B · Bottom sheet (recommended on iOS).">
+        <DCArtboard id="prompt-centered-light" label="A · Centered · Random selected" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <CenteredModalScreen tokens={lightTokens} selectedId="random"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="prompt-sheet-light" label="B · Bottom sheet · Prompt selected" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <BottomSheetScreen tokens={lightTokens} selectedId="p2" contextOpen={true}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="prompt-sheet-light-none" label="B · Bottom sheet · No prompt" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <BottomSheetScreen tokens={lightTokens} selectedId="none"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="prompt-dark" title="Prompt modal · Dark">
+        <DCArtboard id="prompt-centered-dark" label="A · Centered · Random selected" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <CenteredModalScreen tokens={darkTokens} selectedId="random"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="prompt-sheet-dark" label="B · Bottom sheet · Prompt selected" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <BottomSheetScreen tokens={darkTokens} selectedId="p2" contextOpen={true}/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="prompt-handoff" title="Flutter handoff · prompt selection"
+        subtitle="PromptSelectionSheet (bottom-sheet host) + rewritten item widgets. Data layer untouched.">
+        <DCArtboard id="prompt-flutter" label="prompt_selection_sheet.dart" width={920} height={PHONE_H}>
+          <PromptCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="home-notes" title="Home — Hero applied"
+        subtitle="Today's photo timeline restructured around the same accent/headline ramp, with the FAB upgraded into a wide selection action bar.">
+        <DCArtboard id="home-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <HomeNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="home-light" title="Home · Light"
+        subtitle="Default · selection (2 photos) · empty state.">
+        <DCArtboard id="home-default-light" label="Default · Camera FAB" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <HomeScreen tokens={lightTokens} state="default"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="home-selection-light" label="Selection · 2 photos" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <HomeScreen tokens={lightTokens} state="selection"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="home-empty-light" label="Empty state" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <HomeScreen tokens={lightTokens} state="empty"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="home-dark" title="Home · Dark">
+        <DCArtboard id="home-default-dark" label="Default · Camera FAB" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <HomeScreen tokens={darkTokens} state="default"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="home-selection-dark" label="Selection · 2 photos" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <HomeScreen tokens={darkTokens} state="selection"/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="home-handoff" title="Flutter handoff · home"
+        subtitle="HomeContentWidget rewrite + HomePhotoTile + smart bottom action. Controllers untouched.">
+        <DCArtboard id="home-flutter" label="home_content_widget.dart" width={920} height={PHONE_H}>
+          <HomeCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="settings-notes" title="Settings — Hero applied"
+        subtitle="Plan card promoted to the page hero; sections become flat groups headed by accent labels.">
+        <DCArtboard id="settings-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <SettingsNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="settings-light" title="Settings · Light"
+        subtitle="Basic plan (with usage progress) — Premium plan (auto-renewal caption).">
+        <DCArtboard id="settings-basic-light" label="Basic · 12 / 30" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <SettingsScreen tokens={lightTokens} isPremium={false}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="settings-premium-light" label="Premium · 47 / 100" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <SettingsScreen tokens={lightTokens} isPremium={true}/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="settings-dark" title="Settings · Dark">
+        <DCArtboard id="settings-basic-dark" label="Basic · 12 / 30" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <SettingsScreen tokens={darkTokens} isPremium={false}/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="settings-premium-dark" label="Premium · 47 / 100" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <SettingsScreen tokens={darkTokens} isPremium={true}/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="settings-handoff" title="Flutter handoff · settings"
+        subtitle="settings_screen.dart + SettingsRow rewrite + _PlanCard. Controller and section widgets untouched.">
+        <DCArtboard id="settings-flutter" label="settings_screen.dart" width={920} height={PHONE_H}>
+          <SettingsCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="filter-notes" title="Diary filter — Hero applied"
+        subtitle="Filter bottom sheet + active-filters strip rebuilt around the shared chip vocabulary.">
+        <DCArtboard id="filter-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <FilterNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="filter-light" title="Filter · Light"
+        subtitle="Empty state · with selection · resulting list with active strip.">
+        <DCArtboard id="filter-empty-light" label="Sheet · empty" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <FilterSheetScreen tokens={lightTokens} state="default"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="filter-selected-light" label="Sheet · 5 filters" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <FilterSheetScreen tokens={lightTokens} state="applied"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="filter-strip-light" label="List · active filters strip" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={false}>
+            <DiariesWithFiltersScreen tokens={lightTokens}/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="filter-dark" title="Filter · Dark">
+        <DCArtboard id="filter-selected-dark" label="Sheet · 5 filters" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <FilterSheetScreen tokens={darkTokens} state="applied"/>
+          </IOSDevice>
+        </DCArtboard>
+        <DCArtboard id="filter-strip-dark" label="List · active filters strip" width={PHONE_W} height={PHONE_H}>
+          <IOSDevice width={402} height={874} dark={true}>
+            <DiariesWithFiltersScreen tokens={darkTokens}/>
+          </IOSDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="filter-handoff" title="Flutter handoff · filter"
+        subtitle="filter_bottom_sheet.dart + ActiveFiltersDisplay rewrite. DiaryFilter model untouched.">
+        <DCArtboard id="filter-flutter" label="filter_bottom_sheet.dart" width={920} height={PHONE_H}>
+          <FilterCodeCard/>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
