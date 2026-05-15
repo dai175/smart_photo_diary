@@ -63,27 +63,20 @@
 
 #### 2. `lib/ui/design_system/app_typography.dart`
 
-**変更スタイル**（既存を更新）:
-
-| スタイル | 変更前 | 変更後 | 用途 |
-|---|---|---|---|
-| `diaryTitle` | 18pt/w500 | 26pt/w700/-0.3 | 詳細画面タイトル |
-| `titleLarge` | 22pt/w500 | 22pt/w700/-0.2 | カードタイトル |
-| `labelSmall` | 11pt/w500/+0.8 | 11pt/w700/uppercase/+0.8 | セクションラベル |
-| `bodyLarge` | 16pt/+0.5/1.50lh | 15.5pt/+0.05/1.75lh | 詳細本文 |
-| `bodyMedium` | 14pt/+0.25/1.43lh | 13.5pt/+0.1/1.55lh | カード本文 |
-| `statisticsNumber` | 32pt/w300/-0.5 | 40pt/w700/-1.2 | 統計ヒーロー数字 |
+**既存スタイルは変更しない**: `titleLarge` / `labelSmall` / `bodyLarge` / `bodyMedium` / `diaryTitle` / `statisticsNumber` は設定・ダイアログ・オンボーディング等で広く参照されているため直接更新しない。対象ウィジェット側で以下の新規スタイルに置き換える。
 
 **新規追加スタイル**:
 
-| スタイル名 | 仕様 | 用途 |
-|---|---|---|
-| `statsDisplay` | 40pt/w700/-1.2/lh1.0 | 統計ヒーロー数字 |
-| `sectionLabel` | 11pt/w700/uppercase/+0.8/lh1.2 | セクションヘッダー |
-| `dateLabel` | 11pt/w700/uppercase/+0.6/lh1.2 | 日付アクセント |
-| `cardTitle` | 22pt/w700/-0.2/lh1.2 | ヒーローカードタイトル |
-| `magazineTitle` | 19pt/w700/-0.1/lh1.25 | マガジンカードタイトル |
-| `cardBody` | 13.5pt/w400/+0.1/1.55lh | カード本文抜粋 |
+| スタイル名 | 仕様 | 用途 | 置き換え元 |
+|---|---|---|---|
+| `detailTitle` | 26pt/w700/-0.3/lh1.2 | 詳細画面タイトル | `diaryTitle` |
+| `detailBody` | 15.5pt/w400/+0.05/1.75lh | 詳細本文 | `bodyLarge` |
+| `statsDisplay` | 40pt/w700/-1.2/lh1.0 | 統計ヒーロー数字 | `statisticsNumber` |
+| `sectionLabel` | 11pt/w700/uppercase/+0.8/lh1.2 | セクションヘッダー | `labelSmall` |
+| `dateLabel` | 11pt/w700/uppercase/+0.6/lh1.2 | 日付アクセント | — |
+| `cardTitle` | 22pt/w700/-0.2/lh1.2 | ヒーローカードタイトル | `titleLarge` |
+| `magazineTitle` | 19pt/w700/-0.1/lh1.25 | マガジンカードタイトル | — |
+| `cardBody` | 13.5pt/w400/+0.1/1.55lh | カード本文抜粋 | `bodyMedium` |
 
 ---
 
@@ -168,7 +161,7 @@ factory ModernChip.tonedTag(String label, {required int index}) {
 実装詳細:
 - `AspectRatio(aspectRatio: 3/2)` でヒーロー写真
 - 写真なし時: `glyphBg` 背景 + `Icons.photo_camera_outlined`
-- 日付フォーマット: `DateFormat("MMM dd · EEEE").format(date).toUpperCase()`
+- 日付フォーマット: ロケール対応が必要。`DateFormat.yMMMEd(locale.toString()).format(date).toUpperCase()` を使用するか、フォーマットパターンを ARB キーで定義する（英語固定不可）
 - タグ: `ModernChip.tonedTag(label, index: i)` で自動3-tone
 - カード `borderRadius`: `BorderRadius.circular(20)`
 - シャドウ: `BoxShadow(color: Color(0x0A231E1A), blurRadius: 22, offset: Offset(0, 6))`
@@ -182,8 +175,8 @@ factory ModernChip.tonedTag(String label, {required int index}) {
 | 要素 | 仕様 |
 |---|---|
 | ドラッグハンドル | 36×5px / radius 999 / `handle`色 |
-| ヘッダーラベル | "Diaries" 11pt/uppercase / `accentMuted` |
-| ヘッダータイトル | "Filter" 24pt/w700/-0.3 |
+| ヘッダーラベル | `context.l10n` 経由の文言 / 11pt/uppercase / `accentMuted` |
+| ヘッダータイトル | `context.l10n` 経由の文言 / 24pt/w700/-0.3 |
 | DatePill | 2列グリッド / height 56 / radius 14 |
 | DatePill 未選択 | `glyphBg` 背景 + border `divider` |
 | DatePill 選択済 | `selectedBg` 背景 + border accent + ×クリア |
@@ -200,10 +193,10 @@ factory ModernChip.tonedTag(String label, {required int index}) {
 | 要素 | 仕様 |
 |---|---|
 | ヘッダー日付ラベル | 11pt/uppercase/`accentMuted` |
-| ヘッダータイトル | "Choose a prompt" 22pt/w700 |
-| Quick options | 2列グリッド: "No prompt" / "Random" |
+| ヘッダータイトル | `context.l10n` 経由の文言 / 22pt/w700 |
+| Quick options | 2列グリッド: `context.l10n` 経由のラベル |
 | プロンプトリスト行 | カテゴリタグ + プレミアムバッジ + タイトル + 説明 |
-| スティッキーアクションバー | Cancelボタン + "Create with [selection]"ボタン |
+| スティッキーアクションバー | `context.l10n` 経由のボタン文言 |
 | コンテキスト入力 | トグル付きオプションフィールド |
 
 ---
@@ -224,7 +217,6 @@ factory ModernChip.tonedTag(String label, {required int index}) {
 - ラベル: 11pt/w700/uppercase/0.9tracking
 - 数値: `statsDisplay` (40pt/w700/-1.2)
 - 単位: 13pt/w500/`muted`
-- デルタバッジ: 11pt/w700/`success`色/`successContainer`背景
 
 ---
 
