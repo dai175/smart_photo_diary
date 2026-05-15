@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/writing_prompt.dart';
 import '../ui/components/modern_chip.dart';
+import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../utils/prompt_category_utils.dart';
@@ -128,6 +129,7 @@ class PromptSelectionItems {
     BuildContext context, {
     required WritingPrompt prompt,
     required bool isSelected,
+    required bool isPremium,
     required VoidCallback onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -149,6 +151,10 @@ class PromptSelectionItems {
                 ),
                 index: prompt.category.index,
               ),
+              if (!isPremium && prompt.isPremiumOnly) ...[
+                const SizedBox(width: AppSpacing.xs),
+                const _PremiumBadge(),
+              ],
               const Spacer(),
               if (isSelected)
                 Icon(Icons.check_circle, color: accentColor, size: 20),
@@ -215,6 +221,42 @@ class _SelectableCard extends StatelessWidget {
           ),
         ),
         child: child,
+      ),
+    );
+  }
+}
+
+/// プレミアムプロンプトのバッジ（ロックアイコン + "PREMIUM" ラベル）
+class _PremiumBadge extends StatelessWidget {
+  const _PremiumBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.tagAccentBg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.lock_outline,
+            size: 10,
+            color: AppColors.tagAccentFg,
+          ),
+          const SizedBox(width: AppSpacing.xxs),
+          Text(
+            'PREMIUM',
+            style: AppTypography.sectionLabel.copyWith(
+              color: AppColors.tagAccentFg,
+            ),
+          ),
+        ],
       ),
     );
   }

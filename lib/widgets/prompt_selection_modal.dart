@@ -128,12 +128,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      title: context.l10n.promptSelectionTitle,
-      icon: Icons.edit_note_rounded,
-      iconColor: Theme.of(context).colorScheme.primary,
       maxWidth: 420,
+      contentPadding: EdgeInsets.zero,
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 480),
+        constraints: const BoxConstraints(maxHeight: 520),
         child: _isLoading ? _buildLoadingContent() : _buildContent(context),
       ),
       actions: _buildActions(),
@@ -183,10 +181,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   }
 
   Widget _buildLoadingContent() {
-    return Container(
+    return const SizedBox(
       height: 200,
-      padding: AppSpacing.cardPadding,
-      child: const Center(child: CircularProgressIndicator()),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -196,28 +193,40 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 日付ラベル
+        // ヘッダー: 日付ラベル + タイトル
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md,
-            AppSpacing.xs,
-            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
             0,
           ),
-          child: Text(
-            _headerDate,
-            style: AppTypography.dateLabel.copyWith(
-              color: AppColors.accentMuted,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _headerDate,
+                style: AppTypography.dateLabel.copyWith(
+                  color: AppColors.accentMuted,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.promptSelectionTitle,
+                style: AppTypography.cardTitle.copyWith(
+                  color: AppColors.onSurface,
+                ),
+              ),
+            ],
           ),
         ),
 
         // コンテキスト入力トグル
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md,
+            AppSpacing.lg,
             AppSpacing.xs,
-            AppSpacing.md,
+            AppSpacing.lg,
             AppSpacing.sm,
           ),
           child: Column(
@@ -282,7 +291,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
         // クイックオプション 2列グリッド
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Row(
             children: [
               Expanded(
@@ -361,9 +370,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
             Text(
               title,
               style: AppTypography.cardBody.copyWith(
-                color: isSelected
-                    ? AppColors.accentMuted
-                    : AppColors.onSurface,
+                color: isSelected ? AppColors.accentMuted : AppColors.onSurface,
                 fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
@@ -387,6 +394,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
           context,
           prompt: prompt,
           isSelected: _selectedPrompt?.id == prompt.id && !_isRandomSelected,
+          isPremium: _isPremium,
           onTap: () => _selectPrompt(prompt),
         );
       },
