@@ -24,25 +24,34 @@ class ModernChip extends StatefulWidget {
     this.style = ChipStyle.filled,
     this.animationDuration = AppConstants.quickAnimationDuration,
     this.borderRadius,
+    this.textStyle,
   }) : _variant = _ChipVariant.normal;
 
+  static const _tonedTagBgs = [
+    AppColors.tagPrimaryBg,
+    AppColors.tagSecondaryBg,
+    AppColors.tagAccentBg,
+  ];
+  static const _tonedTagFgs = [
+    AppColors.tagPrimaryFg,
+    AppColors.tagSecondaryFg,
+    AppColors.tagAccentFg,
+  ];
+  static const _tonedTagTextStyle = TextStyle(
+    fontSize: 11.5,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.15,
+  );
+
   factory ModernChip.tonedTag(String label, {required int index}) {
-    const bgs = [
-      AppColors.tagPrimaryBg,
-      AppColors.tagSecondaryBg,
-      AppColors.tagAccentBg,
-    ];
-    const fgs = [
-      AppColors.tagPrimaryFg,
-      AppColors.tagSecondaryFg,
-      AppColors.tagAccentFg,
-    ];
     final tone = index % 3;
     return ModernChip(
       label: label,
-      backgroundColor: bgs[tone],
-      foregroundColor: fgs[tone],
+      backgroundColor: _tonedTagBgs[tone],
+      foregroundColor: _tonedTagFgs[tone],
       borderRadius: 8.0,
+      size: ChipSize.small,
+      textStyle: _tonedTagTextStyle,
     );
   }
 
@@ -61,6 +70,7 @@ class ModernChip extends StatefulWidget {
       style = ChipStyle.filled,
       animationDuration = AppConstants.quickAnimationDuration,
       borderRadius = null,
+      textStyle = null,
       _variant = _ChipVariant.tag;
 
   /// タグカウントバッジ表示専用コンストラクタ
@@ -77,6 +87,7 @@ class ModernChip extends StatefulWidget {
       style = ChipStyle.filled,
       animationDuration = AppConstants.quickAnimationDuration,
       borderRadius = null,
+      textStyle = null,
       _variant = _ChipVariant.badge;
 
   /// チップのラベルテキスト
@@ -117,6 +128,8 @@ class ModernChip extends StatefulWidget {
 
   /// カスタム角丸半径（null時はサイズに応じた pill 形）
   final double? borderRadius;
+
+  final TextStyle? textStyle;
 
   /// チップのバリアント（内部フラグ）
   final _ChipVariant _variant;
@@ -235,7 +248,7 @@ class _ModernChipState extends State<ModernChip>
                     ],
                     Text(
                       widget.label,
-                      style: chipData.textStyle.copyWith(
+                      style: (widget.textStyle ?? chipData.textStyle).copyWith(
                         color: colorData.foregroundColor,
                       ),
                     ),
