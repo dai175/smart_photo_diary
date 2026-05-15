@@ -290,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXs),
             child: LinearProgressIndicator(
               value: usageRate,
               minHeight: 6,

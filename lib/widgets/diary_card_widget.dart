@@ -201,8 +201,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   }
 
   Widget _buildHeroImage(BuildContext context, AssetEntity asset) {
-    final dpr = MediaQuery.of(context).devicePixelRatio;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final mq = MediaQuery.of(context);
+    final dpr = mq.devicePixelRatio;
+    final screenWidth = mq.size.width;
     final w = (screenWidth * dpr).toInt();
     final h = (screenWidth / 1.5 * dpr).toInt();
 

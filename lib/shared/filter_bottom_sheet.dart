@@ -200,7 +200,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ),
       child: Column(
         children: [
-          // ドラッグハンドル
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.md),
             child: Center(
@@ -217,7 +216,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
           const SizedBox(height: AppSpacing.md),
 
-          // ヘッダー
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
@@ -258,18 +256,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             color: AppColors.divider,
           ),
 
-          // フィルタオプション
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               children: [
-                // 日付範囲
                 _buildSection(
                   title: l10n.filterDateRange,
                   child: _buildDatePillGrid(context),
                 ),
 
-                // タグ
                 _buildSection(
                   title: l10n.filterTags,
                   child: _isLoadingTags
@@ -306,7 +301,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         ),
                 ),
 
-                // 時間帯
                 _buildSection(
                   title: l10n.filterTimeOfDay,
                   child: Wrap(
@@ -330,7 +324,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             ),
           ),
 
-          // 適用ボタン
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,

@@ -31,6 +31,7 @@ class CalendarMarkerConstants {
   static const double size = 14.0;
   static const double dotSize = 6.0;
   static const double legendIndicatorSize = 10.0;
+  static const double todayBorderWidth = 1.5;
 }
 
 /// 丸いタイル/アバターなどの共通サイズ

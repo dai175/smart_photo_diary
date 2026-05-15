@@ -74,7 +74,10 @@ class StatisticsCalendar extends StatelessWidget {
               ),
               todayDecoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.calToday, width: 1.5),
+                border: Border.all(
+                  color: AppColors.calToday,
+                  width: CalendarMarkerConstants.todayBorderWidth,
+                ),
               ),
               todayTextStyle: const TextStyle(
                 color: AppColors.calToday,
@@ -84,11 +87,8 @@ class StatisticsCalendar extends StatelessWidget {
             ),
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
-                final events = StatisticsCalculator.getEventsForDay(
-                  diaryMap,
-                  day,
-                );
-                if (events.isEmpty) return null;
+                final normalizedDay = DateTime(day.year, day.month, day.day);
+                if (!diaryMap.containsKey(normalizedDay)) return null;
                 return Container(
                   margin: const EdgeInsets.all(AppSpacing.xxs),
                   decoration: const BoxDecoration(
@@ -257,7 +257,10 @@ class StatisticsCalendar extends StatelessWidget {
       height: CalendarMarkerConstants.legendIndicatorSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.calToday, width: 1.5),
+        border: Border.all(
+          color: AppColors.calToday,
+          width: CalendarMarkerConstants.todayBorderWidth,
+        ),
       ),
     );
   }
