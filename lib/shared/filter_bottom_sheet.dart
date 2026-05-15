@@ -221,11 +221,24 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    l10n.filterTitle,
-                    style: AppTypography.detailTitle,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.navigationDiary.toUpperCase(),
+                        style: AppTypography.sectionLabel.copyWith(
+                          color: AppColors.accentMuted,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        l10n.filterTitle,
+                        style: AppTypography.detailTitle.copyWith(fontSize: 24),
+                      ),
+                    ],
                   ),
                 ),
                 TextOnlyButton(
@@ -237,6 +250,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
 
           const SizedBox(height: AppSpacing.sm),
+          const Divider(
+            height: 1,
+            thickness: 0.5,
+            indent: 20,
+            endIndent: 20,
+            color: AppColors.divider,
+          ),
 
           // フィルタオプション
           Expanded(
@@ -455,18 +475,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         duration: AppConstants.quickAnimationDuration,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.selectedBg : AppColors.glyphBg,
+          color: isSelected ? AppColors.accentMuted : AppColors.glyphBg,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isSelected ? AppColors.accentMuted : AppColors.divider,
+            color: isSelected ? Colors.transparent : AppColors.divider,
           ),
         ),
-        child: Text(
-          label,
-          style: AppTypography.cardBody.copyWith(
-            color: isSelected ? AppColors.accentMuted : AppColors.muted,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected) ...[
+              const Icon(Icons.check, size: 13, color: Colors.white),
+              const SizedBox(width: AppSpacing.xs),
+            ],
+            Text(
+              label,
+              style: AppTypography.cardBody.copyWith(
+                color: isSelected ? Colors.white : AppColors.muted,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+              ),
+            ),
+          ],
         ),
       ),
     );
