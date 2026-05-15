@@ -28,7 +28,9 @@ class DialogConstants {
 
 /// カレンダーマーカー（統計画面など）の規格値
 class CalendarMarkerConstants {
-  static const double size = 22.0; // 直径
+  static const double size = 14.0;
+  static const double dotSize = 6.0;
+  static const double legendIndicatorSize = 10.0;
 }
 
 /// 丸いタイル/アバターなどの共通サイズ

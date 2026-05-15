@@ -1356,6 +1356,22 @@
       }
     }
   },
+  "statisticsCalendarLegendEntry": "Entry",
+  "@statisticsCalendarLegendEntry": {
+    "description": "Calendar legend label for days with a single diary entry"
+  },
+  "statisticsCalendarLegendMultiple": "Multiple",
+  "@statisticsCalendarLegendMultiple": {
+    "description": "Calendar legend label for days with multiple diary entries"
+  },
+  "statisticsCalendarLegendToday": "Today",
+  "@statisticsCalendarLegendToday": {
+    "description": "Calendar legend label for today's date indicator"
+  },
+  "statisticsCalendarLegendSelected": "Selected",
+  "@statisticsCalendarLegendSelected": {
+    "description": "Calendar legend label for the selected date indicator"
+  },
   "subscriptionUsageWarningRemaining": "You have {remaining} stories remaining.",
   "@subscriptionUsageWarningRemaining": {
     "description": "Warning message shown when story usage is near the monthly limit",

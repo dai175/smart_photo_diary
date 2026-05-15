@@ -1356,6 +1356,22 @@
       }
     }
   },
+  "statisticsCalendarLegendEntry": "エントリ",
+  "@statisticsCalendarLegendEntry": {
+    "description": "カレンダー凡例：日記が1件ある日のラベル"
+  },
+  "statisticsCalendarLegendMultiple": "複数",
+  "@statisticsCalendarLegendMultiple": {
+    "description": "カレンダー凡例：日記が複数ある日のラベル"
+  },
+  "statisticsCalendarLegendToday": "今日",
+  "@statisticsCalendarLegendToday": {
+    "description": "カレンダー凡例：今日の日付インジケーターのラベル"
+  },
+  "statisticsCalendarLegendSelected": "選択中",
+  "@statisticsCalendarLegendSelected": {
+    "description": "カレンダー凡例：選択中の日付インジケーターのラベル"
+  },
   "subscriptionUsageWarningRemaining": "残りの日記が{remaining}件です",
   "@subscriptionUsageWarningRemaining": {
     "description": "日記残数が制限に近づいた時の警告メッセージ",
