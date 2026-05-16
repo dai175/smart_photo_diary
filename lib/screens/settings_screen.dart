@@ -100,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -110,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: AppColors.accentMuted,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             context.l10n.settingsAppBarTitle,
             style: TextStyle(
@@ -118,6 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               fontWeight: FontWeight.w700,
               color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.3,
+              height: 1.1,
             ),
           ),
         ],

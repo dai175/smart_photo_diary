@@ -44,7 +44,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           appBar: AppBar(
             title: Text(l10n.navigationStatistics),
-            centerTitle: false,
           ),
           body: _controller.isLoading
               ? Center(

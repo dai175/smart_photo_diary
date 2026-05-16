@@ -247,7 +247,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ? TextField(
               controller: _controller.searchController,
               autofocus: true,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(color: colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: context.l10n.diarySearchHint,
                 hintStyle: TextStyle(
@@ -275,7 +275,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             ]
           : [
               IconButton(
-                icon: const Icon(AppIcons.search),
+                icon: Icon(AppIcons.search, color: colorScheme.onSurface),
                 onPressed: _controller.startSearch,
               ),
               Container(
@@ -287,7 +287,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         : AppIcons.filter,
                     color: _controller.currentFilter.isActive
                         ? colorScheme.primary
-                        : null,
+                        : colorScheme.onSurface,
                   ),
                   onPressed: _showFilterBottomSheet,
                 ),
