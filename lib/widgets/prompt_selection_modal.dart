@@ -144,8 +144,8 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   }
 
   List<Widget> _buildActions() {
-    final l10n = context.l10n;
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final accentColor = theme.brightness == Brightness.dark
         ? AppColors.accentLight
         : AppColors.accent;
@@ -159,10 +159,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     }
 
     return [
-      CustomDialogAction(
-        text: l10n.commonCancel,
-        onPressed: () => Navigator.of(context).pop(),
-      ),
       AnimatedButton(
         onPressed: () {
           final contextText = _getContextText();
@@ -186,10 +182,36 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     ];
   }
 
+  Widget _buildCloseButton(BuildContext context) {
+    return IconButton(
+      onPressed: () => Navigator.of(context).pop(),
+      tooltip: context.l10n.commonCancel,
+      icon: Icon(
+        Icons.close,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        size: 20,
+      ),
+      style: IconButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: EdgeInsets.zero,
+      ),
+    );
+  }
+
   Widget _buildLoadingContent() {
-    return const SizedBox(
-      height: 200,
-      child: Center(child: CircularProgressIndicator()),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.sm, right: AppSpacing.sm),
+          child: _buildCloseButton(context),
+        ),
+        const SizedBox(
+          height: AppSpacing.xxl * 5,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ],
     );
   }
 
@@ -209,32 +231,40 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
             AppSpacing.lg,
-            AppSpacing.lg,
+            AppSpacing.sm,
             0,
           ),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _headerDate,
-                style: AppTypography.dateLabel.copyWith(
-                  color: accentMutedColor,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _headerDate,
+                      style: AppTypography.dateLabel.copyWith(
+                        color: accentMutedColor,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.promptSelectionTitle,
+                      style: AppTypography.cardTitle.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.promptSelectionSubtitle,
+                      style: AppTypography.cardBody.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                l10n.promptSelectionTitle,
-                style: AppTypography.cardTitle.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                l10n.promptSelectionSubtitle,
-                style: AppTypography.cardBody.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
+              _buildCloseButton(context),
             ],
           ),
         ),
