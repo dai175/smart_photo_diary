@@ -78,7 +78,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
   PreferredSizeWidget _buildHeader(BuildContext context) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(108),
+      preferredSize: const Size.fromHeight(84),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -101,14 +101,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.4,
                         height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      context.l10n.homeHeaderSubtitle,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

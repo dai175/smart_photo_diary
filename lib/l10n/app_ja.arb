@@ -244,10 +244,6 @@
   "@homeSelectionClearAll": {
     "description": "ホーム画面の写真選択を全解除するボタン"
   },
-  "homeHeaderSubtitle": "今日の写真をタップして日記を作成",
-  "@homeHeaderSubtitle": {
-    "description": "ホーム画面ヘッダーの「今日」見出し直下に表示するサブテキスト"
-  },
   "commonCancel": "キャンセル",
   "@commonCancel": {
     "description": "キャンセルボタン共通文言"

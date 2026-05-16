@@ -244,10 +244,6 @@
   "@homeSelectionClearAll": {
     "description": "Button to clear all photo selections on home screen"
   },
-  "homeHeaderSubtitle": "Tap photos from today to create a diary",
-  "@homeHeaderSubtitle": {
-    "description": "Subtitle shown below the Today heading in the home screen header"
-  },
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Generic cancel button label"
