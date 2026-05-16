@@ -41,7 +41,7 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 
 ### Directory Structure
 
-- `lib/core/` — DI container, Result<T> pattern, exception hierarchy
+- `lib/core/` — DI container, `result/` (Result<T> sealed class + UI/async extensions), exception hierarchy
   - `hive_encryption_helper.dart` — Hive box encryption (AES-256 via flutter_secure_storage)
 - `lib/config/` — environment config (.env loader, build-time constants)
 - `lib/constants/` — app-wide constants (subscription, theme, AI, cache)
@@ -52,9 +52,9 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 - `lib/services/social_share/` — social share channel implementations
 - `lib/services/mixins/` — shared service mixins (e.g., error handling)
 - `lib/services/*.dart` — core service implementations, delegates, usage tracking (`ai_usage_service`, `prompt_usage_service`), feature access control, and subscription state management (flat structure at services root)
-- `lib/controllers/` — ChangeNotifier-based screen controllers, `BaseErrorController` (shared error handling), and utility notifiers (`PastPhotosNotifier`, `ScrollSignal`, `SmartFabController`)
+- `lib/controllers/` — ChangeNotifier-based screen controllers, `BaseErrorController` (shared error handling), and utility notifiers (`PastPhotosNotifier`, `ScrollSignal`); `UpgradeDialogController` manages premium upgrade flow
 - `lib/screens/` — screen/page implementations with subdirectories (`home/`, `diary_detail/`, `diary_preview/`, `statistics/`, `onboarding/`) and root-level screen files (`settings_screen.dart`, `diary_screen.dart`)
-- `lib/widgets/` — domain-specific reusable widgets (timeline, settings, upgrade, FAB, calendar, prompt selection)
+- `lib/widgets/` — domain-specific reusable widgets organized into subdirs: `buttons/`, `settings/` (subscription/storage sections), `timeline/` (photo tile, scroll manager, cache), `upgrade/` (plan cards, upgrade dialog); root-level widgets include diary cards, search, calendar
 - `lib/ui/design_system/` — Material Design 3 theme, colors, typography
 - `lib/ui/components/` — shared UI components (CustomDialog, buttons, etc.)
 - `lib/ui/component_constants.dart` — shared UI component constants
