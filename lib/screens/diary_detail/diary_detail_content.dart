@@ -45,7 +45,6 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
 
   late final IPhotoCacheService _photoCacheService;
   final _galleryFutures = <String, Future<Result<Uint8List>>>{};
-  late String _cachedDateLabel;
 
   @override
   void initState() {
@@ -54,20 +53,17 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _cachedDateLabel = _computeDateLabel();
-  }
-
-  @override
   void didUpdateWidget(DiaryDetailContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.diaryEntry.date != widget.diaryEntry.date) {
-      _cachedDateLabel = _computeDateLabel();
-    }
     if (!listEquals(oldWidget.photoAssets, widget.photoAssets)) {
       _galleryFutures.clear();
     }
+  }
+
+  @override
+  void dispose() {
+    _galleryFutures.clear();
+    super.dispose();
   }
 
   String _computeDateLabel() {
@@ -107,7 +103,7 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _cachedDateLabel,
+                  _computeDateLabel(),
                   style: AppTypography.withColor(
                     AppTypography.dateLabel,
                     AppColors.accentMuted,
@@ -237,6 +233,7 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
 
   Widget _buildInlineGallery(BuildContext context) {
     final galleryAssets = widget.photoAssets.sublist(1);
+    final colorScheme = Theme.of(context).colorScheme;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -259,7 +256,6 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
             child: FutureBuilder<Result<Uint8List>>(
               future: _getGalleryThumbnail(asset),
               builder: (context, snapshot) {
-                final colorScheme = Theme.of(context).colorScheme;
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Container(color: colorScheme.surfaceContainerHighest);
                 }

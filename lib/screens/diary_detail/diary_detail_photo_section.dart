@@ -37,9 +37,13 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
   @override
   void didUpdateWidget(DiaryDetailPhotoSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.photoAssets.isEmpty ||
-        widget.photoAssets.isEmpty ||
-        oldWidget.photoAssets.first.id != widget.photoAssets.first.id) {
+    final oldFirst = oldWidget.photoAssets.isNotEmpty
+        ? oldWidget.photoAssets.first.id
+        : null;
+    final newFirst = widget.photoAssets.isNotEmpty
+        ? widget.photoAssets.first.id
+        : null;
+    if (oldFirst != newFirst) {
       _heroThumbnailFuture = _loadHeroThumbnail();
     }
   }
