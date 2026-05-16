@@ -150,7 +150,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     final l10n = context.l10n;
     final accentColor = theme.brightness == Brightness.dark
         ? AppColors.accentLight
-        : AppColors.accent;
+        : AppColors.accentDark;
     final String primaryText;
     if (_isRandomSelected) {
       primaryText = l10n.promptCreateRandom;

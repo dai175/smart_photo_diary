@@ -408,6 +408,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }) {
     final hasDate = date != null;
     final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = hasDate ? AppColors.selectedBg : _unselectedBg(isDark);
+    final borderColor = hasDate ? AppColors.accentMuted : _unselectedBorder(isDark);
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: () => _selectSingleDate(isStart),
@@ -415,11 +418,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: hasDate ? AppColors.selectedBg : AppColors.glyphBg,
+          color: bgColor,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: hasDate ? AppColors.accentMuted : AppColors.divider,
-          ),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
@@ -431,7 +432,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   Text(
                     label,
                     style: AppTypography.sectionLabel.copyWith(
-                      color: AppColors.accentMuted,
+                      color: isDark ? AppColors.onSurfaceVariantDark : AppColors.accentMuted,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -440,7 +441,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   Text(
                     hasDate ? l10n.formatMonthDay(date) : '--',
                     style: AppTypography.bodyMedium.copyWith(
-                      color: hasDate ? AppColors.accentMuted : AppColors.muted,
+                      color: hasDate
+                          ? (isDark ? AppColors.onSurfaceVariantDark : AppColors.accentMuted)
+                          : _unselectedText(isDark),
                     ),
                   ),
                 ],
@@ -462,17 +465,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isSelected ? AppColors.accentMuted : _unselectedBg(isDark);
+    final chipBorder = isSelected ? Colors.transparent : _unselectedBorder(isDark);
+    final textColor = isSelected ? Colors.white : _unselectedText(isDark);
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: AppConstants.quickAnimationDuration,
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.accentMuted : AppColors.glyphBg,
+          color: chipBg,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: isSelected ? Colors.transparent : AppColors.divider,
-          ),
+          border: Border.all(color: chipBorder),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -484,7 +488,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             Text(
               label,
               style: AppTypography.cardBody.copyWith(
-                color: isSelected ? Colors.white : AppColors.muted,
+                color: textColor,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
               ),
             ),
@@ -493,6 +497,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ),
     );
   }
+
+  Color _unselectedBg(bool isDark) =>
+      isDark ? AppColors.surfaceContainerHighestDark : AppColors.glyphBg;
+
+  Color _unselectedBorder(bool isDark) =>
+      isDark ? AppColors.outlineDark : AppColors.divider;
+
+  Color _unselectedText(bool isDark) =>
+      isDark ? AppColors.onSurfaceVariantDark : AppColors.muted;
 
   Widget _buildSection({required String title, required Widget child}) {
     return Column(

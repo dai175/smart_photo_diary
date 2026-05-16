@@ -17,8 +17,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
 
     // Color Scheme
     colorScheme: const ColorScheme.light(
-      primary: AppColors.accent,
-      onPrimary: AppColors.onBackground,
+      primary: AppColors.accentDark,
+      onPrimary: Colors.white,
       primaryContainer: AppColors.primaryContainer,
       onPrimaryContainer: AppColors.onPrimaryContainer,
       secondary: AppColors.secondary,
@@ -87,8 +87,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.accent,
-        foregroundColor: AppColors.onBackground,
+        backgroundColor: AppColors.accentDark,
+        foregroundColor: Colors.white,
         elevation: AppSpacing.elevationXs,
         shadowColor: AppColors.shadow,
         shape: const RoundedRectangleBorder(
@@ -245,7 +245,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       surfaceTintColor: Colors.transparent,
       dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.accent;
+          return AppColors.accentDark;
         }
         return null;
       }),

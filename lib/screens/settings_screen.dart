@@ -337,9 +337,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             AnimatedButton(
               onPressed: _showUpgradeDialog,
               width: double.infinity,
-              backgroundColor: AppColors.accent,
+              backgroundColor: AppColors.accentDark,
               foregroundColor: Colors.white,
-              shadowColor: AppColors.accent.withValues(alpha: 0.3),
+              shadowColor: AppColors.accentDark.withValues(alpha: 0.3),
               child: ButtonContent(text: context.l10n.settingsUpgradeToPremium),
             )
           else if (expiryDate != null)

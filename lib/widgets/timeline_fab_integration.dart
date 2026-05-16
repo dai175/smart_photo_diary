@@ -59,7 +59,7 @@ class TimelineFABIntegration extends StatelessWidget {
                       child: FloatingActionButton(
                         heroTag: null,
                         onPressed: callbacks.onCameraPressed,
-                        backgroundColor: AppColors.accent,
+                        backgroundColor: AppColors.accentDark,
                         foregroundColor: Colors.white,
                         tooltip: context.l10n.fabTooltipTakePhoto,
                         shape: const CircleBorder(),
@@ -94,7 +94,7 @@ class TimelineFABIntegration extends StatelessWidget {
     return Container(
       height: 56,
       decoration: BoxDecoration(
-        color: AppColors.accent,
+        color: AppColors.accentDark,
         borderRadius: BorderRadius.circular(999),
       ),
       padding: const EdgeInsets.only(left: 16, right: 8),
