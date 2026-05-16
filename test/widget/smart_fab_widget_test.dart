@@ -30,9 +30,7 @@ Widget _wrapWithApp(Widget child, {ThemeData? theme}) {
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('en'),
     theme: theme ?? ThemeData(useMaterial3: true),
-    home: Scaffold(
-      body: Center(child: child),
-    ),
+    home: Scaffold(body: Center(child: child)),
   );
 }
 
@@ -139,12 +137,16 @@ void main() {
         await tester.pumpAndSettle();
 
         // 選択後はピルバーが表示、FABは非表示
-        expect(find.byKey(const ValueKey('fab_selection_pill')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('fab_selection_pill')),
+          findsOneWidget,
+        );
         expect(find.byType(FloatingActionButton), findsNothing);
       });
 
-      testWidgets('ピルの「Create diary」ボタンでonCreateDiaryPressedが呼ばれる',
-          (tester) async {
+      testWidgets('ピルの「Create diary」ボタンでonCreateDiaryPressedが呼ばれる', (
+        tester,
+      ) async {
         bool createDiaryCalled = false;
         final mockAssets = _createMockAssets(3);
         photoController.setPhotoAssets(mockAssets);
@@ -204,7 +206,10 @@ void main() {
 
         // FABではなくピルが表示されることを確認
         expect(find.byType(FloatingActionButton), findsNothing);
-        expect(find.byKey(const ValueKey('fab_selection_pill')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('fab_selection_pill')),
+          findsOneWidget,
+        );
       });
     });
   });

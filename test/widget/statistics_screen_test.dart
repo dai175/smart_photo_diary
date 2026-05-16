@@ -216,10 +216,10 @@ void main() {
         diaryCompleter.complete(mockDiary);
         await pumpFrames(tester);
 
-        expect(find.text('Total entries'), findsOneWidget);
-        expect(find.text('Current streak'), findsOneWidget);
-        expect(find.text('Longest streak'), findsOneWidget);
-        expect(find.text('This month'), findsOneWidget);
+        expect(find.text('TOTAL ENTRIES'), findsOneWidget);
+        expect(find.text('CURRENT STREAK'), findsOneWidget);
+        expect(find.text('LONGEST STREAK'), findsOneWidget);
+        expect(find.text('THIS MONTH'), findsOneWidget);
       });
     });
 

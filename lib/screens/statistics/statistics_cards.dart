@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_constants.dart';
-import '../../constants/app_icons.dart';
 import '../../localization/localization_extensions.dart';
-import '../../ui/components/custom_card.dart';
-
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
 
-/// 統計カード群ウィジェット
+const _tonesBgLight = [Color(0xFFEEEAE3), Color(0xFFF2EAE2), Color(0xFFF4E1D2)];
+const _tonesBgDark = [Color(0xFF2A2723), Color(0xFF2C2421), Color(0xFF2E211C)];
+
 class StatisticsCards extends StatelessWidget {
   const StatisticsCards({
     super.key,
@@ -40,7 +39,7 @@ class StatisticsCards extends StatelessWidget {
                   l10n.statisticsTotalEntriesTitle,
                   '$totalEntries',
                   l10n.statisticsUnitDiary,
-                  AppIcons.statisticsTotal,
+                  0,
                 ),
               ),
             ),
@@ -53,7 +52,7 @@ class StatisticsCards extends StatelessWidget {
                   l10n.statisticsCurrentStreakTitle,
                   '$currentStreak',
                   l10n.statisticsUnitDay,
-                  AppIcons.statisticsStreak,
+                  1,
                 ),
               ),
             ),
@@ -70,7 +69,7 @@ class StatisticsCards extends StatelessWidget {
                   l10n.statisticsLongestStreakTitle,
                   '$longestStreak',
                   l10n.statisticsUnitDay,
-                  AppIcons.statisticsRecord,
+                  2,
                 ),
               ),
             ),
@@ -83,7 +82,7 @@ class StatisticsCards extends StatelessWidget {
                   l10n.statisticsMonthlyCountTitle,
                   '$monthlyCount',
                   l10n.statisticsUnitDiary,
-                  AppIcons.statisticsMonth,
+                  3,
                 ),
               ),
             ),
@@ -98,57 +97,50 @@ class StatisticsCards extends StatelessWidget {
     String title,
     String value,
     String unit,
-    IconData icon,
+    int index,
   ) {
-    return CustomCard(
-      elevation: AppSpacing.elevationXs,
-      child: Row(
+    final theme = Theme.of(context);
+    final tones = theme.brightness == Brightness.dark
+        ? _tonesBgDark
+        : _tonesBgLight;
+    final muted = theme.colorScheme.onSurfaceVariant;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: tones[index % 3],
+        borderRadius: AppSpacing.cardRadius,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: AppSpacing.iconMd,
+          Text(
+            title.toUpperCase(),
+            style: AppTypography.sectionLabel.copyWith(color: muted),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+          const SizedBox(height: AppSpacing.xs),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Flexible(
+                child: Text(
+                  value,
+                  style: AppTypography.statsDisplay.copyWith(
+                    color: theme.colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        value,
-                        style: AppTypography.headlineSmall.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      unit,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                unit,
+                style: AppTypography.sectionLabel.copyWith(color: muted),
+              ),
+            ],
           ),
         ],
       ),

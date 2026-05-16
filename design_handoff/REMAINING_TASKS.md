@@ -136,15 +136,15 @@
 
 ### Task 3-1: `lib/screens/statistics/statistics_cards.dart`
 
-- [ ] 3-tone 背景色定数を追加
+- [x] 3-tone 背景色定数を追加
   - ライト: `#EEEAE3` / `#F2EAE2` / `#F4E1D2`
   - ダーク: `#2A2723` / `#2C2421` / `#2E211C`
-- [ ] `_buildStatCard()` の第5引数を `IconData icon` → `int index` に変更
-- [ ] `CustomCard` を廃止し、`Container` + `BoxDecoration(color: tones[index % 3])` に変更
-- [ ] 数値スタイルを `headlineSmall`（24pt）→ `AppTypography.statsDisplay`（40pt/w700/-1.2）に変更
-- [ ] ラベルスタイルを `AppTypography.sectionLabel`（11pt/w700/uppercase）に変更
-- [ ] アイコン表示を廃止
-- [ ] 呼び出し元 4箇所の `icon:` 引数を `index: 0/1/2/3` に変更
+- [x] `_buildStatCard()` の第5引数を `IconData icon` → `int index` に変更
+- [x] `CustomCard` を廃止し、`Container` + `BoxDecoration(color: tones[index % 3])` に変更
+- [x] 数値スタイルを `headlineSmall`（24pt）→ `AppTypography.statsDisplay`（40pt/w700/-1.2）に変更
+- [x] ラベルスタイルを `AppTypography.sectionLabel`（11pt/w700/uppercase）に変更
+- [x] アイコン表示を廃止
+- [x] 呼び出し元 4箇所の `icon:` 引数を `index: 0/1/2/3` に変更
 
 ---
 
