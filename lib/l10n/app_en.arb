@@ -1240,6 +1240,15 @@
   "@diaryDetailPhotosSectionTitle": {
     "description": "Heading for the photos section"
   },
+  "diaryDetailPhotoCount": "{count} photos",
+  "@diaryDetailPhotoCount": {
+    "description": "Photo count in diary detail metadata",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diaryDetailTagsSectionTitle": "Tags",
   "@diaryDetailTagsSectionTitle": {
     "description": "Heading for the tags section"

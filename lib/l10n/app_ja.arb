@@ -1240,6 +1240,15 @@
   "@diaryDetailPhotosSectionTitle": {
     "description": "写真セクションのタイトル"
   },
+  "diaryDetailPhotoCount": "{count}枚",
+  "@diaryDetailPhotoCount": {
+    "description": "日記詳細メタデータの写真枚数",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diaryDetailTagsSectionTitle": "タグ",
   "@diaryDetailTagsSectionTitle": {
     "description": "タグセクションのタイトル"

@@ -86,39 +86,39 @@
 
 ### Task 2-3: `lib/screens/diary_detail/diary_detail_photo_section.dart`
 
-- [ ] `CustomCard` ラッパーを廃止
-- [ ] `AspectRatio(4/3)` + `Stack` 構造に変更
-- [ ] グラデーションスクリム（上部 45% 高さ、`rgba(0,0,0,0.5)` → 透明）を追加
-- [ ] 複数写真時の枚数バッジ（右下、`Colors.black54` / blur / "1 / N"）を追加
-- [ ] 写真ロード: `IPhotoCacheService.getThumbnail` + `Image.memory`（既存 `diary_card_widget` パターン参考）
+- [x] `CustomCard` ラッパーを廃止
+- [x] `AspectRatio(4/3)` + `Stack` 構造に変更
+- [x] グラデーションスクリム（上部 45% 高さ、`rgba(0,0,0,0.5)` → 透明）を追加
+- [x] 複数写真時の枚数バッジ（右下、`Colors.black54` / blur / "1 / N"）を追加
+- [x] 写真ロード: `IPhotoCacheService.getThumbnail` + `Image.memory`（既存 `diary_card_widget` パターン参考）
 
 ### Task 2-4: `lib/screens/diary_detail/diary_detail_content_editor.dart`
 
-- [ ] `build()` から `_buildHeader()`（アイコン + `diaryDetailContentHeading`）の呼び出しを削除
-- [ ] `CustomCard` ラッパーを廃止し、`Column` のみを返す
-- [ ] 閲覧モードメソッド（`_buildReadOnlyTitle` / `_buildReadOnlyContent`）を削除（content 側に移動済みとなるため）
+- [x] `build()` から `_buildHeader()`（アイコン + `diaryDetailContentHeading`）の呼び出しを削除
+- [x] `CustomCard` ラッパーを廃止し、`Column` のみを返す
+- [x] 閲覧モードメソッド（`_buildReadOnlyTitle` / `_buildReadOnlyContent`）を削除（content 側に移動済みとなるため）
 
 ### Task 2-5: `lib/screens/diary_detail/diary_detail_metadata_section.dart`
 
-- [ ] タグ表示ブロックを削除（タグは `diary_detail_content.dart` 側に移動）
-- [ ] MetaRow のみ（作成日・更新日・写真枚数など）を返すように縮小
-- [ ] `CustomCard` ラッパーを廃止
+- [x] タグ表示ブロックを削除（タグは `diary_detail_content.dart` 側に移動）
+- [x] MetaRow のみ（作成日・更新日・写真枚数など）を返すように縮小
+- [x] `CustomCard` ラッパーを廃止
 
 ### Task 2-1: `lib/screens/diary_detail/diary_detail_screen.dart`
 
-- [ ] `Scaffold.extendBodyBehindAppBar: true` を追加
-- [ ] 閲覧モード時: `appBar: null`、`body` を `Stack` でラップしてフローティングコントロールを上層配置
-- [ ] 編集モード時: 既存 `_buildAppBar()` を維持
-- [ ] `_buildFloatingControls()` を実装（戻る / シェア / 編集 / ⋯ の 36×36 ピルボタン）
+- [x] `Scaffold.extendBodyBehindAppBar: true` を追加
+- [x] 閲覧モード時: `appBar: null`、`body` を `Stack` でラップしてフローティングコントロールを上層配置
+- [x] 編集モード時: 既存 `_buildAppBar()` を維持
+- [x] `_buildFloatingControls()` を実装（戻る / シェア / 編集 / ⋯ の 36×36 ピルボタン）
   - 位置: `top: MediaQuery.padding.top + 12` / `left: 20` / `right: 20`
   - スタイル: `Colors.black.withValues(alpha: 0.45)` 背景 / 白アイコン
-- [ ] `_showMoreMenu()` を実装（既存 `PopupMenuButton` の削除メニューを代替）
-- [ ] `PopScope` は維持（物理バックキー対応）
+- [x] `_showMoreMenu()` を実装（既存 `PopupMenuButton` の削除メニューを代替）
+- [x] `PopScope` は維持（物理バックキー対応）
 
 ### Task 2-2: `lib/screens/diary_detail/diary_detail_content.dart`
 
-- [ ] `_buildDateHeader()` メソッドを削除
-- [ ] `SingleChildScrollView` 内を 1面エディトリアルレイアウトに全面書き換え
+- [x] `_buildDateHeader()` メソッドを削除
+- [x] `SingleChildScrollView` 内を 1面エディトリアルレイアウトに全面書き換え
   - `_buildHeroPhotoSection(context)` または写真なしプレースホルダー（Task 2-3 を使用）
   - 日付ラベル: `AppTypography.dateLabel` / `accentMuted`（`_buildDateLabel()` メソッドで生成）
   - タイトル: 閲覧時 `AppTypography.detailTitle` / 編集時 `_buildEditableTitleInline()`
@@ -127,8 +127,8 @@
   - 本文: 閲覧時 `AppTypography.detailBody` / 編集時 `_buildEditableContentInline()`
   - `_buildInlineGallery()`: 2枚目以降の写真を 3列グリッド（radius 10 / `shrinkWrap: true`）
   - `Divider` + `DiaryDetailMetadataSection`
-- [ ] `_buildDateLabel(BuildContext)` メソッドを実装（`DateFormat('MMM d · EEEE', locale).format(date).toUpperCase()`）
-- [ ] `_buildInlineGallery(BuildContext)` メソッドを実装
+- [x] `_buildDateLabel(BuildContext)` メソッドを実装（`DateFormat('MMM d · EEEE', locale).format(date).toUpperCase()`）
+- [x] `_buildInlineGallery(BuildContext)` メソッドを実装
 
 ---
 
