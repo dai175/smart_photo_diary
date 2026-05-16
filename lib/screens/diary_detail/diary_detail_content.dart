@@ -45,6 +45,7 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
 
   late final IPhotoCacheService _photoCacheService;
   final _galleryFutures = <String, Future<Result<Uint8List>>>{};
+  late String _dateLabel;
 
   @override
   void initState() {
@@ -53,17 +54,20 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dateLabel = _computeDateLabel();
+  }
+
+  @override
   void didUpdateWidget(DiaryDetailContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(oldWidget.photoAssets, widget.photoAssets)) {
       _galleryFutures.clear();
     }
-  }
-
-  @override
-  void dispose() {
-    _galleryFutures.clear();
-    super.dispose();
+    if (oldWidget.diaryEntry.date != widget.diaryEntry.date) {
+      _dateLabel = _computeDateLabel();
+    }
   }
 
   String _computeDateLabel() {
@@ -103,7 +107,7 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _computeDateLabel(),
+                  _dateLabel,
                   style: AppTypography.withColor(
                     AppTypography.dateLabel,
                     AppColors.accentMuted,

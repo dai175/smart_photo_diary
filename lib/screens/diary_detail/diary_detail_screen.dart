@@ -356,49 +356,37 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   Widget _buildErrorState(AppLocalizations l10n) {
-    return Center(
-      child: FadeInWidget(
-        child: CustomCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: AppSpacing.cardPadding,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.errorContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.error_outline_rounded,
-                  color: Theme.of(context).colorScheme.error,
-                  size: AppSpacing.iconLg,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text(l10n.commonErrorOccurred, style: AppTypography.titleLarge),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                _getErrorMessage(l10n),
-                style: AppTypography.bodyMedium.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(
-                onPressed: () => Navigator.pop(context),
-                text: l10n.commonBack,
-              ),
-            ],
-          ),
-        ),
-      ),
+    final cs = Theme.of(context).colorScheme;
+    return _buildInfoCard(
+      iconData: Icons.error_outline_rounded,
+      iconColor: cs.error,
+      iconBgColor: cs.errorContainer.withValues(alpha: 0.3),
+      title: l10n.commonErrorOccurred,
+      subtitle: _getErrorMessage(l10n),
+      subtitleColor: cs.error,
     );
   }
 
   Widget _buildNotFoundState(AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    return _buildInfoCard(
+      iconData: Icons.search_off_rounded,
+      iconColor: cs.secondary,
+      iconBgColor: cs.secondaryContainer.withValues(alpha: 0.3),
+      title: l10n.diaryNotFoundMessage,
+      subtitle: l10n.diaryNotFoundSubtitle,
+      subtitleColor: cs.onSurfaceVariant,
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData iconData,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String title,
+    required String subtitle,
+    required Color subtitleColor,
+  }) {
     return Center(
       child: FadeInWidget(
         child: CustomCard(
@@ -408,31 +396,23 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               Container(
                 padding: AppSpacing.cardPadding,
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                  color: iconBgColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.search_off_rounded,
-                  color: Theme.of(context).colorScheme.secondary,
-                  size: AppSpacing.iconLg,
-                ),
+                child: Icon(iconData, color: iconColor, size: AppSpacing.iconLg),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Text(l10n.diaryNotFoundMessage, style: AppTypography.titleLarge),
+              Text(title, style: AppTypography.titleLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                l10n.diaryNotFoundSubtitle,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                subtitle,
+                style: AppTypography.bodyMedium.copyWith(color: subtitleColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xl),
               PrimaryButton(
                 onPressed: () => Navigator.pop(context),
-                text: l10n.commonBack,
+                text: context.l10n.commonBack,
               ),
             ],
           ),

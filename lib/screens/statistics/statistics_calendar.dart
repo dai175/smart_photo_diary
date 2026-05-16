@@ -367,7 +367,7 @@ class StatisticsCalendar extends StatelessWidget {
                                     borderRadius: AppSpacing.chipRadius,
                                   ),
                                   child: Text(
-                                    '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
+                                    l10n.formatTime(diary.date),
                                     style: AppTypography.labelSmall.copyWith(
                                       color:
                                           Theme.of(context).brightness ==

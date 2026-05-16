@@ -36,7 +36,7 @@ class TimelineFABIntegration extends StatelessWidget {
         TimelinePhotoWidget(
           controller: controller,
           callbacks: callbacks,
-          showFAB: false, // FABは別途管理
+          showFAB: false,
           scrollSignal: scrollSignal,
         ),
         ListenableBuilder(
@@ -60,7 +60,6 @@ class TimelineFABIntegration extends StatelessWidget {
     );
   }
 
-  /// 日記作成ボタンがタップされた時の処理
   Future<void> _onCreateDiaryPressed(BuildContext context) async {
     final logger = ServiceRegistration.get<ILoggingService>();
 
@@ -81,7 +80,6 @@ class TimelineFABIntegration extends StatelessWidget {
         return;
       }
 
-      // プロンプト選択モーダルを表示
       await showDialog<void>(
         context: context,
         barrierDismissible: false,
@@ -115,7 +113,6 @@ class TimelineFABIntegration extends StatelessWidget {
     }
   }
 
-  /// 日記プレビュー画面に遷移
   void _navigateToDiaryPreview(
     BuildContext context,
     List<AssetEntity> selectedPhotos,
@@ -142,7 +139,6 @@ class TimelineFABIntegration extends StatelessWidget {
       ),
     ).then((created) {
       if (created == true) {
-        // 日記作成完了後に選択をクリアし、コールバックを実行
         controller.clearSelection();
         callbacks.onDiaryCreated?.call();
       }

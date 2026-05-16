@@ -48,18 +48,15 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
   Future<void> _loadUsageSummary() async {
     final service = await ServiceRegistration.getAsync<ISubscriptionService>();
-    final results = await Future.wait([
-      service.getRemainingGenerations(),
-      service.getCurrentPlanClass(),
-    ]);
+    final remainingFuture = service.getRemainingGenerations();
+    final planFuture = service.getCurrentPlanClass();
+    final remainingResult = await remainingFuture;
+    final planResult = await planFuture;
     if (mounted) {
-      final remainingResult = results[0];
-      final planResult = results[1];
       setState(() {
-        _remainingGenerations = remainingResult.isSuccess
-            ? remainingResult.value as int
-            : null;
-        _cachedPlan = planResult.isSuccess ? planResult.value as Plan : null;
+        _remainingGenerations =
+            remainingResult.isSuccess ? remainingResult.value : null;
+        _cachedPlan = planResult.isSuccess ? planResult.value : null;
       });
     }
   }
@@ -188,16 +185,10 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   Widget _buildTimelineSection(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-      ),
-      child: TimelineFABIntegration(
-        controller: widget.photoController,
-        callbacks: widget.callbacks,
-        scrollSignal: widget.scrollSignal,
-      ),
+    return TimelineFABIntegration(
+      controller: widget.photoController,
+      callbacks: widget.callbacks,
+      scrollSignal: widget.scrollSignal,
     );
   }
 
