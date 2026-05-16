@@ -30,6 +30,7 @@ class DiaryDetailShareHelper {
         final l10n = dialogContext.l10n;
         return CustomDialog(
           title: l10n.commonShare,
+          onClose: () => Navigator.of(dialogContext).pop(),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,12 +75,6 @@ class DiaryDetailShareHelper {
               ),
             ],
           ),
-          actions: [
-            CustomDialogAction(
-              text: l10n.commonCancel,
-              onPressed: () => Navigator.of(dialogContext).pop(),
-            ),
-          ],
         );
       },
     );

@@ -248,7 +248,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                   children: [
                     Text(
                       _headerDate,
-                      style: AppTypography.dateLabel.copyWith(
+                      style: AppTypography.sectionLabel.copyWith(
                         color: accentMutedColor,
                       ),
                     ),

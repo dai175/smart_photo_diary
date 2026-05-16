@@ -60,22 +60,18 @@ class PresetDialogs {
     required String title,
     required String message,
     String? confirmText,
-    String? cancelText,
     bool isDestructive = false,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
   }) {
     final l10n = context.l10n;
     return CustomDialog(
-      icon: Icons.help_rounded,
+      icon: isDestructive ? Icons.warning_amber_rounded : Icons.help_rounded,
       iconColor: isDestructive ? AppColors.warning : AppColors.info,
       title: title,
       message: message,
+      onClose: onCancel,
       actions: [
-        CustomDialogAction(
-          text: cancelText ?? l10n.commonCancel,
-          onPressed: onCancel,
-        ),
         CustomDialogAction(
           text: confirmText ?? l10n.commonConfirm,
           isPrimary: true,
@@ -93,18 +89,7 @@ class PresetDialogs {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Builder(
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                shape: BoxShape.circle,
-              ),
-              child: const CircularProgressIndicator(strokeWidth: 3),
-            ),
-          ),
+          const CircularProgressIndicator(strokeWidth: 3),
           const SizedBox(height: AppSpacing.lg),
           Builder(
             builder: (context) => Text(
@@ -132,24 +117,20 @@ class PresetDialogs {
     final l10n = context.l10n;
     final resetDateText = l10n.formatMonthDayLong(nextResetDate);
 
-    final actions = <CustomDialogAction>[
-      CustomDialogAction(text: l10n.commonNotNow, onPressed: onDismiss),
-    ];
-
-    if (onUpgrade != null) {
-      actions.add(
-        CustomDialogAction(
-          text: l10n.settingsUpgradeToPremium,
-          isPrimary: true,
-          onPressed: onUpgrade,
-        ),
-      );
-    }
-
     return CustomDialog(
       icon: Icons.block_rounded,
       iconColor: AppColors.warning,
       title: l10n.usageLimitDialogTitle,
+      onClose: onDismiss,
+      actions: onUpgrade != null
+          ? [
+              CustomDialogAction(
+                text: l10n.settingsUpgradeToPremium,
+                isPrimary: true,
+                onPressed: onUpgrade,
+              ),
+            ]
+          : null,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -160,29 +141,38 @@ class PresetDialogs {
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: AppSpacing.sm),
-            Builder(
-              builder: (context) => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.errorContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppSpacing.xs),
-                ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.warningContainer.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: IntrinsicHeight(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      l10n.usageLimitDialogResetLabel,
-                      style: AppTypography.labelSmall,
-                    ),
-                    Text(
-                      l10n.usageLimitDialogResetValue(resetDateText),
-                      style: AppTypography.labelSmall.copyWith(
-                        fontWeight: FontWeight.w500,
+                    Container(width: 3, color: AppColors.warning),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              l10n.usageLimitDialogResetLabel,
+                              style: AppTypography.labelSmall,
+                            ),
+                            Text(
+                              l10n.usageLimitDialogResetValue(resetDateText),
+                              style: AppTypography.labelSmall.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -192,7 +182,6 @@ class PresetDialogs {
           ],
         ),
       ),
-      actions: actions,
     );
   }
 
@@ -230,89 +219,85 @@ class PresetDialogs {
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: AppSpacing.lg),
-            Builder(
-              builder: (context) => Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppSpacing.sm),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            l10n.currentPlanPhotosLabel,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          photosValue,
-                          style: AppTypography.labelLarge.copyWith(
-                            fontWeight: FontWeight.w600,
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          l10n.currentPlanPhotosLabel,
+                          style: AppTypography.bodyMedium.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            l10n.currentPlanStoriesLabel,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        photosValue,
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          l10n.currentPlanStoriesValue(usageCount, limit),
-                          style: AppTypography.labelLarge.copyWith(
-                            fontWeight: FontWeight.w600,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          l10n.currentPlanStoriesLabel,
+                          style: AppTypography.bodyMedium.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        l10n.currentPlanStoriesValue(usageCount, limit),
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Builder(
-              builder: (context) => Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppSpacing.xs),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.refresh_rounded,
-                      size: AppSpacing.iconSm,
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.refresh_rounded,
+                    size: AppSpacing.iconSm,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    l10n.usageStatusResetInfo(resetDateText),
+                    style: AppTypography.labelSmall.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      l10n.usageStatusResetInfo(resetDateText),
-                      style: AppTypography.labelSmall.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             if (isBasic) ...[
@@ -331,18 +316,16 @@ class PresetDialogs {
           ],
         ),
       ),
-      actions: [
-        CustomDialogAction(
-          text: isBasic ? l10n.commonNotNow : l10n.commonClose,
-          onPressed: onDismiss,
-        ),
-        if (isBasic && onUpgrade != null)
-          CustomDialogAction(
-            text: l10n.settingsUpgradeToPremium,
-            isPrimary: true,
-            onPressed: onUpgrade,
-          ),
-      ],
+      onClose: onDismiss,
+      actions: isBasic && onUpgrade != null
+          ? [
+              CustomDialogAction(
+                text: l10n.settingsUpgradeToPremium,
+                isPrimary: true,
+                onPressed: onUpgrade,
+              ),
+            ]
+          : null,
     );
   }
 }

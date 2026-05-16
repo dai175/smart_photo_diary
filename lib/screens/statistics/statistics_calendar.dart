@@ -419,12 +419,7 @@ class StatisticsCalendar extends StatelessWidget {
               },
             ),
           ),
-          actions: [
-            CustomDialogAction(
-              text: l10n.commonClose,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
+          onClose: () => Navigator.of(context).pop(),
         );
       },
     );

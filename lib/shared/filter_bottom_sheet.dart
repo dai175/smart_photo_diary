@@ -204,7 +204,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             padding: const EdgeInsets.only(top: AppSpacing.md),
             child: Center(
               child: Container(
-                width: 36,
+                width: 40,
                 height: 5,
                 decoration: BoxDecoration(
                   color: AppColors.handle,

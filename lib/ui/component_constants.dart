@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Chip/Tag コンポーネントの規格値
 class ChipConstants {
   // 高さ
@@ -110,4 +112,26 @@ class BottomSheetConstants {
 /// モーダルの規格値
 class ModalConstants {
   static const double radius = 24.0;
+  static const double iconSize = 44.0;
+  static const double iconRadius = 12.0;
+  static const List<BoxShadow> shadow = [
+    BoxShadow(
+      color: Color(0x08231E1A),
+      blurRadius: 4,
+      offset: Offset(0, 2),
+      spreadRadius: 0,
+    ),
+    BoxShadow(
+      color: Color(0x14231E1A),
+      blurRadius: 16,
+      offset: Offset(0, 6),
+      spreadRadius: 0,
+    ),
+    BoxShadow(
+      color: Color(0x0A231E1A),
+      blurRadius: 40,
+      offset: Offset(0, 16),
+      spreadRadius: 0,
+    ),
+  ];
 }

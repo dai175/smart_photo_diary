@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../component_constants.dart';
 import '../design_system/app_spacing.dart';
 import '../design_system/app_typography.dart';
 import '../animations/micro_interactions.dart';
@@ -6,8 +7,6 @@ import '../components/animated_button.dart';
 
 export 'preset_dialogs.dart';
 
-/// カスタムダイアログウィジェット
-/// Smart Photo Diaryアプリのデザインシステムに合わせたモーダル
 class CustomDialog extends StatelessWidget {
   final String? title;
   final String? message;
@@ -18,6 +17,7 @@ class CustomDialog extends StatelessWidget {
   final bool barrierDismissible;
   final EdgeInsets? contentPadding;
   final double? maxWidth;
+  final VoidCallback? onClose;
 
   const CustomDialog({
     super.key,
@@ -30,6 +30,7 @@ class CustomDialog extends StatelessWidget {
     this.barrierDismissible = true,
     this.contentPadding,
     this.maxWidth,
+    this.onClose,
   });
 
   @override
@@ -46,34 +47,17 @@ class CustomDialog extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x14231E1A),
-                blurRadius: 16,
-                offset: Offset(0, 6),
-                spreadRadius: 0,
-              ),
-              BoxShadow(
-                color: Color(0x0A231E1A),
-                blurRadius: 32,
-                offset: Offset(0, 12),
-                spreadRadius: 0,
-              ),
-            ],
+            borderRadius: BorderRadius.circular(ModalConstants.radius),
+            boxShadow: ModalConstants.shadow,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
+            borderRadius: BorderRadius.circular(ModalConstants.radius),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ヘッダー部分
-                if (icon != null || title != null) _buildHeader(),
-
-                // コンテンツ部分
+                if (icon != null || title != null || onClose != null)
+                  _buildHeader(),
                 Flexible(child: _buildContent()),
-
-                // アクション部分
                 if (actions != null && actions!.isNotEmpty) _buildActions(),
               ],
             ),
@@ -83,66 +67,115 @@ class CustomDialog extends StatelessWidget {
     );
   }
 
+  static const double _closeButtonSize = 32.0;
+
   Widget _buildHeader() {
+    final hasClose = onClose != null;
     return Builder(
-      builder: (context) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: Theme.of(
-            context,
-          ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(AppSpacing.lg),
-            topRight: Radius.circular(AppSpacing.lg),
-          ),
-        ),
-        child: Column(
-          children: [
-            // アイコン
-            if (icon != null) ...[
-              Builder(
-                builder: (context) => Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color:
-                        iconColor?.withValues(alpha: 0.2) ??
-                        Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon!,
-                    size: AppSpacing.iconLg,
-                    color: iconColor ?? Theme.of(context).colorScheme.primary,
+      builder: (context) {
+        final iconWidget = icon != null
+            ? Container(
+                width: ModalConstants.iconSize,
+                height: ModalConstants.iconSize,
+                decoration: BoxDecoration(
+                  color:
+                      iconColor?.withValues(alpha: 0.12) ??
+                      Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(
+                    ModalConstants.iconRadius,
                   ),
                 ),
-              ),
+                child: Icon(
+                  icon!,
+                  size: AppSpacing.iconMd,
+                  color: iconColor ?? Theme.of(context).colorScheme.primary,
+                ),
+              )
+            : null;
+
+        final titleWidget = title != null
+            ? Text(
+                title!,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              )
+            : null;
+
+        final centeredColumn = Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (iconWidget != null) ...[
+              iconWidget,
               const SizedBox(height: AppSpacing.md),
             ],
+            ?titleWidget,
+          ],
+        );
 
-            // タイトル
-            if (title != null)
-              Builder(
-                builder: (context) => Text(
-                  title!,
-                  style: AppTypography.headlineSmall.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.left,
+        if (!hasClose) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xl,
+              0,
+            ),
+            child: centeredColumn,
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.sm,
+            AppSpacing.sm,
+            AppSpacing.sm,
+            0,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: _closeButtonSize),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.lg),
+                  child: centeredColumn,
                 ),
               ),
-          ],
-        ),
-      ),
+              SizedBox(
+                width: _closeButtonSize,
+                height: _closeButtonSize,
+                child: IconButton(
+                  onPressed: onClose,
+                  tooltip: MaterialLocalizations.of(context).closeButtonLabel,
+                  icon: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildContent() {
     final effectivePadding =
-        contentPadding ?? const EdgeInsets.all(AppSpacing.lg);
+        contentPadding ??
+        const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        );
 
     return Container(
       width: double.infinity,
@@ -157,7 +190,6 @@ class CustomDialog extends StatelessWidget {
                       height: 1.5,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    textAlign: TextAlign.left,
                   ),
                 )
               : const SizedBox.shrink()),
@@ -165,16 +197,23 @@ class CustomDialog extends StatelessWidget {
   }
 
   Widget _buildActions() {
-    return Container(
-      width: double.infinity,
+    return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+        AppSpacing.xl,
         0,
-        AppSpacing.lg,
-        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.xl,
       ),
-      child: actions!.length == 1
-          ? actions!.first
+      child: actions!.length == 2
+          ? Row(
+              children: [
+                Expanded(child: actions![0]),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: actions![1]),
+              ],
+            )
+          : actions!.length == 1
+          ? SizedBox(width: double.infinity, child: actions!.first)
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: actions!
