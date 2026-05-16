@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../constants/app_constants.dart';
@@ -86,6 +87,32 @@ class StatisticsCalendar extends StatelessWidget {
               cellMargin: const EdgeInsets.all(AppSpacing.xs),
             ),
             calendarBuilders: CalendarBuilders(
+              headerTitleBuilder: (context, day) {
+                final theme = Theme.of(context);
+                final locale = Localizations.localeOf(context).languageCode;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${day.year}',
+                      style: AppTypography.sectionLabel.copyWith(
+                        color: AppColors.accentMuted,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      DateFormat.MMMM(locale).format(day),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                );
+              },
               defaultBuilder: (context, day, focusedDay) {
                 final normalizedDay = DateTime(day.year, day.month, day.day);
                 if (!diaryMap.containsKey(normalizedDay)) return null;
@@ -118,9 +145,6 @@ class StatisticsCalendar extends StatelessWidget {
             ),
             headerStyle: HeaderStyle(
               titleCentered: true,
-              titleTextStyle: AppTypography.titleLarge.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
               formatButtonVisible: false,
               leftChevronIcon: Icon(
                 AppIcons.calendarPrev,

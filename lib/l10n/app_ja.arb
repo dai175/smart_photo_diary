@@ -1385,6 +1385,10 @@
   "@statisticsCalendarLegendSelected": {
     "description": "カレンダー凡例：選択中の日付インジケーターのラベル"
   },
+  "statisticsAtAGlanceSuffix": " · 今月のまとめ",
+  "@statisticsAtAGlanceSuffix": {
+    "description": "統計セクションラベルの月・年に続くサフィックス"
+  },
   "subscriptionUsageWarningRemaining": "残りの日記が{remaining}件です",
   "@subscriptionUsageWarningRemaining": {
     "description": "日記残数が制限に近づいた時の警告メッセージ",

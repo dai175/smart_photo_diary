@@ -1385,6 +1385,10 @@
   "@statisticsCalendarLegendSelected": {
     "description": "Calendar legend label for the selected date indicator"
   },
+  "statisticsAtAGlanceSuffix": " · at a glance",
+  "@statisticsAtAGlanceSuffix": {
+    "description": "Suffix appended to the month/year in the statistics section label"
+  },
   "subscriptionUsageWarningRemaining": "You have {remaining} stories remaining.",
   "@subscriptionUsageWarningRemaining": {
     "description": "Warning message shown when story usage is near the monthly limit",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
+import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -16,12 +17,16 @@ class StatisticsCards extends StatelessWidget {
     required this.currentStreak,
     required this.longestStreak,
     required this.monthlyCount,
+    this.currentStreakDelta,
+    this.monthlyCountDelta,
   });
 
   final int totalEntries;
   final int currentStreak;
   final int longestStreak;
   final int monthlyCount;
+  final int? currentStreakDelta;
+  final int? monthlyCountDelta;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +58,7 @@ class StatisticsCards extends StatelessWidget {
                   '$currentStreak',
                   l10n.statisticsUnitDay,
                   1,
+                  delta: currentStreakDelta,
                 ),
               ),
             ),
@@ -83,6 +89,7 @@ class StatisticsCards extends StatelessWidget {
                   '$monthlyCount',
                   l10n.statisticsUnitDiary,
                   3,
+                  delta: monthlyCountDelta,
                 ),
               ),
             ),
@@ -97,8 +104,9 @@ class StatisticsCards extends StatelessWidget {
     String title,
     String value,
     String unit,
-    int index,
-  ) {
+    int index, {
+    int? delta,
+  }) {
     final theme = Theme.of(context);
     final tones = theme.brightness == Brightness.dark
         ? _tonesBgDark
@@ -122,25 +130,68 @@ class StatisticsCards extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Flexible(
-                child: Text(
-                  value,
-                  style: AppTypography.statsDisplay.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        value,
+                        style: AppTypography.statsDisplay.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      unit,
+                      style: AppTypography.sectionLabel.copyWith(color: muted),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                unit,
-                style: AppTypography.sectionLabel.copyWith(color: muted),
-              ),
+              if (delta != null && delta != 0) ...[
+                const SizedBox(width: AppSpacing.xs),
+                _buildDeltaBadge(context, delta),
+              ],
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeltaBadge(BuildContext context, int delta) {
+    final isPositive = delta > 0;
+    final bgColor = isPositive
+        ? AppColors.successContainer
+        : AppColors.errorContainer;
+    final fgColor = isPositive ? AppColors.success : AppColors.error;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(7, 3, 7, 3),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPositive
+                ? Icons.arrow_upward_rounded
+                : Icons.arrow_downward_rounded,
+            color: fgColor,
+            size: 9,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            delta.abs().toString(),
+            style: AppTypography.sectionLabel.copyWith(color: fgColor),
           ),
         ],
       ),

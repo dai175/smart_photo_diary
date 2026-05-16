@@ -221,6 +221,23 @@ void main() {
         expect(find.text('LONGEST STREAK'), findsOneWidget);
         expect(find.text('THIS MONTH'), findsOneWidget);
       });
+
+      testWidgets('shows section label with at a glance suffix', (
+        WidgetTester tester,
+      ) async {
+        final diaryCompleter = Completer<IDiaryService>();
+        serviceLocator.registerAsyncFactory<IDiaryService>(
+          () => diaryCompleter.future,
+        );
+
+        await tester.pumpWidget(buildScreen());
+        await tester.pump();
+
+        diaryCompleter.complete(mockDiary);
+        await pumpFrames(tester);
+
+        expect(find.textContaining('AT A GLANCE'), findsOneWidget);
+      });
     });
 
     group('With diary entries', () {

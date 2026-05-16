@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../controllers/statistics_controller.dart';
 import 'diary_detail_screen.dart';
+import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
+import '../ui/design_system/app_typography.dart';
 import '../ui/components/loading_state_card.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../localization/localization_extensions.dart';
@@ -60,12 +62,35 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppSpacing.xs,
+                            right: AppSpacing.xs,
+                            bottom: AppSpacing.md,
+                          ),
+                          child: Text(
+                            (l10n.formatMonth(DateTime.now()) +
+                                    l10n.statisticsAtAGlanceSuffix)
+                                .toUpperCase(),
+                            style: AppTypography.sectionLabel.copyWith(
+                              color: AppColors.accentMuted,
+                            ),
+                          ),
+                        ),
                         // 統計カード群
                         StatisticsCards(
                           totalEntries: _controller.stats.totalEntries,
                           currentStreak: _controller.stats.currentStreak,
                           longestStreak: _controller.stats.longestStreak,
                           monthlyCount: _controller.stats.monthlyCount,
+                          currentStreakDelta: _computeDelta(
+                            _controller.stats.previousCompletedStreak,
+                            _controller.stats.currentStreak,
+                          ),
+                          monthlyCountDelta: _computeDelta(
+                            _controller.stats.previousMonthlyCount,
+                            _controller.stats.monthlyCount,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
 
@@ -87,6 +112,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         );
       },
     );
+  }
+
+  int? _computeDelta(int? previous, int current) {
+    if (previous == null) return null;
+    return current - previous;
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
