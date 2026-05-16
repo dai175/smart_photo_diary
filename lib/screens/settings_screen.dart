@@ -9,7 +9,6 @@ import '../ui/component_constants.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/loading_state_card.dart';
 import '../ui/components/animated_button.dart';
-import '../ui/components/buttons/button_content.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
@@ -334,13 +333,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 14),
           if (!info.isPremium)
-            AnimatedButton(
+            PrimaryButton(
               onPressed: _showUpgradeDialog,
               width: double.infinity,
-              backgroundColor: AppColors.accentDark,
-              foregroundColor: Colors.white,
-              shadowColor: AppColors.accentDark.withValues(alpha: 0.3),
-              child: ButtonContent(text: context.l10n.settingsUpgradeToPremium),
+              text: context.l10n.settingsUpgradeToPremium,
             )
           else if (expiryDate != null)
             Text(

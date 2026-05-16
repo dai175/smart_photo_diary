@@ -149,7 +149,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   List<Widget> _buildActions() {
     final l10n = context.l10n;
-    const accentColor = AppColors.accentDark;
     final String primaryText;
     if (_isRandomSelected) {
       primaryText = l10n.promptCreateRandom;
@@ -160,7 +159,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     }
 
     return [
-      AnimatedButton(
+      PrimaryButton(
         onPressed: () {
           final contextText = _getContextText();
           if (_isRandomSelected) {
@@ -175,10 +174,8 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
             widget.onSkip(contextText);
           }
         },
-        backgroundColor: accentColor,
-        foregroundColor: Colors.white,
-        shadowColor: accentColor.withValues(alpha: 0.3),
-        child: Center(child: Text(primaryText)),
+        width: double.infinity,
+        text: primaryText,
       ),
     ];
   }

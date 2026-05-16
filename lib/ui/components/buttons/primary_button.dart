@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../constants/app_constants.dart';
+import '../../../ui/design_system/app_colors.dart';
 import 'animated_button_base.dart';
 import 'button_content.dart';
 
@@ -22,22 +23,19 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return AnimatedButton(
       onPressed: isLoading ? null : onPressed,
       width: width,
-      backgroundColor: theme.colorScheme.primary,
-      foregroundColor: theme.colorScheme.onPrimary,
-      shadowColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+      backgroundColor: AppColors.accentDark,
+      foregroundColor: Colors.white,
+      shadowColor: AppColors.accentDark.withValues(alpha: 0.3),
       child: isLoading
-          ? SizedBox(
+          ? const SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: AppConstants.progressIndicatorStrokeWidth,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.colorScheme.onPrimary,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
           : ButtonContent(text: text, icon: icon),
