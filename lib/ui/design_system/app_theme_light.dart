@@ -17,8 +17,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
 
     // Color Scheme
     colorScheme: const ColorScheme.light(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
+      primary: AppColors.accent,
+      onPrimary: AppColors.onBackground,
       primaryContainer: AppColors.primaryContainer,
       onPrimaryContainer: AppColors.onPrimaryContainer,
       secondary: AppColors.secondary,
@@ -87,8 +87,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.accent,
+        foregroundColor: AppColors.onBackground,
         elevation: AppSpacing.elevationXs,
         shadowColor: AppColors.shadow,
         shape: const RoundedRectangleBorder(
@@ -103,8 +103,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     // Outlined Button Theme
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        foregroundColor: AppColors.accent,
+        side: const BorderSide(color: AppColors.accent),
         shape: const RoundedRectangleBorder(
           borderRadius: AppSpacing.buttonRadius,
         ),
@@ -117,7 +117,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
     // Text Button Theme
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.accent,
         shape: const RoundedRectangleBorder(
           borderRadius: AppSpacing.buttonRadius,
         ),
@@ -128,7 +128,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
 
     // Floating Action Button Theme
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: AppColors.primaryDark,
+      backgroundColor: AppColors.accentDark,
       foregroundColor: Colors.white,
       elevation: AppSpacing.elevationSm,
       shape: CircleBorder(),
@@ -149,7 +149,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       focusedBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
         borderSide: BorderSide(
-          color: AppColors.primary,
+          color: AppColors.accent,
           width: InputConstants.borderWidthFocused,
         ),
       ),
@@ -214,7 +214,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       unselectedLabelStyle: AppTypography.labelLarge,
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
-          color: AppColors.primary,
+          color: AppColors.accent,
           width: TabConstants.indicatorThickness,
         ),
       ),
@@ -245,7 +245,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       surfaceTintColor: Colors.transparent,
       dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.primary;
+          return AppColors.accent;
         }
         return null;
       }),
@@ -258,8 +258,8 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
         }
         return AppColors.onSurface;
       }),
-      todayBorder: const BorderSide(color: AppColors.primary),
-      todayForegroundColor: const WidgetStatePropertyAll(AppColors.primary),
+      todayBorder: const BorderSide(color: AppColors.accent),
+      todayForegroundColor: const WidgetStatePropertyAll(AppColors.accent),
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
       ),

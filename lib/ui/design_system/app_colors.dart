@@ -112,6 +112,14 @@ class AppColors {
   static const Color tagAccentBg = Color(0xFFF1DCCB);
   static const Color tagAccentFg = Color(0xFF8E6450);
 
+  // ============= 3-TONE TAG SYSTEM (DARK MODE) =============
+  static const Color tagPrimaryBgDark = Color(0xFF3A3530);
+  static const Color tagSecondaryBgDark = Color(0xFF3F3630);
+  static const Color tagAccentBgDark = Color(0xFF453228);
+  static const Color tagPrimaryFgDark = Color(0xFFD4CFC9);
+  static const Color tagSecondaryFgDark = Color(0xFFD9CFC6);
+  static const Color tagAccentFgDark = Color(0xFFD4A68E);
+
   // ============= CALENDAR TOKENS =============
   static const Color calEntryBg = Color(0x2EB8856C);
   static const Color calCountBg = Color(0xFFB8856C);

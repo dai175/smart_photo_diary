@@ -39,14 +39,14 @@ class ModernChip extends StatefulWidget {
     AppColors.tagAccentFg,
   ];
   static const _tonedTagBgsDark = [
-    Color(0xFF3A3530),
-    Color(0xFF3F3630),
-    Color(0xFF453228),
+    AppColors.tagPrimaryBgDark,
+    AppColors.tagSecondaryBgDark,
+    AppColors.tagAccentBgDark,
   ];
   static const _tonedTagFgsDark = [
-    Color(0xFFD4CFC9),
-    Color(0xFFD9CFC6),
-    Color(0xFFD4A68E),
+    AppColors.tagPrimaryFgDark,
+    AppColors.tagSecondaryFgDark,
+    AppColors.tagAccentFgDark,
   ];
   static const _tonedTagTextStyle = TextStyle(
     fontSize: 11.5,

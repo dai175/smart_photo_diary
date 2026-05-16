@@ -385,7 +385,7 @@ class StatisticsCalendar extends StatelessWidget {
                                     vertical: AppSpacing.xxs,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(
+                                    color: AppColors.accent.withValues(
                                       alpha: AppConstants.opacityXXLow,
                                     ),
                                     borderRadius: AppSpacing.chipRadius,
@@ -396,8 +396,8 @@ class StatisticsCalendar extends StatelessWidget {
                                       color:
                                           Theme.of(context).brightness ==
                                               Brightness.dark
-                                          ? AppColors.primaryLight
-                                          : AppColors.primary,
+                                          ? AppColors.accentLight
+                                          : AppColors.accent,
                                     ),
                                   ),
                                 ),
