@@ -29,7 +29,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
       surfaceContainerHigh: AppColors.surfaceContainerHighDark,
       onSurface: AppColors.onSurfaceDark,
-      error: AppColors.error,
+      error: AppColors.errorDark,
       onError: AppColors.onError,
       errorContainer: AppColors.errorContainer,
       onErrorContainer: AppColors.onErrorContainer,
@@ -180,7 +180,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       ),
       errorBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: BorderSide(color: AppColors.error),
+        borderSide: BorderSide(color: AppColors.errorDark),
       ),
       contentPadding: AppSpacing.inputPadding,
       labelStyle: AppTypography.withColor(
@@ -286,9 +286,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         return AppColors.onSurfaceDark;
       }),
       todayBorder: const BorderSide(color: AppColors.accentLight),
-      todayForegroundColor: const WidgetStatePropertyAll(
-        AppColors.accentLight,
-      ),
+      todayForegroundColor: const WidgetStatePropertyAll(AppColors.accentLight),
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
       ),

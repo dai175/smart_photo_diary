@@ -6,6 +6,7 @@ import '../services/interfaces/logging_service_interface.dart';
 import '../constants/app_constants.dart';
 import '../ui/component_constants.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/components/drag_handle.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -200,18 +201,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.md),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.handle,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.md),
+            child: Center(child: DragHandle()),
           ),
 
           const SizedBox(height: AppSpacing.md),
@@ -410,7 +402,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = hasDate ? AppColors.selectedBg : _unselectedBg(isDark);
-    final borderColor = hasDate ? AppColors.accentMuted : _unselectedBorder(isDark);
+    final borderColor = hasDate
+        ? AppColors.accentMuted
+        : _unselectedBorder(isDark);
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: () => _selectSingleDate(isStart),
@@ -432,7 +426,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   Text(
                     label,
                     style: AppTypography.sectionLabel.copyWith(
-                      color: isDark ? AppColors.onSurfaceVariantDark : AppColors.accentMuted,
+                      color: isDark
+                          ? AppColors.onSurfaceVariantDark
+                          : AppColors.accentMuted,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -442,7 +438,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     hasDate ? l10n.formatMonthDay(date) : '--',
                     style: AppTypography.bodyMedium.copyWith(
                       color: hasDate
-                          ? (isDark ? AppColors.onSurfaceVariantDark : AppColors.accentMuted)
+                          ? (isDark
+                                ? AppColors.onSurfaceVariantDark
+                                : AppColors.accentMuted)
                           : _unselectedText(isDark),
                     ),
                   ),
@@ -467,7 +465,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chipBg = isSelected ? AppColors.accentMuted : _unselectedBg(isDark);
-    final chipBorder = isSelected ? Colors.transparent : _unselectedBorder(isDark);
+    final chipBorder = isSelected
+        ? Colors.transparent
+        : _unselectedBorder(isDark);
     final textColor = isSelected ? Colors.white : _unselectedText(isDark);
     return GestureDetector(
       onTap: onTap,

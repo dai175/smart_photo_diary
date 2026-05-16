@@ -107,6 +107,9 @@ class CardConstants {
 /// ボトムシートの規格値
 class BottomSheetConstants {
   static const double radius = 28.0;
+  static const double handleWidth = 36.0;
+  static const double handleHeight = 4.0;
+  static const double handleRadius = 2.0;
 }
 
 /// モーダルの規格値

@@ -61,8 +61,9 @@ class AppColors {
   static const Color onSurfaceVariantDark = Color(0xFF9E9891);
 
   // ============= STATE COLORS =============
-  /// エラー色 — 落ち着いたレッド
-  static const Color error = Color(0xFFB5453A);
+  /// エラー色 — テラコッタ系ブリックレッド（彩度を落としパレットに統合）
+  static const Color error = Color(0xFF994F47);
+  static const Color errorDark = Color(0xFFCF7268);
   static const Color errorContainer = Color(0xFFFCE4E1);
   static const Color onError = Color(0xFFFFFFFF);
   static const Color onErrorContainer = Color(0xFF4A1510);

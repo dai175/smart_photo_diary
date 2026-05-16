@@ -6,7 +6,9 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/components/custom_card.dart';
+import '../../ui/components/drag_handle.dart';
 import '../../ui/components/loading_state_card.dart';
+import '../../ui/component_constants.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -246,30 +248,42 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   ) async {
     await showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BottomSheetConstants.radius),
+        ),
+      ),
+      builder: (ctx) {
+        final errorColor = Theme.of(ctx).colorScheme.error;
+        return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: AppSpacing.sm),
+            const DragHandle(),
+            const SizedBox(height: AppSpacing.sm),
             ListTile(
-              leading: Icon(
-                Icons.delete_rounded,
-                color: Theme.of(ctx).colorScheme.error,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.xs,
               ),
+              leading: Icon(Icons.delete_rounded, color: errorColor),
               title: Text(
                 l10n.commonDelete,
-                style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+                style: TextStyle(color: errorColor),
               ),
               onTap: () {
-                Navigator.of(ctx).pop();
                 MicroInteractions.hapticTap(
                   intensity: VibrationIntensity.medium,
                 );
+                Navigator.of(ctx).pop();
                 _deleteDiary();
               },
             ),
+            const SizedBox(height: AppSpacing.md),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
