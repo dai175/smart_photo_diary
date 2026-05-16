@@ -108,7 +108,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
           type: MaterialType.card,
           clipBehavior: Clip.antiAlias,
           borderRadius: BorderRadius.circular(CardConstants.radiusHero),
-          color: AppColors.cardBg,
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: InkWell(
             onTap: widget.onTap,
             child: Column(
@@ -145,7 +145,9 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.cardBody.copyWith(
-                            color: AppColors.muted,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -166,7 +168,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
 
   Widget _buildHeroPhoto(BuildContext context) {
     if (widget.entry.photoIds.isEmpty) {
-      return _buildPhotoFallback();
+      return _buildPhotoFallback(context);
     }
     return FutureBuilder<List<AssetEntity>>(
       future: _photoAssetsFuture,
@@ -186,7 +188,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
               else if (firstAsset != null)
                 _buildHeroImage(context, firstAsset)
               else
-                _buildPhotoFallback(),
+                _buildPhotoFallback(context),
               if (widget.entry.photoIds.length >= 2)
                 Positioned(
                   top: 8,
@@ -221,7 +223,7 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
       future: future,
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isFailure) {
-          return _buildPhotoFallback();
+          return _buildPhotoFallback(context);
         }
         return Image.memory(
           snapshot.data!.value,
@@ -232,14 +234,15 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
     );
   }
 
-  Widget _buildPhotoFallback() {
+  Widget _buildPhotoFallback(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AspectRatio(
       aspectRatio: 3 / 2,
       child: Container(
-        color: AppColors.glyphBg,
-        child: const Icon(
+        color: cs.surfaceContainerHighest,
+        child: Icon(
           Icons.photo_camera_outlined,
-          color: AppColors.muted,
+          color: cs.onSurfaceVariant,
           size: 32,
         ),
       ),

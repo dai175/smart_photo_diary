@@ -20,37 +20,37 @@
 
 ### Task 0-1: `lib/widgets/diary_card_widget.dart`
 
-- [ ] `_buildPhotoFallback()` のシグネチャを `_buildPhotoFallback(BuildContext context)` に変更し、呼び出し元も更新
-- [ ] 行 111: `color: AppColors.cardBg`（白固定）→ ダーク時は `colorScheme.surfaceContainerHigh` に
-- [ ] 行 148: `color: AppColors.muted` → `colorScheme.onSurfaceVariant`
-- [ ] 行 239: `color: AppColors.glyphBg`（写真なし背景）→ `colorScheme.surfaceContainerHighest`
-- [ ] 行 242: `color: AppColors.muted`（写真なしアイコン）→ `colorScheme.onSurfaceVariant`
+- [x] `_buildPhotoFallback()` のシグネチャを `_buildPhotoFallback(BuildContext context)` に変更し、呼び出し元も更新
+- [x] 行 111: `color: AppColors.cardBg`（白固定）→ ダーク時は `colorScheme.surfaceContainerHigh` に
+- [x] 行 148: `color: AppColors.muted` → `colorScheme.onSurfaceVariant`
+- [x] 行 239: `color: AppColors.glyphBg`（写真なし背景）→ `colorScheme.surfaceContainerHighest`
+- [x] 行 242: `color: AppColors.muted`（写真なしアイコン）→ `colorScheme.onSurfaceVariant`
 
 ### Task 0-2: `lib/ui/components/modern_chip.dart`
 
-- [ ] `_ChipVariant` enum に `.tonedTag` を追加
-- [ ] `ModernChip` に `final int? _toneIndex` フィールドを追加（`tonedTag` 時のみ非 null）
-- [ ] 既存コンストラクタ（`ModernChip(...)`・`.tag`・`.badge`）のイニシャライザリストに `_toneIndex = null` を追加（追加しないと Dart がビルドエラーになるため必須）
-- [ ] ダーク用 3-tone 定数を追加（`_tonedTagBgsDark` / `_tonedTagFgsDark`）
+- [x] `_ChipVariant` enum に `.tonedTag` を追加
+- [x] `ModernChip` に `final int? _toneIndex` フィールドを追加（`tonedTag` 時のみ非 null）
+- [x] 既存コンストラクタ（`ModernChip(...)`・`.tag`・`.badge`）のイニシャライザリストに `_toneIndex = null` を追加（追加しないと Dart がビルドエラーになるため必須）
+- [x] ダーク用 3-tone 定数を追加（`_tonedTagBgsDark` / `_tonedTagFgsDark`）
   - tone 0: bg `Color(0xFF3A3530)` / fg `Color(0xFFD4CFC9)`
   - tone 1: bg `Color(0xFF3F3630)` / fg `Color(0xFFD9CFC6)`
   - tone 2: bg `Color(0xFF453228)` / fg `Color(0xFFD4A68E)`
-- [ ] `factory ModernChip.tonedTag` で `_variant: _ChipVariant.tonedTag`・`_toneIndex: index % 3` を設定（`backgroundColor` は null のままで可）
-- [ ] `_getChipColorData()` に `_ChipVariant.tonedTag` ケースを追加し、`isDark` に応じてトーン色を返す
+- [x] `factory ModernChip.tonedTag` で `_variant: _ChipVariant.tonedTag`・`_toneIndex: index % 3` を設定（`backgroundColor` は null のままで可）
+- [x] `_getChipColorData()` に `_ChipVariant.tonedTag` ケースを追加し、`isDark` に応じてトーン色を返す
 
 ### Task 0-3: `lib/widgets/settings/settings_row.dart`
 
-- [ ] 行 40: `color: AppColors.glyphBg`（アイコンボックス背景）→ `colorScheme.surfaceContainerHighest`
-- [ ] 行 92: `color: AppColors.divider`（区切り線）→ `colorScheme.outlineVariant`
+- [x] 行 40: `color: AppColors.glyphBg`（アイコンボックス背景）→ `colorScheme.surfaceContainerHighest`
+- [x] 行 92: `color: AppColors.divider`（区切り線）→ `colorScheme.outlineVariant`
 
 ### Task 0-4: `lib/screens/settings_screen.dart` — `_buildPlanCard()`
 
-- [ ] メソッド冒頭に `final isDark = Theme.of(context).brightness == Brightness.dark;` を追加
-- [ ] 行 228: `color: AppColors.glyphBg`（null 状態背景）→ `colorScheme.surfaceContainerHighest`
-- [ ] 行 235: `color: AppColors.muted`（null 状態テキスト）→ `colorScheme.onSurfaceVariant`
-- [ ] 行 249: `color: AppColors.premiumBg` → `isDark ? const Color(0xFF2E2420) : AppColors.premiumBg`
-- [ ] 行 282 / 287: `color: AppColors.muted`（使用量テキスト）→ `colorScheme.onSurfaceVariant`
-- [ ] 行 297: `backgroundColor: AppColors.divider`（プログレスバー背景）→ `colorScheme.outlineVariant`
+- [x] メソッド冒頭に `final isDark = Theme.of(context).brightness == Brightness.dark;` を追加
+- [x] 行 228: `color: AppColors.glyphBg`（null 状態背景）→ `colorScheme.surfaceContainerHighest`
+- [x] 行 235: `color: AppColors.muted`（null 状態テキスト）→ `colorScheme.onSurfaceVariant`
+- [x] 行 249: `color: AppColors.premiumBg` → `isDark ? const Color(0xFF2E2420) : AppColors.premiumBg`
+- [x] 行 282 / 287: `color: AppColors.muted`（使用量テキスト）→ `colorScheme.onSurfaceVariant`
+- [x] 行 297: `backgroundColor: AppColors.divider`（プログレスバー背景）→ `colorScheme.outlineVariant`
 
 ---
 

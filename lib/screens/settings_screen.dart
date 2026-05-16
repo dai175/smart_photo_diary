@@ -216,6 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildPlanCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     final info = _controller.subscriptionInfo;
     final cardRadius = BorderRadius.circular(CardConstants.radiusHero);
     const cardPadding = EdgeInsets.all(20);
@@ -224,15 +225,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return Container(
         padding: cardPadding,
         decoration: BoxDecoration(
-          color: AppColors.glyphBg,
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: cardRadius,
         ),
         child: Text(
           context.l10n.settingsSubscriptionSectionTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.muted,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       );
@@ -246,7 +247,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: cardPadding,
       decoration: BoxDecoration(
-        color: AppColors.premiumBg,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF2E2420)
+            : AppColors.premiumBg,
         borderRadius: cardRadius,
       ),
       child: Column(
@@ -279,12 +282,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(
                 context.l10n.settingsSubscriptionStoriesLabel.toUpperCase(),
                 style: AppTypography.sectionLabel.copyWith(
-                  color: AppColors.muted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
                 '$used / $total',
-                style: const TextStyle(fontSize: 12.5, color: AppColors.muted),
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -294,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: LinearProgressIndicator(
               value: usageRate,
               minHeight: 6,
-              backgroundColor: AppColors.divider,
+              backgroundColor: colorScheme.outlineVariant,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 AppColors.accentMuted,
               ),

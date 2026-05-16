@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_icons.dart';
 import '../../ui/animations/micro_interactions.dart';
-import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 
 class SettingsRow extends StatelessWidget {
@@ -26,6 +25,7 @@ class SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final row = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -37,14 +37,10 @@ class SettingsRow extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.glyphBg,
+                  color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  size: 18,
-                ),
+                child: Icon(icon, color: cs.onSurface, size: 18),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -57,7 +53,7 @@ class SettingsRow extends StatelessWidget {
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.1,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
@@ -65,7 +61,7 @@ class SettingsRow extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12.5,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: cs.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -78,7 +74,7 @@ class SettingsRow extends StatelessWidget {
               if (trailing == null && onTap != null)
                 Icon(
                   AppIcons.actionForward,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: cs.onSurfaceVariant,
                   size: AppSpacing.iconSm,
                 ),
             ],
@@ -88,7 +84,7 @@ class SettingsRow extends StatelessWidget {
           Container(
             height: 0.5,
             margin: const EdgeInsets.only(left: 66),
-            color: AppColors.divider,
+            color: cs.outlineVariant,
           ),
       ],
     );

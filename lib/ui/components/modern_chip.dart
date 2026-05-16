@@ -25,7 +25,8 @@ class ModernChip extends StatefulWidget {
     this.animationDuration = AppConstants.quickAnimationDuration,
     this.borderRadius,
     this.textStyle,
-  }) : _variant = _ChipVariant.normal;
+  }) : _variant = _ChipVariant.normal,
+       _toneIndex = null;
 
   static const _tonedTagBgs = [
     AppColors.tagPrimaryBg,
@@ -37,23 +38,44 @@ class ModernChip extends StatefulWidget {
     AppColors.tagSecondaryFg,
     AppColors.tagAccentFg,
   ];
+  static const _tonedTagBgsDark = [
+    Color(0xFF3A3530),
+    Color(0xFF3F3630),
+    Color(0xFF453228),
+  ];
+  static const _tonedTagFgsDark = [
+    Color(0xFFD4CFC9),
+    Color(0xFFD9CFC6),
+    Color(0xFFD4A68E),
+  ];
   static const _tonedTagTextStyle = TextStyle(
     fontSize: 11.5,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.15,
   );
 
-  factory ModernChip.tonedTag(String label, {required int index}) {
-    final tone = index % 3;
-    return ModernChip(
-      label: label,
-      backgroundColor: _tonedTagBgs[tone],
-      foregroundColor: _tonedTagFgs[tone],
-      borderRadius: 8.0,
-      size: ChipSize.small,
-      textStyle: _tonedTagTextStyle,
-    );
-  }
+  const ModernChip._tonedTag({
+    super.key,
+    required this.label,
+    required int toneIndex,
+  }) : _variant = _ChipVariant.tonedTag,
+       _toneIndex = toneIndex,
+       onTap = null,
+       onDeleted = null,
+       backgroundColor = null,
+       foregroundColor = null,
+       icon = null,
+       deleteIcon = null,
+       selected = false,
+       enabled = true,
+       size = ChipSize.small,
+       style = ChipStyle.filled,
+       animationDuration = AppConstants.quickAnimationDuration,
+       borderRadius = 8.0,
+       textStyle = _tonedTagTextStyle;
+
+  factory ModernChip.tonedTag(String label, {required int index}) =>
+      ModernChip._tonedTag(label: label, toneIndex: index % 3);
 
   /// 日記タグ表示専用コンストラクタ
   /// 全画面で統一されたタグスタイルを提供
@@ -71,7 +93,8 @@ class ModernChip extends StatefulWidget {
       animationDuration = AppConstants.quickAnimationDuration,
       borderRadius = null,
       textStyle = null,
-      _variant = _ChipVariant.tag;
+      _variant = _ChipVariant.tag,
+      _toneIndex = null;
 
   /// タグカウントバッジ表示専用コンストラクタ
   /// 日記詳細画面などでタグ数を表示するバッジに使用
@@ -88,7 +111,8 @@ class ModernChip extends StatefulWidget {
       animationDuration = AppConstants.quickAnimationDuration,
       borderRadius = null,
       textStyle = null,
-      _variant = _ChipVariant.badge;
+      _variant = _ChipVariant.badge,
+      _toneIndex = null;
 
   /// チップのラベルテキスト
   final String label;
@@ -133,6 +157,8 @@ class ModernChip extends StatefulWidget {
 
   /// チップのバリアント（内部フラグ）
   final _ChipVariant _variant;
+
+  final int? _toneIndex;
 
   @override
   State<ModernChip> createState() => _ModernChipState();
@@ -330,6 +356,8 @@ class _ModernChipState extends State<ModernChip>
   }
 
   _ChipColorData _getChipColorData(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (widget.selected) {
       return _ChipColorData(
         backgroundColor: widget.backgroundColor ?? AppColors.primary,
@@ -341,9 +369,25 @@ class _ModernChipState extends State<ModernChip>
       );
     }
 
+    if (widget._variant == _ChipVariant.tonedTag) {
+      // _toneIndex is always non-null when _variant == tonedTag (set in _tonedTag constructor)
+      final tone = widget._toneIndex!;
+      final bg = isDark
+          ? ModernChip._tonedTagBgsDark[tone]
+          : ModernChip._tonedTagBgs[tone];
+      final fg = isDark
+          ? ModernChip._tonedTagFgsDark[tone]
+          : ModernChip._tonedTagFgs[tone];
+      return _ChipColorData(
+        backgroundColor: bg,
+        foregroundColor: fg,
+        borderColor: Colors.transparent,
+        hoverColor: bg.withValues(alpha: AppConstants.opacityHigh),
+      );
+    }
+
     if (widget._variant == _ChipVariant.tag ||
         widget._variant == _ChipVariant.badge) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
       final bg = AppColors.primary.withValues(alpha: AppConstants.opacityXXLow);
       return _ChipColorData(
         backgroundColor: bg,
@@ -364,7 +408,7 @@ class _ModernChipState extends State<ModernChip>
 }
 
 /// チップのバリアント（内部用）
-enum _ChipVariant { normal, tag, badge }
+enum _ChipVariant { normal, tag, badge, tonedTag }
 
 /// チップのサイズ
 enum ChipSize { small, medium, large }
