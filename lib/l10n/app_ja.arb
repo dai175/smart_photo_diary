@@ -1635,6 +1635,35 @@
   "@photoSemanticLocked": {
     "description": "写真がロック状態であることを示すラベル（Premium限定）"
   },
+  "planCardThisMonth": "今月",
+  "@planCardThisMonth": {
+    "description": "プランカードのセクションヘッダー"
+  },
+  "planCardDiaryUnit": "件",
+  "@planCardDiaryUnit": {
+    "description": "プランカードの日記単位ラベル"
+  },
+  "planCardRemainingAndReset": "残り{remaining}件 · {date}リセット",
+  "@planCardRemainingAndReset": {
+    "description": "プランカードの残り件数とリセット日",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardAutoRenews": "{date}に自動更新 · サブスクリプション管理",
+  "@planCardAutoRenews": {
+    "description": "Premiumプランの自動更新フッター",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "diaryCardSemanticLabel": "日記: {title}、{date}",
   "@diaryCardSemanticLabel": {
     "description": "日記カードウィジェットのセマンティックラベル",

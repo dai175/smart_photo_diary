@@ -399,7 +399,11 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                   color: iconBgColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(iconData, color: iconColor, size: AppSpacing.iconLg),
+                child: Icon(
+                  iconData,
+                  color: iconColor,
+                  size: AppSpacing.iconLg,
+                ),
               ),
               const SizedBox(height: AppSpacing.xl),
               Text(title, style: AppTypography.titleLarge),

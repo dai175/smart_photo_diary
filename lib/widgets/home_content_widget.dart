@@ -54,8 +54,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     final planResult = await planFuture;
     if (mounted) {
       setState(() {
-        _remainingGenerations =
-            remainingResult.isSuccess ? remainingResult.value : null;
+        _remainingGenerations = remainingResult.isSuccess
+            ? remainingResult.value
+            : null;
         _cachedPlan = planResult.isSuccess ? planResult.value : null;
       });
     }

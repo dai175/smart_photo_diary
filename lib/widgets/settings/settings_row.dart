@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_icons.dart';
 import '../../ui/animations/micro_interactions.dart';
+import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 
 class SettingsRow extends StatelessWidget {
@@ -26,6 +27,7 @@ class SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final row = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -40,7 +42,11 @@ class SettingsRow extends StatelessWidget {
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: cs.onSurface, size: 18),
+                child: Icon(
+                  icon,
+                  color: isDark ? AppColors.accentLight : AppColors.accentMuted,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(

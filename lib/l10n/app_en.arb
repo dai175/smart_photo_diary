@@ -1635,6 +1635,35 @@
   "@photoSemanticLocked": {
     "description": "Semantic label indicating the photo is locked (Premium only)"
   },
+  "planCardThisMonth": "This month",
+  "@planCardThisMonth": {
+    "description": "Plan card section header"
+  },
+  "planCardDiaryUnit": "diaries",
+  "@planCardDiaryUnit": {
+    "description": "Unit label for diary count in plan card"
+  },
+  "planCardRemainingAndReset": "{remaining} left · resets {date}",
+  "@planCardRemainingAndReset": {
+    "description": "Plan card remaining count and reset date",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardAutoRenews": "Auto-renews on {date} · Manage subscription",
+  "@planCardAutoRenews": {
+    "description": "Premium plan auto-renew footer",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "diaryCardSemanticLabel": "Diary: {title}, {date}",
   "@diaryCardSemanticLabel": {
     "description": "Semantic label for diary card widget",

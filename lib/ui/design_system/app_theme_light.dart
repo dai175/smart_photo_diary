@@ -27,7 +27,7 @@ ThemeData buildLightTheme({required bool isTestEnv}) {
       onSecondaryContainer: AppColors.onSecondaryContainer,
       surface: AppColors.surface,
       onSurface: AppColors.onSurface,
-      surfaceContainerHighest: Color(0xFFC4BEB7),
+      surfaceContainerHighest: AppColors.surfaceVariant,
       surfaceContainerHigh: Color(0xFFE8E4DF),
       onSurfaceVariant: AppColors.onSurfaceVariant,
       error: AppColors.error,

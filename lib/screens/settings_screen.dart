@@ -21,6 +21,7 @@ import '../widgets/settings/diary_settings_section.dart';
 import '../widgets/settings/photo_filter_settings_section.dart';
 import '../widgets/settings/settings_row.dart';
 import '../widgets/settings/storage_settings_section.dart';
+import '../ui/components/modern_chip.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -217,9 +218,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildPlanCard() {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final info = _controller.subscriptionInfo;
     final cardRadius = BorderRadius.circular(CardConstants.radiusHero);
-    const cardPadding = EdgeInsets.all(20);
+    const cardPadding = EdgeInsets.all(18);
 
     if (info == null) {
       return Container(
@@ -243,77 +245,108 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final usageRate = info.usageStats.usageRate.clamp(0.0, 1.0);
     final used = info.usageStats.monthlyUsageCount;
     final total = info.usageStats.monthlyLimit;
+    final remaining = info.usageStats.remainingCount;
+    final resetDate = context.l10n.formatMonthDayLong(
+      info.usageStats.nextResetDate,
+    );
+    final expiryDate = info.periodInfo.expiryDate != null
+        ? context.l10n.formatMonthDayLong(info.periodInfo.expiryDate!)
+        : null;
+
+    const usageWarningThreshold = 0.85;
+
+    final cardBgColor = isDark
+        ? AppColors.premiumBgDark
+        : (info.isPremium ? AppColors.premiumBg : AppColors.cardBg);
+    final barColor = usageRate > usageWarningThreshold
+        ? colorScheme.error
+        : AppColors.calSelected;
 
     return Container(
       padding: cardPadding,
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF2E2420)
-            : AppColors.premiumBg,
-        borderRadius: cardRadius,
-      ),
+      decoration: BoxDecoration(color: cardBgColor, borderRadius: cardRadius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              Icon(
-                info.isPremium ? Icons.star_rounded : Icons.star_border_rounded,
-                color: AppColors.accentMuted,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  planName,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                context.l10n.settingsSubscriptionStoriesLabel.toUpperCase(),
-                style: AppTypography.sectionLabel.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+              ModernChip(
+                label: planName,
+                size: ChipSize.medium,
+                backgroundColor: info.isPremium
+                    ? AppColors.accentMuted
+                    : AppColors.tagPrimaryBg,
+                foregroundColor: info.isPremium
+                    ? Colors.white
+                    : AppColors.tagPrimaryFg,
+                textStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
                 ),
               ),
-              Text(
-                '$used / $total',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+              const Icon(
+                AppIcons.actionForward,
+                color: AppColors.muted,
+                size: AppSpacing.iconSm,
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXs),
-            child: LinearProgressIndicator(
-              value: usageRate,
-              minHeight: 6,
-              backgroundColor: colorScheme.outlineVariant,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.accentMuted,
-              ),
+          const SizedBox(height: 14),
+          Text(
+            context.l10n.planCardThisMonth.toUpperCase(),
+            style: AppTypography.sectionLabel.copyWith(
+              color: AppColors.accentMuted,
             ),
           ),
-          if (!info.isPremium) ...[
-            const SizedBox(height: 16),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$used',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '/ $total ${context.l10n.planCardDiaryUnit}',
+                style: const TextStyle(fontSize: 16, color: AppColors.muted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            context.l10n.planCardRemainingAndReset(remaining, resetDate),
+            style: AppTypography.caption.copyWith(color: AppColors.muted),
+          ),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(
+            value: usageRate,
+            minHeight: 6,
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXs),
+            backgroundColor: colorScheme.outlineVariant,
+            valueColor: AlwaysStoppedAnimation<Color>(barColor),
+          ),
+          const SizedBox(height: 14),
+          if (!info.isPremium)
             PrimaryButton(
               onPressed: _showUpgradeDialog,
               text: context.l10n.settingsUpgradeToPremium,
               width: double.infinity,
+            )
+          else if (expiryDate != null)
+            Text(
+              context.l10n.planCardAutoRenews(expiryDate),
+              style: AppTypography.caption.copyWith(color: AppColors.muted),
             ),
-          ],
         ],
       ),
     );

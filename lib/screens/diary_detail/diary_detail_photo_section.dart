@@ -104,9 +104,7 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
                 widthFactor: 1,
                 heightFactor: 0.45,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color(0x40000000),
-                  ),
+                  decoration: BoxDecoration(color: Color(0x40000000)),
                 ),
               ),
             ),
