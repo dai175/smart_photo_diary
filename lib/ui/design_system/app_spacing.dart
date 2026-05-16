@@ -36,6 +36,7 @@ class AppSpacing {
 
   // ============= SPECIFIC USE CASES =============
   /// アイコンサイズ
+  static const double iconXxs = 14.0;
   static const double iconXs = 16.0;
   static const double iconSm = 20.0;
   static const double iconMd = 24.0;

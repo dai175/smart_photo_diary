@@ -153,7 +153,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             children: [
               const Icon(
                 Icons.auto_awesome_rounded,
-                size: 14,
+                size: AppSpacing.iconXxs,
                 color: AppColors.accentMuted,
               ),
               const SizedBox(width: 4),

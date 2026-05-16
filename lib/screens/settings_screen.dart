@@ -9,6 +9,7 @@ import '../ui/component_constants.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/loading_state_card.dart';
 import '../ui/components/animated_button.dart';
+import '../ui/components/buttons/button_content.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
@@ -275,21 +276,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 label: planName,
                 size: ChipSize.medium,
                 backgroundColor: info.isPremium
-                    ? AppColors.accentMuted
+                    ? Colors.white
                     : AppColors.tagPrimaryBg,
                 foregroundColor: info.isPremium
-                    ? Colors.white
+                    ? AppColors.tagAccentFg
                     : AppColors.tagPrimaryFg,
                 textStyle: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.2,
                 ),
-              ),
-              const Icon(
-                AppIcons.actionForward,
-                color: AppColors.muted,
-                size: AppSpacing.iconSm,
               ),
             ],
           ),
@@ -337,10 +333,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 14),
           if (!info.isPremium)
-            PrimaryButton(
+            AnimatedButton(
               onPressed: _showUpgradeDialog,
-              text: context.l10n.settingsUpgradeToPremium,
               width: double.infinity,
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              shadowColor: AppColors.accent.withValues(alpha: 0.3),
+              child: ButtonContent(text: context.l10n.settingsUpgradeToPremium),
             )
           else if (expiryDate != null)
             Text(

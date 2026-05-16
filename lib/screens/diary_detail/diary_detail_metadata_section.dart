@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
+import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 
 /// 日記詳細のメタデータセクション（作成日・更新日・写真枚数）
@@ -20,7 +21,7 @@ class DiaryDetailMetadataSection extends StatelessWidget {
 
     Widget metaRow(IconData icon, String label) => Row(
       children: [
-        Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
+        Icon(icon, size: AppSpacing.iconXxs, color: colorScheme.onSurfaceVariant),
         const SizedBox(width: 6),
         Text(
           label,

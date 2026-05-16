@@ -78,12 +78,6 @@ class PlanOptionCard extends StatelessWidget {
                       ),
                     ),
                     _buildPriceDisplay(context),
-                    const SizedBox(width: AppSpacing.sm),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      size: AppSpacing.iconXs,
-                    ),
                   ],
                 ),
               ),

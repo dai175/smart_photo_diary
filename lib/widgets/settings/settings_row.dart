@@ -81,7 +81,7 @@ class SettingsRow extends StatelessWidget {
                 Icon(
                   AppIcons.actionForward,
                   color: cs.onSurfaceVariant,
-                  size: AppSpacing.iconSm,
+                  size: AppSpacing.iconXxs,
                 ),
             ],
           ),
