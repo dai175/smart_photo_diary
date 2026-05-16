@@ -1687,5 +1687,9 @@
         "type": "int"
       }
     }
+  },
+  "premiumBadgeLabel": "PREMIUM",
+  "@premiumBadgeLabel": {
+    "description": "プレミアムプロンプトバッジのラベル"
   }
 }

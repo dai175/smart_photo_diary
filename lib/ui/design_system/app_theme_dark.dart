@@ -112,7 +112,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     // Elevated Button Theme (Dark)
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.accentLight,
+        backgroundColor: AppColors.accentDark,
         foregroundColor: AppColors.onBackground,
         elevation: AppSpacing.elevationXs,
         shadowColor: Colors.black26,

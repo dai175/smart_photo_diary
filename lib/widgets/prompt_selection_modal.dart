@@ -39,6 +39,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   late final ISubscriptionService _subscriptionService;
 
   bool _isLoading = true;
+  bool _initSucceeded = false;
   bool _isPremium = false;
   List<WritingPrompt> _availablePrompts = [];
   WritingPrompt? _selectedPrompt;
@@ -112,6 +113,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
       setState(() {
         _isLoading = false;
+        _initSucceeded = true;
       });
     } catch (e) {
       _logger.error(
@@ -146,11 +148,8 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   }
 
   List<Widget> _buildActions() {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
-    final accentColor = theme.brightness == Brightness.dark
-        ? AppColors.accentLight
-        : AppColors.accentDark;
+    const accentColor = AppColors.accentDark;
     final String primaryText;
     if (_isRandomSelected) {
       primaryText = l10n.promptCreateRandom;
@@ -387,7 +386,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                       icon: Icons.shuffle_rounded,
                       title: l10n.promptOptionRandom,
                       desc: l10n.promptRandomDescription,
-                      onTap: _isLoading
+                      onTap: (_isLoading || !_initSucceeded)
                           ? null
                           : () => setState(() {
                               _selectedPrompt = null;

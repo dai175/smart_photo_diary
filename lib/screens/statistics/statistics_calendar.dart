@@ -89,7 +89,7 @@ class StatisticsCalendar extends StatelessWidget {
             calendarBuilders: CalendarBuilders(
               headerTitleBuilder: (context, day) {
                 final theme = Theme.of(context);
-                final locale = Localizations.localeOf(context).languageCode;
+                final locale = Localizations.localeOf(context).toLanguageTag();
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

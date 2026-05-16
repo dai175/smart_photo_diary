@@ -105,6 +105,7 @@ void main() {
         ),
       );
       expect(find.text('3'), findsOneWidget);
+      expect(find.byIcon(Icons.label_outline), findsOneWidget);
     });
   });
 }

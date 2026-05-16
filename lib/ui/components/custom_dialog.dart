@@ -67,7 +67,7 @@ class CustomDialog extends StatelessWidget {
     );
   }
 
-  static const double _closeButtonSize = 32.0;
+  static const double _closeButtonSize = AppSpacing.minTouchTarget;
 
   Widget _buildHeader() {
     final hasClose = onClose != null;

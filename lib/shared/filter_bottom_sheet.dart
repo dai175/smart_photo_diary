@@ -65,7 +65,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       } else {
         setState(() => _isLoadingTags = false);
         _logger.error(
-          context.l10n.filterTagLoadError,
+          'Failed to load available tags',
           error: result.error,
           context: 'FilterBottomSheet',
         );
@@ -73,7 +73,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     } catch (e) {
       setState(() => _isLoadingTags = false);
       _logger.error(
-        context.l10n.filterTagLoadError,
+        'Failed to load available tags',
         error: e,
         context: 'FilterBottomSheet',
       );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/localization_extensions.dart';
 import '../models/writing_prompt.dart';
 import '../ui/components/modern_chip.dart';
 import '../ui/design_system/app_colors.dart';
@@ -107,10 +108,12 @@ class _PremiumBadge extends StatelessWidget {
             color: AppColors.tagAccentFg,
           ),
           const SizedBox(width: AppSpacing.xxs),
-          Text(
-            'PREMIUM',
-            style: AppTypography.sectionLabel.copyWith(
-              color: AppColors.tagAccentFg,
+          Builder(
+            builder: (context) => Text(
+              context.l10n.premiumBadgeLabel,
+              style: AppTypography.sectionLabel.copyWith(
+                color: AppColors.tagAccentFg,
+              ),
             ),
           ),
         ],
