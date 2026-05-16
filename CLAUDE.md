@@ -121,9 +121,13 @@ All log messages, exception messages, and debug data map keys must be written in
   ```
 
 ### UI Guidelines
+
+See **[DESIGN.md](DESIGN.md)** for the full design system reference (colors, typography, spacing, component rules).
+
+Key rules for quick reference:
 - Use `CustomDialog` for modals, never `AlertDialog`
-- No gradients, follow Material Design 3 (theme defined in `ui/design_system/`)
-- All UI text uses internationalization (i18n) via `context.l10n`, never hardcoded strings
+- No gradients; CTA buttons use `AppColors.accentDark` (not `accent`) for WCAG AA compliance
+- All UI text via `context.l10n`, never hardcoded strings
 - Variable names in English, UI text localized (Japanese/English)
 - Service methods accept `Locale?` parameter for language-specific operations
 

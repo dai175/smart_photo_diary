@@ -188,6 +188,7 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 ## ドキュメント
 
 - **[CLAUDE.md](CLAUDE.md)** - AI開発アシスタント向けガイドライン
+- **[DESIGN.md](DESIGN.md)** - デザインシステム（カラー・タイポグラフィ・スペーシング・コンポーネント規約）
 - **[docs/](docs/)** - 専門ドキュメント
   - [ci_cd_guide.md](docs/ci_cd_guide.md) - CI/CD詳細運用手順
   - [monetization_strategy.md](docs/monetization_strategy.md) - 収益化戦略
