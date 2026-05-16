@@ -8,6 +8,7 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
 import '../../services/interfaces/photo_cache_service_interface.dart';
+import '../../ui/component_constants.dart';
 import '../../ui/components/fullscreen_photo_viewer.dart';
 
 /// 日記詳細のヒーロー写真セクション（4:3 フルブリード）
@@ -110,25 +111,36 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
             ),
             if (totalCount > 1)
               Positioned(
-                bottom: 12,
-                right: 12,
+                bottom: 14,
+                right: 14,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(999),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    filter: ImageFilter.blur(sigmaX: BlurConstants.defaultBlur, sigmaY: BlurConstants.defaultBlur),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                        horizontal: 12,
+                        vertical: 6,
                       ),
                       color: Colors.black54,
-                      child: Text(
-                        '1 / $totalCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.photo_library_outlined,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '1 / $totalCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

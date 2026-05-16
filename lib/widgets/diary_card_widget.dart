@@ -191,8 +191,8 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
                 _buildPhotoFallback(context),
               if (widget.entry.photoIds.length >= 2)
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  bottom: AppSpacing.md,
+                  right: AppSpacing.md,
                   child: _buildPhotoBadge(widget.entry.photoIds.length),
                 ),
             ],
