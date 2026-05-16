@@ -8,6 +8,7 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../../core/service_locator.dart';
 import '../../services/interfaces/photo_cache_service_interface.dart';
+import '../../localization/localization_extensions.dart';
 import '../../ui/component_constants.dart';
 import '../../ui/components/fullscreen_photo_viewer.dart';
 
@@ -116,7 +117,10 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: BlurConstants.defaultBlur, sigmaY: BlurConstants.defaultBlur),
+                    filter: ImageFilter.blur(
+                      sigmaX: BlurConstants.defaultBlur,
+                      sigmaY: BlurConstants.defaultBlur,
+                    ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -133,7 +137,7 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '1 / $totalCount',
+                            context.l10n.photoCountIndicator(1, totalCount),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,

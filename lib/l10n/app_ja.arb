@@ -1675,5 +1675,17 @@
         "type": "String"
       }
     }
+  },
+  "photoCountIndicator": "{current} / {total}",
+  "@photoCountIndicator": {
+    "description": "写真カウンター（例: 1 / 3）",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   }
 }

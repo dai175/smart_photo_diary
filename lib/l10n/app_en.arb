@@ -1675,5 +1675,17 @@
         "type": "String"
       }
     }
+  },
+  "photoCountIndicator": "{current} / {total}",
+  "@photoCountIndicator": {
+    "description": "Photo counter indicator (e.g. 1 / 3)",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   }
 }
