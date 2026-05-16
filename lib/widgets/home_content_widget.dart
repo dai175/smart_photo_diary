@@ -93,7 +93,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildHeaderDateLabel(context),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       context.l10n.timelineToday,
                       style: const TextStyle(

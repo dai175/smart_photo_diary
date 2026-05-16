@@ -110,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: AppColors.accentMuted,
             ),
           ),
-          const SizedBox(height: AppSpacing.xxs),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.settingsAppBarTitle,
             style: TextStyle(
