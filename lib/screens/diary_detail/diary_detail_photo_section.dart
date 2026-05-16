@@ -105,11 +105,7 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
                 heightFactor: 0.45,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Color(0x80000000), Colors.transparent],
-                    ),
+                    color: Color(0x40000000),
                   ),
                 ),
               ),
