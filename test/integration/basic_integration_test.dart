@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 import 'package:smart_photo_diary/constants/app_icons.dart';
 import 'package:smart_photo_diary/main.dart';
 import 'test_helpers/integration_test_helpers.dart';
@@ -31,15 +30,8 @@ void main() {
       // Wait for initial widgets to appear - extend timeout for app initialization
       await IntegrationTestHelpers.pumpAndSettleWithExtendedTimeout(tester);
 
-      // Assert - 日付タイトルが表示されることを確認
-      final now = DateTime.now();
-      final scaffoldContext = tester.element(find.byType(Scaffold).first);
-      final locale = Localizations.localeOf(scaffoldContext);
-      final localeName = locale.countryCode != null
-          ? '${locale.languageCode}_${locale.countryCode}'
-          : locale.languageCode;
-      final expectedTitle = DateFormat.yMMMMd(localeName).format(now);
-      expect(find.text(expectedTitle), findsOneWidget);
+      // Assert - カスタムヘッダー（PreferredSize）が表示されることを確認
+      expect(find.byType(PreferredSize), findsWidgets);
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
@@ -53,18 +45,11 @@ void main() {
       await tester.pumpWidget(const MyApp());
       await IntegrationTestHelpers.pumpAndSettleWithExtendedTimeout(tester);
 
-      // Assert - 日付タイトルが表示されることを確認
-      final now = DateTime.now();
-      final scaffoldContext = tester.element(find.byType(Scaffold).first);
-      final locale = Localizations.localeOf(scaffoldContext);
-      final localeName = locale.countryCode != null
-          ? '${locale.languageCode}_${locale.countryCode}'
-          : locale.languageCode;
-      final expectedTitle = DateFormat.yMMMMd(localeName).format(now);
-      expect(find.text(expectedTitle), findsOneWidget);
+      // Assert - カスタムヘッダーが表示されることを確認
+      expect(find.byType(PreferredSize), findsWidgets);
 
-      // 権限が拒否されている場合の確認（メッセージやボタンが表示される）
-      // Note: 実際のUI構造に依存するため、少なくとも日付が表示されれば成功とする
+      // 権限が拒否されている場合の確認
+      // Note: 実際のUI構造に依存するため、ヘッダーが表示されれば成功とする
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 

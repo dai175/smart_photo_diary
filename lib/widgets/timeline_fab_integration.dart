@@ -39,15 +39,22 @@ class TimelineFABIntegration extends StatelessWidget {
           showFAB: false, // FABは別途管理
           scrollSignal: scrollSignal,
         ),
-        Positioned(
-          right: 16,
-          bottom: 16,
-          child: SmartFABWidget(
-            photoController: controller,
-            onCameraPressed: callbacks.onCameraPressed,
-            onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
-            heroTag: null,
-          ),
+        ListenableBuilder(
+          listenable: controller,
+          builder: (context, child) {
+            final isSelecting = controller.selectedCount > 0;
+            return Positioned(
+              left: isSelecting ? 16 : null,
+              right: 16,
+              bottom: 16,
+              child: SmartFABWidget(
+                photoController: controller,
+                onCameraPressed: callbacks.onCameraPressed,
+                onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
+                heroTag: null,
+              ),
+            );
+          },
         ),
       ],
     );

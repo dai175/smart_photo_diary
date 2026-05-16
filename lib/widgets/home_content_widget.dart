@@ -1,26 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../controllers/scroll_signal.dart';
 import '../models/timeline_callbacks.dart';
+import '../models/plans/plan.dart';
 import '../widgets/timeline_fab_integration.dart';
+import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/components/buttons/text_only_button.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
-import '../constants/app_constants.dart';
 import '../constants/subscription_constants.dart';
 
-/// ホーム画面のメインコンテンツウィジェット
-///
-/// タブ統合後の統一ホーム画面を提供。
-/// - TimelinePhotoWidget と FAB統合のコンテナ
-/// - プル・トゥ・リフレッシュ機能
-/// - 日記作成フローとの統合
 class HomeContentWidget extends StatefulWidget {
   final PhotoSelectionController photoController;
   final TimelineCallbacks callbacks;
@@ -42,6 +37,33 @@ class HomeContentWidget extends StatefulWidget {
 }
 
 class _HomeContentWidgetState extends State<HomeContentWidget> {
+  int? _remainingGenerations;
+  Plan? _cachedPlan;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsageSummary();
+  }
+
+  Future<void> _loadUsageSummary() async {
+    final service = await ServiceRegistration.getAsync<ISubscriptionService>();
+    final results = await Future.wait([
+      service.getRemainingGenerations(),
+      service.getCurrentPlanClass(),
+    ]);
+    if (mounted) {
+      final remainingResult = results[0];
+      final planResult = results[1];
+      setState(() {
+        _remainingGenerations = remainingResult.isSuccess
+            ? remainingResult.value as int
+            : null;
+        _cachedPlan = planResult.isSuccess ? planResult.value as Plan : null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,21 +79,98 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   }
 
   PreferredSizeWidget _buildHeader(BuildContext context) {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      title: Text(context.l10n.formatFullDate(DateTime.now())),
-      centerTitle: false,
-      actions: [
-        // 使用量カウンター表示ボタン
-        Container(
-          margin: const EdgeInsets.only(right: AppSpacing.xs),
-          child: IconButton(
-            icon: const Icon(Icons.data_usage_rounded),
-            onPressed: () => _showUsageStatus(context),
-            tooltip: context.l10n.usageStatusDialogTitle,
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(108),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildHeaderDateLabel(context),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.timelineToday,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.4,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.homeHeaderSubtitle,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _buildUsagePill(context),
+            ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderDateLabel(BuildContext context) {
+    final label = DateFormat(
+      'EEEE · MMM d',
+      context.l10n.localeName,
+    ).format(DateTime.now()).toUpperCase();
+    return Text(
+      label,
+      style: AppTypography.dateLabel.copyWith(color: AppColors.accentMuted),
+    );
+  }
+
+  Widget _buildUsagePill(BuildContext context) {
+    final remaining = _remainingGenerations;
+    final limit = _cachedPlan?.monthlyAiGenerationLimit;
+    final label = (remaining != null && limit != null)
+        ? '$remaining / $limit'
+        : '—';
+
+    return Material(
+      color: AppColors.accent.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: () => _showUsageStatus(context),
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.auto_awesome_rounded,
+                size: 14,
+                color: AppColors.accentMuted,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accentMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -94,80 +193,29 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.lg),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 選択解除バー
-          AnimatedSize(
-            duration: AppConstants.quickAnimationDuration,
-            curve: Curves.easeInOut,
-            alignment: Alignment.topCenter,
-            child: ListenableBuilder(
-              listenable: widget.photoController,
-              builder: (context, _) {
-                return AnimatedSwitcher(
-                  duration: AppConstants.quickAnimationDuration,
-                  child: widget.photoController.selectedCount > 0
-                      ? Padding(
-                          key: const ValueKey('selection-bar'),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                context.l10n.homeSelectionCount(
-                                  widget.photoController.selectedCount,
-                                ),
-                                style: AppTypography.labelMedium.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              TextOnlyButton(
-                                onPressed:
-                                    widget.photoController.clearSelection,
-                                text: context.l10n.homeSelectionClearAll,
-                              ),
-                            ],
-                          ),
-                        )
-                      : const SizedBox(
-                          width: double.infinity,
-                          key: ValueKey('empty'),
-                        ),
-                );
-              },
-            ),
-          ),
-          // 統合されたタイムラインFAB表示
-          Expanded(
-            child: TimelineFABIntegration(
-              controller: widget.photoController,
-              callbacks: widget.callbacks,
-              scrollSignal: widget.scrollSignal,
-            ),
-          ),
-        ],
+      child: TimelineFABIntegration(
+        controller: widget.photoController,
+        callbacks: widget.callbacks,
+        scrollSignal: widget.scrollSignal,
       ),
     );
   }
 
-  /// 使用量状況表示メソッド
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
       final subscriptionService =
           await ServiceRegistration.getAsync<ISubscriptionService>();
 
-      // 使用量情報を取得
-      final statusResult = await subscriptionService.getCurrentStatus();
-      final planResult = await subscriptionService.getCurrentPlanClass();
-      final resetDateResult = await subscriptionService.getNextResetDate();
+      // 常に最新のプラン情報を取得し、プラン変更が即座にダイアログに反映されるようにする
+      final statusFuture = subscriptionService.getCurrentStatus();
+      final resetDateFuture = subscriptionService.getNextResetDate();
+      final planFuture = subscriptionService.getCurrentPlanClass();
+
+      final statusResult = await statusFuture;
+      final planResult = await planFuture;
+      final resetDateResult = await resetDateFuture;
 
       if (statusResult.isFailure || planResult.isFailure) {
-        // エラー時はフォールバック表示
         if (context.mounted) {
           await showDialog<void>(
             context: context,
@@ -188,8 +236,6 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
           ? resetDateResult.value
           : DateTime.now().add(const Duration(days: 30));
 
-      final limit = plan.monthlyAiGenerationLimit;
-
       if (context.mounted) {
         await showDialog<void>(
           context: context,
@@ -199,7 +245,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             planName: context.l10n.localizedPlanName(plan.id),
             planId: plan.id,
             usageCount: status.monthlyUsageCount,
-            limit: limit,
+            limit: plan.monthlyAiGenerationLimit,
             nextResetDate: nextResetDate,
             onUpgrade: plan.id == SubscriptionConstants.basicPlanId
                 ? () {
@@ -226,9 +272,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
   }
 
-  /// プラン変更誘導機能
   void _navigateToUpgrade(BuildContext context) {
-    // 共通のアップグレードダイアログを表示
     UpgradeDialogUtils.showUpgradeDialog(context);
   }
 }

@@ -3,23 +3,15 @@ import '../controllers/smart_fab_controller.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../constants/app_constants.dart';
 import '../localization/localization_extensions.dart';
+import '../ui/design_system/app_colors.dart';
 
 /// スマートFABウィジェット
-/// 写真選択状態に応じてカメラ撮影と日記作成を切り替える
+/// 写真選択状態に応じてカメラFABと選択ピルバーを切り替える
 class SmartFABWidget extends StatefulWidget {
-  /// 写真選択コントローラー
   final PhotoSelectionController photoController;
-
-  /// カメラ撮影処理コールバック
   final VoidCallback? onCameraPressed;
-
-  /// 日記作成処理コールバック
   final VoidCallback? onCreateDiaryPressed;
-
-  /// FAB表示制御（デフォルト: true）
   final bool visible;
-
-  /// ユニークなHeroタグ（オプション）
   final String? heroTag;
 
   const SmartFABWidget({
@@ -60,15 +52,7 @@ class _SmartFABWidgetState extends State<SmartFABWidget> {
         return AnimatedSwitcher(
           duration: AppConstants.standardTransitionDuration,
           transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-                  CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-                ),
-                child: child,
-              ),
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
           child: widget.visible && _fabController.shouldShow
               ? _buildFAB(context)
@@ -78,46 +62,80 @@ class _SmartFABWidgetState extends State<SmartFABWidget> {
     );
   }
 
-  /// FABを構築
   Widget _buildFAB(BuildContext context) {
-    final theme = Theme.of(context);
-    final state = _fabController.currentState;
+    return switch (_fabController.currentState) {
+      SmartFABState.camera => _buildCameraFAB(context),
+      SmartFABState.createDiary => _buildSelectionPill(context),
+    };
+  }
 
+  Widget _buildCameraFAB(BuildContext context) {
     return FloatingActionButton(
-      key: ValueKey('fab_${state.name}'),
+      key: const ValueKey('fab_camera'),
       heroTag: widget.heroTag,
       onPressed: _onPressed,
-      backgroundColor: _fabController.getBackgroundColor(theme.colorScheme),
-      foregroundColor: _fabController.getForegroundColor(theme.colorScheme),
-      tooltip: _fabController.getLocalizedTooltip(
-        cameraText: context.l10n.fabTooltipTakePhoto,
-        createDiaryText: (count) => context.l10n.fabTooltipCreateDiary(count),
-      ),
+      backgroundColor: AppColors.accent,
+      foregroundColor: Colors.white,
+      tooltip: context.l10n.fabTooltipTakePhoto,
       shape: const CircleBorder(),
-      child: AnimatedSwitcher(
-        duration: AppConstants.quickAnimationDuration,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return RotationTransition(
-            turns: Tween<double>(begin: 0.8, end: 1.0).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+      child: const Icon(Icons.photo_camera_rounded, size: 24),
+    );
+  }
+
+  Widget _buildSelectionPill(BuildContext context) {
+    final count = _fabController.selectedCount;
+    return Container(
+      key: const ValueKey('fab_selection_pill'),
+      height: 56,
+      decoration: BoxDecoration(
+        color: AppColors.accent,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      padding: const EdgeInsets.only(left: 16, right: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.l10n.homeSelectionCount(count),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        child: Icon(
-          _fabController.icon,
-          key: ValueKey('icon_${state.name}'),
-          size: 24,
-        ),
+          ),
+          const SizedBox(width: 4),
+          TextButton(
+            onPressed: widget.photoController.clearSelection,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white.withValues(alpha: 0.7),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(context.l10n.homeSelectionClearAll),
+          ),
+          const SizedBox(width: 4),
+          TextButton(
+            onPressed: _onPressed,
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            child: Text(context.l10n.fabCreateDiaryShort),
+          ),
+        ],
       ),
     );
   }
 
-  /// FABがタップされた時の処理
   void _onPressed() {
-    final state = _fabController.currentState;
-
-    switch (state) {
+    switch (_fabController.currentState) {
       case SmartFABState.camera:
         widget.onCameraPressed?.call();
         break;

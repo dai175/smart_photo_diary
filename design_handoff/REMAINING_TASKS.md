@@ -58,25 +58,25 @@
 
 ### Task 1-1: `lib/widgets/home_content_widget.dart` — ヘッダーリデザイン
 
-- [ ] `app_en.arb` / `app_ja.arb` に `homeHeaderSubtitle` キーを追加（Task 4-1 先行）
-- [ ] `_buildHeader()` を `PreferredSize`（高さ約 96）ベースのカスタムヘッダーに差し替え
+- [x] `app_en.arb` / `app_ja.arb` に `homeHeaderSubtitle` キーを追加（Task 4-1 先行）
+- [x] `_buildHeader()` を `PreferredSize`（高さ 108）ベースのカスタムヘッダーに差し替え
   - 左カラム: 日付小ラベル（`AppTypography.dateLabel` / `accentMuted`）+ `context.l10n.timelineToday`（既存キー・ja: "今日"）（28pt/w700/-0.4）+ サブテキスト（13.5pt/`onSurfaceVariant`）
   - 右: `_buildUsagePill()`
-- [ ] `_buildHeaderDateLabel(BuildContext)` メソッドを実装（`DateFormat('EEEE · MMM d', locale).format(now).toUpperCase()`）
-- [ ] `_buildUsagePill()` メソッドを実装（`ISubscriptionService` から使用量を取得、ピル UI、タップで既存 `_showUsageStatus()` を呼ぶ）
-- [ ] `_buildTimelineSection()` 内の選択解除バー（`AnimatedSize` + `ListenableBuilder` ブロック 行 100〜144）を削除
+- [x] `_buildHeaderDateLabel(BuildContext)` メソッドを実装（`DateFormat('EEEE · MMM d', locale).format(now).toUpperCase()`）
+- [x] `_buildUsagePill()` メソッドを実装（`ISubscriptionService` から使用量を取得、ピル UI、タップで既存 `_showUsageStatus()` を呼ぶ）
+- [x] `_buildTimelineSection()` 内の選択解除バー（`AnimatedSize` + `ListenableBuilder` ブロック 行 100〜144）を削除
 
 ### Task 1-2: `lib/widgets/smart_fab_widget.dart` + `lib/widgets/timeline_fab_integration.dart`
 
-- [ ] `SmartFABWidget._buildFAB()` を `SmartFABState.camera` と `createDiary` で分岐するように改修
-- [ ] `_buildCameraFAB()`: 既存 `FloatingActionButton` を移動。背景色を `AppColors.accent`（`#B8856C`）固定に
-- [ ] `_buildSelectionPill()`: 全幅ピルバーを実装
+- [x] `SmartFABWidget._buildFAB()` を `SmartFABState.camera` と `createDiary` で分岐するように改修
+- [x] `_buildCameraFAB()`: 既存 `FloatingActionButton` を移動。背景色を `AppColors.accent`（`#B8856C`）固定に
+- [x] `_buildSelectionPill()`: 全幅ピルバーを実装
   - `Container` height 56 / radius 999 / 背景 `AppColors.accent`
   - 左: 選択枚数テキスト（白 14pt/w600）
   - 右: `context.l10n.homeSelectionClearAll`（既存キー・ja: "選択解除"）テキストボタン（白70）+ `context.l10n.fabCreateDiaryShort` ピルボタン（白背景 20% / 白テキスト）
-- [ ] `app_en.arb` / `app_ja.arb` に `fabCreateDiaryShort` キーを追加（Task 4-1 先行）
-- [ ] `AnimatedSwitcher.transitionBuilder` を `FadeTransition` のみに簡略化（形状変化に対応）
-- [ ] `timeline_fab_integration.dart` の `Positioned` を `ListenableBuilder` でラップし、選択時は `left: 16` も追加して全幅配置に
+- [x] `app_en.arb` / `app_ja.arb` に `fabCreateDiaryShort` キーを追加（Task 4-1 先行）
+- [x] `AnimatedSwitcher.transitionBuilder` を `FadeTransition` のみに簡略化（形状変化に対応）
+- [x] `timeline_fab_integration.dart` の `Positioned` を `ListenableBuilder` でラップし、選択時は `left: 16` も追加して全幅配置に
 
 ---
 

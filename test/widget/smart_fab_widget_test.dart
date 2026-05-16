@@ -6,10 +6,10 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/controllers/photo_selection_controller.dart';
 import 'package:smart_photo_diary/widgets/smart_fab_widget.dart';
 import 'package:smart_photo_diary/l10n/generated/app_localizations.dart';
+import 'package:smart_photo_diary/ui/design_system/app_colors.dart';
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 
-/// テスト用のモックAssetEntityリストを生成
 List<AssetEntity> _createMockAssets(int count) {
   return List.generate(count, (i) {
     final mock = MockAssetEntity();
@@ -19,7 +19,6 @@ List<AssetEntity> _createMockAssets(int count) {
   });
 }
 
-/// テスト用にl10n付きMaterialAppでラップ
 Widget _wrapWithApp(Widget child, {ThemeData? theme}) {
   return MaterialApp(
     localizationsDelegates: const [
@@ -32,7 +31,6 @@ Widget _wrapWithApp(Widget child, {ThemeData? theme}) {
     locale: const Locale('en'),
     theme: theme ?? ThemeData(useMaterial3: true),
     home: Scaffold(
-      // Scaffoldの中にFABとして配置するのではなく、bodyに置く
       body: Center(child: child),
     ),
   );
@@ -51,7 +49,7 @@ void main() {
 
   group('SmartFABWidget', () {
     group('表示', () {
-      testWidgets('FABが表示される', (tester) async {
+      testWidgets('カメラ状態でFABが表示される', (tester) async {
         await tester.pumpWidget(
           _wrapWithApp(
             SmartFABWidget(
@@ -118,7 +116,7 @@ void main() {
     });
 
     group('日記作成状態（写真選択あり）', () {
-      testWidgets('写真選択後にアイコンが変わる', (tester) async {
+      testWidgets('写真選択後にピルバーが表示される', (tester) async {
         final mockAssets = _createMockAssets(3);
         photoController.setPhotoAssets(mockAssets);
 
@@ -132,18 +130,21 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // まだカメラアイコン
-        expect(find.byIcon(Icons.photo_camera_rounded), findsOneWidget);
+        // 未選択時はFAB表示
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.byKey(const ValueKey('fab_selection_pill')), findsNothing);
 
         // 写真を選択
         photoController.toggleSelect(0);
         await tester.pumpAndSettle();
 
-        // 日記作成アイコンに変更
-        expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+        // 選択後はピルバーが表示、FABは非表示
+        expect(find.byKey(const ValueKey('fab_selection_pill')), findsOneWidget);
+        expect(find.byType(FloatingActionButton), findsNothing);
       });
 
-      testWidgets('タップでonCreateDiaryPressedが呼ばれる', (tester) async {
+      testWidgets('ピルの「Create diary」ボタンでonCreateDiaryPressedが呼ばれる',
+          (tester) async {
         bool createDiaryCalled = false;
         final mockAssets = _createMockAssets(3);
         photoController.setPhotoAssets(mockAssets);
@@ -160,7 +161,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byType(FloatingActionButton));
+        // "Create diary →" テキストのボタンをタップ
+        await tester.tap(find.text('Create diary →'));
         await tester.pump();
 
         expect(createDiaryCalled, true);
@@ -168,19 +170,13 @@ void main() {
     });
 
     group('色', () {
-      testWidgets('カメラ状態でprimaryカラーが使用される', (tester) async {
-        final theme = ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(),
-        );
-
+      testWidgets('カメラ状態でAccentカラーが使用される', (tester) async {
         await tester.pumpWidget(
           _wrapWithApp(
             SmartFABWidget(
               photoController: photoController,
               heroTag: 'test_fab_color_camera',
             ),
-            theme: theme,
           ),
         );
         await tester.pumpAndSettle();
@@ -188,14 +184,10 @@ void main() {
         final fab = tester.widget<FloatingActionButton>(
           find.byType(FloatingActionButton),
         );
-        expect(fab.backgroundColor, const ColorScheme.light().primary);
+        expect(fab.backgroundColor, AppColors.accent);
       });
 
-      testWidgets('日記作成状態でtertiaryカラーが使用される', (tester) async {
-        final theme = ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(),
-        );
+      testWidgets('日記作成状態でピルバーがAccentカラー背景', (tester) async {
         final mockAssets = _createMockAssets(3);
         photoController.setPhotoAssets(mockAssets);
         photoController.toggleSelect(0);
@@ -206,15 +198,13 @@ void main() {
               photoController: photoController,
               heroTag: 'test_fab_color_diary',
             ),
-            theme: theme,
           ),
         );
         await tester.pumpAndSettle();
 
-        final fab = tester.widget<FloatingActionButton>(
-          find.byType(FloatingActionButton),
-        );
-        expect(fab.backgroundColor, const ColorScheme.light().tertiary);
+        // FABではなくピルが表示されることを確認
+        expect(find.byType(FloatingActionButton), findsNothing);
+        expect(find.byKey(const ValueKey('fab_selection_pill')), findsOneWidget);
       });
     });
   });
