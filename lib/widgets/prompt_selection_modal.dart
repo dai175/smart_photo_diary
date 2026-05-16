@@ -16,7 +16,6 @@ import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
 import 'prompt_selection_items.dart';
 
-/// プロンプト選択モーダル
 class PromptSelectionModal extends StatefulWidget {
   final void Function(WritingPrompt?, String?) onPromptSelected;
   final void Function(String?) onSkip;
@@ -86,9 +85,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Future<void> _initializeServices() async {
     try {
-      _promptService = await ServiceRegistration.getAsync<IPromptService>();
-      _subscriptionService =
-          await ServiceRegistration.getAsync<ISubscriptionService>();
+      final services = await Future.wait([
+        ServiceRegistration.getAsync<IPromptService>(),
+        ServiceRegistration.getAsync<ISubscriptionService>(),
+      ]);
+      _promptService = services[0] as IPromptService;
+      _subscriptionService = services[1] as ISubscriptionService;
 
       final accessResult = await _subscriptionService
           .canAccessPremiumFeatures();
@@ -204,7 +206,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.sm, right: AppSpacing.sm),
+          padding: const EdgeInsets.only(
+            top: AppSpacing.sm,
+            right: AppSpacing.sm,
+          ),
           child: _buildCloseButton(context),
         ),
         const SizedBox(

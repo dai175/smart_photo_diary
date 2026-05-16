@@ -19,7 +19,6 @@ import '../../ui/design_system/app_typography.dart';
 import 'diary_detail_metadata_section.dart';
 import 'diary_detail_photo_section.dart';
 
-/// 日記詳細のコンテンツ表示ウィジェット（エディトリアルレイアウト）
 class DiaryDetailContent extends StatefulWidget {
   const DiaryDetailContent({
     super.key,

@@ -170,6 +170,7 @@ class TimelineFABIntegration extends StatelessWidget {
               context,
               selectedPhotos,
               prompt,
+              logger: logger,
               contextText: contextText,
             );
           },
@@ -179,6 +180,7 @@ class TimelineFABIntegration extends StatelessWidget {
               context,
               selectedPhotos,
               null,
+              logger: logger,
               contextText: contextText,
             );
           },
@@ -197,10 +199,9 @@ class TimelineFABIntegration extends StatelessWidget {
     BuildContext context,
     List<AssetEntity> selectedPhotos,
     WritingPrompt? selectedPrompt, {
+    required ILoggingService logger,
     String? contextText,
   }) {
-    final logger = ServiceRegistration.get<ILoggingService>();
-
     logger.info(
       'Navigating to diary preview screen',
       context: 'TimelineFABIntegration._navigateToDiaryPreview',
