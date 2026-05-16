@@ -14,7 +14,7 @@ class CustomDialog extends StatelessWidget {
   final Widget? content;
   final IconData? icon;
   final Color? iconColor;
-  final List<CustomDialogAction>? actions;
+  final List<Widget>? actions;
   final bool barrierDismissible;
   final EdgeInsets? contentPadding;
   final double? maxWidth;

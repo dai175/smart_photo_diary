@@ -11,6 +11,7 @@ import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
+import '../ui/components/animated_button.dart';
 import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
 import 'prompt_selection_items.dart';
@@ -142,8 +143,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     return text.isEmpty ? null : text;
   }
 
-  List<CustomDialogAction> _buildActions() {
+  List<Widget> _buildActions() {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final accentColor = theme.brightness == Brightness.dark
+        ? AppColors.accentLight
+        : AppColors.accent;
     final String primaryText;
     if (_isRandomSelected) {
       primaryText = l10n.promptCreateRandom;
@@ -158,9 +163,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
         text: l10n.commonCancel,
         onPressed: () => Navigator.of(context).pop(),
       ),
-      CustomDialogAction(
-        text: primaryText,
-        isPrimary: true,
+      AnimatedButton(
         onPressed: () {
           final contextText = _getContextText();
           if (_isRandomSelected) {
@@ -175,6 +178,10 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
             widget.onSkip(contextText);
           }
         },
+        backgroundColor: accentColor,
+        foregroundColor: Colors.white,
+        shadowColor: accentColor.withValues(alpha: 0.3),
+        child: Center(child: Text(primaryText)),
       ),
     ];
   }
@@ -188,6 +195,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Widget _buildContent(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final accentMutedColor = isDark
+        ? AppColors.accentLight
+        : AppColors.accentMuted;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,20 +218,22 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
               Text(
                 _headerDate,
                 style: AppTypography.dateLabel.copyWith(
-                  color: AppColors.accentMuted,
+                  color: accentMutedColor,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.promptSelectionTitle,
                 style: AppTypography.cardTitle.copyWith(
-                  color: AppColors.onSurface,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.promptSelectionSubtitle,
-                style: AppTypography.cardBody.copyWith(color: AppColors.muted),
+                style: AppTypography.cardBody.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -253,17 +268,17 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                       AnimatedRotation(
                         turns: _showContextInput ? 0.25 : 0,
                         duration: AppConstants.quickAnimationDuration,
-                        child: const Icon(
+                        child: Icon(
                           Icons.chevron_right,
                           size: 18,
-                          color: AppColors.accentMuted,
+                          color: accentMutedColor,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         l10n.promptContextToggle,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.accentMuted,
+                          color: accentMutedColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -272,7 +287,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                         child: Text(
                           l10n.promptContextInputHelper,
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.muted,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 11,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -312,7 +327,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
               Text(
                 l10n.promptSectionQuickOptions,
                 style: AppTypography.sectionLabel.copyWith(
-                  color: AppColors.muted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -360,7 +375,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
               Text(
                 l10n.promptSectionBrowse,
                 style: AppTypography.sectionLabel.copyWith(
-                  color: AppColors.muted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const Spacer(),
@@ -369,7 +384,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                   l10n.promptBrowseCount(_availablePrompts.length),
                   style: AppTypography.cardBody.copyWith(
                     fontSize: 11.5,
-                    color: AppColors.muted,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
             ],
@@ -393,16 +408,26 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     required String desc,
     required VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBgColor = isDark
+        ? AppColors.surfaceContainerDark
+        : AppColors.cardBg;
+    final glyphBgColor = colorScheme.surfaceContainerHighest;
+
     return InkWell(
       borderRadius: AppSpacing.cardRadiusLarge,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.selectedBg : AppColors.cardBg,
+          color: isSelected ? AppColors.selectedBg : cardBgColor,
           borderRadius: AppSpacing.cardRadiusLarge,
           border: Border.all(
-            color: isSelected ? AppColors.accentMuted : AppColors.divider,
+            color: isSelected
+                ? AppColors.accent
+                : (isDark ? AppColors.outlineDark : AppColors.divider),
           ),
         ),
         child: Column(
@@ -414,15 +439,15 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.accentMuted
-                        : AppColors.glyphBg,
+                    color: isSelected ? AppColors.accent : glyphBgColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
                     size: 16,
-                    color: isSelected ? Colors.white : AppColors.muted,
+                    color: isSelected
+                        ? Colors.white
+                        : colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const Spacer(),
@@ -430,19 +455,19 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                   const Icon(
                     Icons.check_circle,
                     size: 18,
-                    color: AppColors.accentMuted,
+                    color: AppColors.accent,
                   ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.1,
                 height: 1.2,
-                color: AppColors.onSurface,
+                color: colorScheme.onSurface,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -450,11 +475,11 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
             const SizedBox(height: AppSpacing.xs),
             Text(
               desc,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w400,
                 height: 1.45,
-                color: AppColors.muted,
+                color: colorScheme.onSurfaceVariant,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -466,6 +491,9 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   }
 
   Widget _buildPromptList() {
+    final dividerColor = Theme.of(context).brightness == Brightness.dark
+        ? AppColors.outlineDark
+        : AppColors.divider;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.sm,
@@ -474,12 +502,8 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
         AppSpacing.lg,
       ),
       itemCount: _availablePrompts.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        color: AppColors.divider,
-        indent: 14,
-        endIndent: 14,
-      ),
+      separatorBuilder: (context, index) =>
+          Divider(height: 1, color: dividerColor, indent: 14, endIndent: 14),
       itemBuilder: (context, index) {
         final prompt = _availablePrompts[index];
         return PromptSelectionItems.buildPromptCard(

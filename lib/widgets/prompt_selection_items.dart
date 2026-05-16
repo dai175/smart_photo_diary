@@ -26,7 +26,7 @@ class PromptSelectionItems {
           color: isSelected ? AppColors.selectedBg : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.accentMuted : Colors.transparent,
+            color: isSelected ? AppColors.accent : Colors.transparent,
           ),
         ),
         child: Column(
@@ -49,7 +49,7 @@ class PromptSelectionItems {
                 if (isSelected)
                   const Icon(
                     Icons.check_circle,
-                    color: AppColors.accentMuted,
+                    color: AppColors.accent,
                     size: 20,
                   ),
               ],
@@ -62,17 +62,17 @@ class PromptSelectionItems {
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 letterSpacing: -0.1,
                 height: 1.4,
-                color: AppColors.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             if (prompt.description != null) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(
                 prompt.description!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12.5,
                   height: 1.5,
-                  color: AppColors.muted,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
