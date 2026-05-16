@@ -21,7 +21,11 @@ class DiaryDetailMetadataSection extends StatelessWidget {
 
     Widget metaRow(IconData icon, String label) => Row(
       children: [
-        Icon(icon, size: AppSpacing.iconXxs, color: colorScheme.onSurfaceVariant),
+        Icon(
+          icon,
+          size: AppSpacing.iconXxs,
+          color: colorScheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 6),
         Text(
           label,

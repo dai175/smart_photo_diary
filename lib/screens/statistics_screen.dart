@@ -42,9 +42,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       builder: (context, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          appBar: AppBar(
-            title: Text(l10n.navigationStatistics),
-          ),
+          appBar: AppBar(title: Text(l10n.navigationStatistics)),
           body: _controller.isLoading
               ? Center(
                   child: LoadingStateCard(
