@@ -9,13 +9,14 @@ import 'interfaces/settings_service_interface.dart';
 import '../core/service_registration.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import 'diary_service.dart';
 
 /// 日記タグ管理サービス
 ///
 /// タグの取得（AI生成/キャッシュ）、全タグ集計、人気タグ集計、
 /// バックグラウンドタグ生成を担当。
 class DiaryTagService implements IDiaryTagService {
-  static const String _boxName = 'diary_entries';
+  static const String _boxName = DiaryService.diaryEntriesBoxName;
 
   final IAiService _aiService;
   final ILoggingService _logger;

@@ -169,18 +169,21 @@ class PhotoSelectionController extends ChangeNotifier {
 
   /// ローディング状態を設定
   void setLoading(bool loading) {
+    if (_isLoading == loading) return;
     _isLoading = loading;
     notifyListeners();
   }
 
   /// 権限状態を設定
   void setPermission(bool permission) {
+    if (_hasPermission == permission) return;
     _hasPermission = permission;
     notifyListeners();
   }
 
   /// 追加写真存在フラグを設定
   void setHasMorePhotos(bool hasMore) {
+    if (_hasMorePhotos == hasMore) return;
     _hasMorePhotos = hasMore;
     notifyListeners();
   }

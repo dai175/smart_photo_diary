@@ -19,7 +19,7 @@ import 'diary_query_delegate.dart';
 /// インデックス管理はDiaryIndexManagerに、タグ管理はIDiaryTagServiceに、
 /// 統計はIDiaryStatisticsServiceに委譲。
 class DiaryService implements IDiaryService {
-  static const String _boxName = 'diary_entries';
+  static const String diaryEntriesBoxName = 'diary_entries';
   Box<DiaryEntry>? _diaryBox;
   final ILoggingService _loggingService;
   final HiveAesCipher? _encryptionCipher;
@@ -118,7 +118,7 @@ class DiaryService implements IDiaryService {
       }
 
       _diaryBox = await Hive.openBox<DiaryEntry>(
-        _boxName,
+        diaryEntriesBoxName,
         encryptionCipher: _encryptionCipher,
       );
       _loggingService.info(
@@ -141,19 +141,21 @@ class DiaryService implements IDiaryService {
   Future<void> _migrateToEncrypted(Box metaBox) async {
     try {
       // 未暗号化で開いてデータを読み出す
-      final unencryptedBox = await Hive.openBox<DiaryEntry>(_boxName);
+      final unencryptedBox = await Hive.openBox<DiaryEntry>(
+        diaryEntriesBoxName,
+      );
       final entries = unencryptedBox.toMap();
       _loggingService.info(
         'Starting encryption migration: ${entries.length} entries found',
       );
       await unencryptedBox.close();
-      await Hive.deleteBoxFromDisk(_boxName);
+      await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
 
       // 暗号化ボックスに書き込み
       // NOTE: HiveObjectは元のボックスへの参照を持つため、
       // copyWith()で新しいインスタンスを作成してから書き込む
       _diaryBox = await Hive.openBox<DiaryEntry>(
-        _boxName,
+        diaryEntriesBoxName,
         encryptionCipher: _encryptionCipher,
       );
       await _diaryBox!.putAll(entries.map((k, v) => MapEntry(k, v.copyWith())));
@@ -173,10 +175,10 @@ class DiaryService implements IDiaryService {
   /// スキーマ不整合時のみボックスを削除して再作成する
   Future<void> _recreateBox() async {
     try {
-      await Hive.deleteBoxFromDisk(_boxName);
+      await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
       _loggingService.warning('Old box deleted');
       _diaryBox = await Hive.openBox<DiaryEntry>(
-        _boxName,
+        diaryEntriesBoxName,
         encryptionCipher: _encryptionCipher,
       );
       _loggingService.info('New box created');

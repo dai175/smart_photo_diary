@@ -40,13 +40,8 @@ class SettingsService implements ISettingsService {
     );
   }
 
-  // 日記の長さ設定のキー
   static const String _diaryLengthKey = 'diary_length';
-
-  // テーマ設定のキー
   static const String _themeKey = 'theme_mode';
-
-  // 初回起動フラグのキー
   static const String _firstLaunchKey = 'is_first_launch';
 
   @override

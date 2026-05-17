@@ -1,5 +1,6 @@
 import 'package:hive_ce/hive_ce.dart';
 import '../models/diary_entry.dart';
+import 'diary_service.dart';
 import 'interfaces/diary_statistics_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/result/result.dart';
@@ -10,7 +11,7 @@ import '../core/errors/app_exceptions.dart';
 /// 日記の総数・期間別カウントなどの統計情報を提供。
 /// Hiveボックスは遅延取得（DiaryServiceが先にオープン済みを前提）。
 class DiaryStatisticsService implements IDiaryStatisticsService {
-  static const String _boxName = 'diary_entries';
+  static const String _boxName = DiaryService.diaryEntriesBoxName;
 
   final ILoggingService _logger;
 
