@@ -45,42 +45,39 @@ class PlanOptionCard extends StatelessWidget {
         onTap: onTap,
         child: ExcludeSemantics(
           child: CustomCard(
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-              child: Padding(
-                padding: AppSpacing.cardPadding,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            planName,
-                            style: AppTypography.titleMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (description.isNotEmpty) ...[
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              description,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ],
+            onTap: onTap,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        planName,
+                        style: AppTypography.titleMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    _buildPriceDisplay(context),
-                  ],
+                      if (description.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          description,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
+                _buildPriceDisplay(priceText),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ],
             ),
           ),
         ),
@@ -110,9 +107,9 @@ class PlanOptionCard extends StatelessWidget {
         : context.l10n.pricingPerYearShort(price);
   }
 
-  Widget _buildPriceDisplay(BuildContext context) {
+  Widget _buildPriceDisplay(String priceText) {
     return Text(
-      _getPriceText(context),
+      priceText,
       style: AppTypography.titleMedium.copyWith(
         fontWeight: FontWeight.w700,
         color: AppColors.accentDark,
