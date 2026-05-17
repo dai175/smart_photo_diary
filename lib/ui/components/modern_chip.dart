@@ -18,7 +18,6 @@ class ModernChip extends StatefulWidget {
     this.foregroundColor,
     this.icon,
     this.deleteIcon,
-    this.selected = false,
     this.enabled = true,
     this.size = ChipSize.medium,
     this.style = ChipStyle.filled,
@@ -66,7 +65,6 @@ class ModernChip extends StatefulWidget {
        foregroundColor = null,
        icon = null,
        deleteIcon = null,
-       selected = false,
        enabled = true,
        size = ChipSize.small,
        style = ChipStyle.filled,
@@ -86,7 +84,6 @@ class ModernChip extends StatefulWidget {
       foregroundColor = null,
       icon = null,
       deleteIcon = null,
-      selected = false,
       enabled = true,
       size = ChipSize.small,
       style = ChipStyle.filled,
@@ -104,7 +101,6 @@ class ModernChip extends StatefulWidget {
       backgroundColor = null,
       foregroundColor = null,
       deleteIcon = null,
-      selected = false,
       enabled = true,
       size = ChipSize.small,
       style = ChipStyle.filled,
@@ -134,9 +130,6 @@ class ModernChip extends StatefulWidget {
 
   /// 削除アイコン
   final IconData? deleteIcon;
-
-  /// 選択状態
-  final bool selected;
 
   /// 有効状態
   final bool enabled;
@@ -358,17 +351,6 @@ class _ModernChipState extends State<ModernChip>
   _ChipColorData _getChipColorData(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (widget.selected) {
-      return _ChipColorData(
-        backgroundColor: widget.backgroundColor ?? AppColors.primary,
-        foregroundColor: widget.foregroundColor ?? Colors.white,
-        borderColor: widget.backgroundColor ?? AppColors.primary,
-        hoverColor: (widget.backgroundColor ?? AppColors.primary).withValues(
-          alpha: AppConstants.opacityHigh,
-        ),
-      );
-    }
-
     if (widget._variant == _ChipVariant.tonedTag) {
       // _toneIndex is always non-null when _variant == tonedTag (set in _tonedTag constructor)
       final tone = widget._toneIndex!;
@@ -402,7 +384,9 @@ class _ModernChipState extends State<ModernChip>
     return _ChipColorData(
       backgroundColor: widget.backgroundColor ?? AppColors.primaryContainer,
       foregroundColor: widget.foregroundColor ?? AppColors.onPrimaryContainer,
-      borderColor: widget.backgroundColor ?? AppColors.primary,
+      borderColor:
+          widget.backgroundColor ??
+          (isDark ? AppColors.outlineDark : AppColors.chipOutline),
       hoverColor: (widget.backgroundColor ?? AppColors.primaryContainer)
           .withValues(alpha: AppConstants.opacityHigh),
     );

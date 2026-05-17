@@ -307,7 +307,7 @@ class PresetDialogs {
                   SubscriptionConstants.premiumMonthlyAiLimit,
                 ),
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.primary,
+                  color: AppColors.accentDark,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.left,

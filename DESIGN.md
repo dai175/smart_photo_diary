@@ -42,7 +42,7 @@
 | エラー | `AppColors.error` | テラコッタ系ブリックレッド（`#994F47`） |
 | 成功 | `AppColors.success` | セージグリーン（`#5C8A62`） |
 | 警告 | `AppColors.warning` | ウォームアンバー（`#C4844A`） |
-| 情報 | `AppColors.info` | ミューテッドブルー（`#5A7F96`） |
+- `AppColors.primary` / `primaryLight` / `AppColors.info` はテキスト・アイコン・背景いずれにも使用しない（カレンダーの「今日」マーカーは意図的な例外）
 
 ### 3トーン タグシステム
 
@@ -166,6 +166,7 @@ tagAccent:    背景 #F1DCCB / 文字 #8E6450
 新しい UI を追加する際の確認事項:
 
 - [ ] CTA・選択状態は `accentDark`（`accent` は装飾のみ）
+- [ ] `info`・`primary`・`primaryLight` をテキスト・アイコン・背景に使っていないか確認（代わりにウォームパレットのセマンティックカラーを使用）
 - [ ] ダイアログは `CustomDialog`（`AlertDialog` は不可）
 - [ ] スペーシングは `AppSpacing` トークンを使用（マジックナンバー禁止）
 - [ ] タッチターゲットは最小 44pt
