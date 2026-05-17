@@ -61,11 +61,11 @@
 
 ### 2-2. `subscription_state_service.dart`（503 行）
 
-- [ ] 責務分析: 状態保持・プラン判定・制限チェックの 3 責務を特定
-- [ ] `SubscriptionPlanResolver` を抽出（プラン種別の判定ロジック）
-- [ ] `SubscriptionLimitChecker` を抽出（機能制限の判定ロジック）
-- [ ] `SubscriptionStateService` を状態管理のみに削減（目標 200 行以下）
-- [ ] 分割後の各クラスに単体テストを追加
+- [x] 責務分析: 状態保持・プラン判定・制限チェックの 3 責務を特定
+- [x] `SubscriptionPlanResolver` を抽出（プラン種別の判定ロジック）
+- [x] `SubscriptionLimitChecker` を抽出（機能制限の判定ロジック）
+- [x] `SubscriptionStateService` を状態管理のみに削減（結果 324 行、内部委譲パターン採用）
+- [x] 分割後の各クラスに単体テストを追加
 
 ### 2-3. `prompt_service.dart`（486 行）
 
