@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Smart Photo Diary — Diaries List redesign</title>
+<title>Smart Photo Diary — redesign canvas</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +30,7 @@
 <script type="text/babel" src="home-screen.jsx"></script>
 <script type="text/babel" src="settings-screen.jsx"></script>
 <script type="text/babel" src="filter-sheet.jsx"></script>
+<script type="text/babel" src="generating-screen.jsx"></script>
 
 <script type="text/babel">
 
@@ -3255,6 +3256,420 @@ function FilterCodeCard() {
   );
 }
 
+// ─── Generating-screen notes card ─────────────────────────────
+function GeneratingNotesCard() {
+  const Bullet = ({ title, body }) => (
+    <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ width: 6, height: 6, borderRadius: 999, background: '#B8856C',
+        marginTop: 9, flexShrink: 0 }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#2C2825', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6560' }}>{body}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#FAF8F5', borderRadius: 18,
+      padding: 26, boxSizing: 'border-box', border: '0.5px solid rgba(0,0,0,0.05)',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          textTransform: 'uppercase', color: '#8E6450', marginBottom: 6 }}>
+          Diary generation
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2825',
+          letterSpacing: -0.3, lineHeight: 1.25 }}>
+          One screen, no chrome stack
+        </div>
+      </div>
+      <Bullet title="The problem"
+        body="The current 'Diary preview' screen stacks four CustomCards with icon+title headers (Diary date, Current Prompt with category badge, Selected photos, then a card-in-a-card loading state). It looks like a form being submitted, not the few seconds before a personal entry appears."/>
+      <Bullet title="Hero language applied"
+        body="Same vocabulary used on detail / list / settings: ACCENT eyebrow → bold 26pt headline, hairline dividers replacing card chrome, slim accent-coloured progress instead of a CircularProgressIndicator in a card. Date moves to the small uppercase tier."/>
+      <Bullet title="A · Calm editorial"
+        body="Quietest take. Bold 'Writing your diary…' headline, the prompt as a quiet italic block-quote with a left-rule, the user's photos as a flat 4-up strip, and one slim indeterminate bar pinned to the bottom with a one-line status ('Composing · Step 3 of 4'). Reads as a moment of pause."/>
+      <Bullet title="B · Staged"
+        body="Vertical stage list with a connector line — Reading photos → Sensing mood → Composing → Polishing. Completed steps get a filled check disc, the active step pulses, pending steps are hollow rings. Gives the 1–3 second wait a sense of what the AI is doing without flooding the screen."/>
+      <Bullet title="C · Skeleton preview"
+        body="Most ambitious. Full-bleed hero photo + skeleton shimmer where the title, tags and body will land — the screen looks like the detail page being filled in. A soft accent banner above the home indicator says 'Writing your diary…' with a slightly thicker progress track. Promises the result before it arrives."/>
+      <Bullet title="Cancel & speed"
+        body="Generation takes 1–3 seconds; an explicit Cancel button would invite anxiety on a path that's near-instant. The back button on the AppBar (and the system back gesture) already cover the rare case. All three variants use an indeterminate progress affordance — no fake percentages."/>
+      <Bullet title="My recommendation"
+        body="Ship C (Skeleton preview). It uses the moment to introduce the detail-page layout the user is about to land on, eliminating the route-change flash entirely. B is the safe alternative if the team wants explicit progress copy."/>
+    </div>
+  );
+}
+
+// ─── Generating-screen Flutter code ───────────────────────────
+const GENERATING_FLUTTER_CODE = `// Refactored diary_preview_screen.dart — Hero language during generation.
+// Drops the four CustomCard stack (date / prompt / photos / loading)
+// and renders one continuous editorial surface that mirrors the detail
+// screen the result will land on.
+//
+// Wraps DiaryPreviewController — the existing controller that manages
+// generation state, photo processing and the final navigation. Only the
+// build() output changes.
+
+class DiaryPreviewScreen extends StatefulWidget {
+  final List<AssetEntity> selectedAssets;
+  final WritingPrompt? selectedPrompt;
+  final String? contextText;
+  const DiaryPreviewScreen({
+    super.key,
+    required this.selectedAssets,
+    this.selectedPrompt,
+    this.contextText,
+  });
+  @override
+  State<DiaryPreviewScreen> createState() => _DiaryPreviewScreenState();
+}
+
+class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
+  late final DiaryPreviewController _controller;
+  // … initState / dispose / generation flow identical to the original …
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+
+    return Scaffold(
+      backgroundColor: cs.surface,
+      body: Stack(children: [
+        // ───── hero photo (matches DetailScreen layout) ─────
+        Column(children: [
+          Hero(
+            tag: 'diary-detail-asset-\${widget.selectedAssets.first.id}',
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: Stack(fit: StackFit.expand, children: [
+                DiaryHeroPhoto(asset: widget.selectedAssets.first),
+                const _TopScrim(),
+                if (widget.selectedAssets.length > 1)
+                  Positioned(
+                    right: 14, bottom: 14,
+                    child: _PhotoCountBadge(
+                      current: 1, total: widget.selectedAssets.length),
+                  ),
+              ]),
+            ),
+          ),
+          Expanded(child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // date label (same tier as everywhere else)
+              _DateLine(date: _controller.diaryDate),
+              const SizedBox(height: 12),
+
+              // skeleton title (two lines)
+              _SkeletonBar(width: 0.85, height: 22, radius: 6),
+              const SizedBox(height: 10),
+              _SkeletonBar(width: 0.55, height: 22, radius: 6),
+              const SizedBox(height: 16),
+
+              // skeleton chip row
+              Row(children: const [
+                _SkeletonBar(width: null, fixedWidth: 70, height: 22, radius: 6),
+                SizedBox(width: 6),
+                _SkeletonBar(width: null, fixedWidth: 86, height: 22, radius: 6),
+                SizedBox(width: 6),
+                _SkeletonBar(width: null, fixedWidth: 58, height: 22, radius: 6),
+              ]),
+
+              const SizedBox(height: 20),
+              const _Hairline(),
+              const SizedBox(height: 20),
+
+              // skeleton body lines
+              const _SkeletonBar(width: 1.00, height: 12, radius: 4),
+              const SizedBox(height: 10),
+              const _SkeletonBar(width: 0.96, height: 12, radius: 4),
+              const SizedBox(height: 10),
+              const _SkeletonBar(width: 1.00, height: 12, radius: 4),
+              const SizedBox(height: 10),
+              const _SkeletonBar(width: 0.78, height: 12, radius: 4),
+            ]),
+          )),
+
+          // generating banner pinned above the safe area
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(children: [
+              _GeneratingBanner(
+                photoCount: widget.selectedAssets.length,
+                promptCategory: widget.selectedPrompt?.category,
+                statusText: _controller.statusText,
+              ),
+              const SizedBox(height: 10),
+              const _IndeterminateBar(),
+            ]),
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ]),
+
+        // ───── floating back button over the scrim ─────
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 4,
+          left: 8,
+          child: _FloatingBackButton(onTap: () => Navigator.pop(context)),
+        ),
+      ]),
+    );
+  }
+}
+
+// ─── shimmering skeleton bar ────────────────────────────────────
+class _SkeletonBar extends StatefulWidget {
+  final double? width;       // 0…1 fraction of parent; null → use fixedWidth
+  final double? fixedWidth;  // px (used when width is null)
+  final double height;
+  final double radius;
+  const _SkeletonBar({
+    this.width, this.fixedWidth,
+    required this.height, required this.radius,
+  });
+  @override
+  State<_SkeletonBar> createState() => _SkeletonBarState();
+}
+
+class _SkeletonBarState extends State<_SkeletonBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ac = AnimationController(
+    vsync: this, duration: const Duration(milliseconds: 1400),
+  )..repeat();
+
+  @override
+  void dispose() { _ac.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark
+      ? Colors.white.withValues(alpha: 0.05)
+      : Colors.black.withValues(alpha: 0.05);
+    final hi = isDark
+      ? Colors.white.withValues(alpha: 0.10)
+      : Colors.black.withValues(alpha: 0.09);
+
+    final bar = AnimatedBuilder(
+      animation: _ac,
+      builder: (_, __) => Container(
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: base,
+          borderRadius: BorderRadius.circular(widget.radius),
+          gradient: LinearGradient(
+            colors: [base, hi, base],
+            stops: const [0.0, 0.5, 1.0],
+            begin: Alignment(-1 + _ac.value * 3, 0),
+            end:   Alignment( 1 + _ac.value * 3, 0),
+          ),
+        ),
+      ),
+    );
+
+    if (widget.fixedWidth != null) {
+      return SizedBox(width: widget.fixedWidth, child: bar);
+    }
+    return FractionallySizedBox(
+      widthFactor: widget.width ?? 1.0,
+      alignment: Alignment.centerLeft,
+      child: bar,
+    );
+  }
+}
+
+// ─── generating banner (accent-tinted) ───────────────────────────
+class _GeneratingBanner extends StatelessWidget {
+  final int photoCount;
+  final String? promptCategory;
+  final String statusText;
+  const _GeneratingBanner({
+    required this.photoCount,
+    required this.promptCategory,
+    required this.statusText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    final bg = isDark
+      ? AppColors.accentLight.withValues(alpha: 0.14)
+      : AppColors.accent.withValues(alpha: 0.10);
+    final border = isDark
+      ? AppColors.accentLight.withValues(alpha: 0.22)
+      : AppColors.accent.withValues(alpha: 0.20);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: border, width: 0.5),
+      ),
+      child: Row(children: [
+        _PulsingDisc(color: accent),
+        const SizedBox(width: 12),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(statusText, style: TextStyle(
+              fontSize: 13.5, fontWeight: FontWeight.w700,
+              letterSpacing: -0.1, height: 1.25, color: cs.onSurface,
+            ), maxLines: 1, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 2),
+            Text(
+              promptCategory == null
+                ? l10n.diaryGenerationCaptionNoPrompt(photoCount)
+                : l10n.diaryGenerationCaptionWithPrompt(
+                    photoCount, promptCategory!.toLowerCase()),
+              style: TextStyle(
+                fontSize: 11.5, letterSpacing: 0.2,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ],
+        )),
+      ]),
+    );
+  }
+}
+
+class _PulsingDisc extends StatefulWidget {
+  final Color color;
+  const _PulsingDisc({required this.color});
+  @override
+  State<_PulsingDisc> createState() => _PulsingDiscState();
+}
+
+class _PulsingDiscState extends State<_PulsingDisc>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ac = AnimationController(
+    vsync: this, duration: const Duration(milliseconds: 1600),
+  )..repeat(reverse: true);
+  @override
+  void dispose() { _ac.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween(begin: 0.6, end: 1.0).animate(_ac),
+      child: Container(
+        width: 28, height: 28,
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+        child: const Icon(
+          Icons.auto_awesome_rounded,
+          size: 14, color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── indeterminate accent bar ───────────────────────────────────
+class _IndeterminateBar extends StatelessWidget {
+  const _IndeterminateBar();
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: LinearProgressIndicator(
+        minHeight: 4,
+        backgroundColor: isDark
+          ? Colors.white.withValues(alpha: 0.06)
+          : Colors.black.withValues(alpha: 0.06),
+        valueColor: AlwaysStoppedAnimation<Color>(accent),
+      ),
+    );
+  }
+}
+
+// ─── top scrim under the floating back button (shared with detail) ──
+class _TopScrim extends StatelessWidget {
+  const _TopScrim();
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        alignment: Alignment.topCenter, height: 140,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            colors: [Color(0x73141210), Color(0x00141210)],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingBackButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _FloatingBackButton({required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.42),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: const SizedBox(
+          width: 36, height: 36,
+          child: Icon(Icons.chevron_left_rounded,
+            color: Colors.white, size: 22),
+        ),
+      ),
+    );
+  }
+}`;
+
+function GeneratingCodeCard() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#1F1B17', color: '#E8E2DC', borderRadius: 18,
+      padding: 24, boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', gap: 16,
+      fontFamily: '"Noto Sans JP", -apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#FAF8F5', letterSpacing: -0.3 }}>
+          Flutter handoff · generation
+        </div>
+        <div style={{ fontSize: 13, color: '#9E9891' }}>
+          diary_preview_screen.dart · skeleton variant
+        </div>
+      </div>
+      <div style={{ fontSize: 13, lineHeight: 1.55, color: '#C7C0B8' }}>
+        Refactor of <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>DiaryPreviewScreen</code>.
+        Drops the four <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>CustomCard</code> stack
+        (date / prompt / photos / loading) and renders one editorial surface that mirrors the detail screen — same Hero photo,
+        same <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>_TopScrim</code>,
+        same <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3' }}>Hero</code> tag
+        so the cross-fade into the final entry is seamless.
+        <code style={{ background: '#2E2A27', padding: '1px 6px', borderRadius: 4, color: '#E4BEA3', marginLeft: 4 }}>DiaryPreviewController</code> (generation state, photo processing, success navigation) stays untouched.
+      </div>
+      <pre style={{
+        flex: 1, margin: 0, overflow: 'auto',
+        background: '#15120F', borderRadius: 12, padding: 18,
+        fontFamily: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
+        fontSize: 11.5, lineHeight: 1.55, color: '#E8E2DC',
+      }}>{GENERATING_FLUTTER_CODE}</pre>
+    </div>
+  );
+}
+
 // ─── canvas ──────────────────────────────────────────────────────
 const PHONE_W = 460, PHONE_H = 950;
 
@@ -3561,6 +3976,43 @@ function App() {
         subtitle="filter_bottom_sheet.dart + ActiveFiltersDisplay rewrite. DiaryFilter model untouched.">
         <DCArtboard id="filter-flutter" label="filter_bottom_sheet.dart" width={920} height={PHONE_H}>
           <FilterCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="generating-notes" title="Diary generation — Hero applied"
+        subtitle="The 1–3 seconds between prompt and entry. Three takes on the same content (photos + prompt + status), all on one editorial surface — no per-section CustomCard chrome.">
+        <DCArtboard id="generating-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <GeneratingNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="generating-light" title="Generation · Light"
+        subtitle="A · Calm editorial — B · Staged list — C · Skeleton preview (recommended).">
+        {GEN_VARIANTS.map((v) => (
+          <DCArtboard key={v.id} id={`generating-${v.id}-light`} label={v.label}
+            width={PHONE_W} height={PHONE_H}>
+            <IOSDevice width={402} height={874} dark={false}>
+              <v.Screen tokens={lightTokens}/>
+            </IOSDevice>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="generating-dark" title="Generation · Dark">
+        {GEN_VARIANTS.map((v) => (
+          <DCArtboard key={v.id} id={`generating-${v.id}-dark`} label={v.label}
+            width={PHONE_W} height={PHONE_H}>
+            <IOSDevice width={402} height={874} dark={true}>
+              <v.Screen tokens={darkTokens}/>
+            </IOSDevice>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="generating-handoff" title="Flutter handoff · generation"
+        subtitle="Refactored diary_preview_screen.dart. Shared _TopScrim, _PhotoCountBadge and Hero tag with the detail screen so the cross-fade into the final entry is seamless.">
+        <DCArtboard id="generating-flutter" label="diary_preview_screen.dart" width={920} height={PHONE_H}>
+          <GeneratingCodeCard/>
         </DCArtboard>
       </DCSection>
     </DesignCanvas>

@@ -1027,6 +1027,21 @@
   "@diaryPreviewDiscardDialogConfirm": {
     "description": "日記破棄を確定するボタンラベル"
   },
+  "diaryGenerationCaptionNoPrompt": "{photoCount}枚の写真",
+  "@diaryGenerationCaptionNoPrompt": {
+    "description": "日記生成中バナーのキャプション（プロンプトなし）",
+    "placeholders": {
+      "photoCount": { "type": "int", "format": "decimalPattern" }
+    }
+  },
+  "diaryGenerationCaptionWithPrompt": "{photoCount}枚の写真 · {category}プロンプト",
+  "@diaryGenerationCaptionWithPrompt": {
+    "description": "日記生成中バナーのキャプション（プロンプトあり）",
+    "placeholders": {
+      "photoCount": { "type": "int", "format": "decimalPattern" },
+      "category": { "type": "String" }
+    }
+  },
   "diaryCardUntitled": "無題",
   "@diaryCardUntitled": {
     "description": "タイトル未設定時のフォールバック"

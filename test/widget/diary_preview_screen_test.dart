@@ -1,15 +1,20 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
+import 'package:smart_photo_diary/screens/diary_preview/diary_preview_generating.dart';
 import 'package:smart_photo_diary/screens/diary_preview/diary_preview_screen.dart';
 import 'package:smart_photo_diary/screens/diary_preview/diary_preview_body.dart';
 import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
@@ -19,6 +24,8 @@ import 'package:smart_photo_diary/services/interfaces/subscription_service_inter
 import '../integration/mocks/mock_services.dart';
 import '../test_helpers/mock_platform_channels.dart';
 import '../test_helpers/widget_test_helpers.dart';
+
+class MockIPhotoCacheService extends Mock implements IPhotoCacheService {}
 
 void main() {
   late MockILoggingService mockLogger;
@@ -41,6 +48,20 @@ void main() {
     // Synchronous services required by DiaryPreviewController constructor
     serviceLocator.registerSingleton<ILoggingService>(mockLogger);
     serviceLocator.registerSingleton<IPhotoService>(mockPhoto);
+
+    // IPhotoCacheService is used by DiaryPreviewGeneratingScreen._HeroPhoto
+    final mockPhotoCache = MockIPhotoCacheService();
+    when(
+      () => mockPhotoCache.getThumbnail(
+        any(),
+        width: any(named: 'width'),
+        height: any(named: 'height'),
+        quality: any(named: 'quality'),
+      ),
+    ).thenAnswer(
+      (_) async => const Failure<Uint8List>(PhotoAccessException('test')),
+    );
+    serviceLocator.registerSingleton<IPhotoCacheService>(mockPhotoCache);
 
     // ISettingsService is resolved asynchronously in DiaryPreviewScreen
     final mockSettings = MockSettingsService();
@@ -109,90 +130,72 @@ void main() {
     );
   }
 
-  /// Pump a few frames to trigger initState / postFrameCallback without
-  /// waiting for pumpAndSettle (which would time out due to ongoing animations
-  /// and never-completing async services).
-  Future<void> pumpFrames(WidgetTester tester) async {
-    await tester.pump(); // first frame
+  /// Build the screen at phone size and pump a few frames.
+  ///
+  /// Sets a 390×844 surface BEFORE pumpWidget so the 4:3 hero photo doesn't
+  /// overflow the default 800×600 test canvas. Resets the size on teardown.
+  Future<void> buildAndPump(WidgetTester tester, Widget widget) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(widget);
     await tester.pump(const Duration(milliseconds: 200)); // async init
     await tester.pump(const Duration(milliseconds: 200)); // animations
   }
 
   group('DiaryPreviewScreen', () {
     group('AppBar display', () {
-      testWidgets('shows AppBar with preview title', (
+      testWidgets('no AppBar shown during loading (skeleton screen)', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
-        expect(find.byType(AppBar), findsOneWidget);
-        expect(find.text('Diary preview'), findsOneWidget);
-      });
-
-      testWidgets('AppBar uses theme default background color', (
-        WidgetTester tester,
-      ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
-
-        // AppBar now uses theme default (no explicit backgroundColor)
-        final appBar = tester.widget<AppBar>(find.byType(AppBar));
-        expect(appBar.backgroundColor, isNull);
+        // During generation the skeleton screen is shown — no AppBar.
+        expect(find.byType(AppBar), findsNothing);
       });
     });
 
     group('Initial loading state', () {
-      testWidgets('shows CircularProgressIndicator during initialization', (
+      testWidgets('shows DiaryPreviewGeneratingScreen during loading', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        // Pump enough to fire the postFrameCallback and its internal
-        // Future.delayed(100ms), but async services never complete so
-        // the controller stays in loading state.
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
-        // PhotoGallery's PhotoThumbnailWidget also shows a loading indicator,
-        // so multiple CircularProgressIndicators may exist simultaneously.
-        expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
+        expect(find.byType(DiaryPreviewGeneratingScreen), findsOneWidget);
+        expect(find.byType(DiaryPreviewBody), findsNothing);
       });
 
-      testWidgets('shows generating text after initialization phase', (
+      testWidgets('shows generating status text during loading phase', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
-        // After the 100ms delay, isInitializing becomes false and isLoading
-        // becomes true. The loading states widget shows "Creating your diary..."
+        // The banner inside DiaryPreviewGeneratingScreen shows the status text.
         expect(find.text('Creating your diary...'), findsOneWidget);
       });
     });
 
     group('DiaryPreviewBody', () {
-      testWidgets('DiaryPreviewBody widget is rendered', (
+      testWidgets('DiaryPreviewBody is not shown during loading', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
-        expect(find.byType(DiaryPreviewBody), findsOneWidget);
+        // Body is only shown after generation completes.
+        expect(find.byType(DiaryPreviewBody), findsNothing);
       });
     });
 
     group('PopScope configuration', () {
-      testWidgets('PopScope widget exists with canPop false', (
+      testWidgets('PopScope exists with canPop true during loading', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
-        // Find PopScope via predicate since multiple PopScopes may exist
-        // in the widget tree (from MaterialApp scaffolding, routes, etc.).
+        // During generation, back navigation is allowed freely (canPop: true).
         final popScopeFinder = find.byWidgetPredicate(
-          (widget) => widget is PopScope && widget.canPop == false,
+          (widget) => widget is PopScope && widget.canPop == true,
         );
-        expect(popScopeFinder, findsOneWidget);
+        expect(popScopeFinder, findsAtLeastNWidgets(1));
       });
     });
 
@@ -200,8 +203,7 @@ void main() {
       testWidgets('save icon is not shown in AppBar during loading', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
         // save_rounded icon should not appear while initializing/loading
         expect(find.byIcon(Icons.save_rounded), findsNothing);
@@ -210,8 +212,7 @@ void main() {
       testWidgets('bottom bar is not shown during loading', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
         // The bottom bar with the "Save diary" button should not appear
         // while the controller is still loading or initializing.
@@ -223,8 +224,7 @@ void main() {
       testWidgets('renders Scaffold as the main widget', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(buildScreen());
-        await pumpFrames(tester);
+        await buildAndPump(tester, buildScreen());
 
         expect(find.byType(Scaffold), findsOneWidget);
       });
