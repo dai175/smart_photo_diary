@@ -27,7 +27,7 @@ class StorageImportDelegate {
     try {
       // ファイル選択
       final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
         dialogTitle: l10n.settingsRestoreDialogTitle,
