@@ -78,10 +78,10 @@
 
 ### 2-4. `diary_generator.dart`（427 行）
 
-- [ ] 責務分析: プロンプト組み立て・API 呼び出し・レスポンス解析の責務を特定
-- [ ] レスポンス解析ロジックを `DiaryResponseParser` に抽出
-- [ ] `DiaryGenerator` を薄いオーケストレーターに削減（目標 250 行以下）
-- [ ] 分割後の各クラスに単体テストを追加
+- [x] 責務分析: プロンプト組み立て・API 呼び出し・レスポンス解析の責務を特定
+- [x] レスポンス解析ロジックを `DiaryResponseParser` に抽出
+- [x] `DiaryGenerator` を薄いオーケストレーターに削減（結果 352 行、`DiaryResponseParser` 分離で内部委譲パターン採用）
+- [x] 分割後の各クラスに単体テストを追加
 
 ### 2-5. `diary_prompt_builder.dart`（406 行）
 
