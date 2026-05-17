@@ -67,7 +67,7 @@ class StorageExportDelegate {
     final fileName =
         'smart_diary_backup_${DateTime.now().millisecondsSinceEpoch}.json';
     final l10n = LocalizationUtils.resolveFor(await _resolveLocale());
-    final outputFile = await FilePicker.platform.saveFile(
+    final outputFile = await FilePicker.saveFile(
       dialogTitle: l10n.settingsBackupDialogTitle,
       fileName: fileName,
       type: FileType.custom,
