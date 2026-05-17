@@ -69,15 +69,18 @@ class TimelineFABIntegration extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  left: 16,
+                  left: 0,
+                  right: 0,
                   bottom: 16,
-                  child: AnimatedOpacity(
-                    opacity: isSelecting ? 1.0 : 0.0,
-                    duration: AppConstants.standardTransitionDuration,
-                    curve: Curves.easeInOut,
-                    child: IgnorePointer(
-                      ignoring: !isSelecting,
-                      child: _buildSelectionPill(context),
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: isSelecting ? 1.0 : 0.0,
+                      duration: AppConstants.standardTransitionDuration,
+                      curve: Curves.easeInOut,
+                      child: IgnorePointer(
+                        ignoring: !isSelecting,
+                        child: _buildSelectionPill(context),
+                      ),
                     ),
                   ),
                 ),
@@ -116,7 +119,6 @@ class TimelineFABIntegration extends StatelessWidget {
               foregroundColor: Colors.white.withValues(alpha: 0.7),
               padding: const EdgeInsets.symmetric(horizontal: 8),
               minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(context.l10n.homeSelectionClearAll),
           ),
@@ -128,7 +130,6 @@ class TimelineFABIntegration extends StatelessWidget {
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
               ),
