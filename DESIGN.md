@@ -171,5 +171,26 @@ tagAccent:    背景 #F1DCCB / 文字 #8E6450
 - [ ] スペーシングは `AppSpacing` トークンを使用（マジックナンバー禁止）
 - [ ] タッチターゲットは最小 44pt
 - [ ] グラデーションを使っていないか確認
-- [ ] ダークモード対応（`Theme.of(context)` 経由で色を取得）
+- [ ] **ダークモード**: 下記「ダークモード実装ルール」を全項目確認済み
 - [ ] 日本語テキストは `context.l10n` 経由（ハードコード禁止）
+
+---
+
+## ダークモード実装ルール
+
+UI タスク完了前に必ずライト・ダーク両モードで確認する。
+
+**禁止事項（NG）:**
+- `Colors.white` / `Colors.black` のハードコード
+- `Color(0xFF...)` の直書き
+- `Colors.grey` / `Colors.red` 等の Material 固定色
+
+**正しい取得方法:**
+- `Theme.of(context).colorScheme.*` — サーフェス・テキスト・アウトライン等
+- `AppColors.*` トークン — プロジェクト定義のセマンティックカラー
+- 輝度条件分岐: `Theme.of(context).brightness == Brightness.dark ? ... : ...`
+
+**特に注意するケース:**
+- アイコンの `color:` — デフォルト値はテーマ非依存のことがある。必ず明示的に指定
+- 影・オーバーレイ — `Colors.black.withOpacity(n)` は brightness チェック内でのみ使用
+- 画像・カードの背景 — `colorScheme.surface` / `colorScheme.surfaceContainerLowest` を使用

@@ -131,6 +131,8 @@ Key rules for quick reference:
 - Variable names in English, UI text localized (Japanese/English)
 - Service methods accept `Locale?` parameter for language-specific operations
 
+- **Dark mode**: Before marking any UI task done, verify both light and dark modes. See **[DESIGN.md — ダークモード実装ルール](DESIGN.md)** for the full checklist.
+
 ### Testing
 - Maintain 100% test success rate
 - All new features must have tests
