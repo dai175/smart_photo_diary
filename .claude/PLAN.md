@@ -11,32 +11,32 @@
 
 ### 1-1. 写真選択 → 日記生成フロー
 
-- [ ] `test/integration/smoke/photo_to_diary_smoke_test.dart` を新規作成
-  - [ ] 写真を選択すると `DiaryPreviewController` が生成フローを開始する
-  - [ ] AI サービスが呼ばれ、日記テキストが返却される
-  - [ ] 生成完了後に `DiaryPreviewScreen` に遷移する
-  - [ ] エラー時（API 失敗）に適切なエラー状態になる
+- [x] `test/integration/smoke/photo_to_diary_smoke_test.dart` を新規作成
+  - [x] 写真を選択すると `DiaryPreviewController` が生成フローを開始する
+  - [x] AI サービスが呼ばれ、日記テキストが返却される
+  - [x] 生成完了後に `DiaryPreviewScreen` に遷移する
+  - [x] エラー時（API 失敗）に適切なエラー状態になる
 
 ### 1-2. 日記保存 → 一覧表示フロー
 
-- [ ] `test/integration/smoke/diary_save_view_smoke_test.dart` を新規作成
-  - [ ] プレビュー画面から保存すると `DiaryService.create` が呼ばれる
-  - [ ] 保存後に日記一覧画面に日記が表示される
-  - [ ] 日記詳細画面が正しく日記データを表示する
+- [x] `test/integration/smoke/diary_save_view_smoke_test.dart` を新規作成
+  - [x] プレビュー画面から保存すると `DiaryService.create` が呼ばれる
+  - [x] 保存後に日記一覧画面に日記が表示される
+  - [x] 日記詳細画面が正しく日記データを表示する
 
 ### 1-3. サブスクリプション購入フロー
 
-- [ ] `test/integration/smoke/subscription_purchase_smoke_test.dart` を新規作成
-  - [ ] 購入開始 → IAP フロー → `SubscriptionStateService` の状態更新 の一連を確認
-  - [ ] 購入失敗時に状態が変化しないことを確認
-  - [ ] 復元フローが状態を正しく更新することを確認
-  - [ ] ※既存の `subscription_service_integration_test.dart` との重複に注意し差分のみカバー
+- [x] `test/integration/smoke/subscription_purchase_smoke_test.dart` を新規作成
+  - [x] 購入開始 → IAP フロー → `SubscriptionStateService` の状態更新 の一連を確認
+  - [x] 購入失敗時に状態が変化しないことを確認
+  - [x] 復元フローが状態を正しく更新することを確認
+  - [x] ※既存の `subscription_service_integration_test.dart` との重複に注意し差分のみカバー
 
 ### 1-4. 設定変更フロー
 
-- [ ] `test/integration/smoke/settings_flow_smoke_test.dart` を新規作成
-  - [ ] `SettingsService` の言語設定変更が永続化される
-  - [ ] `FeatureAccessService` が Premium/Basic に応じて正しく機能制限を返す
+- [x] `test/integration/smoke/settings_flow_smoke_test.dart` を新規作成
+  - [x] `SettingsService` の言語設定変更が永続化される
+  - [x] `FeatureAccessService` が Premium/Basic に応じて正しく機能制限を返す
 
 ### 1-5. スモークテスト共通
 
