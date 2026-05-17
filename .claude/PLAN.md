@@ -69,12 +69,12 @@
 
 ### 2-3. `prompt_service.dart`（486 行）
 
-- [ ] 責務分析: キャッシュ・フィルタ・永続化の責務を特定
-- [ ] `PromptCacheService` を抽出（メモリキャッシュ管理）
-- [ ] `PromptFilterService` を抽出（フィルタ・ソートロジック）
-- [ ] `PromptService` を薄いファサードに削減（目標 200 行以下）
-- [ ] `service_registration.dart` の登録を更新
-- [ ] 分割後の各クラスに単体テストを追加
+- [x] 責務分析: キャッシュ・フィルタ・永続化の責務を特定
+- [x] `PromptCacheService` を抽出（メモリキャッシュ管理）
+- [x] `PromptFilterService` を抽出（フィルタ・ソートロジック）
+- [x] `PromptService` を薄いファサードに削減（結果 279 行、内部委譲パターン採用）
+- [x] `service_registration.dart` の登録を更新（新クラスは PromptService 内部でインスタンス化のため変更不要と確認）
+- [x] 分割後の各クラスに単体テストを追加
 
 ### 2-4. `diary_generator.dart`（427 行）
 
