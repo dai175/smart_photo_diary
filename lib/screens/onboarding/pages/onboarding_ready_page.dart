@@ -71,7 +71,6 @@ class _PhotoGridTeaser extends StatelessWidget {
                   ),
                 ),
               ),
-              // 最初のセルにアクセントボーダーとチェックマークを表示
               if (isFirst) ...[
                 Positioned.fill(
                   child: Container(

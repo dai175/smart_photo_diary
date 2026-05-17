@@ -46,9 +46,8 @@ class _MiniHeroCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 写真エリア（3:2）
             AspectRatio(
-              aspectRatio: 3 / 2,
+              aspectRatio: 1,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -61,7 +60,6 @@ class _MiniHeroCard extends StatelessWidget {
                           : AppColors.glyphBg,
                     ),
                   ),
-                  // 「サンプル」バッジ
                   Positioned(
                     top: 10,
                     left: 10,
@@ -90,13 +88,11 @@ class _MiniHeroCard extends StatelessWidget {
               ),
             ),
 
-            // テキストエリア
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // アクセントカラーの日付
                   Text(
                     l10n.onboardingSampleDate.toUpperCase(),
                     style: TextStyle(
