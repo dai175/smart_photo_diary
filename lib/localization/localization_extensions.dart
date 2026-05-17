@@ -22,6 +22,10 @@ extension LocalizationFormattingX on AppLocalizations {
   String formatMonthDay(DateTime date) =>
       DateFormat.Md(localeName).format(date);
 
+  /// 例: SEP 20 · SATURDAY (大文字、日記カード/詳細ヘッダー用)
+  String formatMonthDayWithDayName(DateTime date) =>
+      DateFormat('MMM d · EEEE', localeName).format(date).toUpperCase();
+
   /// 例: 9月20日 / September 20
   String formatMonthDayLong(DateTime date) =>
       DateFormat.MMMMd(localeName).format(date);

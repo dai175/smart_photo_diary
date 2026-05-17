@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../constants/app_constants.dart';
@@ -69,13 +68,8 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
     }
   }
 
-  String _computeDateLabel() {
-    final locale = Localizations.localeOf(context).toString();
-    return DateFormat(
-      'MMM d · EEEE',
-      locale,
-    ).format(widget.diaryEntry.date).toUpperCase();
-  }
+  String _computeDateLabel() =>
+      context.l10n.formatMonthDayWithDayName(widget.diaryEntry.date);
 
   Future<Result<Uint8List>> _getGalleryThumbnail(AssetEntity asset) {
     return _galleryFutures.putIfAbsent(

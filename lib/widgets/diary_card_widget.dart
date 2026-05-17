@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../core/result/result.dart';
@@ -63,13 +62,8 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
     _photoAssetsFuture = _fetchPhotoAssets();
   }
 
-  String _computeHeroDate() {
-    final locale = Localizations.localeOf(context);
-    return DateFormat(
-      'MMM d · EEEE',
-      locale.toString(),
-    ).format(widget.entry.date).toUpperCase();
-  }
+  String _computeHeroDate() =>
+      context.l10n.formatMonthDayWithDayName(widget.entry.date);
 
   Future<List<AssetEntity>> _fetchPhotoAssets() {
     if (widget.entry.photoIds.isEmpty) {
