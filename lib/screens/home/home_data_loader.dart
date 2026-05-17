@@ -45,7 +45,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       // Pre-fetch screenshot asset IDs for filtering
       if (_self._photoTypeFilter == PhotoTypeFilter.photosOnly) {
         _self._screenshotAssetIds =
-            await PhotoQueryService.getScreenshotAssetIds(_self._logger);
+            await PhotoFilterService.getScreenshotAssetIds(_self._logger);
       } else {
         _self._screenshotAssetIds = {};
       }
@@ -56,7 +56,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
         limit: _HomeScreenState._photosPerPage,
       );
       final dateFilteredPhotos = photosResult.getOrDefault([]);
-      final photos = PhotoQueryService.filterByPhotoType(
+      final photos = PhotoFilterService.filterByPhotoType(
         dateFilteredPhotos,
         _self._photoTypeFilter,
         _self._screenshotAssetIds,
@@ -156,7 +156,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
         limit: requested,
       );
       final dateFilteredNewPhotos = newPhotosResult.getOrDefault([]);
-      final newPhotos = PhotoQueryService.filterByPhotoType(
+      final newPhotos = PhotoFilterService.filterByPhotoType(
         dateFilteredNewPhotos,
         _self._photoTypeFilter,
         _self._screenshotAssetIds,

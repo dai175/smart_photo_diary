@@ -53,11 +53,11 @@
 
 ### 2-1. `photo_query_service.dart`（542 行）
 
-- [ ] 責務分析: クエリ・フィルタ・日付レンジの 3 責務を特定
-- [ ] `PhotoFilterService` を抽出（フィルタ条件の構築）
-- [ ] `PhotoDateRangeService` を抽出（日付範囲解決ロジック）
-- [ ] `PhotoQueryService` を薄いオーケストレーター層に削減（目標 200 行以下）
-- [ ] 分割後の各クラスに単体テストを追加
+- [x] 責務分析: クエリ・フィルタ・日付レンジの 3 責務を特定
+- [x] `PhotoFilterService` を抽出（フィルタ条件の構築）
+- [x] `PhotoDateRangeService` を抽出（日付範囲解決ロジック）
+- [x] `PhotoQueryService` を薄いオーケストレーター層に削減（目標 200 行以下）
+- [x] 分割後の各クラスに単体テストを追加
 
 ### 2-2. `subscription_state_service.dart`（503 行）
 

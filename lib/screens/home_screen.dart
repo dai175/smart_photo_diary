@@ -17,7 +17,7 @@ import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/settings_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
-import '../services/photo_query_service.dart';
+import '../services/photo_filter_service.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
