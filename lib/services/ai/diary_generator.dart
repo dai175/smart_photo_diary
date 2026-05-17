@@ -8,16 +8,20 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import 'diary_locale_utils.dart';
 import 'diary_time_segment.dart';
+import 'diary_prompt_analyzer.dart';
 import 'diary_prompt_builder.dart';
+import 'diary_response_parser.dart';
 
 /// 日記生成を担当するサービス
 class DiaryGenerator {
   final GeminiApiClient _apiClient;
   final ILoggingService _logger;
+  final DiaryResponseParser _responseParser;
 
   DiaryGenerator({required ILoggingService logger, GeminiApiClient? apiClient})
     : _logger = logger,
-      _apiClient = apiClient ?? GeminiApiClient(logger: logger);
+      _apiClient = apiClient ?? GeminiApiClient(logger: logger),
+      _responseParser = DiaryResponseParser(logger: logger);
 
   /// 画像から直接日記を生成
   Future<Result<DiaryGenerationResult>> generateFromImage({
@@ -43,14 +47,14 @@ class DiaryGenerator {
 
     try {
       // プロンプト種別分析と最適化パラメータ取得
-      final promptType = DiaryPromptBuilder.analyzePromptType(prompt);
-      final optimParams = DiaryPromptBuilder.getOptimizationParams(
+      final promptType = DiaryPromptAnalyzer.analyzePromptType(prompt);
+      final optimParams = DiaryPromptAnalyzer.getOptimizationParams(
         promptType,
         locale,
         diaryLength: diaryLength,
       );
-      final emphasis = optimParams['emphasis'] as String;
-      final maxTokens = optimParams['maxTokens'] as int;
+      final emphasis = optimParams.emphasis;
+      final maxTokens = optimParams.maxTokens;
 
       final finalPrompt = DiaryPromptBuilder.buildSingleImagePrompt(
         locale: locale,
@@ -88,7 +92,7 @@ class DiaryGenerator {
         case Success(data: final response):
           final content = _apiClient.extractTextFromResponse(response);
           if (content != null) {
-            return Success(_parseGeneratedDiary(content, locale));
+            return Success(_responseParser.parse(content, locale));
           }
           return Failure(
             AiProcessingException(
@@ -200,83 +204,6 @@ class DiaryGenerator {
     }
   }
 
-  /// 生成された日記テキストをタイトルと本文に分割
-  DiaryGenerationResult _parseGeneratedDiary(
-    String generatedText,
-    Locale locale,
-  ) {
-    try {
-      final titleMatchJa = RegExp(
-        r'【タイトル】\s*(.+?)(?=【本文】|$)',
-        dotAll: true,
-      ).firstMatch(generatedText);
-      final contentMatchJa = RegExp(
-        r'【本文】\s*(.+?)$',
-        dotAll: true,
-      ).firstMatch(generatedText);
-
-      String? title = titleMatchJa?.group(1)?.trim();
-      String? content = contentMatchJa?.group(1)?.trim();
-
-      if (title == null ||
-          title.isEmpty ||
-          content == null ||
-          content.isEmpty) {
-        final titleMatchEn = RegExp(
-          r'\[Title\]\s*(.+?)(?=\[Body\]|$)',
-          dotAll: true,
-          caseSensitive: false,
-        ).firstMatch(generatedText);
-        final contentMatchEn = RegExp(
-          r'\[Body\]\s*(.+?)$',
-          dotAll: true,
-          caseSensitive: false,
-        ).firstMatch(generatedText);
-
-        title = titleMatchEn?.group(1)?.trim() ?? title;
-        content = contentMatchEn?.group(1)?.trim() ?? content;
-      }
-
-      if (title == null ||
-          title.isEmpty ||
-          content == null ||
-          content.isEmpty) {
-        final lines = generatedText
-            .split('\n')
-            .where((line) => line.trim().isNotEmpty)
-            .toList();
-        if (lines.isNotEmpty) {
-          title = lines.first.trim();
-          content = lines.skip(1).join('\n').trim();
-        }
-      }
-
-      final defaultTitle = DiaryLocaleUtils.isJapanese(locale)
-          ? '今日の日記'
-          : "Today's Journal";
-
-      return DiaryGenerationResult(
-        title: (title == null || title.isEmpty) ? defaultTitle : title,
-        content: (content == null || content.isEmpty)
-            ? generatedText.trim()
-            : content,
-      );
-    } catch (e) {
-      _logger.error(
-        'Error during diary parsing',
-        context: '_parseGeneratedDiary',
-        error: e,
-      );
-      final defaultTitle = DiaryLocaleUtils.isJapanese(locale)
-          ? '今日の日記'
-          : "Today's Journal";
-      return DiaryGenerationResult(
-        title: defaultTitle,
-        content: generatedText.trim(),
-      );
-    }
-  }
-
   /// 1枚の画像を分析して説明を取得
   Future<String> _analyzeImage(
     Uint8List imageData,
@@ -355,24 +282,25 @@ Describe the situation and mood you infer from the image, including any emotiona
       );
     }
 
-    final promptType = DiaryPromptBuilder.analyzePromptType(customPrompt);
-    final optimParams = DiaryPromptBuilder.getOptimizationParams(
+    final promptType = DiaryPromptAnalyzer.analyzePromptType(customPrompt);
+    final isJapanese = DiaryLocaleUtils.isJapanese(locale);
+    final optimParams = DiaryPromptAnalyzer.getOptimizationParams(
       promptType,
       locale,
       diaryLength: diaryLength,
     );
-    final emphasis = optimParams['emphasis'] as String;
-    final baseMaxTokens = optimParams['maxTokens'] as int;
+    final emphasis = optimParams.emphasis;
+    final baseMaxTokens = optimParams.maxTokens;
     final isShort = diaryLength == DiaryLength.short;
     final int extraTokens;
-    if (DiaryLocaleUtils.isJapanese(locale)) {
+    if (isJapanese) {
       extraTokens = isShort
-          ? DiaryPromptBuilder.multiImageExtraTokensJaShort
-          : DiaryPromptBuilder.multiImageExtraTokensJaStandard;
+          ? DiaryPromptAnalyzer.multiImageExtraTokensJaShort
+          : DiaryPromptAnalyzer.multiImageExtraTokensJaStandard;
     } else {
       extraTokens = isShort
-          ? DiaryPromptBuilder.multiImageExtraTokensEnShort
-          : DiaryPromptBuilder.multiImageExtraTokensEnStandard;
+          ? DiaryPromptAnalyzer.multiImageExtraTokensEnShort
+          : DiaryPromptAnalyzer.multiImageExtraTokensEnStandard;
     }
     final multiImageMaxTokens = baseMaxTokens + extraTokens;
 
@@ -411,7 +339,7 @@ Describe the situation and mood you infer from the image, including any emotiona
       case Success(data: final response):
         final content = _apiClient.extractTextFromResponse(response);
         if (content != null) {
-          return Success(_parseGeneratedDiary(content, locale));
+          return Success(_responseParser.parse(content, locale));
         }
         return Failure(
           AiProcessingException(

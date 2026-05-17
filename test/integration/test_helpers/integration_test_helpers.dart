@@ -8,6 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/models/photo_type_filter.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/subscription_info_v2.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
@@ -206,7 +207,10 @@ class IntegrationTestHelpers {
         date: any(named: 'date'),
         location: any(named: 'location'),
         photoTimes: any(named: 'photoTimes'),
+        prompt: any(named: 'prompt'),
+        contextText: any(named: 'contextText'),
         locale: any(named: 'locale'),
+        diaryLength: any(named: 'diaryLength'),
       ),
     ).thenAnswer((_) async => _createMockDiaryResult());
 
@@ -267,11 +271,12 @@ class IntegrationTestHelpers {
     });
   }
 
-  /// Create mock image data
-  static Uint8List _createMockImageData() {
-    // Simple PNG header
-    return Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10]);
-  }
+  /// Minimal PNG magic bytes for use in tests that need a non-empty image.
+  static Uint8List get mockPngBytes =>
+      Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10]);
+
+  static Uint8List _createMockImageData() =>
+      Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10]);
 
   /// Setup mock photos for today
   static void setupMockTodayPhotos(List<AssetEntity> assets) {
@@ -295,7 +300,10 @@ class IntegrationTestHelpers {
         date: any(named: 'date'),
         location: any(named: 'location'),
         photoTimes: any(named: 'photoTimes'),
+        prompt: any(named: 'prompt'),
+        contextText: any(named: 'contextText'),
         locale: any(named: 'locale'),
+        diaryLength: any(named: 'diaryLength'),
       ),
     ).thenAnswer((_) async => result);
 
@@ -494,6 +502,22 @@ class IntegrationTestHelpers {
     // Settings service defaults - basic mock setup
     when(() => mockSettingsService.themeMode).thenReturn(ThemeMode.system);
     when(() => mockSettingsService.isFirstLaunch).thenReturn(false);
+    when(() => mockSettingsService.getSubscriptionInfoV2()).thenAnswer((
+      _,
+    ) async {
+      final status = SubscriptionStatus(
+        planId: 'basic',
+        isActive: true,
+        startDate: DateTime.now(),
+        expiryDate: null,
+        monthlyUsageCount: 0,
+        lastResetDate: DateTime.now(),
+        autoRenewal: false,
+        transactionId: null,
+        lastPurchaseDate: null,
+      );
+      return Success(SubscriptionInfoV2.fromStatus(status));
+    });
 
     // Setup locale notifier properly
     final localeNotifier = ValueNotifier<Locale?>(const Locale('ja'));

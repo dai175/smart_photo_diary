@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
-import '../models/photo_type_filter.dart';
 import 'interfaces/logging_service_interface.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
+import 'photo_date_range_service.dart';
 
-/// 写真のクエリ・日付フィルタリング・ページネーションを担当する内部サービス
+/// 写真のクエリ・ページネーションを担当する内部サービス
 class PhotoQueryService {
   final ILoggingService _logger;
   final Future<Result<bool>> Function() _requestPermission;
@@ -18,11 +16,6 @@ class PhotoQueryService {
   }) : _logger = logger,
        _requestPermission = requestPermission;
 
-  // =================================================================
-  // 共通ヘルパー
-  // =================================================================
-
-  /// 権限チェック。権限がない場合は false を返す。
   Future<bool> _ensurePermission(String caller) async {
     final result = await _requestPermission();
     final hasPermission = result.getOrDefault(false);
@@ -35,25 +28,6 @@ class PhotoQueryService {
     return hasPermission;
   }
 
-  /// 日付範囲用の FilterOptionGroup を構築
-  FilterOptionGroup _buildDateFilter({DateTime? startDate, DateTime? endDate}) {
-    if (startDate != null || endDate != null) {
-      return FilterOptionGroup(
-        orders: const [
-          OrderOption(type: OrderOptionType.createDate, asc: false),
-        ],
-        createTimeCond: DateTimeCond(
-          min: startDate ?? DateTime(1970),
-          max: endDate ?? DateTime.now(),
-        ),
-      );
-    }
-    return FilterOptionGroup(
-      orders: const [OrderOption(type: OrderOptionType.createDate, asc: false)],
-    );
-  }
-
-  /// アルバムの先頭から写真を取得する共通処理
   Future<List<AssetEntity>> _fetchFromAlbum(
     FilterOptionGroup filterOption, {
     required int offset,
@@ -89,142 +63,6 @@ class PhotoQueryService {
     return album.getAssetListRange(start: offset, end: offset + actualLimit);
   }
 
-  /// 写真の日付を検証し、範囲内のもののみ返す
-  List<AssetEntity> _filterByDateRange(
-    List<AssetEntity> assets, {
-    required DateTime startDate,
-    required DateTime endDate,
-    required String caller,
-  }) {
-    final now = DateTime.now();
-    final validAssets = <AssetEntity>[];
-    for (final asset in assets) {
-      try {
-        final createDate = asset.createDateTime;
-        if (createDate.year < 1970 || createDate.isAfter(now)) {
-          _logger.warning(
-            'Skipping photo with invalid creation date',
-            context: 'PhotoQueryService.$caller',
-            data: 'createDate: $createDate, assetId: ${asset.id}',
-          );
-          continue;
-        }
-
-        final localDate = DateTime(
-          createDate.year,
-          createDate.month,
-          createDate.day,
-          createDate.hour,
-          createDate.minute,
-          createDate.second,
-        );
-
-        if (localDate.isBefore(startDate) || localDate.isAfter(endDate)) {
-          _logger.debug(
-            'Skipping photo outside date range after timezone adjustment',
-            context: 'PhotoQueryService.$caller',
-            data: 'createDate: $localDate, range: $startDate - $endDate',
-          );
-          continue;
-        }
-
-        validAssets.add(asset);
-      } catch (e) {
-        _logger.warning(
-          'Error during photo validation',
-          context: 'PhotoQueryService.$caller',
-          data: 'assetId: ${asset.id}, error: $e',
-        );
-        continue;
-      }
-    }
-    return validAssets;
-  }
-
-  // =================================================================
-  // 写真タイプフィルター
-  // =================================================================
-
-  /// iOSスクリーンショットスマートアルバムのアセットIDセットを取得
-  ///
-  /// iOSでは「スクリーンショット」スマートアルバムに属するアセットのIDを返す。
-  /// Androidでは空セットを返す（relativePathベースで判定するため不要）。
-  static Future<Set<String>> getScreenshotAssetIds([
-    ILoggingService? logger,
-  ]) async {
-    if (!Platform.isIOS) return {};
-
-    try {
-      // PMDarwinPathFilterでスクリーンショットスマートアルバムを直接取得（ロケール非依存）
-      final albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        hasAll: false,
-        pathFilterOption: const PMPathFilter(
-          darwin: PMDarwinPathFilter(
-            type: [PMDarwinAssetCollectionType.smartAlbum],
-            subType: [PMDarwinAssetCollectionSubtype.smartAlbumScreenshots],
-          ),
-        ),
-      );
-
-      final screenshotAlbum = albums.firstOrNull;
-      if (screenshotAlbum == null) return {};
-
-      final count = await screenshotAlbum.assetCountAsync;
-      if (count == 0) return {};
-
-      final assets = await screenshotAlbum.getAssetListRange(
-        start: 0,
-        end: count,
-      );
-      return assets.map((a) => a.id).toSet();
-    } catch (e) {
-      logger?.warning(
-        'Failed to get screenshot asset IDs',
-        context: 'PhotoQueryService.getScreenshotAssetIds',
-        data: 'error: $e',
-      );
-      return {};
-    }
-  }
-
-  /// スクリーンショット判定
-  static bool _isScreenshot(AssetEntity asset, Set<String> screenshotAssetIds) {
-    // スマートアルバムベース判定（iOS/Android共通）
-    if (screenshotAssetIds.contains(asset.id)) {
-      return true;
-    }
-
-    // iOS: スマートアルバム（screenshotAssetIds）のみで判定
-    // subtype ビットマスクは実機で信頼できないため使用しない
-    if (Platform.isIOS) {
-      return false;
-    }
-
-    // Android: MediaStore.RELATIVE_PATH ベース
-    final path = asset.relativePath ?? '';
-    return path.toLowerCase().contains('screenshot');
-  }
-
-  /// 写真タイプフィルターを適用
-  static List<AssetEntity> filterByPhotoType(
-    List<AssetEntity> assets,
-    PhotoTypeFilter filter,
-    Set<String> screenshotAssetIds,
-  ) {
-    return switch (filter) {
-      PhotoTypeFilter.all => assets,
-      PhotoTypeFilter.photosOnly =>
-        assets
-            .where((asset) => !_isScreenshot(asset, screenshotAssetIds))
-            .toList(),
-    };
-  }
-
-  // =================================================================
-  // 公開メソッド
-  // =================================================================
-
   /// 今日撮影された写真を取得する
   Future<Result<List<AssetEntity>>> getTodayPhotos({int limit = 20}) async {
     if (!await _ensurePermission('getTodayPhotos')) {
@@ -236,7 +74,7 @@ class PhotoQueryService {
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
-      final filterOption = _buildDateFilter(
+      final filterOption = PhotoDateRangeService.buildDateFilter(
         startDate: startOfDay,
         endDate: endOfDay,
       );
@@ -247,11 +85,12 @@ class PhotoQueryService {
         caller: 'getTodayPhotos',
       );
 
-      final validAssets = _filterByDateRange(
+      final validAssets = PhotoDateRangeService.filterByDateRange(
         assets,
         startDate: startOfDay,
         endDate: endOfDay,
-        caller: 'getTodayPhotos',
+        logger: _logger,
+        logContext: 'PhotoQueryService.getTodayPhotos',
       );
 
       _logger.info(
@@ -316,7 +155,7 @@ class PhotoQueryService {
         context: 'PhotoQueryService.getPhotosInDateRange',
       );
 
-      final filterOption = _buildDateFilter(
+      final filterOption = PhotoDateRangeService.buildDateFilter(
         startDate: localStartDate,
         endDate: localEndDate,
       );
@@ -327,11 +166,12 @@ class PhotoQueryService {
         caller: 'getPhotosInDateRange',
       );
 
-      final validAssets = _filterByDateRange(
+      final validAssets = PhotoDateRangeService.filterByDateRange(
         assets,
         startDate: localStartDate,
         endDate: localEndDate,
-        caller: 'getPhotosInDateRange',
+        logger: _logger,
+        logContext: 'PhotoQueryService.getPhotosInDateRange',
       );
 
       _logger.info(
@@ -383,7 +223,7 @@ class PhotoQueryService {
             'Date: $date, offset: $offset, limit: $limit, range: $startOfDay - $endOfDay (local timezone)',
       );
 
-      final filterOption = _buildDateFilter(
+      final filterOption = PhotoDateRangeService.buildDateFilter(
         startDate: startOfDay,
         endDate: endOfDay,
       );
@@ -394,11 +234,12 @@ class PhotoQueryService {
         caller: 'getPhotosForDate',
       );
 
-      final validAssets = _filterByDateRange(
+      final validAssets = PhotoDateRangeService.filterByDateRange(
         assets,
         startDate: startOfDay,
         endDate: endOfDay,
-        caller: 'getPhotosForDate',
+        logger: _logger,
+        logContext: 'PhotoQueryService.getPhotosForDate',
       );
 
       _logger.info(
@@ -438,7 +279,7 @@ class PhotoQueryService {
     }
 
     try {
-      final filterOption = _buildDateFilter();
+      final filterOption = PhotoDateRangeService.buildDateFilter();
       final assets = await _fetchFromAlbum(
         filterOption,
         offset: 0,
@@ -502,7 +343,7 @@ class PhotoQueryService {
     int offset = 0,
     int limit = 30,
   }) async {
-    final filterOption = _buildDateFilter(
+    final filterOption = PhotoDateRangeService.buildDateFilter(
       startDate: startDate,
       endDate: endDate,
     );
@@ -513,30 +354,23 @@ class PhotoQueryService {
       caller: 'getPhotosEfficient',
     );
 
-    if (startDate != null && endDate != null) {
-      final validAssets = _filterByDateRange(
-        assets,
-        startDate: startDate,
-        endDate: endDate,
-        caller: 'getPhotosEfficient',
-      );
-
-      _logger.debug(
-        'Photos retrieved efficiently',
-        context: 'PhotoQueryService.getPhotosEfficient',
-        data:
-            'Count: ${validAssets.length} (original: ${assets.length}), offset: $offset, limit: $limit',
-      );
-
-      return validAssets;
-    }
+    final validAssets = (startDate != null && endDate != null)
+        ? PhotoDateRangeService.filterByDateRange(
+            assets,
+            startDate: startDate,
+            endDate: endDate,
+            logger: _logger,
+            logContext: 'PhotoQueryService.getPhotosEfficient',
+          )
+        : assets;
 
     _logger.debug(
       'Photos retrieved efficiently',
       context: 'PhotoQueryService.getPhotosEfficient',
-      data: 'Count: ${assets.length}, offset: $offset, limit: $limit',
+      data:
+          'Count: ${validAssets.length} (original: ${assets.length}), offset: $offset, limit: $limit',
     );
 
-    return assets;
+    return validAssets;
   }
 }

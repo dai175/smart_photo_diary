@@ -30,6 +30,7 @@ enum DiaryPreviewLoadingState { idle, initializing, analyzingPhotos, saving }
 /// 日時解決は [PhotoDateResolver] にそれぞれ委譲する。
 class DiaryPreviewController extends BaseErrorController {
   late final ILoggingService _logger;
+  late final Future<IAiService> Function() _getAiService;
   late final DiaryPreviewGenerationDelegate _generationDelegate;
   late final DiaryPreviewSaveDelegate _saveDelegate;
 
@@ -105,10 +106,13 @@ class DiaryPreviewController extends BaseErrorController {
   DiaryPreviewController({
     required ILoggingService logger,
     required IPhotoService photoService,
+    Future<IAiService> Function()? getAiService,
     Future<IDiaryCrudService> Function()? getDiaryService,
     Future<IPromptService> Function()? getPromptService,
   }) {
     _logger = logger;
+    _getAiService =
+        getAiService ?? () => ServiceRegistration.getAsync<IAiService>();
 
     _generationDelegate = DiaryPreviewGenerationDelegate(
       photoService: photoService,
@@ -174,7 +178,7 @@ class DiaryPreviewController extends BaseErrorController {
     setLoading(true);
 
     try {
-      final aiService = await ServiceRegistration.getAsync<IAiService>();
+      final aiService = await _getAiService();
       if (localVersion != _requestVersion) return;
 
       _photoDateTime = PhotoDateResolver.resolveMedianDateTime(assets);
