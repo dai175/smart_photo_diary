@@ -115,7 +115,7 @@ class PlanOptionCard extends StatelessWidget {
       _getPriceText(context),
       style: AppTypography.titleMedium.copyWith(
         fontWeight: FontWeight.w700,
-        color: AppColors.primary,
+        color: AppColors.accentDark,
       ),
     );
   }

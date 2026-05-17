@@ -6,7 +6,6 @@ import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 
-/// Premium特典の箇条書きリスト Widget
 class PremiumBulletList extends StatelessWidget {
   const PremiumBulletList({super.key});
 
@@ -35,7 +34,7 @@ class PremiumBulletList extends StatelessWidget {
                       width: 5,
                       height: 5,
                       decoration: const BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.accentDark,
                         shape: BoxShape.circle,
                       ),
                     ),
