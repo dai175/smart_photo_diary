@@ -73,10 +73,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 OnboardingHeader(
                   step: _controller.currentPage + 1,
                   total: _controller.pageCount,
-                  isLastStep: _controller.isLastPage,
-                  onSkip: _controller.isProcessing
-                      ? () {}
-                      : _completeOnboarding,
+                  onSkip: _controller.isProcessing ? null : _completeOnboarding,
                 ),
                 Expanded(
                   child: PageView(

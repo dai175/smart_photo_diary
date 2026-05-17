@@ -132,13 +132,12 @@ void main() {
     });
 
     group('Skip button', () {
-      testWidgets('is visible on pages 0-2 but absent on page 3', (
+      testWidgets('is visible on all pages including the last', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Skip visible on page 0
         expect(find.text('Skip'), findsOneWidget);
 
         // Navigate to page 3 (last page)
@@ -148,8 +147,7 @@ void main() {
           await tester.pumpAndSettle();
         }
 
-        // Skip is not rendered on the last page
-        expect(find.text('Skip'), findsNothing);
+        expect(find.text('Skip'), findsOneWidget);
       });
     });
 

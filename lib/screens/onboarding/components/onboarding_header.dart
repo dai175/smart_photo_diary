@@ -4,18 +4,16 @@ import '../../../localization/localization_extensions.dart';
 import '../../../ui/design_system/app_colors.dart';
 
 /// オンボーディング画面上部のクロム:
-/// 4セグメントの進行トラック + スキップボタン（最後のステップでは非表示）
+/// 4セグメントの進行トラック + スキップボタン（全ページで表示）
 class OnboardingHeader extends StatelessWidget {
   final int step;
   final int total;
-  final bool isLastStep;
-  final VoidCallback onSkip;
+  final VoidCallback? onSkip;
 
   const OnboardingHeader({
     super.key,
     required this.step,
     required this.total,
-    required this.isLastStep,
     required this.onSkip,
   });
 
@@ -27,22 +25,23 @@ class OnboardingHeader extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 8, 14, 8),
-      child: Row(
-        children: [
-          for (int i = 0; i < total; i++) ...[
-            Expanded(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 240),
-                height: 3,
-                decoration: BoxDecoration(
-                  color: i < step ? fill : empty,
-                  borderRadius: BorderRadius.circular(999),
+      child: SizedBox(
+        height: 32,
+        child: Row(
+          children: [
+            for (int i = 0; i < total; i++) ...[
+              Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 240),
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: i < step ? fill : empty,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
               ),
-            ),
-            if (i < total - 1) const SizedBox(width: 5),
-          ],
-          if (!isLastStep) ...[
+              if (i < total - 1) const SizedBox(width: 5),
+            ],
             const SizedBox(width: 14),
             TextButton(
               onPressed: onSkip,
@@ -58,7 +57,7 @@ class OnboardingHeader extends StatelessWidget {
               child: Text(context.l10n.onboardingSkip),
             ),
           ],
-        ],
+        ),
       ),
     );
   }

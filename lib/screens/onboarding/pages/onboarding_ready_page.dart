@@ -24,13 +24,13 @@ class OnboardingReadyPage extends StatelessWidget {
 
 class _PhotoGridTeaser extends StatelessWidget {
   static const _assets = [
-    'assets/onboarding/evening.jpg',
+    'assets/onboarding/coffee.jpg',
     'assets/onboarding/flowers.jpg',
     'assets/onboarding/sunset.jpg',
     'assets/onboarding/cat.jpg',
     'assets/onboarding/forest.jpg',
-    'assets/onboarding/waterfall.jpg',
-    'assets/onboarding/hill.jpg',
+    'assets/onboarding/cathedral.jpg',
+    'assets/onboarding/food.jpg',
     'assets/onboarding/lake.jpg',
     'assets/onboarding/city.jpg',
   ];

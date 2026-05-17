@@ -42,7 +42,7 @@ class _PhotoStack extends StatelessWidget {
             rot: -12,
           ),
           _StackTile(
-            src: 'assets/onboarding/waterfall.jpg',
+            src: 'assets/onboarding/cathedral.jpg',
             dx: 86,
             dy: 0,
             rot: 10,
