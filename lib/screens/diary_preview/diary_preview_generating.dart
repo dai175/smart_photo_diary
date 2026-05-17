@@ -398,19 +398,23 @@ class _FloatingBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withValues(alpha: 0.42),
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: const SizedBox(
-          width: 36,
-          height: 36,
-          child: Icon(
-            Icons.chevron_left_rounded,
-            color: Colors.white,
-            size: 22,
+    return Semantics(
+      button: true,
+      label: context.l10n.commonBack,
+      child: Material(
+        color: Colors.black.withValues(alpha: 0.42),
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: const SizedBox(
+            width: 36,
+            height: 36,
+            child: Icon(
+              Icons.chevron_left_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
         ),
       ),
