@@ -1092,65 +1092,121 @@
   "@onboardingSkip": {
     "description": "オンボーディングで表示するスキップボタン"
   },
-  "onboardingPhilosophyTitle": "あなたの写真には、\nもう物語がある。",
-  "@onboardingPhilosophyTitle": {
-    "description": "フィロソフィーページのタイトル"
+  "onboardingStep1Eyebrow": "01 · ようこそ",
+  "@onboardingStep1Eyebrow": {
+    "description": "オンボーディング ステップ1のアイブロウラベル"
   },
-  "onboardingPhilosophySubtitle": "それを言葉にするお手伝いをします。",
+  "onboardingStep2Eyebrow": "02 · 使い方",
+  "@onboardingStep2Eyebrow": {
+    "description": "オンボーディング ステップ2のアイブロウラベル"
+  },
+  "onboardingStep3Eyebrow": "03 · プライバシー",
+  "@onboardingStep3Eyebrow": {
+    "description": "オンボーディング ステップ3のアイブロウラベル"
+  },
+  "onboardingStep4Eyebrow": "04 · 準備完了",
+  "@onboardingStep4Eyebrow": {
+    "description": "オンボーディング ステップ4のアイブロウラベル"
+  },
+  "onboardingPhilosophyTitle": "あなたの写真には、もう物語がある。",
+  "@onboardingPhilosophyTitle": {
+    "description": "オンボーディング ウェルカムページの見出し"
+  },
+  "onboardingPhilosophySubtitle": "それを言葉にするお手伝いをします — あなたのトーンで書かれた、静かな2段落の日記として。",
   "@onboardingPhilosophySubtitle": {
-    "description": "フィロソフィーページのサブタイトル"
+    "description": "オンボーディング ウェルカムページの本文"
   },
   "onboardingPhilosophyCta": "はじめる",
   "@onboardingPhilosophyCta": {
-    "description": "フィロソフィーページのCTAボタン"
+    "description": "ウェルカムページのCTAボタン"
   },
-  "onboardingExperienceTitle": "一日を、数秒で振り返る。",
+  "onboardingExperienceTitle": "写真を選ぶだけ。あとは私たちが書きます。",
   "@onboardingExperienceTitle": {
-    "description": "体験ページのタイトル"
+    "description": "オンボーディング 使い方ページの見出し"
   },
-  "onboardingExperienceSubtitle": "写真を選ぶだけ。\n思い出がよみがえります。",
+  "onboardingExperienceSubtitle": "約3秒で、その瞬間に根ざしたエントリが完成。そのまま保存しても、編集しても。",
   "@onboardingExperienceSubtitle": {
-    "description": "体験ページのサブタイトル"
+    "description": "オンボーディング 使い方ページの本文"
   },
   "onboardingExperienceCta": "次へ",
   "@onboardingExperienceCta": {
-    "description": "体験ページのCTAボタン"
+    "description": "使い方ページのCTAボタン"
   },
-  "onboardingExperienceSampleDate": "4月15日",
-  "@onboardingExperienceSampleDate": {
-    "description": "体験ページのサンプル日記の日付"
+  "onboardingExampleEntryPill": "サンプル",
+  "@onboardingExampleEntryPill": {
+    "description": "オンボーディングのサンプル日記カードのバッジラベル"
   },
-  "onboardingExperienceSampleTitle": "静かな午後",
-  "@onboardingExperienceSampleTitle": {
-    "description": "体験ページのサンプル日記のタイトル"
+  "onboardingSampleDate": "2月17日",
+  "@onboardingSampleDate": {
+    "description": "オンボーディングのサンプル日記カードの日付"
   },
-  "onboardingExperienceSampleBody": "差し込む光の中で丸くなって、\nそっと息をしていた。\n部屋は静まり返り、\nしばらくの間、\n何も気にならなかった。",
-  "@onboardingExperienceSampleBody": {
-    "description": "体験ページのサンプル日記の本文"
+  "onboardingSampleTitle": "猫の視線の中にある安らぎ",
+  "@onboardingSampleTitle": {
+    "description": "オンボーディングのサンプル日記カードのタイトル"
   },
-  "onboardingTrustTitle": "プライバシーを最優先に。",
+  "onboardingSampleExcerpt": "午後の光の中に丸まって、目をほとんど閉じていた。部屋は静まり返り、しばらくの間、他のことは何も気にならなかった。",
+  "@onboardingSampleExcerpt": {
+    "description": "オンボーディングのサンプル日記カードの抜粋"
+  },
+  "onboardingSampleTag1": "午前",
+  "@onboardingSampleTag1": {
+    "description": "オンボーディングのサンプル日記カードのタグ1"
+  },
+  "onboardingSampleTag2": "ねこ",
+  "@onboardingSampleTag2": {
+    "description": "オンボーディングのサンプル日記カードのタグ2"
+  },
+  "onboardingSampleTag3": "やすらぎ",
+  "@onboardingSampleTag3": {
+    "description": "オンボーディングのサンプル日記カードのタグ3"
+  },
+  "onboardingTrustTitle": "日記は、ここにとどまります。",
   "@onboardingTrustTitle": {
-    "description": "信頼ページのタイトル"
+    "description": "オンボーディング プライバシーページの見出し"
   },
-  "onboardingTrustSubtitle": "日記データは端末内に保存。\nアカウント登録も不要です。",
-  "@onboardingTrustSubtitle": {
-    "description": "信頼ページのサブタイトル"
+  "onboardingPrivacyOnDeviceTitle": "端末内にのみ保存",
+  "@onboardingPrivacyOnDeviceTitle": {
+    "description": "オンボーディング プライバシー行1のタイトル"
+  },
+  "onboardingPrivacyOnDeviceSubtitle": "日記はこの端末の外へ出ません。",
+  "@onboardingPrivacyOnDeviceSubtitle": {
+    "description": "オンボーディング プライバシー行1のサブタイトル"
+  },
+  "onboardingPrivacyNoAccountTitle": "アカウント不要",
+  "@onboardingPrivacyNoAccountTitle": {
+    "description": "オンボーディング プライバシー行2のタイトル"
+  },
+  "onboardingPrivacyNoAccountSubtitle": "メールも、パスワードも、登録も不要。",
+  "@onboardingPrivacyNoAccountSubtitle": {
+    "description": "オンボーディング プライバシー行2のサブタイトル"
+  },
+  "onboardingPrivacyYouOwnTitle": "すべてはあなたのもの",
+  "@onboardingPrivacyYouOwnTitle": {
+    "description": "オンボーディング プライバシー行3のタイトル"
+  },
+  "onboardingPrivacyYouOwnSubtitle": "いつでもエクスポート、削除、バックアップが可能。",
+  "@onboardingPrivacyYouOwnSubtitle": {
+    "description": "オンボーディング プライバシー行3のサブタイトル"
   },
   "onboardingTrustCta": "続ける",
   "@onboardingTrustCta": {
-    "description": "信頼ページのCTAボタン"
+    "description": "プライバシーページのCTAボタン"
   },
   "onboardingPermissionTitle": "今日からはじめよう。",
   "@onboardingPermissionTitle": {
-    "description": "権限ページのタイトル"
+    "description": "オンボーディング 準備完了ページの見出し"
   },
-  "onboardingPermissionSubtitle": "最初の日記を作るために\n写真へのアクセスが必要です。",
+  "onboardingPermissionSubtitle": "最初の日記を作るために、写真へのアクセスをお願いします。",
   "@onboardingPermissionSubtitle": {
-    "description": "権限ページのサブタイトル"
+    "description": "オンボーディング 準備完了ページの本文"
+  },
+  "onboardingStep4Note": "選んだ写真のみ読み込まれます。外部にアップロードされることはありません。",
+  "@onboardingStep4Note": {
+    "description": "準備完了ページのプライバシーサブノート"
   },
   "onboardingPermissionCta": "最初の日記を作る",
   "@onboardingPermissionCta": {
-    "description": "権限ページのCTAボタン"
+    "description": "準備完了ページのCTAボタン"
   },
   "onboardingProcessing": "準備中...",
   "@onboardingProcessing": {

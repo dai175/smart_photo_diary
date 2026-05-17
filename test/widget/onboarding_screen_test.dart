@@ -55,43 +55,40 @@ void main() {
 
   group('OnboardingScreen', () {
     group('Initial display', () {
-      testWidgets('shows philosophy page (first page) on launch', (
+      testWidgets('shows welcome page (first page) on launch', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Philosophy page should be visible
         expect(
-          find.text('Your photos\nalready hold the story.'),
+          find.text('Your photos already hold the story.'),
           findsOneWidget,
         );
       });
 
-      testWidgets('shows page indicator with 4 dots', (
+      testWidgets('shows progress header with 4 segments', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // 4 AnimatedContainers for the page indicator dots
+        // 4 AnimatedContainers for the progress segment track
         expect(find.byType(AnimatedContainer), findsNWidgets(4));
       });
     });
 
     group('Page navigation', () {
-      testWidgets('tapping Begin navigates to experience page', (
+      testWidgets('tapping Begin navigates to how-it-works page', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Tap Begin button
         await tester.tap(find.text('Begin'));
         await tester.pumpAndSettle();
 
-        // Experience page should be visible
-        expect(find.text('Relive your day in seconds.'), findsOneWidget);
+        expect(find.text('Pick a photo. We do the writing.'), findsOneWidget);
       });
 
       testWidgets('can navigate through all 4 pages', (
@@ -100,21 +97,21 @@ void main() {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Page 1: Philosophy -> tap Begin
+        // Page 1: Welcome -> tap Begin
         await tester.tap(find.text('Begin'));
         await tester.pumpAndSettle();
 
-        // Page 2: Experience -> tap Next
-        expect(find.text('Relive your day in seconds.'), findsOneWidget);
+        // Page 2: How It Works -> tap Next
+        expect(find.text('Pick a photo. We do the writing.'), findsOneWidget);
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
 
-        // Page 3: Trust -> tap Continue
-        expect(find.text('Private by design.'), findsOneWidget);
+        // Page 3: Privacy -> tap Continue
+        expect(find.text('Your diary stays here.'), findsOneWidget);
         await tester.tap(find.text('Continue'));
         await tester.pumpAndSettle();
 
-        // Page 4: Permission (last page)
+        // Page 4: Ready (last page)
         expect(find.text('Start with today.'), findsOneWidget);
         expect(find.text('Create my first diary'), findsOneWidget);
       });
@@ -125,17 +122,17 @@ void main() {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Swipe left to go to next page
-        await tester.drag(find.byType(PageView), const Offset(-400, 0));
+        // fling with velocity to ensure PageView wins the gesture arena
+        // over the vertical SingleChildScrollView inside each page
+        await tester.fling(find.byType(PageView), const Offset(-400, 0), 1200);
         await tester.pumpAndSettle();
 
-        // Should now see experience page content
-        expect(find.text('Relive your day in seconds.'), findsOneWidget);
+        expect(find.text('Pick a photo. We do the writing.'), findsOneWidget);
       });
     });
 
     group('Skip button', () {
-      testWidgets('is visible on pages 0-2 but not on page 3', (
+      testWidgets('is visible on pages 0-2 but absent on page 3', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(buildOnboardingScreen());
@@ -146,19 +143,13 @@ void main() {
 
         // Navigate to page 3 (last page)
         final ctaTexts = ['Begin', 'Next', 'Continue'];
-        for (int i = 0; i < 3; i++) {
-          await tester.tap(find.text(ctaTexts[i]));
+        for (final label in ctaTexts) {
+          await tester.tap(find.text(label));
           await tester.pumpAndSettle();
         }
 
-        // Skip should be visually hidden on last page (Visibility with maintainSize)
-        final visibilityWidget = tester.widget<Visibility>(
-          find.ancestor(
-            of: find.text('Skip'),
-            matching: find.byType(Visibility),
-          ),
-        );
-        expect(visibilityWidget.visible, isFalse);
+        // Skip is not rendered on the last page
+        expect(find.text('Skip'), findsNothing);
       });
     });
 
@@ -166,8 +157,6 @@ void main() {
       testWidgets(
         'tapping Create my first diary on last page calls completion services',
         (WidgetTester tester) async {
-          // Block requestPermission so navigation to HomeScreen never happens
-          // (avoids pending-timer issues from HomeScreen initialization).
           when(
             () => mockPhoto.requestPermission(),
           ).thenAnswer((_) => Completer<Result<bool>>().future);
@@ -175,19 +164,16 @@ void main() {
           await tester.pumpWidget(buildOnboardingScreen());
           await tester.pumpAndSettle();
 
-          // Navigate to last page
           final ctaTexts = ['Begin', 'Next', 'Continue'];
-          for (int i = 0; i < 3; i++) {
-            await tester.tap(find.text(ctaTexts[i]));
+          for (final label in ctaTexts) {
+            await tester.tap(find.text(label));
             await tester.pumpAndSettle();
           }
 
-          // Tap Create my first diary
           await tester.tap(find.text('Create my first diary'));
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          // Settings service should be called
           verify(() => mockSettings.setFirstLaunchCompleted()).called(1);
         },
       );
@@ -195,7 +181,6 @@ void main() {
       testWidgets('tapping Skip calls completion flow', (
         WidgetTester tester,
       ) async {
-        // Block requestPermission so navigation to HomeScreen never happens
         when(
           () => mockPhoto.requestPermission(),
         ).thenAnswer((_) => Completer<Result<bool>>().future);
@@ -203,12 +188,10 @@ void main() {
         await tester.pumpWidget(buildOnboardingScreen());
         await tester.pumpAndSettle();
 
-        // Tap Skip
         await tester.tap(find.text('Skip'));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Settings service should be called
         verify(() => mockSettings.setFirstLaunchCompleted()).called(1);
       });
     });

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/app_constants.dart';
 import '../../controllers/onboarding_controller.dart';
 import '../../localization/localization_extensions.dart';
-import '../../ui/components/buttons/primary_button.dart';
-import '../../ui/design_system/app_spacing.dart';
-import '../../ui/design_system/app_typography.dart';
+import '../../ui/components/buttons/animated_button_base.dart';
+import '../../ui/design_system/app_colors.dart';
 import '../home_screen.dart';
+import 'components/onboarding_header.dart';
 import 'onboarding_pages.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -37,7 +36,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _completeOnboarding() async {
     final shouldNavigate = await _controller.completeOnboarding();
-
     if (shouldNavigate && mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -48,22 +46,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  String _getCtaText(BuildContext context) {
+  String _getCtaLabel(BuildContext context) {
     final l10n = context.l10n;
-    switch (_controller.currentPage) {
-      case 0:
-        return l10n.onboardingPhilosophyCta;
-      case 1:
-        return l10n.onboardingExperienceCta;
-      case 2:
-        return l10n.onboardingTrustCta;
-      case 3:
-        return _controller.isProcessing
+    return switch (_controller.currentPage) {
+      0 => l10n.onboardingPhilosophyCta,
+      1 => l10n.onboardingExperienceCta,
+      2 => l10n.onboardingTrustCta,
+      3 =>
+        _controller.isProcessing
             ? l10n.onboardingProcessing
-            : l10n.onboardingPermissionCta;
-      default:
-        return l10n.onboardingPhilosophyCta;
-    }
+            : l10n.onboardingPermissionCta,
+      _ => l10n.onboardingPhilosophyCta,
+    };
   }
 
   @override
@@ -76,52 +70,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // スキップボタン（最後のページ以外で表示、空間は常に確保）
-                Visibility(
-                  visible: !_controller.isLastPage,
-                  maintainSize: true,
-                  maintainAnimation: true,
-                  maintainState: true,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: TextButton(
-                        onPressed: _controller.isProcessing
-                            ? null
-                            : _completeOnboarding,
-                        child: Text(
-                          context.l10n.onboardingSkip,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                OnboardingHeader(
+                  step: _controller.currentPage + 1,
+                  total: _controller.pageCount,
+                  isLastStep: _controller.isLastPage,
+                  onSkip: _controller.isProcessing
+                      ? () {}
+                      : _completeOnboarding,
                 ),
-
-                // ページビュー
                 Expanded(
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: _controller.setCurrentPage,
                     children: const [
-                      OnboardingPhilosophyPage(),
-                      OnboardingExperiencePage(),
-                      OnboardingTrustPage(),
-                      OnboardingPermissionPage(),
+                      OnboardingWelcomePage(),
+                      OnboardingHowItWorksPage(),
+                      OnboardingPrivacyPage(),
+                      OnboardingReadyPage(),
                     ],
                   ),
                 ),
-
-                // ページインジケーター
-                _buildPageIndicator(),
-
-                // CTAボタン
-                _buildCtaButton(),
+                _buildCta(context),
               ],
             ),
           ),
@@ -130,44 +99,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPageIndicator() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(_controller.pageCount, (index) {
-          return AnimatedContainer(
-            duration: AppConstants.standardTransitionDuration,
-            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: _controller.currentPage == index
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-          );
-        }),
-      ),
-    );
-  }
+  Widget _buildCta(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
+    final isLastPage = _controller.isLastPage;
+    final isProcessing = _controller.isProcessing;
 
-  Widget _buildCtaButton() {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: SizedBox(
-        width: double.infinity,
-        child: PrimaryButton(
-          onPressed: _controller.isProcessing
-              ? null
-              : _controller.isLastPage
-              ? _completeOnboarding
-              : () => _controller.nextPage(_pageController),
-          text: _getCtaText(context),
-        ),
+      padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
+      child: AnimatedButton(
+        onPressed: isProcessing
+            ? null
+            : isLastPage
+            ? _completeOnboarding
+            : () => _controller.nextPage(_pageController),
+        backgroundColor: accent,
+        foregroundColor: Colors.white,
+        shadowColor: accent.withValues(alpha: 0.35),
+        height: 52,
+        borderRadius: BorderRadius.circular(14),
+        child: isProcessing
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _getCtaLabel(context),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  if (isLastPage) ...[
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_forward_rounded, size: 16),
+                  ],
+                ],
+              ),
       ),
     );
   }

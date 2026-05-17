@@ -74,44 +74,63 @@ class DiaryPreviewGeneratingScreen extends StatelessWidget {
                     children: [
                       _DateLine(date: photoDateTime),
                       const SizedBox(height: 12),
-                      const _SkeletonBar(
-                        widthFactor: 0.85,
-                        height: 22,
-                        radius: 6,
-                      ),
-                      const SizedBox(height: 10),
-                      const _SkeletonBar(
-                        widthFactor: 0.55,
-                        height: 22,
-                        radius: 6,
-                      ),
-                      const SizedBox(height: 16),
-                      const Row(
-                        children: [
-                          _SkeletonBar(fixedWidth: 70, height: 22, radius: 6),
-                          SizedBox(width: 6),
-                          _SkeletonBar(fixedWidth: 86, height: 22, radius: 6),
-                          SizedBox(width: 6),
-                          _SkeletonBar(fixedWidth: 58, height: 22, radius: 6),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      const _Hairline(),
-                      const SizedBox(height: 20),
-                      const _SkeletonBar(height: 12, radius: 4),
-                      const SizedBox(height: 10),
-                      const _SkeletonBar(
-                        widthFactor: 0.96,
-                        height: 12,
-                        radius: 4,
-                      ),
-                      const SizedBox(height: 10),
-                      const _SkeletonBar(height: 12, radius: 4),
-                      const SizedBox(height: 10),
-                      const _SkeletonBar(
-                        widthFactor: 0.78,
-                        height: 12,
-                        radius: 4,
+                      const LoadingShimmer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _SkeletonBar(
+                              widthFactor: 0.85,
+                              height: 22,
+                              radius: 6,
+                            ),
+                            SizedBox(height: 10),
+                            _SkeletonBar(
+                              widthFactor: 0.55,
+                              height: 22,
+                              radius: 6,
+                            ),
+                            SizedBox(height: 16),
+                            Row(
+                              children: [
+                                _SkeletonBar(
+                                  fixedWidth: 70,
+                                  height: 22,
+                                  radius: 6,
+                                ),
+                                SizedBox(width: 6),
+                                _SkeletonBar(
+                                  fixedWidth: 86,
+                                  height: 22,
+                                  radius: 6,
+                                ),
+                                SizedBox(width: 6),
+                                _SkeletonBar(
+                                  fixedWidth: 58,
+                                  height: 22,
+                                  radius: 6,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20),
+                            _Hairline(),
+                            SizedBox(height: 20),
+                            _SkeletonBar(height: 12, radius: 4),
+                            SizedBox(height: 10),
+                            _SkeletonBar(
+                              widthFactor: 0.96,
+                              height: 12,
+                              radius: 4,
+                            ),
+                            SizedBox(height: 10),
+                            _SkeletonBar(height: 12, radius: 4),
+                            SizedBox(height: 10),
+                            _SkeletonBar(
+                              widthFactor: 0.78,
+                              height: 12,
+                              radius: 4,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -206,22 +225,20 @@ class _SkeletonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bar = LoadingShimmer(
-      child: Container(
-        height: height,
-        width: fixedWidth,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(radius),
-        ),
+    final shape = Container(
+      height: height,
+      width: fixedWidth,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(radius),
       ),
     );
 
-    if (fixedWidth != null) return bar;
+    if (fixedWidth != null) return shape;
     return FractionallySizedBox(
       widthFactor: widthFactor ?? 1.0,
       alignment: Alignment.centerLeft,
-      child: bar,
+      child: shape,
     );
   }
 }
@@ -357,15 +374,13 @@ class _IndeterminateBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = isDark ? AppColors.accentLight : AppColors.accentDark;
-    return ClipRRect(
+    return LinearProgressIndicator(
+      minHeight: 4,
       borderRadius: BorderRadius.circular(999),
-      child: LinearProgressIndicator(
-        minHeight: 4,
-        backgroundColor: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.black.withValues(alpha: 0.06),
-        valueColor: AlwaysStoppedAnimation<Color>(accent),
-      ),
+      backgroundColor: isDark
+          ? Colors.white.withValues(alpha: 0.06)
+          : Colors.black.withValues(alpha: 0.06),
+      valueColor: AlwaysStoppedAnimation<Color>(accent),
     );
   }
 }

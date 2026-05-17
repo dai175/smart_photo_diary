@@ -97,6 +97,7 @@ flutter:
   assets:
     - assets/images/
     - assets/data/
+    - assets/onboarding/
     # .env は PROJECT ROOT に配置（assetsには含めない）
 
   # An image asset can refer to one or more resolution-specific "variants", see
