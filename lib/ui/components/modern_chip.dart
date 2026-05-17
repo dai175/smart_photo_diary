@@ -388,11 +388,13 @@ class _ModernChipState extends State<ModernChip>
 
     if (widget._variant == _ChipVariant.tag ||
         widget._variant == _ChipVariant.badge) {
-      final bg = AppColors.primary.withValues(alpha: AppConstants.opacityXXLow);
+      final bg = isDark ? AppColors.tagPrimaryBgDark : AppColors.tagPrimaryBg;
       return _ChipColorData(
         backgroundColor: bg,
-        foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
-        borderColor: AppColors.primary,
+        foregroundColor: isDark
+            ? AppColors.tagPrimaryFgDark
+            : AppColors.tagPrimaryFg,
+        borderColor: isDark ? AppColors.outlineDark : AppColors.chipOutline,
         hoverColor: bg.withValues(alpha: AppConstants.opacityHigh),
       );
     }

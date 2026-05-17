@@ -67,7 +67,7 @@ class PresetDialogs {
     final l10n = context.l10n;
     return CustomDialog(
       icon: isDestructive ? Icons.warning_amber_rounded : Icons.help_rounded,
-      iconColor: isDestructive ? AppColors.warning : AppColors.info,
+      iconColor: isDestructive ? AppColors.warning : AppColors.secondary,
       title: title,
       message: message,
       onClose: onCancel,

@@ -87,7 +87,7 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
       builder: (BuildContext context) {
         return CustomDialog(
           icon: Icons.photo_library_outlined,
-          iconColor: AppColors.info,
+          iconColor: AppColors.secondary,
           title: context.l10n.homeLimitedAccessTitle,
           message: context.l10n.homeLimitedAccessMessage,
           onClose: () => Navigator.of(context).pop(),
