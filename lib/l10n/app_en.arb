@@ -303,6 +303,26 @@
   "@settingsAppBarTitle": {
     "description": "App bar title for the settings screen"
   },
+  "settingsAccountLabel": "Account",
+  "@settingsAccountLabel": {
+    "description": "Uppercase section label above the settings screen title"
+  },
+  "settingsGroupAppearance": "Appearance",
+  "@settingsGroupAppearance": {
+    "description": "Settings group header for appearance options"
+  },
+  "settingsGroupDiaryPhotos": "Diary & Photos",
+  "@settingsGroupDiaryPhotos": {
+    "description": "Settings group header for diary and photo options"
+  },
+  "settingsGroupData": "Data",
+  "@settingsGroupData": {
+    "description": "Settings group header for data management options"
+  },
+  "settingsGroupAbout": "About",
+  "@settingsGroupAbout": {
+    "description": "Settings group header for app information"
+  },
   "settingsLoadingTitle": "Loading settings...",
   "@settingsLoadingTitle": {
     "description": "Headline shown while settings are loading"
@@ -1216,6 +1236,15 @@
   "@diaryDetailPhotosSectionTitle": {
     "description": "Heading for the photos section"
   },
+  "diaryDetailPhotoCount": "{count} photos",
+  "@diaryDetailPhotoCount": {
+    "description": "Photo count in diary detail metadata",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diaryDetailTagsSectionTitle": "Tags",
   "@diaryDetailTagsSectionTitle": {
     "description": "Heading for the tags section"
@@ -1336,6 +1365,26 @@
       }
     }
   },
+  "statisticsCalendarLegendEntry": "Entry",
+  "@statisticsCalendarLegendEntry": {
+    "description": "Calendar legend label for days with a single diary entry"
+  },
+  "statisticsCalendarLegendMultiple": "Multiple",
+  "@statisticsCalendarLegendMultiple": {
+    "description": "Calendar legend label for days with multiple diary entries"
+  },
+  "statisticsCalendarLegendToday": "Today",
+  "@statisticsCalendarLegendToday": {
+    "description": "Calendar legend label for today's date indicator"
+  },
+  "statisticsCalendarLegendSelected": "Selected",
+  "@statisticsCalendarLegendSelected": {
+    "description": "Calendar legend label for the selected date indicator"
+  },
+  "statisticsAtAGlanceSuffix": " · at a glance",
+  "@statisticsAtAGlanceSuffix": {
+    "description": "Suffix appended to the month/year in the statistics section label"
+  },
   "subscriptionUsageWarningRemaining": "You have {remaining} stories remaining.",
   "@subscriptionUsageWarningRemaining": {
     "description": "Warning message shown when story usage is near the monthly limit",
@@ -1406,6 +1455,10 @@
         "type": "int"
       }
     }
+  },
+  "fabCreateDiaryShort": "Create diary →",
+  "@fabCreateDiaryShort": {
+    "description": "Short label for the create diary action button in the selection pill bar"
   },
   "timelineToday": "Today",
   "@timelineToday": {
@@ -1482,6 +1535,27 @@
   "promptContextInputHelper": "Your words make the story richer",
   "@promptContextInputHelper": {
     "description": "Helper text for the context text input"
+  },
+  "promptSelectionSubtitle": "Pick a question to anchor your writing, or skip.",
+  "@promptSelectionSubtitle": {
+    "description": "Subtitle below the prompt selection modal title"
+  },
+  "promptSectionQuickOptions": "Quick options",
+  "@promptSectionQuickOptions": {
+    "description": "Section label above the quick option cards in prompt selection modal"
+  },
+  "promptSectionBrowse": "Browse prompts",
+  "@promptSectionBrowse": {
+    "description": "Section label above the prompt list in prompt selection modal"
+  },
+  "promptBrowseCount": "{count} available",
+  "@promptBrowseCount": {
+    "description": "Prompt count label shown next to the Browse prompts section header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "diaryDetailCopiedToClipboard": "Diary copied to clipboard",
   "@diaryDetailCopiedToClipboard": {
@@ -1561,6 +1635,35 @@
   "@photoSemanticLocked": {
     "description": "Semantic label indicating the photo is locked (Premium only)"
   },
+  "planCardThisMonth": "This month",
+  "@planCardThisMonth": {
+    "description": "Plan card section header"
+  },
+  "planCardDiaryUnit": "diaries",
+  "@planCardDiaryUnit": {
+    "description": "Unit label for diary count in plan card"
+  },
+  "planCardRemainingAndReset": "{remaining} left · resets {date}",
+  "@planCardRemainingAndReset": {
+    "description": "Plan card remaining count and reset date",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardAutoRenews": "Auto-renews on {date} · Manage subscription",
+  "@planCardAutoRenews": {
+    "description": "Premium plan auto-renew footer",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "diaryCardSemanticLabel": "Diary: {title}, {date}",
   "@diaryCardSemanticLabel": {
     "description": "Semantic label for diary card widget",
@@ -1572,5 +1675,21 @@
         "type": "String"
       }
     }
+  },
+  "photoCountIndicator": "{current} / {total}",
+  "@photoCountIndicator": {
+    "description": "Photo counter indicator (e.g. 1 / 3)",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumBadgeLabel": "PREMIUM",
+  "@premiumBadgeLabel": {
+    "description": "Label shown on premium prompt badge"
   }
 }

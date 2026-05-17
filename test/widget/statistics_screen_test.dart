@@ -216,10 +216,27 @@ void main() {
         diaryCompleter.complete(mockDiary);
         await pumpFrames(tester);
 
-        expect(find.text('Total entries'), findsOneWidget);
-        expect(find.text('Current streak'), findsOneWidget);
-        expect(find.text('Longest streak'), findsOneWidget);
-        expect(find.text('This month'), findsOneWidget);
+        expect(find.text('TOTAL ENTRIES'), findsOneWidget);
+        expect(find.text('CURRENT STREAK'), findsOneWidget);
+        expect(find.text('LONGEST STREAK'), findsOneWidget);
+        expect(find.text('THIS MONTH'), findsOneWidget);
+      });
+
+      testWidgets('shows section label with at a glance suffix', (
+        WidgetTester tester,
+      ) async {
+        final diaryCompleter = Completer<IDiaryService>();
+        serviceLocator.registerAsyncFactory<IDiaryService>(
+          () => diaryCompleter.future,
+        );
+
+        await tester.pumpWidget(buildScreen());
+        await tester.pump();
+
+        diaryCompleter.complete(mockDiary);
+        await pumpFrames(tester);
+
+        expect(find.textContaining('AT A GLANCE'), findsOneWidget);
       });
     });
 

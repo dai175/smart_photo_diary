@@ -7,6 +7,8 @@ class StatisticsData {
   final int longestStreak;
   final int monthlyCount;
   final Map<DateTime, List<DiaryEntry>> diaryMap;
+  final int? previousMonthlyCount;
+  final int? previousCompletedStreak;
 
   const StatisticsData({
     required this.totalEntries,
@@ -14,6 +16,8 @@ class StatisticsData {
     required this.longestStreak,
     required this.monthlyCount,
     required this.diaryMap,
+    this.previousMonthlyCount,
+    this.previousCompletedStreak,
   });
 }
 
@@ -25,7 +29,9 @@ class StatisticsCalculator {
   static StatisticsData calculate(List<DiaryEntry> allDiaries) {
     final diaryMap = _buildDiaryMap(allDiaries);
     final streaks = _calculateStreaks(diaryMap);
-    final monthlyCount = _getMonthlyCount(allDiaries);
+    final (monthlyCount, previousMonthlyCount) = _getMonthlyAndPreviousCount(
+      allDiaries,
+    );
 
     return StatisticsData(
       totalEntries: allDiaries.length,
@@ -33,6 +39,11 @@ class StatisticsCalculator {
       longestStreak: streaks.$2,
       monthlyCount: monthlyCount,
       diaryMap: diaryMap,
+      previousMonthlyCount: previousMonthlyCount,
+      previousCompletedStreak: _getPreviousCompletedStreak(
+        diaryMap,
+        streaks.$1,
+      ),
     );
   }
 
@@ -87,25 +98,49 @@ class StatisticsCalculator {
     return (currentStreak, longestStreak);
   }
 
-  /// 今月の記録日数を計算
-  static int _getMonthlyCount(List<DiaryEntry> allDiaries) {
+  /// 今月・先月の記録日数を1パスで計算。戻り値は (currentMonth, previousMonth)
+  static (int, int) _getMonthlyAndPreviousCount(List<DiaryEntry> allDiaries) {
     final now = DateTime.now();
-    final currentMonth = DateTime(now.year, now.month);
-    final nextMonth = DateTime(now.year, now.month + 1);
+    final currentMonthStart = DateTime(now.year, now.month);
+    final nextMonthStart = DateTime(now.year, now.month + 1);
+    final prevMonthStart = DateTime(now.year, now.month - 1);
 
-    final monthlyDates = <DateTime>{};
+    final currentDates = <DateTime>{};
+    final previousDates = <DateTime>{};
     for (final diary in allDiaries) {
-      if (diary.date.isAfter(currentMonth.subtract(const Duration(days: 1))) &&
-          diary.date.isBefore(nextMonth)) {
-        final date = DateTime(
-          diary.date.year,
-          diary.date.month,
-          diary.date.day,
-        );
-        monthlyDates.add(date);
+      final d = DateTime(diary.date.year, diary.date.month, diary.date.day);
+      if (!d.isBefore(currentMonthStart) && d.isBefore(nextMonthStart)) {
+        currentDates.add(d);
+      } else if (!d.isBefore(prevMonthStart) && d.isBefore(currentMonthStart)) {
+        previousDates.add(d);
       }
     }
-    return monthlyDates.length;
+    return (currentDates.length, previousDates.length);
+  }
+
+  /// 現在ストリークの直前にあった完了ストリークの日数を返す（存在しない場合は null）
+  static int? _getPreviousCompletedStreak(
+    Map<DateTime, List<DiaryEntry>> diaryMap,
+    int currentStreak,
+  ) {
+    if (diaryMap.isEmpty) return null;
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final earliest = diaryMap.keys.reduce((a, b) => a.isBefore(b) ? a : b);
+
+    // Skip past the current streak, then skip any gap days
+    DateTime check = todayDate.subtract(Duration(days: currentStreak + 1));
+    while (!diaryMap.containsKey(check) && !check.isBefore(earliest)) {
+      check = check.subtract(const Duration(days: 1));
+    }
+    if (!diaryMap.containsKey(check)) return null;
+
+    int prev = 0;
+    while (diaryMap.containsKey(check)) {
+      prev++;
+      check = check.subtract(const Duration(days: 1));
+    }
+    return prev;
   }
 
   /// 特定日のイベントを取得

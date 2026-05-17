@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../constants/app_constants.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../controllers/scroll_signal.dart';
 import '../core/service_registration.dart';
+import '../localization/localization_extensions.dart';
 import '../models/timeline_callbacks.dart';
 import '../models/writing_prompt.dart';
 import '../screens/diary_preview_screen.dart';
 import '../services/interfaces/logging_service_interface.dart';
+import '../ui/design_system/app_colors.dart';
 import '../widgets/prompt_selection_modal.dart';
-import '../widgets/smart_fab_widget.dart';
 import '../widgets/timeline_photo_widget.dart';
 
 /// タイムライン表示とスマートFABを統合したウィジェット
@@ -36,24 +38,109 @@ class TimelineFABIntegration extends StatelessWidget {
         TimelinePhotoWidget(
           controller: controller,
           callbacks: callbacks,
-          showFAB: false, // FABは別途管理
+          showFAB: false,
           scrollSignal: scrollSignal,
         ),
-        Positioned(
-          right: 16,
-          bottom: 16,
-          child: SmartFABWidget(
-            photoController: controller,
-            onCameraPressed: callbacks.onCameraPressed,
-            onCreateDiaryPressed: () => _onCreateDiaryPressed(context),
-            heroTag: null,
-          ),
+        ListenableBuilder(
+          listenable: controller,
+          builder: (context, child) {
+            final isSelecting = controller.selectedCount > 0;
+            return Stack(
+              children: [
+                Positioned(
+                  right: 16,
+                  bottom: 16,
+                  child: AnimatedOpacity(
+                    opacity: isSelecting ? 0.0 : 1.0,
+                    duration: AppConstants.standardTransitionDuration,
+                    curve: Curves.easeInOut,
+                    child: IgnorePointer(
+                      ignoring: isSelecting,
+                      child: FloatingActionButton(
+                        heroTag: null,
+                        onPressed: callbacks.onCameraPressed,
+                        backgroundColor: AppColors.accentDark,
+                        foregroundColor: Colors.white,
+                        tooltip: context.l10n.fabTooltipTakePhoto,
+                        shape: const CircleBorder(),
+                        child: const Icon(Icons.photo_camera_rounded, size: 24),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 16,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: isSelecting ? 1.0 : 0.0,
+                      duration: AppConstants.standardTransitionDuration,
+                      curve: Curves.easeInOut,
+                      child: IgnorePointer(
+                        ignoring: !isSelecting,
+                        child: _buildSelectionPill(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
   }
 
-  /// 日記作成ボタンがタップされた時の処理
+  Widget _buildSelectionPill(BuildContext context) {
+    final count = controller.selectedCount;
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: AppColors.accentDark,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      padding: const EdgeInsets.only(left: 16, right: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.l10n.homeSelectionCount(count),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          TextButton(
+            onPressed: controller.clearSelection,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white.withValues(alpha: 0.7),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+            ),
+            child: Text(context.l10n.homeSelectionClearAll),
+          ),
+          const SizedBox(width: 4),
+          TextButton(
+            onPressed: () => _onCreateDiaryPressed(context),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              minimumSize: Size.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            child: Text(context.l10n.fabCreateDiaryShort),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _onCreateDiaryPressed(BuildContext context) async {
     final logger = ServiceRegistration.get<ILoggingService>();
 
@@ -74,7 +161,6 @@ class TimelineFABIntegration extends StatelessWidget {
         return;
       }
 
-      // プロンプト選択モーダルを表示
       await showDialog<void>(
         context: context,
         barrierDismissible: false,
@@ -85,6 +171,7 @@ class TimelineFABIntegration extends StatelessWidget {
               context,
               selectedPhotos,
               prompt,
+              logger: logger,
               contextText: contextText,
             );
           },
@@ -94,6 +181,7 @@ class TimelineFABIntegration extends StatelessWidget {
               context,
               selectedPhotos,
               null,
+              logger: logger,
               contextText: contextText,
             );
           },
@@ -108,15 +196,13 @@ class TimelineFABIntegration extends StatelessWidget {
     }
   }
 
-  /// 日記プレビュー画面に遷移
   void _navigateToDiaryPreview(
     BuildContext context,
     List<AssetEntity> selectedPhotos,
     WritingPrompt? selectedPrompt, {
+    required ILoggingService logger,
     String? contextText,
   }) {
-    final logger = ServiceRegistration.get<ILoggingService>();
-
     logger.info(
       'Navigating to diary preview screen',
       context: 'TimelineFABIntegration._navigateToDiaryPreview',
@@ -135,7 +221,6 @@ class TimelineFABIntegration extends StatelessWidget {
       ),
     ).then((created) {
       if (created == true) {
-        // 日記作成完了後に選択をクリアし、コールバックを実行
         controller.clearSelection();
         callbacks.onDiaryCreated?.call();
       }

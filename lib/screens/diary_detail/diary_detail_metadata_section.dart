@@ -1,60 +1,64 @@
 import 'package:flutter/material.dart';
+
 import '../../localization/localization_extensions.dart';
 import '../../models/diary_entry.dart';
-import '../../ui/components/custom_card.dart';
-import '../../ui/components/modern_chip.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
-import '../../ui/animations/list_animations.dart';
 
-/// 日記詳細のタグセクション
+/// 日記詳細のメタデータセクション（作成日・更新日・写真枚数）
 class DiaryDetailMetadataSection extends StatelessWidget {
-  const DiaryDetailMetadataSection({
-    super.key,
-    required this.diaryEntry,
-    this.hasPhotos = false,
-  });
+  const DiaryDetailMetadataSection({super.key, required this.diaryEntry});
 
   final DiaryEntry diaryEntry;
-  final bool hasPhotos;
 
   @override
   Widget build(BuildContext context) {
-    if (diaryEntry.effectiveTags.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    final l10n = context.l10n;
+    final photoCount = diaryEntry.photoIds.length;
+    final showUpdated =
+        diaryEntry.updatedAt.difference(diaryEntry.createdAt).inMinutes > 1;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return SlideInWidget(
-      delay: Duration(milliseconds: hasPhotos ? 300 : 200),
-      child: CustomCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.tag_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: AppSpacing.iconMd,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  context.l10n.diaryDetailTagsSectionTitle,
-                  style: AppTypography.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.xs,
-              runSpacing: AppSpacing.xs,
-              children: diaryEntry.effectiveTags
-                  .map((tag) => ModernChip.tag(label: tag))
-                  .toList(),
-            ),
-          ],
+    Widget metaRow(IconData icon, String label) => Row(
+      children: [
+        Icon(
+          icon,
+          size: AppSpacing.iconXxs,
+          color: colorScheme.onSurfaceVariant,
         ),
-      ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: AppTypography.withColor(
+            AppTypography.bodySmall,
+            colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (photoCount > 0) ...[
+          metaRow(
+            Icons.photo_library_rounded,
+            l10n.diaryDetailPhotoCount(photoCount),
+          ),
+          const SizedBox(height: 6),
+        ],
+        metaRow(
+          Icons.calendar_today_rounded,
+          l10n.formatFullDateTime(diaryEntry.createdAt),
+        ),
+        if (showUpdated) ...[
+          const SizedBox(height: 6),
+          metaRow(
+            Icons.edit_calendar_rounded,
+            l10n.formatFullDateTime(diaryEntry.updatedAt),
+          ),
+        ],
+      ],
     );
   }
 }

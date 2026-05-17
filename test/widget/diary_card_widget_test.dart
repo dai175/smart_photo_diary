@@ -126,8 +126,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // 日付テキストが表示される（バッジからプレーンテキストに変更）
-        expect(find.textContaining('6/15'), findsOneWidget);
+        // Hero カード: "JUN 15 · SUNDAY" 形式（英語ロケール）
+        expect(find.textContaining('JUN'), findsOneWidget);
       });
     });
 

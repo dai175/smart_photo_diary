@@ -88,12 +88,14 @@ class _LoadingShimmerState extends State<LoadingShimmer>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor =
         widget.baseColor ??
-        (isDark ? const Color(0xFF2E2A27) : AppColors.surfaceVariant);
+        (isDark
+            ? AppColors.surfaceContainerHighDark
+            : AppColors.surfaceVariant);
     final highlightColor =
         widget.highlightColor ??
         (isDark
-            ? const Color(0xFF3A3633)
-            : Colors.white.withValues(alpha: 0.8));
+            ? AppColors.surfaceContainerHighestDark
+            : const Color(0xCCFFFFFF));
 
     return AnimatedBuilder(
       animation: _animation,

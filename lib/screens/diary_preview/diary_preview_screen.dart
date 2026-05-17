@@ -231,7 +231,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(context.l10n.diaryPreviewAppBarTitle),
-      centerTitle: false,
       actions: [
         // 再生成ボタン（プロンプトをスキップ）
         if (!_controller.isInitializing &&

@@ -6,7 +6,9 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../localization/localization_extensions.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/components/custom_card.dart';
+import '../../ui/components/drag_handle.dart';
 import '../../ui/components/loading_state_card.dart';
+import '../../ui/component_constants.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/design_system/app_typography.dart';
 import '../../ui/animations/list_animations.dart';
@@ -78,16 +80,13 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   void _onControllerChanged() {
-    // Controller の diaryEntry が変わったらテキストコントローラーを同期
     final entry = _controller.diaryEntry;
     if (entry != null && !_controller.isEditing) {
       _titleController.text = entry.title;
       _contentController.text = entry.content;
     }
-    // ListenableBuilder がUIを再構築するため setState は不要
   }
 
-  /// 日記を更新する
   Future<void> _updateDiary() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
@@ -111,7 +110,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     }
   }
 
-  /// 日記を削除する
   Future<void> _deleteDiary() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -143,7 +141,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     }
   }
 
-  /// エラー種別からローカライズされたメッセージを取得
   String _getErrorMessage(AppLocalizations l10n) {
     final detail = _controller.rawErrorDetail;
     return switch (_controller.errorType) {
@@ -167,10 +164,19 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
       child: ListenableBuilder(
         listenable: _controller,
         builder: (context, child) {
+          final isEditing = _controller.isEditing;
           return Scaffold(
+            extendBodyBehindAppBar: true,
             backgroundColor: Theme.of(context).colorScheme.surface,
-            appBar: _buildAppBar(l10n),
-            body: _buildBody(l10n),
+            appBar: isEditing ? _buildAppBar(l10n) : null,
+            body: isEditing
+                ? _buildBody(l10n)
+                : Stack(
+                    children: [
+                      _buildBody(l10n),
+                      _buildFloatingControls(context, l10n),
+                    ],
+                  ),
             bottomNavigationBar: _buildBottomBar(l10n),
           );
         },
@@ -178,71 +184,109 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
   }
 
-  /// AppBarを構築
   PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
-    return AppBar(
-      title: _controller.isEditing ? Text(l10n.diaryDetailEditTitle) : null,
-      actions: [
-        // 共有ボタン
-        if (!_controller.isLoading &&
-            !_controller.hasError &&
-            _controller.diaryEntry != null &&
-            !_controller.isEditing)
-          IconButton(
-            onPressed: () {
-              DiaryDetailShareHelper.showShareDialog(
+    return AppBar(title: Text(l10n.diaryDetailEditTitle));
+  }
+
+  Widget _buildFloatingControls(BuildContext context, AppLocalizations l10n) {
+    final canShowActions =
+        !_controller.isLoading &&
+        !_controller.hasError &&
+        _controller.diaryEntry != null;
+
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 12,
+      left: 20,
+      right: 20,
+      child: Row(
+        children: [
+          _buildFloatingButton(
+            Icons.arrow_back_ios_new_rounded,
+            () => Navigator.of(
+              context,
+            ).pop(_controller.wasModified ? 'updated' : null),
+          ),
+          const Spacer(),
+          if (canShowActions) ...[
+            _buildFloatingButton(
+              Icons.share_rounded,
+              () => DiaryDetailShareHelper.showShareDialog(
                 context: context,
                 diaryEntry: _controller.diaryEntry!,
                 photoAssets: _controller.photoAssets,
-              );
-            },
-            icon: const Icon(Icons.share_rounded),
-            tooltip: l10n.commonShare,
-          ),
-        // 編集モード切替ボタン（閲覧モード時のみ表示、編集時は下部バーで操作）
-        if (!_controller.isLoading &&
-            !_controller.hasError &&
-            _controller.diaryEntry != null &&
-            !_controller.isEditing)
-          IconButton(
-            onPressed: () {
-              _controller.startEditing();
-            },
-            icon: const Icon(Icons.edit_rounded),
-            tooltip: l10n.commonEdit,
-          ),
-        // オーバーフローメニュー（削除など）
-        if (!_controller.isLoading &&
-            !_controller.hasError &&
-            _controller.diaryEntry != null &&
-            !_controller.isEditing)
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'delete') {
-                MicroInteractions.hapticTap(
-                  intensity: VibrationIntensity.medium,
-                );
-                _deleteDiary();
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete_rounded),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(l10n.commonDelete),
-                  ],
-                ),
               ),
-            ],
-          ),
-      ],
+            ),
+            const SizedBox(width: 8),
+            _buildFloatingButton(
+              Icons.edit_rounded,
+              () => _controller.startEditing(),
+            ),
+            const SizedBox(width: 8),
+            _buildFloatingButton(
+              Icons.more_horiz_rounded,
+              () => _showMoreMenu(context, l10n),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
-  /// Bodyを構築
+  Widget _buildFloatingButton(IconData icon, VoidCallback onTap) {
+    return CircularIconButton(
+      onPressed: onTap,
+      icon: icon,
+      backgroundColor: Colors.black.withValues(alpha: 0.45),
+      foregroundColor: Colors.white,
+      size: 36,
+    );
+  }
+
+  Future<void> _showMoreMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BottomSheetConstants.radius),
+        ),
+      ),
+      builder: (ctx) {
+        final errorColor = Theme.of(ctx).colorScheme.error;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: AppSpacing.sm),
+            const DragHandle(),
+            const SizedBox(height: AppSpacing.sm),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.xs,
+              ),
+              leading: Icon(Icons.delete_rounded, color: errorColor),
+              title: Text(
+                l10n.commonDelete,
+                style: TextStyle(color: errorColor),
+              ),
+              onTap: () {
+                MicroInteractions.hapticTap(
+                  intensity: VibrationIntensity.medium,
+                );
+                Navigator.of(ctx).pop();
+                _deleteDiary();
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildBody(AppLocalizations l10n) {
     if (_controller.isLoading) {
       return _buildLoadingState(l10n);
@@ -265,7 +309,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
   }
 
-  /// BottomBarを構築
   Widget? _buildBottomBar(AppLocalizations l10n) {
     if (!_controller.isEditing ||
         _controller.isLoading ||
@@ -312,7 +355,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
   }
 
-  /// ローディング状態を構築
   Widget _buildLoadingState(AppLocalizations l10n) {
     return Center(
       child: FadeInWidget(
@@ -327,52 +369,38 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     );
   }
 
-  /// エラー状態を構築
   Widget _buildErrorState(AppLocalizations l10n) {
-    return Center(
-      child: FadeInWidget(
-        child: CustomCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: AppSpacing.cardPadding,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.errorContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.error_outline_rounded,
-                  color: Theme.of(context).colorScheme.error,
-                  size: AppSpacing.iconLg,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text(l10n.commonErrorOccurred, style: AppTypography.titleLarge),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                _getErrorMessage(l10n),
-                style: AppTypography.bodyMedium.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(
-                onPressed: () => Navigator.pop(context),
-                text: l10n.commonBack,
-              ),
-            ],
-          ),
-        ),
-      ),
+    final cs = Theme.of(context).colorScheme;
+    return _buildInfoCard(
+      iconData: Icons.error_outline_rounded,
+      iconColor: cs.error,
+      iconBgColor: cs.errorContainer.withValues(alpha: 0.3),
+      title: l10n.commonErrorOccurred,
+      subtitle: _getErrorMessage(l10n),
+      subtitleColor: cs.error,
     );
   }
 
-  /// 未検出状態を構築
   Widget _buildNotFoundState(AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    return _buildInfoCard(
+      iconData: Icons.search_off_rounded,
+      iconColor: cs.secondary,
+      iconBgColor: cs.secondaryContainer.withValues(alpha: 0.3),
+      title: l10n.diaryNotFoundMessage,
+      subtitle: l10n.diaryNotFoundSubtitle,
+      subtitleColor: cs.onSurfaceVariant,
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData iconData,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String title,
+    required String subtitle,
+    required Color subtitleColor,
+  }) {
     return Center(
       child: FadeInWidget(
         child: CustomCard(
@@ -382,31 +410,27 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
               Container(
                 padding: AppSpacing.cardPadding,
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                  color: iconBgColor,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.search_off_rounded,
-                  color: Theme.of(context).colorScheme.secondary,
+                  iconData,
+                  color: iconColor,
                   size: AppSpacing.iconLg,
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Text(l10n.diaryNotFoundMessage, style: AppTypography.titleLarge),
+              Text(title, style: AppTypography.titleLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                l10n.diaryNotFoundSubtitle,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                subtitle,
+                style: AppTypography.bodyMedium.copyWith(color: subtitleColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xl),
               PrimaryButton(
                 onPressed: () => Navigator.pop(context),
-                text: l10n.commonBack,
+                text: context.l10n.commonBack,
               ),
             ],
           ),

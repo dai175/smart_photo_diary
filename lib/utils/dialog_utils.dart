@@ -84,7 +84,6 @@ class DialogUtils {
   /// [title]: ダイアログのタイトル
   /// [message]: 確認メッセージ
   /// [confirmText]: 確認ボタンのテキスト（デフォルト: 'OK'）
-  /// [cancelText]: キャンセルボタンのテキスト（デフォルト: 'キャンセル'）
   /// [isDestructive]: 確認アクションが破壊的操作かどうか（テキストを赤色にする）
   /// 戻り値: ユーザーが確認した場合true、キャンセルした場合false
   static Future<bool?> showConfirmationDialog(
@@ -92,7 +91,6 @@ class DialogUtils {
     String title,
     String message, {
     String? confirmText,
-    String? cancelText,
     bool isDestructive = false,
   }) {
     return showDialog<bool>(
@@ -102,7 +100,6 @@ class DialogUtils {
         title: title,
         message: message,
         confirmText: confirmText,
-        cancelText: cancelText,
         isDestructive: isDestructive,
         onConfirm: () => Navigator.pop(context, true),
         onCancel: () => Navigator.pop(context, false),
@@ -150,11 +147,12 @@ class DialogUtils {
             return CustomDialog(
               title: title,
               maxWidth: _radioDialogMaxWidth,
+              onClose: () => Navigator.pop(context),
               contentPadding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
                 AppSpacing.md,
                 AppSpacing.lg,
-                AppSpacing.sm,
+                AppSpacing.lg,
               ),
               content: RadioGroup<T>(
                 groupValue: selectedValue,
@@ -202,12 +200,6 @@ class DialogUtils {
                   }),
                 ),
               ),
-              actions: [
-                CustomDialogAction(
-                  text: context.l10n.commonCancel,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
             );
           },
         );

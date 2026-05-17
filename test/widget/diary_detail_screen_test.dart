@@ -10,14 +10,18 @@ import 'package:smart_photo_diary/models/diary_entry.dart';
 import 'package:smart_photo_diary/screens/diary_detail/diary_detail_screen.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
 import '../integration/mocks/mock_services.dart';
 import '../test_helpers/mock_platform_channels.dart';
 import '../test_helpers/widget_test_helpers.dart';
 
+class MockIPhotoCacheService extends Mock implements IPhotoCacheService {}
+
 void main() {
   late MockIDiaryService mockDiaryService;
+  late MockIPhotoCacheService mockPhotoCache;
 
   final testEntry = DiaryEntry(
     id: 'test-id-1',
@@ -45,6 +49,19 @@ void main() {
 
     final mockPhotoService = TestServiceSetup.getPhotoService();
     serviceLocator.registerSingleton<IPhotoService>(mockPhotoService);
+
+    mockPhotoCache = MockIPhotoCacheService();
+    when(
+      () => mockPhotoCache.getThumbnail(
+        any(),
+        width: any(named: 'width'),
+        height: any(named: 'height'),
+        quality: any(named: 'quality'),
+      ),
+    ).thenAnswer(
+      (_) async => const Failure(PhotoAccessException('Test thumbnail')),
+    );
+    serviceLocator.registerSingleton<IPhotoCacheService>(mockPhotoCache);
   });
 
   tearDown(() {
@@ -110,7 +127,7 @@ void main() {
 
         expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
         expect(find.byIcon(Icons.share_rounded), findsOneWidget);
-        expect(find.byType(PopupMenuButton<String>), findsOneWidget);
+        expect(find.byIcon(Icons.more_horiz_rounded), findsOneWidget);
       });
     });
 

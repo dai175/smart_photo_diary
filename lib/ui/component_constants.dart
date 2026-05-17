@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Chip/Tag コンポーネントの規格値
 class ChipConstants {
   // 高さ
@@ -28,7 +30,10 @@ class DialogConstants {
 
 /// カレンダーマーカー（統計画面など）の規格値
 class CalendarMarkerConstants {
-  static const double size = 22.0; // 直径
+  static const double size = 14.0;
+  static const double dotSize = 6.0;
+  static const double legendIndicatorSize = 10.0;
+  static const double todayBorderWidth = 1.5;
 }
 
 /// 丸いタイル/アバターなどの共通サイズ
@@ -39,6 +44,8 @@ class TileConstants {
 /// ボタンの規格値
 class ButtonConstants {
   static const double borderWidth = 1.5;
+  static const double heightSm = 46.0;
+  static const double heightMd = 50.0;
 }
 
 /// 入力フィールドの規格値
@@ -88,4 +95,46 @@ class LabelConstants {
   /// 未選択アイテムの不透明度（ライト/ダーク共通）
   /// 基準色は Light: onSurfaceVariant / Dark: onSurfaceDark を使用
   static const double unselectedOpacity = 0.55;
+}
+
+/// カードの角丸半径
+class CardConstants {
+  static const double radiusHero = 20.0;
+  static const double radiusMagazine = 18.0;
+  static const double radiusEditorial = 22.0;
+}
+
+/// ボトムシートの規格値
+class BottomSheetConstants {
+  static const double radius = 28.0;
+  static const double handleWidth = 36.0;
+  static const double handleHeight = 4.0;
+  static const double handleRadius = 2.0;
+}
+
+/// モーダルの規格値
+class ModalConstants {
+  static const double radius = 24.0;
+  static const double iconSize = 44.0;
+  static const double iconRadius = 12.0;
+  static const List<BoxShadow> shadow = [
+    BoxShadow(
+      color: Color(0x08231E1A),
+      blurRadius: 4,
+      offset: Offset(0, 2),
+      spreadRadius: 0,
+    ),
+    BoxShadow(
+      color: Color(0x14231E1A),
+      blurRadius: 16,
+      offset: Offset(0, 6),
+      spreadRadius: 0,
+    ),
+    BoxShadow(
+      color: Color(0x0A231E1A),
+      blurRadius: 40,
+      offset: Offset(0, 16),
+      spreadRadius: 0,
+    ),
+  ];
 }

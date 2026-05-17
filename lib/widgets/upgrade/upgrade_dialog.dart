@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/plans/plan.dart';
-import '../../ui/design_system/app_spacing.dart';
 import '../../ui/components/custom_dialog.dart';
-import 'premium_bullet_list.dart';
-import 'plan_option_card.dart';
+import '../../ui/design_system/app_colors.dart';
+import '../../ui/design_system/app_spacing.dart';
 import 'auto_renew_notice.dart';
+import 'plan_option_card.dart';
+import 'premium_bullet_list.dart';
 
-/// プレミアムプラン選択ダイアログ Widget
 class UpgradeDialog extends StatelessWidget {
   final List<Plan> plans;
   final Map<String, String> priceStrings;
@@ -24,12 +24,16 @@ class UpgradeDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return CustomDialog(
+      icon: Icons.stars_rounded,
+      iconColor: AppColors.accent,
       title: context.l10n.upgradeDialogTitle,
+      headerColor: isDark ? AppColors.premiumBgDark : AppColors.premiumBg,
+      onClose: () => Navigator.of(context).pop(),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const PremiumBulletList(),
             const SizedBox(height: AppSpacing.md),
@@ -49,12 +53,6 @@ class UpgradeDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
-        CustomDialogAction(
-          text: context.l10n.commonCancel,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
     );
   }
 }

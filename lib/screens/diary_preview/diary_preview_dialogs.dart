@@ -27,7 +27,6 @@ class DiaryPreviewDialogHelper {
         title: context.l10n.diaryPreviewDiscardDialogTitle,
         message: context.l10n.diaryPreviewDiscardDialogMessage,
         confirmText: context.l10n.diaryPreviewDiscardDialogConfirm,
-        cancelText: context.l10n.commonCancel,
         isDestructive: true,
         onConfirm: () => Navigator.of(context).pop(true),
         onCancel: () => Navigator.of(context).pop(false),

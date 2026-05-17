@@ -26,7 +26,7 @@ class StorageImportResultDialog {
             ? AppColors.success
             : result.hasErrors
             ? AppColors.warning
-            : AppColors.info,
+            : AppColors.secondary,
         title: context.l10n.settingsRestoreResultTitle,
         content: SingleChildScrollView(
           child: Column(

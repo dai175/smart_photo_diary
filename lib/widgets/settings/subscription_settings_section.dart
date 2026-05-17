@@ -307,10 +307,10 @@ class _SubscriptionSettingsSectionState
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.1),
+        color: AppColors.accentDark.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppSpacing.sm),
         border: Border.all(
-          color: AppColors.info.withValues(alpha: 0.3),
+          color: AppColors.accentDark.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -318,7 +318,7 @@ class _SubscriptionSettingsSectionState
         children: [
           const Icon(
             Icons.lightbulb_outline_rounded,
-            color: AppColors.info,
+            color: AppColors.accentDark,
             size: AppSpacing.iconSm,
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -326,7 +326,7 @@ class _SubscriptionSettingsSectionState
             child: Text(
               message,
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.info,
+                color: AppColors.accentDark,
                 fontWeight: FontWeight.w500,
               ),
             ),

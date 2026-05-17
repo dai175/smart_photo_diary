@@ -178,6 +178,7 @@ void main() {
                         context: context,
                         title: 'Confirm Action',
                         message: 'Are you sure?',
+                        onCancel: () => Navigator.of(context).pop(),
                       ),
                     );
                   },
@@ -195,8 +196,8 @@ void main() {
         expect(find.text('Confirm Action'), findsOneWidget);
         expect(find.text('Are you sure?'), findsOneWidget);
         expect(find.byIcon(Icons.help_rounded), findsOneWidget);
-        // Default button labels from l10n
-        expect(find.text('Cancel'), findsOneWidget);
+        // Cancel → X button, Confirm stays as bottom action
+        expect(find.byIcon(Icons.close), findsOneWidget);
         expect(find.text('Confirm'), findsOneWidget);
       });
 
@@ -216,8 +217,8 @@ void main() {
                         title: 'Delete?',
                         message: 'This cannot be undone.',
                         confirmText: 'Delete',
-                        cancelText: 'Keep',
                         isDestructive: true,
+                        onCancel: () => Navigator.of(context).pop(),
                       ),
                     );
                   },
@@ -233,7 +234,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Delete'), findsOneWidget);
-        expect(find.text('Keep'), findsOneWidget);
+        expect(find.byIcon(Icons.close), findsOneWidget);
       });
 
       testWidgets('calls onConfirm and onCancel callbacks', (
@@ -286,7 +287,7 @@ void main() {
         await tester.tap(find.text('Show'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Cancel'));
+        await tester.tap(find.byIcon(Icons.close));
         await tester.pumpAndSettle();
 
         expect(cancelled, isTrue);
@@ -360,8 +361,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byIcon(Icons.block_rounded), findsOneWidget);
-        // "Not now" button
-        expect(find.text('Not now'), findsOneWidget);
+        // onDismiss not provided → no X button, no "Not now" text
+        expect(find.byIcon(Icons.close), findsNothing);
       });
 
       testWidgets('shows upgrade button when onUpgrade is provided', (
@@ -505,6 +506,7 @@ void main() {
                         usageCount: 5,
                         limit: 100,
                         nextResetDate: nextReset,
+                        onDismiss: () => Navigator.of(context).pop(),
                       ),
                     );
                   },
@@ -519,9 +521,9 @@ void main() {
         await tester.tap(find.text('Show'));
         await tester.pumpAndSettle();
 
-        // Premium plan should show Close, not upgrade
+        // Premium plan should show X close button, not upgrade
         expect(find.text('Unlock Premium'), findsNothing);
-        expect(find.text('Close'), findsOneWidget);
+        expect(find.byIcon(Icons.close), findsOneWidget);
       });
     });
   });

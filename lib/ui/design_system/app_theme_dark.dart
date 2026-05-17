@@ -17,10 +17,10 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
 
     // Color Scheme — 温かみのあるダークパレット
     colorScheme: const ColorScheme.dark(
-      primary: AppColors.primaryLight,
+      primary: AppColors.accentLight,
       onPrimary: AppColors.onBackground,
-      primaryContainer: AppColors.primaryDark,
-      onPrimaryContainer: AppColors.primaryLight,
+      primaryContainer: AppColors.accentDark,
+      onPrimaryContainer: AppColors.accentLight,
       secondary: AppColors.secondaryLight,
       onSecondary: AppColors.onBackground,
       secondaryContainer: AppColors.secondaryDark,
@@ -29,7 +29,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
       surfaceContainerHigh: AppColors.surfaceContainerHighDark,
       onSurface: AppColors.onSurfaceDark,
-      error: AppColors.error,
+      error: AppColors.errorDark,
       onError: AppColors.onError,
       errorContainer: AppColors.errorContainer,
       onErrorContainer: AppColors.onErrorContainer,
@@ -112,7 +112,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     // Elevated Button Theme (Dark)
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryLight,
+        backgroundColor: AppColors.accentDark,
         foregroundColor: AppColors.onBackground,
         elevation: AppSpacing.elevationXs,
         shadowColor: Colors.black26,
@@ -128,8 +128,8 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     // Outlined Button Theme (Dark)
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primaryLight,
-        side: const BorderSide(color: AppColors.primaryLight),
+        foregroundColor: AppColors.accentLight,
+        side: const BorderSide(color: AppColors.accentLight),
         shape: const RoundedRectangleBorder(
           borderRadius: AppSpacing.buttonRadius,
         ),
@@ -142,7 +142,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
     // Text Button Theme (Dark)
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.primaryLight,
+        foregroundColor: AppColors.accentLight,
         shape: const RoundedRectangleBorder(
           borderRadius: AppSpacing.buttonRadius,
         ),
@@ -153,7 +153,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
 
     // Floating Action Button Theme (Dark)
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: AppColors.primaryLight,
+      backgroundColor: AppColors.accentLight,
       foregroundColor: AppColors.onBackground,
       elevation: AppSpacing.elevationSm,
       shape: CircleBorder(),
@@ -174,13 +174,13 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       focusedBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
         borderSide: BorderSide(
-          color: AppColors.primaryLight,
+          color: AppColors.accentLight,
           width: InputConstants.borderWidthFocused,
         ),
       ),
       errorBorder: const OutlineInputBorder(
         borderRadius: AppSpacing.inputRadius,
-        borderSide: BorderSide(color: AppColors.error),
+        borderSide: BorderSide(color: AppColors.errorDark),
       ),
       contentPadding: AppSpacing.inputPadding,
       labelStyle: AppTypography.withColor(
@@ -244,7 +244,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       unselectedLabelStyle: AppTypography.labelLarge,
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
-          color: AppColors.primaryLight,
+          color: AppColors.accentLight,
           width: TabConstants.indicatorThickness,
         ),
       ),
@@ -275,7 +275,7 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
       surfaceTintColor: Colors.transparent,
       dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.primaryLight;
+          return AppColors.accentLight;
         }
         return null;
       }),
@@ -285,10 +285,8 @@ ThemeData buildDarkTheme({required bool isTestEnv}) {
         }
         return AppColors.onSurfaceDark;
       }),
-      todayBorder: const BorderSide(color: AppColors.primaryLight),
-      todayForegroundColor: const WidgetStatePropertyAll(
-        AppColors.primaryLight,
-      ),
+      todayBorder: const BorderSide(color: AppColors.accentLight),
+      todayForegroundColor: const WidgetStatePropertyAll(AppColors.accentLight),
       shape: const RoundedRectangleBorder(
         borderRadius: AppSpacing.cardRadiusLarge,
       ),

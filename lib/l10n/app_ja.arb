@@ -303,6 +303,26 @@
   "@settingsAppBarTitle": {
     "description": "設定画面のアプリバータイトル"
   },
+  "settingsAccountLabel": "アカウント",
+  "@settingsAccountLabel": {
+    "description": "設定画面タイトル上の大文字セクションラベル"
+  },
+  "settingsGroupAppearance": "外観",
+  "@settingsGroupAppearance": {
+    "description": "外観オプションのグループヘッダー"
+  },
+  "settingsGroupDiaryPhotos": "日記・写真",
+  "@settingsGroupDiaryPhotos": {
+    "description": "日記・写真オプションのグループヘッダー"
+  },
+  "settingsGroupData": "データ",
+  "@settingsGroupData": {
+    "description": "データ管理オプションのグループヘッダー"
+  },
+  "settingsGroupAbout": "アプリについて",
+  "@settingsGroupAbout": {
+    "description": "アプリ情報グループヘッダー"
+  },
   "settingsLoadingTitle": "設定を読み込み中...",
   "@settingsLoadingTitle": {
     "description": "設定画面ローディングカードのタイトル"
@@ -1216,6 +1236,15 @@
   "@diaryDetailPhotosSectionTitle": {
     "description": "写真セクションのタイトル"
   },
+  "diaryDetailPhotoCount": "{count}枚",
+  "@diaryDetailPhotoCount": {
+    "description": "日記詳細メタデータの写真枚数",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diaryDetailTagsSectionTitle": "タグ",
   "@diaryDetailTagsSectionTitle": {
     "description": "タグセクションのタイトル"
@@ -1336,6 +1365,26 @@
       }
     }
   },
+  "statisticsCalendarLegendEntry": "エントリ",
+  "@statisticsCalendarLegendEntry": {
+    "description": "カレンダー凡例：日記が1件ある日のラベル"
+  },
+  "statisticsCalendarLegendMultiple": "複数",
+  "@statisticsCalendarLegendMultiple": {
+    "description": "カレンダー凡例：日記が複数ある日のラベル"
+  },
+  "statisticsCalendarLegendToday": "今日",
+  "@statisticsCalendarLegendToday": {
+    "description": "カレンダー凡例：今日の日付インジケーターのラベル"
+  },
+  "statisticsCalendarLegendSelected": "選択中",
+  "@statisticsCalendarLegendSelected": {
+    "description": "カレンダー凡例：選択中の日付インジケーターのラベル"
+  },
+  "statisticsAtAGlanceSuffix": " · 今月のまとめ",
+  "@statisticsAtAGlanceSuffix": {
+    "description": "統計セクションラベルの月・年に続くサフィックス"
+  },
   "subscriptionUsageWarningRemaining": "残りの日記が{remaining}件です",
   "@subscriptionUsageWarningRemaining": {
     "description": "日記残数が制限に近づいた時の警告メッセージ",
@@ -1406,6 +1455,10 @@
         "type": "int"
       }
     }
+  },
+  "fabCreateDiaryShort": "日記を作成 →",
+  "@fabCreateDiaryShort": {
+    "description": "選択ピルバーの日記作成アクションボタン短縮ラベル"
   },
   "timelineToday": "今日",
   "@timelineToday": {
@@ -1482,6 +1535,27 @@
   "promptContextInputHelper": "あなたの言葉が物語をより豊かにします",
   "@promptContextInputHelper": {
     "description": "状況テキスト入力のヘルパーテキスト"
+  },
+  "promptSelectionSubtitle": "質問を選んで日記を深めるか、スキップしてください",
+  "@promptSelectionSubtitle": {
+    "description": "プロンプト選択モーダルのタイトル下サブタイトル"
+  },
+  "promptSectionQuickOptions": "クイックオプション",
+  "@promptSectionQuickOptions": {
+    "description": "プロンプト選択モーダルのクイックオプションカード上のセクションラベル"
+  },
+  "promptSectionBrowse": "プロンプト一覧",
+  "@promptSectionBrowse": {
+    "description": "プロンプト選択モーダルのプロンプトリスト上のセクションラベル"
+  },
+  "promptBrowseCount": "{count} 件",
+  "@promptBrowseCount": {
+    "description": "プロンプト一覧セクションヘッダー横の件数ラベル",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "diaryDetailCopiedToClipboard": "日記をコピーしました",
   "@diaryDetailCopiedToClipboard": {
@@ -1561,6 +1635,35 @@
   "@photoSemanticLocked": {
     "description": "写真がロック状態であることを示すラベル（Premium限定）"
   },
+  "planCardThisMonth": "今月",
+  "@planCardThisMonth": {
+    "description": "プランカードのセクションヘッダー"
+  },
+  "planCardDiaryUnit": "件",
+  "@planCardDiaryUnit": {
+    "description": "プランカードの日記単位ラベル"
+  },
+  "planCardRemainingAndReset": "残り{remaining}件 · {date}リセット",
+  "@planCardRemainingAndReset": {
+    "description": "プランカードの残り件数とリセット日",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardAutoRenews": "{date}に自動更新 · サブスクリプション管理",
+  "@planCardAutoRenews": {
+    "description": "Premiumプランの自動更新フッター",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "diaryCardSemanticLabel": "日記: {title}、{date}",
   "@diaryCardSemanticLabel": {
     "description": "日記カードウィジェットのセマンティックラベル",
@@ -1572,5 +1675,21 @@
         "type": "String"
       }
     }
+  },
+  "photoCountIndicator": "{current} / {total}",
+  "@photoCountIndicator": {
+    "description": "写真カウンター（例: 1 / 3）",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumBadgeLabel": "PREMIUM",
+  "@premiumBadgeLabel": {
+    "description": "プレミアムプロンプトバッジのラベル"
   }
 }

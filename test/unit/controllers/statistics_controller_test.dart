@@ -95,6 +95,105 @@ void main() {
         expect(controller.isLoading, isFalse);
       });
 
+      test('先月のエントリーがある場合 previousMonthlyCount が正しく計算される', () async {
+        final now = DateTime.now();
+        final prevMonth = DateTime(now.year, now.month - 1);
+        final entries = [
+          _createEntry(
+            'p1',
+            date: DateTime(prevMonth.year, prevMonth.month, 5),
+          ),
+          _createEntry(
+            'p2',
+            date: DateTime(prevMonth.year, prevMonth.month, 6),
+          ),
+          _createEntry(
+            'p3',
+            date: DateTime(prevMonth.year, prevMonth.month, 7),
+          ),
+        ];
+        when(
+          () => mockDiaryService.getSortedDiaryEntries(
+            descending: any(named: 'descending'),
+          ),
+        ).thenAnswer((_) async => Success(entries));
+
+        final controller = createController();
+        addTearDown(controller.dispose);
+
+        await controller.loadStatistics();
+
+        expect(controller.stats.previousMonthlyCount, 3);
+      });
+
+      test('先月エントリーがない場合 previousMonthlyCount は 0 になる', () async {
+        when(
+          () => mockDiaryService.getSortedDiaryEntries(
+            descending: any(named: 'descending'),
+          ),
+        ).thenAnswer((_) async => const Success([]));
+
+        final controller = createController();
+        addTearDown(controller.dispose);
+
+        await controller.loadStatistics();
+
+        expect(controller.stats.previousMonthlyCount, 0);
+      });
+
+      test(
+        '現在ストリーク前に完了ストリークがない場合 previousCompletedStreak は null になる',
+        () async {
+          when(
+            () => mockDiaryService.getSortedDiaryEntries(
+              descending: any(named: 'descending'),
+            ),
+          ).thenAnswer((_) async => const Success([]));
+
+          final controller = createController();
+          addTearDown(controller.dispose);
+
+          await controller.loadStatistics();
+
+          expect(controller.stats.previousCompletedStreak, isNull);
+        },
+      );
+
+      test(
+        '現在ストリークと前回ストリークの間に複数日の空白があっても previousCompletedStreak が検出される',
+        () async {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          // 今日・昨日（2日連続の現在ストリーク）
+          final currentStreakEntries = [
+            _createEntry('c1', date: today),
+            _createEntry('c2', date: today.subtract(const Duration(days: 1))),
+          ];
+          // 3日前〜5日前は空白
+          // 6日前〜8日前（3日連続の前回ストリーク）
+          final prevStreakEntries = [
+            _createEntry('p1', date: today.subtract(const Duration(days: 6))),
+            _createEntry('p2', date: today.subtract(const Duration(days: 7))),
+            _createEntry('p3', date: today.subtract(const Duration(days: 8))),
+          ];
+          when(
+            () => mockDiaryService.getSortedDiaryEntries(
+              descending: any(named: 'descending'),
+            ),
+          ).thenAnswer(
+            (_) async =>
+                Success([...currentStreakEntries, ...prevStreakEntries]),
+          );
+
+          final controller = createController();
+          addTearDown(controller.dispose);
+
+          await controller.loadStatistics();
+
+          expect(controller.stats.previousCompletedStreak, 3);
+        },
+      );
+
       test('エラー時もローディングが解除される', () async {
         when(
           () => mockDiaryService.getSortedDiaryEntries(

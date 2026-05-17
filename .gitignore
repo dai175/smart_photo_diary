@@ -59,7 +59,6 @@ web/build/
 .claude/memory/
 .claude/cache/
 .claude/logs/
-.claude/settings.json
 .claude/session/
 
 # --- Serena MCP Server ---

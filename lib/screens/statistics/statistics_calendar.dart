@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../constants/app_constants.dart';
@@ -64,31 +65,79 @@ class StatisticsCalendar extends StatelessWidget {
               outsideTextStyle: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              selectedDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+              selectedDecoration: const BoxDecoration(
+                color: AppColors.calSelected,
                 shape: BoxShape.circle,
+              ),
+              selectedTextStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
               todayDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.calToday,
+                  width: CalendarMarkerConstants.todayBorderWidth,
+                ),
               ),
-              markerDecoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.6),
-                shape: BoxShape.circle,
+              todayTextStyle: const TextStyle(
+                color: AppColors.calToday,
+                fontWeight: FontWeight.w600,
               ),
-              markersMaxCount: 3,
               cellMargin: const EdgeInsets.all(AppSpacing.xs),
             ),
             calendarBuilders: CalendarBuilders(
+              headerTitleBuilder: (context, day) {
+                final theme = Theme.of(context);
+                final locale = Localizations.localeOf(context).toLanguageTag();
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${day.year}',
+                      style: AppTypography.sectionLabel.copyWith(
+                        color: AppColors.accentMuted,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      DateFormat.MMMM(locale).format(day),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                );
+              },
+              defaultBuilder: (context, day, focusedDay) {
+                final normalizedDay = DateTime(day.year, day.month, day.day);
+                if (!diaryMap.containsKey(normalizedDay)) return null;
+                return Container(
+                  margin: const EdgeInsets.all(AppSpacing.xxs),
+                  decoration: const BoxDecoration(
+                    color: AppColors.calEntryBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                );
+              },
               markerBuilder: (context, day, events) {
                 if (events.isNotEmpty) {
-                  final eventCount = events.length;
                   return Positioned(
-                    right: 4,
-                    bottom: 4,
-                    child: _buildMarker(context, eventCount),
+                    right: AppSpacing.xs,
+                    bottom: AppSpacing.xs,
+                    child: _buildMarker(events.length),
                   );
                 }
                 return null;
@@ -96,9 +145,6 @@ class StatisticsCalendar extends StatelessWidget {
             ),
             headerStyle: HeaderStyle(
               titleCentered: true,
-              titleTextStyle: AppTypography.titleLarge.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
               formatButtonVisible: false,
               leftChevronIcon: Icon(
                 AppIcons.calendarPrev,
@@ -121,32 +167,123 @@ class StatisticsCalendar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
+          _buildLegend(context),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     );
   }
 
-  Widget _buildMarker(BuildContext context, int count) {
+  Widget _buildMarker(int count) {
+    if (count == 1) {
+      return Container(
+        width: CalendarMarkerConstants.dotSize,
+        height: CalendarMarkerConstants.dotSize,
+        decoration: const BoxDecoration(
+          color: AppColors.calDot,
+          shape: BoxShape.circle,
+        ),
+      );
+    }
     return Container(
       width: CalendarMarkerConstants.size,
       height: CalendarMarkerConstants.size,
-      decoration: BoxDecoration(
-        color: count > 1
-            ? Theme.of(context).colorScheme.secondary.withValues(
-                alpha: AppConstants.opacityHigh,
-              )
-            : Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: AppConstants.opacityHigh),
+      decoration: const BoxDecoration(
+        color: AppColors.calCountBg,
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
           count > 9 ? '9+' : count.toString(),
-          style: AppTypography.labelSmall.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
-            fontWeight: FontWeight.w600,
+          style: const TextStyle(
+            color: AppColors.calCountFg,
+            fontSize: 8,
+            fontWeight: FontWeight.w700,
+            height: 1,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegend(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
+        children: [
+          _buildLegendItem(
+            _buildLegendCircle(color: AppColors.calEntryBg),
+            l10n.statisticsCalendarLegendEntry,
+          ),
+          _buildLegendItem(
+            _buildLegendBadge(),
+            l10n.statisticsCalendarLegendMultiple,
+          ),
+          _buildLegendItem(
+            _buildLegendRing(),
+            l10n.statisticsCalendarLegendToday,
+          ),
+          _buildLegendItem(
+            _buildLegendCircle(color: AppColors.calSelected),
+            l10n.statisticsCalendarLegendSelected,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Widget indicator, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        indicator,
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          label.toUpperCase(),
+          style: AppTypography.sectionLabel.copyWith(color: AppColors.muted),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLegendCircle({required Color color, Widget? child}) {
+    return Container(
+      width: CalendarMarkerConstants.legendIndicatorSize,
+      height: CalendarMarkerConstants.legendIndicatorSize,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: child,
+    );
+  }
+
+  Widget _buildLegendBadge() {
+    return _buildLegendCircle(
+      color: AppColors.calCountBg,
+      child: const Center(
+        child: Text(
+          '2',
+          style: TextStyle(
+            color: AppColors.calCountFg,
+            fontSize: 6,
+            fontWeight: FontWeight.w700,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegendRing() {
+    return Container(
+      width: CalendarMarkerConstants.legendIndicatorSize,
+      height: CalendarMarkerConstants.legendIndicatorSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: AppColors.calToday,
+          width: CalendarMarkerConstants.todayBorderWidth,
         ),
       ),
     );
@@ -248,19 +385,19 @@ class StatisticsCalendar extends StatelessWidget {
                                     vertical: AppSpacing.xxs,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(
+                                    color: AppColors.accent.withValues(
                                       alpha: AppConstants.opacityXXLow,
                                     ),
                                     borderRadius: AppSpacing.chipRadius,
                                   ),
                                   child: Text(
-                                    '${diary.date.hour.toString().padLeft(2, '0')}:${diary.date.minute.toString().padLeft(2, '0')}',
+                                    l10n.formatTime(diary.date),
                                     style: AppTypography.labelSmall.copyWith(
                                       color:
                                           Theme.of(context).brightness ==
                                               Brightness.dark
-                                          ? AppColors.primaryLight
-                                          : AppColors.primary,
+                                          ? AppColors.accentLight
+                                          : AppColors.accent,
                                     ),
                                   ),
                                 ),
@@ -282,12 +419,7 @@ class StatisticsCalendar extends StatelessWidget {
               },
             ),
           ),
-          actions: [
-            CustomDialogAction(
-              text: l10n.commonClose,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
+          onClose: () => Navigator.of(context).pop(),
         );
       },
     );

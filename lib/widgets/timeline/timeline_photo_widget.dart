@@ -95,7 +95,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _scrollController.addListener(_scrollManager.onScroll);
     // 再タップ等のスクロール指示に対応
     widget.scrollSignal?.addListener(_scrollManager.scrollToTop);
-    _updatePhotoGroups();
 
     // 初期ビューポート分を軽くプリフェッチ
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -119,6 +118,7 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     _yesterdayLabel = context.l10n.timelineYesterday;
     _monthYearFormatter = (year, month) =>
         context.l10n.timelineMonthYear(year, month);
+    _updatePhotoGroups();
   }
 
   @override
@@ -201,17 +201,6 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
     }
   }
 
-  /// 多言語化対応のフォトグルーピング（buildメソッドで使用）
-  List<TimelinePhotoGroup> _getLocalizedPhotoGroups(BuildContext context) {
-    return _groupingService.groupPhotosForTimelineLocalized(
-      widget.controller.photoAssets,
-      todayLabel: context.l10n.timelineToday,
-      yesterdayLabel: context.l10n.timelineYesterday,
-      monthYearFormatter: (year, month) =>
-          context.l10n.timelineMonthYear(year, month),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -242,22 +231,17 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       widget.controller.selectedPhotos,
     );
 
-    // 多言語化されたグループを取得
-    final localizedGroups = _getLocalizedPhotoGroups(context);
-
-    // flutter_sticky_headerを使ったシンプルな実装
     return CustomScrollView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        for (var i = 0; i < localizedGroups.length; i++) ...[
-          if (localizedGroups[i].photos.isEmpty)
+        for (var i = 0; i < _photoGroups.length; i++) ...[
+          if (_photoGroups[i].photos.isEmpty && !_photoGroups[i].isToday)
             SliverStickyHeader(
               header: TimelineStickyHeader(
-                group: localizedGroups[i],
+                group: _photoGroups[i],
                 isFullyLocked:
-                    _groupFullyLockedCache[localizedGroups[i].groupDate] ??
-                    false,
+                    _groupFullyLockedCache[_photoGroups[i].groupDate] ?? false,
               ),
               sliver: SliverToBoxAdapter(
                 child: SizedBox(
@@ -271,45 +255,16 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                 ),
               ),
             )
+          else if (_photoGroups[i].isToday)
+            _buildGroupPhotoSliver(_photoGroups[i], i, selectedDate)
           else
             SliverStickyHeader(
               header: TimelineStickyHeader(
-                group: localizedGroups[i],
+                group: _photoGroups[i],
                 isFullyLocked:
-                    _groupFullyLockedCache[localizedGroups[i].groupDate] ??
-                    false,
+                    _groupFullyLockedCache[_photoGroups[i].groupDate] ?? false,
               ),
-              sliver: SliverMainAxisGroup(
-                slivers: [
-                  SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              TimelineLayoutConstants.crossAxisCount,
-                          crossAxisSpacing:
-                              TimelineLayoutConstants.crossAxisSpacing,
-                          mainAxisSpacing:
-                              TimelineLayoutConstants.mainAxisSpacing,
-                          childAspectRatio:
-                              TimelineLayoutConstants.childAspectRatio,
-                        ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildPhotoTile(
-                        localizedGroups[i],
-                        index,
-                        selectedDate,
-                      ),
-                      childCount: _calculateChildCount(
-                        localizedGroups[i],
-                        isLastGroup: i == localizedGroups.length - 1,
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: AppSpacing.md),
-                  ),
-                ],
-              ),
+              sliver: _buildGroupPhotoSliver(_photoGroups[i], i, selectedDate),
             ),
         ],
         // 追加読み込みインジケーター（追加写真がある場合のみ）
@@ -359,6 +314,33 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       );
     }
     return total;
+  }
+
+  SliverMainAxisGroup _buildGroupPhotoSliver(
+    TimelinePhotoGroup group,
+    int groupIndex,
+    DateTime? selectedDate,
+  ) {
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: TimelineLayoutConstants.crossAxisCount,
+            crossAxisSpacing: TimelineLayoutConstants.crossAxisSpacing,
+            mainAxisSpacing: TimelineLayoutConstants.mainAxisSpacing,
+            childAspectRatio: TimelineLayoutConstants.childAspectRatio,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _buildPhotoTile(group, index, selectedDate),
+            childCount: _calculateChildCount(
+              group,
+              isLastGroup: groupIndex == _photoGroups.length - 1,
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+      ],
+    );
   }
 
   /// 個別の写真タイルを構築

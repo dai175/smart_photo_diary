@@ -54,7 +54,7 @@ lib/
 │   └── *.dart          # コアサービス実装、Delegate、使用量追跡、機能アクセス制御、サブスク状態管理
 ├── controllers/        # 画面コントローラー（ChangeNotifier + Delegate）、BaseErrorController、ユーティリティNotifier
 ├── screens/            # 画面実装（home/, diary_detail/, diary_preview/, statistics/, onboarding/ + ルート直下）
-├── widgets/            # ドメイン固有ウィジェット（タイムライン、設定、アップグレード、FAB、カレンダー、プロンプト選択）
+├── widgets/            # ドメイン固有ウィジェット（buttons/, settings/, timeline/, upgrade/ サブディレクトリ + カレンダー・プロンプト選択・日記カード等）
 ├── shared/             # 共有UIコンポーネント（フィルター等）
 ├── ui/
 │   ├── design_system/  # Material Design 3テーマ、カラー、タイポグラフィ
@@ -188,6 +188,7 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 ## ドキュメント
 
 - **[CLAUDE.md](CLAUDE.md)** - AI開発アシスタント向けガイドライン
+- **[DESIGN.md](DESIGN.md)** - デザインシステム（カラー・タイポグラフィ・スペーシング・コンポーネント規約）
 - **[docs/](docs/)** - 専門ドキュメント
   - [ci_cd_guide.md](docs/ci_cd_guide.md) - CI/CD詳細運用手順
   - [monetization_strategy.md](docs/monetization_strategy.md) - 収益化戦略

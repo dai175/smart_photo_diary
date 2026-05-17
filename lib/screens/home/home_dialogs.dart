@@ -17,11 +17,8 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
         iconColor: Theme.of(dialogContext).colorScheme.primary,
         title: dialogContext.l10n.lockedPhotoDialogTitle,
         message: dialogContext.l10n.lockedPhotoDialogMessage,
+        onClose: () => Navigator.of(dialogContext).pop(),
         actions: [
-          CustomDialogAction(
-            text: dialogContext.l10n.commonNotNow,
-            onPressed: () => Navigator.of(dialogContext).pop(),
-          ),
           CustomDialogAction(
             text: dialogContext.l10n.settingsUpgradeToPremium,
             isPrimary: true,
@@ -65,11 +62,8 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
           iconColor: AppColors.warning,
           title: context.l10n.homePermissionDialogTitle,
           message: context.l10n.homePermissionDialogMessage,
+          onClose: () => Navigator.of(context).pop(),
           actions: [
-            CustomDialogAction(
-              text: context.l10n.commonCancel,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
             CustomDialogAction(
               text: context.l10n.commonOpenSettings,
               isPrimary: true,
@@ -93,14 +87,11 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
       builder: (BuildContext context) {
         return CustomDialog(
           icon: Icons.photo_library_outlined,
-          iconColor: AppColors.info,
+          iconColor: AppColors.secondary,
           title: context.l10n.homeLimitedAccessTitle,
           message: context.l10n.homeLimitedAccessMessage,
+          onClose: () => Navigator.of(context).pop(),
           actions: [
-            CustomDialogAction(
-              text: context.l10n.commonLater,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
             CustomDialogAction(
               text: context.l10n.photoSelectAction,
               isPrimary: true,
@@ -128,11 +119,8 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
         iconColor: Theme.of(context).colorScheme.primary,
         title: context.l10n.cameraPermissionDialogTitle,
         message: context.l10n.cameraPermissionDialogMessage,
+        onClose: () => Navigator.of(context).pop(),
         actions: [
-          CustomDialogAction(
-            text: context.l10n.commonCancel,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
           CustomDialogAction(
             text: context.l10n.commonOpenSettings,
             isPrimary: true,

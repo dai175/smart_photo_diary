@@ -14,7 +14,7 @@ class AutoRenewNotice extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.1),
+        color: AppColors.selectedBg,
         borderRadius: BorderRadius.circular(AppSpacing.xs),
       ),
       child: Column(
@@ -25,13 +25,13 @@ class AutoRenewNotice extends StatelessWidget {
               const Icon(
                 Icons.info_outline_rounded,
                 size: AppSpacing.iconXs,
-                color: AppColors.info,
+                color: AppColors.accentDark,
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 context.l10n.settingsSubscriptionAutoRenewTitle,
                 style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.info,
+                  color: AppColors.accentDark,
                   fontWeight: FontWeight.w600,
                 ),
               ),

@@ -61,8 +61,9 @@ class AppColors {
   static const Color onSurfaceVariantDark = Color(0xFF9E9891);
 
   // ============= STATE COLORS =============
-  /// エラー色 — 落ち着いたレッド
-  static const Color error = Color(0xFFB5453A);
+  /// エラー色 — テラコッタ系ブリックレッド（彩度を落としパレットに統合）
+  static const Color error = Color(0xFF994F47);
+  static const Color errorDark = Color(0xFFCF7268);
   static const Color errorContainer = Color(0xFFFCE4E1);
   static const Color onError = Color(0xFFFFFFFF);
   static const Color onErrorContainer = Color(0xFF4A1510);
@@ -90,4 +91,41 @@ class AppColors {
   static const Color shadow = Color(0x14231E1A);
   static const Color shadowLight = Color(0x0A231E1A);
   static const Color shadowStrong = Color(0x28231E1A);
+
+  // ============= SEMANTIC CARD TOKENS =============
+  static const Color cardBg = Color(0xFFFFFFFF);
+  static const Color muted = Color(0xFF6B6560);
+  static const Color accentMuted = Color(0xFF8E6450);
+  static const Color divider = Color(0xFFEDE9E4);
+  static const Color chipOutline = Color(0xFFDDD8D2);
+  static const Color glyphBg = Color(0xFFF0EDE8);
+  static const Color photoFallback = Color(0xFFF0EDE8);
+  static const Color handle = Color(0xFFDDD8D2);
+  static const Color selectedBg = Color(0x1AB8856C);
+  static const Color premiumBg = Color(0xFFF4E1D2);
+  static const Color premiumBgDark = Color(0xFF2E2420);
+
+  // ============= 3-TONE TAG SYSTEM =============
+  static const Color tagPrimaryBg = Color(0xFFE5E0DA);
+  static const Color tagPrimaryFg = Color(0xFF2C3338);
+  static const Color tagSecondaryBg = Color(0xFFEFE6DE);
+  static const Color tagSecondaryFg = Color(0xFF3E322B);
+  static const Color tagAccentBg = Color(0xFFF1DCCB);
+  static const Color tagAccentFg = Color(0xFF8E6450);
+
+  // ============= 3-TONE TAG SYSTEM (DARK MODE) =============
+  static const Color tagPrimaryBgDark = Color(0xFF3A3530);
+  static const Color tagSecondaryBgDark = Color(0xFF3F3630);
+  static const Color tagAccentBgDark = Color(0xFF453228);
+  static const Color tagPrimaryFgDark = Color(0xFFD4CFC9);
+  static const Color tagSecondaryFgDark = Color(0xFFD9CFC6);
+  static const Color tagAccentFgDark = Color(0xFFD4A68E);
+
+  // ============= CALENDAR TOKENS =============
+  static const Color calEntryBg = Color(0x2EB8856C);
+  static const Color calCountBg = Color(0xFFB8856C);
+  static const Color calCountFg = Color(0xFFFFFFFF);
+  static const Color calToday = Color(0xFF6B7B8D);
+  static const Color calSelected = Color(0xFFB8856C);
+  static const Color calDot = Color(0xFF8E6450);
 }
