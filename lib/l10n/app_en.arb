@@ -1092,65 +1092,121 @@
   "@onboardingSkip": {
     "description": "Skip button shown on onboarding pages"
   },
-  "onboardingPhilosophyTitle": "Your photos\nalready hold the story.",
-  "@onboardingPhilosophyTitle": {
-    "description": "Title for the philosophy onboarding page"
+  "onboardingStep1Eyebrow": "01 · WELCOME",
+  "@onboardingStep1Eyebrow": {
+    "description": "Eyebrow label for onboarding step 1"
   },
-  "onboardingPhilosophySubtitle": "We help you put it into words.",
+  "onboardingStep2Eyebrow": "02 · HOW IT WORKS",
+  "@onboardingStep2Eyebrow": {
+    "description": "Eyebrow label for onboarding step 2"
+  },
+  "onboardingStep3Eyebrow": "03 · PRIVATE BY DESIGN",
+  "@onboardingStep3Eyebrow": {
+    "description": "Eyebrow label for onboarding step 3"
+  },
+  "onboardingStep4Eyebrow": "04 · READY",
+  "@onboardingStep4Eyebrow": {
+    "description": "Eyebrow label for onboarding step 4"
+  },
+  "onboardingPhilosophyTitle": "Your photos already hold the story.",
+  "@onboardingPhilosophyTitle": {
+    "description": "Headline for onboarding welcome page"
+  },
+  "onboardingPhilosophySubtitle": "We help you put it into words — a quiet two-paragraph diary entry, written in your tone.",
   "@onboardingPhilosophySubtitle": {
-    "description": "Subtitle for the philosophy onboarding page"
+    "description": "Body copy for onboarding welcome page"
   },
   "onboardingPhilosophyCta": "Begin",
   "@onboardingPhilosophyCta": {
-    "description": "CTA button on the philosophy onboarding page"
+    "description": "CTA button on the welcome onboarding page"
   },
-  "onboardingExperienceTitle": "Relive your day in seconds.",
+  "onboardingExperienceTitle": "Pick a photo. We do the writing.",
   "@onboardingExperienceTitle": {
-    "description": "Title for the experience onboarding page"
+    "description": "Headline for onboarding how-it-works page"
   },
-  "onboardingExperienceSubtitle": "Select a photo.\nWatch your memory unfold.",
+  "onboardingExperienceSubtitle": "In about three seconds, an entry anchored to the moment — yours to keep, edit or share.",
   "@onboardingExperienceSubtitle": {
-    "description": "Subtitle for the experience onboarding page"
+    "description": "Body copy for onboarding how-it-works page"
   },
   "onboardingExperienceCta": "Next",
   "@onboardingExperienceCta": {
-    "description": "CTA button on the experience onboarding page"
+    "description": "CTA button on the how-it-works onboarding page"
   },
-  "onboardingExperienceSampleDate": "April 15",
-  "@onboardingExperienceSampleDate": {
-    "description": "Sample diary date on the experience onboarding page"
+  "onboardingExampleEntryPill": "EXAMPLE ENTRY",
+  "@onboardingExampleEntryPill": {
+    "description": "Badge label on the sample diary card in onboarding"
   },
-  "onboardingExperienceSampleTitle": "A Quiet Afternoon",
-  "@onboardingExperienceSampleTitle": {
-    "description": "Sample diary title on the experience onboarding page"
+  "onboardingSampleDate": "Feb 17",
+  "@onboardingSampleDate": {
+    "description": "Date shown on the sample diary card in onboarding"
   },
-  "onboardingExperienceSampleBody": "He curled up in the fading light,\nbreathing softly beside me.\nThe room grew still,\nand for a while,\nnothing else seemed to matter.",
-  "@onboardingExperienceSampleBody": {
-    "description": "Sample diary body on the experience onboarding page"
+  "onboardingSampleTitle": "Comfort in a feline gaze",
+  "@onboardingSampleTitle": {
+    "description": "Title shown on the sample diary card in onboarding"
   },
-  "onboardingTrustTitle": "Private by design.",
+  "onboardingSampleExcerpt": "She lay curled in the afternoon light, eyes barely open. The room was still, and for a moment nothing else seemed to matter.",
+  "@onboardingSampleExcerpt": {
+    "description": "Excerpt shown on the sample diary card in onboarding"
+  },
+  "onboardingSampleTag1": "Morning",
+  "@onboardingSampleTag1": {
+    "description": "First tag on the sample diary card in onboarding"
+  },
+  "onboardingSampleTag2": "Cat",
+  "@onboardingSampleTag2": {
+    "description": "Second tag on the sample diary card in onboarding"
+  },
+  "onboardingSampleTag3": "Warmth",
+  "@onboardingSampleTag3": {
+    "description": "Third tag on the sample diary card in onboarding"
+  },
+  "onboardingTrustTitle": "Your diary stays here.",
   "@onboardingTrustTitle": {
-    "description": "Title for the trust onboarding page"
+    "description": "Headline for onboarding privacy page"
   },
-  "onboardingTrustSubtitle": "Your diary stays on your device.\nNo account required.",
-  "@onboardingTrustSubtitle": {
-    "description": "Subtitle for the trust onboarding page"
+  "onboardingPrivacyOnDeviceTitle": "On device only",
+  "@onboardingPrivacyOnDeviceTitle": {
+    "description": "Privacy row 1 title in onboarding"
+  },
+  "onboardingPrivacyOnDeviceSubtitle": "Your diary never leaves this phone.",
+  "@onboardingPrivacyOnDeviceSubtitle": {
+    "description": "Privacy row 1 subtitle in onboarding"
+  },
+  "onboardingPrivacyNoAccountTitle": "No account required",
+  "@onboardingPrivacyNoAccountTitle": {
+    "description": "Privacy row 2 title in onboarding"
+  },
+  "onboardingPrivacyNoAccountSubtitle": "No email, password or sign-up.",
+  "@onboardingPrivacyNoAccountSubtitle": {
+    "description": "Privacy row 2 subtitle in onboarding"
+  },
+  "onboardingPrivacyYouOwnTitle": "You own everything",
+  "@onboardingPrivacyYouOwnTitle": {
+    "description": "Privacy row 3 title in onboarding"
+  },
+  "onboardingPrivacyYouOwnSubtitle": "Export, delete or back up anytime.",
+  "@onboardingPrivacyYouOwnSubtitle": {
+    "description": "Privacy row 3 subtitle in onboarding"
   },
   "onboardingTrustCta": "Continue",
   "@onboardingTrustCta": {
-    "description": "CTA button on the trust onboarding page"
+    "description": "CTA button on the privacy onboarding page"
   },
   "onboardingPermissionTitle": "Start with today.",
   "@onboardingPermissionTitle": {
-    "description": "Title for the permission onboarding page"
+    "description": "Headline for onboarding ready page"
   },
-  "onboardingPermissionSubtitle": "We need access to your photos\nto craft your first story.",
+  "onboardingPermissionSubtitle": "We'll ask for access to your photos to craft your first story.",
   "@onboardingPermissionSubtitle": {
-    "description": "Subtitle for the permission onboarding page"
+    "description": "Body copy for onboarding ready page"
+  },
+  "onboardingStep4Note": "Only the photos you choose are read — we never upload them anywhere.",
+  "@onboardingStep4Note": {
+    "description": "Privacy subnote on the ready onboarding page"
   },
   "onboardingPermissionCta": "Create my first diary",
   "@onboardingPermissionCta": {
-    "description": "CTA button on the permission onboarding page"
+    "description": "CTA button on the ready onboarding page"
   },
   "onboardingProcessing": "Preparing...",
   "@onboardingProcessing": {

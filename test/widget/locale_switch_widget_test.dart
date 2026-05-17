@@ -40,12 +40,12 @@ void main() {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('あなたの写真には、\nもう物語がある。'), findsOneWidget);
+      expect(find.text('あなたの写真には、もう物語がある。'), findsOneWidget);
 
       localeNotifier.value = const Locale('en');
       await tester.pumpAndSettle();
 
-      expect(find.text('Your photos\nalready hold the story.'), findsOneWidget);
+      expect(find.text('Your photos already hold the story.'), findsOneWidget);
     });
   });
 }

@@ -173,22 +173,10 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, child) {
-        // 生成中（初期化・AI処理）はスケルトンプレビュー画面を表示
-        if (_controller.isInitializing || _controller.isLoading) {
-          return PopScope(
-            canPop: true,
-            child: DiaryPreviewGeneratingScreen(
-              selectedAssets: widget.selectedAssets,
-              photoDateTime: _controller.photoDateTime,
-              selectedPrompt: _controller.selectedPrompt,
-              statusText: _generatingStatusText(context),
-              onBack: () => Navigator.of(context).pop(),
-            ),
-          );
-        }
-
+        final isGenerating =
+            _controller.isInitializing || _controller.isLoading;
         return PopScope(
-          canPop: false,
+          canPop: isGenerating,
           onPopInvokedWithResult: (didPop, result) async {
             if (didPop) return;
 
@@ -206,27 +194,37 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
               Navigator.of(context).pop();
             }
           },
-          child: Scaffold(
-            appBar: _buildAppBar(),
-            body: SafeArea(
-              child: DiaryPreviewBody(
-                selectedAssets: widget.selectedAssets,
-                photoDateTime: _controller.photoDateTime,
-                selectedPrompt: _controller.selectedPrompt,
-                isInitializing: _controller.isInitializing,
-                isLoading: _controller.isLoading,
-                isSaving: _controller.isSaving,
-                hasError: _controller.hasError,
-                errorMessage: _controller.hasError ? _getErrorMessage() : '',
-                isAnalyzingPhotos: _controller.isAnalyzingPhotos,
-                currentPhotoIndex: _controller.currentPhotoIndex,
-                totalPhotos: _controller.totalPhotos,
-                titleController: _titleController,
-                contentController: _contentController,
-              ),
-            ),
-            bottomNavigationBar: _buildBottomBar(),
-          ),
+          child: isGenerating
+              ? DiaryPreviewGeneratingScreen(
+                  selectedAssets: widget.selectedAssets,
+                  photoDateTime: _controller.photoDateTime,
+                  selectedPrompt: _controller.selectedPrompt,
+                  statusText: _generatingStatusText(context),
+                  onBack: () => Navigator.of(context).pop(),
+                )
+              : Scaffold(
+                  appBar: _buildAppBar(),
+                  body: SafeArea(
+                    child: DiaryPreviewBody(
+                      selectedAssets: widget.selectedAssets,
+                      photoDateTime: _controller.photoDateTime,
+                      selectedPrompt: _controller.selectedPrompt,
+                      isInitializing: _controller.isInitializing,
+                      isLoading: _controller.isLoading,
+                      isSaving: _controller.isSaving,
+                      hasError: _controller.hasError,
+                      errorMessage: _controller.hasError
+                          ? _getErrorMessage()
+                          : '',
+                      isAnalyzingPhotos: _controller.isAnalyzingPhotos,
+                      currentPhotoIndex: _controller.currentPhotoIndex,
+                      totalPhotos: _controller.totalPhotos,
+                      titleController: _titleController,
+                      contentController: _contentController,
+                    ),
+                  ),
+                  bottomNavigationBar: _buildBottomBar(),
+                ),
         );
       },
     );

@@ -31,6 +31,7 @@
 <script type="text/babel" src="settings-screen.jsx"></script>
 <script type="text/babel" src="filter-sheet.jsx"></script>
 <script type="text/babel" src="generating-screen.jsx"></script>
+<script type="text/babel" src="onboarding-screen.jsx"></script>
 
 <script type="text/babel">
 
@@ -4013,6 +4014,58 @@ function App() {
         subtitle="Refactored diary_preview_screen.dart. Shared _TopScrim, _PhotoCountBadge and Hero tag with the detail screen so the cross-fade into the final entry is seamless.">
         <DCArtboard id="generating-flutter" label="diary_preview_screen.dart" width={920} height={PHONE_H}>
           <GeneratingCodeCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="onboarding-notes" title="Onboarding — Hero applied"
+        subtitle="The four pre-app screens get the same accent eyebrow / bold headline / 3-tone chip vocabulary used everywhere else, plus real product previews in place of the app-icon and shield glyph.">
+        <DCArtboard id="onboarding-notes-card" label="What changed" width={520} height={PHONE_H}>
+          <OnboardingNotesCard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="onboarding-editorial-light" title="A · Editorial · Light"
+        subtitle="Recommended. Paginated 4-screen flow restyled with the shared ramp; decorative glyphs replaced by real product previews.">
+        {[1, 2, 3, 4].map((step) => (
+          <DCArtboard key={step} id={`onb-editorial-${step}-light`}
+            label={`Step ${step} · ${STEPS[step - 1].eyebrow.split('·')[1].trim()}`}
+            width={PHONE_W} height={PHONE_H}>
+            <IOSDevice width={402} height={874} dark={false}>
+              <OnboardingScreen tokens={lightTokens} step={step} variant="editorial"/>
+            </IOSDevice>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="onboarding-editorial-dark" title="A · Editorial · Dark">
+        {[1, 2, 3, 4].map((step) => (
+          <DCArtboard key={step} id={`onb-editorial-${step}-dark`}
+            label={`Step ${step} · ${STEPS[step - 1].eyebrow.split('·')[1].trim()}`}
+            width={PHONE_W} height={PHONE_H}>
+            <IOSDevice width={402} height={874} dark={true}>
+              <OnboardingScreen tokens={darkTokens} step={step} variant="editorial"/>
+            </IOSDevice>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="onboarding-photo-light" title="B · Photo-led · Light"
+        subtitle="Alternate. Each screen anchored by a full-bleed cover photo with the headline in white, body + CTA on a tray below. Pushes harder on imagery — useful as App Store screenshot material.">
+        {[1, 2, 3, 4].map((step) => (
+          <DCArtboard key={step} id={`onb-photo-${step}-light`}
+            label={`Step ${step} · ${STEPS[step - 1].eyebrow.split('·')[1].trim()}`}
+            width={PHONE_W} height={PHONE_H}>
+            <IOSDevice width={402} height={874} dark={false}>
+              <OnboardingScreen tokens={lightTokens} step={step} variant="photo"/>
+            </IOSDevice>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="onboarding-handoff" title="Flutter handoff · onboarding"
+        subtitle="Editorial direction. Reuses SettingsRow, _DiaryTagRow and the shared accent FilledButton from earlier handoffs.">
+        <DCArtboard id="onboarding-flutter" label="onboarding_screen.dart" width={920} height={PHONE_H}>
+          <OnboardingCodeCard/>
         </DCArtboard>
       </DCSection>
     </DesignCanvas>
