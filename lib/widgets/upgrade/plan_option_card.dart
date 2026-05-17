@@ -63,7 +63,9 @@ class PlanOptionCard extends StatelessWidget {
                         Text(
                           description,
                           style: AppTypography.bodySmall.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
