@@ -85,7 +85,12 @@ void main() {
     });
 
     test('写真画像取得失敗時に generationFailed エラーになる', () async {
-      // getImageForAi のデフォルトが Failure を返すことを利用
+      when(
+        () => IntegrationTestHelpers.mockPhotoService.getImageForAi(any()),
+      ).thenAnswer(
+        (_) async =>
+            const Failure(PhotoAccessException('Image fetch failed in test')),
+      );
       final assets = IntegrationTestHelpers.createMockAssets(1);
       final controller = createController();
       addTearDown(controller.dispose);

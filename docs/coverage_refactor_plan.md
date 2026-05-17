@@ -26,7 +26,7 @@
 
 ### 1-3. サブスクリプション購入フロー
 
-- [x] `test/integration/smoke/subscription_purchase_smoke_test.dart` を新規作成
+- [x] `test/integration/smoke/subscription_smoke_test.dart` を新規作成
   - [x] 購入開始 → IAP フロー → `SubscriptionStateService` の状態更新 の一連を確認
   - [x] 購入失敗時に状態が変化しないことを確認
   - [x] 復元フローが状態を正しく更新することを確認

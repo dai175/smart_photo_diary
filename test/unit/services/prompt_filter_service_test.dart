@@ -199,7 +199,7 @@ void main() {
           count: 2,
           isPremium: true,
         );
-        expect(result.length, lessThanOrEqualTo(2));
+        expect(result.length, equals(2));
         expect(result.map((p) => p.id).toSet().length, result.length);
       });
 

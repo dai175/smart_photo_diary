@@ -139,6 +139,7 @@ final class PromptFilterService {
   WritingPrompt _selectWeightedRandom(List<WritingPrompt> prompts) {
     if (prompts.length == 1) return prompts.first;
     final totalWeight = prompts.fold<int>(0, (sum, p) => sum + p.priority);
+    if (totalWeight <= 0) return prompts[_random.nextInt(prompts.length)];
     final randomWeight = _random.nextInt(totalWeight);
     int currentWeight = 0;
     for (final prompt in prompts) {

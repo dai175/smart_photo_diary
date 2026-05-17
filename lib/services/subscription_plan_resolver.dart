@@ -95,16 +95,18 @@ final class SubscriptionPlanResolver {
     );
 
     final forcedPlanId = resolveForcedPlanId(forcePlan);
-    final expiryDuration =
-        forcedPlanId == SubscriptionConstants.premiumYearlyPlanId
+    final isBasicPlan = forcedPlanId == SubscriptionConstants.basicPlanId;
+    final now = DateTime.now();
+    final expiryDuration = isBasicPlan
+        ? null
+        : forcedPlanId == SubscriptionConstants.premiumYearlyPlanId
         ? const Duration(days: SubscriptionConstants.subscriptionYearDays)
         : const Duration(days: SubscriptionConstants.subscriptionMonthDays);
-    final now = DateTime.now();
     return status.copyWith(
       planId: forcedPlanId,
       isActive: true,
       startDate: status.startDate ?? now,
-      expiryDate: now.add(expiryDuration),
-    );
+      autoRenewal: !isBasicPlan,
+    )..expiryDate = expiryDuration != null ? now.add(expiryDuration) : null;
   }
 }

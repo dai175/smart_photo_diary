@@ -72,7 +72,7 @@ void main() {
         () => mockDiaryService.saveDiaryEntryWithPhotos(
           date: any(named: 'date'),
           title: 'テスト日記のタイトル',
-          content: any(named: 'content'),
+          content: 'これはテスト用に生成された日記の内容です。写真から素敵な思い出を記録しました。',
           photos: any(named: 'photos'),
         ),
       ).called(1);

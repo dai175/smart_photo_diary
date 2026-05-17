@@ -73,9 +73,7 @@ void main() {
       addTearDown(controller.dispose);
       await controller.loadSettings();
 
-      await controller.settingsService?.setPhotoTypeFilter(
-        PhotoTypeFilter.photosOnly,
-      );
+      await controller.setPhotoTypeFilter(PhotoTypeFilter.photosOnly);
 
       verify(
         () =>

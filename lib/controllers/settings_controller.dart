@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../core/service_registration.dart';
+import '../core/result/result.dart';
+import '../models/photo_type_filter.dart';
 import '../models/subscription_info_v2.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/settings_service_interface.dart';
@@ -85,6 +87,10 @@ class SettingsController extends BaseErrorController {
     }
 
     setLoading(false);
+  }
+
+  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) async {
+    return _settingsService!.setPhotoTypeFilter(filter);
   }
 
   /// ロケール変更

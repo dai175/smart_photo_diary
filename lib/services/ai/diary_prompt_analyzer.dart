@@ -65,7 +65,10 @@ class DiaryPromptAnalyzer {
     }
 
     if (lowerPrompt.contains('つながり') ||
-        lowerPrompt.contains('人') ||
+        lowerPrompt.contains('人と') ||
+        lowerPrompt.contains('人々') ||
+        lowerPrompt.contains('仲間') ||
+        lowerPrompt.contains('他者') ||
         lowerPrompt.contains('関係') ||
         lowerPrompt.contains('connection') ||
         lowerPrompt.contains('relationship') ||
