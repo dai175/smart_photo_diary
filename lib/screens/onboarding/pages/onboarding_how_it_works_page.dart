@@ -119,13 +119,12 @@ class _MiniHeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // 3色トーンチップ（ModernChip.tonedTag を再利用）
-                  Row(
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
                     children: [
                       ModernChip.tonedTag(l10n.onboardingSampleTag1, index: 0),
-                      const SizedBox(width: 6),
                       ModernChip.tonedTag(l10n.onboardingSampleTag2, index: 1),
-                      const SizedBox(width: 6),
                       ModernChip.tonedTag(l10n.onboardingSampleTag3, index: 2),
                     ],
                   ),
