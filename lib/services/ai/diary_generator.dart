@@ -8,6 +8,7 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import 'diary_locale_utils.dart';
 import 'diary_time_segment.dart';
+import 'diary_prompt_analyzer.dart';
 import 'diary_prompt_builder.dart';
 import 'diary_response_parser.dart';
 
@@ -46,14 +47,14 @@ class DiaryGenerator {
 
     try {
       // プロンプト種別分析と最適化パラメータ取得
-      final promptType = DiaryPromptBuilder.analyzePromptType(prompt);
-      final optimParams = DiaryPromptBuilder.getOptimizationParams(
+      final promptType = DiaryPromptAnalyzer.analyzePromptType(prompt);
+      final optimParams = DiaryPromptAnalyzer.getOptimizationParams(
         promptType,
         locale,
         diaryLength: diaryLength,
       );
-      final emphasis = optimParams['emphasis'] as String;
-      final maxTokens = optimParams['maxTokens'] as int;
+      final emphasis = optimParams.emphasis;
+      final maxTokens = optimParams.maxTokens;
 
       final finalPrompt = DiaryPromptBuilder.buildSingleImagePrompt(
         locale: locale,
@@ -281,24 +282,25 @@ Describe the situation and mood you infer from the image, including any emotiona
       );
     }
 
-    final promptType = DiaryPromptBuilder.analyzePromptType(customPrompt);
-    final optimParams = DiaryPromptBuilder.getOptimizationParams(
+    final promptType = DiaryPromptAnalyzer.analyzePromptType(customPrompt);
+    final isJapanese = DiaryLocaleUtils.isJapanese(locale);
+    final optimParams = DiaryPromptAnalyzer.getOptimizationParams(
       promptType,
       locale,
       diaryLength: diaryLength,
     );
-    final emphasis = optimParams['emphasis'] as String;
-    final baseMaxTokens = optimParams['maxTokens'] as int;
+    final emphasis = optimParams.emphasis;
+    final baseMaxTokens = optimParams.maxTokens;
     final isShort = diaryLength == DiaryLength.short;
     final int extraTokens;
-    if (DiaryLocaleUtils.isJapanese(locale)) {
+    if (isJapanese) {
       extraTokens = isShort
-          ? DiaryPromptBuilder.multiImageExtraTokensJaShort
-          : DiaryPromptBuilder.multiImageExtraTokensJaStandard;
+          ? DiaryPromptAnalyzer.multiImageExtraTokensJaShort
+          : DiaryPromptAnalyzer.multiImageExtraTokensJaStandard;
     } else {
       extraTokens = isShort
-          ? DiaryPromptBuilder.multiImageExtraTokensEnShort
-          : DiaryPromptBuilder.multiImageExtraTokensEnStandard;
+          ? DiaryPromptAnalyzer.multiImageExtraTokensEnShort
+          : DiaryPromptAnalyzer.multiImageExtraTokensEnStandard;
     }
     final multiImageMaxTokens = baseMaxTokens + extraTokens;
 

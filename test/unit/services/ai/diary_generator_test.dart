@@ -7,7 +7,7 @@ import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/ai/diary_generator.dart';
-import 'package:smart_photo_diary/services/ai/diary_prompt_builder.dart';
+import 'package:smart_photo_diary/services/ai/diary_prompt_analyzer.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
 
 import '../../../../test/integration/mocks/mock_services.dart';
@@ -462,7 +462,7 @@ void main() {
         diaryLength: DiaryLength.short,
       );
 
-      expect(capturedMaxTokens, DiaryPromptBuilder.emotionTokensJaShort);
+      expect(capturedMaxTokens, DiaryPromptAnalyzer.emotionTokensJaShort);
     });
 
     test('generateFromImage with standard → uses standard maxTokens', () async {
@@ -503,7 +503,7 @@ void main() {
         diaryLength: DiaryLength.standard,
       );
 
-      expect(capturedMaxTokens, DiaryPromptBuilder.emotionTokensJaStandard);
+      expect(capturedMaxTokens, DiaryPromptAnalyzer.emotionTokensJaStandard);
     });
 
     test(
@@ -551,8 +551,8 @@ void main() {
         );
 
         final expectedTokens =
-            DiaryPromptBuilder.emotionTokensJaShort +
-            DiaryPromptBuilder.multiImageExtraTokensJaShort;
+            DiaryPromptAnalyzer.emotionTokensJaShort +
+            DiaryPromptAnalyzer.multiImageExtraTokensJaShort;
         expect(capturedTextMaxTokens, expectedTokens);
       },
     );
