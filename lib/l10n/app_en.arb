@@ -1027,6 +1027,21 @@
   "@diaryPreviewDiscardDialogConfirm": {
     "description": "Confirmation button label for discarding the diary"
   },
+  "diaryGenerationCaptionNoPrompt": "{photoCount} {photoCount, plural, =1{photo} other{photos}}",
+  "@diaryGenerationCaptionNoPrompt": {
+    "description": "Generating banner caption when no prompt is selected",
+    "placeholders": {
+      "photoCount": { "type": "int", "format": "decimalPattern" }
+    }
+  },
+  "diaryGenerationCaptionWithPrompt": "{photoCount} {photoCount, plural, =1{photo} other{photos}} · {category} prompt",
+  "@diaryGenerationCaptionWithPrompt": {
+    "description": "Generating banner caption with prompt category name",
+    "placeholders": {
+      "photoCount": { "type": "int", "format": "decimalPattern" },
+      "category": { "type": "String" }
+    }
+  },
   "diaryCardUntitled": "Untitled",
   "@diaryCardUntitled": {
     "description": "Fallback title when a diary entry has no title"

@@ -17,6 +17,7 @@ import '../../ui/animations/micro_interactions.dart';
 import '../diary_detail_screen.dart';
 import 'diary_preview_body.dart';
 import 'diary_preview_dialogs.dart';
+import 'diary_preview_generating.dart';
 
 /// 生成された日記のプレビュー画面
 class DiaryPreviewScreen extends StatefulWidget {
@@ -172,6 +173,20 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, child) {
+        // 生成中（初期化・AI処理）はスケルトンプレビュー画面を表示
+        if (_controller.isInitializing || _controller.isLoading) {
+          return PopScope(
+            canPop: true,
+            child: DiaryPreviewGeneratingScreen(
+              selectedAssets: widget.selectedAssets,
+              photoDateTime: _controller.photoDateTime,
+              selectedPrompt: _controller.selectedPrompt,
+              statusText: _generatingStatusText(context),
+              onBack: () => Navigator.of(context).pop(),
+            ),
+          );
+        }
+
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) async {
@@ -215,6 +230,13 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         );
       },
     );
+  }
+
+  String _generatingStatusText(BuildContext context) {
+    if (_controller.isAnalyzingPhotos) {
+      return context.l10n.diaryPreviewAnalyzingPhotos;
+    }
+    return context.l10n.diaryPreviewGeneratingDiaryTitle;
   }
 
   String _getErrorMessage() {
