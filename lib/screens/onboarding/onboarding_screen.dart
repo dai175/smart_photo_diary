@@ -105,6 +105,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
       child: AnimatedButton(
+        width: double.infinity,
         onPressed: isProcessing
             ? null
             : isLastPage
