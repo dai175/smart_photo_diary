@@ -146,10 +146,10 @@
 
 ### 4-1. `writing_prompt.dart`（532 行）
 
-- [ ] `legacyTags` deprecated フィールドの扱いを決定（除去 or 移行）
-- [ ] WritingPrompt 本体と関連 enum/extension を別ファイルに分割
-- [ ] Hive アダプタ再生成（`fvm dart run build_runner build`）
-- [ ] 移行後に単体テストを追加
+- [x] `_parseDualLocaleDeprecated` deprecated JSON フォールバックを除去（assets に旧形式なし確認済み）
+- [x] `PromptCategory` → `prompt_category.dart`、`PromptUsageHistory` → `prompt_usage_history.dart` に分割（`writing_prompt.dart` 270 行以下に削減）
+- [x] Hive アダプタ再生成（`fvm dart run build_runner build`）
+- [x] 単体テストを追加（`prompt_category_test.dart` 5 ケース、`prompt_usage_history_test.dart` 6 ケース、`writing_prompt_test.dart` にローカライゼーション 6 ケース追加）
 
 ---
 

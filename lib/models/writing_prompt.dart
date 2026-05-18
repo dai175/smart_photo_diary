@@ -3,54 +3,12 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce/hive_ce.dart';
 
+export 'prompt_category.dart';
+export 'prompt_usage_history.dart';
+
+import 'prompt_category.dart';
+
 part 'writing_prompt.g.dart';
-
-/// ライティングプロンプトのカテゴリ定義（感情深掘り型）
-/// 感情中心のプロンプトカテゴリのみを提供します
-@HiveType(typeId: 3)
-enum PromptCategory {
-  // 基本感情カテゴリ（Basic用）
-  @HiveField(0)
-  emotion('emotion'),
-
-  // Premium感情深掘りカテゴリ
-  @HiveField(1)
-  emotionDepth('emotion_depth'),
-
-  @HiveField(2)
-  sensoryEmotion('sensory_emotion'),
-
-  @HiveField(3)
-  emotionGrowth('emotion_growth'),
-
-  @HiveField(4)
-  emotionConnection('emotion_connection'),
-
-  @HiveField(5)
-  emotionDiscovery('emotion_discovery'),
-
-  @HiveField(6)
-  emotionFantasy('emotion_fantasy'),
-
-  @HiveField(7)
-  emotionHealing('emotion_healing'),
-
-  @HiveField(8)
-  emotionEnergy('emotion_energy');
-
-  const PromptCategory(this.id);
-
-  /// カテゴリID（JSON保存用）
-  final String id;
-
-  /// IDからカテゴリを取得
-  static PromptCategory fromId(String id) {
-    return PromptCategory.values.firstWhere(
-      (category) => category.id == id,
-      orElse: () => PromptCategory.emotion,
-    );
-  }
-}
 
 /// ライティングプロンプトモデル
 /// Premium機能として日記生成時の創作支援を提供します
@@ -115,7 +73,6 @@ class WritingPrompt extends HiveObject {
        ),
        localizedTags = _mergeLocalizedTags(localizedTags, tags);
 
-  /// JSONからWritingPromptを作成
   factory WritingPrompt.fromJson(Map<String, dynamic> json) {
     return WritingPrompt(
       id: json['id'] as String,
@@ -129,9 +86,7 @@ class WritingPrompt extends HiveObject {
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       isActive: json['isActive'] as bool? ?? true,
-      localizedTexts:
-          _parseLocalizedStringMap(json['localizedTexts']) ??
-          _parseDualLocaleDeprecated(json, 'texts'),
+      localizedTexts: _parseLocalizedStringMap(json['localizedTexts']) ?? {},
       localizedDescriptions: _parseLocalizedStringMap(
         json['localizedDescriptions'],
       ),
@@ -139,7 +94,6 @@ class WritingPrompt extends HiveObject {
     );
   }
 
-  /// WritingPromptをJSONに変換
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -157,7 +111,6 @@ class WritingPrompt extends HiveObject {
     };
   }
 
-  /// プロンプトが指定されたプランで使用可能かどうか
   bool isAvailableForPlan({required bool isPremium}) {
     if (isPremiumOnly && !isPremium) {
       return false;
@@ -165,7 +118,6 @@ class WritingPrompt extends HiveObject {
     return isActive;
   }
 
-  /// プロンプトがキーワードにマッチするかどうか
   bool matchesKeyword(String keyword) {
     final lowerKeyword = keyword.toLowerCase();
     if (text.toLowerCase().contains(lowerKeyword)) {
@@ -203,30 +155,24 @@ class WritingPrompt extends HiveObject {
     return false;
   }
 
-  /// プロンプトの長さ（文字数）を取得
   int get textLength => text.length;
 
-  /// プロンプトが長文かどうか（50文字以上）
   bool get isLongPrompt => text.length >= 50;
 
-  /// プロンプトのプレビューテキスト（最初の30文字 + "..."）
   String get previewText {
     if (text.length <= 30) return text;
     return '${text.substring(0, 30)}...';
   }
 
-  /// 指定ロケールに適したテキストを取得
   String textForLocale(Locale? locale) {
     return _resolveLocalizedString(localizedTexts, locale) ?? text;
   }
 
-  /// 指定ロケールに適した説明を取得
   String? descriptionForLocale(Locale? locale) {
     return _resolveLocalizedString(localizedDescriptions, locale) ??
         description;
   }
 
-  /// 指定ロケールに適したタグリストを取得
   List<String> tagsForLocale(Locale? locale) {
     final localized = _resolveLocalizedList(localizedTags, locale);
     if (localized != null && localized.isNotEmpty) {
@@ -235,7 +181,6 @@ class WritingPrompt extends HiveObject {
     return tags;
   }
 
-  /// 指定ロケール向けにローカライズしたコピーを生成
   WritingPrompt localizedCopy(Locale? locale) {
     if (locale == null) {
       return this;
@@ -243,18 +188,18 @@ class WritingPrompt extends HiveObject {
 
     final localizedText = textForLocale(locale);
     final localizedDescription = descriptionForLocale(locale);
-    final localizedTags = tagsForLocale(locale);
+    final localizedTagsList = tagsForLocale(locale);
 
     if (localizedText == text &&
         localizedDescription == description &&
-        listEquals(localizedTags, tags)) {
+        listEquals(localizedTagsList, tags)) {
       return this;
     }
 
     return copyWith(
       text: localizedText,
       description: localizedDescription,
-      tags: localizedTags,
+      tags: localizedTagsList,
     );
   }
 
@@ -272,7 +217,6 @@ class WritingPrompt extends HiveObject {
   @override
   int get hashCode => id.hashCode;
 
-  /// デバッグ用の詳細情報を取得
   @visibleForTesting
   Map<String, dynamic> get debugInfo {
     return {
@@ -286,7 +230,6 @@ class WritingPrompt extends HiveObject {
     };
   }
 
-  /// コピーコンストラクタ
   WritingPrompt copyWith({
     String? id,
     String? text,
@@ -376,20 +319,6 @@ class WritingPrompt extends HiveObject {
     return null;
   }
 
-  static Map<String, String>? _parseDualLocaleDeprecated(
-    Map<String, dynamic> json,
-    String key,
-  ) {
-    if (!json.containsKey(key)) {
-      return null;
-    }
-    final value = json[key];
-    if (value is Map<String, dynamic>) {
-      return value.map((k, dynamic v) => MapEntry(k, v as String));
-    }
-    return null;
-  }
-
   static Map<String, List<String>>? _parseLocalizedTags(dynamic value) {
     if (value is Map<String, dynamic>) {
       return value.map(
@@ -470,63 +399,4 @@ class WritingPrompt extends HiveObject {
     candidates.add(languageCode);
     return candidates;
   }
-}
-
-/// プロンプト使用履歴管理用モデル
-@HiveType(typeId: 5)
-class PromptUsageHistory extends HiveObject {
-  @HiveField(0)
-  final String promptId;
-
-  @HiveField(1)
-  final DateTime usedAt;
-
-  @HiveField(2)
-  final String? diaryEntryId;
-
-  @HiveField(3)
-  final bool wasHelpful;
-
-  PromptUsageHistory({
-    required this.promptId,
-    DateTime? usedAt,
-    this.diaryEntryId,
-    this.wasHelpful = true,
-  }) : usedAt = usedAt ?? DateTime.now();
-
-  /// JSONからPromptUsageHistoryを作成
-  factory PromptUsageHistory.fromJson(Map<String, dynamic> json) {
-    return PromptUsageHistory(
-      promptId: json['promptId'] as String,
-      usedAt: DateTime.parse(json['usedAt'] as String),
-      diaryEntryId: json['diaryEntryId'] as String?,
-      wasHelpful: json['wasHelpful'] as bool? ?? true,
-    );
-  }
-
-  /// PromptUsageHistoryをJSONに変換
-  Map<String, dynamic> toJson() {
-    return {
-      'promptId': promptId,
-      'usedAt': usedAt.toIso8601String(),
-      'diaryEntryId': diaryEntryId,
-      'wasHelpful': wasHelpful,
-    };
-  }
-
-  @override
-  String toString() {
-    return 'PromptUsageHistory(promptId: $promptId, usedAt: $usedAt, helpful: $wasHelpful)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is PromptUsageHistory &&
-        other.promptId == promptId &&
-        other.usedAt == usedAt;
-  }
-
-  @override
-  int get hashCode => Object.hash(promptId, usedAt);
 }
