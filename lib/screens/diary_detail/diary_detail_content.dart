@@ -26,6 +26,7 @@ class DiaryDetailContent extends StatefulWidget {
     required this.isEditing,
     required this.titleController,
     required this.contentController,
+    this.photoCacheService,
   });
 
   final DiaryEntry diaryEntry;
@@ -33,6 +34,7 @@ class DiaryDetailContent extends StatefulWidget {
   final bool isEditing;
   final TextEditingController titleController;
   final TextEditingController contentController;
+  final IPhotoCacheService? photoCacheService;
 
   @override
   State<DiaryDetailContent> createState() => _DiaryDetailContentState();
@@ -48,7 +50,8 @@ class _DiaryDetailContentState extends State<DiaryDetailContent> {
   @override
   void initState() {
     super.initState();
-    _photoCacheService = serviceLocator.get<IPhotoCacheService>();
+    _photoCacheService =
+        widget.photoCacheService ?? serviceLocator.get<IPhotoCacheService>();
   }
 
   @override

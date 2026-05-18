@@ -24,6 +24,7 @@ class PastPhotoCalendarWidget extends StatefulWidget {
   final Function(List<AssetEntity>) onPhotosSelected;
   final Set<String> usedPhotoIds;
   final Function()? onSelectionCleared;
+  final ILoggingService? logger;
 
   const PastPhotoCalendarWidget({
     super.key,
@@ -32,6 +33,7 @@ class PastPhotoCalendarWidget extends StatefulWidget {
     required this.onPhotosSelected,
     required this.usedPhotoIds,
     this.onSelectionCleared,
+    this.logger,
   });
 
   @override
@@ -40,6 +42,7 @@ class PastPhotoCalendarWidget extends StatefulWidget {
 }
 
 class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
+  late final ILoggingService _logger;
   late DateTime _focusedDay;
   DateTime? _selectedDay;
   final Map<DateTime, List<AssetEntity>> _photosByDate = {};
@@ -63,6 +66,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   @override
   void initState() {
     super.initState();
+    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
     // focusedDayを昨日に設定（今日は除外されるため）
     final now = DateTime.now();
     _focusedDay = DateTime(
@@ -127,12 +131,11 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         _isLoading = false;
       });
     } catch (e) {
-      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(
         e,
         context: 'photo-count-loading',
       );
-      loggingService.warning(
+      _logger.warning(
         'Failed to load photo counts, but continuing',
         context: 'PastPhotoCalendarWidget._loadPhotoCountsForMonth',
         data: appError.toString(),
@@ -174,12 +177,11 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
       // 選択された写真を親に通知
       widget.onPhotosSelected(photos);
     } catch (e) {
-      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(
         e,
         context: 'load-photos-by-date',
       );
-      loggingService.error(
+      _logger.error(
         'Error loading photos for selected date',
         context: 'PastPhotoCalendarWidget._loadPhotosForDate',
         error: appError,
@@ -253,20 +255,18 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
             _diaryDates = dates;
           });
         case Failure(exception: final e):
-          final loggingService = serviceLocator.get<ILoggingService>();
-          loggingService.warning(
+          _logger.warning(
             'Failed to load diary dates, but continuing',
             context: 'PastPhotoCalendarWidget._loadDiaryDates',
             data: e.message,
           );
       }
     } catch (e) {
-      final loggingService = serviceLocator.get<ILoggingService>();
       final appError = ErrorHandler.handleError(
         e,
         context: 'diary-date-loading',
       );
-      loggingService.warning(
+      _logger.warning(
         '日記日付の読み込みに失敗しましたが、機能は継続します',
         context: 'PastPhotoCalendarWidget._loadDiaryDates',
         data: appError.toString(),

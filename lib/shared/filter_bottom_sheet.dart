@@ -19,12 +19,14 @@ class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
   final Function(DiaryFilter) onApply;
   final IDiaryTagService? tagService;
+  final ILoggingService? logger;
 
   const FilterBottomSheet({
     super.key,
     required this.initialFilter,
     required this.onApply,
     this.tagService,
+    this.logger,
   });
 
   @override
@@ -48,7 +50,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<ILoggingService>();
+    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
     _currentFilter = widget.initialFilter;
     _loadAvailableTags();
   }

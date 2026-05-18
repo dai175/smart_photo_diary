@@ -21,8 +21,15 @@ import '../controllers/scroll_signal.dart';
 
 class DiaryScreen extends StatefulWidget {
   final ScrollSignal? scrollSignal;
+  final ILoggingService? logger;
+  final IPhotoCacheService? photoCacheService;
 
-  const DiaryScreen({super.key, this.scrollSignal});
+  const DiaryScreen({
+    super.key,
+    this.scrollSignal,
+    this.logger,
+    this.photoCacheService,
+  });
 
   @override
   State<DiaryScreen> createState() => _DiaryScreenState();
@@ -38,7 +45,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<ILoggingService>();
+    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
     _controller = DiaryScreenController();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
@@ -115,7 +122,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
       return;
     }
 
-    final cache = serviceLocator.get<IPhotoCacheService>();
+    final cache =
+        widget.photoCacheService ?? serviceLocator.get<IPhotoCacheService>();
     final size = AppConstants.diaryThumbnailSize.toInt();
     await cache.preloadThumbnails(
       assets,

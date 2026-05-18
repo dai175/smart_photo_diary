@@ -14,9 +14,14 @@ import '../../ui/components/fullscreen_photo_viewer.dart';
 
 /// 日記詳細のヒーロー写真セクション（4:3 フルブリード）
 class DiaryDetailPhotoSection extends StatefulWidget {
-  const DiaryDetailPhotoSection({super.key, required this.photoAssets});
+  const DiaryDetailPhotoSection({
+    super.key,
+    required this.photoAssets,
+    this.photoCacheService,
+  });
 
   final List<AssetEntity> photoAssets;
+  final IPhotoCacheService? photoCacheService;
 
   @override
   State<DiaryDetailPhotoSection> createState() =>
@@ -32,7 +37,8 @@ class _DiaryDetailPhotoSectionState extends State<DiaryDetailPhotoSection> {
   @override
   void initState() {
     super.initState();
-    _photoCacheService = serviceLocator.get<IPhotoCacheService>();
+    _photoCacheService =
+        widget.photoCacheService ?? serviceLocator.get<IPhotoCacheService>();
     _heroThumbnailFuture = _loadHeroThumbnail();
   }
 

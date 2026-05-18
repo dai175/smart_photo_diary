@@ -19,8 +19,16 @@ import '../ui/design_system/app_typography.dart';
 class DiaryCardWidget extends StatefulWidget {
   final DiaryEntry entry;
   final VoidCallback onTap;
+  final IPhotoCacheService? photoCacheService;
+  final IPhotoService? photoService;
 
-  const DiaryCardWidget({super.key, required this.entry, required this.onTap});
+  const DiaryCardWidget({
+    super.key,
+    required this.entry,
+    required this.onTap,
+    this.photoCacheService,
+    this.photoService,
+  });
 
   @override
   State<DiaryCardWidget> createState() => _DiaryCardWidgetState();
@@ -35,7 +43,8 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   @override
   void initState() {
     super.initState();
-    _photoCacheService = serviceLocator.get<IPhotoCacheService>();
+    _photoCacheService =
+        widget.photoCacheService ?? serviceLocator.get<IPhotoCacheService>();
     _initAsyncState();
   }
 
@@ -69,7 +78,8 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
     if (widget.entry.photoIds.isEmpty) {
       return Future.value([]);
     }
-    final photoService = serviceLocator.get<IPhotoService>();
+    final photoService =
+        widget.photoService ?? serviceLocator.get<IPhotoService>();
     return photoService
         .getAssetsByIds(widget.entry.photoIds)
         .then((result) => result.getOrDefault([]));

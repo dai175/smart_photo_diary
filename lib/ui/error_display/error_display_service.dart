@@ -5,7 +5,6 @@ import '../../ui/design_system/app_spacing.dart';
 import '../../core/result/result.dart';
 import '../../localization/localization_extensions.dart';
 import '../../services/interfaces/logging_service_interface.dart';
-import '../../core/service_locator.dart';
 import 'error_severity.dart';
 import 'error_display_widgets.dart';
 
@@ -15,16 +14,17 @@ class ErrorDisplayService {
   factory ErrorDisplayService() => _instance;
   ErrorDisplayService._internal();
 
-  ILoggingService? _loggingService;
+  static ILoggingService? _logger;
 
-  ILoggingService? get loggingService {
-    try {
-      _loggingService ??= serviceLocator.get<ILoggingService>();
-      return _loggingService;
-    } catch (e) {
-      // LoggingServiceが初期化されていない場合
-      return null;
-    }
+  /// ロガーを注入する（ServiceRegistration初期化時に呼び出す）
+  static void configure({required ILoggingService logger}) {
+    _logger = logger;
+  }
+
+  /// テスト用: ロガーをリセットする
+  @visibleForTesting
+  static void resetForTesting() {
+    _logger = null;
   }
 
   /// エラーを表示する
@@ -39,30 +39,12 @@ class ErrorDisplayService {
 
     // ログ出力
     if (displayConfig.logError) {
-      try {
-        final logging = loggingService;
-        if (logging != null) {
-          logging.error(
-            error.message,
-            context: 'ErrorDisplayService',
-            error: error.originalError,
-            stackTrace: error.stackTrace,
-          );
-        }
-      } catch (e) {
-        // LoggingService初期化エラーの場合はログ出力をスキップ
-        try {
-          final logger = serviceLocator.get<ILoggingService>();
-          logger.warning(
-            'Failed to log error',
-            context: 'ErrorDisplayService.showError',
-            data: e.toString(),
-          );
-        } catch (_) {
-          // 最後の手段としてdebugPrintを使用
-          debugPrint('ErrorDisplayService: Failed to log error - $e');
-        }
-      }
+      _logger?.error(
+        error.message,
+        context: 'ErrorDisplayService',
+        error: error.originalError,
+        stackTrace: error.stackTrace,
+      );
     }
 
     // 表示方法に応じて適切なウィジェットで表示

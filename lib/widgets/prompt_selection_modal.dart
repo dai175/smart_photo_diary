@@ -20,12 +20,18 @@ class PromptSelectionModal extends StatefulWidget {
   final void Function(WritingPrompt?, String?) onPromptSelected;
   final void Function(String?) onSkip;
   final DateTime? date;
+  final ILoggingService? logger;
+  final IPromptService? promptService;
+  final ISubscriptionService? subscriptionService;
 
   const PromptSelectionModal({
     super.key,
     required this.onPromptSelected,
     required this.onSkip,
     this.date,
+    this.logger,
+    this.promptService,
+    this.subscriptionService,
   });
 
   @override
@@ -53,7 +59,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   @override
   void initState() {
     super.initState();
-    _logger = serviceLocator.get<ILoggingService>();
+    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
     _contextController = TextEditingController();
     _contextAnimationController = AnimationController(
       duration: AppConstants.quickAnimationDuration,
@@ -87,8 +93,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   Future<void> _initializeServices() async {
     try {
       final services = await Future.wait([
-        ServiceRegistration.getAsync<IPromptService>(),
-        ServiceRegistration.getAsync<ISubscriptionService>(),
+        widget.promptService != null
+            ? Future.value(widget.promptService!)
+            : ServiceRegistration.getAsync<IPromptService>(),
+        widget.subscriptionService != null
+            ? Future.value(widget.subscriptionService!)
+            : ServiceRegistration.getAsync<ISubscriptionService>(),
       ]);
       _promptService = services[0] as IPromptService;
       _subscriptionService = services[1] as ISubscriptionService;

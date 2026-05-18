@@ -23,6 +23,7 @@ class DiaryDetailShareHelper {
     required BuildContext context,
     required DiaryEntry diaryEntry,
     required List<AssetEntity> photoAssets,
+    ISocialShareService? socialShareService,
   }) async {
     final result = await showDialog<ShareFormat>(
       context: context,
@@ -48,7 +49,11 @@ class DiaryDetailShareHelper {
                 icon: Icons.share_rounded,
                 onTap: () async {
                   Navigator.of(dialogContext).pop();
-                  await shareToX(context: context, diaryEntry: diaryEntry);
+                  await shareToX(
+                    context: context,
+                    diaryEntry: diaryEntry,
+                    socialShareService: socialShareService,
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -86,6 +91,7 @@ class DiaryDetailShareHelper {
         diaryEntry: diaryEntry,
         photoAssets: photoAssets,
         format: result,
+        socialShareService: socialShareService,
       );
     }
   }
@@ -94,6 +100,7 @@ class DiaryDetailShareHelper {
   static Future<void> shareToX({
     required BuildContext context,
     required DiaryEntry diaryEntry,
+    ISocialShareService? socialShareService,
   }) async {
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -126,7 +133,8 @@ class DiaryDetailShareHelper {
         },
       );
 
-      final share = serviceLocator.get<ISocialShareService>();
+      final share =
+          socialShareService ?? serviceLocator.get<ISocialShareService>();
       final result = await share.shareToX(
         diary: diaryEntry,
         shareOrigin: shareOrigin,
@@ -163,6 +171,7 @@ class DiaryDetailShareHelper {
     required DiaryEntry diaryEntry,
     required List<AssetEntity> photoAssets,
     required ShareFormat format,
+    ISocialShareService? socialShareService,
   }) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -193,10 +202,11 @@ class DiaryDetailShareHelper {
       );
 
       // SocialShareServiceを取得
-      final socialShareService = serviceLocator.get<ISocialShareService>();
+      final shareSvc =
+          socialShareService ?? serviceLocator.get<ISocialShareService>();
 
       // Instagram共有を実行
-      final result = await socialShareService.shareToSocialMedia(
+      final result = await shareSvc.shareToSocialMedia(
         diary: diaryEntry,
         format: format,
         photos: photoAssets,
