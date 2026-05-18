@@ -47,8 +47,8 @@ void main() {
       return DiaryPreviewController(
         logger: logger,
         photoService: IntegrationTestHelpers.mockPhotoService,
-        getAiService: () async => effectiveAiMock,
-        getDiaryService: () async => mockDiaryService,
+        aiService: effectiveAiMock,
+        diaryCrudService: mockDiaryService,
       );
     }
 

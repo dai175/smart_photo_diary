@@ -17,8 +17,14 @@ import '../widgets/settings/settings_loading_view.dart';
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
   final ScrollSignal? scrollSignal;
+  final ILoggingService? logger;
 
-  const SettingsScreen({super.key, this.onThemeChanged, this.scrollSignal});
+  const SettingsScreen({
+    super.key,
+    this.onThemeChanged,
+    this.scrollSignal,
+    this.logger,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -32,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _controller = SettingsController(
-      logger: ServiceRegistration.get<ILoggingService>(),
+      logger: widget.logger ?? ServiceRegistration.get<ILoggingService>(),
     );
     _scrollController = ScrollController();
     widget.scrollSignal?.addListener(_onScrollToTop);
@@ -76,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SettingsLoadingView()
                   else if (_controller.hasSettingsLoaded)
                     SettingsContentBody(
-                      settingsService: _controller.settingsService!,
+                      settingsService: _controller.settingsService,
                       logger: _controller.logger,
                       selectedLocale: _controller.selectedLocale,
                       subscriptionInfo: _controller.subscriptionInfo,

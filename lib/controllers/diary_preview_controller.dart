@@ -30,7 +30,7 @@ enum DiaryPreviewLoadingState { idle, initializing, analyzingPhotos, saving }
 /// 日時解決は [PhotoDateResolver] にそれぞれ委譲する。
 class DiaryPreviewController extends BaseErrorController {
   late final ILoggingService _logger;
-  late final Future<IAiService> Function() _getAiService;
+  IAiService? _aiService;
   late final DiaryPreviewGenerationDelegate _generationDelegate;
   late final DiaryPreviewSaveDelegate _saveDelegate;
 
@@ -106,25 +106,20 @@ class DiaryPreviewController extends BaseErrorController {
   DiaryPreviewController({
     required ILoggingService logger,
     required IPhotoService photoService,
-    Future<IAiService> Function()? getAiService,
-    Future<IDiaryCrudService> Function()? getDiaryService,
-    Future<IPromptService> Function()? getPromptService,
+    IAiService? aiService,
+    IDiaryCrudService? diaryCrudService,
+    IPromptService? promptService,
   }) {
     _logger = logger;
-    _getAiService =
-        getAiService ?? () => ServiceRegistration.getAsync<IAiService>();
+    _aiService = aiService;
 
     _generationDelegate = DiaryPreviewGenerationDelegate(
       photoService: photoService,
       logger: _logger,
     );
     _saveDelegate = DiaryPreviewSaveDelegate(
-      getDiaryService:
-          getDiaryService ??
-          () => ServiceRegistration.getAsync<IDiaryCrudService>(),
-      getPromptService:
-          getPromptService ??
-          () => ServiceRegistration.getAsync<IPromptService>(),
+      diaryCrudService: diaryCrudService,
+      promptService: promptService,
       logger: _logger,
     );
   }
@@ -178,7 +173,7 @@ class DiaryPreviewController extends BaseErrorController {
     setLoading(true);
 
     try {
-      final aiService = await _getAiService();
+      _aiService ??= await ServiceRegistration.getAsync<IAiService>();
       if (localVersion != _requestVersion) return;
 
       _photoDateTime = PhotoDateResolver.resolveMedianDateTime(assets);
@@ -186,7 +181,7 @@ class DiaryPreviewController extends BaseErrorController {
       final Result<GenerationOutput> genResult;
       if (assets.length == 1) {
         genResult = await _generationDelegate.generateFromSinglePhoto(
-          aiService: aiService,
+          aiService: _aiService!,
           asset: assets.first,
           photoDateTime: _photoDateTime,
           locale: locale,
@@ -202,7 +197,7 @@ class DiaryPreviewController extends BaseErrorController {
         notifyListeners();
 
         genResult = await _generationDelegate.generateFromMultiplePhotos(
-          aiService: aiService,
+          aiService: _aiService!,
           assets: assets,
           locale: locale,
           prompt: _selectedPrompt?.text,

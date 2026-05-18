@@ -24,12 +24,15 @@ class TimelineFABIntegration extends StatelessWidget {
   /// 外部から先頭へスクロールさせるためのシグナル
   final ScrollSignal? scrollSignal;
 
-  const TimelineFABIntegration({
+  final ILoggingService _logger;
+
+  TimelineFABIntegration({
     super.key,
     required this.controller,
     this.callbacks = const TimelineCallbacks(),
     this.scrollSignal,
-  });
+    ILoggingService? logger,
+  }) : _logger = logger ?? ServiceRegistration.get<ILoggingService>();
 
   @override
   Widget build(BuildContext context) {
@@ -142,19 +145,17 @@ class TimelineFABIntegration extends StatelessWidget {
   }
 
   Future<void> _onCreateDiaryPressed(BuildContext context) async {
-    final logger = ServiceRegistration.get<ILoggingService>();
-
     try {
       final selectedPhotos = controller.selectedPhotos;
 
-      logger.info(
+      _logger.info(
         'Starting diary creation (from smart FAB)',
         context: 'TimelineFABIntegration._onCreateDiaryPressed',
         data: 'Selected photos: ${selectedPhotos.length}',
       );
 
       if (selectedPhotos.isEmpty) {
-        logger.warning(
+        _logger.warning(
           'Diary creation: no photos selected',
           context: 'TimelineFABIntegration._onCreateDiaryPressed',
         );
@@ -171,7 +172,7 @@ class TimelineFABIntegration extends StatelessWidget {
               context,
               selectedPhotos,
               prompt,
-              logger: logger,
+              logger: _logger,
               contextText: contextText,
             );
           },
@@ -181,14 +182,14 @@ class TimelineFABIntegration extends StatelessWidget {
               context,
               selectedPhotos,
               null,
-              logger: logger,
+              logger: _logger,
               contextText: contextText,
             );
           },
         ),
       );
     } catch (e) {
-      logger.error(
+      _logger.error(
         'Error during diary creation process',
         context: 'TimelineFABIntegration._onCreateDiaryPressed',
         error: e,

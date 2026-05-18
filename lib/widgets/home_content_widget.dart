@@ -22,6 +22,7 @@ class HomeContentWidget extends StatefulWidget {
   final Function(String) onDiaryTap;
   final Future<void> Function()? onRefresh;
   final ScrollSignal? scrollSignal;
+  final ISubscriptionService? subscriptionService;
 
   const HomeContentWidget({
     super.key,
@@ -30,6 +31,7 @@ class HomeContentWidget extends StatefulWidget {
     required this.onDiaryTap,
     this.onRefresh,
     this.scrollSignal,
+    this.subscriptionService,
   });
 
   @override
@@ -37,19 +39,22 @@ class HomeContentWidget extends StatefulWidget {
 }
 
 class _HomeContentWidgetState extends State<HomeContentWidget> {
+  late final ISubscriptionService _subscriptionService;
   int? _remainingGenerations;
   Plan? _cachedPlan;
 
   @override
   void initState() {
     super.initState();
+    _subscriptionService =
+        widget.subscriptionService ??
+        ServiceRegistration.get<ISubscriptionService>();
     _loadUsageSummary();
   }
 
   Future<void> _loadUsageSummary() async {
-    final service = await ServiceRegistration.getAsync<ISubscriptionService>();
-    final remainingFuture = service.getRemainingGenerations();
-    final planFuture = service.getCurrentPlanClass();
+    final remainingFuture = _subscriptionService.getRemainingGenerations();
+    final planFuture = _subscriptionService.getCurrentPlanClass();
     final remainingResult = await remainingFuture;
     final planResult = await planFuture;
     if (mounted) {
@@ -187,13 +192,10 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
 
   Future<void> _showUsageStatus(BuildContext context) async {
     try {
-      final subscriptionService =
-          await ServiceRegistration.getAsync<ISubscriptionService>();
-
       // 常に最新のプラン情報を取得し、プラン変更が即座にダイアログに反映されるようにする
-      final statusFuture = subscriptionService.getCurrentStatus();
-      final resetDateFuture = subscriptionService.getNextResetDate();
-      final planFuture = subscriptionService.getCurrentPlanClass();
+      final statusFuture = _subscriptionService.getCurrentStatus();
+      final resetDateFuture = _subscriptionService.getNextResetDate();
+      final planFuture = _subscriptionService.getCurrentPlanClass();
 
       final statusResult = await statusFuture;
       final planResult = await planFuture;

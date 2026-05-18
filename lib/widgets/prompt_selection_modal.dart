@@ -5,7 +5,6 @@ import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
-import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -41,7 +40,7 @@ class PromptSelectionModal extends StatefulWidget {
 class _PromptSelectionModalState extends State<PromptSelectionModal>
     with SingleTickerProviderStateMixin {
   late final ILoggingService _logger;
-  late final IPromptService _promptService;
+  IPromptService? _promptService;
   late final ISubscriptionService _subscriptionService;
 
   bool _isLoading = true;
@@ -59,7 +58,11 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   @override
   void initState() {
     super.initState();
-    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
+    _logger = widget.logger ?? ServiceRegistration.get<ILoggingService>();
+    _promptService = widget.promptService;
+    _subscriptionService =
+        widget.subscriptionService ??
+        ServiceRegistration.get<ISubscriptionService>();
     _contextController = TextEditingController();
     _contextAnimationController = AnimationController(
       duration: AppConstants.quickAnimationDuration,
@@ -92,17 +95,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Future<void> _initializeServices() async {
     try {
-      final services = await Future.wait([
-        widget.promptService != null
-            ? Future.value(widget.promptService!)
-            : ServiceRegistration.getAsync<IPromptService>(),
-        widget.subscriptionService != null
-            ? Future.value(widget.subscriptionService!)
-            : ServiceRegistration.getAsync<ISubscriptionService>(),
-      ]);
-      _promptService = services[0] as IPromptService;
-      _subscriptionService = services[1] as ISubscriptionService;
-
+      _promptService ??= await ServiceRegistration.getAsync<IPromptService>();
       final accessResult = await _subscriptionService
           .canAccessPremiumFeatures();
       if (accessResult.isSuccess) {
@@ -112,7 +105,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       if (!mounted) return;
 
       final locale = Localizations.localeOf(context);
-      _availablePrompts = _promptService.getPromptsForPlan(
+      _availablePrompts = _promptService!.getPromptsForPlan(
         isPremium: _isPremium,
         locale: locale,
       );
@@ -173,7 +166,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
         onPressed: () {
           final contextText = _getContextText();
           if (_isRandomSelected) {
-            final randomPrompt = _promptService.getRandomPrompt(
+            final randomPrompt = _promptService!.getRandomPrompt(
               isPremium: _isPremium,
               locale: Localizations.localeOf(context),
             );
@@ -462,7 +455,7 @@ class _QuickOptionCell extends StatelessWidget {
         : AppColors.cardBg;
     final glyphBgColor = colorScheme.surfaceContainerHighest;
 
-    return Ink(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isSelected ? AppColors.selectedBg : cardBgColor,
         borderRadius: AppSpacing.cardRadiusLarge,
@@ -472,66 +465,70 @@ class _QuickOptionCell extends StatelessWidget {
               : (isDark ? AppColors.outlineDark : AppColors.divider),
         ),
       ),
-      child: InkWell(
+      child: Material(
+        type: MaterialType.transparency,
         borderRadius: AppSpacing.cardRadiusLarge,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.accent : glyphBgColor,
-                      borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: AppSpacing.cardRadiusLarge,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.accent : glyphBgColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 16,
+                        color: isSelected
+                            ? Colors.white
+                            : colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: isSelected
-                          ? Colors.white
-                          : colorScheme.onSurfaceVariant,
-                    ),
+                    const Spacer(),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: AppColors.accent,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                    height: 1.2,
+                    color: colorScheme.onSurface,
                   ),
-                  const Spacer(),
-                  if (isSelected)
-                    const Icon(
-                      Icons.check_circle,
-                      size: 18,
-                      color: AppColors.accent,
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.1,
-                  height: 1.2,
-                  color: colorScheme.onSurface,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                desc,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w400,
-                  height: 1.45,
-                  color: colorScheme.onSurfaceVariant,
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w400,
+                    height: 1.45,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

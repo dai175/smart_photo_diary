@@ -5,14 +5,13 @@ import '../constants/app_constants.dart';
 import '../models/plans/plan.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/diary_query_service_interface.dart';
-import '../core/service_registration.dart';
 import '../core/result/result.dart';
+import '../core/service_registration.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/animations/list_animations.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 import '../core/errors/error_handler.dart';
 import '../localization/localization_extensions.dart';
 import 'past_photo_calendar_builders.dart';
@@ -25,6 +24,8 @@ class PastPhotoCalendarWidget extends StatefulWidget {
   final Set<String> usedPhotoIds;
   final Function()? onSelectionCleared;
   final ILoggingService? logger;
+  final IPhotoService? photoService;
+  final IDiaryQueryService? diaryQueryService;
 
   const PastPhotoCalendarWidget({
     super.key,
@@ -34,6 +35,8 @@ class PastPhotoCalendarWidget extends StatefulWidget {
     required this.usedPhotoIds,
     this.onSelectionCleared,
     this.logger,
+    this.photoService,
+    this.diaryQueryService,
   });
 
   @override
@@ -43,6 +46,8 @@ class PastPhotoCalendarWidget extends StatefulWidget {
 
 class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   late final ILoggingService _logger;
+  late final IPhotoService _photoService;
+  late final IDiaryQueryService _diaryQueryService;
   late DateTime _focusedDay;
   DateTime? _selectedDay;
   final Map<DateTime, List<AssetEntity>> _photosByDate = {};
@@ -66,7 +71,12 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   @override
   void initState() {
     super.initState();
-    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
+    _logger = widget.logger ?? ServiceRegistration.get<ILoggingService>();
+    _photoService =
+        widget.photoService ?? ServiceRegistration.get<IPhotoService>();
+    _diaryQueryService =
+        widget.diaryQueryService ??
+        ServiceRegistration.get<IDiaryQueryService>();
     // focusedDayを昨日に設定（今日は除外されるため）
     final now = DateTime.now();
     _focusedDay = DateTime(
@@ -92,8 +102,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
     setState(() => _isLoading = true);
 
     try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-
       // 月の開始と終了を計算
       final startOfMonth = DateTime(month.year, month.month, 1);
       final endOfMonth = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
@@ -108,7 +116,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
           : endOfMonth;
 
       // 月単位で写真を取得
-      final photosResult = await photoService.getPhotosInDateRange(
+      final photosResult = await _photoService.getPhotosInDateRange(
         startDate: startOfMonth,
         endDate: adjustedEnd.add(const Duration(days: 1)),
         limit: 1000, // 月単位の写真数上限
@@ -151,8 +159,6 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   /// 特定日の写真を読み込み
   Future<void> _loadPhotosForDate(DateTime date) async {
     try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(
         date.year,
@@ -164,7 +170,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
         999,
       );
 
-      final photosResult = await photoService.getPhotosInDateRange(
+      final photosResult = await _photoService.getPhotosInDateRange(
         startDate: startOfDay,
         endDate: endOfDay,
         limit: 200, // 1日あたりの写真数上限
@@ -234,9 +240,7 @@ class _PastPhotoCalendarWidgetState extends State<PastPhotoCalendarWidget> {
   /// 日記が存在する日付を読み込み
   Future<void> _loadDiaryDates() async {
     try {
-      final diaryService =
-          await ServiceRegistration.getAsync<IDiaryQueryService>();
-      final result = await diaryService.getSortedDiaryEntries();
+      final result = await _diaryQueryService.getSortedDiaryEntries();
       if (!mounted) return;
 
       switch (result) {

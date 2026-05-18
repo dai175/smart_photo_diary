@@ -4,10 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/controllers/diary_preview_controller.dart';
-import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/prompt_service_interface.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 
@@ -17,32 +18,34 @@ class MockAiService extends Mock implements IAiService {}
 
 class MockPhotoService extends Mock implements IPhotoService {}
 
+class MockDiaryCrudService extends Mock implements IDiaryCrudService {}
+
+class MockPromptService extends Mock implements IPromptService {}
+
 class MockAssetEntity extends Mock implements AssetEntity {}
 
 void main() {
   late MockLoggingService mockLogger;
   late MockAiService mockAiService;
   late MockPhotoService mockPhotoService;
+  late MockDiaryCrudService mockDiaryCrudService;
+  late MockPromptService mockPromptService;
 
   setUp(() {
-    ServiceLocator().clear();
     mockLogger = MockLoggingService();
     mockAiService = MockAiService();
     mockPhotoService = MockPhotoService();
-
-    ServiceLocator().registerSingleton<ILoggingService>(mockLogger);
-    ServiceLocator().registerSingleton<IAiService>(mockAiService);
-    ServiceLocator().registerSingleton<IPhotoService>(mockPhotoService);
-  });
-
-  tearDown(() {
-    ServiceLocator().clear();
+    mockDiaryCrudService = MockDiaryCrudService();
+    mockPromptService = MockPromptService();
   });
 
   DiaryPreviewController createController() {
     return DiaryPreviewController(
       logger: mockLogger,
       photoService: mockPhotoService,
+      aiService: mockAiService,
+      diaryCrudService: mockDiaryCrudService,
+      promptService: mockPromptService,
     );
   }
 

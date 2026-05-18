@@ -11,10 +11,32 @@ import 'storage_import_result_dialog.dart';
 /// Storage and backup-related settings section.
 ///
 /// Displays backup and restore actions.
-class StorageSettingsSection extends StatelessWidget {
+class StorageSettingsSection extends StatefulWidget {
   final VoidCallback onReloadSettings;
+  final IStorageService? storageService;
+  final ILoggingService? logger;
 
-  const StorageSettingsSection({super.key, required this.onReloadSettings});
+  const StorageSettingsSection({
+    super.key,
+    required this.onReloadSettings,
+    this.storageService,
+    this.logger,
+  });
+
+  @override
+  State<StorageSettingsSection> createState() => _StorageSettingsSectionState();
+}
+
+class _StorageSettingsSectionState extends State<StorageSettingsSection> {
+  IStorageService? _storageService;
+  late final ILoggingService _logger;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageService = widget.storageService;
+    _logger = widget.logger ?? ServiceRegistration.get<ILoggingService>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +73,8 @@ class StorageSettingsSection extends StatelessWidget {
         context.l10n.settingsBackupInProgress,
       );
 
-      final storageService =
-          await ServiceRegistration.getAsync<IStorageService>();
-      final exportResult = await storageService.exportDataResult();
+      _storageService ??= await ServiceRegistration.getAsync<IStorageService>();
+      final exportResult = await _storageService!.exportDataResult();
 
       if (!context.mounted) return;
       Navigator.pop(context);
@@ -77,7 +98,7 @@ class StorageSettingsSection extends StatelessWidget {
         );
       }
     } catch (e) {
-      ServiceRegistration.get<ILoggingService>().error(
+      _logger.error(
         'Data export failed',
         context: 'StorageSettingsSection._exportData',
         error: e,
@@ -98,9 +119,8 @@ class StorageSettingsSection extends StatelessWidget {
         context.l10n.settingsRestoreInProgress,
       );
 
-      final storageService =
-          await ServiceRegistration.getAsync<IStorageService>();
-      final result = await storageService.importData();
+      _storageService ??= await ServiceRegistration.getAsync<IStorageService>();
+      final result = await _storageService!.importData();
 
       if (!context.mounted) return;
       Navigator.pop(context);
@@ -108,7 +128,7 @@ class StorageSettingsSection extends StatelessWidget {
       result.fold(
         (importResult) {
           if (importResult == null) return;
-          onReloadSettings();
+          widget.onReloadSettings();
           StorageImportResultDialog.show(context, importResult);
         },
         (error) {
@@ -119,7 +139,7 @@ class StorageSettingsSection extends StatelessWidget {
         },
       );
     } catch (e) {
-      ServiceRegistration.get<ILoggingService>().error(
+      _logger.error(
         'Data restore failed',
         context: 'StorageSettingsSection._restoreData',
         error: e,

@@ -1,7 +1,6 @@
 import 'package:photo_manager/photo_manager.dart';
 
 import '../core/result/result.dart';
-import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../models/diary_entry.dart';
 import '../services/interfaces/diary_crud_service_interface.dart';
@@ -15,9 +14,16 @@ enum DiaryDetailErrorType { notFound, loadFailed, updateFailed, deleteFailed }
 /// DiaryDetailScreen の状態管理・ビジネスロジック
 class DiaryDetailController extends BaseErrorController {
   final ILoggingService _logger;
+  IDiaryCrudService? _diaryCrudService;
+  final IPhotoService _photoService;
 
-  DiaryDetailController({ILoggingService? logger})
-    : _logger = logger ?? serviceLocator.get<ILoggingService>();
+  DiaryDetailController({
+    ILoggingService? logger,
+    IDiaryCrudService? diaryCrudService,
+    IPhotoService? photoService,
+  }) : _logger = logger ?? ServiceRegistration.get<ILoggingService>(),
+       _diaryCrudService = diaryCrudService,
+       _photoService = photoService ?? ServiceRegistration.get<IPhotoService>();
 
   DiaryEntry? _diaryEntry;
   List<AssetEntity> _photoAssets = [];
@@ -68,10 +74,10 @@ class DiaryDetailController extends BaseErrorController {
       _clearErrorState();
       setLoading(true);
 
-      final diaryService =
+      _diaryCrudService ??=
           await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return;
-      final result = await diaryService.getDiaryEntry(diaryId);
+      final result = await _diaryCrudService!.getDiaryEntry(diaryId);
 
       switch (result) {
         case Success(data: final entry):
@@ -81,10 +87,8 @@ class DiaryDetailController extends BaseErrorController {
             return;
           }
 
-          final photoService =
-              await ServiceRegistration.getAsync<IPhotoService>();
           if (localVersion != _requestVersion) return;
-          final assetsResult = await photoService.getAssetsByIds(
+          final assetsResult = await _photoService.getAssetsByIds(
             entry.photoIds,
           );
 
@@ -126,7 +130,7 @@ class DiaryDetailController extends BaseErrorController {
       setLoading(true);
       _clearErrorState();
 
-      final diaryService =
+      _diaryCrudService ??=
           await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return false;
 
@@ -135,7 +139,9 @@ class DiaryDetailController extends BaseErrorController {
         content: content,
         updatedAt: DateTime.now(),
       );
-      final updateResult = await diaryService.updateDiaryEntry(updatedEntry);
+      final updateResult = await _diaryCrudService!.updateDiaryEntry(
+        updatedEntry,
+      );
       if (localVersion != _requestVersion) return updateResult.isSuccess;
 
       switch (updateResult) {
@@ -165,11 +171,11 @@ class DiaryDetailController extends BaseErrorController {
       setLoading(true);
       _clearErrorState();
 
-      final diaryService =
+      _diaryCrudService ??=
           await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return false;
-      final deleteResult = await diaryService.deleteDiaryEntry(diaryId);
-      if (localVersion != _requestVersion) return deleteResult.isSuccess;
+      final deleteResult = await _diaryCrudService!.deleteDiaryEntry(diaryId);
+      if (localVersion != _requestVersion) return false;
 
       switch (deleteResult) {
         case Success():

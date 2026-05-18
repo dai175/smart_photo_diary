@@ -2,15 +2,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/controllers/onboarding_controller.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 
 class _MockLogger extends Mock implements ILoggingService {}
+
+class _MockSettingsService extends Mock implements ISettingsService {}
+
+class _MockPhotoService extends Mock implements IPhotoService {}
 
 void main() {
   late OnboardingController controller;
   bool manuallyDisposed = false;
 
   setUp(() {
-    controller = OnboardingController(logger: _MockLogger());
+    controller = OnboardingController(
+      logger: _MockLogger(),
+      settingsService: _MockSettingsService(),
+      photoService: _MockPhotoService(),
+    );
     manuallyDisposed = false;
   });
 

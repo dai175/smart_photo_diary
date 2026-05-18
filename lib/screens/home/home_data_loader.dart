@@ -21,8 +21,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
     _self._photoController.setLoading(true);
 
     try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-      final permissionResult = await photoService.requestPermission();
+      final permissionResult = await _self._photoService.requestPermission();
       final hasPermission = permissionResult.getOrDefault(false);
 
       if (!mounted) return;
@@ -50,7 +49,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
         _self._screenshotAssetIds = {};
       }
 
-      final photosResult = await photoService.getPhotosInDateRange(
+      final photosResult = await _self._photoService.getPhotosInDateRange(
         startDate: todayStart.subtract(const Duration(days: _loadDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         limit: _HomeScreenState._photosPerPage,
@@ -65,9 +64,8 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       if (!mounted) return;
 
       if (photos.isEmpty) {
-        final isLimited = (await photoService.isLimitedAccess()).getOrDefault(
-          false,
-        );
+        final isLimited = (await _self._photoService.isLimitedAccess())
+            .getOrDefault(false);
         if (isLimited) {
           await _self._showLimitedAccessDialog();
         }
@@ -142,14 +140,13 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
     }
 
     try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
       final preloadPages = showLoading ? 1 : AppConstants.timelinePreloadPages;
       final requested = _HomeScreenState._photosPerPage * preloadPages;
 
-      final newPhotosResult = await photoService.getPhotosEfficient(
+      final newPhotosResult = await _self._photoService.getPhotosEfficient(
         startDate: todayStart.subtract(const Duration(days: _loadDays)),
         endDate: todayStart.add(const Duration(days: 1)),
         offset: _self._currentPhotoOffset,
@@ -209,8 +206,9 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
   Future<void> _loadUsedPhotoIds() async {
     try {
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final result = await diaryService.getSortedDiaryEntries();
+      _self._diaryService ??=
+          await ServiceRegistration.getAsync<IDiaryService>();
+      final result = await _self._diaryService!.getSortedDiaryEntries();
       switch (result) {
         case Success(data: final entries):
           _collectUsedPhotoIds(entries);
@@ -240,8 +238,9 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
   Future<void> _subscribeDiaryChanges() async {
     try {
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      _self._diarySub = diaryService.changes.listen((change) {
+      _self._diaryService ??=
+          await ServiceRegistration.getAsync<IDiaryService>();
+      _self._diarySub = _self._diaryService!.changes.listen((change) {
         switch (change.type) {
           case DiaryChangeType.created:
             _self._photoController.addUsedPhotoIds(change.addedPhotoIds);
@@ -272,9 +271,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
   Future<int> _getPlanAccessDays() async {
     int accessDays = 1;
     try {
-      final subscriptionService =
-          await ServiceRegistration.getAsync<ISubscriptionService>();
-      final planResult = await subscriptionService.getCurrentPlanClass();
+      final planResult = await _self._subscriptionService.getCurrentPlanClass();
       if (planResult.isSuccess) {
         final plan = planResult.value;
         accessDays = plan.pastPhotoAccessDays;

@@ -4,11 +4,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/main.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 
 class _MockSettingsService extends Mock implements ISettingsService {}
 
 class _MockLoggingService extends Mock implements ILoggingService {}
+
+class _MockPhotoService extends Mock implements IPhotoService {}
 
 void main() {
   setUp(() {
@@ -34,6 +37,7 @@ void main() {
 
       serviceLocator.registerSingleton<ILoggingService>(loggingService);
       serviceLocator.registerSingleton<ISettingsService>(settingsService);
+      serviceLocator.registerSingleton<IPhotoService>(_MockPhotoService());
 
       addTearDown(localeNotifier.dispose);
 
