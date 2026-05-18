@@ -37,14 +37,18 @@ class ErrorDisplayService {
   }) async {
     final displayConfig = config ?? _getDefaultConfigForError(error);
 
-    // ログ出力
+    // ログ出力（configure() 未呼び出し時は debugPrint にフォールバック）
     if (displayConfig.logError) {
-      _logger?.error(
-        error.message,
-        context: 'ErrorDisplayService',
-        error: error.originalError,
-        stackTrace: error.stackTrace,
-      );
+      if (_logger != null) {
+        _logger!.error(
+          error.message,
+          context: 'ErrorDisplayService',
+          error: error.originalError,
+          stackTrace: error.stackTrace,
+        );
+      } else {
+        debugPrint('[ErrorDisplayService] ${error.message}');
+      }
     }
 
     // 表示方法に応じて適切なウィジェットで表示
