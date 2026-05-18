@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/purchase_product_delegate.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_state_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';

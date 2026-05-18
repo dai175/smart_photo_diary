@@ -71,23 +71,18 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) async {
-    if (_preferences == null) {
-      return const Failure(
-        SettingsException('SettingsService is not initialized'),
+  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) =>
+      _withPreferences(
+        (prefs) => ResultHelper.tryExecuteAsync(() async {
+          final saved = await prefs.setInt(_photoTypeFilterKey, filter.index);
+          if (!saved) {
+            throw const SettingsException(
+              'Failed to persist photo type filter',
+            );
+          }
+          _photoTypeFilterNotifier.value = filter;
+        }, context: 'SettingsService.setPhotoTypeFilter'),
       );
-    }
-    return ResultHelper.tryExecuteAsync(() async {
-      final saved = await _preferences!.setInt(
-        _photoTypeFilterKey,
-        filter.index,
-      );
-      if (!saved) {
-        throw const SettingsException('Failed to persist photo type filter');
-      }
-      _photoTypeFilterNotifier.value = filter;
-    }, context: 'SettingsService.setPhotoTypeFilter');
-  }
 
   // 日記の長さ
   @override
@@ -109,17 +104,12 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setDiaryLength(DiaryLength length) async {
-    if (_preferences == null) {
-      return const Failure(
-        SettingsException('SettingsService is not initialized'),
-      );
-    }
-    return ResultHelper.tryExecuteAsync(
-      () async => _preferences!.setInt(_diaryLengthKey, length.index),
+  Future<Result<void>> setDiaryLength(DiaryLength length) => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(
+      () async => prefs.setInt(_diaryLengthKey, length.index),
       context: 'SettingsService.setDiaryLength',
-    );
-  }
+    ),
+  );
 
   // テーマモード
   @override
@@ -140,17 +130,12 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
-    if (_preferences == null) {
-      return const Failure(
-        SettingsException('SettingsService is not initialized'),
-      );
-    }
-    return ResultHelper.tryExecuteAsync(
-      () async => _preferences!.setInt(_themeKey, themeMode.index),
+  Future<Result<void>> setThemeMode(ThemeMode themeMode) => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(
+      () async => prefs.setInt(_themeKey, themeMode.index),
       context: 'SettingsService.setThemeMode',
-    );
-  }
+    ),
+  );
 
   @override
   Locale? get locale {
@@ -161,21 +146,16 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setLocale(Locale? locale) async {
-    if (_preferences == null) {
-      return const Failure(
-        SettingsException('SettingsService is not initialized'),
-      );
-    }
-    return ResultHelper.tryExecuteAsync(() async {
+  Future<Result<void>> setLocale(Locale? locale) => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(() async {
       if (locale == null) {
-        await _preferences!.remove(_localeKey);
+        await prefs.remove(_localeKey);
       } else {
-        await _preferences!.setString(_localeKey, _serializeLocale(locale));
+        await prefs.setString(_localeKey, _serializeLocale(locale));
       }
       _localeNotifier.value = locale;
-    }, context: 'SettingsService.setLocale');
-  }
+    }, context: 'SettingsService.setLocale'),
+  );
 
   // 初回起動判定
   @override
@@ -192,17 +172,12 @@ class SettingsService implements ISettingsService {
 
   // 初回起動完了を記録
   @override
-  Future<Result<void>> setFirstLaunchCompleted() async {
-    if (_preferences == null) {
-      return const Failure(
-        SettingsException('SettingsService is not initialized'),
-      );
-    }
-    return ResultHelper.tryExecuteAsync(
-      () async => _preferences!.setBool(_firstLaunchKey, false),
+  Future<Result<void>> setFirstLaunchCompleted() => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(
+      () async => prefs.setBool(_firstLaunchKey, false),
       context: 'SettingsService.setFirstLaunchCompleted',
-    );
-  }
+    ),
+  );
 
   Locale? _loadStoredLocale() => locale;
 
@@ -271,6 +246,19 @@ class SettingsService implements ISettingsService {
   @override
   Future<Result<List<Plan>>> getAvailablePlansV2() =>
       _delegateOr((d) => d.getAvailablePlansV2());
+
+  /// 未初期化時は Failure を返す。_preferences の null チェックをここに集約。
+  Future<Result<void>> _withPreferences(
+    Future<Result<void>> Function(SharedPreferences) fn,
+  ) async {
+    final prefs = _preferences;
+    if (prefs == null) {
+      return const Failure(
+        SettingsException('SettingsService is not initialized'),
+      );
+    }
+    return fn(prefs);
+  }
 
   /// delegate 未初期化時は Failure を返す。null チェックをここに集約。
   Future<Result<T>> _delegateOr<T>(

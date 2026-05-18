@@ -29,12 +29,12 @@ class SettingsSubscriptionDelegate {
 
   /// プラン期限情報を取得（V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
-    final statusResult = await _subscriptionService.getCurrentStatus();
+    final (statusResult, planResult) = await (
+      _subscriptionService.getCurrentStatus(),
+      _subscriptionService.getCurrentPlanClass(),
+    ).wait;
     if (statusResult.isFailure) return Failure(statusResult.error);
-
-    final planResult = await _subscriptionService.getCurrentPlanClass();
     if (planResult.isFailure) return Failure(planResult.error);
-
     return Success(
       PlanPeriodInfoV2.fromStatusAndPlan(statusResult.value, planResult.value),
     );
@@ -49,12 +49,12 @@ class SettingsSubscriptionDelegate {
 
   /// 使用統計情報を取得（Planクラス版）
   Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass() async {
-    final statusResult = await _subscriptionService.getCurrentStatus();
+    final (statusResult, planResult) = await (
+      _subscriptionService.getCurrentStatus(),
+      _subscriptionService.getCurrentPlanClass(),
+    ).wait;
     if (statusResult.isFailure) return Failure(statusResult.error);
-
-    final planResult = await _subscriptionService.getCurrentPlanClass();
     if (planResult.isFailure) return Failure(planResult.error);
-
     return Success(
       UsageStatisticsV2.fromStatusAndPlan(statusResult.value, planResult.value),
     );
