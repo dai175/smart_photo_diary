@@ -1,0 +1,12 @@
+pre-commit:
+  commands:
+    secrets:
+      run: git secrets --pre_commit_hook -- "$@"
+      fail_text: "Potential secret detected. Remove it before committing."
+    format:
+      glob: "**/*.dart"
+      run: fvm dart format --set-exit-if-changed .
+      fail_text: "Run: fvm dart format ."
+    analyze:
+      run: fvm flutter analyze
+      fail_text: "Fix analysis issues before committing."
