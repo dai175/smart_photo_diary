@@ -53,13 +53,13 @@ class SettingsController extends BaseErrorController {
     setLoading(true);
 
     try {
+      final packageFuture = PackageInfo.fromPlatform()
+          .then<PackageInfo?>((v) => v)
+          .catchError((_) => null);
       _settingsService ??=
           await ServiceRegistration.getAsync<ISettingsService>();
       if (localVersion != _requestVersion) return;
 
-      final packageFuture = PackageInfo.fromPlatform()
-          .then<PackageInfo?>((v) => v)
-          .catchError((_) => null);
       final packageInfo = await packageFuture;
       if (localVersion != _requestVersion) return;
 

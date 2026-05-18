@@ -173,8 +173,6 @@ class DiaryPreviewController extends BaseErrorController {
     setLoading(true);
 
     try {
-      if (localVersion != _requestVersion) return;
-
       _aiService ??= await ServiceRegistration.getAsync<IAiService>();
       if (localVersion != _requestVersion) return;
 
