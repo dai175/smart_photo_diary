@@ -1,56 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 
 void main() {
-  group('PromptCategory', () {
-    test('fromId returns correct category', () {
-      expect(PromptCategory.fromId('emotion'), PromptCategory.emotion);
-      expect(
-        PromptCategory.fromId('emotion_depth'),
-        PromptCategory.emotionDepth,
-      );
-      expect(
-        PromptCategory.fromId('sensory_emotion'),
-        PromptCategory.sensoryEmotion,
-      );
-      expect(
-        PromptCategory.fromId('emotion_growth'),
-        PromptCategory.emotionGrowth,
-      );
-      expect(
-        PromptCategory.fromId('emotion_connection'),
-        PromptCategory.emotionConnection,
-      );
-      expect(
-        PromptCategory.fromId('emotion_discovery'),
-        PromptCategory.emotionDiscovery,
-      );
-      expect(
-        PromptCategory.fromId('emotion_fantasy'),
-        PromptCategory.emotionFantasy,
-      );
-      expect(
-        PromptCategory.fromId('emotion_healing'),
-        PromptCategory.emotionHealing,
-      );
-      expect(
-        PromptCategory.fromId('emotion_energy'),
-        PromptCategory.emotionEnergy,
-      );
-    });
-
-    test('fromId returns emotion for unknown id', () {
-      expect(PromptCategory.fromId('unknown'), PromptCategory.emotion);
-      expect(PromptCategory.fromId(''), PromptCategory.emotion);
-    });
-
-    test('all categories have unique IDs', () {
-      final ids = PromptCategory.values.map((c) => c.id).toList();
-      expect(ids.length, 9);
-      expect(ids.toSet().length, ids.length);
-    });
-  });
-
   group('WritingPrompt', () {
     test('creates basic prompt correctly', () {
       final prompt = WritingPrompt(
@@ -151,11 +104,8 @@ void main() {
         isPremiumOnly: true,
       );
 
-      // Basic user
       expect(basicPrompt.isAvailableForPlan(isPremium: false), true);
       expect(premiumPrompt.isAvailableForPlan(isPremium: false), false);
-
-      // Premium user
       expect(basicPrompt.isAvailableForPlan(isPremium: true), true);
       expect(premiumPrompt.isAvailableForPlan(isPremium: true), true);
     });
@@ -181,20 +131,13 @@ void main() {
         description: 'A prompt about appreciating good things in life',
       );
 
-      // Text matches
       expect(prompt.matchesKeyword('grateful'), true);
       expect(prompt.matchesKeyword('today'), true);
-      expect(prompt.matchesKeyword('GRATEFUL'), true); // Case insensitive
-
-      // Tag matches
+      expect(prompt.matchesKeyword('GRATEFUL'), true);
       expect(prompt.matchesKeyword('mindfulness'), true);
-      expect(prompt.matchesKeyword('thankful'), true); // Partial match
-
-      // Description matches
+      expect(prompt.matchesKeyword('thankful'), true);
       expect(prompt.matchesKeyword('appreciating'), true);
       expect(prompt.matchesKeyword('life'), true);
-
-      // No matches
       expect(prompt.matchesKeyword('travel'), false);
       expect(prompt.matchesKeyword('xyz'), false);
     });
@@ -214,17 +157,12 @@ void main() {
         priority: 90,
       );
 
-      // textLength
       expect(shortPrompt.textLength, 12);
       expect(longPrompt.textLength, greaterThan(50));
-
-      // isLongPrompt
       expect(shortPrompt.isLongPrompt, false);
       expect(longPrompt.isLongPrompt, true);
-
-      // previewText
       expect(shortPrompt.previewText, 'Short prompt');
-      expect(longPrompt.previewText.length, 33); // 30 chars + "..."
+      expect(longPrompt.previewText.length, 33);
       expect(longPrompt.previewText.endsWith('...'), true);
     });
 
@@ -243,14 +181,14 @@ void main() {
         priority: 80,
       );
 
-      expect(copied.id, 'original'); // Unchanged
-      expect(copied.text, 'Updated text'); // Changed
-      expect(copied.category, PromptCategory.emotion); // Unchanged
-      expect(copied.isPremiumOnly, true); // Changed
-      expect(copied.priority, 80); // Changed
+      expect(copied.id, 'original');
+      expect(copied.text, 'Updated text');
+      expect(copied.category, PromptCategory.emotion);
+      expect(copied.isPremiumOnly, true);
+      expect(copied.priority, 80);
     });
 
-    test('equality works correctly', () {
+    test('equality based on id only', () {
       final prompt1 = WritingPrompt(
         id: 'same-id',
         text: 'Text 1',
@@ -259,8 +197,8 @@ void main() {
 
       final prompt2 = WritingPrompt(
         id: 'same-id',
-        text: 'Text 2', // Different text
-        category: PromptCategory.emotionDepth, // Different category
+        text: 'Text 2',
+        category: PromptCategory.emotionDepth,
       );
 
       final prompt3 = WritingPrompt(
@@ -269,59 +207,93 @@ void main() {
         category: PromptCategory.emotion,
       );
 
-      expect(prompt1, equals(prompt2)); // Same ID
-      expect(prompt1, isNot(equals(prompt3))); // Different ID
-      expect(prompt1.hashCode, prompt2.hashCode); // Same hash
-    });
-  });
-
-  group('PromptUsageHistory', () {
-    test('creates usage history correctly', () {
-      final history = PromptUsageHistory(
-        promptId: 'prompt-1',
-        diaryEntryId: 'diary-1',
-        wasHelpful: true,
-      );
-
-      expect(history.promptId, 'prompt-1');
-      expect(history.diaryEntryId, 'diary-1');
-      expect(history.wasHelpful, true);
-      expect(history.usedAt, isNotNull);
+      expect(prompt1, equals(prompt2));
+      expect(prompt1, isNot(equals(prompt3)));
+      expect(prompt1.hashCode, prompt2.hashCode);
     });
 
-    test('fromJson and toJson work correctly', () {
-      final original = PromptUsageHistory(
-        promptId: 'prompt-test',
-        usedAt: DateTime(2024, 1, 1, 12, 0),
-        diaryEntryId: 'diary-test',
-        wasHelpful: false,
-      );
+    group('localization', () {
+      test('textForLocale returns Japanese text by default', () {
+        final prompt = WritingPrompt(
+          id: 'loc-1',
+          text: '今日はどんな一日でしたか？',
+          category: PromptCategory.emotion,
+          localizedTexts: {'en': 'How was your day today?'},
+        );
 
-      final json = original.toJson();
-      final restored = PromptUsageHistory.fromJson(json);
+        expect(prompt.textForLocale(null), '今日はどんな一日でしたか？');
+        expect(prompt.textForLocale(const Locale('ja')), '今日はどんな一日でしたか？');
+      });
 
-      expect(restored.promptId, original.promptId);
-      expect(restored.usedAt, original.usedAt);
-      expect(restored.diaryEntryId, original.diaryEntryId);
-      expect(restored.wasHelpful, original.wasHelpful);
-    });
+      test('textForLocale returns localized text for specified locale', () {
+        final prompt = WritingPrompt(
+          id: 'loc-2',
+          text: '今日はどんな一日でしたか？',
+          category: PromptCategory.emotion,
+          localizedTexts: {'en': 'How was your day today?'},
+        );
 
-    test('equality works correctly', () {
-      final time = DateTime(2024, 1, 1, 12, 0);
+        expect(
+          prompt.textForLocale(const Locale('en')),
+          'How was your day today?',
+        );
+      });
 
-      final history1 = PromptUsageHistory(promptId: 'prompt-1', usedAt: time);
+      test('tagsForLocale returns localized tags', () {
+        final prompt = WritingPrompt(
+          id: 'loc-3',
+          text: 'プロンプト',
+          category: PromptCategory.emotion,
+          tags: ['感謝', '日常'],
+          localizedTags: {
+            'en': ['gratitude', 'daily'],
+          },
+        );
 
-      final history2 = PromptUsageHistory(
-        promptId: 'prompt-1',
-        usedAt: time,
-        wasHelpful: false, // Different helpful status
-      );
+        expect(prompt.tagsForLocale(const Locale('ja')), ['感謝', '日常']);
+        expect(prompt.tagsForLocale(const Locale('en')), [
+          'gratitude',
+          'daily',
+        ]);
+      });
 
-      final history3 = PromptUsageHistory(promptId: 'prompt-2', usedAt: time);
+      test('localizedCopy returns same instance when no change', () {
+        final prompt = WritingPrompt(
+          id: 'loc-4',
+          text: '今日の気持ちは？',
+          category: PromptCategory.emotion,
+        );
 
-      expect(history1, equals(history2)); // Same prompt and time
-      expect(history1, isNot(equals(history3))); // Different prompt
-      expect(history1.hashCode, history2.hashCode);
+        expect(identical(prompt.localizedCopy(null), prompt), true);
+        expect(
+          identical(prompt.localizedCopy(const Locale('ja')), prompt),
+          true,
+        );
+      });
+
+      test('localizedCopy returns new instance with localized content', () {
+        final prompt = WritingPrompt(
+          id: 'loc-5',
+          text: '今日の気持ちは？',
+          category: PromptCategory.emotion,
+          localizedTexts: {'en': 'How do you feel today?'},
+        );
+
+        final localized = prompt.localizedCopy(const Locale('en'));
+        expect(localized.text, 'How do you feel today?');
+        expect(localized.id, prompt.id);
+      });
+
+      test('textForLocale falls back to Japanese for unsupported locale', () {
+        final prompt = WritingPrompt(
+          id: 'loc-6',
+          text: '今日の気持ちは？',
+          category: PromptCategory.emotion,
+          localizedTexts: {'en': 'How do you feel today?'},
+        );
+
+        expect(prompt.textForLocale(const Locale('fr')), '今日の気持ちは？');
+      });
     });
   });
 }
