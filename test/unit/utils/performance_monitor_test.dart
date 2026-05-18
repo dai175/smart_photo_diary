@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/utils/performance_monitor.dart';
 
@@ -11,18 +10,12 @@ void main() {
 
   setUp(() {
     mockLogger = MockLoggingService();
-    if (serviceLocator.isRegistered<ILoggingService>()) {
-      serviceLocator.unregister<ILoggingService>();
-    }
-    serviceLocator.registerSingleton<ILoggingService>(mockLogger);
+    PerformanceMonitor.configure(mockLogger);
     PerformanceMonitor.clearStats();
   });
 
   tearDown(() {
     PerformanceMonitor.clearStats();
-    if (serviceLocator.isRegistered<ILoggingService>()) {
-      serviceLocator.unregister<ILoggingService>();
-    }
   });
 
   group('PerformanceMonitor', () {
