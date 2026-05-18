@@ -100,16 +100,18 @@
 
 ### 3-1. `prompt_selection_modal.dart`（586 行）
 
-- [ ] `PromptSearchBar` ウィジェットを抽出（検索入力 UI）
-- [ ] `PromptListItem` ウィジェットを抽出（リストアイテム表示）
-- [ ] `PromptSelectionModal` をシェルのみに削減（目標 200 行以下）
-- [ ] 各ウィジェットにウィジェットテストを追加
+- [x] `PromptSearchBar` ウィジェットを抽出（検索入力 UI）
+- [x] `PromptListItem` ウィジェットを抽出（リストアイテム表示）
+- [x] `PromptSelectionModal` をシェルのみに削減（目標 200 行以下）
+- [x] 各ウィジェットにウィジェットテストを追加
 
 ### 3-2. `diary_preview_generating.dart`（504 行）
 
-- [ ] スケルトン UI、進捗 UI、エラー状態を別ウィジェットに分割
-- [ ] 状態別ウィジェット: `DiaryGeneratingSkeletonView`, `DiaryGeneratingErrorView`
-- [ ] 各状態ウィジェットにウィジェットテストを追加
+- [x] `DiaryGeneratingSkeletonView` を抽出（スケルトン UI + 日付行）
+- [x] `DiaryGeneratingBanner` を抽出（進捗バナー + `_PulsingDisc` + `_IndeterminateBar`）
+- [x] `DiaryPreviewGeneratingScreen` をシェルに削減（504 行 → 200 行）
+- [x] 各ウィジェットにウィジェットテストを追加（10 ケース）
+- [x] `DiaryGeneratingErrorView` はスコープ外と判断（エラーは親 `diary_preview_screen.dart` で処理）
 
 ### 3-3. `settings_screen.dart`（441 行）
 
