@@ -11,6 +11,7 @@ import 'package:smart_photo_diary/screens/diary_detail/diary_detail_screen.dart'
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_cache_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/photo_service_interface.dart';
 
 import '../integration/mocks/mock_services.dart';
@@ -18,6 +19,8 @@ import '../test_helpers/mock_platform_channels.dart';
 import '../test_helpers/widget_test_helpers.dart';
 
 class MockIPhotoCacheService extends Mock implements IPhotoCacheService {}
+
+class MockLoggingService extends Mock implements ILoggingService {}
 
 void main() {
   late MockIDiaryService mockDiaryService;
@@ -49,6 +52,8 @@ void main() {
 
     final mockPhotoService = TestServiceSetup.getPhotoService();
     serviceLocator.registerSingleton<IPhotoService>(mockPhotoService);
+
+    serviceLocator.registerSingleton<ILoggingService>(MockLoggingService());
 
     mockPhotoCache = MockIPhotoCacheService();
     when(
