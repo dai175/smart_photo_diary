@@ -16,8 +16,13 @@ import 'timeline_constants.dart';
 /// これにより、テスト環境等でサービス未登録時にもインデックスキャッシュ等の
 /// 軽量操作は問題なく利用できる。
 class TimelineCacheManager {
-  late final IPhotoCacheService _cacheService = serviceLocator
-      .get<IPhotoCacheService>();
+  final IPhotoCacheService? _injectedCacheService;
+  IPhotoCacheService? _resolvedCacheService;
+
+  // 初回アクセス時に一度だけ解決し、以降はキャッシュを返す
+  IPhotoCacheService get _cacheService => _resolvedCacheService ??=
+      _injectedCacheService ?? serviceLocator.get<IPhotoCacheService>();
+
   final Map<String, Future<Result<Uint8List>>> _thumbFutureCache = {};
   final Map<String, int> _photoIndexCache = {};
 
@@ -25,7 +30,8 @@ class TimelineCacheManager {
   int _lastPrefetchStartIndex = -1;
   bool _isViewportPrefetching = false;
 
-  TimelineCacheManager();
+  TimelineCacheManager({IPhotoCacheService? photoCacheService})
+    : _injectedCacheService = photoCacheService;
 
   /// 写真インデックスキャッシュ（メインインデックス検索用）
   Map<String, int> get photoIndexCache => _photoIndexCache;

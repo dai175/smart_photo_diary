@@ -44,6 +44,7 @@ import '../services/diary_image_generator.dart';
 import 'errors/error_handler.dart';
 import 'hive_encryption_helper.dart';
 import 'service_locator.dart';
+import '../ui/error_display/error_display_service.dart';
 
 /// Service registration configuration
 ///
@@ -162,6 +163,7 @@ class ServiceRegistration {
 
     // ErrorHandler にロガーを注入（ServiceLocator直接依存を排除）
     ErrorHandler.configure(logger: loggingService);
+    ErrorDisplayService.configure(logger: loggingService);
 
     _logger.debug(
       'Starting core service registration',

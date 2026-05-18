@@ -39,12 +39,16 @@ class TimelinePhotoWidget extends StatefulWidget {
   /// 外部から先頭へスクロールさせるためのシグナル
   final ScrollSignal? scrollSignal;
 
+  /// ロガー（テスト用注入に使用）
+  final ILoggingService? logger;
+
   const TimelinePhotoWidget({
     super.key,
     required this.controller,
     this.callbacks = const TimelineCallbacks(),
     this.showFAB = true,
     this.scrollSignal,
+    this.logger,
   });
 
   @override
@@ -64,23 +68,26 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
       '$year/$month';
 
   // ログサービス
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  late final ILoggingService _logger;
 
   // ヘルパーインスタンス
-  late final TimelineCacheManager _cacheManager = TimelineCacheManager();
+  late final TimelineCacheManager _cacheManager;
 
-  late final TimelineScrollManager _scrollManager = TimelineScrollManager(
-    scrollController: _scrollController,
-    logger: _logger,
-    updateState: (fn) {
-      if (mounted) setState(fn);
-    },
-    isMounted: () => mounted,
-  );
+  late final TimelineScrollManager _scrollManager;
 
   @override
   void initState() {
     super.initState();
+    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
+    _cacheManager = TimelineCacheManager();
+    _scrollManager = TimelineScrollManager(
+      scrollController: _scrollController,
+      logger: _logger,
+      updateState: (fn) {
+        if (mounted) setState(fn);
+      },
+      isMounted: () => mounted,
+    );
 
     // スクロールマネージャーのコールバック設定
     _scrollManager.onLoadMorePhotos = widget.callbacks.onLoadMorePhotos;

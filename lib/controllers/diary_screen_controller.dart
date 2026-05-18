@@ -10,6 +10,8 @@ import 'base_error_controller.dart';
 import '../constants/app_constants.dart';
 
 class DiaryScreenController extends BaseErrorController {
+  final IDiaryQueryService? _injectedDiaryService;
+
   // 日記データ
   List<DiaryEntry> _diaryEntries = [];
   DiaryFilter _currentFilter = DiaryFilter.empty;
@@ -36,10 +38,15 @@ class DiaryScreenController extends BaseErrorController {
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;
 
-  DiaryScreenController() {
+  DiaryScreenController({IDiaryQueryService? diaryService})
+    : _injectedDiaryService = diaryService {
     _searchController = TextEditingController();
     loadDiaryEntries();
   }
+
+  Future<IDiaryQueryService> _getDiaryService() async =>
+      _injectedDiaryService ??
+      await serviceLocator.getAsync<IDiaryQueryService>();
 
   @override
   void dispose() {
@@ -60,7 +67,7 @@ class DiaryScreenController extends BaseErrorController {
     notifyListeners();
 
     try {
-      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
+      final diaryService = await _getDiaryService();
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,
         offset: _offset,
@@ -111,7 +118,7 @@ class DiaryScreenController extends BaseErrorController {
     try {
       if (showShimmer) setLoading(true);
       _resetPaging();
-      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
+      final diaryService = await _getDiaryService();
       final result = await diaryService.getFilteredDiaryEntriesPage(
         filter,
         offset: _offset,
@@ -215,7 +222,7 @@ class DiaryScreenController extends BaseErrorController {
   // シマーを表示せずにデータを再読み込み（スクロール位置維持）
   Future<void> silentRefresh() async {
     try {
-      final diaryService = await serviceLocator.getAsync<IDiaryQueryService>();
+      final diaryService = await _getDiaryService();
       final fetchCount = _offset > 0 ? _offset : _pageSize;
       final result = await diaryService.getFilteredDiaryEntriesPage(
         _currentFilter,

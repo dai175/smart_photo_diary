@@ -38,8 +38,15 @@ part 'home/home_data_loader.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
+  final ILoggingService? logger;
+  final ISettingsService? settingsService;
 
-  const HomeScreen({super.key, this.onThemeChanged});
+  const HomeScreen({
+    super.key,
+    this.onThemeChanged,
+    this.logger,
+    this.settingsService,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -83,8 +90,9 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _logger = serviceLocator.get<ILoggingService>();
-    _settingsService = serviceLocator.get<ISettingsService>();
+    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
+    _settingsService =
+        widget.settingsService ?? serviceLocator.get<ISettingsService>();
     _photoTypeFilter = _settingsService.photoTypeFilter;
     _settingsService.photoTypeFilterNotifier.addListener(
       _onPhotoTypeFilterChanged,
