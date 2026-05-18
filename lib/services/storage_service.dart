@@ -44,11 +44,13 @@ class StorageService implements IStorageService {
 
   /// DiaryService を取得
   Future<IDiaryService> _getDiaryService() async {
-    assert(
-      _diaryService != null,
-      'StorageService: diaryService is not injected. Ensure it is provided via constructor.',
-    );
-    return _diaryService!;
+    final diaryService = _diaryService;
+    if (diaryService == null) {
+      throw StateError(
+        'StorageService: diaryService is not injected. Ensure it is provided via constructor.',
+      );
+    }
+    return diaryService;
   }
 
   /// 現在のロケールを解決する

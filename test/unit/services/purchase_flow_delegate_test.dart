@@ -120,6 +120,25 @@ void main() {
       );
     });
 
+    test('queryProductDetailsがFailure → Failureを返して購入フラグを戻す', () async {
+      when(() => mockStateService.isInitialized).thenReturn(true);
+
+      when(() => mockProductDelegate.queryProductDetails(any())).thenAnswer(
+        (_) async => const Failure(ServiceException('lookup failed')),
+      );
+
+      final result = await delegate.purchasePlan(PremiumMonthlyPlan());
+
+      expect(result.isFailure, isTrue);
+      expect(result.error.toString(), contains('lookup failed'));
+      expect(isPurchasing, isFalse);
+      verifyNever(
+        () => mockInAppPurchase.buyNonConsumable(
+          purchaseParam: any(named: 'purchaseParam'),
+        ),
+      );
+    });
+
     test('正常系 → Success(pending)', () async {
       when(() => mockStateService.isInitialized).thenReturn(true);
       final fakeProduct = FakeProductDetails();
