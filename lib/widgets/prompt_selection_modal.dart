@@ -5,7 +5,6 @@ import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../core/service_registration.dart';
-import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
@@ -59,7 +58,12 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   @override
   void initState() {
     super.initState();
-    _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
+    _logger = widget.logger ?? ServiceRegistration.get<ILoggingService>();
+    _promptService =
+        widget.promptService ?? ServiceRegistration.get<IPromptService>();
+    _subscriptionService =
+        widget.subscriptionService ??
+        ServiceRegistration.get<ISubscriptionService>();
     _contextController = TextEditingController();
     _contextAnimationController = AnimationController(
       duration: AppConstants.quickAnimationDuration,
@@ -92,17 +96,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Future<void> _initializeServices() async {
     try {
-      final services = await Future.wait([
-        widget.promptService != null
-            ? Future.value(widget.promptService!)
-            : ServiceRegistration.getAsync<IPromptService>(),
-        widget.subscriptionService != null
-            ? Future.value(widget.subscriptionService!)
-            : ServiceRegistration.getAsync<ISubscriptionService>(),
-      ]);
-      _promptService = services[0] as IPromptService;
-      _subscriptionService = services[1] as ISubscriptionService;
-
       final accessResult = await _subscriptionService
           .canAccessPremiumFeatures();
       if (accessResult.isSuccess) {

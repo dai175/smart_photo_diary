@@ -40,12 +40,18 @@ class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
   final ILoggingService? logger;
   final ISettingsService? settingsService;
+  final IPhotoService? photoService;
+  final IDiaryService? diaryService;
+  final ISubscriptionService? subscriptionService;
 
   const HomeScreen({
     super.key,
     this.onThemeChanged,
     this.logger,
     this.settingsService,
+    this.photoService,
+    this.diaryService,
+    this.subscriptionService,
   });
 
   @override
@@ -56,6 +62,9 @@ class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, _HomeDialogsMixin, _HomeDataLoaderMixin {
   // サービス
   late final ILoggingService _logger;
+  late final IPhotoService _photoService;
+  late final IDiaryService _diaryService;
+  late final ISubscriptionService _subscriptionService;
 
   // タブナビゲーション・画面キー管理コントローラー
   late final HomeController _homeController;
@@ -93,6 +102,13 @@ class _HomeScreenState extends State<HomeScreen>
     _logger = widget.logger ?? serviceLocator.get<ILoggingService>();
     _settingsService =
         widget.settingsService ?? serviceLocator.get<ISettingsService>();
+    _photoService =
+        widget.photoService ?? ServiceRegistration.get<IPhotoService>();
+    _diaryService =
+        widget.diaryService ?? ServiceRegistration.get<IDiaryService>();
+    _subscriptionService =
+        widget.subscriptionService ??
+        ServiceRegistration.get<ISubscriptionService>();
     _photoTypeFilter = _settingsService.photoTypeFilter;
     _settingsService.photoTypeFilterNotifier.addListener(
       _onPhotoTypeFilterChanged,
@@ -171,8 +187,7 @@ class _HomeScreenState extends State<HomeScreen>
   /// 写真IDから日記詳細画面に遷移
   Future<void> _navigateToDiaryDetailByPhotoId(String photoId) async {
     try {
-      final diaryService = await ServiceRegistration.getAsync<IDiaryService>();
-      final result = await diaryService.getDiaryEntryByPhotoId(photoId);
+      final result = await _diaryService.getDiaryEntryByPhotoId(photoId);
 
       switch (result) {
         case Success(data: final diaryEntry):
@@ -215,15 +230,13 @@ class _HomeScreenState extends State<HomeScreen>
   // カメラ撮影処理
   Future<void> _capturePhoto() async {
     try {
-      final photoService = ServiceRegistration.get<IPhotoService>();
-
       _logger.info(
         'Starting camera capture (from FAB)',
         context: 'HomeScreen._capturePhoto',
       );
 
       // カメラで撮影（権限チェックはcapturePhoto内で実行）
-      final captureResult = await photoService.capturePhoto();
+      final captureResult = await _photoService.capturePhoto();
 
       if (captureResult.isFailure) {
         _logger.error(

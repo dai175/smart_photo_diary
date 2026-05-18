@@ -2,22 +2,23 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../core/result/result.dart';
 import '../core/errors/error_handler.dart';
+import '../core/service_registration.dart';
 import '../services/interfaces/diary_crud_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/prompt_service_interface.dart';
 
 /// 日記保存・プロンプト使用記録を担当する内部委譲クラス
 class DiaryPreviewSaveDelegate {
-  final Future<IDiaryCrudService> Function() _getDiaryService;
-  final Future<IPromptService> Function() _getPromptService;
+  IDiaryCrudService? _diaryCrudService;
+  IPromptService? _promptService;
   final ILoggingService _logger;
 
   DiaryPreviewSaveDelegate({
-    required Future<IDiaryCrudService> Function() getDiaryService,
-    required Future<IPromptService> Function() getPromptService,
+    IDiaryCrudService? diaryCrudService,
+    IPromptService? promptService,
     required ILoggingService logger,
-  }) : _getDiaryService = getDiaryService,
-       _getPromptService = getPromptService,
+  }) : _diaryCrudService = diaryCrudService,
+       _promptService = promptService,
        _logger = logger;
 
   /// 日記を保存し、保存された日記IDを返す
@@ -33,9 +34,9 @@ class DiaryPreviewSaveDelegate {
         context: 'DiaryPreviewSaveDelegate',
       );
 
-      final diaryService = await _getDiaryService();
-
-      final saveResult = await diaryService.saveDiaryEntryWithPhotos(
+      _diaryCrudService ??=
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
+      final saveResult = await _diaryCrudService!.saveDiaryEntryWithPhotos(
         date: photoDateTime,
         title: title,
         content: content,
@@ -66,8 +67,10 @@ class DiaryPreviewSaveDelegate {
   /// プロンプト使用履歴を記録（非クリティカル）
   Future<void> recordPromptUsage({required String promptId}) async {
     try {
-      final promptService = await _getPromptService();
-      final result = await promptService.recordPromptUsage(promptId: promptId);
+      _promptService ??= await ServiceRegistration.getAsync<IPromptService>();
+      final result = await _promptService!.recordPromptUsage(
+        promptId: promptId,
+      );
       if (result case Failure(:final exception)) {
         _logger.error(
           'Prompt usage history recording failed',

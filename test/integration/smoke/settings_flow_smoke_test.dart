@@ -46,7 +46,7 @@ void main() {
 
       await controller.loadSettings();
 
-      expect(controller.settingsService?.themeMode, equals(ThemeMode.system));
+      expect(controller.settingsService.themeMode, equals(ThemeMode.system));
     });
 
     test('loadSettings 後に localeNotifier が日本語を示す', () async {
@@ -55,9 +55,9 @@ void main() {
 
       await controller.loadSettings();
 
-      expect(controller.settingsService?.localeNotifier, isNotNull);
+      expect(controller.settingsService.localeNotifier, isNotNull);
       expect(
-        controller.settingsService?.localeNotifier.value,
+        controller.settingsService.localeNotifier.value,
         equals(const Locale('ja')),
       );
     });

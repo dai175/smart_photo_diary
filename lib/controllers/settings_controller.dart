@@ -14,6 +14,7 @@ import 'base_error_controller.dart';
 class SettingsController extends BaseErrorController {
   late final ILoggingService _logger;
   ISettingsService? _settingsService;
+  bool _isSettingsLoaded = false;
 
   /// ログサービス（UIウィジェットに渡す用）
   ILoggingService get logger => _logger;
@@ -33,13 +34,17 @@ class SettingsController extends BaseErrorController {
   Locale? get selectedLocale => _selectedLocale;
 
   /// 設定サービス（UI側で直接アクセスが必要な場合用）
-  ISettingsService? get settingsService => _settingsService;
+  ISettingsService get settingsService => _settingsService!;
 
   /// 設定データの読み込みが完了しているか
-  bool get hasSettingsLoaded => _settingsService != null;
+  bool get hasSettingsLoaded => _isSettingsLoaded;
 
-  SettingsController({required ILoggingService logger}) {
+  SettingsController({
+    required ILoggingService logger,
+    ISettingsService? settingsService,
+  }) {
     _logger = logger;
+    _settingsService = settingsService;
   }
 
   /// 設定データを読み込む
@@ -48,18 +53,16 @@ class SettingsController extends BaseErrorController {
     setLoading(true);
 
     try {
-      // settingsService と packageInfo を並列取得
-      final settingsFuture = ServiceRegistration.getAsync<ISettingsService>();
+      _settingsService ??=
+          await ServiceRegistration.getAsync<ISettingsService>();
+      if (localVersion != _requestVersion) return;
+
       final packageFuture = PackageInfo.fromPlatform()
           .then<PackageInfo?>((v) => v)
           .catchError((_) => null);
-      final (settings, packageInfo) = await (
-        settingsFuture,
-        packageFuture,
-      ).wait;
+      final packageInfo = await packageFuture;
       if (localVersion != _requestVersion) return;
 
-      _settingsService = settings;
       _packageInfo = packageInfo;
       _selectedLocale = _settingsService!.locale;
 
@@ -77,6 +80,8 @@ class SettingsController extends BaseErrorController {
           context: 'SettingsController',
         );
       }
+
+      _isSettingsLoaded = true;
     } catch (e) {
       if (localVersion != _requestVersion) return;
       _logger.error(

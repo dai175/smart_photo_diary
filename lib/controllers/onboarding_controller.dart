@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_constants.dart';
-import '../core/service_locator.dart';
 import '../core/service_registration.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
@@ -16,9 +15,17 @@ class OnboardingController extends ChangeNotifier {
   bool _disposed = false;
 
   final ILoggingService _logger;
+  final ISettingsService _settingsService;
+  final IPhotoService _photoService;
 
-  OnboardingController({ILoggingService? logger})
-    : _logger = logger ?? serviceLocator.get<ILoggingService>();
+  OnboardingController({
+    ILoggingService? logger,
+    ISettingsService? settingsService,
+    IPhotoService? photoService,
+  }) : _logger = logger ?? ServiceRegistration.get<ILoggingService>(),
+       _settingsService =
+           settingsService ?? ServiceRegistration.get<ISettingsService>(),
+       _photoService = photoService ?? ServiceRegistration.get<IPhotoService>();
 
   int get currentPage => _currentPage;
   bool get isProcessing => _isProcessing;
@@ -69,13 +76,10 @@ class OnboardingController extends ChangeNotifier {
     _safeNotifyListeners();
 
     try {
-      final settingsService =
-          await ServiceRegistration.getAsync<ISettingsService>();
-      await settingsService.setFirstLaunchCompleted();
+      await _settingsService.setFirstLaunchCompleted();
 
-      final photoService = ServiceRegistration.get<IPhotoService>();
       // Result is intentionally not checked here — permission is best-effort during onboarding
-      await photoService.requestPermission();
+      await _photoService.requestPermission();
 
       _logger.info('Onboarding completed', context: 'OnboardingScreen');
       return true;

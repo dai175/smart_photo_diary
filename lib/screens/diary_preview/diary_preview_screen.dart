@@ -5,11 +5,11 @@ import '../../constants/app_constants.dart';
 import '../../controllers/diary_preview_controller.dart';
 import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
-import '../../models/diary_length.dart';
 import '../../models/writing_prompt.dart';
 import '../../services/interfaces/logging_service_interface.dart';
 import '../../services/interfaces/photo_service_interface.dart';
 import '../../services/interfaces/settings_service_interface.dart';
+import '../../services/interfaces/subscription_service_interface.dart';
 import '../../ui/components/animated_button.dart';
 import '../../ui/design_system/app_spacing.dart';
 import '../../ui/animations/list_animations.dart';
@@ -30,11 +30,20 @@ class DiaryPreviewScreen extends StatefulWidget {
   /// 状況補足テキスト（オプション）
   final String? contextText;
 
+  final ILoggingService? logger;
+  final IPhotoService? photoService;
+  final ISettingsService? settingsService;
+  final ISubscriptionService? subscriptionService;
+
   const DiaryPreviewScreen({
     super.key,
     required this.selectedAssets,
     this.selectedPrompt,
     this.contextText,
+    this.logger,
+    this.photoService,
+    this.settingsService,
+    this.subscriptionService,
   });
 
   @override
@@ -43,53 +52,45 @@ class DiaryPreviewScreen extends StatefulWidget {
 
 class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
   late final DiaryPreviewController _controller;
+  ISubscriptionService? _subscriptionService;
   late TextEditingController _titleController;
   late TextEditingController _contentController;
 
   @override
   void initState() {
     super.initState();
+    final logger = widget.logger ?? ServiceRegistration.get<ILoggingService>();
+    final photoService =
+        widget.photoService ?? ServiceRegistration.get<IPhotoService>();
+    final settingsService =
+        widget.settingsService ?? ServiceRegistration.get<ISettingsService>();
+    _subscriptionService = widget.subscriptionService;
+    if (_subscriptionService == null) {
+      ServiceRegistration.getAsync<ISubscriptionService>().then((s) {
+        if (mounted) _subscriptionService = s;
+      });
+    }
+
     _controller = DiaryPreviewController(
-      logger: ServiceRegistration.get<ILoggingService>(),
-      photoService: ServiceRegistration.get<IPhotoService>(),
+      logger: logger,
+      photoService: photoService,
     );
     _titleController = TextEditingController();
     _contentController = TextEditingController();
     _controller.addListener(_onControllerChanged);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    final defaultLength = settingsService.diaryLength;
+    _controller.setDiaryLength(defaultLength);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
-      // Load default diary length from settings (async-safe)
-      var defaultLength = DiaryLength.standard;
-      try {
-        final settingsService =
-            await ServiceRegistration.getAsync<ISettingsService>();
-        defaultLength = settingsService.diaryLength;
-      } catch (e) {
-        // Fall back to standard if settings service is unavailable
-        try {
-          final logger = await ServiceRegistration.getAsync<ILoggingService>();
-          logger.warning(
-            'Failed to load diary length from settings, using standard',
-            context: 'DiaryPreviewScreen.initState',
-            data: e,
-          );
-        } catch (_) {
-          // LoggingService also unavailable — silent fallback acceptable
-        }
-      }
-      _controller.setDiaryLength(defaultLength);
-
-      if (mounted) {
-        _controller.initializeAndGenerate(
-          assets: widget.selectedAssets,
-          prompt: widget.selectedPrompt,
-          contextText: widget.contextText,
-          locale: Localizations.localeOf(context),
-          diaryLength: defaultLength,
-        );
-      }
+      _controller.initializeAndGenerate(
+        assets: widget.selectedAssets,
+        prompt: widget.selectedPrompt,
+        contextText: widget.contextText,
+        locale: Localizations.localeOf(context),
+        diaryLength: defaultLength,
+      );
     });
   }
 
@@ -114,8 +115,13 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
     }
 
     // 使用量制限に到達した場合はダイアログ表示（consumeで1回限り）
-    if (_controller.consumeUsageLimitReached() && mounted) {
-      DiaryPreviewDialogHelper.showUsageLimitDialog(context);
+    if (_controller.consumeUsageLimitReached() &&
+        mounted &&
+        _subscriptionService != null) {
+      DiaryPreviewDialogHelper.showUsageLimitDialog(
+        context,
+        subscriptionService: _subscriptionService!,
+      );
     }
 
     // 自動保存完了後のナビゲーション（consumeで1回限り）

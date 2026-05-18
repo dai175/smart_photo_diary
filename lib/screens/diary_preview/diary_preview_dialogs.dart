@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/plans/basic_plan.dart';
 import '../../services/interfaces/logging_service_interface.dart';
@@ -41,11 +40,11 @@ class DiaryPreviewDialogHelper {
   }
 
   /// Phase 1.7.2.1: 使用量制限エラー専用ダイアログ表示
-  static Future<void> showUsageLimitDialog(BuildContext context) async {
+  static Future<void> showUsageLimitDialog(
+    BuildContext context, {
+    required ISubscriptionService subscriptionService,
+  }) async {
     try {
-      final subscriptionService =
-          await ServiceRegistration.getAsync<ISubscriptionService>();
-
       final planResult = await subscriptionService.getCurrentPlanClass();
       final resetDateResult = await subscriptionService.getNextResetDate();
 
