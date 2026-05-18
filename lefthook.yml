@@ -1,7 +1,7 @@
 pre-commit:
   commands:
     secrets:
-      run: git secrets --pre_commit_hook -- "$@"
+      run: bash -c 'if command -v git-secrets &>/dev/null; then git secrets --pre_commit_hook -- "$@"; fi'
       fail_text: "Potential secret detected. Remove it before committing."
     format:
       glob: "**/*.dart"

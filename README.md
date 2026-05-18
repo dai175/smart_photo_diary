@@ -130,11 +130,15 @@ fvm flutter run
 
 ### Git フック（lefthook）
 
-コミット時に `dart format` と `flutter analyze` を自動実行します。
+コミット時に `dart format`、`flutter analyze`、シークレットスキャンを自動実行します。
 
 ```bash
 # lefthook をインストール（初回のみ）
 brew install lefthook
+
+# git-secrets をインストール（シークレットスキャン用・任意だが推奨）
+brew install git-secrets
+git secrets --register-aws  # AWS パターンを登録
 
 # フックを有効化（clone 後に一度だけ実行）
 lefthook install
