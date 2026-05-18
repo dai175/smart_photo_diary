@@ -7,6 +7,7 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/loading_state_card.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../localization/localization_extensions.dart';
+import 'statistics/diary_selection_dialog.dart';
 import 'statistics/statistics_cards.dart';
 import 'statistics/statistics_calendar.dart';
 
@@ -74,7 +75,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             ),
                           ),
                         ),
-                        // 統計カード群
                         StatisticsCards(
                           totalEntries: _controller.stats.totalEntries,
                           currentStreak: _controller.stats.currentStreak,
@@ -90,8 +90,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
-
-                        // カレンダーセクション
                         StatisticsCalendar(
                           diaryMap: _controller.stats.diaryMap,
                           focusedDay: _controller.focusedDay,
@@ -125,11 +123,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           DiaryDetailScreen(diaryId: diaries.first.id).customRoute(),
         );
       } else {
-        StatisticsCalendar.showDiarySelectionDialog(
-          context,
-          diaries,
-          selectedDay,
-        );
+        showDiarySelectionDialog(context, diaries, selectedDay);
       }
     }
   }

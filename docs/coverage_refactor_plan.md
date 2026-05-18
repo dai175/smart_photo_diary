@@ -134,9 +134,11 @@
 
 ### 3-6. `statistics_calendar.dart`（427 行）
 
-- [ ] `CalendarDayCell` ウィジェットを抽出
-- [ ] `StatisticsCalendar` をレイアウトのみに削減（目標 250 行以下）
-- [ ] ウィジェットテストを追加
+- [x] `CalendarDayCell` ウィジェットを抽出（日記あり日付のハイライトセル）
+- [x] `CalendarLegend` ウィジェットを抽出（凡例 5 メソッド → 独立ウィジェット）
+- [x] `showDiarySelectionDialog` をトップレベル関数 + `_DiaryListItem` に抽出（`diary_selection_dialog.dart`）
+- [x] `StatisticsCalendar` をレイアウトのみに削減（427 行 → 166 行）
+- [x] ウィジェットテストを追加（`CalendarDayCell` 5 ケース、`CalendarLegend` 6 ケース、`DiarySelectionDialog` 6 ケース）
 
 ---
 
