@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:in_app_purchase/in_app_purchase.dart' as iap;
+import '../../core/errors/app_exceptions.dart';
 import '../../models/subscription_status.dart';
 import '../../models/plans/plan.dart';
 import '../../constants/subscription_constants.dart';
@@ -170,7 +171,9 @@ mixin PurchaseEventHandler on ServiceLogging {
   ) async {
     final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
     if (plan == null) {
-      throw ArgumentError('Unknown product ID: ${purchaseDetails.productID}');
+      throw ServiceException(
+        'Unknown product ID: ${purchaseDetails.productID}',
+      );
     }
     await updateSubscriptionFromPurchase(purchaseDetails, plan);
     return plan;
@@ -301,7 +304,7 @@ mixin PurchaseEventHandler on ServiceLogging {
           days: SubscriptionConstants.subscriptionYearDays,
         );
       } else {
-        throw ArgumentError('Basic plan cannot be purchased');
+        throw const ServiceException('Basic plan cannot be purchased');
       }
 
       // 現在の使用量を引き継ぐ（月途中のアップグレードで使用量がリセットされるのを防止）

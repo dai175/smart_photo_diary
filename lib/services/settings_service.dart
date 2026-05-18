@@ -71,19 +71,18 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final prefs = _preferences;
-      if (prefs == null) {
-        throw const SettingsException('SettingsService is not initialized');
-      }
-      final saved = await prefs.setInt(_photoTypeFilterKey, filter.index);
-      if (!saved) {
-        throw const SettingsException('Failed to persist photo type filter');
-      }
-      _photoTypeFilterNotifier.value = filter;
-    }, context: 'SettingsService.setPhotoTypeFilter');
-  }
+  Future<Result<void>> setPhotoTypeFilter(PhotoTypeFilter filter) =>
+      _withPreferences(
+        (prefs) => ResultHelper.tryExecuteAsync(() async {
+          final saved = await prefs.setInt(_photoTypeFilterKey, filter.index);
+          if (!saved) {
+            throw const SettingsException(
+              'Failed to persist photo type filter',
+            );
+          }
+          _photoTypeFilterNotifier.value = filter;
+        }, context: 'SettingsService.setPhotoTypeFilter'),
+      );
 
   // 日記の長さ
   @override
@@ -105,15 +104,12 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setDiaryLength(DiaryLength length) async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final prefs = _preferences;
-      if (prefs == null) {
-        throw const SettingsException('SettingsService is not initialized');
-      }
-      await prefs.setInt(_diaryLengthKey, length.index);
-    }, context: 'SettingsService.setDiaryLength');
-  }
+  Future<Result<void>> setDiaryLength(DiaryLength length) => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(
+      () async => prefs.setInt(_diaryLengthKey, length.index),
+      context: 'SettingsService.setDiaryLength',
+    ),
+  );
 
   // テーマモード
   @override
@@ -134,15 +130,12 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setThemeMode(ThemeMode themeMode) async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final prefs = _preferences;
-      if (prefs == null) {
-        throw const SettingsException('SettingsService is not initialized');
-      }
-      await prefs.setInt(_themeKey, themeMode.index);
-    }, context: 'SettingsService.setThemeMode');
-  }
+  Future<Result<void>> setThemeMode(ThemeMode themeMode) => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(
+      () async => prefs.setInt(_themeKey, themeMode.index),
+      context: 'SettingsService.setThemeMode',
+    ),
+  );
 
   @override
   Locale? get locale {
@@ -153,20 +146,16 @@ class SettingsService implements ISettingsService {
   }
 
   @override
-  Future<Result<void>> setLocale(Locale? locale) async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final prefs = _preferences;
-      if (prefs == null) {
-        throw const SettingsException('SettingsService is not initialized');
-      }
+  Future<Result<void>> setLocale(Locale? locale) => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(() async {
       if (locale == null) {
         await prefs.remove(_localeKey);
       } else {
         await prefs.setString(_localeKey, _serializeLocale(locale));
       }
       _localeNotifier.value = locale;
-    }, context: 'SettingsService.setLocale');
-  }
+    }, context: 'SettingsService.setLocale'),
+  );
 
   // 初回起動判定
   @override
@@ -183,15 +172,12 @@ class SettingsService implements ISettingsService {
 
   // 初回起動完了を記録
   @override
-  Future<Result<void>> setFirstLaunchCompleted() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final prefs = _preferences;
-      if (prefs == null) {
-        throw const SettingsException('SettingsService is not initialized');
-      }
-      await prefs.setBool(_firstLaunchKey, false);
-    }, context: 'SettingsService.setFirstLaunchCompleted');
-  }
+  Future<Result<void>> setFirstLaunchCompleted() => _withPreferences(
+    (prefs) => ResultHelper.tryExecuteAsync(
+      () async => prefs.setBool(_firstLaunchKey, false),
+      context: 'SettingsService.setFirstLaunchCompleted',
+    ),
+  );
 
   Locale? _loadStoredLocale() => locale;
 
@@ -226,57 +212,64 @@ class SettingsService implements ISettingsService {
 
   // サブスクリプション状態管理API（SettingsSubscriptionDelegate に委譲）
 
-  /// delegate が初期化済みであることを保証してから返す
-  SettingsSubscriptionDelegate _requireDelegate() {
-    final delegate = _subscriptionDelegate;
-    if (delegate == null) {
-      throw StateError('SubscriptionService is not initialized');
-    }
-    return delegate;
-  }
-
   @override
   Future<Result<SubscriptionInfoV2>> getSubscriptionInfoV2() =>
-      _delegateOr(() => _requireDelegate().getSubscriptionInfoV2());
+      _delegateOr((d) => d.getSubscriptionInfoV2());
 
   @override
   Future<Result<Plan>> getCurrentPlanClass() =>
-      _delegateOr(() => _requireDelegate().getCurrentPlanClass());
+      _delegateOr((d) => d.getCurrentPlanClass());
 
   @override
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() =>
-      _delegateOr(() => _requireDelegate().getPlanPeriodInfoV2());
+      _delegateOr((d) => d.getPlanPeriodInfoV2());
 
   @override
   Future<Result<AutoRenewalInfoV2>> getAutoRenewalInfo() =>
-      _delegateOr(() => _requireDelegate().getAutoRenewalInfo());
+      _delegateOr((d) => d.getAutoRenewalInfo());
 
   @override
   Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass() =>
-      _delegateOr(() => _requireDelegate().getUsageStatisticsWithPlanClass());
+      _delegateOr((d) => d.getUsageStatisticsWithPlanClass());
 
   @override
   Future<Result<int>> getRemainingGenerations() =>
-      _delegateOr(() => _requireDelegate().getRemainingGenerations());
+      _delegateOr((d) => d.getRemainingGenerations());
 
   @override
   Future<Result<DateTime>> getNextResetDate() =>
-      _delegateOr(() => _requireDelegate().getNextResetDate());
+      _delegateOr((d) => d.getNextResetDate());
 
   @override
-  Future<Result<bool>> canChangePlan() =>
-      _delegateOr(() => _requireDelegate().canChangePlan());
+  Future<Result<bool>> canChangePlan() => _delegateOr((d) => d.canChangePlan());
 
   @override
   Future<Result<List<Plan>>> getAvailablePlansV2() =>
-      _delegateOr(() => _requireDelegate().getAvailablePlansV2());
+      _delegateOr((d) => d.getAvailablePlansV2());
 
-  /// delegate 未初期化時は Failure を返すラッパー
-  Future<Result<T>> _delegateOr<T>(Future<Result<T>> Function() fn) async {
-    try {
-      return await fn();
-    } on StateError catch (e) {
-      return Failure(ServiceException(e.message));
+  /// 未初期化時は Failure を返す。_preferences の null チェックをここに集約。
+  Future<Result<void>> _withPreferences(
+    Future<Result<void>> Function(SharedPreferences) fn,
+  ) async {
+    final prefs = _preferences;
+    if (prefs == null) {
+      return const Failure(
+        SettingsException('SettingsService is not initialized'),
+      );
     }
+    return fn(prefs);
+  }
+
+  /// delegate 未初期化時は Failure を返す。null チェックをここに集約。
+  Future<Result<T>> _delegateOr<T>(
+    Future<Result<T>> Function(SettingsSubscriptionDelegate) fn,
+  ) async {
+    final delegate = _subscriptionDelegate;
+    if (delegate == null) {
+      return const Failure(
+        ServiceException('SubscriptionService is not initialized'),
+      );
+    }
+    return fn(delegate);
   }
 }

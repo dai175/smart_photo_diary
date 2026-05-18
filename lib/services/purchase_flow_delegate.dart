@@ -58,10 +58,14 @@ class PurchaseFlowDelegate with PurchaseErrorHandlerMixin {
       );
       _setIsPurchasing(true);
 
-      final productDetails = await _productDelegate.queryProductDetails(
+      final detailsResult = await _productDelegate.queryProductDetails(
         productId,
       );
-      final purchaseParam = PurchaseParam(productDetails: productDetails);
+      if (detailsResult.isFailure) {
+        _setIsPurchasing(false);
+        return Failure(detailsResult.error);
+      }
+      final purchaseParam = PurchaseParam(productDetails: detailsResult.value);
 
       try {
         _log('Calling buyNonConsumable...');

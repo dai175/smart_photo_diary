@@ -224,7 +224,7 @@ void main() {
   });
 
   group('queryProductDetails', () {
-    test('クエリエラー → ServiceException', () async {
+    test('クエリエラー → Failure(ServiceException)', () async {
       when(() => mockStateService.isInitialized).thenReturn(true);
 
       when(() => mockInAppPurchase.queryProductDetails(any())).thenAnswer(
@@ -239,15 +239,14 @@ void main() {
         ),
       );
 
-      expect(
-        () => delegate.queryProductDetails(
-          'smart_photo_diary_premium_monthly_plan',
-        ),
-        throwsA(isA<ServiceException>()),
+      final result = await delegate.queryProductDetails(
+        'smart_photo_diary_premium_monthly_plan',
       );
+      expect(result.isFailure, isTrue);
+      expect(result.error, isA<ServiceException>());
     });
 
-    test('商品が見つからない → ServiceException', () async {
+    test('商品が見つからない → Failure(ServiceException)', () async {
       when(() => mockStateService.isInitialized).thenReturn(true);
 
       when(() => mockInAppPurchase.queryProductDetails(any())).thenAnswer(
@@ -257,12 +256,11 @@ void main() {
         ),
       );
 
-      expect(
-        () => delegate.queryProductDetails(
-          'smart_photo_diary_premium_monthly_plan',
-        ),
-        throwsA(isA<ServiceException>()),
+      final result = await delegate.queryProductDetails(
+        'smart_photo_diary_premium_monthly_plan',
       );
+      expect(result.isFailure, isTrue);
+      expect(result.error, isA<ServiceException>());
     });
   });
 }

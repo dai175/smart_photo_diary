@@ -44,13 +44,13 @@ class StorageService implements IStorageService {
 
   /// DiaryService を取得
   Future<IDiaryService> _getDiaryService() async {
-    if (_diaryService == null) {
+    final diaryService = _diaryService;
+    if (diaryService == null) {
       throw StateError(
-        'StorageService: diaryService is not injected. '
-        'Ensure it is provided via constructor.',
+        'StorageService: diaryService is not injected. Ensure it is provided via constructor.',
       );
     }
-    return _diaryService;
+    return diaryService;
   }
 
   /// 現在のロケールを解決する
@@ -103,7 +103,12 @@ class StorageService implements IStorageService {
   // データのエクスポート（保存先選択可能）
   @override
   Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
-    return _exportDelegate.exportData(startDate: startDate, endDate: endDate);
+    final result = await exportDataResult(
+      startDate: startDate,
+      endDate: endDate,
+    );
+    if (result.isFailure) throw result.error;
+    return result.value;
   }
 
   // データのインポート（リストア機能）
@@ -188,16 +193,7 @@ class StorageService implements IStorageService {
   Future<Result<String?>> exportDataResult({
     DateTime? startDate,
     DateTime? endDate,
-  }) async {
-    try {
-      final result = await exportData(startDate: startDate, endDate: endDate);
-      return Success(result);
-    } catch (e) {
-      return Failure(
-        ServiceException('Failed to export data', originalError: e),
-      );
-    }
-  }
+  }) => _exportDelegate.exportData(startDate: startDate, endDate: endDate);
 
   /// データベースの最適化（Result版）
   @override

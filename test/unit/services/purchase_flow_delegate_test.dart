@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:in_app_purchase/in_app_purchase.dart' hide PurchaseStatus;
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/services/purchase_flow_delegate.dart';
 import 'package:smart_photo_diary/services/purchase_product_delegate.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_state_service_interface.dart';
@@ -119,13 +120,32 @@ void main() {
       );
     });
 
+    test('queryProductDetailsがFailure → Failureを返して購入フラグを戻す', () async {
+      when(() => mockStateService.isInitialized).thenReturn(true);
+
+      when(() => mockProductDelegate.queryProductDetails(any())).thenAnswer(
+        (_) async => const Failure(ServiceException('lookup failed')),
+      );
+
+      final result = await delegate.purchasePlan(PremiumMonthlyPlan());
+
+      expect(result.isFailure, isTrue);
+      expect(result.error.toString(), contains('lookup failed'));
+      expect(isPurchasing, isFalse);
+      verifyNever(
+        () => mockInAppPurchase.buyNonConsumable(
+          purchaseParam: any(named: 'purchaseParam'),
+        ),
+      );
+    });
+
     test('正常系 → Success(pending)', () async {
       when(() => mockStateService.isInitialized).thenReturn(true);
       final fakeProduct = FakeProductDetails();
 
       when(
         () => mockProductDelegate.queryProductDetails(any()),
-      ).thenAnswer((_) async => fakeProduct);
+      ).thenAnswer((_) async => Success(fakeProduct));
 
       when(
         () => mockInAppPurchase.buyNonConsumable(
@@ -146,7 +166,7 @@ void main() {
 
       when(
         () => mockProductDelegate.queryProductDetails(any()),
-      ).thenAnswer((_) async => fakeProduct);
+      ).thenAnswer((_) async => Success(fakeProduct));
 
       when(
         () => mockInAppPurchase.buyNonConsumable(
