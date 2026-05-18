@@ -84,7 +84,8 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Untitled'), findsOneWidget);
+      final l10n = WidgetTestHelpers.getL10n(tester, find.byType(Dialog));
+      expect(find.text(l10n.diaryCardUntitled), findsOneWidget);
     });
 
     testWidgets('displays index numbers for each diary', (tester) async {

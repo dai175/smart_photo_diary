@@ -65,7 +65,7 @@ void main() {
       await tester.pumpWidget(buildWidget(onToggle: () => toggled = true));
       await tester.pump();
 
-      await tester.tap(find.byType(InkWell).first);
+      await tester.tap(find.byKey(const Key('prompt_search_bar_toggle')));
       expect(toggled, isTrue);
     });
 

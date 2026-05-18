@@ -29,6 +29,7 @@ class FilterDateSection extends StatelessWidget {
       children: [
         Expanded(
           child: _DatePill(
+            key: const Key('start_date_pill'),
             label: context.l10n.filterSelectStartDate,
             date: startDate,
             onTap: onStartDateTap,
@@ -38,6 +39,7 @@ class FilterDateSection extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _DatePill(
+            key: const Key('end_date_pill'),
             label: context.l10n.filterSelectEndDate,
             date: endDate,
             onTap: onEndDateTap,
@@ -51,6 +53,7 @@ class FilterDateSection extends StatelessWidget {
 
 class _DatePill extends StatelessWidget {
   const _DatePill({
+    super.key,
     required this.label,
     required this.date,
     required this.onTap,

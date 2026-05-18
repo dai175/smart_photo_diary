@@ -41,6 +41,7 @@ class PromptSearchBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
+            key: const Key('prompt_search_bar_toggle'),
             borderRadius: BorderRadius.circular(8),
             onTap: onToggle,
             child: Padding(

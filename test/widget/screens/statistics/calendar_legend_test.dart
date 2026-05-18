@@ -12,41 +12,75 @@ void main() {
     );
   }
 
+  Future<void> pumpLegend(WidgetTester tester) async {
+    await tester.pumpWidget(buildWidget());
+    await tester.pump();
+  }
+
   group('CalendarLegend', () {
     testWidgets('renders four legend items', (tester) async {
-      await tester.pumpWidget(buildWidget());
-      await tester.pump();
+      await pumpLegend(tester);
 
       expect(find.byType(Row), findsWidgets);
       expect(find.byType(Container), findsWidgets);
     });
 
     testWidgets('shows localized Entry label', (tester) async {
-      await tester.pumpWidget(buildWidget());
-      await tester.pump();
-      expect(find.textContaining('ENTRY', findRichText: true), findsOneWidget);
+      await pumpLegend(tester);
+      final l10n = WidgetTestHelpers.getL10n(
+        tester,
+        find.byType(CalendarLegend),
+      );
+      expect(
+        find.textContaining(
+          l10n.statisticsCalendarLegendEntry.toUpperCase(),
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows localized Multiple label', (tester) async {
-      await tester.pumpWidget(buildWidget());
-      await tester.pump();
+      await pumpLegend(tester);
+      final l10n = WidgetTestHelpers.getL10n(
+        tester,
+        find.byType(CalendarLegend),
+      );
       expect(
-        find.textContaining('MULTIPLE', findRichText: true),
+        find.textContaining(
+          l10n.statisticsCalendarLegendMultiple.toUpperCase(),
+          findRichText: true,
+        ),
         findsOneWidget,
       );
     });
 
     testWidgets('shows localized Today label', (tester) async {
-      await tester.pumpWidget(buildWidget());
-      await tester.pump();
-      expect(find.textContaining('TODAY', findRichText: true), findsOneWidget);
+      await pumpLegend(tester);
+      final l10n = WidgetTestHelpers.getL10n(
+        tester,
+        find.byType(CalendarLegend),
+      );
+      expect(
+        find.textContaining(
+          l10n.statisticsCalendarLegendToday.toUpperCase(),
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows localized Selected label', (tester) async {
-      await tester.pumpWidget(buildWidget());
-      await tester.pump();
+      await pumpLegend(tester);
+      final l10n = WidgetTestHelpers.getL10n(
+        tester,
+        find.byType(CalendarLegend),
+      );
       expect(
-        find.textContaining('SELECTED', findRichText: true),
+        find.textContaining(
+          l10n.statisticsCalendarLegendSelected.toUpperCase(),
+          findRichText: true,
+        ),
         findsOneWidget,
       );
     });

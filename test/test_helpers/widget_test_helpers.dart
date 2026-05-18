@@ -205,6 +205,11 @@ class WidgetTestHelpers {
     return find.byKey(ValueKey(value));
   }
 
+  /// Get AppLocalizations from a pumped widget tree
+  static AppLocalizations getL10n(WidgetTester tester, Finder finder) {
+    return AppLocalizations.of(tester.element(finder));
+  }
+
   /// Create a mock ThemeData for testing
   static ThemeData createTestTheme({Brightness brightness = Brightness.light}) {
     return ThemeData(

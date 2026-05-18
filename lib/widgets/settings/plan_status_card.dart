@@ -55,9 +55,9 @@ class PlanStatusCard extends StatelessWidget {
         ? context.l10n.formatMonthDayLong(info.periodInfo.expiryDate!)
         : null;
 
-    final cardBgColor = isDark
-        ? AppColors.premiumBgDark
-        : (isPremium ? AppColors.premiumBg : AppColors.cardBg);
+    final cardBgColor = isPremium
+        ? (isDark ? AppColors.premiumBgDark : AppColors.premiumBg)
+        : (isDark ? colorScheme.surfaceContainerHighest : AppColors.cardBg);
     final barColor = usageRate > _usageWarningThreshold
         ? colorScheme.error
         : AppColors.calSelected;

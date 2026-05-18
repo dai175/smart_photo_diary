@@ -87,7 +87,7 @@ void main() {
         );
         await tester.pump();
 
-        await tester.tap(find.byType(InkWell).first);
+        await tester.tap(find.byKey(const Key('start_date_pill')));
         expect(called, isTrue);
       });
 
@@ -96,23 +96,29 @@ void main() {
         await tester.pumpWidget(buildWidget(onEndDateTap: () => called = true));
         await tester.pump();
 
-        await tester.tap(find.byType(InkWell).last);
+        await tester.tap(find.byKey(const Key('end_date_pill')));
         expect(called, isTrue);
       });
 
       testWidgets('fires onClear when close icon tapped', (tester) async {
         var called = false;
+        var startTapped = false;
+        var endTapped = false;
         await tester.pumpWidget(
           buildWidget(
             startDate: testStart,
             endDate: testEnd,
             onClear: () => called = true,
+            onStartDateTap: () => startTapped = true,
+            onEndDateTap: () => endTapped = true,
           ),
         );
         await tester.pump();
 
         await tester.tap(find.byIcon(Icons.close).first);
         expect(called, isTrue);
+        expect(startTapped, isFalse);
+        expect(endTapped, isFalse);
       });
     });
   });
