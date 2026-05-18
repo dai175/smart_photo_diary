@@ -14,7 +14,7 @@ enum DiaryDetailErrorType { notFound, loadFailed, updateFailed, deleteFailed }
 /// DiaryDetailScreen の状態管理・ビジネスロジック
 class DiaryDetailController extends BaseErrorController {
   final ILoggingService _logger;
-  final IDiaryCrudService _diaryCrudService;
+  IDiaryCrudService? _diaryCrudService;
   final IPhotoService _photoService;
 
   DiaryDetailController({
@@ -22,8 +22,7 @@ class DiaryDetailController extends BaseErrorController {
     IDiaryCrudService? diaryCrudService,
     IPhotoService? photoService,
   }) : _logger = logger ?? ServiceRegistration.get<ILoggingService>(),
-       _diaryCrudService =
-           diaryCrudService ?? ServiceRegistration.get<IDiaryCrudService>(),
+       _diaryCrudService = diaryCrudService,
        _photoService = photoService ?? ServiceRegistration.get<IPhotoService>();
 
   DiaryEntry? _diaryEntry;
@@ -75,8 +74,10 @@ class DiaryDetailController extends BaseErrorController {
       _clearErrorState();
       setLoading(true);
 
+      _diaryCrudService ??=
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return;
-      final result = await _diaryCrudService.getDiaryEntry(diaryId);
+      final result = await _diaryCrudService!.getDiaryEntry(diaryId);
 
       switch (result) {
         case Success(data: final entry):
@@ -129,6 +130,8 @@ class DiaryDetailController extends BaseErrorController {
       setLoading(true);
       _clearErrorState();
 
+      _diaryCrudService ??=
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return false;
 
       final updatedEntry = _diaryEntry!.copyWith(
@@ -136,7 +139,7 @@ class DiaryDetailController extends BaseErrorController {
         content: content,
         updatedAt: DateTime.now(),
       );
-      final updateResult = await _diaryCrudService.updateDiaryEntry(
+      final updateResult = await _diaryCrudService!.updateDiaryEntry(
         updatedEntry,
       );
       if (localVersion != _requestVersion) return updateResult.isSuccess;
@@ -168,8 +171,10 @@ class DiaryDetailController extends BaseErrorController {
       setLoading(true);
       _clearErrorState();
 
+      _diaryCrudService ??=
+          await ServiceRegistration.getAsync<IDiaryCrudService>();
       if (localVersion != _requestVersion) return false;
-      final deleteResult = await _diaryCrudService.deleteDiaryEntry(diaryId);
+      final deleteResult = await _diaryCrudService!.deleteDiaryEntry(diaryId);
       if (localVersion != _requestVersion) return false;
 
       switch (deleteResult) {

@@ -40,7 +40,7 @@ class PromptSelectionModal extends StatefulWidget {
 class _PromptSelectionModalState extends State<PromptSelectionModal>
     with SingleTickerProviderStateMixin {
   late final ILoggingService _logger;
-  late final IPromptService _promptService;
+  IPromptService? _promptService;
   late final ISubscriptionService _subscriptionService;
 
   bool _isLoading = true;
@@ -59,8 +59,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
   void initState() {
     super.initState();
     _logger = widget.logger ?? ServiceRegistration.get<ILoggingService>();
-    _promptService =
-        widget.promptService ?? ServiceRegistration.get<IPromptService>();
+    _promptService = widget.promptService;
     _subscriptionService =
         widget.subscriptionService ??
         ServiceRegistration.get<ISubscriptionService>();
@@ -96,6 +95,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Future<void> _initializeServices() async {
     try {
+      _promptService ??= await ServiceRegistration.getAsync<IPromptService>();
       final accessResult = await _subscriptionService
           .canAccessPremiumFeatures();
       if (accessResult.isSuccess) {
@@ -105,7 +105,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       if (!mounted) return;
 
       final locale = Localizations.localeOf(context);
-      _availablePrompts = _promptService.getPromptsForPlan(
+      _availablePrompts = _promptService!.getPromptsForPlan(
         isPremium: _isPremium,
         locale: locale,
       );
@@ -166,7 +166,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
         onPressed: () {
           final contextText = _getContextText();
           if (_isRandomSelected) {
-            final randomPrompt = _promptService.getRandomPrompt(
+            final randomPrompt = _promptService!.getRandomPrompt(
               isPremium: _isPremium,
               locale: Localizations.localeOf(context),
             );
