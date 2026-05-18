@@ -160,33 +160,43 @@ class PurchaseProductDelegate with PurchaseErrorHandlerMixin {
   }
 
   /// App Store から商品詳細を取得する
-  Future<ProductDetails> queryProductDetails(String productId) async {
-    _loggingService?.debug(
-      'Querying product details',
-      context: logTag,
-      data: {'productId': productId},
-    );
-    final response = await _getInAppPurchase()!.queryProductDetails({
-      productId,
-    });
-
-    if (response.error != null) {
-      throw ServiceException(
-        'Failed to get product details for purchase',
-        details: response.error.toString(),
+  Future<Result<ProductDetails>> queryProductDetails(String productId) async {
+    try {
+      _loggingService?.debug(
+        'Querying product details',
+        context: logTag,
+        data: {'productId': productId},
       );
-    }
+      final response = await _getInAppPurchase()!.queryProductDetails({
+        productId,
+      });
 
-    if (response.productDetails.isEmpty) {
-      throw ServiceException('Product not found: $productId');
-    }
+      if (response.error != null) {
+        return Failure(
+          ServiceException(
+            'Failed to get product details for purchase',
+            details: response.error.toString(),
+          ),
+        );
+      }
 
-    final details = response.productDetails.first;
-    _log(
-      'Product details retrieved',
-      data: {'id': details.id, 'title': details.title, 'price': details.price},
-    );
-    return details;
+      if (response.productDetails.isEmpty) {
+        return Failure(ServiceException('Product not found: $productId'));
+      }
+
+      final details = response.productDetails.first;
+      _log(
+        'Product details retrieved',
+        data: {
+          'id': details.id,
+          'title': details.title,
+          'price': details.price,
+        },
+      );
+      return Success(details);
+    } catch (e) {
+      return handlePurchaseError(e, 'queryProductDetails', details: productId);
+    }
   }
 
   // =================================================================

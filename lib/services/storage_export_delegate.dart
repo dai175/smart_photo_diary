@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 
-import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import '../localization/localization_utils.dart';
 import 'interfaces/diary_service_interface.dart';
 
@@ -19,14 +19,15 @@ class StorageExportDelegate {
        _resolveLocale = resolveLocale;
 
   /// データのエクスポート（保存先選択可能）
-  Future<String?> exportData({DateTime? startDate, DateTime? endDate}) async {
+  Future<Result<String?>> exportData({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     final diaryService = await _getDiaryService();
     final result = await diaryService.getSortedDiaryEntries();
 
     if (result.isFailure) {
-      throw StorageException(
-        'Failed to retrieve diary data: ${result.error.message}',
-      );
+      return Failure(result.error);
     }
 
     var entries = result.value;
@@ -75,6 +76,6 @@ class StorageExportDelegate {
       bytes: utf8.encode(jsonString),
     );
 
-    return outputFile;
+    return Success(outputFile);
   }
 }

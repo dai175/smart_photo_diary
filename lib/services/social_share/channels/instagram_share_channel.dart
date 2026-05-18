@@ -69,7 +69,7 @@ class InstagramShareChannel with ShareChannelMixin {
                 (l10n) => l10n.commonShareTimeout,
                 'Sharing timed out',
               );
-              throw Exception(timeoutMessage);
+              throw InstagramShareException(timeoutMessage);
             },
           );
 

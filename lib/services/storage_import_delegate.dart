@@ -148,9 +148,7 @@ class StorageImportDelegate {
       // パフォーマンス最適化: 既存エントリーを一度だけ取得
       final existingResult = await diaryService.getSortedDiaryEntries();
       if (existingResult.isFailure) {
-        throw StorageException(
-          'Failed to retrieve existing diary data: ${existingResult.error.message}',
-        );
+        return Failure(existingResult.error);
       }
       final existingEntries = existingResult.value;
       // インポート済みエントリーの追跡用セット（同一バックアップ内の重複検出）
@@ -288,9 +286,7 @@ class StorageImportDelegate {
       );
 
       if (saveResult.isFailure) {
-        throw StorageException(
-          'Failed to save entry: ${saveResult.error.message}',
-        );
+        return Failure(saveResult.error);
       }
 
       // インポート済みセットを更新（同一バックアップ内の後続重複を検出するため）

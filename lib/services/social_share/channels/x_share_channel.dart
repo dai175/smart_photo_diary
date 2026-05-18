@@ -97,7 +97,7 @@ class XShareChannel with ShareChannelMixin {
                 (l10n) => l10n.commonShareTimeout,
                 'Sharing timed out',
               );
-              throw Exception(timeoutMessage);
+              throw XShareException(timeoutMessage);
             },
           );
 

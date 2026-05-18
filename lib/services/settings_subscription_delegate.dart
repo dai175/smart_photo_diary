@@ -16,20 +16,11 @@ class SettingsSubscriptionDelegate {
     required ISubscriptionService subscriptionService,
   }) : _subscriptionService = subscriptionService;
 
-  /// Result から値を取り出す。Failure の場合は例外をスロー。
-  T _requireResult<T>(Result<T> result) {
-    if (result.isFailure) throw result.error;
-    return result.value;
-  }
-
   /// 包括的なサブスクリプション情報を取得（V2版）
   Future<Result<SubscriptionInfoV2>> getSubscriptionInfoV2() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final status = _requireResult(
-        await _subscriptionService.getCurrentStatus(),
-      );
-      return SubscriptionInfoV2.fromStatus(status);
-    }, context: 'SettingsSubscriptionDelegate.getSubscriptionInfoV2');
+    final statusResult = await _subscriptionService.getCurrentStatus();
+    if (statusResult.isFailure) return Failure(statusResult.error);
+    return Success(SubscriptionInfoV2.fromStatus(statusResult.value));
   }
 
   /// 現在のプラン情報を取得（Planクラス版）
@@ -38,40 +29,35 @@ class SettingsSubscriptionDelegate {
 
   /// プラン期限情報を取得（V2版）
   Future<Result<PlanPeriodInfoV2>> getPlanPeriodInfoV2() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final status = _requireResult(
-        await _subscriptionService.getCurrentStatus(),
-      );
-      final plan = _requireResult(
-        await _subscriptionService.getCurrentPlanClass(),
-      );
+    final statusResult = await _subscriptionService.getCurrentStatus();
+    if (statusResult.isFailure) return Failure(statusResult.error);
 
-      return PlanPeriodInfoV2.fromStatusAndPlan(status, plan);
-    }, context: 'SettingsSubscriptionDelegate.getPlanPeriodInfoV2');
+    final planResult = await _subscriptionService.getCurrentPlanClass();
+    if (planResult.isFailure) return Failure(planResult.error);
+
+    return Success(
+      PlanPeriodInfoV2.fromStatusAndPlan(statusResult.value, planResult.value),
+    );
   }
 
   /// 自動更新状態情報を取得
   Future<Result<AutoRenewalInfoV2>> getAutoRenewalInfo() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final status = _requireResult(
-        await _subscriptionService.getCurrentStatus(),
-      );
-      return AutoRenewalInfoV2.fromStatus(status);
-    }, context: 'SettingsSubscriptionDelegate.getAutoRenewalInfo');
+    final statusResult = await _subscriptionService.getCurrentStatus();
+    if (statusResult.isFailure) return Failure(statusResult.error);
+    return Success(AutoRenewalInfoV2.fromStatus(statusResult.value));
   }
 
   /// 使用統計情報を取得（Planクラス版）
   Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final status = _requireResult(
-        await _subscriptionService.getCurrentStatus(),
-      );
-      final plan = _requireResult(
-        await _subscriptionService.getCurrentPlanClass(),
-      );
+    final statusResult = await _subscriptionService.getCurrentStatus();
+    if (statusResult.isFailure) return Failure(statusResult.error);
 
-      return UsageStatisticsV2.fromStatusAndPlan(status, plan);
-    }, context: 'SettingsSubscriptionDelegate.getUsageStatisticsWithPlanClass');
+    final planResult = await _subscriptionService.getCurrentPlanClass();
+    if (planResult.isFailure) return Failure(planResult.error);
+
+    return Success(
+      UsageStatisticsV2.fromStatusAndPlan(statusResult.value, planResult.value),
+    );
   }
 
   /// 残り使用可能回数を取得
@@ -84,18 +70,15 @@ class SettingsSubscriptionDelegate {
 
   /// プラン変更可能かどうかを確認
   Future<Result<bool>> canChangePlan() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      // サービス正常性チェック（値は不要だが、失敗時にFailureを返すためのガード）
-      _requireResult(await _subscriptionService.getCurrentStatus());
-      return _subscriptionService.isInitialized;
-    }, context: 'SettingsSubscriptionDelegate.canChangePlan');
+    final statusResult = await _subscriptionService.getCurrentStatus();
+    if (statusResult.isFailure) return Failure(statusResult.error);
+    return Success(_subscriptionService.isInitialized);
   }
 
   /// プラン比較情報を取得（V2版）
-  Future<Result<List<Plan>>> getAvailablePlansV2() async {
-    return ResultHelper.tryExecuteAsync(() async {
-      final plans = PlanFactory.getAllPlans();
-      return plans;
-    }, context: 'SettingsSubscriptionDelegate.getAvailablePlansV2');
-  }
+  Future<Result<List<Plan>>> getAvailablePlansV2() =>
+      ResultHelper.tryExecuteAsync(
+        () async => PlanFactory.getAllPlans(),
+        context: 'SettingsSubscriptionDelegate.getAvailablePlansV2',
+      );
 }
