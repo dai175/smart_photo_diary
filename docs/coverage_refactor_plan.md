@@ -129,8 +129,8 @@
 
 ### 3-5. `filter_bottom_sheet.dart`（528 行）
 
-- [ ] フィルタ条件別ウィジェットに分割（日付・タグ・ムード）
-- [ ] ウィジェットテストを追加
+- [x] フィルタ条件別ウィジェットに分割（日付・タグ・時間帯）: `FilterSelectionChip`, `FilterDateSection`, `FilterTagSection`, `FilterTimeOfDaySection` を抽出（528行 → 351行）
+- [x] ウィジェットテストを追加（`test/widget/shared/` に 30ケース）
 
 ### 3-6. `statistics_calendar.dart`（427 行）
 

@@ -11,6 +11,9 @@ import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../localization/localization_extensions.dart';
+import 'filter_date_section.dart';
+import 'filter_tag_section.dart';
+import 'filter_time_of_day_section.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final DiaryFilter initialFilter;
@@ -174,18 +177,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     });
   }
 
-  List<MapEntry<TimeOfDayPeriod, String>> _timeOfDayEntries(
-    BuildContext context,
-  ) {
-    final l10n = context.l10n;
-    return [
-      MapEntry(TimeOfDayPeriod.morning, '🌅 ${l10n.filterTimeSlotMorning}'),
-      MapEntry(TimeOfDayPeriod.noon, '☀️ ${l10n.filterTimeSlotNoon}'),
-      MapEntry(TimeOfDayPeriod.evening, '🌆 ${l10n.filterTimeSlotEvening}'),
-      MapEntry(TimeOfDayPeriod.night, '🌙 ${l10n.filterTimeSlotNight}'),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -254,60 +245,30 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               children: [
                 _buildSection(
                   title: l10n.filterDateRange,
-                  child: _buildDatePillGrid(context),
+                  child: FilterDateSection(
+                    startDate: _currentFilter.dateRange?.start,
+                    endDate: _currentFilter.dateRange?.end,
+                    onStartDateTap: () => _selectSingleDate(true),
+                    onEndDateTap: () => _selectSingleDate(false),
+                    onClear: _clearDateRange,
+                  ),
                 ),
 
                 _buildSection(
                   title: l10n.filterTags,
-                  child: _isLoadingTags
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: AppSpacing.sm,
-                          ),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      : _availableTags.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.sm,
-                          ),
-                          child: Text(
-                            l10n.filterNoTags,
-                            style: AppTypography.cardBody.copyWith(
-                              color: AppColors.muted,
-                            ),
-                          ),
-                        )
-                      : Wrap(
-                          spacing: AppSpacing.xs,
-                          runSpacing: AppSpacing.xs,
-                          children: _availableTags
-                              .map(
-                                (tag) => _buildFilterChip(
-                                  '#$tag',
-                                  _currentFilter.selectedTags.contains(tag),
-                                  () => _toggleTag(tag),
-                                ),
-                              )
-                              .toList(),
-                        ),
+                  child: FilterTagSection(
+                    availableTags: _availableTags,
+                    selectedTags: _currentFilter.selectedTags,
+                    isLoading: _isLoadingTags,
+                    onTagToggled: _toggleTag,
+                  ),
                 ),
 
                 _buildSection(
                   title: l10n.filterTimeOfDay,
-                  child: Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xs,
-                    children: _timeOfDayEntries(context).map((entry) {
-                      final isSelected = _currentFilter.timeOfDay.contains(
-                        entry.key,
-                      );
-                      return _buildFilterChip(
-                        entry.value,
-                        isSelected,
-                        () => _toggleTimeOfDay(entry.key),
-                      );
-                    }).toList(),
+                  child: FilterTimeOfDaySection(
+                    selectedPeriods: _currentFilter.timeOfDay,
+                    onPeriodToggled: _toggleTimeOfDay,
                   ),
                 ),
 
@@ -368,144 +329,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ),
     );
   }
-
-  Widget _buildDatePillGrid(BuildContext context) {
-    final startDate = _currentFilter.dateRange?.start;
-    final endDate = _currentFilter.dateRange?.end;
-    return Row(
-      children: [
-        Expanded(
-          child: _buildDatePill(
-            label: context.l10n.filterSelectStartDate,
-            date: startDate,
-            isStart: true,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _buildDatePill(
-            label: context.l10n.filterSelectEndDate,
-            date: endDate,
-            isStart: false,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDatePill({
-    required String label,
-    required DateTime? date,
-    required bool isStart,
-  }) {
-    final hasDate = date != null;
-    final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = hasDate ? AppColors.selectedBg : _unselectedBg(isDark);
-    final borderColor = hasDate
-        ? AppColors.accentMuted
-        : _unselectedBorder(isDark);
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: () => _selectSingleDate(isStart),
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: borderColor),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    style: AppTypography.sectionLabel.copyWith(
-                      color: isDark
-                          ? AppColors.onSurfaceVariantDark
-                          : AppColors.accentMuted,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasDate ? l10n.formatMonthDay(date) : '--',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: hasDate
-                          ? (isDark
-                                ? AppColors.onSurfaceVariantDark
-                                : AppColors.accentMuted)
-                          : _unselectedText(isDark),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (hasDate)
-              GestureDetector(
-                onTap: _clearDateRange,
-                child: const Icon(
-                  Icons.close,
-                  size: 16,
-                  color: AppColors.muted,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chipBg = isSelected ? AppColors.accentMuted : _unselectedBg(isDark);
-    final chipBorder = isSelected
-        ? Colors.transparent
-        : _unselectedBorder(isDark);
-    final textColor = isSelected ? Colors.white : _unselectedText(isDark);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: chipBg,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: chipBorder),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isSelected) ...[
-              const Icon(Icons.check, size: 13, color: Colors.white),
-              const SizedBox(width: AppSpacing.xs),
-            ],
-            Text(
-              label,
-              style: AppTypography.cardBody.copyWith(
-                color: textColor,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _unselectedBg(bool isDark) =>
-      isDark ? AppColors.surfaceContainerHighestDark : AppColors.glyphBg;
-
-  Color _unselectedBorder(bool isDark) =>
-      isDark ? AppColors.outlineDark : AppColors.divider;
-
-  Color _unselectedText(bool isDark) =>
-      isDark ? AppColors.onSurfaceVariantDark : AppColors.muted;
 
   Widget _buildSection({required String title, required Widget child}) {
     return Column(
