@@ -206,7 +206,9 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
   Future<void> _loadUsedPhotoIds() async {
     try {
-      final result = await _self._diaryService.getSortedDiaryEntries();
+      _self._diaryService ??=
+          await ServiceRegistration.getAsync<IDiaryService>();
+      final result = await _self._diaryService!.getSortedDiaryEntries();
       switch (result) {
         case Success(data: final entries):
           _collectUsedPhotoIds(entries);
@@ -236,7 +238,9 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
   Future<void> _subscribeDiaryChanges() async {
     try {
-      _self._diarySub = _self._diaryService.changes.listen((change) {
+      _self._diaryService ??=
+          await ServiceRegistration.getAsync<IDiaryService>();
+      _self._diarySub = _self._diaryService!.changes.listen((change) {
         switch (change.type) {
           case DiaryChangeType.created:
             _self._photoController.addUsedPhotoIds(change.addedPhotoIds);

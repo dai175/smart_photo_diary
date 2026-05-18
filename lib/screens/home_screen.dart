@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen>
   // サービス
   late final ILoggingService _logger;
   late final IPhotoService _photoService;
-  late final IDiaryService _diaryService;
+  IDiaryService? _diaryService;
   late final ISubscriptionService _subscriptionService;
 
   // タブナビゲーション・画面キー管理コントローラー
@@ -104,8 +104,7 @@ class _HomeScreenState extends State<HomeScreen>
         widget.settingsService ?? serviceLocator.get<ISettingsService>();
     _photoService =
         widget.photoService ?? ServiceRegistration.get<IPhotoService>();
-    _diaryService =
-        widget.diaryService ?? ServiceRegistration.get<IDiaryService>();
+    _diaryService = widget.diaryService;
     _subscriptionService =
         widget.subscriptionService ??
         ServiceRegistration.get<ISubscriptionService>();
@@ -187,7 +186,8 @@ class _HomeScreenState extends State<HomeScreen>
   /// 写真IDから日記詳細画面に遷移
   Future<void> _navigateToDiaryDetailByPhotoId(String photoId) async {
     try {
-      final result = await _diaryService.getDiaryEntryByPhotoId(photoId);
+      _diaryService ??= await ServiceRegistration.getAsync<IDiaryService>();
+      final result = await _diaryService!.getDiaryEntryByPhotoId(photoId);
 
       switch (result) {
         case Success(data: final diaryEntry):
