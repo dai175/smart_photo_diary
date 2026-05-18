@@ -128,6 +128,18 @@ cp .env.example .env
 fvm flutter run
 ```
 
+### Git フック（lefthook）
+
+コミット時に `dart format` と `flutter analyze` を自動実行します。
+
+```bash
+# lefthook をインストール（初回のみ）
+brew install lefthook
+
+# フックを有効化（clone 後に一度だけ実行）
+lefthook install
+```
+
 ## テスト・品質管理
 
 ### テスト実行
