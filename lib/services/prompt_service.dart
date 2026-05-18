@@ -262,9 +262,10 @@ class PromptService implements IPromptService {
   }
 
   void _ensureInitialized() {
-    assert(
-      _isInitialized,
-      'PromptService is not initialized. Call initialize() first.',
-    );
+    if (!_isInitialized) {
+      throw StateError(
+        'PromptService is not initialized. Call initialize() first.',
+      );
+    }
   }
 }

@@ -547,17 +547,14 @@ void main() {
 
     group('エラーハンドリング', () {
       test('初期化前のメソッド呼び出しでエラーが発生', () {
-        expect(
-          () => promptService.getAllPrompts(),
-          throwsA(isA<AssertionError>()),
-        );
+        expect(() => promptService.getAllPrompts(), throwsA(isA<StateError>()));
         expect(
           () => promptService.getPromptsForPlan(isPremium: true),
-          throwsA(isA<AssertionError>()),
+          throwsA(isA<StateError>()),
         );
         expect(
           () => promptService.getRandomPrompt(isPremium: true),
-          throwsA(isA<AssertionError>()),
+          throwsA(isA<StateError>()),
         );
       });
     });
