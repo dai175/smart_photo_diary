@@ -121,9 +121,11 @@
 
 ### 3-4. `diary_detail_screen.dart`（441 行）
 
-- [ ] `DiaryDetailActionBar` を抽出（共有・編集ボタン群）
-- [ ] `DiaryDetailScreen` をルーティングと状態管理のみに削減（目標 200 行以下）
-- [ ] ウィジェットテストを追加
+- [x] `DiaryDetailActionBar` を抽出（浮動ボタン群 + モアメニュー）
+- [x] `DiaryDetailEditBottomBar` を抽出（編集モード Cancel/Save バー）
+- [x] `DiaryDetailLoadingView` / `DiaryDetailErrorView` / `DiaryDetailNotFoundView` を `diary_detail_status_views.dart` に抽出
+- [x] `DiaryDetailScreen` をルーティングと状態管理のみに削減（441 行 → 222 行）
+- [x] ウィジェットテストを追加（`diary_detail_action_bar_test.dart` 8 ケース、`diary_detail_edit_bottom_bar_test.dart` 4 ケース）
 
 ### 3-5. `filter_bottom_sheet.dart`（528 行）
 
