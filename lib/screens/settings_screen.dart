@@ -5,23 +5,19 @@ import '../services/interfaces/logging_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
-import '../ui/component_constants.dart';
 import '../ui/components/custom_card.dart';
 import '../ui/components/loading_state_card.dart';
-import '../ui/components/animated_button.dart';
 import '../ui/animations/micro_interactions.dart';
-import '../constants/app_icons.dart';
 import '../constants/app_constants.dart';
 import '../localization/localization_extensions.dart';
 import '../controllers/scroll_signal.dart';
-import '../utils/url_launcher_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
+import '../widgets/settings/about_settings_section.dart';
 import '../widgets/settings/appearance_settings_section.dart';
 import '../widgets/settings/diary_settings_section.dart';
 import '../widgets/settings/photo_filter_settings_section.dart';
-import '../widgets/settings/settings_row.dart';
+import '../widgets/settings/plan_status_card.dart';
 import '../widgets/settings/storage_settings_section.dart';
-import '../ui/components/modern_chip.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -148,7 +144,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
-        _buildPlanCard(),
+        PlanStatusCard(
+          info: _controller.subscriptionInfo,
+          onUpgradePressed: _showUpgradeDialog,
+        ),
         _buildSectionGroupHeader(context.l10n.settingsGroupAppearance),
         CustomCard(
           elevation: AppSpacing.elevationMd,
@@ -192,13 +191,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _buildSectionGroupHeader(context.l10n.settingsGroupAbout),
         CustomCard(
           elevation: AppSpacing.elevationMd,
-          child: Column(
-            children: [
-              _buildVersionInfo(),
-              _buildPrivacyPolicyInfo(),
-              _buildLicenseInfo(),
-            ],
-          ),
+          child: AboutSettingsSection(packageInfo: _controller.packageInfo),
         ),
         const SizedBox(height: AppSpacing.xxxl),
       ],
@@ -213,137 +206,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: AppTypography.sectionLabel.copyWith(
           color: AppColors.accentMuted,
         ),
-      ),
-    );
-  }
-
-  Widget _buildPlanCard() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final info = _controller.subscriptionInfo;
-    final cardRadius = BorderRadius.circular(CardConstants.radiusHero);
-    const cardPadding = EdgeInsets.all(18);
-
-    if (info == null) {
-      return Container(
-        padding: cardPadding,
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: cardRadius,
-        ),
-        child: Text(
-          context.l10n.settingsSubscriptionSectionTitle,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
-
-    final planName = info.getLocalizedPlanDisplayName(context.l10n.localeName);
-    final usageRate = info.usageStats.usageRate.clamp(0.0, 1.0);
-    final used = info.usageStats.monthlyUsageCount;
-    final total = info.usageStats.monthlyLimit;
-    final remaining = info.usageStats.remainingCount;
-    final resetDate = context.l10n.formatMonthDayLong(
-      info.usageStats.nextResetDate,
-    );
-    final expiryDate = info.periodInfo.expiryDate != null
-        ? context.l10n.formatMonthDayLong(info.periodInfo.expiryDate!)
-        : null;
-
-    const usageWarningThreshold = 0.85;
-
-    final cardBgColor = isDark
-        ? AppColors.premiumBgDark
-        : (info.isPremium ? AppColors.premiumBg : AppColors.cardBg);
-    final barColor = usageRate > usageWarningThreshold
-        ? colorScheme.error
-        : AppColors.calSelected;
-
-    return Container(
-      padding: cardPadding,
-      decoration: BoxDecoration(color: cardBgColor, borderRadius: cardRadius),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ModernChip(
-                label: planName,
-                size: ChipSize.medium,
-                backgroundColor: info.isPremium
-                    ? Colors.white
-                    : AppColors.tagPrimaryBg,
-                foregroundColor: info.isPremium
-                    ? AppColors.tagAccentFg
-                    : AppColors.tagPrimaryFg,
-                textStyle: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            context.l10n.planCardThisMonth.toUpperCase(),
-            style: AppTypography.sectionLabel.copyWith(
-              color: AppColors.accentMuted,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '$used',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                  height: 1.0,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '/ $total ${context.l10n.planCardDiaryUnit}',
-                style: const TextStyle(fontSize: 16, color: AppColors.muted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            context.l10n.planCardRemainingAndReset(remaining, resetDate),
-            style: AppTypography.caption.copyWith(color: AppColors.muted),
-          ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: usageRate,
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusXs),
-            backgroundColor: colorScheme.outlineVariant,
-            valueColor: AlwaysStoppedAnimation<Color>(barColor),
-          ),
-          const SizedBox(height: 14),
-          if (!info.isPremium)
-            PrimaryButton(
-              onPressed: _showUpgradeDialog,
-              width: double.infinity,
-              text: context.l10n.settingsUpgradeToPremium,
-            )
-          else if (expiryDate != null)
-            Text(
-              context.l10n.planCardAutoRenews(expiryDate),
-              style: AppTypography.caption.copyWith(color: AppColors.muted),
-            ),
-        ],
       ),
     );
   }
@@ -400,42 +262,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildVersionInfo() {
-    return SettingsRow(
-      showDivider: true,
-      icon: AppIcons.settingsInfo,
-      title: context.l10n.settingsVersionTitle,
-      subtitle: _controller.packageInfo != null
-          ? '${_controller.packageInfo!.version} (${_controller.packageInfo!.buildNumber})'
-          : context.l10n.commonLoading,
-    );
-  }
-
-  Widget _buildPrivacyPolicyInfo() {
-    return SettingsRow(
-      showDivider: true,
-      icon: Icons.privacy_tip_outlined,
-      title: context.l10n.commonPrivacyPolicy,
-      subtitle: context.l10n.settingsPrivacyPolicySubtitle,
-      onTap: () => UrlLauncherUtils.launchPrivacyPolicy(context: context),
-    );
-  }
-
-  Widget _buildLicenseInfo() {
-    return SettingsRow(
-      icon: Icons.article_outlined,
-      title: context.l10n.settingsLicenseTitle,
-      subtitle: context.l10n.settingsLicenseSubtitle,
-      onTap: () => showLicensePage(
-        context: context,
-        applicationName: context.l10n.appTitle,
-        applicationVersion: _controller.packageInfo?.version ?? '1.0.0',
-        applicationLegalese:
-            '© ${DateTime.now().year} ${context.l10n.appTitle}',
-      ),
     );
   }
 }
