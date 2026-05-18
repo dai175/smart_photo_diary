@@ -235,8 +235,8 @@ class ServiceRegistration {
     serviceLocator.registerAsyncFactory<ISettingsService>(() async {
       final subscriptionService = await serviceLocator
           .getAsync<ISubscriptionService>();
-      final service = SettingsService();
-      await service.initialize(subscriptionService: subscriptionService);
+      final service = SettingsService(subscriptionService: subscriptionService);
+      await service.initialize();
       return service;
     });
 

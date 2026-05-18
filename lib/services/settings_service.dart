@@ -15,7 +15,7 @@ import 'settings_subscription_delegate.dart';
 class SettingsService implements ISettingsService {
   SharedPreferences? _preferences;
 
-  ISubscriptionService? _subscriptionService;
+  final ISubscriptionService _subscriptionService;
   SettingsSubscriptionDelegate? _subscriptionDelegate;
 
   static const String _localeKey = 'app_locale';
@@ -24,19 +24,16 @@ class SettingsService implements ISettingsService {
   final ValueNotifier<PhotoTypeFilter> _photoTypeFilterNotifier =
       ValueNotifier<PhotoTypeFilter>(PhotoTypeFilter.all);
 
-  /// DI用の公開コンストラクタ
-  SettingsService();
+  SettingsService({required ISubscriptionService subscriptionService})
+    : _subscriptionService = subscriptionService;
 
   /// DI用の非同期初期化
-  Future<void> initialize({
-    required ISubscriptionService subscriptionService,
-  }) async {
+  Future<void> initialize() async {
     _preferences ??= await SharedPreferences.getInstance();
     _localeNotifier.value = _loadStoredLocale();
     _photoTypeFilterNotifier.value = _loadStoredPhotoTypeFilter();
-    _subscriptionService = subscriptionService;
-    _subscriptionDelegate ??= SettingsSubscriptionDelegate(
-      subscriptionService: _subscriptionService!,
+    _subscriptionDelegate = SettingsSubscriptionDelegate(
+      subscriptionService: _subscriptionService,
     );
   }
 

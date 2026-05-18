@@ -20,10 +20,11 @@ class UpgradeDialogUtils {
     ILoggingService? logger,
     ISubscriptionService? subscriptionService,
   }) async {
-    final resolvedLogger = logger ?? ServiceRegistration.get<ILoggingService>();
     final locale = context.l10n.localeName;
 
     try {
+      final resolvedLogger =
+          logger ?? ServiceRegistration.get<ILoggingService>();
       final resolvedSubscriptionService =
           subscriptionService ??
           await ServiceRegistration.getAsync<ISubscriptionService>();

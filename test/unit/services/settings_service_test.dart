@@ -29,8 +29,8 @@ void main() {
     mockSubscriptionService = MockSubscriptionServiceInterface();
     when(() => mockSubscriptionService.isInitialized).thenReturn(true);
 
-    service = SettingsService();
-    await service.initialize(subscriptionService: mockSubscriptionService);
+    service = SettingsService(subscriptionService: mockSubscriptionService);
+    await service.initialize();
   });
 
   tearDown(() {
@@ -260,12 +260,13 @@ void main() {
 
     group('SubscriptionService未初期化時', () {
       test('getSubscriptionInfoV2 → Failure', () async {
-        // 新しいSettingsServiceを作成し、subscriptionServiceを未設定にする
+        // initializeを呼ばないことで_subscriptionDelegateをnullのままにする
         SharedPreferences.setMockInitialValues({});
         serviceLocator.clear();
-        // ISubscriptionServiceを登録しない
-        final uninitService = SettingsService();
-        // initializeを呼ばない（_subscriptionService == null）
+        final uninitService = SettingsService(
+          subscriptionService: mockSubscriptionService,
+        );
+        // initializeを呼ばない（_subscriptionDelegate == null）
 
         final result = await uninitService.getSubscriptionInfoV2();
         expect(result.isFailure, isTrue);
