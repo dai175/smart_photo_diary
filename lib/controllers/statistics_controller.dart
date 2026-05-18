@@ -12,7 +12,8 @@ import 'base_error_controller.dart';
 
 /// StatisticsScreen の状態管理・ビジネスロジック
 class StatisticsController extends BaseErrorController {
-  late final ILoggingService _logger;
+  final ILoggingService _logger;
+  final IDiaryService? _injectedDiaryService;
 
   List<DiaryEntry> _allDiaries = [];
   StatisticsData _stats = const StatisticsData(
@@ -39,16 +40,21 @@ class StatisticsController extends BaseErrorController {
   /// カレンダーの選択日
   DateTime? get selectedDay => _selectedDay;
 
-  StatisticsController() {
-    _logger = serviceLocator.get<ILoggingService>();
-  }
+  IDiaryService? _cachedDiaryService;
+
+  StatisticsController({ILoggingService? logger, IDiaryService? diaryService})
+    : _logger = logger ?? serviceLocator.get<ILoggingService>(),
+      _injectedDiaryService = diaryService;
+
+  Future<IDiaryService> _getDiaryService() async => _cachedDiaryService ??=
+      _injectedDiaryService ?? await serviceLocator.getAsync<IDiaryService>();
 
   /// 統計データを読み込む
   Future<void> loadStatistics() async {
     setLoading(true);
 
     try {
-      final diaryService = await serviceLocator.getAsync<IDiaryService>();
+      final diaryService = await _getDiaryService();
       final result = await diaryService.getSortedDiaryEntries();
 
       if (result.isSuccess) {
@@ -83,7 +89,7 @@ class StatisticsController extends BaseErrorController {
   /// 日記変更ストリームを購読する
   Future<void> subscribeDiaryChanges() async {
     try {
-      final diaryService = await serviceLocator.getAsync<IDiaryService>();
+      final diaryService = await _getDiaryService();
       _diarySub = diaryService.changes.listen((_) {
         _debounce?.cancel();
         _debounce = Timer(AppConstants.statisticsDebounce, () {

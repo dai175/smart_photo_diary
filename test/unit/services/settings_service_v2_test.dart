@@ -55,7 +55,9 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = SettingsService();
+      settingsService = SettingsService(
+        subscriptionService: mockSubscriptionService,
+      );
       await settingsService.initialize();
 
       final result = await settingsService.getSubscriptionInfoV2();
@@ -80,7 +82,9 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = SettingsService();
+      settingsService = SettingsService(
+        subscriptionService: mockSubscriptionService,
+      );
       await settingsService.initialize();
 
       final result = await settingsService.getCurrentPlanClass();
@@ -109,7 +113,9 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = SettingsService();
+      settingsService = SettingsService(
+        subscriptionService: mockSubscriptionService,
+      );
       await settingsService.initialize();
 
       final result = await settingsService.getUsageStatisticsWithPlanClass();
@@ -146,7 +152,9 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = SettingsService();
+      settingsService = SettingsService(
+        subscriptionService: mockSubscriptionService,
+      );
       await settingsService.initialize();
 
       final result = await settingsService.getPlanPeriodInfoV2();
@@ -169,7 +177,9 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = SettingsService();
+      settingsService = SettingsService(
+        subscriptionService: mockSubscriptionService,
+      );
       await settingsService.initialize();
 
       final result = await settingsService.getAvailablePlansV2();
@@ -200,7 +210,9 @@ void main() {
       );
 
       // SettingsServiceを初期化
-      settingsService = SettingsService();
+      settingsService = SettingsService(
+        subscriptionService: mockSubscriptionService,
+      );
       await settingsService.initialize();
 
       // V2メソッド

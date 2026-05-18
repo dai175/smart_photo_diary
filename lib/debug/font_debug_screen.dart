@@ -5,7 +5,9 @@ import '../core/service_locator.dart';
 
 /// フォントデバッグ用の画面
 class FontDebugScreen extends StatefulWidget {
-  const FontDebugScreen({super.key});
+  const FontDebugScreen({super.key, this.logger});
+
+  final ILoggingService? logger;
 
   @override
   State<FontDebugScreen> createState() => _FontDebugScreenState();
@@ -14,8 +16,8 @@ class FontDebugScreen extends StatefulWidget {
 class _FontDebugScreenState extends State<FontDebugScreen> {
   List<String> systemFonts = [];
 
-  // LoggingServiceのゲッター
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  ILoggingService get _logger =>
+      widget.logger ?? serviceLocator.get<ILoggingService>();
 
   @override
   void initState() {

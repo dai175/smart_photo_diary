@@ -85,9 +85,10 @@ class DiaryPreviewGeneratingScreen extends StatelessWidget {
 }
 
 class _HeroPhoto extends StatefulWidget {
-  const _HeroPhoto({required this.asset});
+  const _HeroPhoto({required this.asset, this.cacheService});
 
   final AssetEntity asset;
+  final IPhotoCacheService? cacheService;
 
   @override
   State<_HeroPhoto> createState() => _HeroPhotoState();
@@ -99,7 +100,9 @@ class _HeroPhotoState extends State<_HeroPhoto> {
   @override
   void initState() {
     super.initState();
-    _future = serviceLocator.get<IPhotoCacheService>().getThumbnail(
+    final cacheService =
+        widget.cacheService ?? serviceLocator.get<IPhotoCacheService>();
+    _future = cacheService.getThumbnail(
       widget.asset,
       width: 800,
       height: 600,

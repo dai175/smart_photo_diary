@@ -15,7 +15,10 @@ class OnboardingController extends ChangeNotifier {
   bool _isProcessing = false;
   bool _disposed = false;
 
-  ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  final ILoggingService _logger;
+
+  OnboardingController({ILoggingService? logger})
+    : _logger = logger ?? serviceLocator.get<ILoggingService>();
 
   int get currentPage => _currentPage;
   bool get isProcessing => _isProcessing;

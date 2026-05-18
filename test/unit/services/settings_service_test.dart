@@ -10,7 +10,6 @@ import 'package:smart_photo_diary/models/subscription_info_v2.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
-import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 
 import '../../integration/mocks/mock_services.dart';
@@ -30,12 +29,7 @@ void main() {
     mockSubscriptionService = MockSubscriptionServiceInterface();
     when(() => mockSubscriptionService.isInitialized).thenReturn(true);
 
-    // SettingsService.initialize()でISubscriptionServiceをgetAsyncするため登録
-    serviceLocator.registerAsyncFactory<ISubscriptionService>(
-      () async => mockSubscriptionService,
-    );
-
-    service = SettingsService();
+    service = SettingsService(subscriptionService: mockSubscriptionService);
     await service.initialize();
   });
 
@@ -266,12 +260,13 @@ void main() {
 
     group('SubscriptionService未初期化時', () {
       test('getSubscriptionInfoV2 → Failure', () async {
-        // 新しいSettingsServiceを作成し、subscriptionServiceを未設定にする
+        // initializeを呼ばないことで_subscriptionDelegateをnullのままにする
         SharedPreferences.setMockInitialValues({});
         serviceLocator.clear();
-        // ISubscriptionServiceを登録しない
-        final uninitService = SettingsService();
-        // initializeを呼ばない（_subscriptionService == null）
+        final uninitService = SettingsService(
+          subscriptionService: mockSubscriptionService,
+        );
+        // initializeを呼ばない（_subscriptionDelegate == null）
 
         final result = await uninitService.getSubscriptionInfoV2();
         expect(result.isFailure, isTrue);

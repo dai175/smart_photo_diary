@@ -1,15 +1,17 @@
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 
 /// パフォーマンス監視ユーティリティ
 class PerformanceMonitor {
   static final Map<String, DateTime> _startTimes = {};
   static final Map<String, List<double>> _measurements = {};
 
-  // LoggingServiceのゲッター
-  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  static ILoggingService? _logger;
+
+  static void configure(ILoggingService logger) {
+    _logger = logger;
+  }
 
   /// パフォーマンス計測を開始
   static void startMeasurement(String label) {
@@ -25,7 +27,7 @@ class PerformanceMonitor {
   static Future<void> endMeasurement(String label, {String? context}) async {
     final startTime = _startTimes[label];
     if (startTime == null) {
-      _logger.warning(
+      _logger?.warning(
         'Measurement not started: $label',
         context: 'PerformanceMonitor.endMeasurement',
       );
@@ -49,7 +51,7 @@ class PerformanceMonitor {
     _startTimes.remove(label);
 
     // ログに記録
-    _logger.debug(
+    _logger?.debug(
       'Performance: $label: ${milliseconds}ms (avg: ${average.toStringAsFixed(1)}ms)',
       context: context ?? 'PerformanceMonitor.endMeasurement',
     );
@@ -70,7 +72,7 @@ class PerformanceMonitor {
       });
     }
 
-    _logger.debug(
+    _logger?.debug(
       'Memory usage recorded',
       context: context,
       data: 'Check in Flutter DevTools',

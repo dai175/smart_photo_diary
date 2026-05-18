@@ -45,6 +45,10 @@ import 'errors/error_handler.dart';
 import 'hive_encryption_helper.dart';
 import 'service_locator.dart';
 import '../ui/error_display/error_display_service.dart';
+import '../utils/performance_monitor.dart';
+import '../utils/dynamic_pricing_utils.dart';
+import '../config/environment_config.dart';
+import '../screens/diary_preview/diary_preview_dialogs.dart';
 
 /// Service registration configuration
 ///
@@ -164,6 +168,10 @@ class ServiceRegistration {
     // ErrorHandler にロガーを注入（ServiceLocator直接依存を排除）
     ErrorHandler.configure(logger: loggingService);
     ErrorDisplayService.configure(logger: loggingService);
+    PerformanceMonitor.configure(loggingService);
+    EnvironmentConfig.configure(loggingService);
+    DynamicPricingUtils.configure(loggingService);
+    DiaryPreviewDialogHelper.configure(loggingService);
 
     _logger.debug(
       'Starting core service registration',
@@ -225,7 +233,9 @@ class ServiceRegistration {
 
     // 7. SettingsService (SubscriptionServiceに依存)
     serviceLocator.registerAsyncFactory<ISettingsService>(() async {
-      final service = SettingsService();
+      final subscriptionService = await serviceLocator
+          .getAsync<ISubscriptionService>();
+      final service = SettingsService(subscriptionService: subscriptionService);
       await service.initialize();
       return service;
     });

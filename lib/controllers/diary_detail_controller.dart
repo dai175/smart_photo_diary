@@ -14,6 +14,11 @@ enum DiaryDetailErrorType { notFound, loadFailed, updateFailed, deleteFailed }
 
 /// DiaryDetailScreen の状態管理・ビジネスロジック
 class DiaryDetailController extends BaseErrorController {
+  final ILoggingService _logger;
+
+  DiaryDetailController({ILoggingService? logger})
+    : _logger = logger ?? serviceLocator.get<ILoggingService>();
+
   DiaryEntry? _diaryEntry;
   List<AssetEntity> _photoAssets = [];
   bool _isEditing = false;
@@ -86,16 +91,12 @@ class DiaryDetailController extends BaseErrorController {
           if (localVersion != _requestVersion) return;
 
           if (assetsResult.isFailure) {
-            try {
-              serviceLocator.get<ILoggingService>().warning(
-                'Failed to load photo assets for diary entry',
-                context: 'DiaryDetailController.loadDiaryEntry',
-                data:
-                    'diaryId: ${entry.id}, error: ${assetsResult.error.message}',
-              );
-            } catch (_) {
-              // LoggingService unavailable — non-critical, photo loading continues with fallback
-            }
+            _logger.warning(
+              'Failed to load photo assets for diary entry',
+              context: 'DiaryDetailController.loadDiaryEntry',
+              data:
+                  'diaryId: ${entry.id}, error: ${assetsResult.error.message}',
+            );
           }
 
           _diaryEntry = entry;
