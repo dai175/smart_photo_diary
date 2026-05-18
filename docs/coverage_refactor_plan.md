@@ -115,9 +115,9 @@
 
 ### 3-3. `settings_screen.dart`（441 行）
 
-- [ ] セクション別コンポーネントに分割: `AccountSection`, `AppearanceSection`, `PlanSection`
-- [ ] `SettingsScreen` をスキャフォールドのみに削減（目標 150 行以下）
-- [ ] 各セクションウィジェットにウィジェットテストを追加
+- [x] セクション別コンポーネントに分割: `AppearanceSettingsSection`, `DiarySettingsSection`, `PhotoFilterSettingsSection`, `StorageSettingsSection`, `AboutSettingsSection`, `PlanStatusCard`
+- [x] `SettingsScreen` をスキャフォールドのみに削減（441行 → 139行）。`SettingsContentBody`, `SettingsLoadingView`, `SettingsLoadErrorView` を抽出
+- [x] 各ウィジェットにウィジェットテストを追加（`appearance`, `about`, `storage` セクション）
 
 ### 3-4. `diary_detail_screen.dart`（441 行）
 
