@@ -455,7 +455,7 @@ class _QuickOptionCell extends StatelessWidget {
         : AppColors.cardBg;
     final glyphBgColor = colorScheme.surfaceContainerHighest;
 
-    return Ink(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isSelected ? AppColors.selectedBg : cardBgColor,
         borderRadius: AppSpacing.cardRadiusLarge,
@@ -465,66 +465,70 @@ class _QuickOptionCell extends StatelessWidget {
               : (isDark ? AppColors.outlineDark : AppColors.divider),
         ),
       ),
-      child: InkWell(
+      child: Material(
+        type: MaterialType.transparency,
         borderRadius: AppSpacing.cardRadiusLarge,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.accent : glyphBgColor,
-                      borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: AppSpacing.cardRadiusLarge,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.accent : glyphBgColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 16,
+                        color: isSelected
+                            ? Colors.white
+                            : colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: isSelected
-                          ? Colors.white
-                          : colorScheme.onSurfaceVariant,
-                    ),
+                    const Spacer(),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: AppColors.accent,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                    height: 1.2,
+                    color: colorScheme.onSurface,
                   ),
-                  const Spacer(),
-                  if (isSelected)
-                    const Icon(
-                      Icons.check_circle,
-                      size: 18,
-                      color: AppColors.accent,
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.1,
-                  height: 1.2,
-                  color: colorScheme.onSurface,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                desc,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w400,
-                  height: 1.45,
-                  color: colorScheme.onSurfaceVariant,
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w400,
+                    height: 1.45,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

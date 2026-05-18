@@ -24,67 +24,72 @@ class PromptListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Ink(
+    final borderRadius = BorderRadius.circular(14);
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isSelected ? AppColors.selectedBg : Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: borderRadius,
         border: Border.all(
           color: isSelected ? AppColors.accent : Colors.transparent,
         ),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  ModernChip.tonedTag(
-                    PromptCategoryUtils.getCategoryDisplayName(
-                      prompt.category,
-                      locale: Localizations.localeOf(context),
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: borderRadius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: borderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    ModernChip.tonedTag(
+                      PromptCategoryUtils.getCategoryDisplayName(
+                        prompt.category,
+                        locale: Localizations.localeOf(context),
+                      ),
+                      index: prompt.category.index,
                     ),
-                    index: prompt.category.index,
-                  ),
-                  if (!isPremium && prompt.isPremiumOnly) ...[
-                    const SizedBox(width: AppSpacing.xs),
-                    const _PremiumBadge(),
+                    if (!isPremium && prompt.isPremiumOnly) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      const _PremiumBadge(),
+                    ],
+                    const Spacer(),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        color: AppColors.accent,
+                        size: 20,
+                      ),
                   ],
-                  const Spacer(),
-                  if (isSelected)
-                    const Icon(
-                      Icons.check_circle,
-                      color: AppColors.accent,
-                      size: 20,
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                prompt.text,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  letterSpacing: -0.1,
-                  height: 1.4,
-                  color: colorScheme.onSurface,
                 ),
-              ),
-              if (prompt.description != null) ...[
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
-                  prompt.description!,
+                  prompt.text,
                   style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.5,
-                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 15,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    letterSpacing: -0.1,
+                    height: 1.4,
+                    color: colorScheme.onSurface,
                   ),
                 ),
+                if (prompt.description != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    prompt.description!,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.5,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
