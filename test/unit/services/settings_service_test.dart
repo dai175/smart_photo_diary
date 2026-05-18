@@ -10,7 +10,6 @@ import 'package:smart_photo_diary/models/subscription_info_v2.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/models/plans/plan.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
-import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
 import 'package:smart_photo_diary/services/settings_service.dart';
 
 import '../../integration/mocks/mock_services.dart';
@@ -30,13 +29,8 @@ void main() {
     mockSubscriptionService = MockSubscriptionServiceInterface();
     when(() => mockSubscriptionService.isInitialized).thenReturn(true);
 
-    // SettingsService.initialize()でISubscriptionServiceをgetAsyncするため登録
-    serviceLocator.registerAsyncFactory<ISubscriptionService>(
-      () async => mockSubscriptionService,
-    );
-
     service = SettingsService();
-    await service.initialize();
+    await service.initialize(subscriptionService: mockSubscriptionService);
   });
 
   tearDown(() {

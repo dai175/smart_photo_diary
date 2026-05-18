@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/service_locator.dart';
 import '../../core/service_registration.dart';
 import '../../localization/localization_extensions.dart';
 import '../../models/plans/basic_plan.dart';
@@ -14,6 +13,12 @@ import '../../utils/upgrade_dialog_utils.dart';
 /// 使用量制限ダイアログ、破棄確認ダイアログ、アップグレード誘導を担当する。
 class DiaryPreviewDialogHelper {
   DiaryPreviewDialogHelper._();
+
+  static ILoggingService? _logger;
+
+  static void configure(ILoggingService logger) {
+    _logger = logger;
+  }
 
   /// 日記破棄の確認ダイアログを表示
   static Future<bool> showDiscardConfirmationDialog(
@@ -70,9 +75,8 @@ class DiaryPreviewDialogHelper {
         );
       }
     } catch (e) {
-      final loggingService = serviceLocator.get<ILoggingService>();
-      loggingService.warning(
-        '使用量制限ダイアログ表示エラー',
+      _logger?.warning(
+        'Failed to show usage limit dialog',
         context: 'DiaryPreviewScreen._showUsageLimitDialog',
         data: e.toString(),
       );

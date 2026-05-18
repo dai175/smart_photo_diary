@@ -10,7 +10,6 @@ import '../models/subscription_info_v2.dart';
 import '../models/plans/plan.dart';
 import 'interfaces/settings_service_interface.dart';
 import 'interfaces/subscription_service_interface.dart';
-import '../core/service_locator.dart';
 import 'settings_subscription_delegate.dart';
 
 class SettingsService implements ISettingsService {
@@ -29,12 +28,13 @@ class SettingsService implements ISettingsService {
   SettingsService();
 
   /// DI用の非同期初期化
-  Future<void> initialize() async {
+  Future<void> initialize({
+    required ISubscriptionService subscriptionService,
+  }) async {
     _preferences ??= await SharedPreferences.getInstance();
     _localeNotifier.value = _loadStoredLocale();
     _photoTypeFilterNotifier.value = _loadStoredPhotoTypeFilter();
-    _subscriptionService ??= await serviceLocator
-        .getAsync<ISubscriptionService>();
+    _subscriptionService = subscriptionService;
     _subscriptionDelegate ??= SettingsSubscriptionDelegate(
       subscriptionService: _subscriptionService!,
     );

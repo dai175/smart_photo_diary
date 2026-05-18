@@ -2,12 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../constants/subscription_constants.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 
 /// 環境変数を安全に管理するクラス
 class EnvironmentConfig {
-  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  static ILoggingService? _logger;
   static bool _isInitialized = false;
+
+  static void configure(ILoggingService logger) {
+    _logger = logger;
+  }
+
   static String? _cachedGeminiApiKey;
   static String? _cachedForcePlan;
 
@@ -20,7 +24,7 @@ class EnvironmentConfig {
         defaultValue: '',
       );
 
-      _logger.info(
+      _logger?.info(
         'API key source: ${_cachedGeminiApiKey!.isEmpty ? ".env file" : "build-time constants"}',
         context: 'EnvironmentConfig.initialize',
       );
@@ -31,12 +35,12 @@ class EnvironmentConfig {
           // プロジェクトルートから読み込み（セキュリティを考慮）
           await dotenv.load(fileName: '.env');
           _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-          _logger.info(
+          _logger?.info(
             'Development: loaded from .env file',
             context: 'EnvironmentConfig.initialize',
           );
         } catch (e) {
-          _logger.warning(
+          _logger?.warning(
             'Failed to load .env file (development)',
             context: 'EnvironmentConfig.initialize',
             data: {'error': e.toString()},
@@ -66,16 +70,16 @@ class EnvironmentConfig {
 
       _isInitialized = true;
 
-      _logger.info(
+      _logger?.info(
         'EnvironmentConfig initialization completed',
         context: 'EnvironmentConfig.initialize',
       );
-      _logger.info(
+      _logger?.info(
         'API key source: ${_cachedGeminiApiKey!.isEmpty ? "not set" : (kDebugMode ? "development" : "production")}',
         context: 'EnvironmentConfig.initialize',
       );
     } catch (e) {
-      _logger.error(
+      _logger?.error(
         'Environment config initialization error',
         context: 'EnvironmentConfig.initialize',
         error: e,
@@ -87,7 +91,7 @@ class EnvironmentConfig {
   /// Gemini APIキーを取得
   static String get geminiApiKey {
     if (!_isInitialized) {
-      _logger.warning(
+      _logger?.warning(
         'EnvironmentConfig is not initialized',
         context: 'EnvironmentConfig.geminiApiKey',
       );
@@ -101,7 +105,7 @@ class EnvironmentConfig {
 
     final key = _cachedGeminiApiKey ?? '';
     if (key.isEmpty) {
-      _logger.warning(
+      _logger?.warning(
         'GEMINI_API_KEY is not set',
         context: 'EnvironmentConfig.geminiApiKey',
       );
@@ -150,7 +154,7 @@ class EnvironmentConfig {
       return plan;
     }
 
-    _logger.warning(
+    _logger?.warning(
       'Invalid FORCE_PLAN specified',
       context: 'EnvironmentConfig.forcePlan',
       data: {'invalidPlan': plan, 'validPlans': validPlans.toList()},
@@ -174,7 +178,7 @@ class EnvironmentConfig {
 
   /// デバッグ情報を出力
   static void printDebugInfo() {
-    _logger.debug(
+    _logger?.debug(
       'Environment Config Debug Info',
       context: 'EnvironmentConfig.printDebugInfo',
       data: {

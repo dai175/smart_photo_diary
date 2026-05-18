@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/service_locator.dart';
+import '../core/service_registration.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
 import '../controllers/upgrade_dialog_controller.dart';
@@ -15,17 +15,22 @@ class UpgradeDialogUtils {
   UpgradeDialogUtils._();
 
   /// プレミアムプラン選択ダイアログを表示
-  static Future<void> showUpgradeDialog(BuildContext context) async {
-    final logger = serviceLocator.get<ILoggingService>();
+  static Future<void> showUpgradeDialog(
+    BuildContext context, {
+    ILoggingService? logger,
+    ISubscriptionService? subscriptionService,
+  }) async {
+    final resolvedLogger = logger ?? ServiceRegistration.get<ILoggingService>();
     final locale = context.l10n.localeName;
 
     try {
-      final subscriptionService = await serviceLocator
-          .getAsync<ISubscriptionService>();
+      final resolvedSubscriptionService =
+          subscriptionService ??
+          await ServiceRegistration.getAsync<ISubscriptionService>();
 
       final controller = UpgradeDialogController(
-        logger: logger,
-        subscriptionService: subscriptionService,
+        logger: resolvedLogger,
+        subscriptionService: resolvedSubscriptionService,
       );
 
       try {
@@ -42,7 +47,7 @@ class UpgradeDialogUtils {
 
         if (!context.mounted) return;
 
-        logger.debug(
+        resolvedLogger.debug(
           'Opening plan selection dialog with dynamic pricing',
           context: 'UpgradeDialogUtils.showUpgradeDialog',
         );
@@ -56,7 +61,7 @@ class UpgradeDialogUtils {
           ),
         );
 
-        logger.debug(
+        resolvedLogger.debug(
           'Plan selection dialog completed',
           context: 'UpgradeDialogUtils.showUpgradeDialog',
         );

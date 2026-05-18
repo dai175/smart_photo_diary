@@ -22,8 +22,10 @@ class FullscreenPhotoViewer {
     BuildContext context, {
     required AssetEntity asset,
     required String heroTag,
+    IPhotoCacheService? cacheService,
   }) {
-    final cacheService = serviceLocator.get<IPhotoCacheService>();
+    final resolvedCacheService =
+        cacheService ?? serviceLocator.get<IPhotoCacheService>();
 
     showGeneralDialog(
       context: context,
@@ -45,7 +47,7 @@ class FullscreenPhotoViewer {
                 child: Hero(
                   tag: heroTag,
                   child: FutureBuilder<Result<Uint8List>>(
-                    future: cacheService.getThumbnail(
+                    future: resolvedCacheService.getThumbnail(
                       asset,
                       width: PhotoPreviewConstants.previewSizePx,
                       height: PhotoPreviewConstants.previewSizePx,

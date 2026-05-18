@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
-import '../core/service_locator.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
+import '../core/service_registration.dart';
 import '../models/plans/plan_factory.dart';
 import '../constants/app_constants.dart';
 import '../constants/subscription_constants.dart';
@@ -20,32 +20,38 @@ class DynamicPricingUtils {
   /// 複数プラン価格取得のデフォルトタイムアウト
   static const Duration multiplePlanTimeout = Duration(seconds: 10);
 
-  // LoggingServiceのゲッター
-  static ILoggingService get _logger => serviceLocator.get<ILoggingService>();
+  static ILoggingService? _logger;
+
+  static void configure(ILoggingService logger) {
+    _logger = logger;
+  }
 
   /// 指定プランの動的価格を取得（フォールバック付き）
   ///
   /// [planId] 取得するプランのID
   /// [locale] ロケール情報（フォールバック時に使用）
+  /// [subscriptionService] 注入するサービス（省略時はServiceRegistrationから取得）
   ///
   /// Returns: 動的価格（成功時）またはフォールバック価格（失敗時）
   static Future<String> getPlanPrice(
     String planId, {
     String? locale,
     Duration timeout = singlePlanTimeout,
+    ISubscriptionService? subscriptionService,
   }) async {
     try {
-      _logger.debug(
+      _logger?.debug(
         'Fetching dynamic price for plan: $planId',
         context: 'DynamicPricingUtils.getPlanPrice',
       );
 
       // SubscriptionServiceを取得
-      final subscriptionService = await serviceLocator
-          .getAsync<ISubscriptionService>();
+      final resolvedService =
+          subscriptionService ??
+          await ServiceRegistration.getAsync<ISubscriptionService>();
 
       // 動的価格を取得（タイムアウト付き）
-      final result = await subscriptionService
+      final result = await resolvedService
           .getProductPrice(planId)
           .timeout(
             timeout,
@@ -64,7 +70,7 @@ class DynamicPricingUtils {
           locale: locale,
         );
 
-        _logger.debug(
+        _logger?.debug(
           'Successfully using dynamic price for $planId',
           context: 'DynamicPricingUtils.getPlanPrice',
           data:
@@ -94,7 +100,7 @@ class DynamicPricingUtils {
     Duration timeout = multiplePlanTimeout,
   }) async {
     try {
-      _logger.debug(
+      _logger?.debug(
         'Fetching multiple plan prices',
         context: 'DynamicPricingUtils.getMultiplePlanPrices',
         data: 'plans=${planIds.join(", ")}',
@@ -113,7 +119,7 @@ class DynamicPricingUtils {
         priceMap[planIds[i]] = priceResults[i];
       }
 
-      _logger.debug(
+      _logger?.debug(
         'Successfully fetched multiple plan prices',
         context: 'DynamicPricingUtils.getMultiplePlanPrices',
         data: 'results=${priceMap.toString()}',
@@ -121,7 +127,7 @@ class DynamicPricingUtils {
 
       return priceMap;
     } catch (e) {
-      _logger.error(
+      _logger?.error(
         'Failed to fetch multiple plan prices',
         context: 'DynamicPricingUtils.getMultiplePlanPrices',
         error: e,
@@ -147,7 +153,7 @@ class DynamicPricingUtils {
       locale ?? 'ja',
     );
 
-    _logger.info(
+    _logger?.info(
       'Using fallback price for $planId',
       context: 'DynamicPricingUtils._getFallbackPrice',
       data: 'fallback_price=$fallbackPrice, error=${error.toString()}',
