@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../constants/ai_constants.dart';
 import '../constants/app_constants.dart';
 import '../models/writing_prompt.dart';
 import '../services/interfaces/prompt_service_interface.dart';
@@ -14,7 +13,8 @@ import '../ui/design_system/app_typography.dart';
 import '../ui/components/animated_button.dart';
 import '../ui/components/custom_dialog.dart';
 import '../localization/localization_extensions.dart';
-import 'prompt_selection_items.dart';
+import 'prompt_list_item.dart';
+import 'prompt_search_bar.dart';
 
 class PromptSelectionModal extends StatefulWidget {
   final void Function(WritingPrompt?, String?) onPromptSelected;
@@ -224,6 +224,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     final accentMutedColor = isDark
         ? AppColors.accentLight
         : AppColors.accentMuted;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,84 +271,20 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
           ),
         ),
 
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.xs,
-            AppSpacing.lg,
-            AppSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  setState(() {
-                    _showContextInput = !_showContextInput;
-                  });
-                  if (_showContextInput) {
-                    _contextAnimationController.forward();
-                  } else {
-                    _contextAnimationController.reverse();
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: Row(
-                    children: [
-                      AnimatedRotation(
-                        turns: _showContextInput ? 0.25 : 0,
-                        duration: AppConstants.quickAnimationDuration,
-                        child: Icon(
-                          Icons.chevron_right,
-                          size: 18,
-                          color: accentMutedColor,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        l10n.promptContextToggle,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: accentMutedColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Flexible(
-                        child: Text(
-                          l10n.promptContextInputHelper,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 11,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizeTransition(
-                sizeFactor: _contextAnimation,
-                axisAlignment: -1.0,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xs),
-                  child: TextField(
-                    controller: _contextController,
-                    maxLines: 2,
-                    maxLength: AiConstants.contextTextMaxLength,
-                    decoration: InputDecoration(
-                      labelText: l10n.promptContextInputLabel,
-                      hintText: l10n.promptContextInputHint,
-                      helperText: l10n.promptContextInputHelper,
-                      helperMaxLines: 2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        PromptSearchBar(
+          controller: _contextController,
+          contextAnimation: _contextAnimation,
+          isExpanded: _showContextInput,
+          onToggle: () {
+            setState(() {
+              _showContextInput = !_showContextInput;
+            });
+            if (_showContextInput) {
+              _contextAnimationController.forward();
+            } else {
+              _contextAnimationController.reverse();
+            }
+          },
         ),
 
         Padding(
@@ -365,7 +302,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
               Row(
                 children: [
                   Expanded(
-                    child: _buildQuickOptionCell(
+                    child: _QuickOptionCell(
                       isSelected: _selectedPrompt == null && !_isRandomSelected,
                       icon: Icons.edit_off_rounded,
                       title: l10n.promptOptionNone,
@@ -378,7 +315,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: _buildQuickOptionCell(
+                    child: _QuickOptionCell(
                       isSelected: _isRandomSelected,
                       icon: Icons.shuffle_rounded,
                       title: l10n.promptOptionRandom,
@@ -432,95 +369,6 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
     );
   }
 
-  Widget _buildQuickOptionCell({
-    required bool isSelected,
-    required IconData icon,
-    required String title,
-    required String desc,
-    required VoidCallback? onTap,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBgColor = isDark
-        ? AppColors.surfaceContainerDark
-        : AppColors.cardBg;
-    final glyphBgColor = colorScheme.surfaceContainerHighest;
-
-    return InkWell(
-      borderRadius: AppSpacing.cardRadiusLarge,
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.selectedBg : cardBgColor,
-          borderRadius: AppSpacing.cardRadiusLarge,
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accent
-                : (isDark ? AppColors.outlineDark : AppColors.divider),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.accent : glyphBgColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 16,
-                    color: isSelected
-                        ? Colors.white
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const Spacer(),
-                if (isSelected)
-                  const Icon(
-                    Icons.check_circle,
-                    size: 18,
-                    color: AppColors.accent,
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.1,
-                height: 1.2,
-                color: colorScheme.onSurface,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              desc,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w400,
-                height: 1.45,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildPromptList() {
     final dividerColor = Theme.of(context).brightness == Brightness.dark
         ? AppColors.outlineDark
@@ -537,8 +385,7 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
           Divider(height: 1, color: dividerColor, indent: 14, endIndent: 14),
       itemBuilder: (context, index) {
         final prompt = _availablePrompts[index];
-        return PromptSelectionItems.buildPromptCard(
-          context,
+        return PromptListItem(
           prompt: prompt,
           isSelected: _selectedPrompt?.id == prompt.id && !_isRandomSelected,
           isPremium: _isPremium,
@@ -550,25 +397,20 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
 
   Widget _buildEmptyState() {
     final l10n = context.l10n;
+    final onSurfaceVariant = Theme.of(context).colorScheme.onSurfaceVariant;
     return Center(
       child: Padding(
         padding: AppSpacing.cardPadding,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.edit_note_rounded,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: 48,
-            ),
+            Icon(Icons.edit_note_rounded, color: onSurfaceVariant, size: 48),
             const SizedBox(height: AppSpacing.md),
             Text(l10n.promptEmptyTitle, style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.promptEmptyDescription,
-              style: AppTypography.bodySmall.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -582,5 +424,107 @@ class _PromptSelectionModalState extends State<PromptSelectionModal>
       _selectedPrompt = prompt;
       _isRandomSelected = false;
     });
+  }
+}
+
+class _QuickOptionCell extends StatelessWidget {
+  const _QuickOptionCell({
+    required this.isSelected,
+    required this.icon,
+    required this.title,
+    required this.desc,
+    required this.onTap,
+  });
+
+  final bool isSelected;
+  final IconData icon;
+  final String title;
+  final String desc;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBgColor = isDark
+        ? AppColors.surfaceContainerDark
+        : AppColors.cardBg;
+    final glyphBgColor = colorScheme.surfaceContainerHighest;
+
+    return Ink(
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.selectedBg : cardBgColor,
+        borderRadius: AppSpacing.cardRadiusLarge,
+        border: Border.all(
+          color: isSelected
+              ? AppColors.accent
+              : (isDark ? AppColors.outlineDark : AppColors.divider),
+        ),
+      ),
+      child: InkWell(
+        borderRadius: AppSpacing.cardRadiusLarge,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.accent : glyphBgColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 16,
+                      color: isSelected
+                          ? Colors.white
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (isSelected)
+                    const Icon(
+                      Icons.check_circle,
+                      size: 18,
+                      color: AppColors.accent,
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.1,
+                  height: 1.2,
+                  color: colorScheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                desc,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w400,
+                  height: 1.45,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

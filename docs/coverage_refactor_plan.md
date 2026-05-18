@@ -100,39 +100,45 @@
 
 ### 3-1. `prompt_selection_modal.dart`（586 行）
 
-- [ ] `PromptSearchBar` ウィジェットを抽出（検索入力 UI）
-- [ ] `PromptListItem` ウィジェットを抽出（リストアイテム表示）
-- [ ] `PromptSelectionModal` をシェルのみに削減（目標 200 行以下）
-- [ ] 各ウィジェットにウィジェットテストを追加
+- [x] `PromptSearchBar` ウィジェットを抽出（検索入力 UI）
+- [x] `PromptListItem` ウィジェットを抽出（リストアイテム表示）
+- [x] `PromptSelectionModal` をシェルのみに削減（目標 200 行以下）
+- [x] 各ウィジェットにウィジェットテストを追加
 
 ### 3-2. `diary_preview_generating.dart`（504 行）
 
-- [ ] スケルトン UI、進捗 UI、エラー状態を別ウィジェットに分割
-- [ ] 状態別ウィジェット: `DiaryGeneratingSkeletonView`, `DiaryGeneratingErrorView`
-- [ ] 各状態ウィジェットにウィジェットテストを追加
+- [x] `DiaryGeneratingSkeletonView` を抽出（スケルトン UI + 日付行）
+- [x] `DiaryGeneratingBanner` を抽出（進捗バナー + `_PulsingDisc` + `_IndeterminateBar`）
+- [x] `DiaryPreviewGeneratingScreen` をシェルに削減（504 行 → 200 行）
+- [x] 各ウィジェットにウィジェットテストを追加（10 ケース）
+- [x] `DiaryGeneratingErrorView` はスコープ外と判断（エラーは親 `diary_preview_screen.dart` で処理）
 
 ### 3-3. `settings_screen.dart`（441 行）
 
-- [ ] セクション別コンポーネントに分割: `AccountSection`, `AppearanceSection`, `PlanSection`
-- [ ] `SettingsScreen` をスキャフォールドのみに削減（目標 150 行以下）
-- [ ] 各セクションウィジェットにウィジェットテストを追加
+- [x] セクション別コンポーネントに分割: `AppearanceSettingsSection`, `DiarySettingsSection`, `PhotoFilterSettingsSection`, `StorageSettingsSection`, `AboutSettingsSection`, `PlanStatusCard`
+- [x] `SettingsScreen` をスキャフォールドのみに削減（441行 → 139行）。`SettingsContentBody`, `SettingsLoadingView`, `SettingsLoadErrorView` を抽出
+- [x] 各ウィジェットにウィジェットテストを追加（`appearance`, `about`, `storage` セクション）
 
 ### 3-4. `diary_detail_screen.dart`（441 行）
 
-- [ ] `DiaryDetailActionBar` を抽出（共有・編集ボタン群）
-- [ ] `DiaryDetailScreen` をルーティングと状態管理のみに削減（目標 200 行以下）
-- [ ] ウィジェットテストを追加
+- [x] `DiaryDetailActionBar` を抽出（浮動ボタン群 + モアメニュー）
+- [x] `DiaryDetailEditBottomBar` を抽出（編集モード Cancel/Save バー）
+- [x] `DiaryDetailLoadingView` / `DiaryDetailErrorView` / `DiaryDetailNotFoundView` を `diary_detail_status_views.dart` に抽出
+- [x] `DiaryDetailScreen` をルーティングと状態管理のみに削減（441 行 → 222 行）
+- [x] ウィジェットテストを追加（`diary_detail_action_bar_test.dart` 8 ケース、`diary_detail_edit_bottom_bar_test.dart` 4 ケース）
 
 ### 3-5. `filter_bottom_sheet.dart`（528 行）
 
-- [ ] フィルタ条件別ウィジェットに分割（日付・タグ・ムード）
-- [ ] ウィジェットテストを追加
+- [x] フィルタ条件別ウィジェットに分割（日付・タグ・時間帯）: `FilterSelectionChip`, `FilterDateSection`, `FilterTagSection`, `FilterTimeOfDaySection` を抽出（528行 → 351行）
+- [x] ウィジェットテストを追加（`test/widget/shared/` に 30ケース）
 
 ### 3-6. `statistics_calendar.dart`（427 行）
 
-- [ ] `CalendarDayCell` ウィジェットを抽出
-- [ ] `StatisticsCalendar` をレイアウトのみに削減（目標 250 行以下）
-- [ ] ウィジェットテストを追加
+- [x] `CalendarDayCell` ウィジェットを抽出（日記あり日付のハイライトセル）
+- [x] `CalendarLegend` ウィジェットを抽出（凡例 5 メソッド → 独立ウィジェット）
+- [x] `showDiarySelectionDialog` をトップレベル関数 + `_DiaryListItem` に抽出（`diary_selection_dialog.dart`）
+- [x] `StatisticsCalendar` をレイアウトのみに削減（427 行 → 166 行）
+- [x] ウィジェットテストを追加（`CalendarDayCell` 5 ケース、`CalendarLegend` 6 ケース、`DiarySelectionDialog` 6 ケース）
 
 ---
 
