@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
 import '../models/diary_entry.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -162,10 +163,15 @@ class RecentDiariesWidget extends StatelessWidget {
   }
 
   Widget _buildTags(BuildContext context, List<String> tags) {
+    final count = tags.length.clamp(0, AppConstants.tagCardDisplayLimit);
+    final remaining = tags.length - count;
     return Wrap(
       spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
-      children: tags.take(3).map((tag) => ModernChip.tag(label: tag)).toList(),
+      children: [
+        for (int i = 0; i < count; i++) ModernChip.tag(label: tags[i]),
+        if (remaining > 0) ModernChip.tag(label: '+$remaining'),
+      ],
     );
   }
 }

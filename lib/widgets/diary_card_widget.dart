@@ -283,13 +283,14 @@ class _DiaryCardWidgetState extends State<DiaryCardWidget> {
   }
 
   Widget _buildTagChips(List<String> tags) {
-    final displayTags = tags.take(3).toList();
+    final count = tags.length.clamp(0, AppConstants.tagCardDisplayLimit);
+    final remaining = tags.length - count;
     return Wrap(
       spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
       children: [
-        for (int i = 0; i < displayTags.length; i++)
-          ModernChip.tonedTag(displayTags[i], index: i),
+        for (int i = 0; i < count; i++) ModernChip.tonedTag(tags[i], index: i),
+        if (remaining > 0) ModernChip.tag(label: '+$remaining'),
       ],
     );
   }

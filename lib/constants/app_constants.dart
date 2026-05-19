@@ -126,6 +126,7 @@ class AppConstants {
   static const int timelinePreloadPages = 2; // 先読み時はページ数×この倍率で取得
 
   // 日記一覧（Diary）関連
+  static const int tagCardDisplayLimit = 3; // カード上に表示するタグ件数上限
   static const int diaryPageSize = 20; // 一度に取得する日記件数
   static const double diaryListLoadMoreThresholdRatio = 0.85; // 末尾手前での追加読込閾値
   static const int diaryListInitialShimmerCount = 6; // 初期ローディングのプレースホルダー件数
