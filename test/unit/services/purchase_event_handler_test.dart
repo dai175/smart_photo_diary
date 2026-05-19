@@ -53,38 +53,29 @@ class _TestPurchaseDetails implements iap.PurchaseDetails {
   });
 }
 
-// PurchaseEventHandler mixin をテストするための具象クラス
-// ServiceLogging を先に宣言する必要がある（PurchaseEventHandler が on ServiceLogging のため）
+// ServiceLogging を先に宣言（PurchaseEventHandler が on ServiceLogging のため）
 class _TestEventHandler with ServiceLogging, PurchaseEventHandler {
-  final ISubscriptionStateService _stateService;
-  final StreamController<PurchaseResult> _controller;
-  final MockILoggingService _logger;
+  @override
+  final ISubscriptionStateService purchaseStateService;
+  @override
+  final StreamController<PurchaseResult> purchaseStreamController;
+  @override
+  final ILoggingService? loggingService;
 
   @override
   bool isPurchasing = false;
-
-  _TestEventHandler({
-    required ISubscriptionStateService stateService,
-    required StreamController<PurchaseResult> controller,
-    required MockILoggingService logger,
-  }) : _stateService = stateService,
-       _controller = controller,
-       _logger = logger;
-
-  @override
-  ISubscriptionStateService get purchaseStateService => _stateService;
-
-  @override
-  StreamController<PurchaseResult> get purchaseStreamController => _controller;
 
   @override
   iap.InAppPurchase? get inAppPurchaseInstance => null;
 
   @override
-  ILoggingService? get loggingService => _logger;
-
-  @override
   String get logTag => 'TestPurchaseEventHandler';
+
+  _TestEventHandler({
+    required this.purchaseStateService,
+    required this.purchaseStreamController,
+    required this.loggingService,
+  });
 }
 
 void main() {
@@ -113,30 +104,16 @@ void main() {
   _TestPurchaseDetails makePurchase({
     required String productId,
     required iap.PurchaseStatus status,
-    bool pendingComplete = false,
   }) {
     return _TestPurchaseDetails(
       productID: productId,
       purchaseID: 'txn-test-${DateTime.now().millisecondsSinceEpoch}',
       transactionDate: DateTime.now().millisecondsSinceEpoch.toString(),
       status: status,
-      pendingCompletePurchase: pendingComplete,
     );
   }
 
-  setUpAll(() {
-    registerMockFallbacks();
-    registerFallbackValue(
-      SubscriptionStatus(
-        planId: SubscriptionConstants.basicPlanId,
-        isActive: true,
-        startDate: DateTime.now(),
-        monthlyUsageCount: 0,
-        lastResetDate: DateTime.now(),
-        autoRenewal: false,
-      ),
-    );
-  });
+  setUpAll(registerMockFallbacks);
 
   setUp(() {
     mockStateService = _MockSubscriptionStateService();
@@ -144,9 +121,9 @@ void main() {
     // sync: true で同期配信にする（テスト内でイベント順序を確実にするため）
     streamController = StreamController<PurchaseResult>.broadcast(sync: true);
     handler = _TestEventHandler(
-      stateService: mockStateService,
-      controller: streamController,
-      logger: mockLogger,
+      purchaseStateService: mockStateService,
+      purchaseStreamController: streamController,
+      loggingService: mockLogger,
     );
   });
 
@@ -486,12 +463,10 @@ void main() {
         productId: SubscriptionConstants.premiumMonthlyProductId,
         status: iap.PurchaseStatus.purchased,
       );
-      final sub = streamController.stream.listen((_) {});
 
       await handler.handlePurchaseCompleted(purchase);
 
       expect(handler.isPurchasing, isFalse);
-      await sub.cancel();
     });
 
     test('handlePurchaseCanceled → isPurchasingがfalseにリセットされる', () async {
@@ -500,12 +475,10 @@ void main() {
         productId: SubscriptionConstants.premiumMonthlyProductId,
         status: iap.PurchaseStatus.canceled,
       );
-      final sub = streamController.stream.listen((_) {});
 
       await handler.handlePurchaseCanceled(purchase);
 
       expect(handler.isPurchasing, isFalse);
-      await sub.cancel();
     });
 
     test('handlePurchaseErrorEvent → isPurchasingがfalseにリセットされる', () async {
@@ -514,12 +487,10 @@ void main() {
         productId: SubscriptionConstants.premiumMonthlyProductId,
         status: iap.PurchaseStatus.error,
       );
-      final sub = streamController.stream.listen((_) {});
 
       await handler.handlePurchaseErrorEvent(purchase);
 
       expect(handler.isPurchasing, isFalse);
-      await sub.cancel();
     });
 
     test('handlePurchaseRestored → isPurchasingがfalseにリセットされる', () async {
@@ -528,12 +499,10 @@ void main() {
         productId: SubscriptionConstants.premiumMonthlyProductId,
         status: iap.PurchaseStatus.restored,
       );
-      final sub = streamController.stream.listen((_) {});
 
       await handler.handlePurchaseRestored(purchase);
 
       expect(handler.isPurchasing, isFalse);
-      await sub.cancel();
     });
   });
 }

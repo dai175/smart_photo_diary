@@ -299,7 +299,6 @@ void main() {
         final keyA = Hive.generateSecureKey();
         final keyB = Hive.generateSecureKey();
 
-        // Step 1: Create encrypted data with Key A (via migration)
         final oldService = DiaryService.createWithDependencies(
           logger: logger,
           tagService: mockTagService,
@@ -332,7 +331,6 @@ void main() {
           await Hive.box(metaBoxName).close();
         }
 
-        // Step 2: Open with Key B (wrong key)
         // Hive CE silently discards data on encryption mismatch — no exception
         final cipherB = HiveAesCipher(keyB);
         final service2 = DiaryService.createWithDependencies(
@@ -342,7 +340,6 @@ void main() {
         );
         await service2.initialize();
 
-        // Step 3: Data appears lost but service is functional (known limitation)
         final result = await service2.getSortedDiaryEntries();
         expect(result.isSuccess, isTrue);
         expect(result.value, isEmpty);
@@ -363,18 +360,18 @@ void main() {
     test(
       'should recover gracefully when encrypted data is opened without cipher',
       () async {
-        // Step 1: Create encrypted data
         final oldService = DiaryService.createWithDependencies(
           logger: logger,
           tagService: mockTagService,
         );
         await oldService.initialize();
-        await oldService.saveDiaryEntry(
+        final save = await oldService.saveDiaryEntry(
           date: DateTime(2024, 11, 1),
           title: 'Encrypted Entry',
           content: 'Encrypted content',
           photoIds: [],
         );
+        expect(save.isSuccess, isTrue);
         oldService.dispose();
         if (Hive.isBoxOpen(boxName)) {
           await Hive.box<DiaryEntry>(boxName).close();
@@ -395,17 +392,15 @@ void main() {
           await Hive.box(metaBoxName).close();
         }
 
-        // Step 2: Open encrypted box without cipher (downgrade / key loss scenario)
-        // Hive CE either throws TypeError/HiveError (→ _recreateBox) or returns garbage
-        // Either way, the service must recover and be functional
+        // Opening encrypted box without cipher: Hive CE either throws
+        // TypeError/HiveError (→ _recreateBox) or returns garbage. Either way,
+        // the service must recover and be functional.
         final noKeyService = DiaryService.createWithDependencies(
           logger: logger,
           tagService: mockTagService,
-          // encryptionCipher: null (omitted)
         );
         await noKeyService.initialize();
 
-        // Step 3: Service is functional after recovery
         final result = await noKeyService.getSortedDiaryEntries();
         expect(result.isSuccess, isTrue);
 
