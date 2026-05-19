@@ -289,6 +289,7 @@ void main() {
 
       final before = DateTime.now();
       final plan = await handler.applyPurchaseSideEffects(purchase);
+      final after = DateTime.now();
 
       expect(plan, isA<PremiumYearlyPlan>());
 
@@ -299,11 +300,13 @@ void main() {
 
       expect(updatedStatus.planId, SubscriptionConstants.premiumYearlyPlanId);
       final minExpiry = before.add(const Duration(days: 365));
+      final maxExpiry = after.add(const Duration(days: 365));
       expect(
         updatedStatus.expiryDate!.isAfter(minExpiry) ||
             updatedStatus.expiryDate!.isAtSameMomentAs(minExpiry),
         isTrue,
       );
+      expect(updatedStatus.expiryDate!.isBefore(maxExpiry), isTrue);
     });
 
     test('復元時に既存有効期限が未来 → 既存expiryDateが維持される', () async {
@@ -390,7 +393,7 @@ void main() {
 
       await expectLater(
         () => handler.applyPurchaseSideEffects(purchase),
-        throwsA(isA<Exception>()),
+        throwsA(isA<ServiceException>()),
       );
 
       verifyNever(() => mockStateService.updateStatus(any()));
