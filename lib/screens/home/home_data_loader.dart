@@ -43,8 +43,10 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
 
       // Pre-fetch screenshot asset IDs for filtering
       if (_self._photoTypeFilter == PhotoTypeFilter.photosOnly) {
-        _self._screenshotAssetIds =
-            await PhotoFilterService.getScreenshotAssetIds(_self._logger);
+        final idsResult = await PhotoFilterService.getScreenshotAssetIds(
+          _self._logger,
+        );
+        _self._screenshotAssetIds = idsResult.getOrDefault({});
       } else {
         _self._screenshotAssetIds = {};
       }
