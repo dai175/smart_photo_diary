@@ -49,12 +49,7 @@ class PromptService implements IPromptService {
         return true;
       }
       await _loadPromptsFromAsset();
-      final buildResult = _cacheService.build(_allPrompts);
-      if (buildResult is Failure) {
-        _logger.error(
-          'PromptService: Cache build failed',
-          error: buildResult.exception,
-        );
+      if (_cacheService.build(_allPrompts).isFailure) {
         return false;
       }
       _isInitialized = true;
@@ -207,15 +202,12 @@ class PromptService implements IPromptService {
 
   @override
   void clearCache() {
-    _cacheService.clear();
     if (_isInitialized) {
-      final buildResult = _cacheService.build(_allPrompts);
-      if (buildResult is Failure) {
-        _logger.error(
-          'PromptService: Cache rebuild failed',
-          error: buildResult.exception,
-        );
+      if (_cacheService.build(_allPrompts).isFailure) {
+        _isInitialized = false;
       }
+    } else {
+      _cacheService.clear();
     }
   }
 

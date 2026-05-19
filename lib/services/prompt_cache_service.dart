@@ -51,7 +51,7 @@ final class PromptCacheService {
       return const Success(null);
     } catch (e) {
       _logger.error('PromptCacheService: Cache build failed', error: e);
-      return Failure(ServiceException('Cache build failed: ${e.toString()}'));
+      return Failure(ServiceException('Cache build failed', originalError: e));
     }
   }
 
