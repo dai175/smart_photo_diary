@@ -22,6 +22,7 @@ final class PromptCacheService {
 
   /// 全プロンプトリストから3種キャッシュを一括構築する
   Result<void> build(List<WritingPrompt> prompts) {
+    _isBuilt = false;
     try {
       _planFilterCache.clear();
       _categoryCache.clear();
