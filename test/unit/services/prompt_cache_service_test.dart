@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/models/writing_prompt.dart';
 import 'package:smart_photo_diary/services/prompt_cache_service.dart';
 import '../helpers/writing_prompt_test_helpers.dart';
@@ -12,15 +13,17 @@ void main() {
     });
 
     group('build()', () {
-      test('正常なリストで isBuilt が true になる', () {
-        cache.build([
+      test('正常なリストで Success を返し isBuilt が true になる', () {
+        final result = cache.build([
           makeWritingPrompt(id: 'p1', category: PromptCategory.emotion),
         ]);
+        expect(result, isA<Success<void>>());
         expect(cache.isBuilt, true);
       });
 
-      test('空リストで例外が発生しない', () {
-        expect(() => cache.build([]), returnsNormally);
+      test('空リストで Success を返す', () {
+        final result = cache.build([]);
+        expect(result, isA<Success<void>>());
         expect(cache.isBuilt, true);
       });
     });

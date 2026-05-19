@@ -49,7 +49,14 @@ class PromptService implements IPromptService {
         return true;
       }
       await _loadPromptsFromAsset();
-      _cacheService.build(_allPrompts);
+      final buildResult = _cacheService.build(_allPrompts);
+      if (buildResult is Failure) {
+        _logger.error(
+          'PromptService: Cache build failed',
+          error: buildResult.exception,
+        );
+        return false;
+      }
       _isInitialized = true;
       _logger.info(
         'PromptService: Initialization completed (prompt count: ${_allPrompts.length})',
@@ -202,7 +209,13 @@ class PromptService implements IPromptService {
   void clearCache() {
     _cacheService.clear();
     if (_isInitialized) {
-      _cacheService.build(_allPrompts);
+      final buildResult = _cacheService.build(_allPrompts);
+      if (buildResult is Failure) {
+        _logger.error(
+          'PromptService: Cache rebuild failed',
+          error: buildResult.exception,
+        );
+      }
     }
   }
 
