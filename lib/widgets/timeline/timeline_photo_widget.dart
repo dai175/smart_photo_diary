@@ -256,7 +256,9 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
                   child: Center(
                     child: Text(
                       context.l10n.photoNoPhotosMessage,
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ),
