@@ -133,19 +133,15 @@ jobs:
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          NOTES="Build artifacts for Smart Photo Diary $VERSION
-
-**Build Info:** $VERSION_NAME (Build $BUILD_NUMBER)
-**Commit:** $COMMIT_SHA
-
-Release notes will be updated manually."
+          printf "Build artifacts for Smart Photo Diary %s\n\n**Build Info:** %s (Build %s)\n**Commit:** %s\n\nRelease notes will be updated manually." \
+            "$VERSION" "$VERSION_NAME" "$BUILD_NUMBER" "$COMMIT_SHA" > release_notes.txt
 
           gh release create "$VERSION" \
             --title "Smart Photo Diary $VERSION" \
             --target "$COMMIT_SHA" \
             --draft \
             ${PRERELEASE_FLAG:+"$PRERELEASE_FLAG"} \
-            --notes "$NOTES" \
+            --notes-file release_notes.txt \
             artifacts/ios/smart-photo-diary-ios-*.zip \
             artifacts/ios/smart-photo-diary-checksums.txt
 
