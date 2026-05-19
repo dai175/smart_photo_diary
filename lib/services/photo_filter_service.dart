@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:photo_manager/photo_manager.dart';
+import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import '../models/photo_type_filter.dart';
 import 'interfaces/logging_service_interface.dart';
 
@@ -12,10 +14,10 @@ final class PhotoFilterService {
   ///
   /// iOSでは「スクリーンショット」スマートアルバムに属するアセットのIDを返す。
   /// Androidでは空セットを返す（relativePathベースで判定するため不要）。
-  static Future<Set<String>> getScreenshotAssetIds([
+  static Future<Result<Set<String>>> getScreenshotAssetIds([
     ILoggingService? logger,
   ]) async {
-    if (!Platform.isIOS) return {};
+    if (!Platform.isIOS) return const Success({});
 
     try {
       // PMDarwinPathFilterでスクリーンショットスマートアルバムを直接取得（ロケール非依存）
@@ -31,23 +33,28 @@ final class PhotoFilterService {
       );
 
       final screenshotAlbum = albums.firstOrNull;
-      if (screenshotAlbum == null) return {};
+      if (screenshotAlbum == null) return const Success({});
 
       final count = await screenshotAlbum.assetCountAsync;
-      if (count == 0) return {};
+      if (count == 0) return const Success({});
 
       final assets = await screenshotAlbum.getAssetListRange(
         start: 0,
         end: count,
       );
-      return assets.map((a) => a.id).toSet();
+      return Success(assets.map((a) => a.id).toSet());
     } catch (e) {
       logger?.warning(
         'Failed to get screenshot asset IDs',
         context: 'PhotoFilterService.getScreenshotAssetIds',
         data: 'error: $e',
       );
-      return {};
+      return Failure(
+        PhotoAccessException(
+          'Failed to get screenshot asset IDs',
+          originalError: e,
+        ),
+      );
     }
   }
 

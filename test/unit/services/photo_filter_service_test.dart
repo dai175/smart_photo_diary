@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/models/photo_type_filter.dart';
 import 'package:smart_photo_diary/services/photo_filter_service.dart';
 
@@ -19,6 +20,15 @@ MockAssetEntity createMockAsset(
 }
 
 void main() {
+  group('PhotoFilterService.getScreenshotAssetIds', () {
+    test('returns Success with empty set on non-iOS platforms', () async {
+      // On test host (macOS/Linux/Windows), Platform.isIOS is false
+      final result = await PhotoFilterService.getScreenshotAssetIds();
+      expect(result, isA<Success<Set<String>>>());
+      expect((result as Success<Set<String>>).data, isEmpty);
+    });
+  });
+
   group('PhotoFilterService.filterByPhotoType', () {
     late List<MockAssetEntity> assets;
     const emptyScreenshotIds = <String>{};
