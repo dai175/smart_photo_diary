@@ -1,3 +1,5 @@
+import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import '../models/writing_prompt.dart';
 import '../utils/prompt_category_utils.dart';
 import 'interfaces/logging_service_interface.dart';
@@ -19,7 +21,8 @@ final class PromptCacheService {
   bool get isBuilt => _isBuilt;
 
   /// 全プロンプトリストから3種キャッシュを一括構築する
-  void build(List<WritingPrompt> prompts) {
+  Result<void> build(List<WritingPrompt> prompts) {
+    _isBuilt = false;
     try {
       _planFilterCache.clear();
       _categoryCache.clear();
@@ -46,9 +49,10 @@ final class PromptCacheService {
 
       _isBuilt = true;
       _logger.info('PromptCacheService: Cache build completed');
+      return const Success(null);
     } catch (e) {
       _logger.error('PromptCacheService: Cache build failed', error: e);
-      rethrow;
+      return Failure(ServiceException('Cache build failed', originalError: e));
     }
   }
 

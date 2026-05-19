@@ -49,7 +49,9 @@ class PromptService implements IPromptService {
         return true;
       }
       await _loadPromptsFromAsset();
-      _cacheService.build(_allPrompts);
+      if (_cacheService.build(_allPrompts).isFailure) {
+        return false;
+      }
       _isInitialized = true;
       _logger.info(
         'PromptService: Initialization completed (prompt count: ${_allPrompts.length})',
@@ -200,9 +202,12 @@ class PromptService implements IPromptService {
 
   @override
   void clearCache() {
-    _cacheService.clear();
     if (_isInitialized) {
-      _cacheService.build(_allPrompts);
+      if (_cacheService.build(_allPrompts).isFailure) {
+        _isInitialized = false;
+      }
+    } else {
+      _cacheService.clear();
     }
   }
 
