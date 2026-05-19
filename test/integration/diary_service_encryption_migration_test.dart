@@ -292,5 +292,128 @@ void main() {
         service2.dispose();
       },
     );
+
+    test(
+      'should return empty results when opened with wrong encryption key (known limitation)',
+      () async {
+        final keyA = Hive.generateSecureKey();
+        final keyB = Hive.generateSecureKey();
+
+        final oldService = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+        );
+        await oldService.initialize();
+        final save = await oldService.saveDiaryEntry(
+          date: DateTime(2024, 10, 1),
+          title: 'Secret Entry',
+          content: 'Important content',
+          photoIds: ['photo_secret'],
+        );
+        expect(save.isSuccess, isTrue);
+        oldService.dispose();
+        if (Hive.isBoxOpen(boxName)) {
+          await Hive.box<DiaryEntry>(boxName).close();
+        }
+
+        final cipherA = HiveAesCipher(keyA);
+        final service1 = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+          encryptionCipher: cipherA,
+        );
+        await service1.initialize();
+        service1.dispose();
+        if (Hive.isBoxOpen(boxName)) {
+          await Hive.box<DiaryEntry>(boxName).close();
+        }
+        if (Hive.isBoxOpen(metaBoxName)) {
+          await Hive.box(metaBoxName).close();
+        }
+
+        // Hive CE silently discards data on encryption mismatch — no exception
+        final cipherB = HiveAesCipher(keyB);
+        final service2 = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+          encryptionCipher: cipherB,
+        );
+        await service2.initialize();
+
+        final result = await service2.getSortedDiaryEntries();
+        expect(result.isSuccess, isTrue);
+        expect(result.value, isEmpty);
+
+        // Can write new entries after wrong-key open
+        final newSave = await service2.saveDiaryEntry(
+          date: DateTime(2024, 10, 2),
+          title: 'New Entry After Wrong Key',
+          content: 'New content',
+          photoIds: [],
+        );
+        expect(newSave.isSuccess, isTrue);
+
+        service2.dispose();
+      },
+    );
+
+    test(
+      'should recover gracefully when encrypted data is opened without cipher',
+      () async {
+        final oldService = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+        );
+        await oldService.initialize();
+        final save = await oldService.saveDiaryEntry(
+          date: DateTime(2024, 11, 1),
+          title: 'Encrypted Entry',
+          content: 'Encrypted content',
+          photoIds: [],
+        );
+        expect(save.isSuccess, isTrue);
+        oldService.dispose();
+        if (Hive.isBoxOpen(boxName)) {
+          await Hive.box<DiaryEntry>(boxName).close();
+        }
+
+        final cipher = HiveAesCipher(Hive.generateSecureKey());
+        final encryptedService = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+          encryptionCipher: cipher,
+        );
+        await encryptedService.initialize();
+        encryptedService.dispose();
+        if (Hive.isBoxOpen(boxName)) {
+          await Hive.box<DiaryEntry>(boxName).close();
+        }
+        if (Hive.isBoxOpen(metaBoxName)) {
+          await Hive.box(metaBoxName).close();
+        }
+
+        // Opening encrypted box without cipher: Hive CE either throws
+        // TypeError/HiveError (→ _recreateBox) or returns garbage. Either way,
+        // the service must recover and be functional.
+        final noKeyService = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+        );
+        await noKeyService.initialize();
+
+        final result = await noKeyService.getSortedDiaryEntries();
+        expect(result.isSuccess, isTrue);
+
+        final newSave = await noKeyService.saveDiaryEntry(
+          date: DateTime(2024, 11, 2),
+          title: 'Post-Recovery Entry',
+          content: 'Recovery content',
+          photoIds: [],
+        );
+        expect(newSave.isSuccess, isTrue);
+
+        noKeyService.dispose();
+      },
+    );
   });
 }
