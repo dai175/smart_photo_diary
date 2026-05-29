@@ -6,6 +6,8 @@ import 'package:smart_photo_diary/controllers/settings_controller.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
+import 'package:smart_photo_diary/models/subscription_info_v2.dart';
+import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 
@@ -105,6 +107,69 @@ void main() {
         controller.onLocaleChanged(null);
 
         expect(controller.selectedLocale, isNull);
+      });
+    });
+
+    group('notifyStateChanged', () {
+      test('subscriptionInfo を再フェッチして notifyListeners を呼ぶ', () async {
+        final mockInfo = SubscriptionInfoV2.fromStatus(SubscriptionStatus());
+        when(
+          () => mockSettings.getSubscriptionInfoV2(),
+        ).thenAnswer((_) async => Success(mockInfo));
+
+        final controller = SettingsController(
+          logger: mockLogger,
+          settingsService: mockSettings,
+        );
+        addTearDown(controller.dispose);
+
+        int notifyCount = 0;
+        controller.addListener(() => notifyCount++);
+
+        controller.notifyStateChanged();
+        // fire-and-forget なので完了を待つ
+        await Future.delayed(Duration.zero);
+        await Future.delayed(Duration.zero);
+
+        verify(() => mockSettings.getSubscriptionInfoV2()).called(1);
+        expect(controller.subscriptionInfo, mockInfo);
+        expect(notifyCount, 1);
+      });
+
+      test('getSubscriptionInfoV2 が Failure でも notifyListeners を呼ぶ', () async {
+        when(
+          () => mockSettings.getSubscriptionInfoV2(),
+        ).thenAnswer((_) async => const Failure(ServiceException('error')));
+
+        final controller = SettingsController(
+          logger: mockLogger,
+          settingsService: mockSettings,
+        );
+        addTearDown(controller.dispose);
+
+        int notifyCount = 0;
+        controller.addListener(() => notifyCount++);
+
+        controller.notifyStateChanged();
+        await Future.delayed(Duration.zero);
+        await Future.delayed(Duration.zero);
+
+        expect(notifyCount, 1);
+        expect(controller.subscriptionInfo, isNull);
+      });
+
+      test('settingsService が null の場合も notifyListeners を呼ぶ', () async {
+        final controller = SettingsController(logger: mockLogger);
+        addTearDown(controller.dispose);
+
+        int notifyCount = 0;
+        controller.addListener(() => notifyCount++);
+
+        controller.notifyStateChanged();
+        await Future.delayed(Duration.zero);
+        await Future.delayed(Duration.zero);
+
+        expect(notifyCount, 1);
       });
     });
 

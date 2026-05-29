@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
 import '../core/errors/app_exceptions.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
@@ -29,6 +33,9 @@ class UpgradeDialogController extends BaseErrorController {
   UpgradeDialogState _state = UpgradeDialogState.loadingPrices;
   List<Plan> _plans = [];
   Map<String, String> _priceStrings = {};
+  bool _isDisposed = false;
+  StreamSubscription<PurchaseResult>? _purchaseSub;
+  final Duration _purchaseTimeout;
 
   /// 現在の状態
   UpgradeDialogState get state => _state;
@@ -42,8 +49,10 @@ class UpgradeDialogController extends BaseErrorController {
   UpgradeDialogController({
     required ILoggingService logger,
     required ISubscriptionService subscriptionService,
+    @visibleForTesting Duration purchaseTimeout = const Duration(minutes: 3),
   }) : _logger = logger,
-       _subscriptionService = subscriptionService;
+       _subscriptionService = subscriptionService,
+       _purchaseTimeout = purchaseTimeout;
 
   /// プラン情報と価格を読み込む
   Future<bool> loadPlansAndPrices({required String locale}) async {
@@ -91,39 +100,54 @@ class UpgradeDialogController extends BaseErrorController {
   }
 
   /// プランを購入する
-  Future<void> purchasePlan(Plan plan) async {
+  ///
+  /// 購入フローを最後まで実行した場合 true、既に購入中でスキップした場合 false を返す。
+  /// 呼び出し元は false の場合にダイアログを閉じない等の制御ができる。
+  Future<bool> purchasePlan(Plan plan) async {
     if (_state == UpgradeDialogState.purchasing) {
       _logger.warning(
         'Purchase already in progress; skipping',
         context: 'UpgradeDialogController.purchasePlan',
       );
-      return;
+      return false;
     }
 
     _state = UpgradeDialogState.purchasing;
-    notifyListeners();
+    if (!_isDisposed) notifyListeners();
 
+    // buyNonConsumable より前に購読してイベント取りこぼしを防ぐ
+    final completer = Completer<PurchaseResult>();
     try {
+      _purchaseSub = _subscriptionService.purchaseStream.listen(
+        (result) {
+          final matchesProduct =
+              result.productId == null || result.productId == plan.productId;
+          if (result.isTerminal && matchesProduct && !completer.isCompleted) {
+            completer.complete(result);
+          }
+        },
+        onError: (Object e, StackTrace st) {
+          if (!completer.isCompleted) {
+            completer.complete(
+              PurchaseResult(
+                status: PurchaseStatus.error,
+                productId: plan.productId,
+                errorMessage: e.toString(),
+              ),
+            );
+          }
+        },
+      );
       _logger.info(
         'Purchase flow started: ${plan.id}',
         context: 'UpgradeDialogController.purchasePlan',
         data: {'productId': plan.productId, 'price': plan.price},
       );
 
-      final result = await _subscriptionService.purchasePlanClass(plan);
+      final initResult = await _subscriptionService.purchasePlanClass(plan);
 
-      if (result.isSuccess) {
-        final purchaseResult = result.value;
-        _logger.info(
-          'Purchase succeeded',
-          context: 'UpgradeDialogController.purchasePlan',
-          data: {
-            'status': purchaseResult.status.toString(),
-            'productId': purchaseResult.productId,
-          },
-        );
-      } else {
-        final error = result.error;
+      if (initResult.isFailure) {
+        final error = initResult.error;
         if (error.message.contains('In-App Purchase not available') ||
             error.message.contains('Product not found')) {
           _logger.warning(
@@ -133,25 +157,68 @@ class UpgradeDialogController extends BaseErrorController {
           );
         } else {
           _logger.error(
-            'Purchase failed',
+            'Purchase initiation failed',
             context: 'UpgradeDialogController.purchasePlan',
             error: error,
           );
         }
+        if (!completer.isCompleted) {
+          completer.complete(
+            PurchaseResult(
+              status: PurchaseStatus.error,
+              productId: plan.productId,
+              errorMessage: error.message,
+            ),
+          );
+        }
+      } else if (initResult.value.status == PurchaseStatus.purchased) {
+        if (!completer.isCompleted) {
+          completer.complete(initResult.value);
+        }
       }
+
+      final finalResult = await completer.future.timeout(
+        _purchaseTimeout,
+        onTimeout: () => PurchaseResult(
+          status: PurchaseStatus.error,
+          productId: plan.productId,
+          errorMessage: 'Purchase timed out after $_purchaseTimeout',
+        ),
+      );
+
+      _logger.info(
+        'Purchase flow finished',
+        context: 'UpgradeDialogController.purchasePlan',
+        data: {
+          'status': finalResult.status.toString(),
+          'productId': finalResult.productId,
+        },
+      );
     } catch (e) {
       _logger.error(
-        'Unexpected error occurred',
+        'Unexpected error in purchase flow',
         context: 'UpgradeDialogController.purchasePlan',
         error: e,
       );
+      return false;
     } finally {
+      await _purchaseSub?.cancel();
+      _purchaseSub = null;
       _state = UpgradeDialogState.showingPlans;
-      notifyListeners();
+      if (!_isDisposed) notifyListeners();
       _logger.debug(
         'Purchase flow finished, resetting state',
         context: 'UpgradeDialogController.purchasePlan',
       );
     }
+    return true;
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _purchaseSub?.cancel();
+    _purchaseSub = null;
+    super.dispose();
   }
 }
