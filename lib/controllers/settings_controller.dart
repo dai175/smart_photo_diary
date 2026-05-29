@@ -111,11 +111,13 @@ class SettingsController extends BaseErrorController {
   }
 
   Future<void> _refetchSubscriptionAndNotify() async {
+    final localVersion = ++_requestVersion;
     if (_settingsService == null) {
-      notifyListeners();
+      if (!_isDisposed) notifyListeners();
       return;
     }
     final result = await _settingsService!.getSubscriptionInfoV2();
+    if (localVersion != _requestVersion || _isDisposed) return;
     if (result.isSuccess) {
       _subscriptionInfo = result.value;
     } else {
@@ -126,5 +128,13 @@ class SettingsController extends BaseErrorController {
       );
     }
     notifyListeners();
+  }
+
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

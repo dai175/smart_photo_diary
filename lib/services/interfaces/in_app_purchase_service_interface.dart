@@ -159,8 +159,10 @@ class PurchaseResult {
       status == PurchaseStatus.restored ||
       status == PurchaseStatus.cancelled ||
       status == PurchaseStatus.error ||
+      status == PurchaseStatus.productNotFound ||
       status == PurchaseStatus.networkError ||
-      status == PurchaseStatus.storeNotAvailable;
+      status == PurchaseStatus.storeNotAvailable ||
+      status == PurchaseStatus.alreadyOwned;
 
   @override
   String toString() {

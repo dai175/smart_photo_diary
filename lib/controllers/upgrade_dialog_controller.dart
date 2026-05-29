@@ -117,28 +117,27 @@ class UpgradeDialogController extends BaseErrorController {
 
     // buyNonConsumable より前に購読してイベント取りこぼしを防ぐ
     final completer = Completer<PurchaseResult>();
-    _purchaseSub = _subscriptionService.purchaseStream.listen(
-      (result) {
-        final matchesProduct =
-            result.productId == null || result.productId == plan.productId;
-        if (result.isTerminal && matchesProduct && !completer.isCompleted) {
-          completer.complete(result);
-        }
-      },
-      onError: (Object e, StackTrace st) {
-        if (!completer.isCompleted) {
-          completer.complete(
-            PurchaseResult(
-              status: PurchaseStatus.error,
-              productId: plan.productId,
-              errorMessage: e.toString(),
-            ),
-          );
-        }
-      },
-    );
-
     try {
+      _purchaseSub = _subscriptionService.purchaseStream.listen(
+        (result) {
+          final matchesProduct =
+              result.productId == null || result.productId == plan.productId;
+          if (result.isTerminal && matchesProduct && !completer.isCompleted) {
+            completer.complete(result);
+          }
+        },
+        onError: (Object e, StackTrace st) {
+          if (!completer.isCompleted) {
+            completer.complete(
+              PurchaseResult(
+                status: PurchaseStatus.error,
+                productId: plan.productId,
+                errorMessage: e.toString(),
+              ),
+            );
+          }
+        },
+      );
       _logger.info(
         'Purchase flow started: ${plan.id}',
         context: 'UpgradeDialogController.purchasePlan',
@@ -201,6 +200,7 @@ class UpgradeDialogController extends BaseErrorController {
         context: 'UpgradeDialogController.purchasePlan',
         error: e,
       );
+      return false;
     } finally {
       await _purchaseSub?.cancel();
       _purchaseSub = null;
