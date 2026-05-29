@@ -258,7 +258,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
     }
   }
 
-  void _navigateToUpgrade(BuildContext context) {
-    UpgradeDialogUtils.showUpgradeDialog(context);
+  Future<void> _navigateToUpgrade(BuildContext context) async {
+    await UpgradeDialogUtils.showUpgradeDialog(context);
+    if (!mounted) return;
+    await _loadUsageSummary();
   }
 }

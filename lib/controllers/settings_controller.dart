@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:package_info_plus/package_info_plus.dart';
@@ -106,6 +107,24 @@ class SettingsController extends BaseErrorController {
 
   /// 外部からUI再構築をトリガーするための公開メソッド
   void notifyStateChanged() {
+    unawaited(_refetchSubscriptionAndNotify());
+  }
+
+  Future<void> _refetchSubscriptionAndNotify() async {
+    if (_settingsService == null) {
+      notifyListeners();
+      return;
+    }
+    final result = await _settingsService!.getSubscriptionInfoV2();
+    if (result.isSuccess) {
+      _subscriptionInfo = result.value;
+    } else {
+      _logger.warning(
+        'Failed to refetch subscription info after state change',
+        context: 'SettingsController',
+        data: {'error': result.error.toString()},
+      );
+    }
     notifyListeners();
   }
 }

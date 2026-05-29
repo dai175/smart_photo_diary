@@ -13,7 +13,7 @@ import 'premium_bullet_list.dart';
 class UpgradeDialog extends StatelessWidget {
   final List<Plan> plans;
   final Map<String, String> priceStrings;
-  final void Function(Plan plan) onPlanSelected;
+  final Future<bool> Function(Plan plan) onPlanSelected;
 
   const UpgradeDialog({
     super.key,
@@ -42,9 +42,9 @@ class UpgradeDialog extends StatelessWidget {
                 plan: plan,
                 priceString: priceStrings[plan.id],
                 onTap: () async {
-                  Navigator.of(context).pop();
                   await Future.delayed(AppConstants.quickAnimationDuration);
-                  onPlanSelected(plan);
+                  final started = await onPlanSelected(plan);
+                  if (started && context.mounted) Navigator.of(context).pop();
                 },
               ),
             ),

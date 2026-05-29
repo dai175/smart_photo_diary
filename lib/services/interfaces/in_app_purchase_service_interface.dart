@@ -153,6 +153,15 @@ class PurchaseResult {
   /// 購入が失敗したかどうか
   bool get isError => status == PurchaseStatus.error;
 
+  /// ストリームの終端イベントかどうか（完了・失敗・キャンセルを含む）
+  bool get isTerminal =>
+      status == PurchaseStatus.purchased ||
+      status == PurchaseStatus.restored ||
+      status == PurchaseStatus.cancelled ||
+      status == PurchaseStatus.error ||
+      status == PurchaseStatus.networkError ||
+      status == PurchaseStatus.storeNotAvailable;
+
   @override
   String toString() {
     return 'PurchaseResult(status: $status, productId: $productId, '
