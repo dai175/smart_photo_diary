@@ -77,6 +77,19 @@ class StoreEntitlementService implements IStoreEntitlementService {
           originalError: e,
         ),
       );
+    } catch (e) {
+      // ペイロードのパース失敗など想定外のエラーも Result 契約を守って Failure に収束させる。
+      _logger.warning(
+        'StoreKit2: invalid entitlement payload',
+        context: _logContext,
+        data: e.toString(),
+      );
+      return Failure(
+        ServiceException(
+          'Invalid StoreKit2 entitlement payload',
+          originalError: e,
+        ),
+      );
     }
   }
 }

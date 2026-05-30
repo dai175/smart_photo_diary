@@ -87,4 +87,17 @@ void main() {
 
     expect(result.isFailure, isTrue);
   });
+
+  test('不正なペイロード（型不一致）→ throwせず Failure', () async {
+    setHandler(
+      (_) async => {
+        'productId': 123, // String を期待するが int
+        'expiryDateMs': 'not-a-number',
+      },
+    );
+
+    final result = await service.getActiveSubscription();
+
+    expect(result.isFailure, isTrue);
+  });
 }
