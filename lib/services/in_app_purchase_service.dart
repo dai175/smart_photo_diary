@@ -48,6 +48,20 @@ class InAppPurchaseService
   @override
   set isPurchasing(bool value) => _isPurchasing = value;
 
+  // 参照カウント: true で ++, false で -- (0以下にはならない)
+  // 複数の sync が重なっても最後の finally が false を流すまでガードが外れない。
+  @override
+  bool get isSyncing => _syncRefCount > 0;
+
+  @override
+  set isSyncing(bool value) {
+    if (value) {
+      _syncRefCount++;
+    } else if (_syncRefCount > 0) {
+      _syncRefCount--;
+    }
+  }
+
   // In-App Purchase関連
   InAppPurchase? _inAppPurchase;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
@@ -58,6 +72,9 @@ class InAppPurchaseService
 
   // 購入処理中フラグ
   bool _isPurchasing = false;
+
+  // Store同期中参照カウント（0 より大きければ isSyncing = true）
+  int _syncRefCount = 0;
 
   // デリゲート
   late final PurchaseProductDelegate _productDelegate;
@@ -87,6 +104,7 @@ class InAppPurchaseService
       getInAppPurchase: () => _inAppPurchase,
       purchaseStream: _purchaseStreamController.stream,
       loggingService: _loggingService,
+      onSyncStateChanged: (syncing) => isSyncing = syncing,
     );
   }
 
