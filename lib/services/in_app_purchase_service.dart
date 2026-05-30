@@ -6,6 +6,7 @@ import '../core/errors/app_exceptions.dart';
 import '../core/errors/error_handler.dart';
 import '../models/plans/plan.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
+import 'interfaces/store_entitlement_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
 import 'interfaces/subscription_sync_result.dart';
@@ -23,6 +24,7 @@ class InAppPurchaseService
     with ServiceLogging, PurchaseEventHandler
     implements IInAppPurchaseService {
   final ISubscriptionStateService _stateService;
+  final IStoreEntitlementService _entitlementService;
   final ILoggingService? _loggingService;
 
   @override
@@ -83,8 +85,10 @@ class InAppPurchaseService
 
   InAppPurchaseService({
     required ISubscriptionStateService stateService,
+    required IStoreEntitlementService entitlementService,
     ILoggingService? logger,
   }) : _stateService = stateService,
+       _entitlementService = entitlementService,
        _loggingService = logger {
     _productDelegate = PurchaseProductDelegate(
       getStateService: () => _stateService,
@@ -102,9 +106,8 @@ class InAppPurchaseService
     _syncDelegate = SubscriptionSyncDelegate(
       getStateService: () => _stateService,
       getInAppPurchase: () => _inAppPurchase,
-      purchaseStream: _purchaseStreamController.stream,
+      getEntitlementService: () => _entitlementService,
       loggingService: _loggingService,
-      onSyncStateChanged: (syncing) => isSyncing = syncing,
     );
   }
 
