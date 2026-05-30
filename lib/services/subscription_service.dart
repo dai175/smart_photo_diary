@@ -6,6 +6,7 @@ import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/ai_usage_service_interface.dart';
 import 'interfaces/feature_access_service_interface.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
+import 'interfaces/subscription_sync_result.dart';
 
 /// SubscriptionService（Facade）
 ///
@@ -155,6 +156,10 @@ class SubscriptionService implements ISubscriptionService {
 
   @override
   Stream<PurchaseResult> get purchaseStream => _purchaseService.purchaseStream;
+
+  @override
+  Future<Result<SubscriptionSyncResult>> syncSubscriptionWithStore() =>
+      _purchaseService.syncSubscriptionWithStore();
 
   @override
   Future<void> dispose() async {

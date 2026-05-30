@@ -8,6 +8,7 @@ import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_yearly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/subscription_sync_result.dart';
 
 // テスト用のモックサービス実装
 class MockSubscriptionService implements ISubscriptionService {
@@ -174,6 +175,11 @@ class MockSubscriptionService implements ISubscriptionService {
   @override
   Stream<PurchaseResult> get purchaseStream {
     return const Stream.empty();
+  }
+
+  @override
+  Future<Result<SubscriptionSyncResult>> syncSubscriptionWithStore() async {
+    return Success(SubscriptionSyncResult.noChange());
   }
 
   @override

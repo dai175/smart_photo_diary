@@ -1,5 +1,6 @@
 import '../../core/result/result.dart';
 import '../../models/plans/plan.dart';
+import 'subscription_sync_result.dart';
 
 /// In-App Purchase サービスのインターフェース
 ///
@@ -65,6 +66,16 @@ abstract class IInAppPurchaseService {
   ///
   /// 購入フローの進行状況や完了/失敗をリアルタイムで通知する。
   Stream<PurchaseResult> get purchaseStream;
+
+  /// 起動時にApp Storeと購読状態を同期する
+  ///
+  /// ローカルがPremiumなのにStoreに有効購読が無い場合はBasicへ降格する。
+  /// ネットワークエラー時は誤Basic化を防ぐため現状維持する。
+  ///
+  /// Returns:
+  /// - Success: [SubscriptionSyncResult]（同期結果）
+  /// - Failure: [ServiceException] 予期しない内部エラー時
+  Future<Result<SubscriptionSyncResult>> syncSubscriptionWithStore();
 
   /// サービスを破棄
   ///
