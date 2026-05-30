@@ -196,6 +196,7 @@ mixin PurchaseEventHandler on ServiceLogging {
 
       final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
       if (plan == null) {
+        isPurchasing = false;
         purchaseStreamController.add(
           PurchaseResult(
             status: iapsi.PurchaseStatus.error,

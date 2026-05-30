@@ -82,13 +82,14 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
     }
 
     var restoredCount = 0;
-    String? restoredProductId;
+    final restoredProductIds = <String>{};
     var hasError = false;
 
     final subscription = _purchaseStream.listen((result) {
       if (result.status == PurchaseStatus.restored) {
         restoredCount++;
-        restoredProductId = result.productId;
+        final productId = result.productId;
+        if (productId != null) restoredProductIds.add(productId);
       } else if (result.status == PurchaseStatus.error ||
           result.status == PurchaseStatus.networkError ||
           result.status == PurchaseStatus.storeNotAvailable) {
@@ -152,6 +153,17 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
       data: {'restoredCount': restoredCount},
     );
 
+    // 複数の distinct productId が restored された場合、どちらが現在アクティブかを
+    // イベント配信順に依存せず決定できないため、自動 refresh はスキップする。
+    if (restoredProductIds.length > 1) {
+      _loggingService?.warning(
+        'Store sync: multiple distinct product IDs restored, skipping auto-refresh',
+        context: logTag,
+        data: {'productIds': restoredProductIds.join(',')},
+      );
+      return Success(SubscriptionSyncResult.synced(restoredCount));
+    }
+
     // ローカルの expiryDate が切れている（または未設定）か、Store 側でプランが
     // 変更されている場合に更新する。
     // in_app_purchase は自動更新に対して purchased イベントを発火しないため、
@@ -159,6 +171,9 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
     // プラン変更（月額→年額など）は期限が有効中でも即座に反映する。
     final current = statusResult.value;
     final now = DateTime.now();
+    final restoredProductId = restoredProductIds.isEmpty
+        ? null
+        : restoredProductIds.first;
     final activePlan = PlanFactory.getPlanByProductId(restoredProductId ?? '');
     final activePlanId = activePlan?.id ?? current.planId;
     final isExpiryStale =

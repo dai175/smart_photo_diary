@@ -596,6 +596,42 @@ void main() {
       expect(calls, [true, false]);
     });
 
+    test(
+      '月額・年額の両 productId が restored された場合 → auto-refreshスキップしてsynced(2)を返す',
+      () async {
+        when(() => mockStateService.getRawStatus()).thenAnswer(
+          (_) async => Success(
+            buildStatus(
+              planId: SubscriptionConstants.premiumMonthlyPlanId,
+              expiryDate: DateTime.now().add(const Duration(days: 15)),
+            ),
+          ),
+        );
+        when(() => mockIAP.restorePurchases()).thenAnswer((_) async {
+          purchaseStreamController.add(
+            const PurchaseResult(
+              status: PurchaseStatus.restored,
+              productId: SubscriptionConstants.premiumMonthlyProductId,
+            ),
+          );
+          purchaseStreamController.add(
+            const PurchaseResult(
+              status: PurchaseStatus.restored,
+              productId: SubscriptionConstants.premiumYearlyProductId,
+            ),
+          );
+        });
+        final delegate = buildDelegate();
+
+        final result = await delegate.syncSubscriptionWithStore();
+
+        expect(result.isSuccess, isTrue);
+        expect(result.value.outcome, SubscriptionSyncOutcome.synced);
+        expect(result.value.restoredCount, 2);
+        verifyNever(() => mockStateService.updateStatus(any()));
+      },
+    );
+
     test('ローカルがPremium、タイムアウト後に restored が来ても集計されず降格', () async {
       // タイムアウトを極短に設定し、delayed で遅延して emit しても間に合わないことを確認
       when(() => mockStateService.getRawStatus()).thenAnswer(

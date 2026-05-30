@@ -550,6 +550,21 @@ void main() {
 
       expect(handler.isPurchasing, isFalse);
     });
+
+    test(
+      'handlePurchaseRestored: 未知productId → isPurchasingがfalseにリセットされる',
+      () async {
+        handler.isPurchasing = true;
+        final purchase = makePurchase(
+          productId: 'unknown.product.id',
+          status: iap.PurchaseStatus.restored,
+        );
+
+        await handler.handlePurchaseRestored(purchase);
+
+        expect(handler.isPurchasing, isFalse);
+      },
+    );
   });
 
   group('isSyncing フラグ — Store同期中の副作用ガード', () {
