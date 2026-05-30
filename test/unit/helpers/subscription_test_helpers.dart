@@ -1,12 +1,18 @@
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
+import 'package:smart_photo_diary/models/store_entitlement.dart';
 import 'package:smart_photo_diary/services/subscription_service.dart';
 import 'package:smart_photo_diary/services/subscription_state_service.dart';
 import 'package:smart_photo_diary/services/ai_usage_service.dart';
 import 'package:smart_photo_diary/services/feature_access_service.dart';
 import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
+import 'package:smart_photo_diary/services/interfaces/store_entitlement_service_interface.dart';
 
 class _MockLoggingService extends Mock implements ILoggingService {}
+
+class _MockStoreEntitlementService extends Mock
+    implements IStoreEntitlementService {}
 
 /// テスト用のサブスクリプションサービス構築結果
 ///
@@ -52,8 +58,13 @@ class SubscriptionTestHelpers {
       stateService: stateService,
       logger: mockLogger,
     );
+    final mockEntitlementService = _MockStoreEntitlementService();
+    when(
+      () => mockEntitlementService.getActiveSubscription(),
+    ).thenAnswer((_) async => const Success<StoreEntitlement?>(null));
     final purchaseService = InAppPurchaseService(
       stateService: stateService,
+      entitlementService: mockEntitlementService,
       logger: mockLogger,
     );
 

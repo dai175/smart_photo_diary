@@ -26,7 +26,9 @@ import '../services/storage_service.dart';
 import '../services/interfaces/storage_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/subscription_service.dart';
+import '../services/interfaces/store_entitlement_service_interface.dart';
 import '../services/interfaces/subscription_state_service_interface.dart';
+import '../services/store_entitlement_service.dart';
 import '../services/subscription_state_service.dart';
 import '../services/interfaces/ai_usage_service_interface.dart';
 import '../services/ai_usage_service.dart';
@@ -178,6 +180,11 @@ class ServiceRegistration {
       context: 'ServiceRegistration._registerCoreServices',
     );
 
+    // 1.5 StoreEntitlementService (StoreKit2 実有効期限取得、loggerのみ依存)
+    serviceLocator.registerSingleton<IStoreEntitlementService>(
+      StoreEntitlementService(logger: loggingService),
+    );
+
     // 2. SubscriptionStateService (Hive依存のみ、基盤サブスクリプション状態管理)
     serviceLocator.registerAsyncFactory<ISubscriptionStateService>(() async {
       final service = SubscriptionStateService(logger: loggingService);
@@ -208,6 +215,7 @@ class ServiceRegistration {
           .getAsync<ISubscriptionStateService>();
       final service = InAppPurchaseService(
         stateService: stateService,
+        entitlementService: serviceLocator.get<IStoreEntitlementService>(),
         logger: loggingService,
       );
       await service.initialize();

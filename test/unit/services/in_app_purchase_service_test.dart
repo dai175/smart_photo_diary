@@ -5,7 +5,9 @@ import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/models/plans/basic_plan.dart';
 import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
 import 'package:smart_photo_diary/models/subscription_status.dart';
+import 'package:smart_photo_diary/models/store_entitlement.dart';
 import 'package:smart_photo_diary/services/in_app_purchase_service.dart';
+import 'package:smart_photo_diary/services/interfaces/store_entitlement_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_state_service_interface.dart';
 
 import '../../integration/mocks/mock_services.dart';
@@ -13,9 +15,13 @@ import '../../integration/mocks/mock_services.dart';
 class MockSubscriptionStateService extends Mock
     implements ISubscriptionStateService {}
 
+class MockStoreEntitlementService extends Mock
+    implements IStoreEntitlementService {}
+
 void main() {
   late InAppPurchaseService service;
   late MockSubscriptionStateService mockStateService;
+  late MockStoreEntitlementService mockEntitlementService;
   late MockILoggingService mockLogger;
 
   setUpAll(() {
@@ -33,9 +39,14 @@ void main() {
 
   setUp(() {
     mockStateService = MockSubscriptionStateService();
+    mockEntitlementService = MockStoreEntitlementService();
     mockLogger = TestServiceSetup.getLoggingService();
+    when(
+      () => mockEntitlementService.getActiveSubscription(),
+    ).thenAnswer((_) async => const Success<StoreEntitlement?>(null));
     service = InAppPurchaseService(
       stateService: mockStateService,
+      entitlementService: mockEntitlementService,
       logger: mockLogger,
     );
   });

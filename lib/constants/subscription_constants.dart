@@ -59,13 +59,6 @@ class SubscriptionConstants {
   /// サブスクリプション状態管理用のHiveボックス名
   static const String hiveBoxName = 'subscription_box';
 
-  // ========================================
-  // Store同期設定
-  // ========================================
-
-  /// 起動時Store同期のタイムアウト（restorePurchasesの結果待ち時間）
-  static const Duration storeSyncTimeout = Duration(seconds: 3);
-
   /// サブスクリプション状態のキー
   static const String statusKey = 'subscription_status';
 
