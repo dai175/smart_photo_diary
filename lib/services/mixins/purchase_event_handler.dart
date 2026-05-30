@@ -38,6 +38,10 @@ mixin PurchaseEventHandler on ServiceLogging {
   bool get isPurchasing;
   set isPurchasing(bool value);
 
+  /// Store同期中フラグ — true の間は restored イベントで状態を更新しない
+  bool get isSyncing;
+  set isSyncing(bool value);
+
   /// 購入ストリーム更新ハンドラ
   Future<void> onPurchaseUpdated(
     List<iap.PurchaseDetails> purchaseDetailsList,
@@ -190,8 +194,23 @@ mixin PurchaseEventHandler on ServiceLogging {
         data: {'productId': purchaseDetails.productID},
       );
 
-      // サイドエフェクトのみ実行（ストリームイベントはemitしない）
-      final plan = await applyPurchaseSideEffects(purchaseDetails);
+      final plan = PlanFactory.getPlanByProductId(purchaseDetails.productID);
+      if (plan == null) {
+        purchaseStreamController.add(
+          PurchaseResult(
+            status: iapsi.PurchaseStatus.error,
+            productId: purchaseDetails.productID,
+            errorMessage: 'Unknown product ID: ${purchaseDetails.productID}',
+          ),
+        );
+        return;
+      }
+
+      // Store同期中: 存在確認のみ行い状態を更新しない。
+      // 同期デリゲートが restored カウントを取得できるようストリームには流す。
+      if (!isSyncing) {
+        await updateSubscriptionFromPurchase(purchaseDetails, plan);
+      }
 
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.restored,

@@ -4,6 +4,7 @@ import 'package:in_app_purchase/in_app_purchase.dart' hide PurchaseStatus;
 
 import '../constants/subscription_constants.dart';
 import '../core/result/result.dart';
+import '../models/plans/plan_factory.dart';
 import '../models/subscription_status.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
@@ -22,17 +23,22 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
   final ILoggingService? _loggingService;
   final Duration _timeout;
 
+  /// sync中フラグの制御コールバック — PurchaseEventHandler 側の isSyncing を操作する
+  final void Function(bool)? _onSyncStateChanged;
+
   SubscriptionSyncDelegate({
     required ISubscriptionStateService Function() getStateService,
     required InAppPurchase? Function() getInAppPurchase,
     required Stream<PurchaseResult> purchaseStream,
     ILoggingService? loggingService,
     Duration timeout = SubscriptionConstants.storeSyncTimeout,
+    void Function(bool)? onSyncStateChanged,
   }) : _getStateService = getStateService,
        _getInAppPurchase = getInAppPurchase,
        _purchaseStream = purchaseStream,
        _loggingService = loggingService,
-       _timeout = timeout;
+       _timeout = timeout,
+       _onSyncStateChanged = onSyncStateChanged;
 
   @override
   String get logTag => 'SubscriptionSyncDelegate';
@@ -76,11 +82,13 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
     }
 
     var restoredCount = 0;
+    String? restoredProductId;
     var hasError = false;
 
     final subscription = _purchaseStream.listen((result) {
       if (result.status == PurchaseStatus.restored) {
         restoredCount++;
+        restoredProductId = result.productId;
       } else if (result.status == PurchaseStatus.error ||
           result.status == PurchaseStatus.networkError ||
           result.status == PurchaseStatus.storeNotAvailable) {
@@ -88,6 +96,7 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
       }
     });
 
+    _onSyncStateChanged?.call(true);
     try {
       await getInAppPurchase()!.restorePurchases();
       await Future<void>.delayed(_timeout);
@@ -100,6 +109,7 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
       return Success(SubscriptionSyncResult.error());
     } finally {
       await subscription.cancel();
+      _onSyncStateChanged?.call(false);
     }
 
     if (hasError) {
@@ -141,6 +151,51 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
       context: logTag,
       data: {'restoredCount': restoredCount},
     );
+
+    // ローカルの expiryDate が切れている（または未設定）か、Store 側でプランが
+    // 変更されている場合に更新する。
+    // in_app_purchase は自動更新に対して purchased イベントを発火しないため、
+    // 起動時同期がローカル期限を最新に保つ唯一の手段になる。
+    // プラン変更（月額→年額など）は期限が有効中でも即座に反映する。
+    final current = statusResult.value;
+    final now = DateTime.now();
+    final activePlan = PlanFactory.getPlanByProductId(restoredProductId ?? '');
+    final activePlanId = activePlan?.id ?? current.planId;
+    final isExpiryStale =
+        current.expiryDate == null || current.expiryDate!.isBefore(now);
+    final isPlanChanged = activePlanId != current.planId;
+
+    if (isExpiryStale || isPlanChanged) {
+      final duration = Duration(
+        days: (activePlan?.isYearly ?? false)
+            ? SubscriptionConstants.subscriptionYearDays
+            : SubscriptionConstants.subscriptionMonthDays,
+      );
+      final refreshed = current.copyWith(
+        planId: activePlanId,
+        expiryDate: now.add(duration),
+        autoRenewal: true,
+      );
+      final saveResult = await getStateService().updateStatus(refreshed);
+      if (saveResult.isFailure) {
+        _loggingService?.warning(
+          'Store sync: failed to refresh subscription state',
+          context: logTag,
+        );
+        return Success(SubscriptionSyncResult.error());
+      } else {
+        _loggingService?.info(
+          'Store sync: refreshed subscription state',
+          context: logTag,
+          data: {
+            'planId': activePlanId,
+            'planChanged': isPlanChanged,
+            'expiryRefreshed': isExpiryStale,
+          },
+        );
+      }
+    }
+
     return Success(SubscriptionSyncResult.synced(restoredCount));
   }
 }

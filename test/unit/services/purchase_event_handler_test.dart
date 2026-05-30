@@ -66,6 +66,9 @@ class _TestEventHandler with ServiceLogging, PurchaseEventHandler {
   bool isPurchasing = false;
 
   @override
+  bool isSyncing = false;
+
+  @override
   iap.InAppPurchase? get inAppPurchaseInstance => null;
 
   @override
@@ -546,6 +549,64 @@ void main() {
       await handler.handlePurchaseRestored(purchase);
 
       expect(handler.isPurchasing, isFalse);
+    });
+  });
+
+  group('isSyncing フラグ — Store同期中の副作用ガード', () {
+    setUp(() {
+      when(() => mockStateService.getCurrentStatus()).thenAnswer(
+        (_) async => Success(
+          buildStatus(
+            planId: SubscriptionConstants.premiumMonthlyPlanId,
+            expiryDate: DateTime.now().add(const Duration(days: 15)),
+          ),
+        ),
+      );
+      when(
+        () => mockStateService.updateStatus(any()),
+      ).thenAnswer((_) async => const Success(null));
+    });
+
+    test('isSyncing=true のとき handlePurchaseRestored は状態を更新しない', () async {
+      handler.isSyncing = true;
+      final purchase = makePurchase(
+        productId: SubscriptionConstants.premiumMonthlyProductId,
+        status: iap.PurchaseStatus.restored,
+      );
+
+      await handler.handlePurchaseRestored(purchase);
+
+      verifyNever(() => mockStateService.updateStatus(any()));
+    });
+
+    test(
+      'isSyncing=true のとき handlePurchaseRestored は restored をストリームに流す',
+      () async {
+        handler.isSyncing = true;
+        final purchase = makePurchase(
+          productId: SubscriptionConstants.premiumMonthlyProductId,
+          status: iap.PurchaseStatus.restored,
+        );
+
+        PurchaseResult? emitted;
+        streamController.stream.listen((r) => emitted = r);
+
+        await handler.handlePurchaseRestored(purchase);
+
+        expect(emitted?.status, PurchaseStatus.restored);
+      },
+    );
+
+    test('isSyncing=false のとき handlePurchaseRestored は通常通り状態を更新する', () async {
+      handler.isSyncing = false;
+      final purchase = makePurchase(
+        productId: SubscriptionConstants.premiumMonthlyProductId,
+        status: iap.PurchaseStatus.restored,
+      );
+
+      await handler.handlePurchaseRestored(purchase);
+
+      verify(() => mockStateService.updateStatus(any())).called(1);
     });
   });
 }

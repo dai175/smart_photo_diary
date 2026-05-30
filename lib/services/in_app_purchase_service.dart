@@ -48,6 +48,12 @@ class InAppPurchaseService
   @override
   set isPurchasing(bool value) => _isPurchasing = value;
 
+  @override
+  bool get isSyncing => _isSyncing;
+
+  @override
+  set isSyncing(bool value) => _isSyncing = value;
+
   // In-App Purchase関連
   InAppPurchase? _inAppPurchase;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
@@ -58,6 +64,9 @@ class InAppPurchaseService
 
   // 購入処理中フラグ
   bool _isPurchasing = false;
+
+  // Store同期中フラグ（同期中は restored イベントで状態を更新しない）
+  bool _isSyncing = false;
 
   // デリゲート
   late final PurchaseProductDelegate _productDelegate;
@@ -87,6 +96,7 @@ class InAppPurchaseService
       getInAppPurchase: () => _inAppPurchase,
       purchaseStream: _purchaseStreamController.stream,
       loggingService: _loggingService,
+      onSyncStateChanged: (syncing) => isSyncing = syncing,
     );
   }
 
