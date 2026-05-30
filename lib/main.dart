@@ -12,6 +12,7 @@ import 'core/service_locator.dart';
 import 'services/interfaces/settings_service_interface.dart';
 import 'services/interfaces/logging_service_interface.dart';
 import 'core/service_registration.dart';
+import 'services/interfaces/in_app_purchase_service_interface.dart';
 import 'ui/design_system/app_theme.dart';
 import 'localization/localization_extensions.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -67,6 +68,26 @@ Future<void> main() async {
 
   // スタートアップ時のデータベース最適化（fire-and-forget、アプリ起動をブロックしない）
   _optimizeDatabaseOnStartup(logger);
+  // スタートアップ時のStore購読状態同期（fire-and-forget、アプリ起動をブロックしない）
+  _syncSubscriptionOnStartup(logger);
+}
+
+Future<void> _syncSubscriptionOnStartup(ILoggingService logger) async {
+  final purchaseService = await serviceLocator
+      .getAsync<IInAppPurchaseService>();
+  final result = await purchaseService.syncSubscriptionWithStore();
+  result.fold(
+    (syncResult) => logger.info(
+      'Startup store sync completed',
+      context: 'main',
+      data: syncResult.toString(),
+    ),
+    (error) => logger.warning(
+      'Startup store sync failed',
+      context: 'main',
+      data: error.toString(),
+    ),
+  );
 }
 
 Future<void> _optimizeDatabaseOnStartup(ILoggingService logger) async {

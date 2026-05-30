@@ -2,6 +2,7 @@ import '../../core/result/result.dart';
 import '../../models/plans/plan.dart';
 import '../../models/subscription_status.dart';
 import 'in_app_purchase_service_interface.dart';
+import 'subscription_sync_result.dart';
 
 // データクラスを再エクスポート（後方互換性のため）
 export 'in_app_purchase_service_interface.dart'
@@ -222,6 +223,13 @@ abstract class ISubscriptionService {
 
   /// 購入状態変更を監視
   Stream<PurchaseResult> get purchaseStream;
+
+  /// 起動時にApp Storeと購読状態を同期する
+  ///
+  /// Returns:
+  /// - Success: [SubscriptionSyncResult]（同期結果）
+  /// - Failure: [ServiceException] 予期しない内部エラー時
+  Future<Result<SubscriptionSyncResult>> syncSubscriptionWithStore();
 
   /// サービスを破棄
   Future<void> dispose();

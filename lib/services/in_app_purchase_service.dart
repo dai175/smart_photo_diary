@@ -8,10 +8,12 @@ import '../models/plans/plan.dart';
 import 'interfaces/in_app_purchase_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
+import 'interfaces/subscription_sync_result.dart';
 import 'mixins/service_logging.dart';
 import 'mixins/purchase_event_handler.dart';
 import 'purchase_product_delegate.dart';
 import 'purchase_flow_delegate.dart';
+import 'subscription_sync_delegate.dart';
 
 /// InAppPurchaseService
 ///
@@ -60,6 +62,7 @@ class InAppPurchaseService
   // デリゲート
   late final PurchaseProductDelegate _productDelegate;
   late final PurchaseFlowDelegate _flowDelegate;
+  late final SubscriptionSyncDelegate _syncDelegate;
 
   InAppPurchaseService({
     required ISubscriptionStateService stateService,
@@ -77,6 +80,12 @@ class InAppPurchaseService
       getIsPurchasing: () => _isPurchasing,
       setIsPurchasing: (value) => _isPurchasing = value,
       productDelegate: _productDelegate,
+      loggingService: _loggingService,
+    );
+    _syncDelegate = SubscriptionSyncDelegate(
+      getStateService: () => _stateService,
+      getInAppPurchase: () => _inAppPurchase,
+      purchaseStream: _purchaseStreamController.stream,
       loggingService: _loggingService,
     );
   }
@@ -171,6 +180,10 @@ class InAppPurchaseService
   @override
   Future<Result<List<PurchaseResult>>> restorePurchases() =>
       _flowDelegate.restorePurchases();
+
+  @override
+  Future<Result<SubscriptionSyncResult>> syncSubscriptionWithStore() =>
+      _syncDelegate.syncSubscriptionWithStore();
 
   @override
   Future<Result<bool>> validatePurchase(String transactionId) async {

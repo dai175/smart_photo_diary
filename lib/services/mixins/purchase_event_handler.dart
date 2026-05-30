@@ -316,13 +316,22 @@ mixin PurchaseEventHandler on ServiceLogging {
           ? currentStatusResult.value.lastResetDate
           : now;
 
-      // 復元時は既存の有効期限を維持（まだ有効であればそちらを使用）
+      // 復元時は既存の有効期限を維持（同じプランかつまだ有効であればそちらを使用）
+      // 異なるプランのrestoredや別sandboxアカウントの切替時は新規期限を算出する
       DateTime expiryDate;
       if (purchaseDetails.status == iap.PurchaseStatus.restored &&
           currentStatusResult.isSuccess &&
           currentStatusResult.value.expiryDate != null &&
           currentStatusResult.value.expiryDate!.isAfter(now)) {
-        expiryDate = currentStatusResult.value.expiryDate!;
+        final restoredPlan = PlanFactory.getPlanByProductId(
+          purchaseDetails.productID,
+        );
+        if (restoredPlan != null &&
+            restoredPlan.id == currentStatusResult.value.planId) {
+          expiryDate = currentStatusResult.value.expiryDate!;
+        } else {
+          expiryDate = now.add(subscriptionDuration);
+        }
       } else {
         expiryDate = now.add(subscriptionDuration);
       }

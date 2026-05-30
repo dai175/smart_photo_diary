@@ -309,7 +309,7 @@ void main() {
       expect(updatedStatus.expiryDate!.isBefore(maxExpiry), isTrue);
     });
 
-    test('復元時に既存有効期限が未来 → 既存expiryDateが維持される', () async {
+    test('復元時に同プランかつ既存有効期限が未来 → 既存expiryDateが維持される', () async {
       final futureExpiry = DateTime.now().add(const Duration(days: 15));
       when(() => mockStateService.getCurrentStatus()).thenAnswer(
         (_) async => Success(
@@ -342,6 +342,46 @@ void main() {
       expect(
         updatedStatus.expiryDate!.millisecondsSinceEpoch,
         closeTo(futureExpiry.millisecondsSinceEpoch, 1000),
+      );
+    });
+
+    test('復元時に異プランかつ既存有効期限が未来 → 新しいexpiryDateが計算される', () async {
+      final futureExpiry = DateTime.now().add(const Duration(days: 15));
+      // ローカルは monthly、restoreは yearly（別アカウントやプラン変更シナリオ）
+      when(() => mockStateService.getCurrentStatus()).thenAnswer(
+        (_) async => Success(
+          buildStatus(
+            planId: SubscriptionConstants.premiumMonthlyPlanId,
+            expiryDate: futureExpiry,
+          ),
+        ),
+      );
+      when(
+        () => mockStateService.updateStatus(any()),
+      ).thenAnswer((_) async => const Success(null));
+
+      final purchase = _TestPurchaseDetails(
+        productID: SubscriptionConstants.premiumYearlyProductId,
+        purchaseID: 'restore-txn',
+        transactionDate: DateTime.now().millisecondsSinceEpoch.toString(),
+        status: iap.PurchaseStatus.restored,
+        pendingCompletePurchase: false,
+      );
+
+      final before = DateTime.now();
+      await handler.applyPurchaseSideEffects(purchase);
+
+      final captured = verify(
+        () => mockStateService.updateStatus(captureAny()),
+      ).captured;
+      final updatedStatus = captured.first as SubscriptionStatus;
+
+      // 異プランのため既存期限は維持されず、yearly の新規期限（now+365日）が設定される
+      final minExpiry = before.add(const Duration(days: 365));
+      expect(
+        updatedStatus.expiryDate!.isAfter(minExpiry) ||
+            updatedStatus.expiryDate!.isAtSameMomentAs(minExpiry),
+        isTrue,
       );
     });
 
