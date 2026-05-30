@@ -323,11 +323,7 @@ mixin PurchaseEventHandler on ServiceLogging {
           currentStatusResult.isSuccess &&
           currentStatusResult.value.expiryDate != null &&
           currentStatusResult.value.expiryDate!.isAfter(now)) {
-        final restoredPlan = PlanFactory.getPlanByProductId(
-          purchaseDetails.productID,
-        );
-        if (restoredPlan != null &&
-            restoredPlan.id == currentStatusResult.value.planId) {
+        if (plan.id == currentStatusResult.value.planId) {
           expiryDate = currentStatusResult.value.expiryDate!;
         } else {
           expiryDate = now.add(subscriptionDuration);

@@ -73,21 +73,29 @@ Future<void> main() async {
 }
 
 Future<void> _syncSubscriptionOnStartup(ILoggingService logger) async {
-  final purchaseService = await serviceLocator
-      .getAsync<IInAppPurchaseService>();
-  final result = await purchaseService.syncSubscriptionWithStore();
-  result.fold(
-    (syncResult) => logger.info(
-      'Startup store sync completed',
-      context: 'main',
-      data: syncResult.toString(),
-    ),
-    (error) => logger.warning(
+  try {
+    final purchaseService = await serviceLocator
+        .getAsync<IInAppPurchaseService>();
+    final result = await purchaseService.syncSubscriptionWithStore();
+    result.fold(
+      (syncResult) => logger.info(
+        'Startup store sync completed',
+        context: 'main',
+        data: syncResult.toString(),
+      ),
+      (error) => logger.warning(
+        'Startup store sync failed',
+        context: 'main',
+        data: error.toString(),
+      ),
+    );
+  } catch (e) {
+    logger.warning(
       'Startup store sync failed',
       context: 'main',
-      data: error.toString(),
-    ),
-  );
+      data: e.toString(),
+    );
+  }
 }
 
 Future<void> _optimizeDatabaseOnStartup(ILoggingService logger) async {
