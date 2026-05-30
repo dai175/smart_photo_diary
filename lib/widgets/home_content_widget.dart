@@ -261,6 +261,9 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   Future<void> _navigateToUpgrade(BuildContext context) async {
     await UpgradeDialogUtils.showUpgradeDialog(context);
     if (!mounted) return;
-    await _loadUsageSummary();
+    await Future.wait([
+      _loadUsageSummary(),
+      widget.onRefresh?.call() ?? Future.value(),
+    ]);
   }
 }

@@ -22,9 +22,10 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
           CustomDialogAction(
             text: dialogContext.l10n.settingsUpgradeToPremium,
             isPrimary: true,
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(dialogContext).pop();
-              unawaited(UpgradeDialogUtils.showUpgradeDialog(context));
+              await UpgradeDialogUtils.showUpgradeDialog(context);
+              if (mounted) unawaited(_self._refreshHome());
             },
           ),
         ],
