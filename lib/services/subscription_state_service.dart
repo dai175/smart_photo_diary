@@ -186,6 +186,7 @@ class SubscriptionStateService
       _subscriptionBox = await Hive.openBox<SubscriptionStatus>(
         SubscriptionConstants.hiveBoxName,
       );
+      await _emitStatusChange();
       return const Success(null);
     } catch (e) {
       log('Error refreshing status', level: LogLevel.error, error: e);
