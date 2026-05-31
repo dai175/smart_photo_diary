@@ -373,6 +373,9 @@ class TestServiceSetup {
     // Default mock behavior for SubscriptionService
     when(() => mock.isInitialized).thenReturn(true);
     when(() => mock.initialize()).thenAnswer((_) async => const Success(null));
+    when(
+      () => mock.statusStream,
+    ).thenAnswer((_) => const Stream<SubscriptionStatus>.empty());
 
     // Basic Plan default setup
     final basicPlan = BasicPlan();

@@ -467,6 +467,9 @@ class IntegrationTestHelpers {
     when(
       () => mockSubscriptionService.initialize(),
     ).thenAnswer((_) async => const Success(null));
+    when(
+      () => mockSubscriptionService.statusStream,
+    ).thenAnswer((_) => const Stream<SubscriptionStatus>.empty());
     when(() => mockSubscriptionService.getCurrentStatus()).thenAnswer(
       (_) async => Success(
         SubscriptionStatus(
