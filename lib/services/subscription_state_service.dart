@@ -19,7 +19,8 @@ class SubscriptionStateService
     implements ISubscriptionStateService {
   Box<SubscriptionStatus>? _subscriptionBox;
   bool _isInitialized = false;
-  Stream<SubscriptionStatus>? _statusStream;
+  final StreamController<SubscriptionStatus> _statusController =
+      StreamController<SubscriptionStatus>.broadcast();
   final ILoggingService? _loggingService;
 
   @override
@@ -163,6 +164,7 @@ class SubscriptionStateService
       }
       await _subscriptionBox!.put(SubscriptionConstants.statusKey, status);
       log('Status updated successfully', level: LogLevel.info);
+      await _emitStatusChange();
       return const Success(null);
     } catch (e) {
       log('Error updating status', level: LogLevel.error, error: e);
@@ -184,6 +186,7 @@ class SubscriptionStateService
       _subscriptionBox = await Hive.openBox<SubscriptionStatus>(
         SubscriptionConstants.hiveBoxName,
       );
+      await _emitStatusChange();
       return const Success(null);
     } catch (e) {
       log('Error refreshing status', level: LogLevel.error, error: e);
@@ -213,6 +216,7 @@ class SubscriptionStateService
         level: LogLevel.info,
         data: {'planId': plan.id},
       );
+      await _emitStatusChange();
       return Success(newStatus);
     } catch (e) {
       log('Error creating status', level: LogLevel.error, error: e);
@@ -250,22 +254,23 @@ class SubscriptionStateService
   }
 
   @override
-  Stream<SubscriptionStatus> get statusStream {
-    return _statusStream ??=
-        Stream.periodic(const Duration(minutes: 5), (_) async {
-              final statusResult = await getCurrentStatus();
-              return statusResult.isSuccess ? statusResult.value : null;
-            })
-            .asyncMap((statusFuture) => statusFuture)
-            .where((status) => status != null)
-            .cast<SubscriptionStatus>()
-            .asBroadcastStream();
+  Stream<SubscriptionStatus> get statusStream => _statusController.stream;
+
+  /// forcePlan などの動的上書きを適用した実効ステータスを流すため、
+  /// 永続化済みの値ではなく [getCurrentStatus] の結果を emit する。
+  Future<void> _emitStatusChange() async {
+    if (_statusController.isClosed) return;
+    final statusResult = await getCurrentStatus();
+    if (statusResult.isSuccess && !_statusController.isClosed) {
+      _statusController.add(statusResult.value);
+    }
   }
 
   @override
   Future<void> dispose() async {
     log('Disposing SubscriptionStateService...', level: LogLevel.info);
     await _subscriptionBox?.close();
+    await _statusController.close();
     _isInitialized = false;
     log('SubscriptionStateService disposed', level: LogLevel.info);
   }

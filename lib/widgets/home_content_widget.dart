@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../controllers/photo_selection_controller.dart';
@@ -10,6 +12,7 @@ import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../services/interfaces/subscription_service_interface.dart';
+import '../models/subscription_status.dart';
 import '../core/service_registration.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../ui/components/custom_dialog.dart';
@@ -42,6 +45,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
   late final ISubscriptionService _subscriptionService;
   int? _remainingGenerations;
   Plan? _cachedPlan;
+  StreamSubscription<SubscriptionStatus>? _statusSub;
 
   @override
   void initState() {
@@ -50,6 +54,15 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         widget.subscriptionService ??
         ServiceRegistration.get<ISubscriptionService>();
     _loadUsageSummary();
+    _statusSub = _subscriptionService.statusStream.listen((_) {
+      _loadUsageSummary();
+    });
+  }
+
+  @override
+  void dispose() {
+    _statusSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadUsageSummary() async {
