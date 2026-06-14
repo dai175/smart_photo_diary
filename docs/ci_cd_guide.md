@@ -56,26 +56,20 @@ CI パイプラインの通過検証。`set-deploy-sha` オプションで `DEPL
 
 ## 必要なSecrets設定
 
-### iOS配布用
+### iOS配布用（fastlane match）
 ```bash
-IOS_DISTRIBUTION_CERTIFICATE    # 配布証明書（.p12ファイル、base64エンコード）
-IOS_CERTIFICATE_PASSWORD        # 証明書パスワード
-IOS_PROVISIONING_PROFILE        # プロビジョニングプロファイル（base64エンコード）
-IOS_KEYCHAIN_PASSWORD           # 一時的なキーチェーンパスワード
+MATCH_PASSWORD                  # match リポジトリ復号用パスフレーズ
+MATCH_DEPLOY_KEY                # flowease-certs を読む SSH デプロイ鍵（秘密鍵・read-only）
 IOS_TEAM_ID                     # Apple Developer Team ID
 APP_STORE_CONNECT_API_KEY_ID    # App Store Connect API キーID
 APP_STORE_CONNECT_ISSUER_ID     # App Store Connect Issuer ID
-APP_STORE_CONNECT_API_KEY       # App Store Connect API キー（.p8内容）
+APP_STORE_CONNECT_API_KEY       # App Store Connect API キー（.p8内容、base64）
 GEMINI_API_KEY                  # Google Gemini API キー
 ```
 
+> 証明書・プロファイルは別リポジトリ `dai175/flowease-certs` に暗号化保管（fastlane match）。CI は `MATCH_DEPLOY_KEY` で取得し、ローカルの証明書更新は `cd ios && bundle exec fastlane renew_signing`。詳細は [CLAUDE.md](../CLAUDE.md) の「iOS Code Signing (fastlane match)」を参照。
+
 ## スクリプト (`scripts/`)
-
-### `testflight_build.sh`
-ローカル環境でTestFlight用のIPAファイルをビルド。`.env` からAPIキーを読み込み、`--dart-define-from-file` でセキュアに渡す。ビルド完了後、Transporter.app または Xcode Organizer でのアップロード手順を表示。
-
-### `prepare_xcode.sh`
-Xcode Archive用のiOSビルド準備。APIキーを設定した状態で `flutter build ios` を実行し、その後Xcodeから手動でArchive・配布を行う。
 
 ### `dev_run.sh`
 開発用の実行スクリプト。`pubspec.dev.yaml` を一時的にコピーして実行し、終了時に復元する。

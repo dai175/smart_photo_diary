@@ -177,7 +177,7 @@ fvm dart format .
 ### GitHub Actions ワークフロー
 - **ci.yml**: コード品質・テスト・ビルド検証自動実行（push + PR + 手動実行時）
 - **release.yml**: GitHub Releases自動作成（バージョンタグ時）
-- **ios-deploy.yml**: App Store/TestFlight手動デプロイ（fastlane経由）
+- **ios-deploy.yml**: Release公開時に fastlane match で署名し TestFlight へアップロード
 
 ## ビルド・デプロイ
 
