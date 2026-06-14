@@ -1,0 +1,23 @@
+# fastlane match configuration.
+# Certificates & profiles are stored ENCRYPTED (via MATCH_PASSWORD) in a
+# SEPARATE private git repo — never in this app repo.
+#
+# This repo is SHARED with other apps under the same Apple Developer team
+# (P785AMQPKJ): the distribution certificate is reused, only a per-app
+# provisioning profile is added. MATCH_PASSWORD MUST match the one that
+# encrypted the repo.
+#
+# SSH URL: CI authenticates with the read-only deploy key registered on
+# flowease-certs (secret MATCH_DEPLOY_KEY); locally it uses your own SSH key.
+git_url(ENV["MATCH_GIT_URL"] || "git@github.com:dai175/flowease-certs.git")
+storage_mode("git")
+
+# App Store distribution signing only (no development certs needed for deploy).
+type("appstore")
+
+app_identifier(["com.focuswave.dev.smartPhotoDiary"])
+team_id("P785AMQPKJ")
+
+# readonly is set per-lane in the Fastfile:
+#   sync_signing  -> readonly: true  (CI: fetch & install only)
+#   renew_signing -> readonly: false (local: create/renew & push to repo)

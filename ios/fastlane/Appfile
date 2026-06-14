@@ -1,0 +1,4 @@
+app_identifier("com.focuswave.dev.smartPhotoDiary")
+team_id("P785AMQPKJ")
+# apple_id is intentionally omitted: signing/upload authenticate via the
+# App Store Connect API key (see Fastfile), so no Apple ID + 2FA is needed.

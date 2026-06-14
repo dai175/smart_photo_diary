@@ -35,10 +35,8 @@ jobs:
       - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          IOS_DISTRIBUTION_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
-          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-          IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
-          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
           IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -46,10 +44,8 @@ jobs:
         run: |
           MISSING=()
           [ -z "$GEMINI_API_KEY" ] && MISSING+=("GEMINI_API_KEY")
-          [ -z "$IOS_DISTRIBUTION_CERTIFICATE" ] && MISSING+=("IOS_DISTRIBUTION_CERTIFICATE")
-          [ -z "$IOS_CERTIFICATE_PASSWORD" ] && MISSING+=("IOS_CERTIFICATE_PASSWORD")
-          [ -z "$IOS_PROVISIONING_PROFILE" ] && MISSING+=("IOS_PROVISIONING_PROFILE")
-          [ -z "$IOS_KEYCHAIN_PASSWORD" ] && MISSING+=("IOS_KEYCHAIN_PASSWORD")
+          [ -z "$MATCH_PASSWORD" ] && MISSING+=("MATCH_PASSWORD")
+          [ -z "$MATCH_DEPLOY_KEY" ] && MISSING+=("MATCH_DEPLOY_KEY")
           [ -z "$IOS_TEAM_ID" ] && MISSING+=("IOS_TEAM_ID")
           [ -z "$APP_STORE_CONNECT_API_KEY_ID" ] && MISSING+=("APP_STORE_CONNECT_API_KEY_ID")
           [ -z "$APP_STORE_CONNECT_ISSUER_ID" ] && MISSING+=("APP_STORE_CONNECT_ISSUER_ID")
@@ -60,36 +56,38 @@ jobs:
           fi
           echo "All required secrets verified"
 
-      - name: Install Apple certificate and provisioning profile
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install match deploy key
         env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
-          P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
-          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
         run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          mkdir -p ~/.ssh
+          printf '%s\n' "$MATCH_DEPLOY_KEY" > ~/.ssh/match_deploy_key
+          chmod 600 ~/.ssh/match_deploy_key
 
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: Sync iOS signing assets (fastlane match)
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          # Scope the deploy key to match's git clone only (avoids forcing all
+          # github.com SSH traffic through this read-only certs-repo key).
+          GIT_SSH_COMMAND: "ssh -i ~/.ssh/match_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          cd ios
+          bundle exec fastlane sync_signing
 
           echo "=== Installed certificates ==="
-          security find-identity -v -p codesigning $KEYCHAIN_PATH
+          security find-identity -v -p codesigning
           echo "=== Installed provisioning profiles ==="
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
-          echo "=== Xcode project signing settings ==="
-          grep -n "CODE_SIGN_STYLE\|PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj || true
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || true
 
       - name: Create ExportOptions.plist
         env:
@@ -115,7 +113,7 @@ jobs:
               <key>provisioningProfiles</key>
               <dict>
                   <key>com.focuswave.dev.smartPhotoDiary</key>
-                  <string>Smart Photo Diary App Store</string>
+                  <string>match AppStore com.focuswave.dev.smartPhotoDiary</string>
               </dict>
           </dict>
           </plist>
@@ -154,13 +152,6 @@ jobs:
         if: always()
         run: rm -f dart_defines.json
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: ios
-
       - name: Upload to TestFlight
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -184,7 +175,7 @@ jobs:
         if: always()
         run: |
           rm -f ios/ExportOptions.plist
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          rm -f ~/.ssh/match_deploy_key
 
       - name: Create release summary
         env:
