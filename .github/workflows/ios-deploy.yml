@@ -63,19 +63,20 @@ jobs:
           bundler-cache: true
           working-directory: ios
 
-      - name: Setup SSH for match
+      - name: Install match deploy key
         env:
           MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "$MATCH_DEPLOY_KEY" > ~/.ssh/match_deploy_key
           chmod 600 ~/.ssh/match_deploy_key
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          printf 'Host github.com\n  IdentityFile ~/.ssh/match_deploy_key\n  IdentitiesOnly yes\n' >> ~/.ssh/config
 
       - name: Sync iOS signing assets (fastlane match)
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          # Scope the deploy key to match's git clone only (avoids forcing all
+          # github.com SSH traffic through this read-only certs-repo key).
+          GIT_SSH_COMMAND: "ssh -i ~/.ssh/match_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
@@ -174,6 +175,7 @@ jobs:
         if: always()
         run: |
           rm -f ios/ExportOptions.plist
+          rm -f ~/.ssh/match_deploy_key
 
       - name: Create release summary
         env:
