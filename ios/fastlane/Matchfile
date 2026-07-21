@@ -8,8 +8,8 @@
 # encrypted the repo.
 #
 # SSH URL: CI authenticates with the read-only deploy key registered on
-# flowease-certs (secret MATCH_DEPLOY_KEY); locally it uses your own SSH key.
-git_url(ENV["MATCH_GIT_URL"] || "git@github.com:dai175/flowease-certs.git")
+# focuswave-certs (secret MATCH_DEPLOY_KEY); locally it uses your own SSH key.
+git_url(ENV["MATCH_GIT_URL"] || "git@github.com:dai175/focuswave-certs.git")
 storage_mode("git")
 
 # App Store distribution signing only (no development certs needed for deploy).

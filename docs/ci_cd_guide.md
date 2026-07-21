@@ -59,7 +59,7 @@ CI パイプラインの通過検証。`set-deploy-sha` オプションで `DEPL
 ### iOS配布用（fastlane match）
 ```bash
 MATCH_PASSWORD                  # match リポジトリ復号用パスフレーズ
-MATCH_DEPLOY_KEY                # flowease-certs を読む SSH デプロイ鍵（秘密鍵・read-only）
+MATCH_DEPLOY_KEY                # focuswave-certs を読む SSH デプロイ鍵（秘密鍵・read-only）
 IOS_TEAM_ID                     # Apple Developer Team ID
 APP_STORE_CONNECT_API_KEY_ID    # App Store Connect API キーID
 APP_STORE_CONNECT_ISSUER_ID     # App Store Connect Issuer ID
@@ -67,7 +67,7 @@ APP_STORE_CONNECT_API_KEY       # App Store Connect API キー（.p8内容、bas
 GEMINI_API_KEY                  # Google Gemini API キー
 ```
 
-> 証明書・プロファイルは別リポジトリ `dai175/flowease-certs` に暗号化保管（fastlane match）。CI は `MATCH_DEPLOY_KEY` で取得し、ローカルの証明書更新は `cd ios && bundle exec fastlane renew_signing`。詳細は [CLAUDE.md](../CLAUDE.md) の「iOS Code Signing (fastlane match)」を参照。
+> 証明書・プロファイルは FocusWave アプリ共通の別リポジトリ `dai175/focuswave-certs` に暗号化保管（fastlane match）。CI は `MATCH_DEPLOY_KEY` で取得し、ローカルの証明書更新は `cd ios && bundle exec fastlane renew_signing`。詳細は [CLAUDE.md](../CLAUDE.md) の「iOS Code Signing (fastlane match)」を参照。
 
 ## スクリプト (`scripts/`)
 
