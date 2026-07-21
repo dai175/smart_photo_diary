@@ -157,9 +157,9 @@ Key rules for quick reference:
 
 ### iOS Code Signing (fastlane match)
 
-- Certs/profiles live in a separate private repo `dai175/flowease-certs` (shared with the Flowease app under the same Apple team `P785AMQPKJ`). CI fetches them with the read-only SSH deploy key secret `MATCH_DEPLOY_KEY`, decrypted with `MATCH_PASSWORD`.
+- Certs/profiles live in the shared private repo `dai175/focuswave-certs` for FocusWave apps under Apple team `P785AMQPKJ`. CI fetches them with the read-only SSH deploy key secret `MATCH_DEPLOY_KEY`, decrypted with `MATCH_PASSWORD`.
 - Lanes in `ios/fastlane/Fastfile`: `sync_signing` (CI, readonly), `renew_signing` (local), `upload_testflight`.
-- **Renew the distribution certificate** (yearly / on expiry): `cd ios && bundle exec fastlane renew_signing` (needs `MATCH_PASSWORD` + App Store Connect API key env). No manual `.p12` / base64 / Secrets work.
+- **Renew the distribution certificate** (yearly / on expiry): `cd ios && bundle exec fastlane renew_signing` (needs `MATCH_GIT_URL`, `MATCH_PASSWORD`, and App Store Connect API key env). No manual `.p12` / base64 / Secrets work.
 - **Release flow**: bump version → push tag `vX.Y.Z` → `release.yml` creates a draft → publish the draft → `ios-deploy.yml` signs + uploads to TestFlight.
 - **Gotcha**: the distribution build configs in `ios/Runner.xcodeproj/project.pbxproj` must match the match assets — `PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*] = "match AppStore com.focuswave.dev.smartPhotoDiary"` and `CODE_SIGN_IDENTITY[sdk=iphoneos*] = "Apple Distribution"`. Updating `ExportOptions.plist` alone is not enough — `flutter build ipa`'s archive step uses the project settings.
 

@@ -35,6 +35,7 @@ jobs:
       - name: Verify required secrets
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
           IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
@@ -44,6 +45,7 @@ jobs:
         run: |
           MISSING=()
           [ -z "$GEMINI_API_KEY" ] && MISSING+=("GEMINI_API_KEY")
+          [ -z "$MATCH_GIT_URL" ] && MISSING+=("MATCH_GIT_URL")
           [ -z "$MATCH_PASSWORD" ] && MISSING+=("MATCH_PASSWORD")
           [ -z "$MATCH_DEPLOY_KEY" ] && MISSING+=("MATCH_DEPLOY_KEY")
           [ -z "$IOS_TEAM_ID" ] && MISSING+=("IOS_TEAM_ID")
@@ -73,6 +75,7 @@ jobs:
 
       - name: Sync iOS signing assets (fastlane match)
         env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           # Scope the deploy key to match's git clone only (avoids forcing all
           # github.com SSH traffic through this read-only certs-repo key).
