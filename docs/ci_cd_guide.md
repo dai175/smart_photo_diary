@@ -58,6 +58,7 @@ CI パイプラインの通過検証。`set-deploy-sha` オプションで `DEPL
 
 ### iOS配布用（fastlane match）
 ```bash
+MATCH_GIT_URL                   # focuswave-certs の SSH URL
 MATCH_PASSWORD                  # match リポジトリ復号用パスフレーズ
 MATCH_DEPLOY_KEY                # focuswave-certs を読む SSH デプロイ鍵（秘密鍵・read-only）
 IOS_TEAM_ID                     # Apple Developer Team ID
