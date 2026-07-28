@@ -57,7 +57,7 @@ dependencies:
   
   # Instagram共有機能用パッケージ
   share_plus: ^12.0.1
-  image: ^4.8.0
+  image: ^4.9.1
   characters: ^1.4.0
   
   # Hive暗号化キーのセキュアストレージ
