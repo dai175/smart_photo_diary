@@ -108,6 +108,9 @@ class AiService implements IAiService {
   }
 
   @override
+  Future<Result<void>> recordGenerationUsage() => _recordAiUsage();
+
+  @override
   Future<Result<DiaryGenerationResult>> generateDiaryFromImage({
     required Uint8List imageData,
     required DateTime date,
@@ -122,7 +125,7 @@ class AiService implements IAiService {
     if (checkResult.isFailure) return Failure(checkResult.error);
 
     final online = await isOnline();
-    final result = await _diaryGenerator.generateFromImage(
+    return await _diaryGenerator.generateFromImage(
       imageData: imageData,
       date: date,
       location: location,
@@ -133,12 +136,6 @@ class AiService implements IAiService {
       locale: locale ?? const Locale('ja'),
       diaryLength: diaryLength ?? DiaryLength.standard,
     );
-
-    if (result.isSuccess) {
-      await _recordAiUsage();
-    }
-
-    return result;
   }
 
   @override
@@ -155,7 +152,7 @@ class AiService implements IAiService {
     if (checkResult.isFailure) return Failure(checkResult.error);
 
     final online = await isOnline();
-    final result = await _diaryGenerator.generateFromMultipleImages(
+    return await _diaryGenerator.generateFromMultipleImages(
       imagesWithTimes: imagesWithTimes,
       location: location,
       prompt: prompt,
@@ -165,12 +162,6 @@ class AiService implements IAiService {
       locale: locale ?? const Locale('ja'),
       diaryLength: diaryLength ?? DiaryLength.standard,
     );
-
-    if (result.isSuccess) {
-      await _recordAiUsage();
-    }
-
-    return result;
   }
 
   @override

@@ -155,6 +155,11 @@ class MockSubscriptionService implements ISubscriptionService {
   }
 
   @override
+  Future<Result<SubscriptionSyncResult>> restorePurchasesAndSync() async {
+    return Success(SubscriptionSyncResult.noChange());
+  }
+
+  @override
   Future<Result<bool>> validatePurchase(String transactionId) async {
     return const Success(true);
   }

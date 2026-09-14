@@ -41,6 +41,16 @@ abstract class IInAppPurchaseService {
   /// - Failure: [ServiceException] 復元処理失敗、またはネットワークエラー時
   Future<Result<List<PurchaseResult>>> restorePurchases();
 
+  /// 購入復元後に StoreKit2 エンタイトルメントでローカル状態を同期する
+  ///
+  /// プラグイン restore 中は [isSyncing] 相当のガードで、restored ストリームが
+  /// 推測期限を書き込まないようにしてから [syncSubscriptionWithStore] を呼ぶ。
+  ///
+  /// Returns:
+  /// - Success: [SubscriptionSyncResult]（同期結果）
+  /// - Failure: [ServiceException] 復元または同期失敗時
+  Future<Result<SubscriptionSyncResult>> restorePurchasesAndSync();
+
   /// 購入状態を検証
   ///
   /// Returns:
@@ -67,9 +77,10 @@ abstract class IInAppPurchaseService {
   /// 購入フローの進行状況や完了/失敗をリアルタイムで通知する。
   Stream<PurchaseResult> get purchaseStream;
 
-  /// 起動時にApp Storeと購読状態を同期する
+  /// App Storeエンタイトルメントとローカル購読状態を両方向に同期する
   ///
-  /// ローカルがPremiumなのにStoreに有効購読が無い場合はBasicへ降格する。
+  /// Premium + 無 entitlement → Basic 降格。
+  /// Basic + 有効 entitlement → Premium 昇格。
   /// ネットワークエラー時は誤Basic化を防ぐため現状維持する。
   ///
   /// Returns:

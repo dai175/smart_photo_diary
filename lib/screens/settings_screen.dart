@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/settings_controller.dart';
 import '../core/service_registration.dart';
 import '../services/interfaces/logging_service_interface.dart';
+import '../services/interfaces/subscription_service_interface.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/design_system/app_spacing.dart';
 import '../ui/design_system/app_typography.dart';
@@ -9,6 +10,7 @@ import '../ui/animations/micro_interactions.dart';
 import '../constants/app_constants.dart';
 import '../localization/localization_extensions.dart';
 import '../controllers/scroll_signal.dart';
+import '../utils/dialog_utils.dart';
 import '../utils/upgrade_dialog_utils.dart';
 import '../widgets/settings/settings_content_body.dart';
 import '../widgets/settings/settings_load_error_view.dart';
@@ -91,6 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onLocaleChanged: _controller.onLocaleChanged,
                       onStateChanged: _controller.notifyStateChanged,
                       onUpgradePressed: _showUpgradeDialog,
+                      onRestorePressed: _restorePurchases,
                       onReloadSettings: _controller.loadSettings,
                     )
                   else
@@ -108,6 +111,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await UpgradeDialogUtils.showUpgradeDialog(context);
     if (!mounted) return;
     _controller.notifyStateChanged();
+  }
+
+  Future<void> _restorePurchases() async {
+    try {
+      final subscriptionService =
+          await ServiceRegistration.getAsync<ISubscriptionService>();
+      final result = await subscriptionService.restorePurchasesAndSync();
+      if (!mounted) return;
+      await UpgradeDialogUtils.showRestoreResult(context, result);
+      if (!mounted) return;
+      if (result.isSuccess) {
+        await _controller.loadSettings();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      await DialogUtils.showErrorDialog(
+        context,
+        context.l10n.restorePurchasesFailed,
+      );
+    }
   }
 }
 

@@ -207,12 +207,9 @@ mixin PurchaseEventHandler on ServiceLogging {
         return;
       }
 
-      // Store同期中: 存在確認のみ行い状態を更新しない。
-      // 同期デリゲートが restored カウントを取得できるようストリームには流す。
-      if (!isSyncing) {
-        await updateSubscriptionFromPurchase(purchaseDetails, plan);
-      }
-
+      // restored ではローカル期限を書かない。plugin restore は非同期で
+      // isSyncing 解除後にも届くため、推測の 30/365 日で StoreKit2 同期結果を
+      // 上書きしうる。状態の真実は syncSubscriptionWithStore / 購入完了のみ。
       final result = PurchaseResult(
         status: iapsi.PurchaseStatus.restored,
         productId: purchaseDetails.productID,

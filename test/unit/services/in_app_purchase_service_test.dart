@@ -121,6 +121,28 @@ void main() {
     });
   });
 
+  group('restorePurchasesAndSync', () {
+    test('restore失敗時は Failure を返し isSyncing は false に戻る', () async {
+      when(() => mockStateService.isInitialized).thenReturn(true);
+
+      expect(service.isSyncing, isFalse);
+
+      final result = await service.restorePurchasesAndSync();
+
+      expect(result.isFailure, isTrue);
+      expect(service.isSyncing, isFalse);
+    });
+
+    test('stateService未初期化 → Failure、isSyncing は false', () async {
+      when(() => mockStateService.isInitialized).thenReturn(false);
+
+      final result = await service.restorePurchasesAndSync();
+
+      expect(result.isFailure, isTrue);
+      expect(service.isSyncing, isFalse);
+    });
+  });
+
   group('validatePurchase', () {
     test('stateService未初期化 → Failure', () async {
       when(() => mockStateService.isInitialized).thenReturn(false);

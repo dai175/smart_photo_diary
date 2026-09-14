@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../core/errors/app_exceptions.dart';
+import '../core/result/result.dart';
 import '../models/plans/plan.dart';
 import '../models/plans/plan_factory.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
+import '../services/interfaces/subscription_sync_result.dart';
 import '../utils/dynamic_pricing_utils.dart';
 import 'base_error_controller.dart';
 
@@ -212,6 +214,43 @@ class UpgradeDialogController extends BaseErrorController {
       );
     }
     return true;
+  }
+
+  /// App Store の購入を復元し、エンタイトルメントでローカル状態を同期する。
+  Future<Result<SubscriptionSyncResult>> restorePurchases() async {
+    _logger.info(
+      'Restore purchases started',
+      context: 'UpgradeDialogController.restorePurchases',
+    );
+    try {
+      final result = await _subscriptionService.restorePurchasesAndSync();
+      if (result.isFailure) {
+        _logger.error(
+          'Restore purchases failed',
+          context: 'UpgradeDialogController.restorePurchases',
+          error: result.error,
+        );
+        setError(result.error);
+      } else {
+        _logger.info(
+          'Restore purchases finished',
+          context: 'UpgradeDialogController.restorePurchases',
+          data: {'outcome': result.value.outcome.toString()},
+        );
+      }
+      return result;
+    } catch (e) {
+      _logger.error(
+        'Unexpected error during restore purchases',
+        context: 'UpgradeDialogController.restorePurchases',
+        error: e,
+      );
+      final error = e is AppException
+          ? e
+          : ServiceException('Failed to restore purchases', originalError: e);
+      setError(error);
+      return Failure(error);
+    }
   }
 
   @override

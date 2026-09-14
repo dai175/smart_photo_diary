@@ -304,6 +304,10 @@ class TestServiceSetup {
       ),
     ).thenAnswer((_) async => const Success(['mock', 'test', 'generated']));
 
+    when(
+      () => mock.recordGenerationUsage(),
+    ).thenAnswer((_) async => const Success(null));
+
     return mock;
   }
 

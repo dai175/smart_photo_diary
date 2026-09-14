@@ -103,17 +103,50 @@ void main() {
       verifyNever(() => mockStateService.updateStatus(any()));
     });
 
-    test('ローカルがBasic → noChange、エンタイトルメント取得もしない', () async {
+    test('ローカルがBasic、有効なエンタイトルメントあり → Premiumへ昇格しsynced', () async {
+      final realExpiry = DateTime.now().add(const Duration(days: 23));
       when(
         () => mockStateService.getRawStatus(),
       ).thenAnswer((_) async => Success(buildStatus()));
+      when(() => mockEntitlementService.getActiveSubscription()).thenAnswer(
+        (_) async => Success(
+          StoreEntitlement(
+            productId: SubscriptionConstants.premiumMonthlyProductId,
+            expiryDate: realExpiry,
+            willAutoRenew: true,
+          ),
+        ),
+      );
+      final delegate = buildDelegate();
+
+      final result = await delegate.syncSubscriptionWithStore();
+
+      expect(result.isSuccess, isTrue);
+      expect(result.value.outcome, SubscriptionSyncOutcome.synced);
+      verify(() => mockEntitlementService.getActiveSubscription()).called(1);
+      final captured = verify(
+        () => mockStateService.updateStatus(captureAny()),
+      ).captured;
+      final saved = captured.first as SubscriptionStatus;
+      expect(saved.planId, SubscriptionConstants.premiumMonthlyPlanId);
+      expect(saved.expiryDate, realExpiry);
+      expect(saved.autoRenewal, isTrue);
+    });
+
+    test('ローカルがBasic、エンタイトルメント無し(null) → noChange、書き込みしない', () async {
+      when(
+        () => mockStateService.getRawStatus(),
+      ).thenAnswer((_) async => Success(buildStatus()));
+      when(
+        () => mockEntitlementService.getActiveSubscription(),
+      ).thenAnswer((_) async => const Success(null));
       final delegate = buildDelegate();
 
       final result = await delegate.syncSubscriptionWithStore();
 
       expect(result.isSuccess, isTrue);
       expect(result.value.outcome, SubscriptionSyncOutcome.noChange);
-      verifyNever(() => mockEntitlementService.getActiveSubscription());
+      verify(() => mockEntitlementService.getActiveSubscription()).called(1);
       verifyNever(() => mockStateService.updateStatus(any()));
     });
 

@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:smart_photo_diary/controllers/diary_preview_controller.dart';
+import 'package:smart_photo_diary/models/diary_entry.dart';
+import 'package:smart_photo_diary/models/diary_length.dart';
 import 'package:smart_photo_diary/services/interfaces/ai_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
@@ -215,6 +219,247 @@ void main() {
         final controller = createController();
         expect(() => controller.dispose(), returnsNormally);
       });
+    });
+
+    group('cancel and usage recording', () {
+      late MockAssetEntity mockAsset;
+
+      DiaryEntry savedEntry() {
+        final now = DateTime(2025, 1, 15);
+        return DiaryEntry(
+          id: 'saved-diary-id',
+          date: now,
+          title: 'Generated Title',
+          content: 'Generated Content',
+          photoIds: const ['photo-1'],
+          createdAt: now,
+          updatedAt: now,
+        );
+      }
+
+      void stubLogger() {
+        when(
+          () => mockLogger.info(any(), context: any(named: 'context')),
+        ).thenReturn(null);
+        when(
+          () => mockLogger.info(
+            any(),
+            context: any(named: 'context'),
+            data: any(named: 'data'),
+          ),
+        ).thenReturn(null);
+        when(
+          () => mockLogger.warning(
+            any(),
+            context: any(named: 'context'),
+            data: any(named: 'data'),
+          ),
+        ).thenReturn(null);
+        when(
+          () => mockLogger.error(
+            any(),
+            context: any(named: 'context'),
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).thenReturn(null);
+      }
+
+      void stubSuccessfulGeneration() {
+        when(() => mockAsset.createDateTime).thenReturn(DateTime(2025, 1, 15));
+        when(
+          () => mockPhotoService.getImageForAi(mockAsset),
+        ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3])));
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+            prompt: any(named: 'prompt'),
+            contextText: any(named: 'contextText'),
+            locale: any(named: 'locale'),
+            diaryLength: any(named: 'diaryLength'),
+          ),
+        ).thenAnswer(
+          (_) async => Success(
+            DiaryGenerationResult(
+              title: 'Generated Title',
+              content: 'Generated Content',
+            ),
+          ),
+        );
+        when(
+          () => mockAiService.recordGenerationUsage(),
+        ).thenAnswer((_) async => const Success(null));
+        when(
+          () => mockDiaryCrudService.saveDiaryEntryWithPhotos(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photos: any(named: 'photos'),
+          ),
+        ).thenAnswer((_) async => Success(savedEntry()));
+      }
+
+      setUp(() {
+        mockAsset = MockAssetEntity();
+        stubLogger();
+        registerFallbackValue(Uint8List(0));
+        registerFallbackValue(DateTime(2025, 1, 1));
+        registerFallbackValue(const Locale('en'));
+        registerFallbackValue(<AssetEntity>[]);
+        registerFallbackValue(DiaryLength.standard);
+      });
+
+      test('dispose mid-flight does not auto-save or record usage', () async {
+        final aiCompleter = Completer<Result<DiaryGenerationResult>>();
+        var usageCount = 0;
+        var saveCount = 0;
+        when(() => mockAsset.createDateTime).thenReturn(DateTime(2025, 1, 15));
+        when(
+          () => mockPhotoService.getImageForAi(mockAsset),
+        ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3])));
+        when(
+          () => mockAiService.generateDiaryFromImage(
+            imageData: any(named: 'imageData'),
+            date: any(named: 'date'),
+            location: any(named: 'location'),
+            photoTimes: any(named: 'photoTimes'),
+            prompt: any(named: 'prompt'),
+            contextText: any(named: 'contextText'),
+            locale: any(named: 'locale'),
+            diaryLength: any(named: 'diaryLength'),
+          ),
+        ).thenAnswer((_) => aiCompleter.future);
+        when(() => mockAiService.recordGenerationUsage()).thenAnswer((_) async {
+          usageCount++;
+          return const Success(null);
+        });
+        when(
+          () => mockDiaryCrudService.saveDiaryEntryWithPhotos(
+            date: any(named: 'date'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+            photos: any(named: 'photos'),
+          ),
+        ).thenAnswer((_) async {
+          saveCount++;
+          return Success(savedEntry());
+        });
+
+        final controller = createController();
+
+        final generateFuture = controller.initializeAndGenerate(
+          assets: [mockAsset],
+          locale: const Locale('en'),
+        );
+
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        controller.dispose();
+
+        aiCompleter.complete(
+          Success(
+            DiaryGenerationResult(
+              title: 'Generated Title',
+              content: 'Generated Content',
+            ),
+          ),
+        );
+        await generateFuture;
+
+        expect(saveCount, 0);
+        expect(usageCount, 0);
+        expect(controller.savedDiaryId, isNull);
+      });
+
+      test('successful auto-save records usage once', () async {
+        stubSuccessfulGeneration();
+        var usageCount = 0;
+        when(() => mockAiService.recordGenerationUsage()).thenAnswer((_) async {
+          usageCount++;
+          return const Success(null);
+        });
+        final controller = createController();
+        addTearDown(controller.dispose);
+
+        await controller.initializeAndGenerate(
+          assets: [mockAsset],
+          locale: const Locale('en'),
+        );
+
+        expect(controller.savedDiaryId, equals('saved-diary-id'));
+        expect(controller.generatedTitle, equals('Generated Title'));
+        expect(usageCount, 1);
+      });
+
+      test(
+        'dispose after AI success before save does not record usage',
+        () async {
+          final saveCompleter = Completer<Result<DiaryEntry>>();
+          var usageCount = 0;
+          var saveStarted = false;
+          when(
+            () => mockAsset.createDateTime,
+          ).thenReturn(DateTime(2025, 1, 15));
+          when(
+            () => mockPhotoService.getImageForAi(mockAsset),
+          ).thenAnswer((_) async => Success(Uint8List.fromList([1, 2, 3])));
+          when(
+            () => mockAiService.generateDiaryFromImage(
+              imageData: any(named: 'imageData'),
+              date: any(named: 'date'),
+              location: any(named: 'location'),
+              photoTimes: any(named: 'photoTimes'),
+              prompt: any(named: 'prompt'),
+              contextText: any(named: 'contextText'),
+              locale: any(named: 'locale'),
+              diaryLength: any(named: 'diaryLength'),
+            ),
+          ).thenAnswer(
+            (_) async => Success(
+              DiaryGenerationResult(
+                title: 'Generated Title',
+                content: 'Generated Content',
+              ),
+            ),
+          );
+          when(() => mockAiService.recordGenerationUsage()).thenAnswer((
+            _,
+          ) async {
+            usageCount++;
+            return const Success(null);
+          });
+          when(
+            () => mockDiaryCrudService.saveDiaryEntryWithPhotos(
+              date: any(named: 'date'),
+              title: any(named: 'title'),
+              content: any(named: 'content'),
+              photos: any(named: 'photos'),
+            ),
+          ).thenAnswer((_) {
+            saveStarted = true;
+            return saveCompleter.future;
+          });
+
+          final controller = createController();
+
+          final generateFuture = controller.initializeAndGenerate(
+            assets: [mockAsset],
+            locale: const Locale('en'),
+          );
+
+          await Future<void>.delayed(const Duration(milliseconds: 150));
+          expect(saveStarted, isTrue);
+
+          controller.dispose();
+          saveCompleter.complete(Success(savedEntry()));
+          await generateFuture;
+
+          expect(usageCount, 0);
+          expect(controller.savedDiaryId, isNull);
+        },
+      );
     });
   });
 }

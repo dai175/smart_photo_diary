@@ -654,6 +654,22 @@
       }
     }
   },
+  "restorePurchasesButton": "購入を復元",
+  "@restorePurchasesButton": {
+    "description": "App Storeの購入復元ボタン"
+  },
+  "restorePurchasesSuccess": "Premium購読を復元しました。",
+  "@restorePurchasesSuccess": {
+    "description": "有効なPremiumが見つかったときの復元成功メッセージ"
+  },
+  "restorePurchasesNone": "復元できる購入は見つかりませんでした。",
+  "@restorePurchasesNone": {
+    "description": "有効な購読が無いときの復元メッセージ"
+  },
+  "restorePurchasesFailed": "購入を復元できませんでした。しばらくしてから再度お試しください。",
+  "@restorePurchasesFailed": {
+    "description": "復元失敗時のメッセージ"
+  },
   "commonRetry": "再試行",
   "@commonRetry": {
     "description": "リトライボタン共通文言"
@@ -1168,7 +1184,7 @@
   "@onboardingPrivacyOnDeviceTitle": {
     "description": "オンボーディング プライバシー行1のタイトル"
   },
-  "onboardingPrivacyOnDeviceSubtitle": "日記はこの端末の外へ出ません。",
+  "onboardingPrivacyOnDeviceSubtitle": "日記の保存は端末内。生成のため選んだ写真だけ Google の AI に送ります。",
   "@onboardingPrivacyOnDeviceSubtitle": {
     "description": "オンボーディング プライバシー行1のサブタイトル"
   },
@@ -1184,7 +1200,7 @@
   "@onboardingPrivacyYouOwnTitle": {
     "description": "オンボーディング プライバシー行3のタイトル"
   },
-  "onboardingPrivacyYouOwnSubtitle": "いつでもエクスポート、削除、バックアップが可能。",
+  "onboardingPrivacyYouOwnSubtitle": "日記は1件ずつ削除でき、バックアップの書き出しと復元もできます。",
   "@onboardingPrivacyYouOwnSubtitle": {
     "description": "オンボーディング プライバシー行3のサブタイトル"
   },
@@ -1200,7 +1216,7 @@
   "@onboardingPermissionSubtitle": {
     "description": "オンボーディング 準備完了ページの本文"
   },
-  "onboardingStep4Note": "選んだ写真のみ読み込まれます。外部にアップロードされることはありません。",
+  "onboardingStep4Note": "日記作成では、選んだ写真だけを Google の AI に送って文章を生成します。focuswave のサーバーには送りません。",
   "@onboardingStep4Note": {
     "description": "準備完了ページのプライバシーサブノート"
   },

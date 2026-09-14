@@ -654,6 +654,22 @@
       }
     }
   },
+  "restorePurchasesButton": "Restore Purchases",
+  "@restorePurchasesButton": {
+    "description": "Button label to restore App Store purchases"
+  },
+  "restorePurchasesSuccess": "Your Premium subscription has been restored.",
+  "@restorePurchasesSuccess": {
+    "description": "Message when restore finds an active Premium entitlement"
+  },
+  "restorePurchasesNone": "No active purchases were found to restore.",
+  "@restorePurchasesNone": {
+    "description": "Message when restore finds no active entitlement"
+  },
+  "restorePurchasesFailed": "Could not restore purchases. Please try again later.",
+  "@restorePurchasesFailed": {
+    "description": "Message when restore fails"
+  },
   "commonRetry": "Retry",
   "@commonRetry": {
     "description": "Generic retry button label"
@@ -1168,7 +1184,7 @@
   "@onboardingPrivacyOnDeviceTitle": {
     "description": "Privacy row 1 title in onboarding"
   },
-  "onboardingPrivacyOnDeviceSubtitle": "Your diary never leaves this phone.",
+  "onboardingPrivacyOnDeviceSubtitle": "Diaries stay on this phone. Only photos you pick are sent to Google AI to generate text.",
   "@onboardingPrivacyOnDeviceSubtitle": {
     "description": "Privacy row 1 subtitle in onboarding"
   },
@@ -1184,7 +1200,7 @@
   "@onboardingPrivacyYouOwnTitle": {
     "description": "Privacy row 3 title in onboarding"
   },
-  "onboardingPrivacyYouOwnSubtitle": "Export, delete or back up anytime.",
+  "onboardingPrivacyYouOwnSubtitle": "Delete entries one by one, and export or restore a backup anytime.",
   "@onboardingPrivacyYouOwnSubtitle": {
     "description": "Privacy row 3 subtitle in onboarding"
   },
@@ -1200,7 +1216,7 @@
   "@onboardingPermissionSubtitle": {
     "description": "Body copy for onboarding ready page"
   },
-  "onboardingStep4Note": "Only the photos you choose are read — we never upload them anywhere.",
+  "onboardingStep4Note": "To create a diary, only the photos you choose are sent to Google AI. They are not sent to focuswave servers.",
   "@onboardingStep4Note": {
     "description": "Privacy subnote on the ready onboarding page"
   },
