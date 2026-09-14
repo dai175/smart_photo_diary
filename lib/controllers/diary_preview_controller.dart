@@ -303,6 +303,7 @@ class DiaryPreviewController extends BaseErrorController {
 
     if (result.isSuccess) {
       await _recordPendingUsageIfNeeded();
+      if (localVersion != _requestVersion) return;
       _savedDiaryId = result.value;
       _loadingState = DiaryPreviewLoadingState.idle;
       notifyListeners();

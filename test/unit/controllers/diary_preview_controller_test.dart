@@ -460,6 +460,37 @@ void main() {
           expect(controller.savedDiaryId, isNull);
         },
       );
+
+      test(
+        'dispose during post-save usage recording does not notify after dispose',
+        () async {
+          stubSuccessfulGeneration();
+          final usageCompleter = Completer<Result<void>>();
+          var usageStarted = false;
+          var usageCount = 0;
+          when(() => mockAiService.recordGenerationUsage()).thenAnswer((_) {
+            usageStarted = true;
+            usageCount++;
+            return usageCompleter.future;
+          });
+
+          final controller = createController();
+          final generateFuture = controller.initializeAndGenerate(
+            assets: [mockAsset],
+            locale: const Locale('en'),
+          );
+
+          await Future<void>.delayed(const Duration(milliseconds: 150));
+          expect(usageStarted, isTrue);
+
+          expect(() => controller.dispose(), returnsNormally);
+          usageCompleter.complete(const Success(null));
+          await generateFuture;
+
+          expect(usageCount, 1);
+          expect(controller.savedDiaryId, isNull);
+        },
+      );
     });
   });
 }
