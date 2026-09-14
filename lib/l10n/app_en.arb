@@ -1176,15 +1176,15 @@
   "@onboardingSampleTag3": {
     "description": "Third tag on the sample diary card in onboarding"
   },
-  "onboardingTrustTitle": "Your diary stays here.",
+  "onboardingTrustTitle": "Diaries stay on this phone.",
   "@onboardingTrustTitle": {
     "description": "Headline for onboarding privacy page"
   },
-  "onboardingPrivacyOnDeviceTitle": "On device only",
+  "onboardingPrivacyOnDeviceTitle": "Stored on device",
   "@onboardingPrivacyOnDeviceTitle": {
     "description": "Privacy row 1 title in onboarding"
   },
-  "onboardingPrivacyOnDeviceSubtitle": "Diaries stay on this phone. Only photos you pick are sent to Google AI to generate text.",
+  "onboardingPrivacyOnDeviceSubtitle": "Diaries stay on this phone. Only photos you pick are sent to Google Gemini to generate text.",
   "@onboardingPrivacyOnDeviceSubtitle": {
     "description": "Privacy row 1 subtitle in onboarding"
   },
@@ -1196,7 +1196,7 @@
   "@onboardingPrivacyNoAccountSubtitle": {
     "description": "Privacy row 2 subtitle in onboarding"
   },
-  "onboardingPrivacyYouOwnTitle": "You own everything",
+  "onboardingPrivacyYouOwnTitle": "You stay in control",
   "@onboardingPrivacyYouOwnTitle": {
     "description": "Privacy row 3 title in onboarding"
   },
@@ -1216,7 +1216,7 @@
   "@onboardingPermissionSubtitle": {
     "description": "Body copy for onboarding ready page"
   },
-  "onboardingStep4Note": "To create a diary, only the photos you choose are sent to Google AI. They are not sent to focuswave servers.",
+  "onboardingStep4Note": "To create a diary, only the photos you choose are sent to Google Gemini. They are not sent to focuswave servers.",
   "@onboardingStep4Note": {
     "description": "Privacy subnote on the ready onboarding page"
   },

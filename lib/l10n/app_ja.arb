@@ -1176,15 +1176,15 @@
   "@onboardingSampleTag3": {
     "description": "オンボーディングのサンプル日記カードのタグ3"
   },
-  "onboardingTrustTitle": "日記は、ここにとどまります。",
+  "onboardingTrustTitle": "日記は端末に残ります。",
   "@onboardingTrustTitle": {
     "description": "オンボーディング プライバシーページの見出し"
   },
-  "onboardingPrivacyOnDeviceTitle": "端末内にのみ保存",
+  "onboardingPrivacyOnDeviceTitle": "端末に保存",
   "@onboardingPrivacyOnDeviceTitle": {
     "description": "オンボーディング プライバシー行1のタイトル"
   },
-  "onboardingPrivacyOnDeviceSubtitle": "日記の保存は端末内。生成のため選んだ写真だけ Google の AI に送ります。",
+  "onboardingPrivacyOnDeviceSubtitle": "日記は端末に保存されます。文章を作るときだけ、選んだ写真を Google Gemini に送ります。",
   "@onboardingPrivacyOnDeviceSubtitle": {
     "description": "オンボーディング プライバシー行1のサブタイトル"
   },
@@ -1192,15 +1192,15 @@
   "@onboardingPrivacyNoAccountTitle": {
     "description": "オンボーディング プライバシー行2のタイトル"
   },
-  "onboardingPrivacyNoAccountSubtitle": "メールも、パスワードも、登録も不要。",
+  "onboardingPrivacyNoAccountSubtitle": "メールもパスワードも、登録もいりません。",
   "@onboardingPrivacyNoAccountSubtitle": {
     "description": "オンボーディング プライバシー行2のサブタイトル"
   },
-  "onboardingPrivacyYouOwnTitle": "すべてはあなたのもの",
+  "onboardingPrivacyYouOwnTitle": "自分で管理できる",
   "@onboardingPrivacyYouOwnTitle": {
     "description": "オンボーディング プライバシー行3のタイトル"
   },
-  "onboardingPrivacyYouOwnSubtitle": "日記は1件ずつ削除でき、バックアップの書き出しと復元もできます。",
+  "onboardingPrivacyYouOwnSubtitle": "1件ずつの削除も、バックアップの書き出しや復元もできます。",
   "@onboardingPrivacyYouOwnSubtitle": {
     "description": "オンボーディング プライバシー行3のサブタイトル"
   },
@@ -1216,7 +1216,7 @@
   "@onboardingPermissionSubtitle": {
     "description": "オンボーディング 準備完了ページの本文"
   },
-  "onboardingStep4Note": "日記作成では、選んだ写真だけを Google の AI に送って文章を生成します。focuswave のサーバーには送りません。",
+  "onboardingStep4Note": "選んだ写真だけを Google Gemini に送って文章を作ります。focuswave のサーバーには送りません。",
   "@onboardingStep4Note": {
     "description": "準備完了ページのプライバシーサブノート"
   },
