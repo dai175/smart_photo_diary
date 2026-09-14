@@ -59,8 +59,6 @@ abstract class IAiService {
     DiaryLength? diaryLength,
   });
 
-  /// 保存済みの AI 日記生成 1 回分を月間クォータに記録する。
-  ///
   /// 破棄された生成結果では呼ばないこと。
   Future<Result<void>> recordGenerationUsage();
 

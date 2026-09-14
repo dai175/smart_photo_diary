@@ -82,7 +82,6 @@ class UpgradeDialogUtils {
     }
   }
 
-  /// 復元結果をユーザー向けメッセージに変換して表示する。
   static Future<void> showRestoreResult(
     BuildContext context,
     Result<SubscriptionSyncResult> result,

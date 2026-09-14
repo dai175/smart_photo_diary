@@ -13,8 +13,6 @@ class SettingsRow extends StatelessWidget {
   final String? semanticLabel;
   final bool showDivider;
 
-  /// Settings keeps a single line. Pass a higher value (or null) when the
-  /// subtitle must stay fully readable, such as onboarding disclosures.
   final int? subtitleMaxLines;
 
   const SettingsRow({

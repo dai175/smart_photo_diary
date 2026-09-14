@@ -181,8 +181,6 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
       builder: (context, child) {
         final isGenerating =
             _controller.isInitializing || _controller.isLoading;
-        // Allow immediate back during generation; State.dispose cancels via
-        // DiaryPreviewController.dispose version bump.
         return PopScope(
           canPop: isGenerating,
           onPopInvokedWithResult: (didPop, result) async {

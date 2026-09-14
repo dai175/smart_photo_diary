@@ -193,8 +193,6 @@ abstract class ISubscriptionService {
   /// - Failure: [ServiceException] IAP未初期化、IAP利用不可時
   Future<Result<List<PurchaseResult>>> restorePurchases();
 
-  /// 購入復元後に StoreKit2 エンタイトルメントでローカル状態を同期する
-  ///
   /// Returns:
   /// - Success: [SubscriptionSyncResult]（同期結果）
   /// - Failure: [ServiceException] 復元または同期失敗時

@@ -216,7 +216,6 @@ class UpgradeDialogController extends BaseErrorController {
     return true;
   }
 
-  /// App Store の購入を復元し、エンタイトルメントでローカル状態を同期する。
   Future<Result<SubscriptionSyncResult>> restorePurchases() async {
     _logger.info(
       'Restore purchases started',

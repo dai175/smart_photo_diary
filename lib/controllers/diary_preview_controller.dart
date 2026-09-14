@@ -38,8 +38,6 @@ class DiaryPreviewController extends BaseErrorController {
       DiaryPreviewLoadingState.initializing;
   int _requestVersion = 0;
 
-  /// True after AI generation succeeds for the current request until usage is
-  /// recorded on save, or cleared on dispose / cancel.
   bool _pendingUsageRecord = false;
   int _currentPhotoIndex = 0;
   int _totalPhotos = 0;
@@ -271,7 +269,6 @@ class DiaryPreviewController extends BaseErrorController {
     await _saveDelegate.recordPromptUsage(promptId: _selectedPrompt!.id);
   }
 
-  /// Record AI quota once after a successful save of new AI content.
   Future<void> _recordPendingUsageIfNeeded() async {
     if (!_pendingUsageRecord) return;
     _pendingUsageRecord = false;
