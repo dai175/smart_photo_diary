@@ -15,10 +15,11 @@ import 'purchase_error_handler_mixin.dart';
 
 /// 起動時のApp Store購読状態同期を担当するデリゲート。
 ///
-/// StoreKit2 の Transaction.currentEntitlements から取得した「Apple 管理の実有効期限」を
-/// 真実として、ローカルのサブスクリプション状態を補正する。
-/// - 有効な購読が無い → Basic へ降格
-/// - 有効な購読がある → 実有効期限・プランをローカルへ反映
+/// StoreKit2 の Transaction.currentEntitlements を真実とし、ローカル Hive 状態を両方向に補正する。
+/// - Premium local + 無 entitlement → Basic へ降格
+/// - Basic local + 有効 entitlement → Premium へ昇格（期限・プラン反映）
+/// - Premium local + 有効 entitlement → 期限・プランをリフレッシュ
+/// - Basic local + 無 entitlement → noChange（書き込みしない）
 /// - 取得に失敗 → 誤降格を防ぐため現状維持
 class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
   final ISubscriptionStateService Function() _getStateService;
@@ -69,13 +70,6 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
     }
 
     final current = statusResult.value;
-    if (current.planId == SubscriptionConstants.basicPlanId) {
-      _loggingService?.debug(
-        'Store sync: already basic plan, no sync needed',
-        context: logTag,
-      );
-      return Success(SubscriptionSyncResult.noChange());
-    }
 
     final entitlementResult = await _getEntitlementService()
         .getActiveSubscription();
@@ -106,6 +100,14 @@ class SubscriptionSyncDelegate with PurchaseErrorHandlerMixin {
     StoreEntitlement? entitlement,
   ) async {
     if (entitlement == null) {
+      if (current.planId == SubscriptionConstants.basicPlanId) {
+        _loggingService?.debug(
+          'Store sync: Basic with no entitlement, no change',
+          context: logTag,
+        );
+        return Success(SubscriptionSyncResult.noChange());
+      }
+
       _loggingService?.info(
         'Store sync: no active entitlement, downgrading to Basic',
         context: logTag,

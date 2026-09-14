@@ -25,6 +25,7 @@ class SettingsContentBody extends StatelessWidget {
   final ValueChanged<Locale?> onLocaleChanged;
   final VoidCallback onStateChanged;
   final VoidCallback onUpgradePressed;
+  final VoidCallback onRestorePressed;
   final VoidCallback onReloadSettings;
 
   const SettingsContentBody({
@@ -38,6 +39,7 @@ class SettingsContentBody extends StatelessWidget {
     required this.onLocaleChanged,
     required this.onStateChanged,
     required this.onUpgradePressed,
+    required this.onRestorePressed,
     required this.onReloadSettings,
   });
 
@@ -50,6 +52,7 @@ class SettingsContentBody extends StatelessWidget {
         PlanStatusCard(
           info: subscriptionInfo,
           onUpgradePressed: onUpgradePressed,
+          onRestorePressed: onRestorePressed,
         ),
         _sectionHeader(context, context.l10n.settingsGroupAppearance),
         CustomCard(

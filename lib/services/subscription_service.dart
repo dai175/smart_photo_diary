@@ -136,9 +136,12 @@ class SubscriptionService implements ISubscriptionService {
       _purchaseService.restorePurchases();
 
   @override
+  Future<Result<SubscriptionSyncResult>> restorePurchasesAndSync() =>
+      _purchaseService.restorePurchasesAndSync();
+
+  @override
   Future<Result<bool>> validatePurchase(String transactionId) =>
       _purchaseService.validatePurchase(transactionId);
-
   @override
   Future<Result<void>> changePlanClass(Plan newPlan) =>
       _purchaseService.changePlan(newPlan);

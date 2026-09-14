@@ -233,6 +233,10 @@ class IntegrationTestHelpers {
         photoCount: any(named: 'photoCount'),
       ),
     ).thenAnswer((_) async => const Success(['テスト', 'タグ']));
+
+    when(
+      () => _mockAiService.recordGenerationUsage(),
+    ).thenAnswer((_) async => const Success(null));
   }
 
   /// Create mock diary generation result

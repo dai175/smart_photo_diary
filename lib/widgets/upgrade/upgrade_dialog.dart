@@ -14,12 +14,14 @@ class UpgradeDialog extends StatelessWidget {
   final List<Plan> plans;
   final Map<String, String> priceStrings;
   final Future<bool> Function(Plan plan) onPlanSelected;
+  final Future<void> Function()? onRestorePressed;
 
   const UpgradeDialog({
     super.key,
     required this.plans,
     required this.priceStrings,
     required this.onPlanSelected,
+    this.onRestorePressed,
   });
 
   @override
@@ -50,6 +52,15 @@ class UpgradeDialog extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             const AutoRenewNotice(),
+            if (onRestorePressed != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              TextButton(
+                onPressed: () async {
+                  await onRestorePressed!();
+                },
+                child: Text(context.l10n.restorePurchasesButton),
+              ),
+            ],
           ],
         ),
       ),

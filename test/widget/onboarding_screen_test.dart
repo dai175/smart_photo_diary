@@ -107,7 +107,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Page 3: Privacy -> tap Continue
-        expect(find.text('Your diary stays here.'), findsOneWidget);
+        expect(find.text('Diaries stay on this phone.'), findsOneWidget);
         await tester.tap(find.text('Continue'));
         await tester.pumpAndSettle();
 

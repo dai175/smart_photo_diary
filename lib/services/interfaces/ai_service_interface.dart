@@ -22,7 +22,8 @@ abstract class IAiService {
 
   /// 画像から直接日記を生成（Vision API使用）
   ///
-  /// 生成前に月間使用量制限チェックを行い、成功後に使用量を記録する。
+  /// 生成前に月間使用量制限チェックを行う。使用量の記録は行わない。
+  /// 呼び出し側は日記の保存成功後に [recordGenerationUsage] を呼ぶこと。
   ///
   /// Returns:
   /// - Success: 生成された [DiaryGenerationResult]（title + content）
@@ -41,7 +42,8 @@ abstract class IAiService {
 
   /// 複数画像から順次日記を生成（Vision API使用）
   ///
-  /// 生成前に月間使用量制限チェックを行い、成功後に使用量を記録する。
+  /// 生成前に月間使用量制限チェックを行う。使用量の記録は行わない。
+  /// 呼び出し側は日記の保存成功後に [recordGenerationUsage] を呼ぶこと。
   ///
   /// Returns:
   /// - Success: 生成された [DiaryGenerationResult]（title + content）
@@ -56,6 +58,9 @@ abstract class IAiService {
     Locale? locale,
     DiaryLength? diaryLength,
   });
+
+  /// 破棄された生成結果では呼ばないこと。
+  Future<Result<void>> recordGenerationUsage();
 
   /// 日記の内容からタグを自動生成
   ///

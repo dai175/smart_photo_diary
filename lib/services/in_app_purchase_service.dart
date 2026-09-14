@@ -203,6 +203,20 @@ class InAppPurchaseService
       _flowDelegate.restorePurchases();
 
   @override
+  Future<Result<SubscriptionSyncResult>> restorePurchasesAndSync() async {
+    isSyncing = true;
+    try {
+      final restoreResult = await restorePurchases();
+      if (restoreResult.isFailure) {
+        return Failure(restoreResult.error);
+      }
+      return await syncSubscriptionWithStore();
+    } finally {
+      isSyncing = false;
+    }
+  }
+
+  @override
   Future<Result<SubscriptionSyncResult>> syncSubscriptionWithStore() =>
       _syncDelegate.syncSubscriptionWithStore();
 

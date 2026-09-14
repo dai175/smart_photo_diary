@@ -11,11 +11,13 @@ import '../../ui/components/modern_chip.dart';
 class PlanStatusCard extends StatelessWidget {
   final SubscriptionInfoV2? info;
   final VoidCallback onUpgradePressed;
+  final VoidCallback? onRestorePressed;
 
   const PlanStatusCard({
     super.key,
     required this.info,
     required this.onUpgradePressed,
+    this.onRestorePressed,
   });
 
   static const _cardPadding = EdgeInsets.all(18);
@@ -140,6 +142,15 @@ class PlanStatusCard extends StatelessWidget {
               context.l10n.planCardAutoRenews(expiryDate),
               style: AppTypography.caption.copyWith(color: AppColors.muted),
             ),
+          if (onRestorePressed != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Center(
+              child: TextButton(
+                onPressed: onRestorePressed,
+                child: Text(context.l10n.restorePurchasesButton),
+              ),
+            ),
+          ],
         ],
       ),
     );

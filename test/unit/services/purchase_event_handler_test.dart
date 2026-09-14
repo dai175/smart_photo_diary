@@ -612,7 +612,7 @@ void main() {
       },
     );
 
-    test('isSyncing=false のとき handlePurchaseRestored は通常通り状態を更新する', () async {
+    test('isSyncing=false でも handlePurchaseRestored は状態を更新しない', () async {
       handler.isSyncing = false;
       final purchase = makePurchase(
         productId: SubscriptionConstants.premiumMonthlyProductId,
@@ -621,7 +621,7 @@ void main() {
 
       await handler.handlePurchaseRestored(purchase);
 
-      verify(() => mockStateService.updateStatus(any())).called(1);
+      verifyNever(() => mockStateService.updateStatus(any()));
     });
   });
 }

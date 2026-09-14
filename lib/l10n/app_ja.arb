@@ -654,6 +654,22 @@
       }
     }
   },
+  "restorePurchasesButton": "購入を復元",
+  "@restorePurchasesButton": {
+    "description": "App Storeの購入復元ボタン"
+  },
+  "restorePurchasesSuccess": "Premium購読を復元しました。",
+  "@restorePurchasesSuccess": {
+    "description": "有効なPremiumが見つかったときの復元成功メッセージ"
+  },
+  "restorePurchasesNone": "復元できる購入は見つかりませんでした。",
+  "@restorePurchasesNone": {
+    "description": "有効な購読が無いときの復元メッセージ"
+  },
+  "restorePurchasesFailed": "購入を復元できませんでした。しばらくしてから再度お試しください。",
+  "@restorePurchasesFailed": {
+    "description": "復元失敗時のメッセージ"
+  },
   "commonRetry": "再試行",
   "@commonRetry": {
     "description": "リトライボタン共通文言"
@@ -1160,15 +1176,15 @@
   "@onboardingSampleTag3": {
     "description": "オンボーディングのサンプル日記カードのタグ3"
   },
-  "onboardingTrustTitle": "日記は、ここにとどまります。",
+  "onboardingTrustTitle": "日記は端末に残ります。",
   "@onboardingTrustTitle": {
     "description": "オンボーディング プライバシーページの見出し"
   },
-  "onboardingPrivacyOnDeviceTitle": "端末内にのみ保存",
+  "onboardingPrivacyOnDeviceTitle": "端末に保存",
   "@onboardingPrivacyOnDeviceTitle": {
     "description": "オンボーディング プライバシー行1のタイトル"
   },
-  "onboardingPrivacyOnDeviceSubtitle": "日記はこの端末の外へ出ません。",
+  "onboardingPrivacyOnDeviceSubtitle": "日記は端末に保存されます。文章を作るときだけ、選んだ写真を Google Gemini に送ります。",
   "@onboardingPrivacyOnDeviceSubtitle": {
     "description": "オンボーディング プライバシー行1のサブタイトル"
   },
@@ -1176,15 +1192,15 @@
   "@onboardingPrivacyNoAccountTitle": {
     "description": "オンボーディング プライバシー行2のタイトル"
   },
-  "onboardingPrivacyNoAccountSubtitle": "メールも、パスワードも、登録も不要。",
+  "onboardingPrivacyNoAccountSubtitle": "メールもパスワードも、登録もいりません。",
   "@onboardingPrivacyNoAccountSubtitle": {
     "description": "オンボーディング プライバシー行2のサブタイトル"
   },
-  "onboardingPrivacyYouOwnTitle": "すべてはあなたのもの",
+  "onboardingPrivacyYouOwnTitle": "自分で管理できる",
   "@onboardingPrivacyYouOwnTitle": {
     "description": "オンボーディング プライバシー行3のタイトル"
   },
-  "onboardingPrivacyYouOwnSubtitle": "いつでもエクスポート、削除、バックアップが可能。",
+  "onboardingPrivacyYouOwnSubtitle": "1件ずつの削除も、バックアップの書き出しや復元もできます。",
   "@onboardingPrivacyYouOwnSubtitle": {
     "description": "オンボーディング プライバシー行3のサブタイトル"
   },
@@ -1200,7 +1216,7 @@
   "@onboardingPermissionSubtitle": {
     "description": "オンボーディング 準備完了ページの本文"
   },
-  "onboardingStep4Note": "選んだ写真のみ読み込まれます。外部にアップロードされることはありません。",
+  "onboardingStep4Note": "選んだ写真だけを Google Gemini に送って文章を作ります。focuswave のサーバーには送りません。",
   "@onboardingStep4Note": {
     "description": "準備完了ページのプライバシーサブノート"
   },

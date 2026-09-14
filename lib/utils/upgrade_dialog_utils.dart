@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/service_registration.dart';
+import '../core/result/result.dart';
 import '../services/interfaces/subscription_service_interface.dart';
 import '../services/interfaces/logging_service_interface.dart';
+import '../services/interfaces/subscription_sync_result.dart';
 import '../controllers/upgrade_dialog_controller.dart';
 import '../widgets/upgrade/upgrade_dialog.dart';
 import '../localization/localization_extensions.dart';
@@ -59,6 +61,8 @@ class UpgradeDialogUtils {
             plans: controller.plans,
             priceStrings: controller.priceStrings,
             onPlanSelected: (plan) => controller.purchasePlan(plan),
+            onRestorePressed: () =>
+                _handleRestore(dialogContext, controller.restorePurchases),
           ),
         );
 
@@ -76,5 +80,51 @@ class UpgradeDialogUtils {
         context.l10n.commonUnexpectedErrorWithDetails(e.toString()),
       );
     }
+  }
+
+  static Future<void> showRestoreResult(
+    BuildContext context,
+    Result<SubscriptionSyncResult> result,
+  ) async {
+    if (!context.mounted) return;
+
+    if (result.isFailure) {
+      await DialogUtils.showErrorDialog(
+        context,
+        context.l10n.restorePurchasesFailed,
+      );
+      return;
+    }
+
+    final message = switch (result.value.outcome) {
+      SubscriptionSyncOutcome.synced => context.l10n.restorePurchasesSuccess,
+      SubscriptionSyncOutcome.noChange => context.l10n.restorePurchasesNone,
+      SubscriptionSyncOutcome.downgradedToBasic =>
+        context.l10n.restorePurchasesNone,
+      SubscriptionSyncOutcome.skipped ||
+      SubscriptionSyncOutcome.error => context.l10n.restorePurchasesFailed,
+    };
+
+    if (result.value.outcome == SubscriptionSyncOutcome.synced) {
+      await DialogUtils.showSuccessDialog(
+        context,
+        context.l10n.restorePurchasesButton,
+        message,
+      );
+    } else if (result.value.outcome == SubscriptionSyncOutcome.noChange ||
+        result.value.outcome == SubscriptionSyncOutcome.downgradedToBasic) {
+      await DialogUtils.showSimpleDialog(context, message);
+    } else {
+      await DialogUtils.showErrorDialog(context, message);
+    }
+  }
+
+  static Future<void> _handleRestore(
+    BuildContext context,
+    Future<Result<SubscriptionSyncResult>> Function() restore,
+  ) async {
+    final result = await restore();
+    if (!context.mounted) return;
+    await showRestoreResult(context, result);
   }
 }

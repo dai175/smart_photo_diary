@@ -37,6 +37,8 @@ class DiaryPreviewController extends BaseErrorController {
   DiaryPreviewLoadingState _loadingState =
       DiaryPreviewLoadingState.initializing;
   int _requestVersion = 0;
+
+  bool _pendingUsageRecord = false;
   int _currentPhotoIndex = 0;
   int _totalPhotos = 0;
   DateTime _photoDateTime = DateTime.now();
@@ -227,6 +229,7 @@ class DiaryPreviewController extends BaseErrorController {
       final output = genResult.value;
       _generatedTitle = output.title;
       _generatedContent = output.content;
+      _pendingUsageRecord = true;
       _loadingState = DiaryPreviewLoadingState.saving;
       setLoading(false);
 
@@ -266,11 +269,29 @@ class DiaryPreviewController extends BaseErrorController {
     await _saveDelegate.recordPromptUsage(promptId: _selectedPrompt!.id);
   }
 
+  Future<void> _recordPendingUsageIfNeeded() async {
+    if (!_pendingUsageRecord) return;
+    _pendingUsageRecord = false;
+
+    try {
+      _aiService ??= await ServiceRegistration.getAsync<IAiService>();
+      await _aiService!.recordGenerationUsage();
+    } catch (e) {
+      _logger.warning(
+        'Failed to record AI generation usage after save',
+        context: 'DiaryPreviewController._recordPendingUsageIfNeeded',
+        data: e.toString(),
+      );
+    }
+  }
+
   /// 自動保存を実行する
   Future<void> _autoSaveDiary({
     required List<AssetEntity> assets,
     required int localVersion,
   }) async {
+    if (localVersion != _requestVersion) return;
+
     final result = await _saveDelegate.saveDiary(
       photoDateTime: _photoDateTime,
       title: _generatedTitle,
@@ -281,6 +302,8 @@ class DiaryPreviewController extends BaseErrorController {
     if (localVersion != _requestVersion) return;
 
     if (result.isSuccess) {
+      await _recordPendingUsageIfNeeded();
+      if (localVersion != _requestVersion) return;
       _savedDiaryId = result.value;
       _loadingState = DiaryPreviewLoadingState.idle;
       notifyListeners();
@@ -307,6 +330,7 @@ class DiaryPreviewController extends BaseErrorController {
     );
 
     if (result.isSuccess) {
+      await _recordPendingUsageIfNeeded();
       _loadingState = DiaryPreviewLoadingState.idle;
       setLoading(false);
       return true;
@@ -314,6 +338,13 @@ class DiaryPreviewController extends BaseErrorController {
       _setErrorState(DiaryPreviewErrorType.saveFailed);
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    ++_requestVersion;
+    _pendingUsageRecord = false;
+    super.dispose();
   }
 
   /// 使用量制限フラグを消費する（1回限りのイベント処理用）

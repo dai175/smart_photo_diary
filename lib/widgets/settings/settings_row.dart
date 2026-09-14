@@ -13,6 +13,8 @@ class SettingsRow extends StatelessWidget {
   final String? semanticLabel;
   final bool showDivider;
 
+  final int? subtitleMaxLines;
+
   const SettingsRow({
     super.key,
     required this.icon,
@@ -22,6 +24,7 @@ class SettingsRow extends StatelessWidget {
     this.trailing,
     this.semanticLabel,
     this.showDivider = false,
+    this.subtitleMaxLines = 1,
   });
 
   @override
@@ -68,9 +71,12 @@ class SettingsRow extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12.5,
                         color: cs.onSurfaceVariant,
+                        height: 1.35,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: subtitleMaxLines,
+                      overflow: subtitleMaxLines == null
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
                     ),
                   ],
                 ),
