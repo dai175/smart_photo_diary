@@ -50,7 +50,10 @@ void main() {
         await tester.pump();
 
         expect(find.text('Backup'), findsOneWidget);
-        expect(find.text('Save your diaries to a file'), findsOneWidget);
+        expect(
+          find.text('Save diary text and tags to a file (photos not included)'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('shows restore title and subtitle', (tester) async {

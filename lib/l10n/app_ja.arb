@@ -452,9 +452,9 @@
   "@settingsBackupTitle": {
     "description": "バックアップアクションのタイトル"
   },
-  "settingsBackupSubtitle": "日記をファイルに保存",
+  "settingsBackupSubtitle": "文章とタグをファイルに保存（写真は含みません）",
   "@settingsBackupSubtitle": {
-    "description": "バックアップアクションの補足"
+    "description": "バックアップアクションの補足（文章とタグのみ、写真は含まない）"
   },
   "settingsRestoreTitle": "リストア",
   "@settingsRestoreTitle": {
@@ -488,9 +488,9 @@
   "@settingsBackupSuccessTitle": {
     "description": "バックアップ成功時のダイアログタイトル"
   },
-  "settingsBackupSuccessMessage": "バックアップファイルが正常に保存されました。",
+  "settingsBackupSuccessMessage": "バックアップを保存しました。文章とタグのみ含まれます。",
   "@settingsBackupSuccessMessage": {
-    "description": "バックアップ成功時のメッセージ"
+    "description": "バックアップ成功時のメッセージ（文章とタグのみ）"
   },
   "settingsBackupErrorWithDetails": "バックアップに失敗しました: {details}",
   "@settingsBackupErrorWithDetails": {
@@ -1184,9 +1184,9 @@
   "@onboardingPrivacyOnDeviceTitle": {
     "description": "オンボーディング プライバシー行1のタイトル"
   },
-  "onboardingPrivacyOnDeviceSubtitle": "日記は端末に保存されます。文章を作るときだけ、選んだ写真を Google Gemini に送ります。",
+  "onboardingPrivacyOnDeviceSubtitle": "日記は端末に保存されます。作成のため、選んだ写真と文章を Google Gemini に送ります。",
   "@onboardingPrivacyOnDeviceSubtitle": {
-    "description": "オンボーディング プライバシー行1のサブタイトル"
+    "description": "オンボーディング プライバシー行1のサブタイトル（端末保存と Gemini 送信の説明）"
   },
   "onboardingPrivacyNoAccountTitle": "アカウント不要",
   "@onboardingPrivacyNoAccountTitle": {
@@ -1216,9 +1216,9 @@
   "@onboardingPermissionSubtitle": {
     "description": "オンボーディング 準備完了ページの本文"
   },
-  "onboardingStep4Note": "選んだ写真だけを Google Gemini に送って文章を作ります。focuswave のサーバーには送りません。",
+  "onboardingStep4Note": "日記作成のため、選んだ写真と文章を Google Gemini に送ります。focuswave のサーバーには送りません。",
   "@onboardingStep4Note": {
-    "description": "準備完了ページのプライバシーサブノート"
+    "description": "準備完了ページのプライバシーサブノート（Gemini 送信、focuswave 非送信）"
   },
   "onboardingPermissionCta": "最初の日記を作る",
   "@onboardingPermissionCta": {
