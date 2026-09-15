@@ -377,6 +377,7 @@ class ServiceRegistration {
         logger: serviceLocator.get<ILoggingService>(),
         tagService: tagService,
         encryptionCipher: _encryptionHelper?.cipher,
+        migrationStore: _encryptionHelper,
       );
 
       // Initialize the service

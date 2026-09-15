@@ -92,5 +92,70 @@ void main() {
         expect(identical(cipher1, cipher2), isTrue);
       });
     });
+
+    group('diary encryption migration flag', () {
+      test('isDiaryEncryptionMigrated returns false when unset', () async {
+        when(
+          () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
+        ).thenAnswer((_) async => null);
+
+        final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+
+        expect(await helper.isDiaryEncryptionMigrated(), isFalse);
+        expect(await helper.isMigrated(), isFalse);
+      });
+
+      test('isDiaryEncryptionMigrated returns true when stored', () async {
+        when(
+          () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
+        ).thenAnswer((_) async => 'true');
+
+        final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+
+        expect(await helper.isDiaryEncryptionMigrated(), isTrue);
+        expect(await helper.isMigrated(), isTrue);
+      });
+
+      test(
+        'markDiaryEncryptionMigrated writes true to secure storage',
+        () async {
+          when(
+            () => mockStorage.write(
+              key: 'hive_diary_encryption_migrated',
+              value: 'true',
+            ),
+          ).thenAnswer((_) async {});
+
+          final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+          await helper.markDiaryEncryptionMigrated();
+
+          verify(
+            () => mockStorage.write(
+              key: 'hive_diary_encryption_migrated',
+              value: 'true',
+            ),
+          ).called(1);
+        },
+      );
+
+      test('markMigrated delegates to markDiaryEncryptionMigrated', () async {
+        when(
+          () => mockStorage.write(
+            key: 'hive_diary_encryption_migrated',
+            value: 'true',
+          ),
+        ).thenAnswer((_) async {});
+
+        final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+        await helper.markMigrated();
+
+        verify(
+          () => mockStorage.write(
+            key: 'hive_diary_encryption_migrated',
+            value: 'true',
+          ),
+        ).called(1);
+      });
+    });
   });
 }

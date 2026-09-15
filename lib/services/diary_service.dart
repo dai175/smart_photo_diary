@@ -8,6 +8,7 @@ import '../models/diary_filter.dart';
 import 'interfaces/diary_service_interface.dart';
 import 'interfaces/diary_tag_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
+import '../core/hive_encryption_helper.dart';
 import '../core/result/result.dart';
 import 'diary_index_manager.dart';
 import 'diary_crud_delegate.dart';
@@ -23,6 +24,7 @@ class DiaryService implements IDiaryService {
   Box<DiaryEntry>? _diaryBox;
   final ILoggingService _loggingService;
   final HiveAesCipher? _encryptionCipher;
+  final DiaryEncryptionMigrationStore? _migrationStore;
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
   bool _disposed = false;
 
@@ -38,9 +40,11 @@ class DiaryService implements IDiaryService {
     required ILoggingService logger,
     required IDiaryTagService tagService,
     HiveAesCipher? encryptionCipher,
+    DiaryEncryptionMigrationStore? migrationStore,
   }) : _loggingService = logger,
        _tagService = tagService,
-       _encryptionCipher = encryptionCipher {
+       _encryptionCipher = encryptionCipher,
+       _migrationStore = migrationStore {
     _crudDelegate = DiaryCrudDelegate(
       getBox: () => _diaryBox!,
       ensureInitialized: _ensureInitialized,
@@ -63,11 +67,13 @@ class DiaryService implements IDiaryService {
     required ILoggingService logger,
     required IDiaryTagService tagService,
     HiveAesCipher? encryptionCipher,
+    DiaryEncryptionMigrationStore? migrationStore,
   }) {
     return DiaryService._(
       logger: logger,
       tagService: tagService,
       encryptionCipher: encryptionCipher,
+      migrationStore: migrationStore,
     );
   }
 
@@ -105,16 +111,36 @@ class DiaryService implements IDiaryService {
     try {
       // 暗号化が有効な場合、未マイグレーションのデータを先に移行する
       // NOTE: Hive CEは暗号化不一致時に例外を投げず、クラッシュリカバリで
-      // サイレントにデータを破棄するため、暗号化で開く前にチェックが必要
+      // サイレントにデータを破棄するため、暗号化で開く前にチェックが必要。
+      // Never open plaintext if durable/meta flags say we already migrated.
       if (_encryptionCipher != null) {
         final metaBox = await Hive.openBox(_metaBoxName);
-        final migrated =
+        final metaMigrated =
             metaBox.get(_encryptionMigratedKey, defaultValue: false) == true;
-        if (!migrated) {
-          await _migrateToEncrypted(metaBox);
+        final durableMigrated = await _migrationStore?.isMigrated() ?? false;
+        final migrated = metaMigrated || durableMigrated;
+
+        if (migrated) {
+          // Already encrypted: open with cipher only; backfill missing flags.
+          await metaBox.put(_encryptionMigratedKey, true);
+          await metaBox.close();
+          await _migrationStore?.markMigrated();
+
+          _diaryBox = await Hive.openBox<DiaryEntry>(
+            diaryEntriesBoxName,
+            encryptionCipher: _encryptionCipher,
+          );
+          _loggingService.info(
+            'Hive box initialization completed: '
+            '${_diaryBox?.length ?? 0} entries',
+          );
+          await _indexManager.buildIndex(_diaryBox!);
           return;
         }
-        await metaBox.close();
+
+        // First-time path only (neither meta nor durable flag set)
+        await _migrateToEncrypted(metaBox);
+        return;
       }
 
       _diaryBox = await Hive.openBox<DiaryEntry>(
@@ -126,67 +152,81 @@ class DiaryService implements IDiaryService {
       );
       await _indexManager.buildIndex(_diaryBox!);
     } on HiveError catch (e) {
-      _loggingService.error('Hive schema error, recreating box', error: e);
-      await _recreateBox();
-    } on TypeError catch (e) {
+      // Never delete the box on schema errors. Wipe-recovery destroys user data.
       _loggingService.error(
-        'Hive type mismatch error, recreating box',
+        'Hive schema error during diary box init',
         error: e,
       );
-      await _recreateBox();
+      rethrow;
+    } on TypeError catch (e) {
+      // Never delete the box on type mismatch. Wipe-recovery destroys user data.
+      _loggingService.error(
+        'Hive type mismatch during diary box init',
+        error: e,
+      );
+      rethrow;
     }
   }
 
-  /// 未暗号化ボックスから暗号化ボックスへマイグレーション
+  /// 未暗号化ボックスから暗号化ボックスへマイグレーション（plaintext-first）。
+  ///
+  /// Only called when neither Hive meta nor the durable migration store
+  /// reports migration complete. Cipher-first probes wipe plaintext boxes
+  /// under Hive CE, so first-time migration must open without cipher.
   Future<void> _migrateToEncrypted(Box metaBox) async {
     try {
-      // 未暗号化で開いてデータを読み出す
+      // 1) Open WITHOUT cipher (plaintext-first for real first-time migrate)
       final unencryptedBox = await Hive.openBox<DiaryEntry>(
         diaryEntriesBoxName,
       );
-      final entries = unencryptedBox.toMap();
-      _loggingService.info(
-        'Starting encryption migration: ${entries.length} entries found',
-      );
-      await unencryptedBox.close();
-      await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
 
-      // 暗号化ボックスに書き込み
-      // NOTE: HiveObjectは元のボックスへの参照を持つため、
-      // copyWith()で新しいインスタンスを作成してから書き込む
+      if (unencryptedBox.isNotEmpty) {
+        final entries = unencryptedBox.toMap();
+        _loggingService.info(
+          'Starting encryption migration: ${entries.length} entries found',
+        );
+        await unencryptedBox.close();
+        await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
+
+        // NOTE: HiveObject keeps a reference to its box; copyWith() before put.
+        _diaryBox = await Hive.openBox<DiaryEntry>(
+          diaryEntriesBoxName,
+          encryptionCipher: _encryptionCipher,
+        );
+        await _diaryBox!.putAll(
+          entries.map((k, v) => MapEntry(k, v.copyWith())),
+        );
+        _loggingService.info(
+          'Encryption migration completed: ${_diaryBox!.length} entries',
+        );
+
+        await _markMigrationComplete(metaBox);
+        await _indexManager.buildIndex(_diaryBox!);
+        return;
+      }
+
+      // 2) Empty plaintext: do NOT deleteBoxFromDisk. Open encrypted fresh.
+      await unencryptedBox.close();
       _diaryBox = await Hive.openBox<DiaryEntry>(
         diaryEntriesBoxName,
         encryptionCipher: _encryptionCipher,
       );
-      await _diaryBox!.putAll(entries.map((k, v) => MapEntry(k, v.copyWith())));
+      await _markMigrationComplete(metaBox);
       _loggingService.info(
-        'Encryption migration completed: ${_diaryBox!.length} entries',
+        'Encryption migration marked complete on empty box: '
+        '${_diaryBox!.length} entries',
       );
-
-      await metaBox.put(_encryptionMigratedKey, true);
-      await metaBox.close();
       await _indexManager.buildIndex(_diaryBox!);
     } catch (e) {
       _loggingService.error('Encryption migration failed', error: e);
-      await _recreateBox();
+      rethrow;
     }
   }
 
-  /// スキーマ不整合時のみボックスを削除して再作成する
-  Future<void> _recreateBox() async {
-    try {
-      await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
-      _loggingService.warning('Old box deleted');
-      _diaryBox = await Hive.openBox<DiaryEntry>(
-        diaryEntriesBoxName,
-        encryptionCipher: _encryptionCipher,
-      );
-      _loggingService.info('New box created');
-      await _indexManager.buildIndex(_diaryBox!);
-    } catch (deleteError) {
-      _loggingService.error('Box recreation error', error: deleteError);
-      rethrow;
-    }
+  Future<void> _markMigrationComplete(Box metaBox) async {
+    await metaBox.put(_encryptionMigratedKey, true);
+    await metaBox.close();
+    await _migrationStore?.markMigrated();
   }
 
   // =================================================================
