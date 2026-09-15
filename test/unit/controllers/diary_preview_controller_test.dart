@@ -394,7 +394,7 @@ void main() {
       });
 
       test(
-        'dispose after AI success before save does not record usage',
+        'dispose after AI success before save still records usage',
         () async {
           final saveCompleter = Completer<Result<DiaryEntry>>();
           var usageCount = 0;
@@ -456,8 +456,8 @@ void main() {
           saveCompleter.complete(Success(savedEntry()));
           await generateFuture;
 
-          expect(usageCount, 0);
-          expect(controller.savedDiaryId, isNull);
+          expect(usageCount, 1);
+          expect(controller.savedDiaryId, equals('saved-diary-id'));
         },
       );
 
@@ -488,7 +488,8 @@ void main() {
           await generateFuture;
 
           expect(usageCount, 1);
-          expect(controller.savedDiaryId, isNull);
+          // Id is set without notifyListeners after dispose.
+          expect(controller.savedDiaryId, equals('saved-diary-id'));
         },
       );
     });

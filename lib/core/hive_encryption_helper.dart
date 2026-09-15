@@ -3,6 +3,16 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_ce/hive_ce.dart';
 
+/// Durable store for diary box encryption migration state.
+///
+/// Lives beside the AES key in secure storage so a lost Hive `diary_meta`
+/// box cannot force a plaintext probe of an already-encrypted diary box.
+/// DiaryService must consult this before opening without a cipher.
+abstract class DiaryEncryptionMigrationStore {
+  Future<bool> isMigrated();
+  Future<void> markMigrated();
+}
+
 /// Hiveボックスの暗号化キーを管理するヘルパークラス
 ///
 /// 初回起動時に256bit AESキーを生成し、flutter_secure_storageに保存。
@@ -12,8 +22,12 @@ import 'package:hive_ce/hive_ce.dart';
 /// Hive CEは暗号化不一致時に例外を投げずクラッシュリカバリで
 /// サイレントにデータを破棄するため、マイグレーション前のデータ確認が必要で、
 /// DiaryEntry固有のcopyWith()が必要なため、ジェネリックな実装は不適切。
-class HiveEncryptionHelper {
+///
+/// Also stores [DiaryEncryptionMigrationStore] so meta-box loss cannot force
+/// a plaintext open of ciphertext (Hive CE wipes on cipher mismatch).
+class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
   static const _keyStorageKey = 'hive_aes_encryption_key';
+  static const _diaryEncryptionMigratedKey = 'hive_diary_encryption_migrated';
 
   final FlutterSecureStorage _secureStorage;
   HiveAesCipher? _cipher;
@@ -26,6 +40,18 @@ class HiveEncryptionHelper {
     var encodedKey = await _secureStorage.read(key: _keyStorageKey);
 
     if (encodedKey == null) {
+      // Migrated diaries need the original AES key. Never mint a replacement.
+      final migrated = await _secureStorage.read(
+        key: _diaryEncryptionMigratedKey,
+      );
+      if (migrated == 'true') {
+        throw StateError(
+          'Hive AES encryption key is missing but diary encryption '
+          'migration is marked complete. Refusing to generate a replacement '
+          'key that would wipe encrypted diary data.',
+        );
+      }
+
       final key = Hive.generateSecureKey();
       encodedKey = base64Url.encode(key);
       await _secureStorage.write(key: _keyStorageKey, value: encodedKey);
@@ -44,4 +70,21 @@ class HiveEncryptionHelper {
     }
     return _cipher!;
   }
+
+  /// Whether diary_entries has completed plaintext→encrypted migration.
+  Future<bool> isDiaryEncryptionMigrated() async {
+    final value = await _secureStorage.read(key: _diaryEncryptionMigratedKey);
+    return value == 'true';
+  }
+
+  /// Persist that diary_entries encryption migration has completed.
+  Future<void> markDiaryEncryptionMigrated() async {
+    await _secureStorage.write(key: _diaryEncryptionMigratedKey, value: 'true');
+  }
+
+  @override
+  Future<bool> isMigrated() => isDiaryEncryptionMigrated();
+
+  @override
+  Future<void> markMigrated() => markDiaryEncryptionMigrated();
 }
