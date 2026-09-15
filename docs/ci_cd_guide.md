@@ -20,7 +20,8 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 `detect-changes` ジョブが単一の `skip_platforms`（`true`|`false`）を出し、プラットフォームジョブはそれだけを読む。
 
 - `workflow_dispatch`: 常に `skip_platforms=false`
-- `push` to main: `git diff --name-only HEAD~1 HEAD` の全ファイルが `pubspec.yaml` / `CHANGELOG.md` のみなら `true`（それ以外・`HEAD~1` 欠落は `false`）
+- `push` to main: `git diff --name-only <before> <sha>`（push 全体。`github.event.before` から `github.sha`）の全ファイルが `pubspec.yaml` / `CHANGELOG.md` のみなら `true`（それ以外・before 欠落/ゼロ SHA は `false`）
+- `cancel-in-progress` は PR のみ。main の version-only push が進行中の Android ビルドを打ち消さない
 - `pull_request`: プラットフォームジョブはイベント条件で既にスキップ
 
 ### 2. Release (`release.yml`)
