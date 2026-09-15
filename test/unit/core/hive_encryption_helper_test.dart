@@ -23,6 +23,9 @@ void main() {
           () => mockStorage.read(key: 'hive_aes_encryption_key'),
         ).thenAnswer((_) async => null);
         when(
+          () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
+        ).thenAnswer((_) async => null);
+        when(
           () => mockStorage.write(
             key: 'hive_aes_encryption_key',
             value: any(named: 'value'),
@@ -43,6 +46,63 @@ void main() {
         ).called(1);
         expect(helper.cipher, isA<HiveAesCipher>());
       });
+
+      test('generates key when missing and migration flag is false', () async {
+        when(
+          () => mockStorage.read(key: 'hive_aes_encryption_key'),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
+        ).thenAnswer((_) async => 'false');
+        when(
+          () => mockStorage.write(
+            key: 'hive_aes_encryption_key',
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
+
+        final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+        await helper.initialize();
+
+        verify(
+          () => mockStorage.write(
+            key: 'hive_aes_encryption_key',
+            value: any(named: 'value'),
+          ),
+        ).called(1);
+        expect(helper.cipher, isA<HiveAesCipher>());
+      });
+
+      test(
+        'throws StateError when key is missing but migration is complete',
+        () async {
+          when(
+            () => mockStorage.read(key: 'hive_aes_encryption_key'),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
+          ).thenAnswer((_) async => 'true');
+
+          final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+
+          await expectLater(
+            helper.initialize(),
+            throwsA(
+              isA<StateError>().having(
+                (e) => e.message,
+                'message',
+                contains('Refusing to generate a replacement key'),
+              ),
+            ),
+          );
+          verifyNever(
+            () => mockStorage.write(
+              key: 'hive_aes_encryption_key',
+              value: any(named: 'value'),
+            ),
+          );
+        },
+      );
 
       test('loads existing key from storage', () async {
         // Arrange

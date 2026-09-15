@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -182,27 +184,72 @@ class DiaryService implements IDiaryService {
 
       if (unencryptedBox.isNotEmpty) {
         final entries = unencryptedBox.toMap();
+        final expectedCount = entries.length;
+        final boxPath = unencryptedBox.path;
         _loggingService.info(
-          'Starting encryption migration: ${entries.length} entries found',
+          'Starting encryption migration: $expectedCount entries found',
         );
         await unencryptedBox.close();
+
+        File? backupFile;
+        if (boxPath != null) {
+          backupFile = File('$boxPath.bak_pre_enc');
+          try {
+            await File(boxPath).copy(backupFile.path);
+          } catch (e) {
+            _loggingService.error(
+              'Failed to create pre-encryption backup of diary box',
+              error: e,
+            );
+            rethrow;
+          }
+        }
+
         await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
 
-        // NOTE: HiveObject keeps a reference to its box; copyWith() before put.
-        _diaryBox = await Hive.openBox<DiaryEntry>(
-          diaryEntriesBoxName,
-          encryptionCipher: _encryptionCipher,
-        );
-        await _diaryBox!.putAll(
-          entries.map((k, v) => MapEntry(k, v.copyWith())),
-        );
-        _loggingService.info(
-          'Encryption migration completed: ${_diaryBox!.length} entries',
-        );
+        try {
+          // NOTE: HiveObject keeps a reference to its box; copyWith() before put.
+          _diaryBox = await Hive.openBox<DiaryEntry>(
+            diaryEntriesBoxName,
+            encryptionCipher: _encryptionCipher,
+          );
+          await _diaryBox!.putAll(
+            entries.map((k, v) => MapEntry(k, v.copyWith())),
+          );
+          if (_diaryBox!.length != expectedCount) {
+            throw StateError(
+              'Encryption migration verification failed: '
+              'expected $expectedCount entries, got ${_diaryBox!.length}',
+            );
+          }
+          _loggingService.info(
+            'Encryption migration completed: ${_diaryBox!.length} entries',
+          );
 
-        await _markMigrationComplete(metaBox);
-        await _indexManager.buildIndex(_diaryBox!);
-        return;
+          if (backupFile != null) {
+            try {
+              if (await backupFile.exists()) {
+                await backupFile.delete();
+              }
+            } catch (e) {
+              _loggingService.error(
+                'Failed to delete pre-encryption backup after successful migration',
+                error: e,
+              );
+            }
+          }
+
+          await _markMigrationComplete(metaBox);
+          await _indexManager.buildIndex(_diaryBox!);
+          return;
+        } catch (e) {
+          await _restorePlaintextAfterFailedMigration(
+            entries: entries,
+            boxPath: boxPath,
+            backupFile: backupFile,
+          );
+          rethrow;
+        }
       }
 
       // 2) Empty plaintext: do NOT deleteBoxFromDisk. Open encrypted fresh.
@@ -220,6 +267,69 @@ class DiaryService implements IDiaryService {
     } catch (e) {
       _loggingService.error('Encryption migration failed', error: e);
       rethrow;
+    }
+  }
+
+  /// Best-effort plaintext restore after delete+encrypt failed.
+  /// Leaves migration unmarked so a later launch can retry.
+  Future<void> _restorePlaintextAfterFailedMigration({
+    required Map<dynamic, DiaryEntry> entries,
+    required String? boxPath,
+    required File? backupFile,
+  }) async {
+    try {
+      if (_diaryBox != null) {
+        if (_diaryBox!.isOpen) {
+          await _diaryBox!.close();
+        }
+        _diaryBox = null;
+      }
+    } catch (e) {
+      _loggingService.error(
+        'Failed to close encrypted box during migration restore',
+        error: e,
+      );
+    }
+
+    try {
+      await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
+    } catch (e) {
+      _loggingService.error(
+        'Failed to remove partial encrypted box during migration restore',
+        error: e,
+      );
+    }
+
+    try {
+      if (backupFile != null && boxPath != null && await backupFile.exists()) {
+        await backupFile.copy(boxPath);
+        try {
+          await backupFile.delete();
+        } catch (e) {
+          _loggingService.error(
+            'Failed to delete pre-encryption backup after restore',
+            error: e,
+          );
+        }
+        _diaryBox = await Hive.openBox<DiaryEntry>(diaryEntriesBoxName);
+        _loggingService.info(
+          'Restored plaintext diary box from pre-encryption backup '
+          '(${_diaryBox!.length} entries)',
+        );
+        return;
+      }
+
+      _diaryBox = await Hive.openBox<DiaryEntry>(diaryEntriesBoxName);
+      await _diaryBox!.putAll(entries.map((k, v) => MapEntry(k, v.copyWith())));
+      _loggingService.info(
+        'Restored plaintext diary box from in-memory entries '
+        '(${_diaryBox!.length} entries)',
+      );
+    } catch (e) {
+      _loggingService.error(
+        'Failed to restore plaintext diary box after encryption migration failure',
+        error: e,
+      );
     }
   }
 

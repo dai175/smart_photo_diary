@@ -40,6 +40,18 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
     var encodedKey = await _secureStorage.read(key: _keyStorageKey);
 
     if (encodedKey == null) {
+      // Migrated diaries need the original AES key. Never mint a replacement.
+      final migrated = await _secureStorage.read(
+        key: _diaryEncryptionMigratedKey,
+      );
+      if (migrated == 'true') {
+        throw StateError(
+          'Hive AES encryption key is missing but diary encryption '
+          'migration is marked complete. Refusing to generate a replacement '
+          'key that would wipe encrypted diary data.',
+        );
+      }
+
       final key = Hive.generateSecureKey();
       encodedKey = base64Url.encode(key);
       await _secureStorage.write(key: _keyStorageKey, value: encodedKey);
