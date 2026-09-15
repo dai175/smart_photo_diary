@@ -38,87 +38,14 @@ jobs:
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
           echo "build_number=${BUILD_NUMBER}" >> $GITHUB_OUTPUT
 
-  build-ios-release:
-    name: Build iOS Release Artifacts
-    needs: [version]
-    runs-on: macos-15
-    timeout-minutes: 45
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Flutter
-        uses: ./.github/actions/setup-flutter
-
-      - name: Setup iOS
-        uses: ./.github/actions/setup-ios
-
-      - name: Verify required secrets
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "::error::GEMINI_API_KEY secret is not set"
-            exit 1
-          fi
-          echo "Required secrets verified"
-
-      - name: Create dart-defines file
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          echo '{}' | jq --arg key "$GEMINI_API_KEY" '.GEMINI_API_KEY = $key' > dart_defines.json
-
-      - name: Build iOS (release, no codesign)
-        run: |
-          echo "Building iOS version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})"
-          flutter build ios --release --no-codesign \
-            --build-name=${{ needs.version.outputs.version_name }} \
-            --build-number=${{ needs.version.outputs.build_number }} \
-            --dart-define-from-file=dart_defines.json
-
-      - name: Cleanup dart-defines file
-        if: always()
-        run: rm -f dart_defines.json
-
-      - name: Prepare iOS artifacts
-        env:
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          mkdir -p ios-artifacts
-
-          (
-            cd build/ios/iphoneos
-            zip -r ../../../ios-artifacts/smart-photo-diary-ios-${VERSION}.zip Runner.app
-          )
-
-          (
-            cd ios-artifacts
-            shasum -a 256 smart-photo-diary-ios-*.zip > smart-photo-diary-checksums.txt
-          )
-
-      - name: Upload iOS artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: ios-release-artifacts
-          path: ios-artifacts/*
-          retention-days: 90
-
   create-release:
     name: Create GitHub Release
-    needs: [version, build-ios-release]
+    needs: [version]
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-
-      - name: Download iOS artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: ios-release-artifacts
-          path: ./artifacts/ios
 
       - name: Create GitHub Release
         env:
@@ -133,7 +60,7 @@ jobs:
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          printf "Build artifacts for Smart Photo Diary %s\n\n**Build Info:** %s (Build %s)\n**Commit:** %s\n\nRelease notes will be updated manually." \
+          printf "Draft release for Smart Photo Diary %s\n\n**Build Info:** %s (Build %s)\n**Commit:** %s\n\nRelease notes will be updated manually. Publishing this draft triggers ios-deploy.yml, which builds and signs the IPA." \
             "$VERSION" "$VERSION_NAME" "$BUILD_NUMBER" "$COMMIT_SHA" > release_notes.txt
 
           gh release create "$VERSION" \
@@ -141,21 +68,21 @@ jobs:
             --target "$COMMIT_SHA" \
             --draft \
             ${PRERELEASE_FLAG:+"$PRERELEASE_FLAG"} \
-            --notes-file release_notes.txt \
-            artifacts/ios/smart-photo-diary-ios-*.zip \
-            artifacts/ios/smart-photo-diary-checksums.txt
+            --notes-file release_notes.txt
 
       - name: Create release summary
         env:
           VERSION: ${{ needs.version.outputs.version }}
           IS_PRERELEASE: ${{ contains(needs.version.outputs.version, '-') }}
+          BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
         run: |
-          echo "## Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## Draft Release Created" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Release Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build number**: $BUILD_NUMBER (GITHUB_RUN_NUMBER; reused by ios-deploy)" >> $GITHUB_STEP_SUMMARY
           echo "- **Pre-release**: $IS_PRERELEASE" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Assets" >> $GITHUB_STEP_SUMMARY
-          echo "- iOS Build Archive" >> $GITHUB_STEP_SUMMARY
-          echo "- SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "### Notes" >> $GITHUB_STEP_SUMMARY
+          echo "- Draft only; no iOS artifacts attached" >> $GITHUB_STEP_SUMMARY
+          echo "- Publish the draft to trigger signed IPA build via ios-deploy.yml" >> $GITHUB_STEP_SUMMARY
