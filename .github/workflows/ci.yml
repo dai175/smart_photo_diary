@@ -20,9 +20,63 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    name: Detect Platform Skip
+    runs-on: ubuntu-latest
+    outputs:
+      skip_platforms: ${{ steps.detect.outputs.skip_platforms }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Decide skip_platforms
+        id: detect
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "skip_platforms=false" >> "$GITHUB_OUTPUT"
+            echo "workflow_dispatch: always run platform builds"
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "skip_platforms=false" >> "$GITHUB_OUTPUT"
+            echo "pull_request: platform jobs gated by event; detect unused"
+            exit 0
+          fi
+
+          # push to main: version-only allowlist → skip platform builds
+          if ! git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            echo "skip_platforms=false" >> "$GITHUB_OUTPUT"
+            echo "HEAD~1 missing: do not skip platforms"
+            exit 0
+          fi
+
+          mapfile -t CHANGED < <(git diff --name-only HEAD~1 HEAD)
+          if [ "${#CHANGED[@]}" -eq 0 ]; then
+            echo "skip_platforms=false" >> "$GITHUB_OUTPUT"
+            echo "No changed files: do not skip platforms"
+            exit 0
+          fi
+
+          SKIP=true
+          for f in "${CHANGED[@]}"; do
+            if [[ ! "$f" =~ ^(pubspec\.yaml|CHANGELOG\.md)$ ]]; then
+              SKIP=false
+              break
+            fi
+          done
+
+          echo "skip_platforms=${SKIP}" >> "$GITHUB_OUTPUT"
+          echo "Changed files: ${CHANGED[*]}"
+          echo "skip_platforms=${SKIP}"
+
   quality-check:
     name: Code Quality & Tests
     runs-on: ubuntu-latest
@@ -34,8 +88,6 @@ jobs:
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
-        with:
-          setup-java: 'true'
 
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
@@ -86,8 +138,8 @@ jobs:
 
   build-android:
     name: Build Android
-    needs: quality-check
-    if: github.event_name != 'pull_request'
+    needs: [quality-check, detect-changes]
+    if: github.event_name != 'pull_request' && needs.detect-changes.outputs.skip_platforms != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -115,38 +167,9 @@ jobs:
             exit 1
           fi
 
-  build-ios:
-    name: Build iOS
-    needs: quality-check
-    if: github.event_name != 'pull_request'
-    runs-on: macos-15
-    timeout-minutes: 45
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Flutter
-        uses: ./.github/actions/setup-flutter
-
-      - name: Setup iOS
-        uses: ./.github/actions/setup-ios
-
-      - name: Build iOS (release, no codesign)
-        run: flutter build ios --release --no-codesign
-
-      - name: Verify iOS build success
-        run: |
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            echo "iOS release build completed successfully"
-          else
-            echo "::error::iOS release build not found"
-            exit 1
-          fi
-
   ci-summary:
     name: CI Summary
-    needs: [quality-check, build-android, build-ios]
+    needs: [quality-check, detect-changes, build-android]
     runs-on: ubuntu-latest
     if: always()
 
@@ -154,31 +177,30 @@ jobs:
       - name: Create CI summary
         env:
           ANDROID_RESULT: ${{ needs.build-android.result }}
-          IOS_RESULT: ${{ needs.build-ios.result }}
+          SKIP_PLATFORMS: ${{ needs.detect-changes.outputs.skip_platforms }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           echo "## CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Completed Steps" >> $GITHUB_STEP_SUMMARY
           echo "- **Code Quality**: Tests, analysis, and formatting checks" >> $GITHUB_STEP_SUMMARY
+          echo "- **iOS CI Build**: Not run (signed IPA is built only in ios-deploy.yml)" >> $GITHUB_STEP_SUMMARY
 
           if [ "$ANDROID_RESULT" = "success" ]; then
             echo "- **Android Build**: AAB compilation verified" >> $GITHUB_STEP_SUMMARY
           elif [ "$ANDROID_RESULT" = "skipped" ]; then
-            echo "- **Android Build**: Skipped (PR build)" >> $GITHUB_STEP_SUMMARY
+            if [ "$EVENT_NAME" = "pull_request" ]; then
+              echo "- **Android Build**: Skipped (pull request)" >> $GITHUB_STEP_SUMMARY
+            elif [ "$SKIP_PLATFORMS" = "true" ]; then
+              echo "- **Android Build**: Skipped (version-only change)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Android Build**: Skipped" >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "- **Android Build**: Failed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "$IOS_RESULT" = "success" ]; then
-            echo "- **iOS Build**: Release compilation verified" >> $GITHUB_STEP_SUMMARY
-          elif [ "$IOS_RESULT" = "skipped" ]; then
-            echo "- **iOS Build**: Skipped (PR build)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **iOS Build**: Failed" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Notes" >> $GITHUB_STEP_SUMMARY
           echo "- CI builds create a dummy .env file for testing purposes" >> $GITHUB_STEP_SUMMARY
-          echo "- iOS builds are unsigned (--no-codesign)" >> $GITHUB_STEP_SUMMARY
-          echo "- Platform builds are skipped on pull requests to reduce cost" >> $GITHUB_STEP_SUMMARY
+          echo "- Platform builds are skipped on pull requests and on version-only main pushes (pubspec.yaml / CHANGELOG.md only)" >> $GITHUB_STEP_SUMMARY

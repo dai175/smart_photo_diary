@@ -13,17 +13,23 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 ✅ コード品質チェック（フォーマット、静的解析）
 ✅ 全テスト実行（100%成功率）
 ✅ カバレッジ生成・ステップサマリー出力（閾値55%以上）
-✅ Android/iOSビルド検証（mainブランチpush時のみ、Releaseビルド）
+✅ Androidビルド検証（main / workflow_dispatch のみ。version-only 変更時はスキップ）
+❌ CI での iOS ビルドなし（署名付き IPA は ios-deploy.yml のみ）
 ```
+
+`detect-changes` ジョブが単一の `skip_platforms`（`true`|`false`）を出し、プラットフォームジョブはそれだけを読む。
+
+- `workflow_dispatch`: 常に `skip_platforms=false`
+- `push` to main: `git diff --name-only HEAD~1 HEAD` の全ファイルが `pubspec.yaml` / `CHANGELOG.md` のみなら `true`（それ以外・`HEAD~1` 欠落は `false`）
+- `pull_request`: プラットフォームジョブはイベント条件で既にスキップ
 
 ### 2. Release (`release.yml`)
 **トリガー**: バージョンタグ(`v*`)push
 
 ```yaml
 ✅ CI通過の検証
-✅ iOSリリースビルド（アーティファクト生成）
-✅ SHA256チェックサム生成
-✅ GitHub Release作成・アップロード
+✅ バージョン / build_number（GITHUB_RUN_NUMBER）抽出
+✅ Draft GitHub Release 作成（ノートのみ。iOS アーティファクトなし）
 ```
 
 ### 3. iOS Deploy (`ios-deploy.yml`)
@@ -31,7 +37,8 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 
 ```yaml
 ✅ CI通過の検証
-✅ 本番環境でのIPAビルド（署名・エクスポート込み）
+✅ ソースから署名付き IPA をビルド（release のアーティファクトは再利用しない）
+✅ build_number は release.yml の runNumber を参照
 ✅ fastlane経由でTestFlight自動アップロード
 ```
 
@@ -39,8 +46,8 @@ Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自�
 
 - **Flutter Version**: `.fvmrc` で管理（setup-flutter Composite Actionが自動読み取り）
 - **Dart Version**: 3.11.1
-- **Java Version**: 17 (Zulu distribution)
-- **Platform**: Ubuntu (Android), macOS (iOS)
+- **Java Version**: 17 (Zulu distribution; Android ビルドジョブのみ)
+- **Platform**: Ubuntu (quality / Android), macOS (ios-deploy のみ)
 
 ## Composite Actions
 
@@ -86,7 +93,7 @@ git push origin feature/new-feature
 # 2. レビュー・マージ
 git checkout main && git merge feature/new-feature
 git push origin main
-# → ci.yml が再度実行（品質チェック・テスト + Android/iOSビルド検証）
+# → ci.yml: 品質チェック・テスト + Androidビルド（version-only なら Android スキップ）
 ```
 
 ### ローカライズQAチェック
@@ -106,11 +113,11 @@ git tag v1.2.0
 git push origin v1.2.0
 
 # → 自動実行される内容:
-#   ✅ release.yml: CI検証 → iOSビルド → GitHub Draft Release作成
+#   ✅ release.yml: CI検証 → Draft GitHub Release（ノートのみ）
 #
 # 2. Draft ReleaseをGitHubで確認・Publish
 # → ios-deploy.yml が自動実行:
-#   ✅ IPAビルド（署名・エクスポート込み） → TestFlightアップロード
+#   ✅ 署名付き IPA をソースからビルド → TestFlightアップロード
 ```
 
 ## よくある問題と解決
@@ -150,12 +157,13 @@ git push origin v1.2.0
 - Flutter SDKキャッシュ: cache: true（setup-flutter Composite Action）
 - pub-cache キャッシュ
 - build_runner キャッシュ
-- Android・iOS ビルドの並列実行
-- PRビルドではプラットフォームビルドをスキップ
+- CI に iOS ビルドなし（macOS ランナーは ios-deploy のみ）
+- PR / version-only main push では Android ビルドをスキップ
+- release.yml は Draft のみ（unsigned iOS 再ビルドなし）
 
 # タイムアウト設定
-timeout-minutes: 30    # CI/CD
-timeout-minutes: 45    # ビルド・デプロイ
+timeout-minutes: 30    # quality-check
+timeout-minutes: 45    # Android ビルド
 timeout-minutes: 60    # iOS デプロイ
 ```
 
@@ -203,7 +211,7 @@ Smart Photo DiaryのCI/CDシステムは、以下の特徴を持つ自動化パ�
 
 - **完全自動化**: コミットからビルドまで
 - **品質保証**: 100%テスト成功率維持
-- **マルチプラットフォーム**: Android・iOS同時対応
+- **マルチプラットフォーム**: CI は Android（条件付き）、配布 iOS は ios-deploy
 - **セキュリティ**: 暗号化Secrets・環境分離
 - **Composite Actions**: セットアップ・検証ロジックの再利用
 - **TestFlightデプロイ**: GitHub Release作成からTestFlightアップロードまで自動化

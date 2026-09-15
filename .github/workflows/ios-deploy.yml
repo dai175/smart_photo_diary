@@ -134,6 +134,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION_NAME="${DEPLOY_TAG#v}"
+          # release.yml no longer uploads iOS artifacts; reuse its GITHUB_RUN_NUMBER only.
           BUILD_NUMBER=$(gh run list --workflow release.yml --commit "$DEPLOY_SHA" --status completed --json runNumber --jq '.[0].runNumber // empty' 2>/dev/null || true)
           if [ -z "$BUILD_NUMBER" ]; then
             echo "::warning::Could not retrieve release build number, using current run number"
@@ -141,6 +142,7 @@ jobs:
           fi
 
           echo "Deploying version: $VERSION_NAME from tag $DEPLOY_TAG (build #$BUILD_NUMBER)"
+          echo "Building and signing IPA from source (draft release has notes only)"
 
           flutter build ipa --release \
             --build-name=$VERSION_NAME \
