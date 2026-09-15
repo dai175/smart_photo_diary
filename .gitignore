@@ -87,3 +87,4 @@ ios/fastlane/README.md
 coverage/
 # --- l10n generated files ---
 lib/l10n/generated/
+.asc/
