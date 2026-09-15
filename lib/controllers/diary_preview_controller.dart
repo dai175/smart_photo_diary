@@ -292,6 +292,9 @@ class DiaryPreviewController extends BaseErrorController {
   }) async {
     if (localVersion != _requestVersion) return;
 
+    // Capture before await: dispose/regenerate may bump version mid-save.
+    final shouldRecordUsage = _pendingUsageRecord;
+
     final result = await _saveDelegate.saveDiary(
       photoDateTime: _photoDateTime,
       title: _generatedTitle,
@@ -299,15 +302,18 @@ class DiaryPreviewController extends BaseErrorController {
       assets: assets,
     );
 
-    if (localVersion != _requestVersion) return;
-
     if (result.isSuccess) {
-      await _recordPendingUsageIfNeeded();
-      if (localVersion != _requestVersion) return;
+      // Hive already has the diary — always meter, even if this request is stale.
+      if (shouldRecordUsage) {
+        _pendingUsageRecord = true;
+        await _recordPendingUsageIfNeeded();
+      }
       _savedDiaryId = result.value;
+      if (localVersion != _requestVersion) return;
       _loadingState = DiaryPreviewLoadingState.idle;
       notifyListeners();
     } else {
+      if (localVersion != _requestVersion) return;
       _setErrorState(DiaryPreviewErrorType.saveFailed);
     }
   }
@@ -342,8 +348,9 @@ class DiaryPreviewController extends BaseErrorController {
 
   @override
   void dispose() {
+    // Bump version to cancel UI updates; keep _pendingUsageRecord so an
+    // in-flight save can still meter after Hive write succeeds.
     ++_requestVersion;
-    _pendingUsageRecord = false;
     super.dispose();
   }
 

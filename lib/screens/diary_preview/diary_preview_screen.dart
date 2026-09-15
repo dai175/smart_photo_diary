@@ -185,6 +185,8 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
           canPop: isGenerating,
           onPopInvokedWithResult: (didPop, result) async {
             if (didPop) return;
+            // Ignore back while auto/manual save is writing to Hive.
+            if (_controller.isSaving) return;
 
             if (!_controller.isLoading &&
                 !_controller.hasError &&
@@ -261,6 +263,7 @@ class _DiaryPreviewScreenState extends State<DiaryPreviewScreen> {
         // 再生成ボタン（プロンプトをスキップ）
         if (!_controller.isInitializing &&
             !_controller.isLoading &&
+            !_controller.isSaving &&
             !_controller.hasError &&
             _controller.selectedPrompt != null)
           Container(
