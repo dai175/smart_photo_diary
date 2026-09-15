@@ -20,7 +20,9 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Cancel only PR runs. On main, a version-only push must not cancel an
+  # in-progress Android build that the new run would skip.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   detect-changes:
@@ -32,10 +34,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Decide skip_platforms
         id: detect
+        env:
+          EVENT_BEFORE: ${{ github.event.before }}
+          EVENT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
 
@@ -51,14 +57,14 @@ jobs:
             exit 0
           fi
 
-          # push to main: version-only allowlist → skip platform builds
-          if ! git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+          # push to main: compare the full pushed range, not only HEAD~1
+          if [ -z "${EVENT_BEFORE:-}" ] || [ "$EVENT_BEFORE" = "0000000000000000000000000000000000000000" ]; then
             echo "skip_platforms=false" >> "$GITHUB_OUTPUT"
-            echo "HEAD~1 missing: do not skip platforms"
+            echo "Missing or zero before SHA: do not skip platforms"
             exit 0
           fi
 
-          mapfile -t CHANGED < <(git diff --name-only HEAD~1 HEAD)
+          mapfile -t CHANGED < <(git diff --name-only "$EVENT_BEFORE" "$EVENT_SHA")
           if [ "${#CHANGED[@]}" -eq 0 ]; then
             echo "skip_platforms=false" >> "$GITHUB_OUTPUT"
             echo "No changed files: do not skip platforms"
