@@ -223,6 +223,11 @@ class UpgradeDialogController extends BaseErrorController {
         context: 'UpgradeDialogController.purchasePlan',
         error: e,
       );
+      _lastPurchaseResult = PurchaseResult(
+        status: PurchaseStatus.error,
+        productId: plan.productId,
+        errorMessage: e.toString(),
+      );
       setError(
         e is AppException
             ? e

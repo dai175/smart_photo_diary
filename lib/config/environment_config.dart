@@ -204,4 +204,14 @@ class EnvironmentConfig {
     _cachedForcePlan = null;
     await initialize();
   }
+
+  /// Test-only override for API key / init state (does not touch secure storage).
+  @visibleForTesting
+  static void debugOverrideForTest({
+    required bool initialized,
+    String? apiKey,
+  }) {
+    _isInitialized = initialized;
+    _cachedOpenRouterApiKey = apiKey;
+  }
 }

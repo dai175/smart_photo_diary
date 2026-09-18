@@ -213,6 +213,19 @@ void main() {
           ),
         ).called(1);
       });
+
+      test('clearMigrated deletes durable migration flag', () async {
+        when(
+          () => mockStorage.delete(key: 'hive_diary_encryption_migrated'),
+        ).thenAnswer((_) async {});
+
+        final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+        await helper.clearMigrated();
+
+        verify(
+          () => mockStorage.delete(key: 'hive_diary_encryption_migrated'),
+        ).called(1);
+      });
     });
   });
 }

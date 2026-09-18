@@ -11,6 +11,10 @@ import 'package:hive_ce/hive_ce.dart';
 abstract class DiaryEncryptionMigrationStore {
   Future<bool> isMigrated();
   Future<void> markMigrated();
+
+  /// Clears the durable migrated flag so remigration from a plaintext
+  /// backup can run after AES key loss.
+  Future<void> clearMigrated();
 }
 
 /// Hiveボックスの暗号化キーを管理するヘルパークラス
@@ -85,9 +89,17 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
     await _secureStorage.write(key: _diaryEncryptionMigratedKey, value: 'true');
   }
 
+  /// Clear durable migration flag (AES key-loss remigration from backup).
+  Future<void> clearDiaryEncryptionMigrated() async {
+    await _secureStorage.delete(key: _diaryEncryptionMigratedKey);
+  }
+
   @override
   Future<bool> isMigrated() => isDiaryEncryptionMigrated();
 
   @override
   Future<void> markMigrated() => markDiaryEncryptionMigrated();
+
+  @override
+  Future<void> clearMigrated() => clearDiaryEncryptionMigrated();
 }

@@ -5,11 +5,11 @@
 ## 特徴
 
 ### 基本機能
-- **AI日記生成**: Google Gemini 2.5 Flash APIを使用した高品質な日記の自動生成
+- **AI日記生成**: OpenRouter 経由の Google Gemini 2.5 Flash による高品質な日記の自動生成
 - **タイムライン表示**: 日付別グルーピング（今日/昨日/月別）による写真タイムライン（スティッキーヘッダー対応）
 - **多言語対応**: 日本語・英語の完全i18n対応（UI、AI生成、タグ全て）
 - **SNSシェア**: X（Twitter）・Instagramへの日記シェア機能（画像生成対応）
-- **プライバシー重視**: 日記は端末内に暗号化保存。生成時のみ選んだ写真を Google Gemini へ送信（プライバシーポリシーに開示）
+- **プライバシー重視**: 日記は端末内に暗号化保存。生成時のみ選んだ写真を OpenRouter（既定: Gemini 2.5 Flash）へ送信（プライバシーポリシーに開示）
 - **統計・分析機能**: 日記の振り返りと使用パターン分析をサポート
 - **過去の写真対応**: Premium会員限定で過去365日間の写真から日記作成可能
 - **データ管理**: 日記データのエクスポート・インポート機能
@@ -80,7 +80,7 @@ lib/
 - **SharedPreferences**: アプリ設定の永続化
 
 ### AI・API連携
-- **Google Gemini 2.5 Flash**: 高品質なAI日記生成・タグ生成
+- **OpenRouter（既定モデル: Google Gemini 2.5 Flash）**: 高品質なAI日記生成・タグ生成
 - **Flutter Dotenv**: 環境変数管理
 
 ### UI/UX
@@ -104,7 +104,7 @@ lib/
 - FVM (Flutter Version Management) - 推奨
 - Xcode（iOSビルド用）
 - Android Studio（Androidビルド用）
-- Google Gemini API キー（OpenRouter経由。OpenRouter APIキーを設定）
+- OpenRouter API キー（`OPENROUTER_API_KEY`。既定モデルは Google Gemini 2.5 Flash）
 
 ### セットアップ
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/config/environment_config.dart';
+import 'package:smart_photo_diary/constants/ai_constants.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
@@ -524,6 +527,50 @@ void main() {
           ),
         ).called(greaterThanOrEqualTo(1));
       });
+
+      test('OpenRouter URL / Bearer / payload を送る', () async {
+        const testKey = 'sk-or-v1-test_dummy_key_for_testing';
+        EnvironmentConfig.debugOverrideForTest(
+          initialized: true,
+          apiKey: testKey,
+        );
+        addTearDown(
+          () => EnvironmentConfig.debugOverrideForTest(
+            initialized: false,
+            apiKey: null,
+          ),
+        );
+
+        http.Request? captured;
+        final mockClient = MockClient((request) async {
+          captured = request;
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final result = await apiClient.sendTextRequest(
+          prompt: 'Hello OpenRouter',
+          maxOutputTokens: 123,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          captured!.url.toString(),
+          AiConstants.openRouterChatCompletionsUrl,
+        );
+        expect(captured!.headers['Authorization'], 'Bearer $testKey');
+        final body = jsonDecode(captured!.body) as Map<String, dynamic>;
+        expect(body['model'], AiConstants.openRouterModelName);
+        expect(body['max_tokens'], 123);
+        final messages = body['messages'] as List<dynamic>;
+        expect(messages, isNotEmpty);
+        final content = (messages.first as Map)['content'] as List<dynamic>;
+        expect(content.first['type'], 'text');
+        expect(content.first['text'], 'Hello OpenRouter');
+      });
     });
 
     group('sendVisionRequest', () {
@@ -566,6 +613,51 @@ void main() {
             stackTrace: any(named: 'stackTrace'),
           ),
         ).called(greaterThanOrEqualTo(1));
+      });
+
+      test('OpenRouter vision payload に image_url data URL を含める', () async {
+        const testKey = 'sk-or-v1-test_dummy_key_for_testing';
+        EnvironmentConfig.debugOverrideForTest(
+          initialized: true,
+          apiKey: testKey,
+        );
+        addTearDown(
+          () => EnvironmentConfig.debugOverrideForTest(
+            initialized: false,
+            apiKey: null,
+          ),
+        );
+
+        http.Request? captured;
+        final mockClient = MockClient((request) async {
+          captured = request;
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final imageData = Uint8List.fromList([1, 2, 3, 4]);
+        final result = await apiClient.sendVisionRequest(
+          prompt: 'Describe',
+          imageData: imageData,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          captured!.url.toString(),
+          AiConstants.openRouterChatCompletionsUrl,
+        );
+        expect(captured!.headers['Authorization'], 'Bearer $testKey');
+        final body = jsonDecode(captured!.body) as Map<String, dynamic>;
+        expect(body['model'], AiConstants.openRouterModelName);
+        final messages = body['messages'] as List<dynamic>;
+        final content = (messages.first as Map)['content'] as List<dynamic>;
+        expect(content.length, 2);
+        expect(content[1]['type'], 'image_url');
+        final url = content[1]['image_url']['url'] as String;
+        expect(url.startsWith('data:image/jpeg;base64,'), isTrue);
       });
     });
 

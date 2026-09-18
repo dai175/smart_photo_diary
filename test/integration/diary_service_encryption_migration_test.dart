@@ -23,6 +23,11 @@ class InMemoryDiaryEncryptionMigrationStore
   Future<void> markMigrated() async {
     _migrated = true;
   }
+
+  @override
+  Future<void> clearMigrated() async {
+    _migrated = false;
+  }
 }
 
 void main() {
@@ -600,6 +605,79 @@ void main() {
         expect(await recoveryStore.isMigrated(), isTrue);
 
         recovered.dispose();
+      },
+    );
+
+    test(
+      'key-loss remigrates from leftover .bak_pre_enc instead of deleting it',
+      () async {
+        final oldKey = Hive.generateSecureKey();
+        final newKey = Hive.generateSecureKey();
+        final store = InMemoryDiaryEncryptionMigrationStore();
+
+        final plaintext = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+        );
+        await plaintext.initialize();
+        final save = await plaintext.saveDiaryEntry(
+          date: DateTime(2025, 2, 1),
+          title: 'Key Loss Entry',
+          content: 'Recover via bak after AES key loss',
+          photoIds: [],
+        );
+        expect(save.isSuccess, isTrue);
+        final savedId = save.value.id;
+        plaintext.dispose();
+        if (Hive.isBoxOpen(boxName)) {
+          await Hive.box<DiaryEntry>(boxName).close();
+        }
+
+        final boxPath = '$testDir/$boxName.hive';
+        final snapshotPath = '$testDir/key_loss_snapshot.hive';
+        await File(boxPath).copy(snapshotPath);
+
+        final migrated = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+          encryptionCipher: HiveAesCipher(oldKey),
+          migrationStore: store,
+        );
+        await migrated.initialize();
+        expect(
+          (await migrated.getDiaryEntry(savedId)).value?.title,
+          'Key Loss Entry',
+        );
+        migrated.dispose();
+        if (Hive.isBoxOpen(boxName)) {
+          await Hive.box<DiaryEntry>(boxName).close();
+        }
+        if (Hive.isBoxOpen(metaBoxName)) {
+          await Hive.box(metaBoxName).close();
+        }
+
+        // Leftover bak as if backup delete failed after successful migration.
+        final backupPath = '$boxPath.bak_pre_enc';
+        await File(snapshotPath).copy(backupPath);
+        expect(await store.isMigrated(), isTrue);
+
+        final remigrated = DiaryService.createWithDependencies(
+          logger: logger,
+          tagService: mockTagService,
+          encryptionCipher: HiveAesCipher(newKey),
+          migrationStore: store,
+          recoveredFromMissingKey: true,
+        );
+        await remigrated.initialize();
+
+        final entry = await remigrated.getDiaryEntry(savedId);
+        expect(entry.isSuccess, isTrue);
+        expect(entry.value?.title, 'Key Loss Entry');
+        expect(entry.value?.content, 'Recover via bak after AES key loss');
+        expect(await store.isMigrated(), isTrue);
+        expect(File(backupPath).existsSync(), isFalse);
+
+        remigrated.dispose();
       },
     );
   });
