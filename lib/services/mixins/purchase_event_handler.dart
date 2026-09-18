@@ -81,9 +81,15 @@ mixin PurchaseEventHandler on ServiceLogging {
         data: {'status': purchaseDetails.status},
       );
 
+      var shouldCompletePurchase = true;
+
       switch (purchaseDetails.status) {
         case iap.PurchaseStatus.purchased:
-          await handlePurchaseCompleted(purchaseDetails);
+          // Only finish the store transaction after local persist succeeds.
+          // Failed persist leaves the purchase pending for resync/retry.
+          shouldCompletePurchase = await handlePurchaseCompleted(
+            purchaseDetails,
+          );
           break;
 
         case iap.PurchaseStatus.restored:
@@ -100,10 +106,11 @@ mixin PurchaseEventHandler on ServiceLogging {
 
         case iap.PurchaseStatus.pending:
           await handlePurchasePending(purchaseDetails);
+          shouldCompletePurchase = false;
           break;
       }
 
-      if (purchaseDetails.pendingCompletePurchase) {
+      if (shouldCompletePurchase && purchaseDetails.pendingCompletePurchase) {
         final instance = inAppPurchaseInstance;
         if (instance != null) {
           await instance.completePurchase(purchaseDetails);
@@ -117,6 +124,13 @@ mixin PurchaseEventHandler on ServiceLogging {
             level: LogLevel.error,
           );
         }
+      } else if (!shouldCompletePurchase &&
+          purchaseDetails.pendingCompletePurchase) {
+        log(
+          'Skipping completePurchase until local subscription persist succeeds',
+          level: LogLevel.warning,
+          data: {'productId': purchaseDetails.productID},
+        );
       }
     } catch (e) {
       log('Error processing purchase update', level: LogLevel.error, error: e);
@@ -130,8 +144,12 @@ mixin PurchaseEventHandler on ServiceLogging {
     }
   }
 
-  /// 購入完了を処理
-  Future<void> handlePurchaseCompleted(
+  /// 購入完了を処理。
+  ///
+  /// Returns `true` when local subscription state was persisted successfully
+  /// (safe to call `completePurchase`). Returns `false` on persist failure so
+  /// the store transaction stays pending for a later retry/resync.
+  Future<bool> handlePurchaseCompleted(
     iap.PurchaseDetails purchaseDetails,
   ) async {
     try {
@@ -158,6 +176,7 @@ mixin PurchaseEventHandler on ServiceLogging {
         level: LogLevel.debug,
         context: 'handlePurchaseCompleted',
       );
+      return true;
     } catch (e) {
       log(
         'Error handling purchase completion',
@@ -165,6 +184,7 @@ mixin PurchaseEventHandler on ServiceLogging {
         error: e,
       );
       await handlePurchaseErrorEvent(purchaseDetails);
+      return false;
     }
   }
 

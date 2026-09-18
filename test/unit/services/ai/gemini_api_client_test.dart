@@ -35,8 +35,8 @@ void main() {
   });
 
   String successResponseBody() {
-    return '{"candidates":[{"content":{"parts":[{"text":"Hello!"}],'
-        '"role":"model"},"finishReason":"STOP"}]}';
+    return '{"choices":[{"message":{"role":"assistant","content":"Hello!"},'
+        '"finish_reason":"stop"}]}';
   }
 
   final testUrl = Uri.parse('https://example.com/api');
@@ -371,17 +371,15 @@ void main() {
         apiClient = GeminiApiClient(logger: mockLogger);
       });
 
-      test('extracts text from standard response format', () {
+      test('extracts text from OpenAI-compatible response format', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {
-                'parts': [
-                  {'text': 'Generated diary content'},
-                ],
-                'role': 'model',
+              'message': {
+                'role': 'assistant',
+                'content': 'Generated diary content',
               },
-              'finishReason': 'STOP',
+              'finish_reason': 'stop',
             },
           ],
         };
@@ -392,52 +390,40 @@ void main() {
         );
       });
 
-      test('extracts text from alternative content.text format', () {
+      test('extracts text from multimodal content parts', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {'text': 'Alt format content'},
-              'finishReason': 'STOP',
+              'message': {
+                'role': 'assistant',
+                'content': [
+                  {'type': 'text', 'text': 'Part content'},
+                ],
+              },
+              'finish_reason': 'stop',
             },
           ],
         };
 
-        expect(apiClient.extractTextFromResponse(data), 'Alt format content');
+        expect(apiClient.extractTextFromResponse(data), 'Part content');
       });
 
-      test('extracts text from thinking process format', () {
-        final data = {
-          'candidates': [
-            {'text': 'Thinking format content', 'finishReason': 'STOP'},
-          ],
-        };
-
-        expect(
-          apiClient.extractTextFromResponse(data),
-          'Thinking format content',
-        );
-      });
-
-      test('returns null for empty candidates', () {
-        final data = {'candidates': []};
+      test('returns null for empty choices', () {
+        final data = {'choices': []};
         expect(apiClient.extractTextFromResponse(data), isNull);
       });
 
-      test('returns null for null candidates', () {
+      test('returns null for missing choices', () {
         final data = <String, dynamic>{};
         expect(apiClient.extractTextFromResponse(data), isNull);
       });
 
       test('returns null when text content is empty', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {
-                'parts': [
-                  {'text': ''},
-                ],
-              },
-              'finishReason': 'STOP',
+              'message': {'role': 'assistant', 'content': ''},
+              'finish_reason': 'stop',
             },
           ],
         };
@@ -446,15 +432,13 @@ void main() {
 
       test('trims whitespace from extracted text', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {
-                'parts': [
-                  {'text': '  trimmed content  '},
-                ],
-                'role': 'model',
+              'message': {
+                'role': 'assistant',
+                'content': '  trimmed content  ',
               },
-              'finishReason': 'STOP',
+              'finish_reason': 'stop',
             },
           ],
         };

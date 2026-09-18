@@ -6,6 +6,7 @@ import '../../models/plans/plan.dart';
 import '../../ui/components/custom_dialog.dart';
 import '../../ui/design_system/app_colors.dart';
 import '../../ui/design_system/app_spacing.dart';
+import '../../utils/dialog_utils.dart';
 import 'auto_renew_notice.dart';
 import 'plan_option_card.dart';
 import 'premium_bullet_list.dart';
@@ -15,6 +16,7 @@ class UpgradeDialog extends StatelessWidget {
   final Map<String, String> priceStrings;
   final Future<bool> Function(Plan plan) onPlanSelected;
   final Future<void> Function()? onRestorePressed;
+  final String? Function()? purchaseFailureMessage;
 
   const UpgradeDialog({
     super.key,
@@ -22,6 +24,7 @@ class UpgradeDialog extends StatelessWidget {
     required this.priceStrings,
     required this.onPlanSelected,
     this.onRestorePressed,
+    this.purchaseFailureMessage,
   });
 
   @override
@@ -46,7 +49,17 @@ class UpgradeDialog extends StatelessWidget {
                 onTap: () async {
                   await Future.delayed(AppConstants.quickAnimationDuration);
                   final started = await onPlanSelected(plan);
-                  if (started && context.mounted) Navigator.of(context).pop();
+                  if (!context.mounted) return;
+                  if (started) {
+                    Navigator.of(context).pop();
+                    return;
+                  }
+                  // Keep paywall open; show cancel/error/timeout result.
+                  // Null message means skipped (e.g. already purchasing).
+                  final message = purchaseFailureMessage?.call();
+                  if (message != null && context.mounted) {
+                    await DialogUtils.showSimpleDialog(context, message);
+                  }
                 },
               ),
             ),

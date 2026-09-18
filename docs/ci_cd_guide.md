@@ -73,7 +73,7 @@ IOS_TEAM_ID                     # Apple Developer Team ID
 APP_STORE_CONNECT_API_KEY_ID    # App Store Connect API キーID
 APP_STORE_CONNECT_ISSUER_ID     # App Store Connect Issuer ID
 APP_STORE_CONNECT_API_KEY       # App Store Connect API キー（.p8内容、base64）
-GEMINI_API_KEY                  # Google Gemini API キー
+OPENROUTER_API_KEY              # OpenRouter API キー（日記生成）
 ```
 
 > 証明書・プロファイルは FocusWave アプリ共通の別リポジトリ `dai175/focuswave-certs` に暗号化保管（fastlane match）。CI は `MATCH_DEPLOY_KEY` で取得し、ローカルの証明書更新は `cd ios && bundle exec fastlane renew_signing`。詳細は [CLAUDE.md](../CLAUDE.md) の「iOS Code Signing (fastlane match)」を参照。

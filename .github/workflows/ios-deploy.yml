@@ -34,7 +34,7 @@ jobs:
 
       - name: Verify required secrets
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
@@ -44,7 +44,7 @@ jobs:
           APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
           MISSING=()
-          [ -z "$GEMINI_API_KEY" ] && MISSING+=("GEMINI_API_KEY")
+          [ -z "$OPENROUTER_API_KEY" ] && MISSING+=("OPENROUTER_API_KEY")
           [ -z "$MATCH_GIT_URL" ] && MISSING+=("MATCH_GIT_URL")
           [ -z "$MATCH_PASSWORD" ] && MISSING+=("MATCH_PASSWORD")
           [ -z "$MATCH_DEPLOY_KEY" ] && MISSING+=("MATCH_DEPLOY_KEY")
@@ -124,9 +124,9 @@ jobs:
 
       - name: Create dart-defines file
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          echo '{}' | jq --arg key "$GEMINI_API_KEY" '.GEMINI_API_KEY = $key' > dart_defines.json
+          echo '{}' | jq --arg key "$OPENROUTER_API_KEY" '.OPENROUTER_API_KEY = $key' > dart_defines.json
 
       - name: Build iOS IPA
         env:

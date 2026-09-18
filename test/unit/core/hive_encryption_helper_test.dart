@@ -73,36 +73,33 @@ void main() {
         expect(helper.cipher, isA<HiveAesCipher>());
       });
 
-      test(
-        'throws StateError when key is missing but migration is complete',
-        () async {
-          when(
-            () => mockStorage.read(key: 'hive_aes_encryption_key'),
-          ).thenAnswer((_) async => null);
-          when(
-            () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
-          ).thenAnswer((_) async => 'true');
+      test('mints replacement key when missing but migration is complete '
+          '(recoverable boot; diaries will be empty)', () async {
+        when(
+          () => mockStorage.read(key: 'hive_aes_encryption_key'),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockStorage.read(key: 'hive_diary_encryption_migrated'),
+        ).thenAnswer((_) async => 'true');
+        when(
+          () => mockStorage.write(
+            key: 'hive_aes_encryption_key',
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
-          final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+        final helper = HiveEncryptionHelper(secureStorage: mockStorage);
+        await helper.initialize();
 
-          await expectLater(
-            helper.initialize(),
-            throwsA(
-              isA<StateError>().having(
-                (e) => e.message,
-                'message',
-                contains('Refusing to generate a replacement key'),
-              ),
-            ),
-          );
-          verifyNever(
-            () => mockStorage.write(
-              key: 'hive_aes_encryption_key',
-              value: any(named: 'value'),
-            ),
-          );
-        },
-      );
+        expect(helper.recoveredFromMissingKey, isTrue);
+        expect(helper.cipher, isA<HiveAesCipher>());
+        verify(
+          () => mockStorage.write(
+            key: 'hive_aes_encryption_key',
+            value: any(named: 'value'),
+          ),
+        ).called(1);
+      });
 
       test('loads existing key from storage', () async {
         // Arrange

@@ -9,7 +9,11 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../interfaces/logging_service_interface.dart';
 
-/// Gemini APIクライアント - API通信を担当
+/// AI API client — diary/tag generation via OpenRouter.
+///
+/// Uses OpenAI-compatible chat completions against OpenRouter, defaulting to
+/// `google/gemini-2.5-flash` so quality stays comparable to the former direct
+/// Gemini client path. Class name kept for call-site stability.
 class GeminiApiClient {
   final http.Client _httpClient;
   final ILoggingService _logger;
@@ -18,44 +22,17 @@ class GeminiApiClient {
   static const Duration baseDelay = Duration(seconds: 1);
   static const Duration requestTimeout = Duration(seconds: 60);
 
-  /// Gemini API safety settings — block medium-and-above for all harm categories
-  static const List<Map<String, String>> _safetySettings = [
-    {
-      'category': 'HARM_CATEGORY_HARASSMENT',
-      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
-    },
-    {
-      'category': 'HARM_CATEGORY_HATE_SPEECH',
-      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
-    },
-    {
-      'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
-    },
-    {
-      'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
-    },
-    {
-      'category': 'HARM_CATEGORY_CIVIC_INTEGRITY',
-      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
-    },
-  ];
-
   GeminiApiClient({required ILoggingService logger, http.Client? httpClient})
     : _logger = logger,
       _httpClient = httpClient ?? http.Client();
 
-  // Google Gemini APIのエンドポイント
-  static String get _apiUrl =>
-      'https://generativelanguage.googleapis.com/v1beta/models/${AiConstants.geminiModelName}:generateContent';
+  static Uri get _apiUrl => Uri.parse(AiConstants.openRouterChatCompletionsUrl);
 
-  // APIキーをEnvironmentConfigから取得
   String get _apiKey {
-    final key = EnvironmentConfig.geminiApiKey;
+    final key = EnvironmentConfig.openRouterApiKey;
     if (key.isEmpty) {
       _logger.warning(
-        'GEMINI_API_KEY is not configured',
+        'OPENROUTER_API_KEY is not configured',
         context: 'GeminiApiClient._apiKey',
       );
       EnvironmentConfig.printDebugInfo();
@@ -70,8 +47,8 @@ class GeminiApiClient {
     int? maxOutputTokens,
   }) async {
     return _executeRequest(
-      parts: [
-        {'text': prompt},
+      content: [
+        {'type': 'text', 'text': prompt},
       ],
       requestContext: 'sendTextRequest',
       temperature: temperature,
@@ -79,7 +56,7 @@ class GeminiApiClient {
     );
   }
 
-  /// 画像付きのAPIリクエストを送信（Vision API）
+  /// 画像付きのAPIリクエストを送信（Vision）
   Future<Result<Map<String, dynamic>>> sendVisionRequest({
     required String prompt,
     required Uint8List imageData,
@@ -89,7 +66,7 @@ class GeminiApiClient {
     // APIキー検証を先に行い、無効時に高コストなBase64エンコードを回避
     if (!EnvironmentConfig.hasValidApiKey) {
       _logger.error(
-        'Gemini API error: No valid API key configured',
+        'OpenRouter API error: No valid API key configured',
         context: 'sendVisionRequest',
       );
       EnvironmentConfig.printDebugInfo();
@@ -101,10 +78,11 @@ class GeminiApiClient {
     final base64Image = base64Encode(imageData);
 
     return _executeRequest(
-      parts: [
-        {'text': prompt},
+      content: [
+        {'type': 'text', 'text': prompt},
         {
-          'inlineData': {'mimeType': 'image/jpeg', 'data': base64Image},
+          'type': 'image_url',
+          'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
         },
       ],
       requestContext: 'sendVisionRequest',
@@ -113,17 +91,16 @@ class GeminiApiClient {
     );
   }
 
-  /// API リクエストの共通処理
+  /// API リクエストの共通処理（OpenRouter OpenAI-compatible）
   Future<Result<Map<String, dynamic>>> _executeRequest({
-    required List<Map<String, dynamic>> parts,
+    required List<Map<String, dynamic>> content,
     required String requestContext,
     double? temperature,
     int? maxOutputTokens,
   }) async {
-    // APIキーの事前検証
     if (!EnvironmentConfig.hasValidApiKey) {
       _logger.error(
-        'Gemini API error: No valid API key configured',
+        'OpenRouter API error: No valid API key configured',
         context: requestContext,
       );
       EnvironmentConfig.printDebugInfo();
@@ -134,24 +111,19 @@ class GeminiApiClient {
 
     try {
       final response = await postWithRetry(
-        Uri.parse(_apiUrl),
+        _apiUrl,
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
         },
         body: jsonEncode({
-          'contents': [
-            {'parts': parts, 'role': 'user'},
+          'model': AiConstants.openRouterModelName,
+          'messages': [
+            {'role': 'user', 'content': content},
           ],
-          'generationConfig': {
-            'temperature': temperature ?? AiConstants.defaultTemperature,
-            'maxOutputTokens':
-                maxOutputTokens ?? AiConstants.defaultMaxOutputTokens,
-            'topP': AiConstants.defaultTopP,
-            'topK': AiConstants.defaultTopK,
-            'thinkingConfig': {'thinkingBudget': 0},
-          },
-          'safetySettings': _safetySettings,
+          'temperature': temperature ?? AiConstants.defaultTemperature,
+          'max_tokens': maxOutputTokens ?? AiConstants.defaultMaxOutputTokens,
+          'top_p': AiConstants.defaultTopP,
         }),
         requestContext: requestContext,
       );
@@ -159,19 +131,19 @@ class GeminiApiClient {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _logger.debug(
-          'Gemini API response received successfully',
+          'OpenRouter API response received successfully',
           context: requestContext,
-          data: _summarizeResponse(data),
+          data: _summarizeResponse(data as Map<String, dynamic>),
         );
-        return Success(data as Map<String, dynamic>);
+        return Success(data);
       } else {
         _logger.error(
-          'Gemini API error: ${response.statusCode}',
+          'OpenRouter API error: ${response.statusCode}',
           context: requestContext,
         );
         return Failure(
           AiProcessingException(
-            'Gemini API error: ${response.statusCode}',
+            'OpenRouter API error: ${response.statusCode}',
             details: response.body,
           ),
         );
@@ -180,12 +152,15 @@ class GeminiApiClient {
       return Failure(e);
     } catch (e) {
       _logger.error(
-        'Gemini API request error',
+        'OpenRouter API request error',
         context: requestContext,
         error: e,
       );
       return Failure(
-        AiProcessingException('Gemini API request failed', originalError: e),
+        AiProcessingException(
+          'OpenRouter API request failed',
+          originalError: e,
+        ),
       );
     }
   }
@@ -298,19 +273,19 @@ class GeminiApiClient {
   /// APIレスポンスのサマリーを生成（ログ出力用）
   String _summarizeResponse(Map<String, dynamic> data) {
     try {
-      final candidates = data['candidates'] as List?;
-      final candidateCount = candidates?.length ?? 0;
+      final choices = data['choices'] as List?;
+      final choiceCount = choices?.length ?? 0;
       String? finishReason;
       int? textLength;
 
-      if (candidates != null && candidates.isNotEmpty) {
-        final candidate = candidates[0] as Map<String, dynamic>;
-        finishReason = candidate['finishReason'] as String?;
+      if (choices != null && choices.isNotEmpty) {
+        final choice = choices[0] as Map<String, dynamic>;
+        finishReason = choice['finish_reason'] as String?;
         final text = extractTextFromResponse(data);
         textLength = text?.length;
       }
 
-      return 'candidates=$candidateCount, '
+      return 'choices=$choiceCount, '
           'finishReason=$finishReason, '
           'textLength=$textLength';
     } catch (_) {
@@ -318,49 +293,48 @@ class GeminiApiClient {
     }
   }
 
-  /// APIレスポンスからテキストコンテンツを抽出
+  /// APIレスポンスからテキストコンテンツを抽出（OpenAI-compatible）
   String? extractTextFromResponse(Map<String, dynamic> data) {
     try {
-      if (data['candidates'] != null && data['candidates'].isNotEmpty) {
-        final candidate = data['candidates'][0];
+      final choices = data['choices'];
+      if (choices is List && choices.isNotEmpty) {
+        final choice = choices[0] as Map<String, dynamic>;
+        final message = choice['message'];
+        if (message is Map<String, dynamic>) {
+          final content = message['content'];
+          if (content is String && content.isNotEmpty) {
+            return content.trim();
+          }
+          // Some providers return multimodal content parts
+          if (content is List && content.isNotEmpty) {
+            final buffer = StringBuffer();
+            for (final part in content) {
+              if (part is Map &&
+                  part['type'] == 'text' &&
+                  part['text'] is String) {
+                buffer.write(part['text']);
+              } else if (part is String) {
+                buffer.write(part);
+              }
+            }
+            final joined = buffer.toString().trim();
+            if (joined.isNotEmpty) return joined;
+          }
+        }
 
-        // Gemini 2.5の場合、異なるレスポンス構造の可能性を考慮
-        String? content;
-
-        // 通常の構造をチェック
-        if (candidate['content'] != null &&
-            candidate['content']['parts'] != null &&
-            candidate['content']['parts'].isNotEmpty &&
-            candidate['content']['parts'][0]['text'] != null) {
-          content = candidate['content']['parts'][0]['text'];
-        }
-        // 代替構造をチェック（直接textフィールド）
-        else if (candidate['content'] != null &&
-            candidate['content']['text'] != null) {
-          content = candidate['content']['text'];
-        }
-        // 思考プロセス用の構造をチェック
-        else if (candidate['text'] != null) {
-          content = candidate['text'];
-        }
-
-        if (content != null && content.isNotEmpty) {
-          return content.trim();
-        } else {
-          _logger.warning(
-            'Text content not found - finishReason: ${candidate['finishReason']}',
-            context: 'extractTextFromResponse',
-          );
-          return null;
-        }
-      } else {
         _logger.warning(
-          'Response structure differs from expected format',
+          'Text content not found - finish_reason: ${choice['finish_reason']}',
           context: 'extractTextFromResponse',
-          data: data.toString(),
         );
         return null;
       }
+
+      _logger.warning(
+        'Response structure differs from expected OpenAI-compatible format',
+        context: 'extractTextFromResponse',
+        data: data.toString(),
+      );
+      return null;
     } catch (e) {
       _logger.error(
         'Response parsing error',

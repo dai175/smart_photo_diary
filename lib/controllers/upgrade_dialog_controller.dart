@@ -38,6 +38,7 @@ class UpgradeDialogController extends BaseErrorController {
   bool _isDisposed = false;
   StreamSubscription<PurchaseResult>? _purchaseSub;
   final Duration _purchaseTimeout;
+  PurchaseResult? _lastPurchaseResult;
 
   /// 現在の状態
   UpgradeDialogState get state => _state;
@@ -47,6 +48,9 @@ class UpgradeDialogController extends BaseErrorController {
 
   /// プランIDから価格文字列へのマップ
   Map<String, String> get priceStrings => _priceStrings;
+
+  /// 直近の購入フロー結果（スキップ時は null）
+  PurchaseResult? get lastPurchaseResult => _lastPurchaseResult;
 
   UpgradeDialogController({
     required ILoggingService logger,
@@ -103,8 +107,9 @@ class UpgradeDialogController extends BaseErrorController {
 
   /// プランを購入する
   ///
-  /// 購入フローを最後まで実行した場合 true、既に購入中でスキップした場合 false を返す。
-  /// 呼び出し元は false の場合にダイアログを閉じない等の制御ができる。
+  /// Returns `true` only when the purchase succeeded (caller may dismiss the
+  /// paywall). Returns `false` when skipped, canceled, errored, or timed out
+  /// so the paywall stays open and result UI can be shown.
   Future<bool> purchasePlan(Plan plan) async {
     if (_state == UpgradeDialogState.purchasing) {
       _logger.warning(
@@ -115,10 +120,12 @@ class UpgradeDialogController extends BaseErrorController {
     }
 
     _state = UpgradeDialogState.purchasing;
+    _lastPurchaseResult = null;
     if (!_isDisposed) notifyListeners();
 
     // buyNonConsumable より前に購読してイベント取りこぼしを防ぐ
     final completer = Completer<PurchaseResult>();
+    PurchaseResult? finalResult;
     try {
       _purchaseSub = _subscriptionService.purchaseStream.listen(
         (result) {
@@ -179,7 +186,7 @@ class UpgradeDialogController extends BaseErrorController {
         }
       }
 
-      final finalResult = await completer.future.timeout(
+      finalResult = await completer.future.timeout(
         _purchaseTimeout,
         onTimeout: () => PurchaseResult(
           status: PurchaseStatus.error,
@@ -187,6 +194,7 @@ class UpgradeDialogController extends BaseErrorController {
           errorMessage: 'Purchase timed out after $_purchaseTimeout',
         ),
       );
+      _lastPurchaseResult = finalResult;
 
       _logger.info(
         'Purchase flow finished',
@@ -196,11 +204,29 @@ class UpgradeDialogController extends BaseErrorController {
           'productId': finalResult.productId,
         },
       );
+
+      if (finalResult.isSuccess) {
+        return true;
+      }
+
+      if (finalResult.isCancelled) {
+        setError(const ServiceException('Purchase was canceled'));
+      } else {
+        setError(
+          ServiceException(finalResult.errorMessage ?? 'Purchase failed'),
+        );
+      }
+      return false;
     } catch (e) {
       _logger.error(
         'Unexpected error in purchase flow',
         context: 'UpgradeDialogController.purchasePlan',
         error: e,
+      );
+      setError(
+        e is AppException
+            ? e
+            : ServiceException('Purchase failed', originalError: e),
       );
       return false;
     } finally {
@@ -213,7 +239,6 @@ class UpgradeDialogController extends BaseErrorController {
         context: 'UpgradeDialogController.purchasePlan',
       );
     }
-    return true;
   }
 
   Future<Result<SubscriptionSyncResult>> restorePurchases() async {

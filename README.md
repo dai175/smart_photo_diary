@@ -104,7 +104,7 @@ lib/
 - FVM (Flutter Version Management) - 推奨
 - Xcode（iOSビルド用）
 - Android Studio（Androidビルド用）
-- Google Gemini API キー
+- Google Gemini API キー（OpenRouter経由。OpenRouter APIキーを設定）
 
 ### セットアップ
 
@@ -122,7 +122,7 @@ fvm dart run build_runner build
 
 # 環境変数設定（テンプレートをコピーしてAPIキーを設定）
 cp .env.example .env
-# .env を編集して GEMINI_API_KEY を設定
+# .env を編集して OPENROUTER_API_KEY を設定
 
 # アプリを起動
 fvm flutter run
@@ -196,7 +196,7 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 
 ## プライバシー・セキュリティ
 
-- **ローカルファースト**: 日記データは端末内に暗号化保存。AI生成時は選んだ写真と生成指示のみ Google Gemini API へ送信
+- **ローカルファースト**: 日記データは端末内に暗号化保存。AI生成時は選んだ写真と生成指示のみ OpenRouter（既定モデル: Google Gemini 2.5 Flash）へ送信
 - **データ暗号化**: 日記データはAES-256で暗号化、暗号鍵はOS標準のセキュアストレージ（Keychain/Keystore）で保護
 - **API キー管理**: 環境変数による安全な管理（.envはプロジェクトルートに配置、gitignore済み）
 - **権限管理**: 写真ライブラリ（および撮影時はカメラ）へのアクセスを要求

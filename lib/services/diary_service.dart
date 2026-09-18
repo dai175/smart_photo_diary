@@ -132,6 +132,7 @@ class DiaryService implements IDiaryService {
             diaryEntriesBoxName,
             encryptionCipher: _encryptionCipher,
           );
+          await _deleteLeftoverPreEncryptionBackup(metaBoxPathHint: null);
           _loggingService.info(
             'Hive box initialization completed: '
             '${_diaryBox?.length ?? 0} entries',
@@ -175,8 +176,13 @@ class DiaryService implements IDiaryService {
   /// Only called when neither Hive meta nor the durable migration store
   /// reports migration complete. Cipher-first probes wipe plaintext boxes
   /// under Hive CE, so first-time migration must open without cipher.
+  ///
+  /// Crash-window mitigation: restore `.bak_pre_enc` before any plaintext
+  /// open, mark migration complete before deleting the backup.
   Future<void> _migrateToEncrypted(Box metaBox) async {
     try {
+      await _restorePreEncryptionBackupIfPresent(metaBox);
+
       // 1) Open WITHOUT cipher (plaintext-first for real first-time migrate)
       final unencryptedBox = await Hive.openBox<DiaryEntry>(
         diaryEntriesBoxName,
@@ -226,6 +232,10 @@ class DiaryService implements IDiaryService {
             'Encryption migration completed: ${_diaryBox!.length} entries',
           );
 
+          // Mark complete BEFORE deleting backup so a crash leaves both
+          // encrypted data (readable via flags) and a recoverable backup.
+          await _markMigrationComplete(metaBox);
+
           if (backupFile != null) {
             try {
               if (await backupFile.exists()) {
@@ -239,7 +249,6 @@ class DiaryService implements IDiaryService {
             }
           }
 
-          await _markMigrationComplete(metaBox);
           await _indexManager.buildIndex(_diaryBox!);
           return;
         } catch (e) {
@@ -267,6 +276,67 @@ class DiaryService implements IDiaryService {
     } catch (e) {
       _loggingService.error('Encryption migration failed', error: e);
       rethrow;
+    }
+  }
+
+  /// If a prior migration crashed after deleting plaintext, restore from
+  /// `.bak_pre_enc` before opening without a cipher (Hive CE would wipe
+  /// leftover ciphertext).
+  Future<void> _restorePreEncryptionBackupIfPresent(Box metaBox) async {
+    final metaPath = metaBox.path;
+    if (metaPath == null) return;
+
+    final dir = File(metaPath).parent.path;
+    final boxPath = '$dir/$diaryEntriesBoxName.hive';
+    final backupFile = File('$boxPath.bak_pre_enc');
+    if (!await backupFile.exists()) return;
+
+    try {
+      if (Hive.isBoxOpen(diaryEntriesBoxName)) {
+        await Hive.box<DiaryEntry>(diaryEntriesBoxName).close();
+      }
+    } catch (e) {
+      _loggingService.error(
+        'Failed to close diary box before pre-encryption backup restore',
+        error: e,
+      );
+    }
+
+    try {
+      await backupFile.copy(boxPath);
+      _loggingService.info(
+        'Restored plaintext diary box from pre-encryption backup '
+        'before migration retry',
+      );
+    } catch (e) {
+      _loggingService.error(
+        'Failed to restore pre-encryption backup before migration',
+        error: e,
+      );
+    }
+  }
+
+  Future<void> _deleteLeftoverPreEncryptionBackup({
+    required String? metaBoxPathHint,
+  }) async {
+    final boxPath = _diaryBox?.path;
+    if (boxPath == null && metaBoxPathHint == null) return;
+    final path =
+        boxPath ??
+        '${File(metaBoxPathHint!).parent.path}/$diaryEntriesBoxName.hive';
+    final backupFile = File('$path.bak_pre_enc');
+    try {
+      if (await backupFile.exists()) {
+        await backupFile.delete();
+        _loggingService.info(
+          'Deleted leftover pre-encryption backup after encrypted open',
+        );
+      }
+    } catch (e) {
+      _loggingService.error(
+        'Failed to delete leftover pre-encryption backup',
+        error: e,
+      );
     }
   }
 

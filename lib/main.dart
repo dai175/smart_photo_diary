@@ -50,6 +50,14 @@ Future<void> main() async {
   final logger = serviceLocator.get<ILoggingService>();
 
   logger.info('Application initialization started', context: 'main');
+  if (encryptionHelper.recoveredFromMissingKey) {
+    logger.error(
+      'Hive AES key was missing after encryption migration; '
+      'minted a replacement key so the app can boot. '
+      'Existing encrypted diaries are unreadable and will appear empty.',
+      context: 'main',
+    );
+  }
   logger.info('ServiceRegistration initialization completed', context: 'main');
 
   // 環境変数の初期化（LoggingServiceが利用可能になった後）

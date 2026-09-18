@@ -670,6 +670,14 @@
   "@restorePurchasesFailed": {
     "description": "Message when restore fails"
   },
+  "purchaseCanceledMessage": "Purchase was canceled.",
+  "@purchaseCanceledMessage": {
+    "description": "Message shown on the paywall after the user cancels purchase"
+  },
+  "purchaseFailedMessage": "Purchase failed. Please try again.",
+  "@purchaseFailedMessage": {
+    "description": "Message shown on the paywall after purchase error or timeout"
+  },
   "commonRetry": "Retry",
   "@commonRetry": {
     "description": "Generic retry button label"
