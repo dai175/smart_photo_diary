@@ -242,8 +242,6 @@ class EnvironmentConfig {
   }) {
     _isInitialized = initialized;
     _cachedOpenRouterApiKey = apiKey;
-    if (model != null) {
-      _cachedOpenRouterModel = model;
-    }
+    _cachedOpenRouterModel = model;
   }
 }
