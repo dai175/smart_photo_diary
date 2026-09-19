@@ -205,7 +205,7 @@ class EnvironmentConfig {
     await initialize();
   }
 
-  /// Test-only override for API key / init state (does not touch secure storage).
+  /// テスト用に API キーと初期化状態を上書きする
   @visibleForTesting
   static void debugOverrideForTest({
     required bool initialized,

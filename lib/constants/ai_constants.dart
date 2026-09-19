@@ -2,11 +2,9 @@
 class AiConstants {
   AiConstants._();
 
-  // OpenRouter (routes to Gemini 2.5 Flash for comparable quality)
+  // OpenRouter API設定
   static const String openRouterChatCompletionsUrl =
       'https://openrouter.ai/api/v1/chat/completions';
-
-  /// OpenRouter model slug — google/gemini-2.5-flash keeps prior quality.
   static const String openRouterModelName = 'google/gemini-2.5-flash';
   static const double defaultTemperature = 0.7;
   static const int defaultMaxOutputTokens = 1000;

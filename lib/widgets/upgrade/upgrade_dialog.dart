@@ -54,8 +54,6 @@ class UpgradeDialog extends StatelessWidget {
                     Navigator.of(context).pop();
                     return;
                   }
-                  // Keep paywall open; show cancel/error/timeout result.
-                  // Null message means skipped (e.g. already purchasing).
                   final message = purchaseFailureMessage?.call();
                   if (message != null && context.mounted) {
                     await DialogUtils.showSimpleDialog(context, message);
