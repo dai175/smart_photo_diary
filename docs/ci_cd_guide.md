@@ -4,6 +4,8 @@
 
 Smart Photo DiaryのCI/CDシステムは、GitHub Actionsを基盤とした自動化パイプラインです。
 
+**CD の終点は TestFlight。** App Store へのハード submit はローカル `asc`（`appstore-submit.yml` は置かない／再追加しない）。AI プロバイダ／キー名の正本は README。
+
 ## ワークフロー構成
 
 ### 1. CI Pipeline (`ci.yml`)
