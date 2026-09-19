@@ -1,0 +1,199 @@
+name: App Store Submit
+
+# One-shot / reusable hard submit via asc CLI.
+# Secrets live in the production environment (same as ios-deploy).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Marketing version (e.g. 1.9.7)
+        required: true
+        type: string
+      build_number:
+        description: CFBundleVersion / ASC build number (e.g. 108)
+        required: true
+        type: string
+      copy_metadata_from:
+        description: Source version for metadata copy
+        required: true
+        type: string
+        default: '1.9.6'
+      whats_new_ja:
+        description: What's New (ja)
+        required: true
+        type: string
+      whats_new_en:
+        description: What's New (en-US)
+        required: true
+        type: string
+      submit:
+        description: Submit for App Review after staging
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    name: Stage and submit
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+
+    steps:
+      - name: Install asc
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download 5.4.0 \
+            -R rorkai/App-Store-Connect-CLI \
+            -p 'asc_5.4.0_linux_amd64' \
+            -O /tmp/asc
+          chmod +x /tmp/asc
+          sudo mv /tmp/asc /usr/local/bin/asc
+          asc --version
+
+      - name: Configure ASC auth from secrets
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          MISSING=()
+          [ -z "$APP_STORE_CONNECT_API_KEY_ID" ] && MISSING+=("APP_STORE_CONNECT_API_KEY_ID")
+          [ -z "$APP_STORE_CONNECT_ISSUER_ID" ] && MISSING+=("APP_STORE_CONNECT_ISSUER_ID")
+          [ -z "$APP_STORE_CONNECT_API_KEY" ] && MISSING+=("APP_STORE_CONNECT_API_KEY")
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "::error::Missing secrets: ${MISSING[*]}"
+            exit 1
+          fi
+          {
+            echo "ASC_BYPASS_KEYCHAIN=1"
+            echo "ASC_KEY_ID=$APP_STORE_CONNECT_API_KEY_ID"
+            echo "ASC_ISSUER_ID=$APP_STORE_CONNECT_ISSUER_ID"
+            echo "ASC_PRIVATE_KEY_B64=$APP_STORE_CONNECT_API_KEY"
+            echo "ASC_APP_ID=6748400854"
+          } >> "$GITHUB_ENV"
+
+      - name: Resolve build and stage version
+        id: stage
+        env:
+          VERSION: ${{ inputs.version }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+          COPY_FROM: ${{ inputs.copy_metadata_from }}
+        run: |
+          set -euo pipefail
+          # Clear Missing Compliance for this build when declaration is exempt.
+          asc builds update \
+            --app "$ASC_APP_ID" \
+            --build-number "$BUILD_NUMBER" \
+            --platform IOS \
+            --uses-non-exempt-encryption=false \
+            --confirm \
+            --output json --pretty || true
+
+          BUILD_JSON=$(asc builds info \
+            --app "$ASC_APP_ID" \
+            --build-number "$BUILD_NUMBER" \
+            --platform IOS \
+            --output json --pretty)
+          echo "$BUILD_JSON" | tee /tmp/build.json
+          BUILD_ID=$(python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/build.json'))
+          # Accept either {data:{id}} or flat {id}
+          if isinstance(data, dict) and 'data' in data and isinstance(data['data'], dict):
+              print(data['data']['id'])
+          elif isinstance(data, dict) and 'id' in data:
+              print(data['id'])
+          else:
+              raise SystemExit(f'unexpected build info shape: {type(data)} keys={list(data)[:20] if isinstance(data, dict) else data}')
+          PY
+          )
+          echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_ENV"
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+
+          asc release stage \
+            --app "$ASC_APP_ID" \
+            --version "$VERSION" \
+            --build-id "$BUILD_ID" \
+            --platform IOS \
+            --copy-metadata-from "$COPY_FROM" \
+            --exclude-fields whatsNew \
+            --confirm \
+            --output json --pretty | tee /tmp/stage.json
+
+          VERSION_ID=$(python3 - <<'PY'
+          import json,re
+          raw=open('/tmp/stage.json').read()
+          # stage may print multiple JSON docs; find version id heuristically
+          ids=re.findall(r'"versionId"\s*:\s*"([^"]+)"', raw)
+          if not ids:
+              ids=re.findall(r'"appStoreVersion"\s*:\s*"([^"]+)"', raw)
+          if not ids:
+              # fallback: list versions
+              raise SystemExit('VERSION_ID_NOT_IN_STAGE')
+          print(ids[-1])
+          PY
+          ) || true
+
+          if [ -z "${VERSION_ID:-}" ] || [ "$VERSION_ID" = "VERSION_ID_NOT_IN_STAGE" ]; then
+            asc versions list --app "$ASC_APP_ID" --platform IOS --output json --pretty | tee /tmp/versions.json
+            VERSION_ID=$(python3 - <<PY
+          import json
+          version="$VERSION"
+          data=json.load(open('/tmp/versions.json'))
+          items=data.get('data', data if isinstance(data, list) else [])
+          for item in items:
+              attrs=item.get('attributes', item)
+              v=attrs.get('versionString') or attrs.get('version')
+              if v == version:
+                  print(item.get('id') or attrs.get('id'))
+                  break
+          else:
+              raise SystemExit(f'version {version} not found')
+          PY
+            )
+          fi
+          echo "VERSION_ID=$VERSION_ID" >> "$GITHUB_ENV"
+          echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
+          echo "Staged version=$VERSION id=$VERSION_ID build=$BUILD_ID"
+
+      - name: Set What's New
+        env:
+          WHATS_NEW_JA: ${{ inputs.whats_new_ja }}
+          WHATS_NEW_EN: ${{ inputs.whats_new_en }}
+        run: |
+          set -euo pipefail
+          asc localizations update \
+            --version "$VERSION_ID" \
+            --locale "ja" \
+            --whats-new "$WHATS_NEW_JA" \
+            --output json --pretty
+          asc localizations update \
+            --version "$VERSION_ID" \
+            --locale "en-US" \
+            --whats-new "$WHATS_NEW_EN" \
+            --output json --pretty
+
+      - name: Submit for App Review
+        if: ${{ inputs.submit }}
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          asc review submit \
+            --app "$ASC_APP_ID" \
+            --version "$VERSION" \
+            --build-id "$BUILD_ID" \
+            --platform IOS \
+            --confirm \
+            --output json --pretty | tee /tmp/submit.json
+          asc status --app "$ASC_APP_ID" --output json --pretty | tee /tmp/status.json
+          echo "## App Store submit" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Build number: \`${{ inputs.build_number }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Build ID: \`$BUILD_ID\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version ID: \`$VERSION_ID\`" >> "$GITHUB_STEP_SUMMARY"
