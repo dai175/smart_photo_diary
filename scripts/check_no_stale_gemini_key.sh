@@ -6,12 +6,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-PATTERN='GEMINI_API_KEY|x-goog-api-key'
-# CHANGELOG may mention the migration; do not scan git metadata.
+# Split literals so this file is not a false positive for git grep.
+NEEDLE_A='GEMINI_API_KEY'
+NEEDLE_B='x-goog-api-key'
+PATTERN="${NEEDLE_A}|${NEEDLE_B}"
+
+# CHANGELOG may mention the migration; this script holds the needles by design.
 HITS="$(
   git grep -nE "$PATTERN" -- \
     ':(exclude)CHANGELOG.md' \
-    ':(exclude).git/*' \
+    ':(exclude)scripts/check_no_stale_gemini_key.sh' \
     2>/dev/null || true
 )"
 
@@ -21,4 +25,4 @@ if [[ -n "$HITS" ]]; then
   exit 1
 fi
 
-echo "OK: no GEMINI_API_KEY / x-goog-api-key outside CHANGELOG.md"
+echo "OK: no stale Gemini-direct API markers outside allowlist"
