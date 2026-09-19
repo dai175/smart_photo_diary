@@ -99,7 +99,7 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
                 Navigator.of(context).pop();
                 // Result is intentionally not checked here — fire and forget
                 await _self._photoService.presentLimitedLibraryPicker();
-                _self._loadTodayPhotos();
+                _self._dataLoader.loadTodayPhotos();
               },
             ),
           ],

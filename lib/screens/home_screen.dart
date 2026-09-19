@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:photo_manager/photo_manager.dart';
 import '../constants/app_constants.dart';
 import '../controllers/home_controller.dart';
+import '../controllers/home_data_loader.dart';
 import '../controllers/photo_selection_controller.dart';
 import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
-import '../models/diary_entry.dart';
 import '../models/photo_type_filter.dart';
 import '../models/subscription_status.dart';
 import '../ui/animations/micro_interactions.dart';
@@ -18,7 +17,6 @@ import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/interfaces/settings_service_interface.dart';
 import '../services/interfaces/subscription_service_interface.dart';
-import '../services/photo_filter_service.dart';
 import '../core/service_registration.dart';
 import '../core/service_locator.dart';
 import '../services/interfaces/logging_service_interface.dart';
@@ -30,12 +28,10 @@ import '../controllers/scroll_signal.dart';
 import '../models/timeline_callbacks.dart';
 import '../ui/design_system/app_colors.dart';
 import '../ui/component_constants.dart';
-import '../models/diary_change.dart';
 import '../localization/localization_extensions.dart';
 import 'dart:async';
 
 part 'home/home_dialogs.dart';
-part 'home/home_data_loader.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(ThemeMode)? onThemeChanged;
@@ -60,11 +56,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with WidgetsBindingObserver, _HomeDialogsMixin, _HomeDataLoaderMixin {
+    with WidgetsBindingObserver, _HomeDialogsMixin {
   // サービス
   late final ILoggingService _logger;
   late final IPhotoService _photoService;
-  IDiaryService? _diaryService;
   late final ISubscriptionService _subscriptionService;
 
   // タブナビゲーション・画面キー管理コントローラー
@@ -72,15 +67,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   // 統合後の単一コントローラー
   late final PhotoSelectionController _photoController;
-
-  // 権限リクエスト中フラグ
-  bool _isRequestingPermission = false;
-
-  // 追加読み込み関連
-  int _currentPhotoOffset = 0;
-  static const int _photosPerPage =
-      AppConstants.timelinePageSize; // タイムライン用ページサイズ
-  bool _isPreloading = false; // 先読み中フラグ（UIブロッキングなし）
+  late final HomeDataLoader _dataLoader;
 
   // ホームタブ再タップで先頭へスクロールさせるためのシグナル
   final ScrollSignal _homeScrollSignal = ScrollSignal();
@@ -91,9 +78,7 @@ class _HomeScreenState extends State<HomeScreen>
   // 写真タイプフィルター（設定から読み込み）
   late final ISettingsService _settingsService;
   late PhotoTypeFilter _photoTypeFilter;
-  Set<String> _screenshotAssetIds = {};
 
-  StreamSubscription<DiaryChange>? _diarySub;
   StreamSubscription<SubscriptionStatus>? _statusSub;
 
   @override
@@ -105,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen>
         widget.settingsService ?? serviceLocator.get<ISettingsService>();
     _photoService =
         widget.photoService ?? ServiceRegistration.get<IPhotoService>();
-    _diaryService = widget.diaryService;
     _subscriptionService =
         widget.subscriptionService ??
         ServiceRegistration.get<ISubscriptionService>();
@@ -117,15 +101,25 @@ class _HomeScreenState extends State<HomeScreen>
     _photoController = PhotoSelectionController();
     // 統合後は日付制限を常時有効化
     _photoController.setDateRestrictionEnabled(true);
+    _photoController.setHasMorePhotos(true);
+    _dataLoader = HomeDataLoader(
+      photoService: _photoService,
+      subscriptionService: _subscriptionService,
+      logger: _logger,
+      photoController: _photoController,
+      homeController: _homeController,
+      isMounted: () => mounted,
+      photoTypeFilter: _photoTypeFilter,
+      onPermissionDenied: _showPermissionDeniedDialog,
+      onLimitedAccess: _showLimitedAccessDialog,
+      diaryService: widget.diaryService,
+    );
 
-    _currentPhotoOffset = 0; // オフセットをリセット
-    _isPreloading = false; // 先読みフラグをリセット
-    _photoController.setHasMorePhotos(true); // コントローラーにも設定
-    _loadTodayPhotos();
-    _loadUsedPhotoIds();
-    _subscribeDiaryChanges();
+    _dataLoader.loadTodayPhotos();
+    _dataLoader.loadUsedPhotoIds();
+    _dataLoader.subscribeDiaryChanges();
     _statusSub = _subscriptionService.statusStream.listen(
-      (_) => _syncAccessibleDays(),
+      (_) => _dataLoader.syncAccessibleDays(),
     );
   }
 
@@ -135,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen>
     _settingsService.photoTypeFilterNotifier.removeListener(
       _onPhotoTypeFilterChanged,
     );
-    _diarySub?.cancel();
     _statusSub?.cancel();
+    _dataLoader.dispose();
     _homeController.dispose();
     _photoController.dispose();
     super.dispose();
@@ -153,21 +147,22 @@ class _HomeScreenState extends State<HomeScreen>
   void _onPhotoTypeFilterChanged() {
     if (!mounted) return;
     _photoTypeFilter = _settingsService.photoTypeFilterNotifier.value;
+    _dataLoader.photoTypeFilter = _photoTypeFilter;
     _homeScrollSignal.trigger();
-    unawaited(_refreshHome());
+    unawaited(_dataLoader.refreshHome());
   }
 
   Future<void> _onResumed() async {
     // 使用済み写真IDのみ更新（日記が他画面で変更された可能性に対応）
     // スクロール位置・読み込み済み写真データ・オフセットはすべて保持
-    await _loadUsedPhotoIds();
+    await _dataLoader.loadUsedPhotoIds();
   }
 
   /// 日記詳細画面を開いた結果を共通で処理
   Future<void> _handleDiaryDetailResult(dynamic result) async {
     if (result == true) {
       _photoController.clearSelection();
-      await _loadUsedPhotoIds();
+      await _dataLoader.loadUsedPhotoIds();
       if (mounted) {
         _homeController.refreshDiaryAndStats();
       }
@@ -191,8 +186,8 @@ class _HomeScreenState extends State<HomeScreen>
   /// 写真IDから日記詳細画面に遷移
   Future<void> _navigateToDiaryDetailByPhotoId(String photoId) async {
     try {
-      _diaryService ??= await ServiceRegistration.getAsync<IDiaryService>();
-      final result = await _diaryService!.getDiaryEntryByPhotoId(photoId);
+      final diaryService = await _dataLoader.ensureDiaryService();
+      final result = await diaryService.getDiaryEntryByPhotoId(photoId);
 
       switch (result) {
         case Success(data: final diaryEntry):
@@ -221,15 +216,6 @@ class _HomeScreenState extends State<HomeScreen>
         _showSimpleDialog('${context.l10n.homeDiaryLoadError}\n$e');
       }
     }
-  }
-
-  // ホーム画面全体のリロード
-  Future<void> _refreshHome() async {
-    _currentPhotoOffset = 0; // オフセットをリセット
-    _isPreloading = false; // 先読みフラグをリセット
-    _photoController.setHasMorePhotos(true); // コントローラーにも設定
-    await _loadTodayPhotos();
-    await _loadUsedPhotoIds();
   }
 
   // カメラ撮影処理
@@ -271,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen>
         );
 
         // 今日の写真リストを再読み込みして新しい写真を含める
-        await _loadTodayPhotos();
+        await _dataLoader.loadTodayPhotos();
 
         // 撮影した写真を自動選択状態で追加
         _photoController.refreshPhotosWithNewCapture(
@@ -306,18 +292,19 @@ class _HomeScreenState extends State<HomeScreen>
       HomeContentWidget(
         photoController: _photoController,
         callbacks: TimelineCallbacks(
-          onRequestPermission: _loadTodayPhotos,
+          onRequestPermission: _dataLoader.loadTodayPhotos,
           onSelectionLimitReached: _showSelectionLimitModal,
           onUsedPhotoSelected: _showUsedPhotoModal,
           onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,
           onDifferentDateSelected: _showDifferentDateModal,
           onLockedPhotoTapped: _showLockedPhotoModal,
           onCameraPressed: _capturePhoto,
-          onDiaryCreated: _onDiaryCreated,
-          onLoadMorePhotos: _loadMorePhotos,
-          onPreloadMorePhotos: () => _preloadMorePhotos(showLoading: false),
+          onDiaryCreated: _dataLoader.onDiaryCreated,
+          onLoadMorePhotos: _dataLoader.loadMorePhotos,
+          onPreloadMorePhotos: () =>
+              _dataLoader.preloadMorePhotos(showLoading: false),
         ),
-        onRefresh: _refreshHome,
+        onRefresh: _dataLoader.refreshHome,
         scrollSignal: _homeScrollSignal,
         onDiaryTap: _openDiaryDetail,
       ),
@@ -385,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen>
 
                   MicroInteractions.hapticSelection();
                   if (index == AppConstants.homeTabIndex) {
-                    _loadUsedPhotoIds();
+                    _dataLoader.loadUsedPhotoIds();
                   }
                   _homeController.setCurrentIndex(index);
                 },
