@@ -1,8 +1,6 @@
 import '../../core/result/result.dart';
 
-/// AI使用量管理サービスのインターフェース
-///
-/// AI生成の使用量追跡、月次リセット、残回数計算を担当する。
+/// AI使用量管理（内部）。公開呼び出しは [ISubscriptionService] を使う。
 abstract class IAiUsageService {
   /// AI生成を使用できるかどうかをチェック
   ///

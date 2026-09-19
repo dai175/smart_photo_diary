@@ -230,14 +230,6 @@ class SettingsService implements ISettingsService {
       _delegateOr((d) => d.getUsageStatisticsWithPlanClass());
 
   @override
-  Future<Result<int>> getRemainingGenerations() =>
-      _delegateOr((d) => d.getRemainingGenerations());
-
-  @override
-  Future<Result<DateTime>> getNextResetDate() =>
-      _delegateOr((d) => d.getNextResetDate());
-
-  @override
   Future<Result<bool>> canChangePlan() => _delegateOr((d) => d.canChangePlan());
 
   @override

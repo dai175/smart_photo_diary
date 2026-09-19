@@ -26,9 +26,7 @@ import '../services/interfaces/store_entitlement_service_interface.dart';
 import '../services/interfaces/subscription_state_service_interface.dart';
 import '../services/store_entitlement_service.dart';
 import '../services/subscription_state_service.dart';
-import '../services/interfaces/ai_usage_service_interface.dart';
 import '../services/ai_usage_service.dart';
-import '../services/interfaces/feature_access_service_interface.dart';
 import '../services/feature_access_service.dart';
 import '../services/interfaces/in_app_purchase_service_interface.dart';
 import '../services/in_app_purchase_service.dart';
@@ -58,10 +56,8 @@ import '../screens/diary_preview/diary_preview_dialogs.dart';
 /// ### Phase 1: Core Services (Internal Dependencies)
 /// 1. **LoggingService** - 基盤ログ機能（他サービスの依存基盤）
 /// 2. **SubscriptionStateService** - サブスクリプション状態管理（Hive依存のみ）
-/// 3. **AiUsageService** - AI使用量管理（SubscriptionStateServiceに依存）
-/// 4. **FeatureAccessService** - 機能アクセス制御（SubscriptionStateServiceに依存）
-/// 5. **InAppPurchaseService** - IAP処理（SubscriptionStateServiceに依存）
-/// 6. **SubscriptionService** - Facade（上記4サービスに委譲）
+/// 3. **InAppPurchaseService** - IAP処理（SubscriptionStateServiceに依存）
+/// 4. **SubscriptionService** - public facade（内部で AiUsage / FeatureAccess を合成）
 /// 7a. **PhotoPermissionService** - 写真権限管理（LoggingServiceに依存）
 /// 7b. **PhotoService** - Facade: 写真クエリ/データ + 権限・カメラ委譲
 /// 7c. **CameraService** - カメラ撮影機能（LoggingService + PhotoService.getTodayPhotosに依存）
@@ -81,10 +77,9 @@ import '../screens/diary_preview/diary_preview_dialogs.dart';
 /// ## 依存関係マップ
 /// - LoggingService → なし（基盤サービス）
 /// - SubscriptionStateService → LoggingService
-/// - AiUsageService → SubscriptionStateService
-/// - FeatureAccessService → SubscriptionStateService
 /// - InAppPurchaseService → SubscriptionStateService
-/// - SubscriptionService(Facade) → SubscriptionStateService + AiUsageService + FeatureAccessService + InAppPurchaseService
+/// - SubscriptionService(Facade) → SubscriptionStateService + InAppPurchaseService
+///   （AiUsageService / FeatureAccessService は locator 非公開の内部委譲）
 /// - PhotoPermissionService → LoggingService
 /// - PhotoService(Facade) → LoggingService + PhotoPermissionService（CameraServiceは遅延解決）
 /// - CameraService → LoggingService + PhotoService.getTodayPhotos
@@ -185,24 +180,7 @@ class ServiceRegistration {
       return service;
     });
 
-    // 3. AiUsageService (SubscriptionStateServiceに依存)
-    serviceLocator.registerAsyncFactory<IAiUsageService>(() async {
-      final stateService = await serviceLocator
-          .getAsync<ISubscriptionStateService>();
-      return AiUsageService(stateService: stateService, logger: loggingService);
-    });
-
-    // 4. FeatureAccessService (SubscriptionStateServiceに依存)
-    serviceLocator.registerAsyncFactory<IFeatureAccessService>(() async {
-      final stateService = await serviceLocator
-          .getAsync<ISubscriptionStateService>();
-      return FeatureAccessService(
-        stateService: stateService,
-        logger: loggingService,
-      );
-    });
-
-    // 5. InAppPurchaseService (SubscriptionStateServiceに依存)
+    // 3. InAppPurchaseService (SubscriptionStateServiceに依存)
     serviceLocator.registerAsyncFactory<IInAppPurchaseService>(() async {
       final stateService = await serviceLocator
           .getAsync<ISubscriptionStateService>();
@@ -215,19 +193,22 @@ class ServiceRegistration {
       return service;
     });
 
-    // 6. SubscriptionService (Facade - 後方互換性のため)
+    // 4. SubscriptionService (public facade; usage/access are internal)
     serviceLocator.registerAsyncFactory<ISubscriptionService>(() async {
       final stateService = await serviceLocator
           .getAsync<ISubscriptionStateService>();
-      final usageService = await serviceLocator.getAsync<IAiUsageService>();
-      final accessService = await serviceLocator
-          .getAsync<IFeatureAccessService>();
       final purchaseService = await serviceLocator
           .getAsync<IInAppPurchaseService>();
       return SubscriptionService(
         stateService: stateService,
-        usageService: usageService,
-        accessService: accessService,
+        usageService: AiUsageService(
+          stateService: stateService,
+          logger: loggingService,
+        ),
+        accessService: FeatureAccessService(
+          stateService: stateService,
+          logger: loggingService,
+        ),
         purchaseService: purchaseService,
       );
     });

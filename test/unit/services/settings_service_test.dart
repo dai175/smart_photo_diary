@@ -202,43 +202,6 @@ void main() {
       });
     });
 
-    group('getRemainingGenerations', () {
-      test('成功 → Success(int)を返す', () async {
-        when(
-          () => mockSubscriptionService.getRemainingGenerations(),
-        ).thenAnswer((_) async => const Success(5));
-
-        final result = await service.getRemainingGenerations();
-
-        expect(result.isSuccess, isTrue);
-        expect(result.value, 5);
-      });
-
-      test('失敗 → Failureを返す', () async {
-        when(
-          () => mockSubscriptionService.getRemainingGenerations(),
-        ).thenAnswer((_) async => const Failure(ServiceException('error')));
-
-        final result = await service.getRemainingGenerations();
-
-        expect(result.isFailure, isTrue);
-      });
-    });
-
-    group('getNextResetDate', () {
-      test('成功 → Success(DateTime)を返す', () async {
-        final nextDate = DateTime(2026, 3, 1);
-        when(
-          () => mockSubscriptionService.getNextResetDate(),
-        ).thenAnswer((_) async => Success(nextDate));
-
-        final result = await service.getNextResetDate();
-
-        expect(result.isSuccess, isTrue);
-        expect(result.value, nextDate);
-      });
-    });
-
     group('canChangePlan', () {
       test('初期化済み → Success(true)', () async {
         when(() => mockSubscriptionService.getCurrentStatus()).thenAnswer(

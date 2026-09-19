@@ -8,11 +8,10 @@ import 'subscription_sync_result.dart';
 export 'in_app_purchase_service_interface.dart'
     show PurchaseProduct, PurchaseResult, PurchaseStatus, SubscriptionException;
 
-/// サブスクリプションサービスのインターフェース（Facade）
+/// サブスクリプションの公開面（UI・設定・AI が解決する唯一の型）。
 ///
-/// 後方互換性のために維持されるFacadeインターフェース。
-/// 内部的にはISubscriptionStateService、IAiUsageService、
-/// IFeatureAccessService、IInAppPurchaseServiceに委譲される。
+/// 使用量・特典・FORCE_PLAN 適用済み状態はすべてこの面を通す。
+/// IAiUsageService / IFeatureAccessService は内部委譲であり locator には載せない。
 ///
 /// `Result<T>`パターンを使用して型安全なエラーハンドリングを実現します。
 /// 委譲先サービスが返すエラーがそのまま伝播されます。

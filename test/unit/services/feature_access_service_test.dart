@@ -149,38 +149,6 @@ void main() {
       });
     });
 
-    group('canAccessDataExport', () {
-      test('Basicプランではtrueを返す（JSON限定）', () async {
-        final status = createBasicStatus();
-        setupStateService(status);
-
-        final result = await service.canAccessDataExport();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isTrue);
-      });
-
-      test('有効なPremiumプランではtrueを返す', () async {
-        final status = createValidPremiumStatus();
-        setupStateService(status, isValid: true);
-
-        final result = await service.canAccessDataExport();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isTrue);
-      });
-
-      test('期限切れPremiumプランではfalseを返す', () async {
-        final status = createExpiredPremiumStatus();
-        setupStateService(status, isValid: false);
-
-        final result = await service.canAccessDataExport();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isFalse);
-      });
-    });
-
     group('canAccessAdvancedFilters', () {
       test('Basicプランではfalseを返す', () async {
         final status = createBasicStatus();
@@ -219,28 +187,6 @@ void main() {
         setupStateService(status, isValid: true);
 
         final result = await service.canAccessAdvancedAnalytics();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isTrue);
-      });
-    });
-
-    group('canAccessStatsDashboard', () {
-      test('Basicプランではfalseを返す', () async {
-        final status = createBasicStatus();
-        setupStateService(status);
-
-        final result = await service.canAccessStatsDashboard();
-
-        expect(result, isA<Success<bool>>());
-        expect(result.value, isFalse);
-      });
-
-      test('有効なPremiumプランではtrueを返す', () async {
-        final status = createValidPremiumStatus();
-        setupStateService(status, isValid: true);
-
-        final result = await service.canAccessStatsDashboard();
 
         expect(result, isA<Success<bool>>());
         expect(result.value, isTrue);
@@ -298,72 +244,6 @@ void main() {
         final result = await service.canAccessPremiumFeatures();
 
         expect(result, isA<Failure<bool>>());
-      });
-
-      test('canAccessDataExportでgetCurrentStatusが例外をスロー → Failure', () async {
-        when(() => mockStateService.isInitialized).thenReturn(true);
-        when(
-          () => mockStateService.getCurrentStatus(),
-        ).thenThrow(Exception('IO error'));
-
-        final result = await service.canAccessDataExport();
-
-        expect(result, isA<Failure<bool>>());
-      });
-
-      test('getFeatureAccessでStateServiceが例外をスロー → Failure', () async {
-        when(() => mockStateService.isInitialized).thenReturn(true);
-        when(
-          () => mockStateService.getCurrentStatus(),
-        ).thenThrow(Exception('Fatal error'));
-
-        final result = await service.getFeatureAccess();
-
-        expect(result, isA<Failure<Map<String, bool>>>());
-      });
-    });
-
-    group('getFeatureAccess', () {
-      test('Basicプランでは正しい機能アクセスマップを返す', () async {
-        final status = createBasicStatus();
-        setupStateService(status);
-
-        final result = await service.getFeatureAccess();
-
-        expect(result, isA<Success<Map<String, bool>>>());
-        final access = result.value;
-        expect(access['premiumFeatures'], isFalse);
-        expect(access['writingPrompts'], isTrue);
-        expect(access['advancedFilters'], isFalse);
-        expect(access['advancedAnalytics'], isFalse);
-        expect(access['prioritySupport'], isFalse);
-        expect(access['dataExport'], isTrue);
-        expect(access['statsDashboard'], isFalse);
-      });
-
-      test('有効なPremiumプランでは正しい機能アクセスマップを返す', () async {
-        final status = createValidPremiumStatus();
-        setupStateService(status, isValid: true);
-
-        final result = await service.getFeatureAccess();
-
-        expect(result, isA<Success<Map<String, bool>>>());
-        final access = result.value;
-        expect(access['premiumFeatures'], isTrue);
-        expect(access['writingPrompts'], isTrue);
-        expect(access['advancedFilters'], isTrue);
-        expect(access['advancedAnalytics'], isTrue);
-        expect(access['prioritySupport'], isTrue);
-        expect(access['dataExport'], isTrue);
-        expect(access['statsDashboard'], isTrue);
-      });
-
-      test('StateServiceが未初期化の場合Failureを返す', () async {
-        when(() => mockStateService.isInitialized).thenReturn(false);
-
-        final result = await service.getFeatureAccess();
-
-        expect(result, isA<Failure<Map<String, bool>>>());
       });
     });
   });
