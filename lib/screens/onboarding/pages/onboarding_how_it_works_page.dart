@@ -8,7 +8,6 @@ import '../../../ui/components/modern_chip.dart';
 import '../components/onboarding_page_scaffold.dart';
 
 /// オンボーディング ステップ2: 使い方
-/// ビジュアル: Hero再設計済みのサンプル日記カード（3:2写真 + アクセント日付 + 3色チップ）
 class OnboardingHowItWorksPage extends StatelessWidget {
   const OnboardingHowItWorksPage({super.key});
 

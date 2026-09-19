@@ -93,7 +93,6 @@ class _HomeScreenState extends State<HomeScreen>
   late PhotoTypeFilter _photoTypeFilter;
   Set<String> _screenshotAssetIds = {};
 
-  // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
   StreamSubscription<SubscriptionStatus>? _statusSub;
 
