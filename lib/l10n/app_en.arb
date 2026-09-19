@@ -1078,24 +1078,6 @@
   "@diaryCardGeneratingTags": {
     "description": "Status message shown while diary tags are loading"
   },
-  "pastPhotoSelectedDateLabel": "Photos from {date}",
-  "@pastPhotoSelectedDateLabel": {
-    "description": "Label showing which date's photos are selected",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "pastPhotoSelectedCount": "{count} photos",
-  "@pastPhotoSelectedCount": {
-    "description": "Displays how many photos exist for the selected date",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "diarySearchHint": "Search titles or body...",
   "@diarySearchHint": {
     "description": "Hint text for the diary search field"
