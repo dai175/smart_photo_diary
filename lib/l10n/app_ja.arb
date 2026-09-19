@@ -678,6 +678,10 @@
   "@purchaseFailedMessage": {
     "description": "課金失敗・タイムアウト時のメッセージ"
   },
+  "purchaseSuccessMessage": "Premium購読が有効になりました。",
+  "@purchaseSuccessMessage": {
+    "description": "Premium購入完了後に表示するスナックバー"
+  },
   "commonRetry": "再試行",
   "@commonRetry": {
     "description": "リトライボタン共通文言"

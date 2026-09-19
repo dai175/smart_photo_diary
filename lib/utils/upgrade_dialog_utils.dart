@@ -74,6 +74,13 @@ class UpgradeDialogUtils {
           ),
         );
 
+        if (controller.lastPurchaseResult?.isSuccess == true &&
+            context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.purchaseSuccessMessage)),
+          );
+        }
+
         resolvedLogger.debug(
           'Plan selection dialog completed',
           context: 'UpgradeDialogUtils.showUpgradeDialog',

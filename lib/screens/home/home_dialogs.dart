@@ -25,7 +25,6 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
             onPressed: () async {
               Navigator.of(dialogContext).pop();
               await UpgradeDialogUtils.showUpgradeDialog(context);
-              if (mounted) unawaited(_self._refreshHome());
             },
           ),
         ],

@@ -1,8 +1,14 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/photo_type_filter.dart';
+import 'package:smart_photo_diary/models/plans/premium_monthly_plan.dart';
+import 'package:smart_photo_diary/models/subscription_status.dart';
 import 'package:smart_photo_diary/screens/home_screen.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
@@ -199,6 +205,63 @@ void main() {
 
         verify(() => mockDiary.changes).called(greaterThan(0));
       });
+    });
+
+    group('Subscription status changes', () {
+      testWidgets(
+        'unlocks older photos when the status stream reports Premium',
+        (WidgetTester tester) async {
+          final statusController =
+              StreamController<SubscriptionStatus>.broadcast();
+          addTearDown(statusController.close);
+          when(
+            () => mockSubscription.statusStream,
+          ).thenAnswer((_) => statusController.stream);
+
+          final oldPhoto = MockAssetEntity();
+          when(() => oldPhoto.id).thenReturn('old-photo');
+          when(
+            () => oldPhoto.createDateTime,
+          ).thenReturn(DateTime.now().subtract(const Duration(days: 30)));
+          when(
+            () => mockPhoto.getPhotosInDateRange(
+              startDate: any(named: 'startDate'),
+              endDate: any(named: 'endDate'),
+              limit: any(named: 'limit'),
+            ),
+          ).thenAnswer((_) async => Success([oldPhoto]));
+          when(
+            () => mockPhotoCache.getThumbnail(
+              any(),
+              width: any(named: 'width'),
+              height: any(named: 'height'),
+              quality: any(named: 'quality'),
+            ),
+          ).thenAnswer((_) => Completer<Result<Uint8List>>().future);
+          when(
+            () => mockPhotoCache.preloadThumbnails(
+              any(),
+              width: any(named: 'width'),
+              height: any(named: 'height'),
+              quality: any(named: 'quality'),
+            ),
+          ).thenAnswer((_) async {});
+
+          await tester.pumpWidget(buildHomeScreen());
+          await pumpFrames(tester);
+          expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+
+          when(
+            () => mockSubscription.getCurrentPlanClass(),
+          ).thenAnswer((_) async => Success(PremiumMonthlyPlan()));
+          statusController.add(
+            SubscriptionStatus(planId: PremiumMonthlyPlan().id, isActive: true),
+          );
+          await pumpFrames(tester);
+
+          expect(find.byIcon(Icons.lock_rounded), findsNothing);
+        },
+      );
     });
   });
 }

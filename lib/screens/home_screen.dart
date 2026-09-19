@@ -8,6 +8,7 @@ import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
 import '../models/diary_entry.dart';
 import '../models/photo_type_filter.dart';
+import '../models/subscription_status.dart';
 import '../ui/animations/micro_interactions.dart';
 import '../screens/diary_screen.dart';
 import '../screens/diary_detail_screen.dart';
@@ -92,8 +93,8 @@ class _HomeScreenState extends State<HomeScreen>
   late PhotoTypeFilter _photoTypeFilter;
   Set<String> _screenshotAssetIds = {};
 
-  // 日記変更イベント購読
   StreamSubscription<DiaryChange>? _diarySub;
+  StreamSubscription<SubscriptionStatus>? _statusSub;
 
   @override
   void initState() {
@@ -123,6 +124,9 @@ class _HomeScreenState extends State<HomeScreen>
     _loadTodayPhotos();
     _loadUsedPhotoIds();
     _subscribeDiaryChanges();
+    _statusSub = _subscriptionService.statusStream.listen(
+      (_) => _syncAccessibleDays(),
+    );
   }
 
   @override
@@ -132,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen>
       _onPhotoTypeFilterChanged,
     );
     _diarySub?.cancel();
+    _statusSub?.cancel();
     _homeController.dispose();
     _photoController.dispose();
     super.dispose();

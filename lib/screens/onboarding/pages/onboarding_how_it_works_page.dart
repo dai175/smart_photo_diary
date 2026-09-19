@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../localization/localization_extensions.dart';
 import '../../../ui/design_system/app_colors.dart';
 import '../../../ui/design_system/app_spacing.dart';
+import '../../../ui/design_system/app_typography.dart';
 import '../../../ui/components/modern_chip.dart';
 import '../components/onboarding_page_scaffold.dart';
 
 /// オンボーディング ステップ2: 使い方
-/// ビジュアル: Hero再設計済みのサンプル日記カード（3:2写真 + アクセント日付 + 3色チップ）
 class OnboardingHowItWorksPage extends StatelessWidget {
   const OnboardingHowItWorksPage({super.key});
 
@@ -103,7 +103,6 @@ class _MiniHeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // タイトル
                   Text(
                     l10n.onboardingSampleTitle,
                     style: TextStyle(
@@ -112,6 +111,13 @@ class _MiniHeroCard extends StatelessWidget {
                       height: 1.22,
                       letterSpacing: -0.2,
                       color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.onboardingSampleExcerpt,
+                    style: AppTypography.cardBody.copyWith(
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 10),

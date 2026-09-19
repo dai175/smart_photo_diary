@@ -239,20 +239,20 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         await showDialog<void>(
           context: context,
           barrierDismissible: true,
-          builder: (context) => PresetDialogs.usageStatus(
-            context: context,
-            planName: context.l10n.localizedPlanName(plan.id),
+          builder: (dialogContext) => PresetDialogs.usageStatus(
+            context: dialogContext,
+            planName: dialogContext.l10n.localizedPlanName(plan.id),
             planId: plan.id,
             usageCount: status.monthlyUsageCount,
             limit: plan.monthlyAiGenerationLimit,
             nextResetDate: nextResetDate,
             onUpgrade: plan.id == SubscriptionConstants.basicPlanId
                 ? () {
-                    Navigator.of(context).pop();
-                    _navigateToUpgrade(context);
+                    Navigator.of(dialogContext).pop();
+                    UpgradeDialogUtils.showUpgradeDialog(context);
                   }
                 : null,
-            onDismiss: () => Navigator.of(context).pop(),
+            onDismiss: () => Navigator.of(dialogContext).pop(),
           ),
         );
       }
@@ -269,14 +269,5 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         );
       }
     }
-  }
-
-  Future<void> _navigateToUpgrade(BuildContext context) async {
-    await UpgradeDialogUtils.showUpgradeDialog(context);
-    if (!mounted) return;
-    await Future.wait([
-      _loadUsageSummary(),
-      widget.onRefresh?.call() ?? Future.value(),
-    ]);
   }
 }
