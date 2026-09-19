@@ -27,6 +27,7 @@ class DiaryService implements IDiaryService {
   final ILoggingService _loggingService;
   final HiveAesCipher? _encryptionCipher;
   final DiaryEncryptionMigrationStore? _migrationStore;
+  final bool _recoveredFromMissingKey;
   final _diaryChangeController = StreamController<DiaryChange>.broadcast();
   bool _disposed = false;
 
@@ -43,10 +44,12 @@ class DiaryService implements IDiaryService {
     required IDiaryTagService tagService,
     HiveAesCipher? encryptionCipher,
     DiaryEncryptionMigrationStore? migrationStore,
+    bool recoveredFromMissingKey = false,
   }) : _loggingService = logger,
        _tagService = tagService,
        _encryptionCipher = encryptionCipher,
-       _migrationStore = migrationStore {
+       _migrationStore = migrationStore,
+       _recoveredFromMissingKey = recoveredFromMissingKey {
     _crudDelegate = DiaryCrudDelegate(
       getBox: () => _diaryBox!,
       ensureInitialized: _ensureInitialized,
@@ -70,12 +73,14 @@ class DiaryService implements IDiaryService {
     required IDiaryTagService tagService,
     HiveAesCipher? encryptionCipher,
     DiaryEncryptionMigrationStore? migrationStore,
+    bool recoveredFromMissingKey = false,
   }) {
     return DiaryService._(
       logger: logger,
       tagService: tagService,
       encryptionCipher: encryptionCipher,
       migrationStore: migrationStore,
+      recoveredFromMissingKey: recoveredFromMissingKey,
     );
   }
 
@@ -123,6 +128,20 @@ class DiaryService implements IDiaryService {
         final migrated = metaMigrated || durableMigrated;
 
         if (migrated) {
+          // AES key was replaced: leftover .bak_pre_enc is the only recoverable
+          // plaintext. Remigrate from it before any cipher open / bak delete.
+          if (_recoveredFromMissingKey &&
+              await _preEncryptionBackupExists(metaBox)) {
+            _loggingService.warning(
+              'AES key missing after migration; remigrating from '
+              'pre-encryption backup with replacement key',
+            );
+            await metaBox.put(_encryptionMigratedKey, false);
+            await _migrationStore?.clearMigrated();
+            await _migrateToEncrypted(metaBox);
+            return;
+          }
+
           // Already encrypted: open with cipher only; backfill missing flags.
           await metaBox.put(_encryptionMigratedKey, true);
           await metaBox.close();
@@ -132,6 +151,11 @@ class DiaryService implements IDiaryService {
             diaryEntriesBoxName,
             encryptionCipher: _encryptionCipher,
           );
+          // Only delete leftover bak when we can still read ciphertext
+          // (not after key-loss recovery with no bak — nothing to save).
+          if (!_recoveredFromMissingKey) {
+            await _deleteLeftoverPreEncryptionBackup(metaBoxPathHint: null);
+          }
           _loggingService.info(
             'Hive box initialization completed: '
             '${_diaryBox?.length ?? 0} entries',
@@ -175,8 +199,13 @@ class DiaryService implements IDiaryService {
   /// Only called when neither Hive meta nor the durable migration store
   /// reports migration complete. Cipher-first probes wipe plaintext boxes
   /// under Hive CE, so first-time migration must open without cipher.
+  ///
+  /// Crash-window mitigation: restore `.bak_pre_enc` before any plaintext
+  /// open, mark migration complete before deleting the backup.
   Future<void> _migrateToEncrypted(Box metaBox) async {
     try {
+      await _restorePreEncryptionBackupIfPresent(metaBox);
+
       // 1) Open WITHOUT cipher (plaintext-first for real first-time migrate)
       final unencryptedBox = await Hive.openBox<DiaryEntry>(
         diaryEntriesBoxName,
@@ -207,6 +236,7 @@ class DiaryService implements IDiaryService {
 
         await Hive.deleteBoxFromDisk(diaryEntriesBoxName);
 
+        var markingStarted = false;
         try {
           // NOTE: HiveObject keeps a reference to its box; copyWith() before put.
           _diaryBox = await Hive.openBox<DiaryEntry>(
@@ -226,6 +256,13 @@ class DiaryService implements IDiaryService {
             'Encryption migration completed: ${_diaryBox!.length} entries',
           );
 
+          // Finish rollback-capable work before marking complete. After the
+          // mark starts, do not roll back to plaintext (flags would lie).
+          await _indexManager.buildIndex(_diaryBox!);
+
+          markingStarted = true;
+          await _markMigrationComplete(metaBox);
+
           if (backupFile != null) {
             try {
               if (await backupFile.exists()) {
@@ -239,15 +276,21 @@ class DiaryService implements IDiaryService {
             }
           }
 
-          await _markMigrationComplete(metaBox);
-          await _indexManager.buildIndex(_diaryBox!);
           return;
         } catch (e) {
-          await _restorePlaintextAfterFailedMigration(
-            entries: entries,
-            boxPath: boxPath,
-            backupFile: backupFile,
-          );
+          if (!markingStarted) {
+            await _restorePlaintextAfterFailedMigration(
+              entries: entries,
+              boxPath: boxPath,
+              backupFile: backupFile,
+            );
+          } else {
+            _loggingService.error(
+              'Skipping plaintext rollback after migration mark started; '
+              'encrypted box retained',
+              error: e,
+            );
+          }
           rethrow;
         }
       }
@@ -258,15 +301,87 @@ class DiaryService implements IDiaryService {
         diaryEntriesBoxName,
         encryptionCipher: _encryptionCipher,
       );
+      await _indexManager.buildIndex(_diaryBox!);
       await _markMigrationComplete(metaBox);
       _loggingService.info(
         'Encryption migration marked complete on empty box: '
         '${_diaryBox!.length} entries',
       );
-      await _indexManager.buildIndex(_diaryBox!);
     } catch (e) {
       _loggingService.error('Encryption migration failed', error: e);
       rethrow;
+    }
+  }
+
+  /// If a prior migration crashed after deleting plaintext, restore from
+  /// `.bak_pre_enc` before opening without a cipher (Hive CE would wipe
+  /// leftover ciphertext).
+  Future<void> _restorePreEncryptionBackupIfPresent(Box metaBox) async {
+    final metaPath = metaBox.path;
+    if (metaPath == null) return;
+
+    final dir = File(metaPath).parent.path;
+    final boxPath = '$dir/$diaryEntriesBoxName.hive';
+    final backupFile = File('$boxPath.bak_pre_enc');
+    if (!await backupFile.exists()) return;
+
+    try {
+      if (Hive.isBoxOpen(diaryEntriesBoxName)) {
+        await Hive.box<DiaryEntry>(diaryEntriesBoxName).close();
+      }
+    } catch (e) {
+      _loggingService.error(
+        'Failed to close diary box before pre-encryption backup restore',
+        error: e,
+      );
+    }
+
+    try {
+      await backupFile.copy(boxPath);
+      _loggingService.info(
+        'Restored plaintext diary box from pre-encryption backup '
+        'before migration retry',
+      );
+    } catch (e) {
+      _loggingService.error(
+        'Failed to restore pre-encryption backup before migration',
+        error: e,
+      );
+      // Do not continue: opening leftover ciphertext without a cipher
+      // would let Hive CE silently discard recoverable data.
+      rethrow;
+    }
+  }
+
+  Future<bool> _preEncryptionBackupExists(Box metaBox) async {
+    final metaPath = metaBox.path;
+    if (metaPath == null) return false;
+    final dir = File(metaPath).parent.path;
+    final backupFile = File('$dir/$diaryEntriesBoxName.hive.bak_pre_enc');
+    return backupFile.exists();
+  }
+
+  Future<void> _deleteLeftoverPreEncryptionBackup({
+    required String? metaBoxPathHint,
+  }) async {
+    final boxPath = _diaryBox?.path;
+    if (boxPath == null && metaBoxPathHint == null) return;
+    final path =
+        boxPath ??
+        '${File(metaBoxPathHint!).parent.path}/$diaryEntriesBoxName.hive';
+    final backupFile = File('$path.bak_pre_enc');
+    try {
+      if (await backupFile.exists()) {
+        await backupFile.delete();
+        _loggingService.info(
+          'Deleted leftover pre-encryption backup after encrypted open',
+        );
+      }
+    } catch (e) {
+      _loggingService.error(
+        'Failed to delete leftover pre-encryption backup',
+        error: e,
+      );
     }
   }
 

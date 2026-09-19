@@ -96,7 +96,7 @@ void main() {
       expect(controller.state, UpgradeDialogState.showingPlans);
     });
 
-    test('キャンセル時も showingPlans に戻る', () async {
+    test('キャンセル時は false を返し showingPlans に戻る', () async {
       final streamController = StreamController<PurchaseResult>.broadcast();
       final controller = createController(
         purchaseStream: streamController.stream,
@@ -121,11 +121,13 @@ void main() {
         ),
       );
 
-      await purchaseFuture;
+      expect(await purchaseFuture, isFalse);
       expect(controller.state, UpgradeDialogState.showingPlans);
+      expect(controller.lastPurchaseResult?.isCancelled, isTrue);
+      expect(controller.hasError, isTrue);
     });
 
-    test('エラーイベント受信時も showingPlans に戻る', () async {
+    test('エラーイベント受信時は false を返し showingPlans に戻る', () async {
       final streamController = StreamController<PurchaseResult>.broadcast();
       final controller = createController(
         purchaseStream: streamController.stream,
@@ -147,8 +149,9 @@ void main() {
         PurchaseResult(status: PurchaseStatus.error, productId: plan.productId),
       );
 
-      await purchaseFuture;
+      expect(await purchaseFuture, isFalse);
       expect(controller.state, UpgradeDialogState.showingPlans);
+      expect(controller.hasError, isTrue);
     });
 
     test('別 productId のイベントは無視し、本命 productId で完了する', () async {
@@ -192,17 +195,22 @@ void main() {
       expect(controller.state, UpgradeDialogState.showingPlans);
     });
 
-    test('purchasePlanClass が Failure の場合は即完了して showingPlans に戻る', () async {
-      final controller = createController();
-      addTearDown(controller.dispose);
+    test(
+      'purchasePlanClass が Failure の場合は false を返し showingPlans に戻る',
+      () async {
+        final controller = createController();
+        addTearDown(controller.dispose);
 
-      when(() => mockSubscription.purchasePlanClass(plan)).thenAnswer(
-        (_) async => const Failure(ServiceException('Purchase not available')),
-      );
+        when(() => mockSubscription.purchasePlanClass(plan)).thenAnswer(
+          (_) async =>
+              const Failure(ServiceException('Purchase not available')),
+        );
 
-      await controller.purchasePlan(plan);
-      expect(controller.state, UpgradeDialogState.showingPlans);
-    });
+        expect(await controller.purchasePlan(plan), isFalse);
+        expect(controller.state, UpgradeDialogState.showingPlans);
+        expect(controller.hasError, isTrue);
+      },
+    );
 
     test('シミュレータモック経路: purchasePlanClass が Success(purchased) を即返す', () async {
       final controller = createController();
@@ -217,7 +225,7 @@ void main() {
         ),
       );
 
-      await controller.purchasePlan(plan);
+      expect(await controller.purchasePlan(plan), isTrue);
       expect(controller.state, UpgradeDialogState.showingPlans);
     });
 
@@ -256,7 +264,7 @@ void main() {
       verify(() => mockSubscription.purchasePlanClass(plan)).called(1);
     });
 
-    test('タイムアウト後に showingPlans に戻る', () async {
+    test('タイムアウト後は false を返し showingPlans に戻る', () async {
       final streamController = StreamController<PurchaseResult>.broadcast();
       when(
         () => mockSubscription.purchaseStream,
@@ -280,9 +288,10 @@ void main() {
         ),
       );
 
-      await controller.purchasePlan(plan);
+      expect(await controller.purchasePlan(plan), isFalse);
       // タイムアウト後に purchasing → showingPlans に遷移する
       expect(controller.state, UpgradeDialogState.showingPlans);
+      expect(controller.hasError, isTrue);
     });
   });
 }

@@ -670,6 +670,14 @@
   "@restorePurchasesFailed": {
     "description": "復元失敗時のメッセージ"
   },
+  "purchaseCanceledMessage": "購入がキャンセルされました。",
+  "@purchaseCanceledMessage": {
+    "description": "課金キャンセル時にペイウォール上へ出すメッセージ"
+  },
+  "purchaseFailedMessage": "購入に失敗しました。もう一度お試しください。",
+  "@purchaseFailedMessage": {
+    "description": "課金失敗・タイムアウト時のメッセージ"
+  },
   "commonRetry": "再試行",
   "@commonRetry": {
     "description": "リトライボタン共通文言"

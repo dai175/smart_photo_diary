@@ -11,6 +11,10 @@ import 'package:hive_ce/hive_ce.dart';
 abstract class DiaryEncryptionMigrationStore {
   Future<bool> isMigrated();
   Future<void> markMigrated();
+
+  /// Clears the durable migrated flag so remigration from a plaintext
+  /// backup can run after AES key loss.
+  Future<void> clearMigrated();
 }
 
 /// Hiveボックスの暗号化キーを管理するヘルパークラス
@@ -32,24 +36,27 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
   final FlutterSecureStorage _secureStorage;
   HiveAesCipher? _cipher;
 
+  /// True when a missing AES key was replaced so the app can boot.
+  /// Old ciphertext is unreadable; diaries will appear empty.
+  bool recoveredFromMissingKey = false;
+
   HiveEncryptionHelper({FlutterSecureStorage? secureStorage})
     : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   /// 暗号化キーを初期化（生成または読み込み）
   Future<void> initialize() async {
+    recoveredFromMissingKey = false;
     var encodedKey = await _secureStorage.read(key: _keyStorageKey);
 
     if (encodedKey == null) {
-      // Migrated diaries need the original AES key. Never mint a replacement.
       final migrated = await _secureStorage.read(
         key: _diaryEncryptionMigratedKey,
       );
       if (migrated == 'true') {
-        throw StateError(
-          'Hive AES encryption key is missing but diary encryption '
-          'migration is marked complete. Refusing to generate a replacement '
-          'key that would wipe encrypted diary data.',
-        );
+        // Key lost after migration: old ciphertext cannot be decrypted.
+        // Mint a replacement so the app boots (empty diary box) instead of
+        // hard-crashing. Prefer recoverable empty state over a brick.
+        recoveredFromMissingKey = true;
       }
 
       final key = Hive.generateSecureKey();
@@ -82,9 +89,17 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
     await _secureStorage.write(key: _diaryEncryptionMigratedKey, value: 'true');
   }
 
+  /// Clear durable migration flag (AES key-loss remigration from backup).
+  Future<void> clearDiaryEncryptionMigrated() async {
+    await _secureStorage.delete(key: _diaryEncryptionMigratedKey);
+  }
+
   @override
   Future<bool> isMigrated() => isDiaryEncryptionMigrated();
 
   @override
   Future<void> markMigrated() => markDiaryEncryptionMigrated();
+
+  @override
+  Future<void> clearMigrated() => clearDiaryEncryptionMigrated();
 }

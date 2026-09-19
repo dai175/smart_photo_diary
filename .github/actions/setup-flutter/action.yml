@@ -48,7 +48,7 @@ runs:
 
     - name: Create .env file
       shell: bash
-      run: echo "GEMINI_API_KEY=dummy_key_for_ci" > .env
+      run: echo "OPENROUTER_API_KEY=sk-or-v1-dummy_key_for_ci" > .env
 
     - name: Generate code
       shell: bash

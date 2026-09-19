@@ -378,6 +378,8 @@ class ServiceRegistration {
         tagService: tagService,
         encryptionCipher: _encryptionHelper?.cipher,
         migrationStore: _encryptionHelper,
+        recoveredFromMissingKey:
+            _encryptionHelper?.recoveredFromMissingKey ?? false,
       );
 
       // Initialize the service

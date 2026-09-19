@@ -12,29 +12,29 @@ class EnvironmentConfig {
     _logger = logger;
   }
 
-  static String? _cachedGeminiApiKey;
+  static String? _cachedOpenRouterApiKey;
   static String? _cachedForcePlan;
 
   /// 環境変数を初期化
   static Future<void> initialize() async {
     try {
       // 1. 本番環境：ビルド時定数（CI/CDシークレット）を優先
-      _cachedGeminiApiKey = const String.fromEnvironment(
-        'GEMINI_API_KEY',
+      _cachedOpenRouterApiKey = const String.fromEnvironment(
+        'OPENROUTER_API_KEY',
         defaultValue: '',
       );
 
       _logger?.info(
-        'API key source: ${_cachedGeminiApiKey!.isEmpty ? ".env file" : "build-time constants"}',
+        'API key source: ${_cachedOpenRouterApiKey!.isEmpty ? ".env file" : "build-time constants"}',
         context: 'EnvironmentConfig.initialize',
       );
 
       // 2. 開発環境：.envファイルから読み込み（デバッグビルドのみ）
-      if (_cachedGeminiApiKey!.isEmpty && kDebugMode) {
+      if (_cachedOpenRouterApiKey!.isEmpty && kDebugMode) {
         try {
           // プロジェクトルートから読み込み（セキュリティを考慮）
           await dotenv.load(fileName: '.env');
-          _cachedGeminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+          _cachedOpenRouterApiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
           _logger?.info(
             'Development: loaded from .env file',
             context: 'EnvironmentConfig.initialize',
@@ -75,7 +75,7 @@ class EnvironmentConfig {
         context: 'EnvironmentConfig.initialize',
       );
       _logger?.info(
-        'API key source: ${_cachedGeminiApiKey!.isEmpty ? "not set" : (kDebugMode ? "development" : "production")}',
+        'API key source: ${_cachedOpenRouterApiKey!.isEmpty ? "not set" : (kDebugMode ? "development" : "production")}',
         context: 'EnvironmentConfig.initialize',
       );
     } catch (e) {
@@ -88,31 +88,31 @@ class EnvironmentConfig {
     }
   }
 
-  /// Gemini APIキーを取得
-  static String get geminiApiKey {
+  /// OpenRouter APIキーを取得
+  static String get openRouterApiKey {
     if (!_isInitialized) {
       _logger?.warning(
         'EnvironmentConfig is not initialized',
-        context: 'EnvironmentConfig.geminiApiKey',
+        context: 'EnvironmentConfig.openRouterApiKey',
       );
       // テスト環境の場合はダミーキーを返す
       if (kDebugMode &&
           const String.fromEnvironment('FLUTTER_TEST') == 'true') {
-        return 'AIzaTest_dummy_key_for_testing';
+        return 'sk-or-v1-test_dummy_key_for_testing';
       }
       return '';
     }
 
-    final key = _cachedGeminiApiKey ?? '';
+    final key = _cachedOpenRouterApiKey ?? '';
     if (key.isEmpty) {
       _logger?.warning(
-        'GEMINI_API_KEY is not set',
-        context: 'EnvironmentConfig.geminiApiKey',
+        'OPENROUTER_API_KEY is not set',
+        context: 'EnvironmentConfig.openRouterApiKey',
       );
       // テスト環境の場合はダミーキーを返す
       if (kDebugMode &&
           const String.fromEnvironment('FLUTTER_TEST') == 'true') {
-        return 'AIzaTest_dummy_key_for_testing';
+        return 'sk-or-v1-test_dummy_key_for_testing';
       }
     }
 
@@ -129,10 +129,11 @@ class EnvironmentConfig {
       return true;
     }
 
+    final key = _cachedOpenRouterApiKey;
     return _isInitialized &&
-        _cachedGeminiApiKey != null &&
-        _cachedGeminiApiKey!.isNotEmpty &&
-        _cachedGeminiApiKey!.startsWith('AIza');
+        key != null &&
+        key.isNotEmpty &&
+        key.startsWith('sk-or-');
   }
 
   /// プラン強制設定を取得（デバッグモードでのみ有効）
@@ -184,10 +185,10 @@ class EnvironmentConfig {
       data: {
         'initialized': _isInitialized,
         'debugMode': kDebugMode,
-        'apiKeySet': _cachedGeminiApiKey?.isNotEmpty == true
+        'apiKeySet': _cachedOpenRouterApiKey?.isNotEmpty == true
             ? 'valid'
             : 'invalid',
-        'apiKeyFormat': _cachedGeminiApiKey?.startsWith('AIza') == true
+        'apiKeyFormat': _cachedOpenRouterApiKey?.startsWith('sk-or-') == true
             ? 'valid'
             : 'invalid',
         'forcePlan': _cachedForcePlan,
@@ -199,8 +200,18 @@ class EnvironmentConfig {
   /// 環境変数を再読み込み
   static Future<void> reload() async {
     _isInitialized = false;
-    _cachedGeminiApiKey = null;
+    _cachedOpenRouterApiKey = null;
     _cachedForcePlan = null;
     await initialize();
+  }
+
+  /// Test-only override for API key / init state (does not touch secure storage).
+  @visibleForTesting
+  static void debugOverrideForTest({
+    required bool initialized,
+    String? apiKey,
+  }) {
+    _isInitialized = initialized;
+    _cachedOpenRouterApiKey = apiKey;
   }
 }

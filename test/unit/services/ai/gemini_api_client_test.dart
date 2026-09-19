@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/config/environment_config.dart';
+import 'package:smart_photo_diary/constants/ai_constants.dart';
 import 'package:smart_photo_diary/core/errors/app_exceptions.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/services/ai/gemini_api_client.dart';
@@ -35,8 +38,8 @@ void main() {
   });
 
   String successResponseBody() {
-    return '{"candidates":[{"content":{"parts":[{"text":"Hello!"}],'
-        '"role":"model"},"finishReason":"STOP"}]}';
+    return '{"choices":[{"message":{"role":"assistant","content":"Hello!"},'
+        '"finish_reason":"stop"}]}';
   }
 
   final testUrl = Uri.parse('https://example.com/api');
@@ -371,17 +374,15 @@ void main() {
         apiClient = GeminiApiClient(logger: mockLogger);
       });
 
-      test('extracts text from standard response format', () {
+      test('extracts text from OpenAI-compatible response format', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {
-                'parts': [
-                  {'text': 'Generated diary content'},
-                ],
-                'role': 'model',
+              'message': {
+                'role': 'assistant',
+                'content': 'Generated diary content',
               },
-              'finishReason': 'STOP',
+              'finish_reason': 'stop',
             },
           ],
         };
@@ -392,52 +393,40 @@ void main() {
         );
       });
 
-      test('extracts text from alternative content.text format', () {
+      test('extracts text from multimodal content parts', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {'text': 'Alt format content'},
-              'finishReason': 'STOP',
+              'message': {
+                'role': 'assistant',
+                'content': [
+                  {'type': 'text', 'text': 'Part content'},
+                ],
+              },
+              'finish_reason': 'stop',
             },
           ],
         };
 
-        expect(apiClient.extractTextFromResponse(data), 'Alt format content');
+        expect(apiClient.extractTextFromResponse(data), 'Part content');
       });
 
-      test('extracts text from thinking process format', () {
-        final data = {
-          'candidates': [
-            {'text': 'Thinking format content', 'finishReason': 'STOP'},
-          ],
-        };
-
-        expect(
-          apiClient.extractTextFromResponse(data),
-          'Thinking format content',
-        );
-      });
-
-      test('returns null for empty candidates', () {
-        final data = {'candidates': []};
+      test('returns null for empty choices', () {
+        final data = {'choices': []};
         expect(apiClient.extractTextFromResponse(data), isNull);
       });
 
-      test('returns null for null candidates', () {
+      test('returns null for missing choices', () {
         final data = <String, dynamic>{};
         expect(apiClient.extractTextFromResponse(data), isNull);
       });
 
       test('returns null when text content is empty', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {
-                'parts': [
-                  {'text': ''},
-                ],
-              },
-              'finishReason': 'STOP',
+              'message': {'role': 'assistant', 'content': ''},
+              'finish_reason': 'stop',
             },
           ],
         };
@@ -446,15 +435,13 @@ void main() {
 
       test('trims whitespace from extracted text', () {
         final data = {
-          'candidates': [
+          'choices': [
             {
-              'content': {
-                'parts': [
-                  {'text': '  trimmed content  '},
-                ],
-                'role': 'model',
+              'message': {
+                'role': 'assistant',
+                'content': '  trimmed content  ',
               },
-              'finishReason': 'STOP',
+              'finish_reason': 'stop',
             },
           ],
         };
@@ -540,6 +527,50 @@ void main() {
           ),
         ).called(greaterThanOrEqualTo(1));
       });
+
+      test('OpenRouter URL / Bearer / payload を送る', () async {
+        const testKey = 'sk-or-v1-test_dummy_key_for_testing';
+        EnvironmentConfig.debugOverrideForTest(
+          initialized: true,
+          apiKey: testKey,
+        );
+        addTearDown(
+          () => EnvironmentConfig.debugOverrideForTest(
+            initialized: false,
+            apiKey: null,
+          ),
+        );
+
+        http.Request? captured;
+        final mockClient = MockClient((request) async {
+          captured = request;
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final result = await apiClient.sendTextRequest(
+          prompt: 'Hello OpenRouter',
+          maxOutputTokens: 123,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          captured!.url.toString(),
+          AiConstants.openRouterChatCompletionsUrl,
+        );
+        expect(captured!.headers['Authorization'], 'Bearer $testKey');
+        final body = jsonDecode(captured!.body) as Map<String, dynamic>;
+        expect(body['model'], AiConstants.openRouterModelName);
+        expect(body['max_tokens'], 123);
+        final messages = body['messages'] as List<dynamic>;
+        expect(messages, isNotEmpty);
+        final content = (messages.first as Map)['content'] as List<dynamic>;
+        expect(content.first['type'], 'text');
+        expect(content.first['text'], 'Hello OpenRouter');
+      });
     });
 
     group('sendVisionRequest', () {
@@ -582,6 +613,51 @@ void main() {
             stackTrace: any(named: 'stackTrace'),
           ),
         ).called(greaterThanOrEqualTo(1));
+      });
+
+      test('OpenRouter vision payload に image_url data URL を含める', () async {
+        const testKey = 'sk-or-v1-test_dummy_key_for_testing';
+        EnvironmentConfig.debugOverrideForTest(
+          initialized: true,
+          apiKey: testKey,
+        );
+        addTearDown(
+          () => EnvironmentConfig.debugOverrideForTest(
+            initialized: false,
+            apiKey: null,
+          ),
+        );
+
+        http.Request? captured;
+        final mockClient = MockClient((request) async {
+          captured = request;
+          return http.Response(successResponseBody(), 200);
+        });
+
+        final apiClient = GeminiApiClient(
+          logger: mockLogger,
+          httpClient: mockClient,
+        );
+        final imageData = Uint8List.fromList([1, 2, 3, 4]);
+        final result = await apiClient.sendVisionRequest(
+          prompt: 'Describe',
+          imageData: imageData,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          captured!.url.toString(),
+          AiConstants.openRouterChatCompletionsUrl,
+        );
+        expect(captured!.headers['Authorization'], 'Bearer $testKey');
+        final body = jsonDecode(captured!.body) as Map<String, dynamic>;
+        expect(body['model'], AiConstants.openRouterModelName);
+        final messages = body['messages'] as List<dynamic>;
+        final content = (messages.first as Map)['content'] as List<dynamic>;
+        expect(content.length, 2);
+        expect(content[1]['type'], 'image_url');
+        final url = content[1]['image_url']['url'] as String;
+        expect(url.startsWith('data:image/jpeg;base64,'), isTrue);
       });
     });
 

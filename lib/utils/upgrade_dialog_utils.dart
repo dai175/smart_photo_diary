@@ -61,6 +61,14 @@ class UpgradeDialogUtils {
             plans: controller.plans,
             priceStrings: controller.priceStrings,
             onPlanSelected: (plan) => controller.purchasePlan(plan),
+            purchaseFailureMessage: () {
+              final result = controller.lastPurchaseResult;
+              if (result == null) return null;
+              if (result.isCancelled) {
+                return dialogContext.l10n.purchaseCanceledMessage;
+              }
+              return dialogContext.l10n.purchaseFailedMessage;
+            },
             onRestorePressed: () =>
                 _handleRestore(dialogContext, controller.restorePurchases),
           ),

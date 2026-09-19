@@ -69,7 +69,9 @@ class _TestEventHandler with ServiceLogging, PurchaseEventHandler {
   bool isSyncing = false;
 
   @override
-  iap.InAppPurchase? get inAppPurchaseInstance => null;
+  iap.InAppPurchase? get inAppPurchaseInstance => mockInAppPurchase;
+
+  final iap.InAppPurchase? mockInAppPurchase;
 
   @override
   String get logTag => 'TestPurchaseEventHandler';
@@ -78,8 +80,11 @@ class _TestEventHandler with ServiceLogging, PurchaseEventHandler {
     required this.purchaseStateService,
     required this.purchaseStreamController,
     required this.loggingService,
+    this.mockInAppPurchase,
   });
 }
+
+class _MockInAppPurchase extends Mock implements iap.InAppPurchase {}
 
 void main() {
   late _TestEventHandler handler;
@@ -116,7 +121,15 @@ void main() {
     );
   }
 
-  setUpAll(registerMockFallbacks);
+  setUpAll(() {
+    registerMockFallbacks();
+    registerFallbackValue(
+      _TestPurchaseDetails(
+        productID: 'fallback',
+        status: iap.PurchaseStatus.purchased,
+      ),
+    );
+  });
 
   setUp(() {
     mockStateService = _MockSubscriptionStateService();
@@ -622,6 +635,58 @@ void main() {
       await handler.handlePurchaseRestored(purchase);
 
       verifyNever(() => mockStateService.updateStatus(any()));
+    });
+  });
+
+  group('completePurchase gating', () {
+    late _MockInAppPurchase mockIap;
+
+    setUp(() {
+      mockIap = _MockInAppPurchase();
+      when(() => mockIap.completePurchase(any())).thenAnswer((_) async {});
+      handler = _TestEventHandler(
+        purchaseStateService: mockStateService,
+        purchaseStreamController: streamController,
+        loggingService: mockLogger,
+        mockInAppPurchase: mockIap,
+      );
+      when(() => mockStateService.getCurrentStatus()).thenAnswer(
+        (_) async => Success(
+          buildStatus(planId: SubscriptionConstants.premiumMonthlyPlanId),
+        ),
+      );
+    });
+
+    test('purchased + persist success → completePurchase が呼ばれる', () async {
+      when(
+        () => mockStateService.updateStatus(any()),
+      ).thenAnswer((_) async => const Success(null));
+
+      final purchase = _TestPurchaseDetails(
+        productID: SubscriptionConstants.premiumMonthlyProductId,
+        status: iap.PurchaseStatus.purchased,
+        pendingCompletePurchase: true,
+      );
+
+      await handler.processPurchaseUpdate(purchase);
+
+      verify(() => mockIap.completePurchase(purchase)).called(1);
+    });
+
+    test('purchased + persist failure → completePurchase は呼ばれない', () async {
+      when(
+        () => mockStateService.updateStatus(any()),
+      ).thenThrow(const ServiceException('Hive write failed'));
+
+      final purchase = _TestPurchaseDetails(
+        productID: SubscriptionConstants.premiumMonthlyProductId,
+        status: iap.PurchaseStatus.purchased,
+        pendingCompletePurchase: true,
+      );
+
+      await handler.processPurchaseUpdate(purchase);
+
+      verifyNever(() => mockIap.completePurchase(any()));
     });
   });
 }
