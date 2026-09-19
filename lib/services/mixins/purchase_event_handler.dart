@@ -85,8 +85,6 @@ mixin PurchaseEventHandler on ServiceLogging {
 
       switch (purchaseDetails.status) {
         case iap.PurchaseStatus.purchased:
-          // Only finish the store transaction after local persist succeeds.
-          // Failed persist leaves the purchase pending for resync/retry.
           shouldCompletePurchase = await handlePurchaseCompleted(
             purchaseDetails,
           );
@@ -146,9 +144,8 @@ mixin PurchaseEventHandler on ServiceLogging {
 
   /// 購入完了を処理。
   ///
-  /// Returns `true` when local subscription state was persisted successfully
-  /// (safe to call `completePurchase`). Returns `false` on persist failure so
-  /// the store transaction stays pending for a later retry/resync.
+  /// ローカル購読状態の永続化に成功したら true（`completePurchase` 可）。
+  /// 失敗時は false（ストア取引を保留し、後で再同期する）。
   Future<bool> handlePurchaseCompleted(
     iap.PurchaseDetails purchaseDetails,
   ) async {

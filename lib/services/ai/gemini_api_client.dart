@@ -9,11 +9,7 @@ import '../../core/errors/app_exceptions.dart';
 import '../../core/result/result.dart';
 import '../interfaces/logging_service_interface.dart';
 
-/// AI API client — diary/tag generation via OpenRouter.
-///
-/// Uses OpenAI-compatible chat completions against OpenRouter, defaulting to
-/// `google/gemini-2.5-flash` so quality stays comparable to the former direct
-/// Gemini client path. Class name kept for call-site stability.
+/// OpenRouter APIクライアント - API通信を担当
 class GeminiApiClient {
   final http.Client _httpClient;
   final ILoggingService _logger;
@@ -91,7 +87,7 @@ class GeminiApiClient {
     );
   }
 
-  /// API リクエストの共通処理（OpenRouter OpenAI-compatible）
+  /// API リクエストの共通処理
   Future<Result<Map<String, dynamic>>> _executeRequest({
     required List<Map<String, dynamic>> content,
     required String requestContext,
@@ -293,7 +289,7 @@ class GeminiApiClient {
     }
   }
 
-  /// APIレスポンスからテキストコンテンツを抽出（OpenAI-compatible）
+  /// APIレスポンスからテキストコンテンツを抽出
   String? extractTextFromResponse(Map<String, dynamic> data) {
     try {
       final choices = data['choices'];
@@ -305,7 +301,6 @@ class GeminiApiClient {
           if (content is String && content.isNotEmpty) {
             return content.trim();
           }
-          // Some providers return multimodal content parts
           if (content is List && content.isNotEmpty) {
             final buffer = StringBuffer();
             for (final part in content) {
@@ -330,7 +325,7 @@ class GeminiApiClient {
       }
 
       _logger.warning(
-        'Response structure differs from expected OpenAI-compatible format',
+        'Response structure differs from expected format',
         context: 'extractTextFromResponse',
         data: data.toString(),
       );

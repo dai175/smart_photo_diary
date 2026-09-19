@@ -107,9 +107,8 @@ class UpgradeDialogController extends BaseErrorController {
 
   /// プランを購入する
   ///
-  /// Returns `true` only when the purchase succeeded (caller may dismiss the
-  /// paywall). Returns `false` when skipped, canceled, errored, or timed out
-  /// so the paywall stays open and result UI can be shown.
+  /// 購入成功時のみ true（呼び出し元はダイアログを閉じてよい）。
+  /// スキップ・キャンセル・エラー・タイムアウトは false（ペイウォールを開いたまま結果を表示）。
   Future<bool> purchasePlan(Plan plan) async {
     if (_state == UpgradeDialogState.purchasing) {
       _logger.warning(

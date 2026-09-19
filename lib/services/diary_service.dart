@@ -128,8 +128,7 @@ class DiaryService implements IDiaryService {
         final migrated = metaMigrated || durableMigrated;
 
         if (migrated) {
-          // AES key was replaced: leftover .bak_pre_enc is the only recoverable
-          // plaintext. Remigrate from it before any cipher open / bak delete.
+          // AESキー置換後は .bak_pre_enc だけが復元可能。暗号オープン／bak削除の前に再移行する。
           if (_recoveredFromMissingKey &&
               await _preEncryptionBackupExists(metaBox)) {
             _loggingService.warning(
@@ -151,10 +150,9 @@ class DiaryService implements IDiaryService {
             diaryEntriesBoxName,
             encryptionCipher: _encryptionCipher,
           );
-          // Only delete leftover bak when we can still read ciphertext
-          // (not after key-loss recovery with no bak — nothing to save).
+          // 暗号文を読める場合のみ残留 bak を削除（キー喪失で bak 無しのときは何も残さない）
           if (!_recoveredFromMissingKey) {
-            await _deleteLeftoverPreEncryptionBackup(metaBoxPathHint: null);
+            await _deleteLeftoverPreEncryptionBackup();
           }
           _loggingService.info(
             'Hive box initialization completed: '
@@ -347,8 +345,6 @@ class DiaryService implements IDiaryService {
         'Failed to restore pre-encryption backup before migration',
         error: e,
       );
-      // Do not continue: opening leftover ciphertext without a cipher
-      // would let Hive CE silently discard recoverable data.
       rethrow;
     }
   }
@@ -361,15 +357,10 @@ class DiaryService implements IDiaryService {
     return backupFile.exists();
   }
 
-  Future<void> _deleteLeftoverPreEncryptionBackup({
-    required String? metaBoxPathHint,
-  }) async {
+  Future<void> _deleteLeftoverPreEncryptionBackup() async {
     final boxPath = _diaryBox?.path;
-    if (boxPath == null && metaBoxPathHint == null) return;
-    final path =
-        boxPath ??
-        '${File(metaBoxPathHint!).parent.path}/$diaryEntriesBoxName.hive';
-    final backupFile = File('$path.bak_pre_enc');
+    if (boxPath == null) return;
+    final backupFile = File('$boxPath.bak_pre_enc');
     try {
       if (await backupFile.exists()) {
         await backupFile.delete();

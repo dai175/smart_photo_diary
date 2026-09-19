@@ -12,8 +12,7 @@ abstract class DiaryEncryptionMigrationStore {
   Future<bool> isMigrated();
   Future<void> markMigrated();
 
-  /// Clears the durable migrated flag so remigration from a plaintext
-  /// backup can run after AES key loss.
+  /// 移行完了フラグをクリア（AESキー喪失時のバックアップからの再移行用）
   Future<void> clearMigrated();
 }
 
@@ -36,8 +35,7 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
   final FlutterSecureStorage _secureStorage;
   HiveAesCipher? _cipher;
 
-  /// True when a missing AES key was replaced so the app can boot.
-  /// Old ciphertext is unreadable; diaries will appear empty.
+  /// AESキー喪失後に置換キーを発行した場合 true（旧暗号文は読めず日記は空表示）
   bool recoveredFromMissingKey = false;
 
   HiveEncryptionHelper({FlutterSecureStorage? secureStorage})
@@ -53,9 +51,8 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
         key: _diaryEncryptionMigratedKey,
       );
       if (migrated == 'true') {
-        // Key lost after migration: old ciphertext cannot be decrypted.
-        // Mint a replacement so the app boots (empty diary box) instead of
-        // hard-crashing. Prefer recoverable empty state over a brick.
+        // 移行後にAESキー喪失: 旧暗号文は復号不可のため置換キーを発行し起動する
+        // （日記は空表示）。起動不能より空状態を優先する。
         recoveredFromMissingKey = true;
       }
 
@@ -89,7 +86,7 @@ class HiveEncryptionHelper implements DiaryEncryptionMigrationStore {
     await _secureStorage.write(key: _diaryEncryptionMigratedKey, value: 'true');
   }
 
-  /// Clear durable migration flag (AES key-loss remigration from backup).
+  /// 暗号化移行完了フラグをクリア
   Future<void> clearDiaryEncryptionMigrated() async {
     await _secureStorage.delete(key: _diaryEncryptionMigratedKey);
   }
