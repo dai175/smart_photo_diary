@@ -563,7 +563,7 @@ void main() {
         );
         expect(captured!.headers['Authorization'], 'Bearer $testKey');
         final body = jsonDecode(captured!.body) as Map<String, dynamic>;
-        expect(body['model'], AiConstants.openRouterModelName);
+        expect(body['model'], EnvironmentConfig.openRouterModel);
         expect(body['max_tokens'], 123);
         final messages = body['messages'] as List<dynamic>;
         expect(messages, isNotEmpty);
@@ -651,7 +651,7 @@ void main() {
         );
         expect(captured!.headers['Authorization'], 'Bearer $testKey');
         final body = jsonDecode(captured!.body) as Map<String, dynamic>;
-        expect(body['model'], AiConstants.openRouterModelName);
+        expect(body['model'], EnvironmentConfig.openRouterModel);
         final messages = body['messages'] as List<dynamic>;
         final content = (messages.first as Map)['content'] as List<dynamic>;
         expect(content.length, 2);

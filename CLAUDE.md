@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Smart Photo Diary is a Flutter mobile application that generates diary entries from photos using AI (Google Gemini). The app implements a freemium monetization model with Basic (free) and Premium subscription tiers. All user data is stored locally on the device (privacy-first design).
+Smart Photo Diary is a Flutter mobile application that generates diary entries from photos using AI via OpenRouter (default model: Google Gemini 2.5 Flash). The app implements a freemium monetization model with Basic (free) and Premium subscription tiers. All user data is stored locally on the device (privacy-first design).
 
 ## Development Commands
 
@@ -153,7 +153,7 @@ Key rules for quick reference:
 
 - `.github/workflows/ci.yml` — test, analyze, format check, coverage (min 55%, UI layer excluded); Android AAB on main/`workflow_dispatch` only (skipped for version-only `pubspec.yaml`/`CHANGELOG.md` pushes); no CI iOS build
 - `.github/workflows/release.yml` — on tag `v*`: verify CI and create a **draft** GitHub Release (notes only; no iOS artifact)
-- `.github/workflows/ios-deploy.yml` — on release **published**: builds signed IPA from source via fastlane match and uploads to TestFlight
+- `.github/workflows/ios-deploy.yml` — on release **published**: builds signed IPA from source via fastlane match and uploads to TestFlight. Embeds `OPENROUTER_API_KEY` (secret) and optional `OPENROUTER_MODEL` (Actions Variable; default `google/gemini-2.5-flash`).
 
 ### iOS Code Signing (fastlane match)
 

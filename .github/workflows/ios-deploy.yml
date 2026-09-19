@@ -125,8 +125,16 @@ jobs:
       - name: Create dart-defines file
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Repository / Environment Variable（Secret ではない）。未設定時は既定モデル。
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
         run: |
-          echo '{}' | jq --arg key "$OPENROUTER_API_KEY" '.OPENROUTER_API_KEY = $key' > dart_defines.json
+          MODEL="${OPENROUTER_MODEL:-google/gemini-2.5-flash}"
+          echo "OpenRouter model: $MODEL"
+          echo '{}' | jq \
+            --arg key "$OPENROUTER_API_KEY" \
+            --arg model "$MODEL" \
+            '.OPENROUTER_API_KEY = $key | .OPENROUTER_MODEL = $model' \
+            > dart_defines.json
 
       - name: Build iOS IPA
         env:

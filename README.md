@@ -104,7 +104,7 @@ lib/
 - FVM (Flutter Version Management) - 推奨
 - Xcode（iOSビルド用）
 - Android Studio（Androidビルド用）
-- OpenRouter API キー（`OPENROUTER_API_KEY`。既定モデルは Google Gemini 2.5 Flash）
+- OpenRouter API キー（`OPENROUTER_API_KEY`）。モデルは任意で `OPENROUTER_MODEL`（既定: `google/gemini-2.5-flash`。本番は GitHub Actions Variable）
 
 ### セットアップ
 
@@ -122,7 +122,7 @@ fvm dart run build_runner build
 
 # 環境変数設定（テンプレートをコピーしてAPIキーを設定）
 cp .env.example .env
-# .env を編集して OPENROUTER_API_KEY を設定
+# .env を編集して OPENROUTER_API_KEY を設定（任意で OPENROUTER_MODEL）
 
 # アプリを起動
 fvm flutter run

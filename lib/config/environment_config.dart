@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../constants/ai_constants.dart';
 import '../constants/subscription_constants.dart';
 import '../services/interfaces/logging_service_interface.dart';
 
@@ -13,6 +14,7 @@ class EnvironmentConfig {
   }
 
   static String? _cachedOpenRouterApiKey;
+  static String? _cachedOpenRouterModel;
   static String? _cachedForcePlan;
 
   /// 環境変数を初期化
@@ -23,6 +25,10 @@ class EnvironmentConfig {
         'OPENROUTER_API_KEY',
         defaultValue: '',
       );
+      _cachedOpenRouterModel = const String.fromEnvironment(
+        'OPENROUTER_MODEL',
+        defaultValue: '',
+      );
 
       _logger?.info(
         'API key source: ${_cachedOpenRouterApiKey!.isEmpty ? ".env file" : "build-time constants"}',
@@ -30,11 +36,18 @@ class EnvironmentConfig {
       );
 
       // 2. 開発環境：.envファイルから読み込み（デバッグビルドのみ）
-      if (_cachedOpenRouterApiKey!.isEmpty && kDebugMode) {
+      if ((_cachedOpenRouterApiKey!.isEmpty ||
+              _cachedOpenRouterModel!.isEmpty) &&
+          kDebugMode) {
         try {
           // プロジェクトルートから読み込み（セキュリティを考慮）
           await dotenv.load(fileName: '.env');
-          _cachedOpenRouterApiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
+          if (_cachedOpenRouterApiKey!.isEmpty) {
+            _cachedOpenRouterApiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
+          }
+          if (_cachedOpenRouterModel!.isEmpty) {
+            _cachedOpenRouterModel = dotenv.env['OPENROUTER_MODEL'] ?? '';
+          }
           _logger?.info(
             'Development: loaded from .env file',
             context: 'EnvironmentConfig.initialize',
@@ -46,6 +59,10 @@ class EnvironmentConfig {
             data: {'error': e.toString()},
           );
         }
+      }
+
+      if (_cachedOpenRouterModel == null || _cachedOpenRouterModel!.isEmpty) {
+        _cachedOpenRouterModel = AiConstants.openRouterModelName;
       }
 
       // プラン強制設定を読み込み（デバッグモードでのみ有効）
@@ -117,6 +134,15 @@ class EnvironmentConfig {
     }
 
     return key;
+  }
+
+  /// OpenRouter モデル ID（未設定時は [AiConstants.openRouterModelName]）
+  static String get openRouterModel {
+    final model = _cachedOpenRouterModel;
+    if (model == null || model.isEmpty) {
+      return AiConstants.openRouterModelName;
+    }
+    return model;
   }
 
   /// 初期化状態を確認
@@ -191,6 +217,7 @@ class EnvironmentConfig {
         'apiKeyFormat': _cachedOpenRouterApiKey?.startsWith('sk-or-') == true
             ? 'valid'
             : 'invalid',
+        'openRouterModel': openRouterModel,
         'forcePlan': _cachedForcePlan,
         'dotenvKeys': '${dotenv.env.keys.length} keys',
       },
@@ -201,6 +228,7 @@ class EnvironmentConfig {
   static Future<void> reload() async {
     _isInitialized = false;
     _cachedOpenRouterApiKey = null;
+    _cachedOpenRouterModel = null;
     _cachedForcePlan = null;
     await initialize();
   }
@@ -210,8 +238,12 @@ class EnvironmentConfig {
   static void debugOverrideForTest({
     required bool initialized,
     String? apiKey,
+    String? model,
   }) {
     _isInitialized = initialized;
     _cachedOpenRouterApiKey = apiKey;
+    if (model != null) {
+      _cachedOpenRouterModel = model;
+    }
   }
 }
