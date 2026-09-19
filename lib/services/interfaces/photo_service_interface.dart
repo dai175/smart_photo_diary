@@ -31,8 +31,9 @@ abstract class IPhotoService {
   /// 今日撮影された写真を取得する
   ///
   /// Limited Access（iOS 14+）の場合、ユーザーが選択した写真のみ返される。
-  /// 日付範囲によるアクセス制限（プレミアム: 365日）は
-  /// [IPhotoAccessControlService] の責務であり、このメソッドでは適用されない。
+  /// 日付範囲によるアクセス制限（プレミアム: 365日）は呼び出し側
+  /// （ホームの PhotoSelectionController など）の責務であり、
+  /// このメソッドでは適用されない。
   ///
   /// Returns:
   /// - Success: [AssetEntity] リスト

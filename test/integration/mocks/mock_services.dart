@@ -9,11 +9,9 @@ import 'package:smart_photo_diary/services/interfaces/diary_service_interface.da
 import 'package:smart_photo_diary/services/interfaces/diary_crud_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_query_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/subscription_service_interface.dart';
-import 'package:smart_photo_diary/services/interfaces/photo_access_control_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/settings_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/storage_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/diary_tag_service_interface.dart';
-import 'package:smart_photo_diary/services/interfaces/diary_statistics_service_interface.dart';
 import 'package:smart_photo_diary/services/interfaces/logging_service_interface.dart';
 import 'package:smart_photo_diary/models/diary_change.dart';
 import 'package:smart_photo_diary/models/diary_filter.dart';
@@ -47,10 +45,6 @@ class MockIDiaryQueryService extends Mock implements IDiaryQueryService {}
 class MockSubscriptionServiceInterface extends Mock
     implements ISubscriptionService {}
 
-/// Mock PhotoAccessControlService for integration testing
-class MockIPhotoAccessControlService extends Mock
-    implements IPhotoAccessControlService {}
-
 /// Mock SettingsService for integration testing
 class MockSettingsService extends Mock implements ISettingsService {}
 
@@ -59,10 +53,6 @@ class MockStorageService extends Mock implements IStorageService {}
 
 /// Mock DiaryTagService for integration testing
 class MockIDiaryTagService extends Mock implements IDiaryTagService {}
-
-/// Mock DiaryStatisticsService for integration testing
-class MockIDiaryStatisticsService extends Mock
-    implements IDiaryStatisticsService {}
 
 /// Mock LoggingService for integration testing
 class MockILoggingService extends Mock implements ILoggingService {}

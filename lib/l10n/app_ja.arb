@@ -1078,24 +1078,6 @@
   "@diaryCardGeneratingTags": {
     "description": "タグ生成中に表示するメッセージ"
   },
-  "pastPhotoSelectedDateLabel": "{date}の写真",
-  "@pastPhotoSelectedDateLabel": {
-    "description": "選択された日付の写真を示すラベル",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "pastPhotoSelectedCount": "{count}枚",
-  "@pastPhotoSelectedCount": {
-    "description": "選択日付の写真枚数を表示する文",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "diarySearchHint": "タイトルや本文を検索...",
   "@diarySearchHint": {
     "description": "日記検索欄のヒントテキスト"
