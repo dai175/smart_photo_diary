@@ -113,7 +113,7 @@ class GeminiApiClient {
           'Authorization': 'Bearer $_apiKey',
         },
         body: jsonEncode({
-          'model': AiConstants.openRouterModelName,
+          'model': EnvironmentConfig.openRouterModel,
           'messages': [
             {'role': 'user', 'content': content},
           ],

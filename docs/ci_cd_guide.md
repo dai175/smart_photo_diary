@@ -76,6 +76,13 @@ APP_STORE_CONNECT_API_KEY       # App Store Connect API キー（.p8内容、bas
 OPENROUTER_API_KEY              # OpenRouter API キー（日記生成）
 ```
 
+### GitHub Actions Variables（Secret ではない）
+```bash
+OPENROUTER_MODEL                # OpenRouter モデル ID（未設定時 google/gemini-2.5-flash）
+```
+
+> `ios-deploy.yml` は `vars.OPENROUTER_MODEL` を読む。Secrets に同名を置いても使われない。
+
 > 証明書・プロファイルは FocusWave アプリ共通の別リポジトリ `dai175/focuswave-certs` に暗号化保管（fastlane match）。CI は `MATCH_DEPLOY_KEY` で取得し、ローカルの証明書更新は `cd ios && bundle exec fastlane renew_signing`。詳細は [CLAUDE.md](../CLAUDE.md) の「iOS Code Signing (fastlane match)」を参照。
 
 ## スクリプト (`scripts/`)
