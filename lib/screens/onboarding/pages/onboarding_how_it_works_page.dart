@@ -104,7 +104,6 @@ class _MiniHeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // タイトル
                   Text(
                     l10n.onboardingSampleTitle,
                     style: TextStyle(
