@@ -14,8 +14,8 @@ class DiaryGenerationResult {
 
 /// AIサービスのインターフェース
 ///
-/// AI日記生成・タグ生成および使用量管理を提供する。
-/// 内部的にSubscriptionServiceと連携し、月間使用量制限を適用する。
+/// 日記・タグ生成。月間使用量制限は内部で [ISubscriptionService] を参照する。
+/// 残回数・使用可否の公開 API は [ISubscriptionService] のみ。
 abstract class IAiService {
   /// インターネット接続があるかどうかを確認
   Future<bool> isOnline();
@@ -76,27 +76,4 @@ abstract class IAiService {
     required int photoCount,
     Locale? locale,
   });
-
-  /// 残りAI生成回数を取得
-  ///
-  /// Returns:
-  /// - Success: 今月の残りAI生成可能回数
-  /// - Failure: [ServiceException] SubscriptionServiceが利用不可の場合
-  Future<Result<int>> getRemainingGenerations();
-
-  /// 使用量リセット日を取得
-  ///
-  /// Returns:
-  /// - Success: 次の月次リセット日時
-  /// - Failure: [ServiceException] SubscriptionServiceが利用不可の場合
-  Future<Result<DateTime>> getNextResetDate();
-
-  /// AI生成が使用可能かチェック
-  ///
-  /// 月次リセット処理を実行した上で使用可否を判定する。
-  ///
-  /// Returns:
-  /// - Success: 使用可能な場合 true、制限超過時 false
-  /// - Failure: [ServiceException] SubscriptionServiceが利用不可の場合
-  Future<Result<bool>> canUseAiGeneration();
 }

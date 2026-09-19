@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
 import '../core/result/result.dart';
 import '../core/errors/app_exceptions.dart';
 import '../models/plans/plan_factory.dart';
 import '../models/plans/basic_plan.dart';
-import '../config/environment_config.dart';
 import 'interfaces/feature_access_service_interface.dart';
 import 'interfaces/subscription_state_service_interface.dart';
 import 'interfaces/logging_service_interface.dart';
@@ -32,30 +30,8 @@ class FeatureAccessService
 
   @override
   Future<Result<bool>> canAccessPremiumFeatures() async {
-    // デバッグモードでプラン強制設定をチェック
-    if (kDebugMode) {
-      final forcePlan = EnvironmentConfig.forcePlan;
-      log(
-        'Debug mode check',
-        level: LogLevel.debug,
-        data: {'forcePlan': forcePlan},
-      );
-      if (forcePlan != null) {
-        final forceResult = forcePlan.toLowerCase().startsWith('premium');
-        log(
-          'Forced plan setting: Premium access',
-          level: LogLevel.debug,
-          data: {'access': forceResult, 'plan': forcePlan},
-        );
-        return Success(forceResult);
-      } else {
-        log(
-          'No forced plan setting, proceeding with normal plan check',
-          level: LogLevel.debug,
-        );
-      }
-    }
-
+    // FORCE_PLAN は SubscriptionStateService.getCurrentStatus →
+    // SubscriptionPlanResolver.applyForcePlan で適用済み。
     return _checkFeatureAccess('Premium features');
   }
 

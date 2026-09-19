@@ -60,14 +60,6 @@ class SettingsSubscriptionDelegate {
     );
   }
 
-  /// 残り使用可能回数を取得
-  Future<Result<int>> getRemainingGenerations() =>
-      _subscriptionService.getRemainingGenerations();
-
-  /// 次回リセット日を取得
-  Future<Result<DateTime>> getNextResetDate() =>
-      _subscriptionService.getNextResetDate();
-
   /// プラン変更可能かどうかを確認
   Future<Result<bool>> canChangePlan() async {
     final statusResult = await _subscriptionService.getCurrentStatus();

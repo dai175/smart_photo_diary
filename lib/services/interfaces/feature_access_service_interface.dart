@@ -1,8 +1,7 @@
 import '../../core/result/result.dart';
 
-/// 機能アクセス制御サービスのインターフェース
-///
-/// プラン別の機能アクセス権限チェックを担当する。
+/// 機能アクセス制御（内部）。公開呼び出しは [ISubscriptionService] を使う。
+/// FORCE_PLAN は [ISubscriptionStateService.getCurrentStatus] 側で適用済み。
 abstract class IFeatureAccessService {
   /// プレミアム機能にアクセスできるかどうか
   ///

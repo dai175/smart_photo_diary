@@ -183,41 +183,4 @@ class AiService implements IAiService {
       locale: locale ?? const Locale('ja'),
     );
   }
-
-  // Phase 1.7.3: UI連携準備メソッド実装
-
-  @override
-  Future<Result<int>> getRemainingGenerations() async {
-    if (_subscriptionService == null) {
-      return const Failure(
-        ServiceException('SubscriptionService is not available'),
-      );
-    }
-
-    return await _subscriptionService.getRemainingGenerations();
-  }
-
-  @override
-  Future<Result<DateTime>> getNextResetDate() async {
-    if (_subscriptionService == null) {
-      return const Failure(
-        ServiceException('SubscriptionService is not available'),
-      );
-    }
-
-    return await _subscriptionService.getNextResetDate();
-  }
-
-  @override
-  Future<Result<bool>> canUseAiGeneration() async {
-    if (_subscriptionService == null) {
-      return const Failure(
-        ServiceException('SubscriptionService is not available'),
-      );
-    }
-
-    await _tryResetMonthlyUsage('canUseAiGeneration');
-
-    return await _subscriptionService.canUseAiGeneration();
-  }
 }

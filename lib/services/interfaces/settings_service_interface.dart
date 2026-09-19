@@ -104,20 +104,6 @@ abstract class ISettingsService {
   /// - Failure: [ServiceException] SubscriptionServiceが未初期化の場合
   Future<Result<UsageStatisticsV2>> getUsageStatisticsWithPlanClass();
 
-  /// 残り使用可能回数を取得
-  ///
-  /// Returns:
-  /// - Success: 今月の残りAI生成可能回数
-  /// - Failure: [ServiceException] SubscriptionServiceが未初期化の場合
-  Future<Result<int>> getRemainingGenerations();
-
-  /// 次回リセット日を取得
-  ///
-  /// Returns:
-  /// - Success: 次の月次リセット日時
-  /// - Failure: [ServiceException] SubscriptionServiceが未初期化の場合
-  Future<Result<DateTime>> getNextResetDate();
-
   /// プラン変更可能かどうかを確認
   ///
   /// Returns:
