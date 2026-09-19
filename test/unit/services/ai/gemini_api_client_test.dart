@@ -530,14 +530,17 @@ void main() {
 
       test('OpenRouter URL / Bearer / payload を送る', () async {
         const testKey = 'sk-or-v1-test_dummy_key_for_testing';
+        const testModel = 'openrouter/test-model';
         EnvironmentConfig.debugOverrideForTest(
           initialized: true,
           apiKey: testKey,
+          model: testModel,
         );
         addTearDown(
           () => EnvironmentConfig.debugOverrideForTest(
             initialized: false,
             apiKey: null,
+            model: null,
           ),
         );
 
@@ -563,7 +566,7 @@ void main() {
         );
         expect(captured!.headers['Authorization'], 'Bearer $testKey');
         final body = jsonDecode(captured!.body) as Map<String, dynamic>;
-        expect(body['model'], EnvironmentConfig.openRouterModel);
+        expect(body['model'], testModel);
         expect(body['max_tokens'], 123);
         final messages = body['messages'] as List<dynamic>;
         expect(messages, isNotEmpty);
@@ -617,14 +620,17 @@ void main() {
 
       test('OpenRouter vision payload に image_url data URL を含める', () async {
         const testKey = 'sk-or-v1-test_dummy_key_for_testing';
+        const testModel = 'openrouter/test-vision-model';
         EnvironmentConfig.debugOverrideForTest(
           initialized: true,
           apiKey: testKey,
+          model: testModel,
         );
         addTearDown(
           () => EnvironmentConfig.debugOverrideForTest(
             initialized: false,
             apiKey: null,
+            model: null,
           ),
         );
 
@@ -651,7 +657,7 @@ void main() {
         );
         expect(captured!.headers['Authorization'], 'Bearer $testKey');
         final body = jsonDecode(captured!.body) as Map<String, dynamic>;
-        expect(body['model'], EnvironmentConfig.openRouterModel);
+        expect(body['model'], testModel);
         final messages = body['messages'] as List<dynamic>;
         final content = (messages.first as Map)['content'] as List<dynamic>;
         expect(content.length, 2);
