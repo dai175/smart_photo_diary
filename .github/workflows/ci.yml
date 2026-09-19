@@ -92,6 +92,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Guard against stale Gemini-direct API markers
+        run: bash scripts/check_no_stale_gemini_key.sh
+
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
 
