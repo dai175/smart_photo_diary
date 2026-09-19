@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../localization/localization_extensions.dart';
 import '../../../ui/design_system/app_colors.dart';
 import '../../../ui/design_system/app_spacing.dart';
+import '../../../ui/design_system/app_typography.dart';
 import '../../../ui/components/modern_chip.dart';
 import '../components/onboarding_page_scaffold.dart';
 
@@ -112,6 +113,13 @@ class _MiniHeroCard extends StatelessWidget {
                       height: 1.22,
                       letterSpacing: -0.2,
                       color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.onboardingSampleExcerpt,
+                    style: AppTypography.cardBody.copyWith(
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 10),

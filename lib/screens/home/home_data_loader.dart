@@ -37,9 +37,7 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
 
-      // Determine actual plan access days for lock state
-      final planAccessDays = await _getPlanAccessDays();
-      _self._photoController.setAccessibleDays(planAccessDays);
+      await _syncAccessibleDays();
 
       // Pre-fetch screenshot asset IDs for filtering
       if (_self._photoTypeFilter == PhotoTypeFilter.photosOnly) {
@@ -268,6 +266,12 @@ mixin _HomeDataLoaderMixin on State<HomeScreen> {
   Future<void> _onDiaryCreated() async {
     _self._homeController.refreshDiaryAndStats();
     await _loadUsedPhotoIds();
+  }
+
+  Future<void> _syncAccessibleDays() async {
+    final planAccessDays = await _getPlanAccessDays();
+    if (!mounted) return;
+    _self._photoController.setAccessibleDays(planAccessDays);
   }
 
   Future<int> _getPlanAccessDays() async {

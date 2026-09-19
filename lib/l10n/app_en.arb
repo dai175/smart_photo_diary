@@ -678,6 +678,10 @@
   "@purchaseFailedMessage": {
     "description": "Message shown on the paywall after purchase error or timeout"
   },
+  "purchaseSuccessMessage": "Your Premium subscription is now active.",
+  "@purchaseSuccessMessage": {
+    "description": "Snackbar shown after a Premium purchase completes"
+  },
   "commonRetry": "Retry",
   "@commonRetry": {
     "description": "Generic retry button label"

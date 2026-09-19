@@ -89,6 +89,13 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Pick a photo. We do the writing.'), findsOneWidget);
+        expect(
+          find.text(
+            'She lay curled in the afternoon light, eyes barely open. '
+            'The room was still, and for a moment nothing else seemed to matter.',
+          ),
+          findsOneWidget,
+        );
       });
 
       testWidgets('can navigate through all 4 pages', (

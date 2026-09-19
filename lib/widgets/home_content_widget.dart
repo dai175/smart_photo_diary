@@ -249,7 +249,7 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
             onUpgrade: plan.id == SubscriptionConstants.basicPlanId
                 ? () {
                     Navigator.of(context).pop();
-                    _navigateToUpgrade(context);
+                    UpgradeDialogUtils.showUpgradeDialog(context);
                   }
                 : null,
             onDismiss: () => Navigator.of(context).pop(),
@@ -269,14 +269,5 @@ class _HomeContentWidgetState extends State<HomeContentWidget> {
         );
       }
     }
-  }
-
-  Future<void> _navigateToUpgrade(BuildContext context) async {
-    await UpgradeDialogUtils.showUpgradeDialog(context);
-    if (!mounted) return;
-    await Future.wait([
-      _loadUsageSummary(),
-      widget.onRefresh?.call() ?? Future.value(),
-    ]);
   }
 }
