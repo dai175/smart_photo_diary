@@ -125,7 +125,6 @@ jobs:
       - name: Create dart-defines file
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # Repository / Environment Variable（Secret ではない）。未設定時は既定モデル。
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
         run: |
           MODEL="${OPENROUTER_MODEL:-google/gemini-2.5-flash}"

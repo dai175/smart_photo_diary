@@ -5,7 +5,6 @@ class AiConstants {
   // OpenRouter API設定
   static const String openRouterChatCompletionsUrl =
       'https://openrouter.ai/api/v1/chat/completions';
-  // Default OPENROUTER_MODEL when unset.
   static const String openRouterModelName = 'google/gemini-2.5-flash';
   static const double defaultTemperature = 0.7;
   static const int defaultMaxOutputTokens = 1000;

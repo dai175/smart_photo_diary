@@ -61,7 +61,7 @@ class EnvironmentConfig {
         }
       }
 
-      if (_cachedOpenRouterModel == null || _cachedOpenRouterModel!.isEmpty) {
+      if (_cachedOpenRouterModel!.isEmpty) {
         _cachedOpenRouterModel = AiConstants.openRouterModelName;
       }
 
@@ -136,7 +136,7 @@ class EnvironmentConfig {
     return key;
   }
 
-  /// OpenRouter モデル ID（未設定時は [AiConstants.openRouterModelName]）
+  /// OpenRouter モデル ID
   static String get openRouterModel {
     final model = _cachedOpenRouterModel;
     if (model == null || model.isEmpty) {
