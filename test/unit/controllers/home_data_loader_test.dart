@@ -27,6 +27,13 @@ class MockDiaryService extends Mock implements IDiaryService {}
 
 class MockAssetEntity extends Mock implements AssetEntity {}
 
+MockAssetEntity mockPhoto(String id) {
+  final photo = MockAssetEntity();
+  when(() => photo.id).thenReturn(id);
+  when(() => photo.createDateTime).thenReturn(DateTime.now());
+  return photo;
+}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2020));
@@ -248,5 +255,97 @@ void main() {
       expect(homeController.diaryScreenKey, isNot(oldDiary));
       expect(homeController.statsScreenKey, isNot(oldStats));
     });
+
+    test(
+      'loadMorePhotos appends a page, advances offset, and keeps selection',
+      () async {
+        final existing = mockPhoto('p1');
+        final nextA = mockPhoto('p2');
+        final nextB = mockPhoto('p3');
+        photoController.setPhotoAssets([existing]);
+        photoController.toggleSelect(0);
+        photoController.setHasMorePhotos(true);
+        photoController.setLoading(false);
+
+        final offsets = <int>[];
+        final inFlight = Completer<Result<List<AssetEntity>>>();
+        var callCount = 0;
+        when(
+          () => photoService.getPhotosEfficient(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((invocation) {
+          final offset = invocation.namedArguments[#offset] as int;
+          offsets.add(offset);
+          callCount++;
+          if (callCount == 1) {
+            return inFlight.future;
+          }
+          return Future.value(const Success([]));
+        });
+
+        final pending = loader.loadMorePhotos();
+        await Future<void>.delayed(Duration.zero);
+        expect(photoController.isLoading, isTrue);
+
+        inFlight.complete(Success([nextA, nextB]));
+        await pending;
+
+        expect(photoController.isLoading, isFalse);
+        expect(photoController.hasMorePhotos, isTrue);
+        expect(photoController.photoAssets.map((p) => p.id), [
+          'p1',
+          'p2',
+          'p3',
+        ]);
+        expect(photoController.selected, [true, false, false]);
+        expect(offsets, [0]);
+
+        await loader.loadMorePhotos();
+        expect(offsets, [0, 2]);
+        expect(photoController.hasMorePhotos, isFalse);
+        expect(photoController.photoAssets.map((p) => p.id), [
+          'p1',
+          'p2',
+          'p3',
+        ]);
+      },
+    );
+
+    test(
+      'loadMorePhotos empty terminal page clears loading and stops paging',
+      () async {
+        final existing = mockPhoto('p1');
+        photoController.setPhotoAssets([existing]);
+        photoController.setHasMorePhotos(true);
+        photoController.setLoading(false);
+
+        var fetchCount = 0;
+        when(
+          () => photoService.getPhotosEfficient(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async {
+          fetchCount++;
+          return const Success([]);
+        });
+
+        await loader.loadMorePhotos();
+
+        expect(photoController.isLoading, isFalse);
+        expect(photoController.hasMorePhotos, isFalse);
+        expect(photoController.photoAssets.map((p) => p.id), ['p1']);
+        expect(fetchCount, 1);
+
+        await loader.loadMorePhotos();
+        expect(fetchCount, 1);
+      },
+    );
   });
 }
