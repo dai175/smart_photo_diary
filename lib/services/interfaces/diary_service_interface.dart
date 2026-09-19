@@ -7,7 +7,7 @@ import 'diary_query_service_interface.dart';
 /// [IDiaryCrudService] と [IDiaryQueryService] を統合し、
 /// 変更ストリームとリソース管理を追加する。
 ///
-/// タグ管理は [IDiaryTagService]、統計は [IDiaryStatisticsService] を使用。
+/// タグ管理は [IDiaryTagService] を使用。
 abstract class IDiaryService implements IDiaryCrudService, IDiaryQueryService {
   /// 日記の変更ストリーム（作成/更新/削除）。broadcast。
   Stream<DiaryChange> get changes;

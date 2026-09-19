@@ -7,9 +7,7 @@ import '../services/interfaces/diary_service_interface.dart';
 import '../services/interfaces/diary_crud_service_interface.dart';
 import '../services/interfaces/diary_query_service_interface.dart';
 import '../services/interfaces/diary_tag_service_interface.dart';
-import '../services/interfaces/diary_statistics_service_interface.dart';
 import '../services/diary_tag_service.dart';
-import '../services/diary_statistics_service.dart';
 import '../services/photo_service.dart';
 import '../services/interfaces/photo_service_interface.dart';
 import '../services/photo_permission_service.dart';
@@ -18,8 +16,6 @@ import '../services/camera_service.dart';
 import '../services/interfaces/camera_service_interface.dart';
 import '../services/photo_cache_service.dart';
 import '../services/interfaces/photo_cache_service_interface.dart';
-import '../services/photo_access_control_service.dart';
-import '../services/interfaces/photo_access_control_service_interface.dart';
 import '../services/settings_service.dart';
 import '../services/interfaces/settings_service_interface.dart';
 import '../services/storage_service.dart';
@@ -70,8 +66,7 @@ import '../screens/diary_preview/diary_preview_dialogs.dart';
 /// 7b. **PhotoService** - Facade: 写真クエリ/データ + 権限・カメラ委譲
 /// 7c. **CameraService** - カメラ撮影機能（LoggingService + PhotoService.getTodayPhotosに依存）
 /// 8. **PhotoCacheService** - 写真キャッシュ機能（LoggingServiceに依存）
-/// 9. **PhotoAccessControlService** - 写真アクセス制御
-/// 10. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
+/// 9. **SettingsService** - アプリ設定管理（SubscriptionServiceに依存）
 /// 11. **StorageService** - ストレージ操作
 /// 12a. **PromptUsageService** - プロンプト使用履歴管理（Hive依存のみ）
 /// 12b. **PromptService** - ライティングプロンプト管理（JSONアセット読み込み、PromptUsageServiceに依存）
@@ -81,8 +76,7 @@ import '../screens/diary_preview/diary_preview_dialogs.dart';
 /// ### Phase 2: Dependent Services
 /// 1. **AiService** - AI日記生成（SubscriptionServiceに依存）
 /// 2. **DiaryTagService** - タグ管理（AiServiceに依存）
-/// 3. **DiaryStatisticsService** - 統計（LoggingServiceに依存）
-/// 4. **DiaryService** - Facade: 日記CRUD + タグ・統計委譲（AiService, PhotoServiceに依存）
+/// 3. **DiaryService** - Facade: 日記CRUD + タグ委譲（AiService, PhotoServiceに依存）
 ///
 /// ## 依存関係マップ
 /// - LoggingService → なし（基盤サービス）
@@ -98,8 +92,7 @@ import '../screens/diary_preview/diary_preview_dialogs.dart';
 /// - SettingsService → SubscriptionService
 /// - AiService → SubscriptionService
 /// - DiaryTagService → AiService + LoggingService
-/// - DiaryStatisticsService → LoggingService
-/// - DiaryService(Facade) → AiService + PhotoService + LoggingService（DiaryTagService/DiaryStatisticsServiceは遅延解決）
+/// - DiaryService(Facade) → AiService + PhotoService + LoggingService（DiaryTagServiceは遅延解決）
 /// - StorageService → DiaryService（DatabaseOptimization用）
 ///
 /// **循環依存**: なし（全て単方向の依存関係）
@@ -276,11 +269,6 @@ class ServiceRegistration {
       ),
     );
 
-    // 10. PhotoAccessControlService (LoggingServiceに依存)
-    serviceLocator.registerFactory<IPhotoAccessControlService>(
-      () => PhotoAccessControlService(logger: loggingService),
-    );
-
     // 11. StorageService — Phase 2 に移動（DiaryServiceに依存するため）
 
     // 12a. PromptUsageService (使用履歴管理 - Hive依存のみ)
@@ -361,12 +349,7 @@ class ServiceRegistration {
       );
     });
 
-    // DiaryStatisticsService (統計 - LoggingServiceに依存)
-    serviceLocator.registerSingleton<IDiaryStatisticsService>(
-      DiaryStatisticsService(logger: serviceLocator.get<ILoggingService>()),
-    );
-
-    // DiaryService (Facade - Tag/Statisticsは遅延解決)
+    // DiaryService (Facade - Tagは遅延解決)
     serviceLocator.registerAsyncFactory<IDiaryService>(() async {
       // DiaryTagServiceを事前解決（DiaryServiceからの同期アクセスのため）
       // ※ IDiaryTagService解決時にIAiServiceも連鎖的に解決される

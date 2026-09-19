@@ -52,7 +52,7 @@ fvm flutter run --dart-define-from-file=.env --dart-define=FORCE_PLAN=premium_mo
 - `lib/services/social_share/` — social share channel implementations
 - `lib/services/mixins/` — shared service mixins (e.g., error handling)
 - `lib/services/*.dart` — core service implementations, delegates, usage tracking, feature access control, and subscription state management (flat structure at services root)
-- `lib/controllers/` — ChangeNotifier-based screen controllers, `BaseErrorController` (shared error handling), and utility notifiers (`PastPhotosNotifier`, `ScrollSignal`); `UpgradeDialogController` manages premium upgrade flow; `PhotoSelectionController` manages photo selection state
+- `lib/controllers/` — ChangeNotifier-based screen controllers, `BaseErrorController` (shared error handling), and utility notifiers (`ScrollSignal`); `UpgradeDialogController` manages premium upgrade flow; `PhotoSelectionController` manages photo selection state
 - `lib/screens/` — screen/page implementations with subdirectories (`home/`, `diary_detail/`, `diary_preview/`, `statistics/`, `onboarding/`) and root-level screen files (`settings_screen.dart`, `diary_screen.dart`)
 - `lib/widgets/` — domain-specific reusable widgets organized into subdirs: `settings/`, `timeline/`, `upgrade/`; root-level widgets include diary cards, search, calendar
 - `lib/ui/design_system/` — Material Design 3 theme, colors, typography

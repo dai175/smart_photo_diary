@@ -19,8 +19,7 @@ import 'diary_query_delegate.dart';
 /// 日記の管理を担当するサービスクラス（Facade）
 ///
 /// CRUD操作は[DiaryCrudDelegate]に、クエリ操作は[DiaryQueryDelegate]に委譲。
-/// インデックス管理はDiaryIndexManagerに、タグ管理はIDiaryTagServiceに、
-/// 統計はIDiaryStatisticsServiceに委譲。
+/// インデックス管理はDiaryIndexManagerに、タグ管理はIDiaryTagServiceに委譲。
 class DiaryService implements IDiaryService {
   static const String diaryEntriesBoxName = 'diary_entries';
   Box<DiaryEntry>? _diaryBox;

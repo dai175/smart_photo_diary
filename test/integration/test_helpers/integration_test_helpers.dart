@@ -138,7 +138,6 @@ class IntegrationTestHelpers {
     ).thenReturn(null);
 
     // Override real services with mock services
-    // Note: IDiaryStatisticsService は実際のサービスを保持（Hive統合テストで必要）
     _serviceLocator.unregister<IPhotoService>();
     _serviceLocator.unregister<IAiService>();
     _serviceLocator.unregister<IDiaryService>();
