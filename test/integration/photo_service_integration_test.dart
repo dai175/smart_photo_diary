@@ -38,6 +38,12 @@ void main() {
         () => mockPermissionService.isPermissionPermanentlyDenied(),
       ).thenAnswer((_) async => const Success(false));
       when(
+        () => mockPermissionService.hasPhotoLibraryAccess(),
+      ).thenAnswer((_) async => const Success(false));
+      when(
+        () => mockPermissionService.openPhotoAccessSettings(),
+      ).thenAnswer((_) async => const Success(null));
+      when(
         () => mockPermissionService.presentLimitedLibraryPicker(),
       ).thenAnswer((_) async => const Success(true));
       when(

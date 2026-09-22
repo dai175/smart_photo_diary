@@ -51,6 +51,14 @@ class PhotoService implements IPhotoService {
       _permissionService.isPermissionPermanentlyDenied();
 
   @override
+  Future<Result<bool>> hasPhotoLibraryAccess() =>
+      _permissionService.hasPhotoLibraryAccess();
+
+  @override
+  Future<Result<void>> openPhotoAccessSettings() =>
+      _permissionService.openPhotoAccessSettings();
+
+  @override
   Future<Result<bool>> presentLimitedLibraryPicker() =>
       _permissionService.presentLimitedLibraryPicker();
 

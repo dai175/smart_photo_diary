@@ -146,6 +146,14 @@
   "@photoPermissionMessage": {
     "description": "写真アクセス権限が未許可の場合の説明"
   },
+  "photoPermissionSettingsMessage": "タイムラインを表示するには、設定アプリで写真へのアクセスをオンにしてください。",
+  "@photoPermissionSettingsMessage": {
+    "description": "システム設定での写真許可が必要なときの説明"
+  },
+  "photoPermissionOpenSettings": "設定を開く",
+  "@photoPermissionOpenSettings": {
+    "description": "写真ライブラリの許可のためシステム設定を開くボタン"
+  },
   "photoRequestPermission": "権限をリクエスト",
   "@photoRequestPermission": {
     "description": "写真アクセス権限リクエストボタン"

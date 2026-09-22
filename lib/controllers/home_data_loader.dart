@@ -66,6 +66,48 @@ class HomeDataLoader {
            resolveDiaryService ??
            (() => ServiceRegistration.getAsync<IDiaryService>());
 
+  Future<void> handlePhotoPermissionAction() async {
+    if (!_isMounted()) return;
+
+    if (_photoController.photoPermissionRequiresSettings) {
+      final settingsResult = await _photoService.openPhotoAccessSettings();
+      settingsResult.onFailure((e) {
+        _logger.warning(
+          'Failed to open app settings for photo permission',
+          context: 'HomeDataLoader.handlePhotoPermissionAction',
+          data: e.message,
+        );
+      });
+      return;
+    }
+
+    await loadTodayPhotos();
+  }
+
+  Future<void> recheckPhotoPermissionOnResume() async {
+    if (!_isMounted() || _photoController.hasPermission) {
+      return;
+    }
+
+    final accessResult = await _photoService.hasPhotoLibraryAccess();
+    if (!_isMounted()) return;
+
+    if (accessResult.getOrDefault(false)) {
+      await loadTodayPhotos();
+      return;
+    }
+
+    await _refreshPhotoPermissionRequiresSettings();
+  }
+
+  Future<void> _refreshPhotoPermissionRequiresSettings() async {
+    final deniedResult = await _photoService.isPermissionPermanentlyDenied();
+    if (!_isMounted()) return;
+    _photoController.setPhotoPermissionRequiresSettings(
+      deniedResult.getOrDefault(false),
+    );
+  }
+
   Future<void> loadTodayPhotos() async {
     if (!_isMounted()) return;
 
@@ -86,6 +128,7 @@ class HomeDataLoader {
 
       if (!hasPermission) {
         _photoController.setLoading(false);
+        await _refreshPhotoPermissionRequiresSettings();
         _logger.warning(
           'Photo library permission denied; skipping timeline load',
           context: 'HomeDataLoader.loadTodayPhotos',

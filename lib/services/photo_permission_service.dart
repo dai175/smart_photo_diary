@@ -127,13 +127,47 @@ class PhotoPermissionService implements IPhotoPermissionService {
   Future<Result<bool>> isPermissionPermanentlyDenied() async {
     try {
       final currentStatus = await Permission.photos.status;
-      return Success(currentStatus.isPermanentlyDenied);
+      if (currentStatus.isPermanentlyDenied) {
+        return const Success(true);
+      }
+      if (defaultTargetPlatform == TargetPlatform.iOS &&
+          (currentStatus.isDenied || currentStatus.isRestricted)) {
+        return const Success(true);
+      }
+      return const Success(false);
     } catch (e) {
       return Failure(
         PhotoAccessException(
           'Permission permanently denied check failed',
           originalError: e,
         ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<bool>> hasPhotoLibraryAccess() async {
+    try {
+      final status = await Permission.photos.status;
+      return Success(status.isGranted || status.isLimited);
+    } catch (e) {
+      return Failure(
+        PhotoAccessException(
+          'Photo library access check failed',
+          originalError: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> openPhotoAccessSettings() async {
+    try {
+      await openAppSettings();
+      return const Success(null);
+    } catch (e) {
+      return Failure(
+        PhotoAccessException('Failed to open app settings', originalError: e),
       );
     }
   }

@@ -20,13 +20,14 @@ abstract class IPhotoService {
   /// - Failure: [PhotoAccessException] 権限リクエスト処理でエラーが発生した場合
   Future<Result<bool>> requestPermission();
 
-  /// 権限が永続的に拒否されているかチェック
-  ///
-  /// Returns:
-  /// - Success(true): 永続的に拒否されている
-  /// - Success(false): 永続的に拒否されていない
-  /// - Failure: [PhotoAccessException] 権限チェック処理でエラーが発生した場合
+  /// システム設定での許可が必要か（再プロンプトが期待できない状態）
   Future<Result<bool>> isPermissionPermanentlyDenied();
+
+  /// 写真ライブラリへのアクセスが付与されているか（プロンプトなし）
+  Future<Result<bool>> hasPhotoLibraryAccess();
+
+  /// ユーザー操作に応じてシステム設定アプリを開く
+  Future<Result<void>> openPhotoAccessSettings();
 
   /// 今日撮影された写真を取得する
   ///

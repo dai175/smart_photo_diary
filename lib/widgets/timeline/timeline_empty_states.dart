@@ -21,11 +21,25 @@ class TimelineLoadingState extends StatelessWidget {
 /// 写真アクセス権限が拒否された状態ウィジェット
 class TimelinePermissionDeniedState extends StatelessWidget {
   final VoidCallback? onRequestPermission;
+  final bool requiresSettings;
+  final bool isLoading;
 
-  const TimelinePermissionDeniedState({super.key, this.onRequestPermission});
+  const TimelinePermissionDeniedState({
+    super.key,
+    this.onRequestPermission,
+    this.requiresSettings = false,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final message = requiresSettings
+        ? context.l10n.photoPermissionSettingsMessage
+        : context.l10n.photoPermissionMessage;
+    final actionLabel = requiresSettings
+        ? context.l10n.photoPermissionOpenSettings
+        : context.l10n.commonAllow;
+
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
@@ -42,15 +56,22 @@ class TimelinePermissionDeniedState extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  context.l10n.photoPermissionMessage,
+                  message,
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                if (onRequestPermission != null)
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(AppSpacing.md),
+                    child: CircularProgressIndicator(
+                      strokeWidth: AppConstants.progressIndicatorStrokeWidth,
+                    ),
+                  )
+                else if (onRequestPermission != null)
                   TextButton(
                     onPressed: onRequestPermission,
-                    child: Text(context.l10n.commonAllow),
+                    child: Text(actionLabel),
                   ),
               ],
             ),

@@ -237,6 +237,12 @@ class TestServiceSetup {
       () => mock.isPermissionPermanentlyDenied(),
     ).thenAnswer((_) async => const Success(false));
     when(
+      () => mock.hasPhotoLibraryAccess(),
+    ).thenAnswer((_) async => const Success(false));
+    when(
+      () => mock.openPhotoAccessSettings(),
+    ).thenAnswer((_) async => const Success(null));
+    when(
       () => mock.capturePhoto(),
     ).thenAnswer((_) async => const Success(null));
     when(

@@ -150,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _onResumed() async {
+    await _dataLoader.recheckPhotoPermissionOnResume();
     // 使用済み写真IDのみ更新（日記が他画面で変更された可能性に対応）
     // スクロール位置・読み込み済み写真データ・オフセットはすべて保持
     await _dataLoader.loadUsedPhotoIds();
@@ -281,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen>
       HomeContentWidget(
         photoController: _photoController,
         callbacks: TimelineCallbacks(
-          onRequestPermission: _dataLoader.loadTodayPhotos,
+          onRequestPermission: _dataLoader.handlePhotoPermissionAction,
           onSelectionLimitReached: _showSelectionLimitModal,
           onUsedPhotoSelected: _showUsedPhotoModal,
           onUsedPhotoDetail: _navigateToDiaryDetailByPhotoId,

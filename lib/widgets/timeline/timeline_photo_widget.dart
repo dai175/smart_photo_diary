@@ -216,6 +216,8 @@ class _TimelinePhotoWidgetState extends State<TimelinePhotoWidget> {
         if (!widget.controller.hasPermission) {
           return TimelinePermissionDeniedState(
             onRequestPermission: widget.callbacks.onRequestPermission,
+            requiresSettings: widget.controller.photoPermissionRequiresSettings,
+            isLoading: widget.controller.isLoading,
           );
         }
 
