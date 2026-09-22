@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:smart_photo_diary/core/errors/photo_error.dart';
 import 'package:smart_photo_diary/core/result/result.dart';
 import 'package:smart_photo_diary/core/service_locator.dart';
 import 'package:smart_photo_diary/models/photo_type_filter.dart';
@@ -185,6 +186,44 @@ void main() {
 
         verify(() => mockPhoto.requestPermission()).called(greaterThan(0));
       });
+
+      testWidgets(
+        'does not open Settings after the user denies photo library access',
+        (WidgetTester tester) async {
+          when(
+            () => mockPhoto.requestPermission(),
+          ).thenAnswer((_) async => const Success(false));
+
+          await tester.pumpWidget(buildHomeScreen());
+          await pumpFrames(tester);
+
+          expect(find.text('Allow photo access'), findsNothing);
+          expect(find.text('Open settings'), findsNothing);
+          expect(
+            find.text('Photo access permission is required'),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'does not open Settings after the user denies camera access',
+        (WidgetTester tester) async {
+          when(() => mockPhoto.capturePhoto()).thenAnswer(
+            (_) async => Failure(PhotoError.cameraPermissionDenied()),
+          );
+
+          await tester.pumpWidget(buildHomeScreen());
+          await pumpFrames(tester);
+
+          await tester.tap(find.byType(FloatingActionButton));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+
+          expect(find.text('Camera access required'), findsNothing);
+          expect(find.text('Open settings'), findsNothing);
+        },
+      );
 
       testWidgets('loads diary entries on init', (WidgetTester tester) async {
         await tester.pumpWidget(buildHomeScreen());
