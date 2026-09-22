@@ -2,6 +2,8 @@
 
 ## 1.9.8
 
+- iOS: 写真権限拒否後の Settings 誘導を停止（Guideline 5.1.1(iv)、#159）
+- Home: 権限拒否後もタイムラインで写真アクセス CTA を復帰（#160）
 - Export compliance: `ITSAppUsesNonExemptEncryption=false`（#150）
 - OpenRouter モデルを Actions Variable `OPENROUTER_MODEL` で設定可能に（#152。既定 `google/gemini-2.5-flash`）
 - オンボーディングのサンプル抜粋表示、iOS 写真権限文言のローカライズ、購入確認の改善（#155）
