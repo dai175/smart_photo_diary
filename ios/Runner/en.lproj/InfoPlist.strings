@@ -1,3 +1,5 @@
 "NSPhotoLibraryUsageDescription" = "Smart Photo Diary reads your photo library so you can choose the photos that become diary entries.";
 "NSPhotoLibraryAddUsageDescription" = "Smart Photo Diary saves photos you take in the app to your photo library.";
 "NSCameraUsageDescription" = "Smart Photo Diary lets you take a photo and add it to your diary right away. The photo you take is selected automatically so you can start writing immediately.";
+"NSLocationWhenInUseUsageDescription" = "This app does not use your location. Some libraries it includes may still reference location APIs.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "This app does not use your location. Some libraries it includes may still reference location APIs.";

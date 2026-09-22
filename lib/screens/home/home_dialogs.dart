@@ -50,34 +50,6 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
     DialogUtils.showSimpleDialog(context, message);
   }
 
-  Future<void> _showPermissionDeniedDialog() async {
-    if (!mounted) return;
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomDialog(
-          icon: Icons.photo_library_outlined,
-          iconColor: AppColors.warning,
-          title: context.l10n.homePermissionDialogTitle,
-          message: context.l10n.homePermissionDialogMessage,
-          onClose: () => Navigator.of(context).pop(),
-          actions: [
-            CustomDialogAction(
-              text: context.l10n.commonOpenSettings,
-              isPrimary: true,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await openAppSettings();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<void> _showLimitedAccessDialog() async {
     if (!mounted) return;
 
@@ -105,31 +77,6 @@ mixin _HomeDialogsMixin on State<HomeScreen> {
           ],
         );
       },
-    );
-  }
-
-  Future<void> _showCameraPermissionDialog() async {
-    if (!mounted) return;
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) => CustomDialog(
-        icon: Icons.camera_alt_outlined,
-        iconColor: Theme.of(context).colorScheme.primary,
-        title: context.l10n.cameraPermissionDialogTitle,
-        message: context.l10n.cameraPermissionDialogMessage,
-        onClose: () => Navigator.of(context).pop(),
-        actions: [
-          CustomDialogAction(
-            text: context.l10n.commonOpenSettings,
-            isPrimary: true,
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await openAppSettings();
-            },
-          ),
-        ],
-      ),
     );
   }
 

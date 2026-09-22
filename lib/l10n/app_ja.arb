@@ -215,14 +215,6 @@
   "@homeDiaryLoadError": {
     "description": "日記取得時に例外が発生した際のメッセージ"
   },
-  "homePermissionDialogTitle": "写真へのアクセスを許可",
-  "@homePermissionDialogTitle": {
-    "description": "写真アクセス権限を案内するダイアログのタイトル"
-  },
-  "homePermissionDialogMessage": "日記作成のために写真ライブラリへのアクセスが必要です。設定アプリで写真へのアクセスを許可してください。",
-  "@homePermissionDialogMessage": {
-    "description": "写真アクセス権限を案内するダイアログの本文"
-  },
   "homeLimitedAccessTitle": "写真を追加選択",
   "@homeLimitedAccessTitle": {
     "description": "限定的な写真アクセス時に表示するダイアログタイトル"
@@ -247,10 +239,6 @@
   "commonCancel": "キャンセル",
   "@commonCancel": {
     "description": "キャンセルボタン共通文言"
-  },
-  "commonOpenSettings": "設定を開く",
-  "@commonOpenSettings": {
-    "description": "設定アプリを開くボタン"
   },
   "pricingFree": "無料",
   "@pricingFree": {
@@ -362,14 +350,6 @@
   "settingsLanguageUpdateError": "言語設定の保存に失敗しました。時間を置いて再度お試しください。",
   "@settingsLanguageUpdateError": {
     "description": "言語設定保存失敗時のメッセージ"
-  },
-  "cameraPermissionDialogTitle": "カメラへのアクセス許可が必要です",
-  "@cameraPermissionDialogTitle": {
-    "description": "カメラ権限ダイアログのタイトル"
-  },
-  "cameraPermissionDialogMessage": "写真を撮影するには、カメラへのアクセスを許可してください。設定アプリからカメラの権限を有効にできます。",
-  "@cameraPermissionDialogMessage": {
-    "description": "カメラ権限ダイアログの本文"
   },
   "settingsThemeSectionTitle": "テーマ",
   "@settingsThemeSectionTitle": {

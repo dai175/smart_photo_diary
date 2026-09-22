@@ -46,7 +46,6 @@ void main() {
   late HomeController homeController;
   late HomeDataLoader loader;
   var mounted = true;
-  var permissionDeniedCalls = 0;
 
   HomeDataLoader buildLoader() {
     return HomeDataLoader(
@@ -57,9 +56,6 @@ void main() {
       homeController: homeController,
       isMounted: () => mounted,
       photoTypeFilter: PhotoTypeFilter.all,
-      onPermissionDenied: () async {
-        permissionDeniedCalls++;
-      },
       onLimitedAccess: () async {},
       diaryService: diaryService,
       resolveDiaryService: () async => diaryService,
@@ -74,10 +70,12 @@ void main() {
     photoController = PhotoSelectionController();
     homeController = HomeController();
     mounted = true;
-    permissionDeniedCalls = 0;
 
     when(
       () => logger.info(any(), context: any(named: 'context')),
+    ).thenReturn(null);
+    when(
+      () => logger.warning(any(), context: any(named: 'context')),
     ).thenReturn(null);
     when(
       () => logger.error(
@@ -160,17 +158,20 @@ void main() {
       },
     );
 
-    test('loadTodayPhotos denies permission and notifies UI', () async {
-      when(
-        () => photoService.requestPermission(),
-      ).thenAnswer((_) async => const Success(false));
+    test(
+      'loadTodayPhotos denies permission without a Settings callback',
+      () async {
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => const Success(false));
 
-      await loader.loadTodayPhotos();
+        await loader.loadTodayPhotos();
 
-      expect(photoController.hasPermission, isFalse);
-      expect(photoController.isLoading, isFalse);
-      expect(permissionDeniedCalls, 1);
-    });
+        expect(photoController.hasPermission, isFalse);
+        expect(photoController.isLoading, isFalse);
+        expect(photoController.photoAssets, isEmpty);
+      },
+    );
 
     test('loadTodayPhotos applies access days then stores photos', () async {
       final photo = MockAssetEntity();
