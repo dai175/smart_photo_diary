@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../constants/app_constants.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/home_data_loader.dart';
 import '../controllers/photo_selection_controller.dart';
-import '../core/errors/app_exceptions.dart';
 import '../core/result/result.dart';
 import '../models/photo_type_filter.dart';
 import '../models/subscription_status.dart';
@@ -110,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen>
       homeController: _homeController,
       isMounted: () => mounted,
       photoTypeFilter: _photoTypeFilter,
-      onPermissionDenied: _showPermissionDeniedDialog,
       onLimitedAccess: _showLimitedAccessDialog,
       diaryService: widget.diaryService,
     );
@@ -236,14 +233,6 @@ class _HomeScreenState extends State<HomeScreen>
           error: captureResult.error,
         );
 
-        if (mounted) {
-          // カメラ権限拒否の場合は設定ダイアログを表示
-          if (captureResult.error is PhotoAccessException &&
-              (captureResult.error as PhotoAccessException).details ==
-                  'Camera permission denied') {
-            await _showCameraPermissionDialog();
-          }
-        }
         return;
       }
 

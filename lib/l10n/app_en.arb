@@ -215,14 +215,6 @@
   "@homeDiaryLoadError": {
     "description": "Message shown when fetching a diary entry fails"
   },
-  "homePermissionDialogTitle": "Allow photo access",
-  "@homePermissionDialogTitle": {
-    "description": "Dialog title prompting users to allow photo access"
-  },
-  "homePermissionDialogMessage": "Photo library access is required to create diary entries. Please enable photo access from the Settings app.",
-  "@homePermissionDialogMessage": {
-    "description": "Dialog body explaining why photo access is required"
-  },
   "homeLimitedAccessTitle": "Select additional photos",
   "@homeLimitedAccessTitle": {
     "description": "Dialog title shown when only limited photo access is granted"
@@ -247,10 +239,6 @@
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Generic cancel button label"
-  },
-  "commonOpenSettings": "Open settings",
-  "@commonOpenSettings": {
-    "description": "Button label to open the system settings app"
   },
   "pricingFree": "Free",
   "@pricingFree": {
@@ -362,14 +350,6 @@
   "settingsLanguageUpdateError": "Couldn't save your language preference. Please try again later.",
   "@settingsLanguageUpdateError": {
     "description": "Message shown when updating the language fails"
-  },
-  "cameraPermissionDialogTitle": "Camera access required",
-  "@cameraPermissionDialogTitle": {
-    "description": "Title for the camera permission dialog"
-  },
-  "cameraPermissionDialogMessage": "Please allow camera access to take new photos. You can enable the permission from the Settings app.",
-  "@cameraPermissionDialogMessage": {
-    "description": "Body text for the camera permission dialog"
   },
   "settingsThemeSectionTitle": "Theme",
   "@settingsThemeSectionTitle": {

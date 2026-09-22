@@ -32,7 +32,6 @@ class HomeDataLoader {
   final PhotoSelectionController _photoController;
   final HomeController _homeController;
   final bool Function() _isMounted;
-  final Future<void> Function() _onPermissionDenied;
   final Future<void> Function() _onLimitedAccess;
   final Future<IDiaryService> Function() _resolveDiaryService;
 
@@ -52,7 +51,6 @@ class HomeDataLoader {
     required HomeController homeController,
     required bool Function() isMounted,
     required this.photoTypeFilter,
-    required Future<void> Function() onPermissionDenied,
     required Future<void> Function() onLimitedAccess,
     IDiaryService? diaryService,
     Future<IDiaryService> Function()? resolveDiaryService,
@@ -62,7 +60,6 @@ class HomeDataLoader {
        _photoController = photoController,
        _homeController = homeController,
        _isMounted = isMounted,
-       _onPermissionDenied = onPermissionDenied,
        _onLimitedAccess = onLimitedAccess,
        _diaryService = diaryService,
        _resolveDiaryService =
@@ -89,7 +86,10 @@ class HomeDataLoader {
 
       if (!hasPermission) {
         _photoController.setLoading(false);
-        await _onPermissionDenied();
+        _logger.warning(
+          'Photo library permission denied; skipping timeline load',
+          context: 'HomeDataLoader.loadTodayPhotos',
+        );
         return;
       }
 
