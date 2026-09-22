@@ -193,6 +193,9 @@ void main() {
           when(
             () => mockPhoto.requestPermission(),
           ).thenAnswer((_) async => const Success(false));
+          when(
+            () => mockPhoto.isPermissionPermanentlyDenied(),
+          ).thenAnswer((_) async => const Success(false));
 
           await tester.pumpWidget(buildHomeScreen());
           await pumpFrames(tester);
@@ -203,8 +206,54 @@ void main() {
             find.text('Photo access permission is required'),
             findsOneWidget,
           );
+          expect(find.text('Allow'), findsOneWidget);
         },
       );
+
+      testWidgets(
+        'shows Open Settings CTA when photo access cannot be re-prompted',
+        (WidgetTester tester) async {
+          when(
+            () => mockPhoto.requestPermission(),
+          ).thenAnswer((_) async => const Success(false));
+          when(
+            () => mockPhoto.isPermissionPermanentlyDenied(),
+          ).thenAnswer((_) async => const Success(true));
+
+          await tester.pumpWidget(buildHomeScreen());
+          await pumpFrames(tester);
+
+          expect(
+            find.text('Turn on photo access in Settings to see your timeline.'),
+            findsOneWidget,
+          );
+          expect(find.text('Open Settings'), findsOneWidget);
+          expect(find.text('Allow'), findsNothing);
+        },
+      );
+
+      testWidgets('opens system settings only when user taps Open Settings', (
+        WidgetTester tester,
+      ) async {
+        when(
+          () => mockPhoto.requestPermission(),
+        ).thenAnswer((_) async => const Success(false));
+        when(
+          () => mockPhoto.isPermissionPermanentlyDenied(),
+        ).thenAnswer((_) async => const Success(true));
+        when(
+          () => mockPhoto.openPhotoAccessSettings(),
+        ).thenAnswer((_) async => const Success(null));
+
+        await tester.pumpWidget(buildHomeScreen());
+        await pumpFrames(tester);
+
+        await tester.tap(find.text('Open Settings'));
+        await tester.pump();
+
+        verify(() => mockPhoto.openPhotoAccessSettings()).called(1);
+        verify(() => mockPhoto.requestPermission()).called(1);
+      });
 
       testWidgets(
         'does not open Settings after the user denies camera access',

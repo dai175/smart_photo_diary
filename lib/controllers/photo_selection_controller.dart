@@ -9,6 +9,7 @@ class PhotoSelectionController extends ChangeNotifier {
   Set<String> _usedPhotoIds = {};
   bool _isLoading = true;
   bool _hasPermission = false;
+  bool _photoPermissionRequiresSettings = false;
   bool _hasMorePhotos = true; // 追加写真が存在するかのフラグ
   DateTime? _selectedDate; // 選択された写真の日付を保持
   DateTime? _accessCutoffDate; // プランに基づくアクセス可能期限
@@ -19,6 +20,7 @@ class PhotoSelectionController extends ChangeNotifier {
   Set<String> get usedPhotoIds => _usedPhotoIds;
   bool get isLoading => _isLoading;
   bool get hasPermission => _hasPermission;
+  bool get photoPermissionRequiresSettings => _photoPermissionRequiresSettings;
   bool get hasMorePhotos => _hasMorePhotos;
 
   /// 選択された写真の数を取得
@@ -176,8 +178,22 @@ class PhotoSelectionController extends ChangeNotifier {
 
   /// 権限状態を設定
   void setPermission(bool permission) {
-    if (_hasPermission == permission) return;
-    _hasPermission = permission;
+    var changed = false;
+    if (_hasPermission != permission) {
+      _hasPermission = permission;
+      changed = true;
+    }
+    if (permission && _photoPermissionRequiresSettings) {
+      _photoPermissionRequiresSettings = false;
+      changed = true;
+    }
+    if (changed) notifyListeners();
+  }
+
+  /// 設定アプリでの許可が必要かどうかを設定
+  void setPhotoPermissionRequiresSettings(bool requiresSettings) {
+    if (_photoPermissionRequiresSettings == requiresSettings) return;
+    _photoPermissionRequiresSettings = requiresSettings;
     notifyListeners();
   }
 

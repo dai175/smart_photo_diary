@@ -146,6 +146,14 @@
   "@photoPermissionMessage": {
     "description": "Explanation shown when photo access is denied"
   },
+  "photoPermissionSettingsMessage": "Turn on photo access in Settings to see your timeline.",
+  "@photoPermissionSettingsMessage": {
+    "description": "Explanation when photo access must be enabled in system Settings"
+  },
+  "photoPermissionOpenSettings": "Open Settings",
+  "@photoPermissionOpenSettings": {
+    "description": "Button to open system Settings for photo library access"
+  },
   "photoRequestPermission": "Request permission",
   "@photoRequestPermission": {
     "description": "Button label to request photo access permission"

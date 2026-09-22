@@ -164,12 +164,63 @@ void main() {
         when(
           () => photoService.requestPermission(),
         ).thenAnswer((_) async => const Success(false));
+        when(
+          () => photoService.isPermissionPermanentlyDenied(),
+        ).thenAnswer((_) async => const Success(true));
 
         await loader.loadTodayPhotos();
 
         expect(photoController.hasPermission, isFalse);
         expect(photoController.isLoading, isFalse);
         expect(photoController.photoAssets, isEmpty);
+        expect(photoController.photoPermissionRequiresSettings, isTrue);
+      },
+    );
+
+    test(
+      'handlePhotoPermissionAction opens settings when re-prompt is unavailable',
+      () async {
+        photoController.setPhotoPermissionRequiresSettings(true);
+        when(
+          () => photoService.openPhotoAccessSettings(),
+        ).thenAnswer((_) async => const Success(null));
+
+        await loader.handlePhotoPermissionAction();
+
+        verify(() => photoService.openPhotoAccessSettings()).called(1);
+        verifyNever(() => photoService.requestPermission());
+      },
+    );
+
+    test(
+      'recheckPhotoPermissionOnResume reloads when access was granted',
+      () async {
+        when(
+          () => photoService.hasPhotoLibraryAccess(),
+        ).thenAnswer((_) async => const Success(true));
+        when(
+          () => photoService.requestPermission(),
+        ).thenAnswer((_) async => const Success(true));
+        when(
+          () => photoService.getPhotosInDateRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => const Success([]));
+        when(
+          () => photoService.getPhotosEfficient(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => const Success([]));
+
+        await loader.recheckPhotoPermissionOnResume();
+
+        verify(() => photoService.hasPhotoLibraryAccess()).called(1);
+        verify(() => photoService.requestPermission()).called(1);
       },
     );
 
